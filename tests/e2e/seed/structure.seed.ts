@@ -110,11 +110,11 @@ const TYPE_PLACES_YEARS = getTypePlacesYearRange().years;
 const FINANCE_YEARS = getYearRange().years;
 
 export const seedValidStructureTypologies = async (
-  structureVersionId: number
+  structureId: number
 ): Promise<void> => {
   await prisma.structureTypologie.createMany({
     data: TYPE_PLACES_YEARS.map((year) => ({
-      structureVersionId,
+      structureId,
       year,
       placesAutorisees: 10,
       pmr: 0,

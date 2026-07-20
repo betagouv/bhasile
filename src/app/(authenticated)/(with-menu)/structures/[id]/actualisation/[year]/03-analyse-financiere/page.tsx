@@ -26,7 +26,7 @@ export default function ActualisationAnalyseFinanciere() {
   const year = Number(useParams().year);
 
   const financeSchema = getFinanceSchema(structure);
-  const defaultValues = getActualisationDefaultValues({ structure, year });
+  const defaultValues = getActualisationDefaultValues({ structure });
 
   const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
     year,

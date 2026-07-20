@@ -12,6 +12,7 @@ import {
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { AntenneApiType } from "./antenne.schema";
 import { formApiSchema } from "./form.schema";
+import { structureTypologieApiSchema } from "./structure-typologie.schema";
 import {
   structureVersionApiSchema,
   StructureVersionApiType,
@@ -35,6 +36,10 @@ const structureVersionTransformationApiUpdateSchema = z.object({
   structureType: z.enum(StructureType).nullish(),
 
   structureVersion: structureVersionApiSchema.optional(),
+
+  structureTypologies: z
+    .array(structureTypologieApiSchema.partial().required({ year: true }))
+    .optional(),
 });
 
 export const structureVersionTransformationApiCreateSchema =
@@ -86,6 +91,7 @@ export type StructureVersionTransformationApiRead =
         codePostalAdministratif?: string | null;
         communeAdministrative?: string | null;
         departementAdministratif?: string | null;
+        placesAutorisees?: number | null;
         antennes?: AntenneApiType[];
         actesAdministratifs?: StructureParentActe[];
         structureTypologies?: {

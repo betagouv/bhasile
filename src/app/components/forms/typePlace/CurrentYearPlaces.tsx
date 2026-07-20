@@ -1,4 +1,3 @@
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
@@ -36,7 +35,6 @@ export const CurrentYearPlaces = ({
     control,
     name: "structureTypologies.0.year",
   });
-  const isActualisation = formKind === FormKind.ACTUALISATION;
 
   const direction =
     originalPlaces !== undefined
@@ -58,13 +56,6 @@ export const CurrentYearPlaces = ({
       <legend className="text-xl font-bold mb-4 text-title-blue-france max-w-3xl">
         {getLegend(formKind, conventionYear)}
       </legend>
-      {isActualisation && (
-        <Alert
-          severity="error"
-          small
-          description="La modification du nombre de places autorisées doit obligatoirement passer par une contraction ou une extension de la structure."
-        />
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="flex flex-col gap-1">
@@ -76,7 +67,6 @@ export const CurrentYearPlaces = ({
             min={0}
             label="Nombre total de places autorisées"
             className="mb-0"
-            disabled={isActualisation}
             state={hasIncoherence ? "error" : undefined}
             stateRelatedMessage={
               hasIncoherence && originalPlaces !== undefined

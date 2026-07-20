@@ -1,5 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { StructureTypologie } from "@/generated/prisma/client";
 
 export const createFakeStructureTypologie = ({
@@ -12,12 +13,13 @@ export const createFakeStructureTypologie = ({
   const lgbt = faker.number.int({ min: 0, max: placesAutorisees });
 
   return {
-    structureVersionId: null,
     year,
+    yearOrigin: null,
     pmr: faker.number.int({ min: 0, max: placesAutorisees }),
     lgbt,
     fvvTeh: faker.number.int({ min: 0, max: placesAutorisees - lgbt }),
-    placesAutorisees,
+    placesAutorisees:
+      year < PLACES_VERSIONED_FROM_YEAR ? placesAutorisees : null,
     placesACreer: null,
     placesAFermer: null,
     echeancePlacesACreer: null,

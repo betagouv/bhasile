@@ -484,6 +484,57 @@ describe("structure.repository db integration", () => {
     expect(version.structureTypologies[0]).toMatchObject(newStructureTypologie);
   });
 
+  it("reporte les places de l'année legacy sur la version de base, sans toucher une version de transfo", async () => {
+    const structure = await createStructure();
+
+    // Version de transfo, plus récente, avec sa propre capacité : intouchable
+    // par un write non-transfo.
+    const transformation = await prisma.transformation.create({
+      data: { type: "EXTENSION_EX_NIHILO" },
+    });
+    const structureVersionTransformation =
+      await prisma.structureVersionTransformation.create({
+        data: { transformationId: transformation.id, type: "EXTENSION" },
+      });
+    const transfoVersion = await prisma.structureVersion.create({
+      data: {
+        structureId: structure.id,
+        effectiveDate: new Date("2027-06-01T12:00:00.000Z"),
+        placesAutorisees: 200,
+        structureVersionTransformationId: structureVersionTransformation.id,
+      },
+    });
+
+    await updateOne({
+      id: structure.id,
+      structureTypologies: [
+        { year: 2025, placesAutorisees: 100, pmr: 1, lgbt: 1, fvvTeh: 1 },
+        { year: 2026, placesAutorisees: 50, pmr: 1, lgbt: 1, fvvTeh: 1 },
+      ],
+    });
+
+    const baseVersion = await prisma.structureVersion.findFirstOrThrow({
+      where: {
+        structureId: structure.id,
+        structureVersionTransformationId: null,
+      },
+    });
+    const refreshedTransfoVersion =
+      await prisma.structureVersion.findUniqueOrThrow({
+        where: { id: transfoVersion.id },
+      });
+    const typologie2026 = await prisma.structureTypologie.findFirstOrThrow({
+      where: { structureId: structure.id, year: 2026 },
+    });
+
+    // La cascade recale la version de base sur ST[2025]...
+    expect(baseVersion.placesAutorisees).toBe(100);
+    // ...laisse la version de transfo intacte...
+    expect(refreshedTransfoVersion.placesAutorisees).toBe(200);
+    // ...et la typologie ≥ seuil ne porte pas les places (elles vivent sur la SV).
+    expect(typologie2026.placesAutorisees).toBeNull();
+  });
+
   it("remplace la liste des adresses et leurs typologies sur la version courante", async () => {
     // GIVEN: a rolling version with one address
     const structure = await createStructure();

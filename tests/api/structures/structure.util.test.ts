@@ -136,10 +136,7 @@ describe("computeStructureListRow", () => {
         { repartition: Repartition.COLLECTIF },
         { repartition: Repartition.DIFFUS },
       ] as unknown as StructureListLightVersion["adresses"],
-      structureTypologies: [
-        { year: 2025, placesAutorisees: 42 },
-        { year: 2024, placesAutorisees: 30 },
-      ] as unknown as StructureListLightVersion["structureTypologies"],
+      placesAutorisees: 42,
     });
     const row = computeStructureListRow(
       buildLightStructure({}, version),
@@ -198,13 +195,8 @@ describe("computeStructureListRow", () => {
     expect(row?.finConvention).toEqual(new Date("2027-12-31T00:00:00.000Z"));
   });
 
-  it("expose les dernières places non nulles pour les bornes même quand l'année la plus récente est nulle", () => {
-    const version = buildVersion({
-      structureTypologies: [
-        { year: 2025, placesAutorisees: null },
-        { year: 2024, placesAutorisees: 30 },
-      ] as unknown as StructureListLightVersion["structureTypologies"],
-    });
+  it("n'expose aucune place pour une version qui n'en porte pas (fermeture)", () => {
+    const version = buildVersion({ placesAutorisees: null });
     const row = computeStructureListRow(
       buildLightStructure({}, version),
       version,
@@ -212,7 +204,6 @@ describe("computeStructureListRow", () => {
     );
 
     expect(row?.placesAutorisees).toBe(null);
-    expect(row?.latestNonNullPlacesAutorisees).toBe(30);
   });
 
   it("marque une fermeture finalisée comme fermée avec sa date et son motif", () => {
@@ -547,30 +538,17 @@ describe("getFermetureHistory", () => {
 });
 
 describe("buildStructureCampaigns", () => {
-  const version = (
-    campaign: {
-      form: {
-        status: boolean;
-        formSteps: { status: StepStatus; stepDefinition: { slug: string } }[];
-      } | null;
-      campaignDefinition: { slug: string } | null;
-    } | null
-  ) => ({ campaign });
+  const form = (
+    slug: string,
+    status: boolean,
+    formSteps: { status: StepStatus; stepDefinition: { slug: string } }[] = []
+  ) => ({ status, formDefinition: { slug }, formSteps });
 
-  it("projette slug + isValidated + formSteps depuis la campagne", () => {
+  it("projette slug + isValidated + formSteps depuis le form d'actualisation", () => {
     const campaigns = buildStructureCampaigns([
-      version({
-        form: {
-          status: true,
-          formSteps: [
-            {
-              status: StepStatus.VALIDE,
-              stepDefinition: { slug: "01-places" },
-            },
-          ],
-        },
-        campaignDefinition: { slug: "actualisation-2026" },
-      }),
+      form("actualisation-2026", true, [
+        { status: StepStatus.VALIDE, stepDefinition: { slug: "01-places" } },
+      ]),
     ]);
 
     expect(campaigns).toEqual([
@@ -583,40 +561,24 @@ describe("buildStructureCampaigns", () => {
   });
 
   it("marque isValidated=false quand le form n'est pas validé", () => {
-    const campaigns = buildStructureCampaigns([
-      version({
-        form: { status: false, formSteps: [] },
-        campaignDefinition: { slug: "actualisation-2026" },
-      }),
-    ]);
-
-    expect(campaigns).toEqual([
-      { slug: "actualisation-2026", isValidated: false, formSteps: [] },
-    ]);
-  });
-
-  it("formSteps vides quand la campagne n'a pas de form (initialisation)", () => {
-    const campaigns = buildStructureCampaigns([
-      version({ form: null, campaignDefinition: { slug: "initialisation" } }),
-    ]);
-
-    expect(campaigns).toEqual([
-      { slug: "initialisation", isValidated: false, formSteps: [] },
-    ]);
-  });
-
-  it("ignore une version sans campagne", () => {
-    expect(buildStructureCampaigns([version(null)])).toEqual([]);
-  });
-
-  it("ignore une campagne sans définition", () => {
     expect(
-      buildStructureCampaigns([
-        version({
-          form: { status: true, formSteps: [] },
-          campaignDefinition: null,
-        }),
-      ])
-    ).toEqual([]);
+      buildStructureCampaigns([form("actualisation-2026", false)])
+    ).toEqual([{ slug: "actualisation-2026", isValidated: false, formSteps: [] }]);
+  });
+
+  it("ignore les forms qui ne sont pas des actualisations", () => {
+    expect(buildStructureCampaigns([form("finalisation-v1", true)])).toEqual([]);
+  });
+
+  it("expose une entrée par année d'actualisation", () => {
+    const campaigns = buildStructureCampaigns([
+      form("actualisation-2026", true),
+      form("actualisation-2027", false),
+    ]);
+
+    expect(campaigns.map((campaign) => campaign.slug)).toEqual([
+      "actualisation-2026",
+      "actualisation-2027",
+    ]);
   });
 });

@@ -461,26 +461,10 @@ describe("transformation.repository db integration", () => {
     expect(structureFinesses[0].description).toBe("finess transfo");
   });
 
-  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
+  it("répartit les places sur la version et le détail sur la SVT (split précoce)", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
-    await prisma.structureTypologie.create({
-      data: {
-        structureVersionId,
-        year: 2024,
-        placesAutorisees: 10,
-        pmr: 1,
-        lgbt: 0,
-        fvvTeh: 0,
-      },
-    });
-    const newTypologie = {
-      year: 2024,
-      placesAutorisees: 33,
-      pmr: 4,
-      lgbt: 1,
-      fvvTeh: 0,
-    };
+
     await updateOne({
       id: transformationId,
       structureVersionTransformations: [
@@ -488,16 +472,34 @@ describe("transformation.repository db integration", () => {
           id: structureVersionTransformationId,
           structureVersion: {
             id: structureVersionId,
-            structureTypologies: [newTypologie],
+            placesAutorisees: 33,
           },
+          structureTypologies: [
+            { year: 2024, pmr: 4, lgbt: 1, fvvTeh: 0 },
+          ],
         },
       ],
     });
-    const rows = await prisma.structureTypologie.findMany({
-      where: { structureVersionId },
+
+    // Les places autorisées vont sur le scalaire de la version...
+    const version = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: structureVersionId },
+      select: { placesAutorisees: true },
     });
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject(newTypologie);
+    expect(version.placesAutorisees).toBe(33);
+
+    // ...et le détail sur une ligne de typologie possédée par la SVT (jamais de places).
+    const detail = await prisma.structureTypologie.findMany({
+      where: { structureVersionTransformationId },
+    });
+    expect(detail).toHaveLength(1);
+    expect(detail[0]).toMatchObject({
+      year: 2024,
+      pmr: 4,
+      lgbt: 1,
+      fvvTeh: 0,
+      placesAutorisees: null,
+    });
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {

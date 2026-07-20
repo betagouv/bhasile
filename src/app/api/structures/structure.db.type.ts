@@ -19,15 +19,8 @@ export const structureListLightVersionSelect = {
       transformation: { select: { form: { select: { status: true } } } },
     },
   },
-  campaignId: true,
-  campaign: {
-    select: { form: { select: { status: true } } },
-  },
+  placesAutorisees: true,
   adresses: { select: { repartition: true } },
-  structureTypologies: {
-    orderBy: { year: "desc" },
-    select: { year: true, placesAutorisees: true },
-  },
   dnaStructures: { select: { dna: { select: { code: true } } } },
   structureFinesses: { select: { finess: { select: { code: true } } } },
 } satisfies Prisma.StructureVersionSelect;
@@ -65,9 +58,6 @@ export const structureListVersionInclude = {
   antennes: true,
   structureFinesses: {
     include: { finess: true },
-  },
-  structureTypologies: {
-    orderBy: { year: "desc" },
   },
   dnaStructures: {
     orderBy: { dna: { code: "asc" } },
@@ -177,12 +167,6 @@ export const structureDetailsInclude = {
                           transformation: {
                             select: { form: { select: { status: true } } },
                           },
-                        },
-                      },
-                      campaignId: true,
-                      campaign: {
-                        select: {
-                          form: { select: { status: true } },
                         },
                       },
                     },

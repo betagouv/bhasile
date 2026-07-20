@@ -1,11 +1,15 @@
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 
-export const YearlyTypePlace = ({ year }: Props) => {
-  const { control, register, watch } = useFormContext();
+export const YearlyTypePlace = ({ year, isCapacityLocked }: Props) => {
+  const { control, register, watch, setValue } = useFormContext();
+
+  const isPlacesAutoriseesReadOnly = year >= PLACES_VERSIONED_FROM_YEAR;
 
   const structureTypologies: StructureTypologieApiType[] = watch(
     "structureTypologies"
@@ -14,6 +18,30 @@ export const YearlyTypePlace = ({ year }: Props) => {
     structureTypologies,
     year
   );
+  const legacyIndex = getMillesimeIndexForAYear(
+    structureTypologies,
+    PLACES_VERSIONED_FROM_YEAR - 1
+  );
+  const legacyPlacesAutorisees =
+    legacyIndex === -1
+      ? undefined
+      : structureTypologies[legacyIndex]?.placesAutorisees;
+
+  const shouldMirrorLegacy =
+    isPlacesAutoriseesReadOnly && !isCapacityLocked && legacyIndex !== -1;
+  useEffect(() => {
+    if (shouldMirrorLegacy && currentStructureTypologyIndex !== -1) {
+      setValue(
+        `structureTypologies.${currentStructureTypologyIndex}.placesAutorisees`,
+        legacyPlacesAutorisees ?? null
+      );
+    }
+  }, [
+    shouldMirrorLegacy,
+    legacyPlacesAutorisees,
+    currentStructureTypologyIndex,
+    setValue,
+  ]);
 
   if (currentStructureTypologyIndex === -1) {
     return null;
@@ -39,6 +67,7 @@ export const YearlyTypePlace = ({ year }: Props) => {
           type="number"
           min={0}
           label=""
+          disabled={isPlacesAutoriseesReadOnly}
           className="mb-0 mx-auto items-center [&_p]:hidden"
           variant="simple"
         />
@@ -93,4 +122,5 @@ export const YearlyTypePlace = ({ year }: Props) => {
 
 type Props = {
   year: number;
+  isCapacityLocked: boolean;
 };
