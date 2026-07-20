@@ -15,6 +15,7 @@ import {
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
+import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import {
   currentVersionArgs,
   currentVersionWhere,
@@ -142,7 +143,8 @@ const writeToCurrentVersion = async (
 
 export const updateOne = async (
   structure: StructureAgentUpdateApiType,
-  isOperateurUpdate: boolean = false
+  isOperateurUpdate: boolean = false,
+  options: { skipActesOrphanDelete?: boolean } = {}
 ): Promise<Structure> => {
   const {
     budgets,
@@ -153,6 +155,7 @@ export const updateOne = async (
     evaluations,
     forms,
     structureMillesimes,
+    structureTypologies,
   } = structure;
 
   return await prisma.$transaction(
@@ -174,10 +177,16 @@ export const updateOne = async (
       await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
         structureId: structure.id,
       });
-      await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+      await createOrUpdateActesAdministratifs(
+        tx,
+        actesAdministratifs,
+        { structureId: structure.id },
+        { skipOrphanDelete: options.skipActesOrphanDelete === true }
+      );
+      await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
         structureId: structure.id,
       });
-      await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
+      await createOrUpdateStructureTypologies(tx, structureTypologies, {
         structureId: structure.id,
       });
       await createOrUpdateControles(tx, controles, structure.id);

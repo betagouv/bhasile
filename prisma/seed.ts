@@ -4,7 +4,7 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import {
   ACTUALISATION_FORM_STEP_SLUGS,
-  actualisationFormSlug,
+  getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
 import { StructureType } from "@/types/structure.type";
 
@@ -124,7 +124,7 @@ async function seed(): Promise<void> {
   const actualisationFormDefinition = await prisma.formDefinition.create({
     data: {
       name: "Actualisation 2026",
-      slug: actualisationFormSlug(2026),
+      slug: getActualisationFormSlug(2026),
       version: 1,
     },
   });

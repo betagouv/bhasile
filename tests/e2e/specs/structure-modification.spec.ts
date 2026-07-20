@@ -69,7 +69,7 @@ test.describe("Structure modification", () => {
     page,
     seededStructure,
   }) => {
-    await seedValidStructureTypologies(seededStructure.structureVersionId);
+    await seedValidStructureTypologies(seededStructure.id);
     const modification = new StructureModificationPage(
       page,
       seededStructure.id

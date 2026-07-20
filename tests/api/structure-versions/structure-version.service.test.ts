@@ -283,10 +283,9 @@ describe("copyStructureVersion", () => {
         finess: { code: "FIN-1" },
       },
     ]);
-    expect(result.structureTypologies?.[0]).toMatchObject({
-      year: 2024,
-      placesAutorisees: 10,
-    });
+    // La copie ne porte jamais les places autorisées : elles sont posées
+    // explicitement par la transformation (garde FERMETURE).
+    expect(result.placesAutorisees).toBeUndefined();
 
     expect(result.dnaStructures?.[0]).not.toHaveProperty("id");
     expect(result.dnaStructures?.[0]?.description).toBe("DNA site d'Avranches");

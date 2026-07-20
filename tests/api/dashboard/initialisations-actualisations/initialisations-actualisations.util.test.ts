@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { actualisationCampaignDefinitionSlug } from "@/app/api/campaigns/campaign.constants";
 import { DashboardStructure } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.db.type";
 import { DashboardStructureRow } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.type";
 import {
@@ -11,6 +10,10 @@ import {
   isOpen,
   paginateDashboardRows,
 } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.util";
+import {
+  FINALISATION_FORM_SLUG,
+  getActualisationFormSlug,
+} from "@/app/api/forms/form.constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
@@ -32,7 +35,7 @@ const actualisationCampaign = (
   steps: StructureCampaignApiRead["formSteps"],
   isValidated = false
 ): StructureCampaignApiRead => ({
-  slug: actualisationCampaignDefinitionSlug(YEAR),
+  slug: getActualisationFormSlug(YEAR),
   isValidated,
   formSteps: steps,
 });
@@ -141,9 +144,25 @@ const makeVersion = (
   departementAdministratif: "75",
   structureVersionTransformationId: null,
   structureVersionTransformation: null,
-  campaignId: null,
-  campaign: null,
   ...overrides,
+});
+
+// La finalisation et l'actualisation sont des forms de structure, discriminés par slug.
+const finalisationForm = (
+  status: boolean
+): DashboardStructure["forms"][number] => ({
+  status,
+  formDefinition: { slug: FINALISATION_FORM_SLUG },
+  formSteps: [],
+});
+
+const actualisationForm = (
+  status: boolean,
+  formSteps: DashboardStructure["forms"][number]["formSteps"] = []
+): DashboardStructure["forms"][number] => ({
+  status,
+  formDefinition: { slug: getActualisationFormSlug(YEAR) },
+  formSteps,
 });
 
 const makeStructure = (
@@ -258,25 +277,14 @@ describe("buildDashboardRows", () => {
 
   it("exclut une structure finalisée ET actualisée (rien d'ouvert)", () => {
     const structure = makeStructure({
-      forms: [{ status: true }],
-      structureVersions: [
-        makeVersion({
-          campaignId: 3,
-          campaign: {
-            campaignDefinition: {
-              slug: actualisationCampaignDefinitionSlug(YEAR),
-            },
-            form: { status: true, formSteps: [] },
-          },
-        }),
-      ],
+      forms: [finalisationForm(true), actualisationForm(true)],
     });
 
     expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
   });
 
   it("garde une structure finalisée dont l'actualisation reste à débuter", () => {
-    const structure = makeStructure({ forms: [{ status: true }] });
+    const structure = makeStructure({ forms: [finalisationForm(true)] });
 
     const rows = buildDashboardRows([structure], baseOptions);
 

@@ -1,5 +1,4 @@
-import { actualisationCampaignDefinitionSlug } from "@/app/api/campaigns/campaign.constants";
-import { ACTUALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
+import { getActualisationFormSlug } from "@/app/api/forms/form.constants";
 import {
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
@@ -20,9 +19,9 @@ import {
 } from "./structure.seed";
 import { seedFinalisationForm } from "./transformation-source.seed";
 
-export type SeededActualisationStructure = SeededStructure & {
-  campaignId: number;
-};
+// Plus d'entité Campaign : une structure actualisable = une structure avec son
+// formulaire `actualisation-<année>`.
+export type SeededActualisationStructure = SeededStructure;
 
 const isAutorisee = (type: StructureType): boolean =>
   type === StructureType.CADA || type === StructureType.CPH;
@@ -110,75 +109,42 @@ export const createActualisationStructureForTest = async ({
   await seedRequiredActe(base.id, base.codeBhasile, type);
   await seedFinalisationForm(base.id);
 
-  const campaignDefinition = await prisma.campaignDefinition.findUniqueOrThrow({
-    where: { slug: actualisationCampaignDefinitionSlug(year) },
-  });
+  // L'actualisation est un formulaire de structure (plus d'entité Campaign) :
+  // FormDefinition `actualisation-<année>` + un Form status=false par structure.
   const formDefinition = await prisma.formDefinition.findUniqueOrThrow({
-    where: { slug: ACTUALISATION_FORM_SLUG },
+    where: { slug: getActualisationFormSlug(year) },
     include: { stepsDefinition: true },
   });
 
-  const campaign = await prisma.campaign.create({
-    data: { campaignDefinitionId: campaignDefinition.id },
-  });
+  await seedValidStructureTypologies(base.id);
 
-  const baseVersion = await prisma.structureVersion.findUniqueOrThrow({
-    where: { id: base.structureVersionId },
-    include: {
-      dnaStructures: { include: { dna: { select: { code: true } } } },
-      structureFinesses: { include: { finess: { select: { code: true } } } },
-    },
-  });
-
-  const campaignVersion = await prisma.structureVersion.create({
+  await prisma.form.create({
     data: {
       structureId: base.id,
-      campaignId: campaign.id,
-      effectiveDate: new Date(),
-      public: baseVersion.public,
-      nom: baseVersion.nom,
-      adresseAdministrative: baseVersion.adresseAdministrative,
-      codePostalAdministratif: baseVersion.codePostalAdministratif,
-      communeAdministrative: baseVersion.communeAdministrative,
-      departementAdministratif: baseVersion.departementAdministratif,
-      creationDate: baseVersion.creationDate,
-      dnaStructures: {
-        create: baseVersion.dnaStructures.map((dnaStructure) => ({
-          dna: { connect: { code: dnaStructure.dna.code } },
-        })),
-      },
-      structureFinesses: {
-        create: baseVersion.structureFinesses.flatMap((structureFiness) =>
-          structureFiness.finess.code
-            ? [{ finess: { connect: { code: structureFiness.finess.code } } }]
-            : []
-        ),
-      },
-    },
-  });
-
-  await seedValidStructureTypologies(campaignVersion.id);
-
-  const form = await prisma.form.create({
-    data: {
-      campaignId: campaign.id,
       formDefinitionId: formDefinition.id,
       status: false,
+      formSteps: {
+        create: formDefinition.stepsDefinition.map((stepDefinition) => ({
+          stepDefinitionId: stepDefinition.id,
+          status: StepStatus.NON_COMMENCE,
+        })),
+      },
     },
   });
-  await prisma.formStep.createMany({
-    data: formDefinition.stepsDefinition.map((stepDefinition) => ({
-      formId: form.id,
-      stepDefinitionId: stepDefinition.id,
-      status: StepStatus.NON_COMMENCE,
-    })),
-  });
 
-  return { ...base, campaignId: campaign.id };
+  return { ...base };
 };
 
-export const deleteActualisationCampaign = async (
-  campaignId: number
+export const deleteActualisationForm = async (
+  structureId: number,
+  year: number
 ): Promise<void> => {
-  await prisma.campaign.delete({ where: { id: campaignId } }).catch(() => {});
+  await prisma.form
+    .deleteMany({
+      where: {
+        structureId,
+        formDefinition: { slug: getActualisationFormSlug(year) },
+      },
+    })
+    .catch(() => {});
 };

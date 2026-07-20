@@ -31,7 +31,7 @@ test.describe("Actualisation", () => {
     await actualisation.expectBannerGone();
 
     await expectActualisationValidated(
-      seededActualisationAutorisee.campaignId,
+      seededActualisationAutorisee.id,
       NEW_PMR,
       YEAR
     );
@@ -58,7 +58,7 @@ test.describe("Actualisation", () => {
     await actualisation.expectBannerGone();
 
     await expectActualisationValidated(
-      seededActualisationSubventionnee.campaignId,
+      seededActualisationSubventionnee.id,
       NEW_PMR,
       YEAR
     );

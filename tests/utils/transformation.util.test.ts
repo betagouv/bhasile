@@ -880,7 +880,9 @@ describe("transformation util", () => {
   });
 
   describe("getPlacesSource", () => {
-    it("retourne placesAutorisees de la typologie source correspondant à l'année de l'effectiveDate", () => {
+    // Places de la structure source à la date d'effet : le serveur résout la version
+    // de référence et pose son scalaire sur la structure. getPlacesSource ne fait que le lire.
+    it("retourne le scalaire placesAutorisees de la structure source", () => {
       const structureVersionTransformation: StructureVersionTransformationApiRead =
         {
           id: 1,
@@ -889,10 +891,7 @@ describe("transformation util", () => {
             effectiveDate: "2025-08-25T12:00:00.000Z",
             structure: {
               codeBhasile: "BHA-NOR-001",
-              structureTypologies: [
-                { year: 2026, placesAutorisees: 47 },
-                { year: 2025, placesAutorisees: 40 },
-              ],
+              placesAutorisees: 40,
             },
           },
         };
@@ -900,67 +899,7 @@ describe("transformation util", () => {
       expect(getPlacesSource(structureVersionTransformation)).toBe(40);
     });
 
-    it("retombe sur la typologie la plus récente quand aucune ne correspond à l'année de l'effectiveDate", () => {
-      const structureVersionTransformation: StructureVersionTransformationApiRead =
-        {
-          id: 1,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            effectiveDate: "2027-01-01T12:00:00.000Z",
-            structure: {
-              codeBhasile: "BHA-NOR-001",
-              structureTypologies: [
-                { year: 2026, placesAutorisees: 47 },
-                { year: 2025, placesAutorisees: 40 },
-              ],
-            },
-          },
-        };
-
-      expect(getPlacesSource(structureVersionTransformation)).toBe(47);
-    });
-
-    it("retombe sur la typologie la plus récente (max year, pas [0]) quand l'ordre n'est pas décroissant", () => {
-      const structureVersionTransformation: StructureVersionTransformationApiRead =
-        {
-          id: 1,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            effectiveDate: "2030-01-01T12:00:00.000Z",
-            structure: {
-              codeBhasile: "BHA-NOR-001",
-              structureTypologies: [
-                { year: 2024, placesAutorisees: 40 },
-                { year: 2026, placesAutorisees: 50 },
-                { year: 2025, placesAutorisees: 47 },
-              ],
-            },
-          },
-        };
-
-      expect(getPlacesSource(structureVersionTransformation)).toBe(50);
-    });
-
-    it("retombe sur la typologie la plus récente quand effectiveDate est absente", () => {
-      const structureVersionTransformation: StructureVersionTransformationApiRead =
-        {
-          id: 1,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            structure: {
-              codeBhasile: "BHA-NOR-001",
-              structureTypologies: [
-                { year: 2026, placesAutorisees: 47 },
-                { year: 2025, placesAutorisees: 40 },
-              ],
-            },
-          },
-        };
-
-      expect(getPlacesSource(structureVersionTransformation)).toBe(47);
-    });
-
-    it("retourne undefined quand la structure source n'a pas de typologie", () => {
+    it("retourne undefined quand la structure source n'a pas de places", () => {
       const structureVersionTransformation: StructureVersionTransformationApiRead =
         {
           id: 1,
@@ -972,17 +911,36 @@ describe("transformation util", () => {
   });
 
   describe("buildTransformationTypologie", () => {
-    it("date le typologie à l'année de l'effectiveDate et le préremplit depuis la typologie source de cette année", () => {
-      const structureVersion = {
-        effectiveDate: "2025-08-25T12:00:00.000Z",
-        structureTypologies: [
-          { year: 2026, placesAutorisees: 50, pmr: 3, lgbt: 2, fvvTeh: 1 },
-          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
-          { year: 2024, placesAutorisees: 40, pmr: 1, lgbt: 0, fvvTeh: 0 },
-        ],
-      } as StructureVersionApiRead;
+    // Split précoce : places = scalaire de la version (brouillon), détail (pmr/lgbt/
+    // fvvTeh) = ce que la transfo a déclaré sur la SVT, résolu par année.
+    const makeSvt = (
+      structureVersion: {
+        effectiveDate?: string;
+        placesAutorisees?: number | null;
+      },
+      structureTypologies: {
+        year: number;
+        pmr?: number;
+        lgbt?: number;
+        fvvTeh?: number;
+      }[]
+    ) =>
+      ({
+        structureVersion,
+        structureTypologies,
+      }) as StructureVersionTransformationApiRead;
 
-      expect(buildTransformationTypologie(structureVersion)).toEqual({
+    it("date à l'année de l'effectiveDate, places depuis le scalaire, détail depuis la SVT de cette année", () => {
+      const svt = makeSvt(
+        { effectiveDate: "2025-08-25T12:00:00.000Z", placesAutorisees: 47 },
+        [
+          { year: 2026, pmr: 3, lgbt: 2, fvvTeh: 1 },
+          { year: 2025, pmr: 2, lgbt: 1, fvvTeh: 0 },
+          { year: 2024, pmr: 1, lgbt: 0, fvvTeh: 0 },
+        ]
+      );
+
+      expect(buildTransformationTypologie(svt)).toEqual({
         year: 2025,
         placesAutorisees: 47,
         pmr: 2,
@@ -991,16 +949,16 @@ describe("transformation util", () => {
       });
     });
 
-    it("retombe sur la typologie la plus récente quand aucune ne correspond à l'année de l'effectiveDate", () => {
-      const structureVersion = {
-        effectiveDate: "2026-08-25T12:00:00.000Z",
-        structureTypologies: [
-          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
-          { year: 2024, placesAutorisees: 40, pmr: 1, lgbt: 0, fvvTeh: 0 },
-        ],
-      } as StructureVersionApiRead;
+    it("retombe sur le détail le plus récent quand aucune SVT ne correspond à l'année", () => {
+      const svt = makeSvt(
+        { effectiveDate: "2026-08-25T12:00:00.000Z", placesAutorisees: 47 },
+        [
+          { year: 2025, pmr: 2, lgbt: 1, fvvTeh: 0 },
+          { year: 2024, pmr: 1, lgbt: 0, fvvTeh: 0 },
+        ]
+      );
 
-      expect(buildTransformationTypologie(structureVersion)).toEqual({
+      expect(buildTransformationTypologie(svt)).toEqual({
         year: 2026,
         placesAutorisees: 47,
         pmr: 2,
@@ -1009,15 +967,13 @@ describe("transformation util", () => {
       });
     });
 
-    it("utilise l'année réelle en cours quand effectiveDate est absente, préremplie depuis la typologie la plus récente", () => {
-      const structureVersion = {
-        structureTypologies: [
-          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
-          { year: 2024, placesAutorisees: 40, pmr: 1, lgbt: 0, fvvTeh: 0 },
-        ],
-      } as StructureVersionApiRead;
+    it("utilise l'année en cours sans effectiveDate, détail depuis la SVT la plus récente", () => {
+      const svt = makeSvt({ placesAutorisees: 47 }, [
+        { year: 2025, pmr: 2, lgbt: 1, fvvTeh: 0 },
+        { year: 2024, pmr: 1, lgbt: 0, fvvTeh: 0 },
+      ]);
 
-      expect(buildTransformationTypologie(structureVersion)).toEqual({
+      expect(buildTransformationTypologie(svt)).toEqual({
         year: new Date().getFullYear(),
         placesAutorisees: 47,
         pmr: 2,
@@ -1026,17 +982,17 @@ describe("transformation util", () => {
       });
     });
 
-    it("prérempli depuis la typologie la plus récente (max year, pas typologies[0]) quand l'ordre n'est pas décroissant", () => {
-      const structureVersion = {
-        effectiveDate: "2030-01-01T12:00:00.000Z",
-        structureTypologies: [
-          { year: 2024, placesAutorisees: 40, pmr: 1, lgbt: 0, fvvTeh: 0 },
-          { year: 2026, placesAutorisees: 50, pmr: 3, lgbt: 2, fvvTeh: 1 },
-          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
-        ],
-      } as StructureVersionApiRead;
+    it("prend le détail de l'année max (pas structureTypologies[0]) quand l'ordre n'est pas décroissant", () => {
+      const svt = makeSvt(
+        { effectiveDate: "2030-01-01T12:00:00.000Z", placesAutorisees: 50 },
+        [
+          { year: 2024, pmr: 1, lgbt: 0, fvvTeh: 0 },
+          { year: 2026, pmr: 3, lgbt: 2, fvvTeh: 1 },
+          { year: 2025, pmr: 2, lgbt: 1, fvvTeh: 0 },
+        ]
+      );
 
-      expect(buildTransformationTypologie(structureVersion)).toEqual({
+      expect(buildTransformationTypologie(svt)).toEqual({
         year: 2030,
         placesAutorisees: 50,
         pmr: 3,
@@ -1045,7 +1001,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("retombe sur l'année réelle en cours sans effectiveDate ni typologie source (structureVersion absente)", () => {
+    it("retombe sur l'année en cours sans SVT (undefined)", () => {
       expect(buildTransformationTypologie(undefined)).toEqual({
         year: new Date().getFullYear(),
         placesAutorisees: undefined,
@@ -1055,12 +1011,10 @@ describe("transformation util", () => {
       });
     });
 
-    it("retombe sur l'année réelle en cours pour une création ex-nihilo (typologies vides, pas d'effectiveDate)", () => {
-      const structureVersion = {
-        structureTypologies: [],
-      } as StructureVersionApiRead;
+    it("retombe sur l'année en cours pour une création ex-nihilo (SVT sans détail ni places)", () => {
+      const svt = makeSvt({}, []);
 
-      expect(buildTransformationTypologie(structureVersion)).toEqual({
+      expect(buildTransformationTypologie(svt)).toEqual({
         year: new Date().getFullYear(),
         placesAutorisees: undefined,
         pmr: undefined,
@@ -1095,10 +1049,11 @@ describe("transformation util", () => {
         antennes: [],
         effectiveDate: "2025-08-25T12:00:00.000Z",
         adresses: [],
-        structureTypologies: [
-          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
-        ],
+        // Split précoce : places sur le scalaire de la version...
+        placesAutorisees: 47,
       } as StructureVersionApiRead,
+      // ...détail déclaré sur la SVT.
+      structureTypologies: [{ year: 2025, pmr: 2, lgbt: 1, fvvTeh: 0 }],
     });
 
     const getDefaultValuesFor = (

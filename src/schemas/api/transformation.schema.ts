@@ -91,6 +91,7 @@ export type StructureVersionTransformationApiRead =
         codePostalAdministratif?: string | null;
         communeAdministrative?: string | null;
         departementAdministratif?: string | null;
+        placesAutorisees?: number | null;
         antennes?: AntenneApiType[];
         actesAdministratifs?: StructureParentActe[];
         structureTypologies?: {

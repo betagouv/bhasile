@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import ActualisationActesAdministratifs from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/04-actes-administratifs/page";
 import { StructureType } from "@/types/structure.type";
 
+import { createActualisationForm } from "../../../../../../test-utils/factories/actualisation-form.factory";
 import { createStructure } from "../../../../../../test-utils/structure.factory";
 import {
   clickButtonByName,
@@ -29,17 +30,23 @@ const actesStructure = () => ({
       fileUploads: [{ id: 1, key: "arrete-tarification" }],
     },
   ],
-  campaigns: [
-    { slug: "actualisation-2026", isValidated: false, formSteps: [] },
-  ],
+  forms: [createActualisationForm(2026)],
 });
 
-const findCampaignPut = (fetchMock: ReturnType<typeof vi.fn>) =>
+const findActualisationPut = (fetchMock: ReturnType<typeof vi.fn>) =>
   fetchMock.mock.calls.find(
     (call) =>
-      call[0] === "/api/campaigns" &&
+      call[0] === "/api/structures/1/actualisation" &&
       (call[1] as RequestInit | undefined)?.method === "PUT"
   );
+
+const stepStatusInPayload = (put: unknown[] | undefined, slug: string) => {
+  const payload = JSON.parse((put?.[1] as RequestInit).body as string);
+  return payload.forms[0].formSteps.find(
+    (formStep: { stepDefinition: { slug: string } }) =>
+      formStep.stepDefinition.slug === slug
+  )?.status;
+};
 
 describe("Page actualisation 04-actes-administratifs", () => {
   beforeEach(() => {
@@ -47,7 +54,7 @@ describe("Page actualisation 04-actes-administratifs", () => {
     global.fetch = vi.fn();
   });
 
-  it("valide l'étape actes vers /api/campaigns pour une autorisée", async () => {
+  it("valide l'étape actes via la sous-route actualisation pour une autorisée", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockResolvedValue({
       ok: true,
@@ -61,13 +68,8 @@ describe("Page actualisation 04-actes-administratifs", () => {
 
     await clickButtonByName("Valider");
 
-    const campaignPut = findCampaignPut(fetchMock);
-    expect(campaignPut).toBeDefined();
-    const payload = JSON.parse((campaignPut?.[1] as RequestInit).body as string);
-    expect(payload).toMatchObject({
-      structureId: 1,
-      year: 2026,
-      step: { slug: "04-actes-administratifs", status: "VALIDE" },
-    });
+    const put = findActualisationPut(fetchMock);
+    expect(put).toBeDefined();
+    expect(stepStatusInPayload(put, "04-actes-administratifs")).toBe("VALIDE");
   });
 });

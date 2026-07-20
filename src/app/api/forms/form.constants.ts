@@ -6,7 +6,7 @@ export const TRANSFORMATION_FORM_SLUG = "transformation-v1";
 
 export const ACTUALISATION_FORM_SLUG_PREFIX = "actualisation-";
 
-export const actualisationFormSlug = (year: number | string): string =>
+export const getActualisationFormSlug = (year: number | string): string =>
   `${ACTUALISATION_FORM_SLUG_PREFIX}${year}`;
 
 export const ACTUALISATION_FORM_STEP_SLUGS = [

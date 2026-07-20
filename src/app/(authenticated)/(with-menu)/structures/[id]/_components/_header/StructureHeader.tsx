@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
-import { hasOpenActualisation } from "@/app/api/campaigns/campaign.util";
+import { hasOpenActualisation } from "@/app/api/structures/actualisation.util";
 import { Badge } from "@/app/components/common/Badge";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";

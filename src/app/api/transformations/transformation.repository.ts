@@ -20,6 +20,7 @@ import {
   createOrUpdateForm,
   initializeStructureVersionTransformationDefaultForms,
 } from "../forms/form.repository";
+import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { transformationInclude } from "./transformation.db.type";
 
@@ -421,6 +422,14 @@ const createOrUpdateStructureVersionTransformation = async (
   await createOrUpdateForm(tx, structureVersionTransformation.form, {
     structureVersionTransformationId,
   });
+
+  // Split précoce : le détail (pmr/lgbt/fvvTeh) déclaré par la transfo vit sur la SVT
+  // (registre permanent) ; les places sont sur le scalaire de la version ci-dessus.
+  await createOrUpdateStructureTypologies(
+    tx,
+    structureVersionTransformation.structureTypologies,
+    { structureVersionTransformationId }
+  );
 
   await createOrUpdateActesAdministratifs(
     tx,
