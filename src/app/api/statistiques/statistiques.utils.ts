@@ -1,6 +1,9 @@
 import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
-import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
+import {
+  EXCLUDED_STRUCTURE_TYPES,
+  PLACES_VERSIONED_FROM_YEAR,
+} from "@/constants";
 import { StructureType } from "@/generated/prisma/client";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
@@ -239,6 +242,31 @@ export const getEffectiveStructureVersionAtDate = (
 
   return effectiveVersion;
 };
+
+export const applyVersionedPlacesToTypologies = (
+  typologies: StatistiqueDbTypologie[],
+  timeline: StatistiqueDbStructureVersionTimeline[],
+  now: Date
+): StatistiqueDbTypologie[] =>
+  typologies.map((typologie) => {
+    if (
+      typologie.structureId === null ||
+      typologie.year < PLACES_VERSIONED_FROM_YEAR
+    ) {
+      return typologie;
+    }
+    const asOfDate = new Date(Date.UTC(typologie.year, 11, 31));
+    const cappedDate = asOfDate < now ? asOfDate : now;
+    const effectiveVersion = getEffectiveStructureVersionAtDate(
+      typologie.structureId,
+      cappedDate,
+      timeline
+    );
+    return {
+      ...typologie,
+      placesAutorisees: effectiveVersion?.placesAutorisees ?? null,
+    };
+  });
 
 /**
  * Ne garde que les lignes (adresses, typologies, …) rattachées à la

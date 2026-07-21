@@ -56,6 +56,7 @@ type BuildTestStructureVersionTimelineEntry = {
   structureId: number;
   structureVersionId?: number;
   effectiveDate?: Date;
+  placesAutorisees?: number | null;
 };
 
 export const buildTestStructureVersionTimeline = (
@@ -72,6 +73,7 @@ export const buildTestStructureVersionTimeline = (
     id: entry.structureVersionId ?? entry.structureId,
     structureId: entry.structureId,
     effectiveDate: entry.effectiveDate ?? defaultEffectiveDate,
+    placesAutorisees: entry.placesAutorisees ?? null,
   }));
 };
 

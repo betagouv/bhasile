@@ -194,6 +194,7 @@ export const findStructureVersionTimeline = async (
       id: true,
       structureId: true,
       effectiveDate: true,
+      placesAutorisees: true,
     },
     orderBy: [
       { structureId: "asc" },

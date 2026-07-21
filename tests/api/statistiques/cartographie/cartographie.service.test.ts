@@ -78,6 +78,7 @@ const buildContext = (
       id: structure.id,
       structureId: structure.id,
       effectiveDate: new Date("2000-01-01"),
+      placesAutorisees: null,
       type: structure.type,
       departementAdministratif: structure.departementAdministratif,
     })),

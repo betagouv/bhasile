@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { afterAll, describe, expect, it } from "vitest";
 
+import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { updateOne } from "@/app/api/structures/structure.repository";
 import {
   getFullStructure,
@@ -12,6 +13,7 @@ import {
 } from "@/app/api/structures/structure.service";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import prisma from "@/lib/prisma";
+import { FormApiType } from "@/schemas/api/form.schema";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
 import { StepStatus } from "@/types/form.type";
@@ -1018,7 +1020,7 @@ describe("structure.repository db integration", () => {
     // WHEN: form status and first step are updated by slug
     const newForm = {
       id: 0,
-      status: true,
+      status: false,
       formDefinition: {
         id: formDefinition.id,
         slug: formDefinition.slug,
@@ -1193,7 +1195,7 @@ describe("structure.repository db integration", () => {
             ],
           },
         ],
-        structureTypologies: [{ year: 2026, placesAutorisees: 42 }],
+        structureTypologies: [{ year: 2025, placesAutorisees: 42 }],
         dnaStructures: [{ dna: { code: dnaCode } }],
       });
 
@@ -1727,6 +1729,75 @@ describe("structure.repository db integration", () => {
         .find((linked) => linked.structure?.id === partnerStructure.id);
       expect(linkedPartner?.structure?.type).toBe(StructureType.CADA);
       expect(linkedPartner?.structure?.communeAdministrative).toBe("Lyon");
+    });
+  });
+
+  describe("validation des formulaires de structure", () => {
+    const FINALISATION_STEP_SLUGS = [
+      "01-identification",
+      "02-documents-financiers",
+      "03-finance",
+      "04-controles",
+      "05-documents",
+      "06-notes",
+    ];
+
+    const buildFinalisationForm = (
+      steps: { slug: string; status: StepStatus }[],
+      status: boolean
+    ): FormApiType => ({
+      id: 0,
+      status,
+      formDefinition: {
+        id: 0,
+        slug: FINALISATION_FORM_SLUG,
+        name: "finalisation",
+        version: 1,
+      },
+      formSteps: steps.map((step, index) => ({
+        id: index,
+        status: step.status,
+        stepDefinition: { id: index, slug: step.slug, label: step.slug },
+      })),
+    });
+
+    it("rejette la validation d'un formulaire dont une étape n'est pas validée", async () => {
+      const structure = await createStructure();
+
+      await expect(
+        updateOne({
+          id: structure.id,
+          forms: [
+            buildFinalisationForm(
+              [{ slug: "01-identification", status: StepStatus.NON_COMMENCE }],
+              true
+            ),
+          ],
+        })
+      ).rejects.toThrow(/étapes doivent être validées/);
+    });
+
+    it("valide un formulaire quand toutes ses étapes sont validées", async () => {
+      const structure = await createStructure();
+
+      await updateOne({
+        id: structure.id,
+        forms: [
+          buildFinalisationForm(
+            FINALISATION_STEP_SLUGS.map((slug) => ({
+              slug,
+              status: StepStatus.VALIDE,
+            })),
+            true
+          ),
+        ],
+      });
+
+      const form = await prisma.form.findFirstOrThrow({
+        where: { structureId: structure.id },
+        select: { status: true },
+      });
+      expect(form.status).toBe(true);
     });
   });
 });

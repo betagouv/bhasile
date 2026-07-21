@@ -201,6 +201,7 @@ export const getFullStructures = async (
         true,
         row.bornFromCreation
       );
+      structure.currentPlaces.placesAutorisees = row.placesAutorisees ?? 0;
       structure.adresses = getReadableAdresses(structure, user);
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);

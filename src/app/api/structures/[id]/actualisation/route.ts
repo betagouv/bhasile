@@ -54,7 +54,7 @@ export async function PUT(
 
     const updatedStructure = await updateActualisation(input, year);
     createStructureEvent(request.method, updatedStructure.id);
-    // Le client re-fetch la structure complète : pas de corps de réponse utile.
+
     return NextResponse.json("Structure actualisée avec succès", {
       status: 200,
     });

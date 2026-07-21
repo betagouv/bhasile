@@ -27,7 +27,7 @@ export const createFakeFormFinalisation = (): Omit<FormDefinition, "id"> => {
     name: "finalisation",
     slug: FINALISATION_FORM_SLUG,
     version: 1,
-    deadline: null,
+    deadline: new Date("2026-08-30T00:00:00.000Z"),
   };
 };
 export const createFakeFormStructureVersionTransformationCreation = (): Omit<

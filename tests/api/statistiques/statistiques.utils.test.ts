@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { StatistiqueDbStructure } from "@/app/api/statistiques/statistiques.db.type";
+import type {
+  StatistiqueDbStructure,
+  StatistiqueDbTypologie,
+} from "@/app/api/statistiques/statistiques.db.type";
 import {
+  applyVersionedPlacesToTypologies,
   filterByActiveStructureId,
   getEffectiveStructureVersionAtDate,
   lookupActiveStructureIds,
@@ -421,5 +425,56 @@ describe("sliceStatistiquesContext - restriction à une zone", () => {
   it("ne modifie pas le contexte d'origine", () => {
     expect(context.structures).toEqual([structure1, structure2]);
     expect(context.departements).toHaveLength(2);
+  });
+});
+
+describe("applyVersionedPlacesToTypologies", () => {
+  const buildTypologie = (
+    year: number,
+    placesAutorisees: number | null
+  ): StatistiqueDbTypologie => ({
+    id: year,
+    structureId: 1,
+    year,
+    placesAutorisees,
+    pmr: 0,
+    lgbt: 0,
+    fvvTeh: 0,
+  });
+
+  it("laisse les millésimes antérieurs au régime versionné inchangés", () => {
+    const timeline = buildTestStructureVersionTimeline([
+      {
+        structureId: 1,
+        effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+        placesAutorisees: 42,
+      },
+    ]);
+
+    const resolved = applyVersionedPlacesToTypologies(
+      [buildTypologie(2025, 20)],
+      timeline,
+      new Date("2026-07-01T00:00:00.000Z")
+    );
+
+    expect(resolved[0].placesAutorisees).toBe(20);
+  });
+
+  it("projette le scalaire de la version effective sur les millésimes versionnés", () => {
+    const timeline = buildTestStructureVersionTimeline([
+      {
+        structureId: 1,
+        effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+        placesAutorisees: 42,
+      },
+    ]);
+
+    const resolved = applyVersionedPlacesToTypologies(
+      [buildTypologie(2026, null)],
+      timeline,
+      new Date("2026-07-01T00:00:00.000Z")
+    );
+
+    expect(resolved[0].placesAutorisees).toBe(42);
   });
 });

@@ -7,24 +7,6 @@
 -- - Compares places between structure and addresses (difference > 10%)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_places_quality" AS
 WITH
-  -- Last typology by structure
-  structure_typologie_dernier_millesime AS (
-    SELECT DISTINCT
-      ON (sc."id") sc."id" AS "structureId",
-      st."placesAutorisees",
-      st."pmr",
-      st."lgbt",
-      st."fvvTeh",
-      st."year"
-    FROM
-:"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureTypologie" st ON st."structureId" = sc."id"
-    WHERE
-      st."placesAutorisees" IS NOT NULL
-    ORDER BY
-      sc."id",
-      st."year" DESC
-  ),
   -- Last typology by address
   adresse_typologie_dernier_millesime AS (
     SELECT DISTINCT
@@ -60,13 +42,13 @@ WITH
       sc."id",
       COALESCE(
         ABS(
-          COALESCE(sdm."placesAutorisees", 0) - COALESCE(aa."places_autorisees_adresse", 0)
-        ) / NULLIF(COALESCE(sdm."placesAutorisees", 0)::float, 0) * 100,
+          COALESCE(sv."placesAutorisees", 0) - COALESCE(aa."places_autorisees_adresse", 0)
+        ) / NULLIF(COALESCE(sv."placesAutorisees", 0)::float, 0) * 100,
         0
       ) AS pct_diff_places_adresse
     FROM
 :"SCHEMA"."structures_core" sc
-      LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = sc."id"
+      INNER JOIN public."StructureVersion" sv ON sv."id" = sc."structure_version_id"
       LEFT JOIN adresses_agregees aa ON aa."structureId" = sc."id"
   ),
   -- Aggregate specific places counts across all years (structure typology history)

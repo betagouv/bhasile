@@ -184,7 +184,7 @@ export const updateOne = async (
         tx,
         actesAdministratifs,
         { structureId: structure.id },
-        { skipOrphanDelete: options.skipActesOrphanDelete === true }
+        { skipOrphanDelete: options.skipActesOrphanDelete }
       );
       await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
         structureId: structure.id,
