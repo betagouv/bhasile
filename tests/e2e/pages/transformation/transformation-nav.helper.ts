@@ -70,7 +70,7 @@ export const annulerDemarche = async (page: Page): Promise<void> => {
   await expect(async () => {
     await page.getByRole("button", { name: "Annuler la démarche" }).click();
     await expect(
-      page.getByText(/vous êtes sur le point d.annuler/i)
+      page.getByRole("heading", { name: /vous êtes sur le point d.annuler/i })
     ).toBeVisible({ timeout: 2000 });
   }).toPass({ timeout: 15000 });
   const deletePromise = page.waitForResponse(
