@@ -18,120 +18,69 @@ vi.mock("@/constants", async () => {
 
 describe("FieldSetTypePlaces", () => {
   const years = [2026, 2025, 2024, 2023];
-  const structure = createStructure({
-    id: 1,
-  });
+  const structure = createStructure({ id: 1 });
+
+  const renderFieldSet = (
+    defaultValues: Record<string, unknown>,
+    overrides?: Partial<typeof structure>,
+    formKind: FormKind = FormKind.FINALISATION
+  ) =>
+    render(
+      <FormTestWrapper defaultValues={defaultValues}>
+        <FieldSetTypePlaces
+          structure={overrides ? { ...structure, ...overrides } : structure}
+          formKind={formKind}
+        />
+      </FormTestWrapper>
+    );
+
+  const filledYears = years.map((year) => ({
+    year,
+    placesAutorisees: 0,
+    pmr: 0,
+    lgbt: 0,
+    fvvTeh: 0,
+  }));
+
   describe("Rendering finalisation form", () => {
     it("affiche la légende Types de place", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: years.map((year) => ({
-              year,
-              placesAutorisees: 0,
-              pmr: 0,
-              lgbt: 0,
-              fvvTeh: 0,
-            })),
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
-
+      renderFieldSet({ structureTypologies: filledYears });
       expect(screen.getByText("Types de place")).toBeInTheDocument();
     });
 
-    it("affiche les en-têtes du tableau", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: years.map((year) => ({
-              year,
-              placesAutorisees: 0,
-              pmr: 0,
-              lgbt: 0,
-              fvvTeh: 0,
-            })),
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
-
-      expect(screen.getByText("Année")).toBeInTheDocument();
-      expect(screen.getByText("Autorisées")).toBeInTheDocument();
-      expect(screen.getByText("PMR")).toBeInTheDocument();
-      expect(screen.getByText("LGBT")).toBeInTheDocument();
-      expect(screen.getByText("FVV/TEH")).toBeInTheDocument();
-    });
-
-    it("affiche une ligne par année", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: years.map((year) => ({
-              year,
-              placesAutorisees: 0,
-              pmr: 0,
-              lgbt: 0,
-              fvvTeh: 0,
-            })),
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
-
+    it("affiche les années en en-têtes de colonnes", () => {
+      renderFieldSet({ structureTypologies: filledYears });
       years.forEach((year) => {
-        expect(screen.getByText(year.toString())).toBeInTheDocument();
+        expect(
+          screen.getByRole("columnheader", { name: year.toString() })
+        ).toBeInTheDocument();
       });
     });
 
-    it("affiche le texte d'instruction", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: [],
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
+    it("affiche une ligne par type de place avec les libellés labellisées/spécialisées", () => {
+      renderFieldSet({ structureTypologies: filledYears });
+      expect(screen.getByText("Places autorisées")).toBeInTheDocument();
+      expect(screen.getByText("Places PMR")).toBeInTheDocument();
+      expect(screen.getByText("Places LGBT")).toBeInTheDocument();
+      expect(screen.getByText("(labellisées)")).toBeInTheDocument();
+      expect(screen.getByText("Places FVV/TEH")).toBeInTheDocument();
+      expect(screen.getByText("(spécialisées)")).toBeInTheDocument();
+    });
 
+    it("affiche le texte d'instruction, y compris la règle contraction/extension", () => {
+      renderFieldSet({ structureTypologies: [] });
       expect(
         screen.getByText(
           /Veuillez renseigner l’historique du nombre de places/i
         )
       ).toBeInTheDocument();
+      expect(
+        screen.getByText(/passer par une\s+contraction ou une extension/i)
+      ).toBeInTheDocument();
     });
 
     it("affiche la légende PMR/LGBT/FVV", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: [],
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
-
+      renderFieldSet({ structureTypologies: [] });
       expect(
         screen.getByText(/PMR : Personnes à Mobilité Réduite/i)
       ).toBeInTheDocument();
@@ -146,25 +95,11 @@ describe("FieldSetTypePlaces", () => {
 
   describe("Rendering modification form", () => {
     it("affiche la légende Détails et historique", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: years.map((year) => ({
-              year,
-              placesAutorisees: 0,
-              pmr: 0,
-              lgbt: 0,
-              fvvTeh: 0,
-            })),
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.MODIFICATION}
-          />
-        </FormTestWrapper>
+      renderFieldSet(
+        { structureTypologies: filledYears },
+        undefined,
+        FormKind.MODIFICATION
       );
-
       expect(screen.getByText("Détails et historique")).toBeInTheDocument();
       expect(screen.queryByText("Types de place")).not.toBeInTheDocument();
     });
@@ -172,71 +107,15 @@ describe("FieldSetTypePlaces", () => {
 
   describe("Form inputs", () => {
     it("affiche tous les champs de saisie pour chaque année", () => {
-      const { container } = render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: years.map((year) => ({
-              year,
-              placesAutorisees: 0,
-              pmr: 0,
-              lgbt: 0,
-              fvvTeh: 0,
-            })),
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
-
+      const { container } = renderFieldSet({ structureTypologies: filledYears });
       years.forEach((_, index) => {
-        expect(
-          container.querySelector(
-            `[name="structureTypologies.${index}.placesAutorisees"]`
-          )
-        ).toBeInTheDocument();
-        expect(
-          container.querySelector(`[name="structureTypologies.${index}.pmr"]`)
-        ).toBeInTheDocument();
-        expect(
-          container.querySelector(`[name="structureTypologies.${index}.lgbt"]`)
-        ).toBeInTheDocument();
-        expect(
-          container.querySelector(
-            `[name="structureTypologies.${index}.fvvTeh"]`
-          )
-        ).toBeInTheDocument();
-      });
-    });
-
-    it("rend des champs date cachés pour chaque année", () => {
-      const { container } = render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: years.map((year) => ({
-              year,
-              placesAutorisees: 0,
-              pmr: 0,
-              lgbt: 0,
-              fvvTeh: 0,
-            })),
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
-
-      years.forEach((_, index) => {
-        const dateInput = container.querySelector(
-          `input[name="structureTypologies.${index}.year"]`
-        );
-        expect(dateInput).toBeInTheDocument();
-        expect(dateInput).toHaveAttribute("type", "hidden");
+        ["placesAutorisees", "pmr", "lgbt", "fvvTeh"].forEach((field) => {
+          expect(
+            container.querySelector(
+              `[name="structureTypologies.${index}.${field}"]`
+            )
+          ).toBeInTheDocument();
+        });
       });
     });
   });
@@ -244,27 +123,9 @@ describe("FieldSetTypePlaces", () => {
   describe("Number inputs", () => {
     it("accepte des valeurs numériques pour placesAutorisees des années legacy", async () => {
       const user = userEvent.setup();
+      const { container } = renderFieldSet({ structureTypologies: filledYears });
 
-      const { container } = render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: years.map((year) => ({
-              year,
-              placesAutorisees: 0,
-              pmr: 0,
-              lgbt: 0,
-              fvvTeh: 0,
-            })),
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
-
-      // index 1 = 2025 (< seuil, éditable) ; l'index 0 = 2026 est en lecture seule.
+      // index 1 = 2025 (< seuil, éditable) ; index 0 = 2026 est en lecture seule.
       const input = container.querySelector(
         '[name="structureTypologies.1.placesAutorisees"]'
       ) as HTMLInputElement;
@@ -280,24 +141,7 @@ describe("FieldSetTypePlaces", () => {
     });
 
     it("verrouille placesAutorisees à partir du seuil de versionnement", () => {
-      const { container } = render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: years.map((year) => ({
-              year,
-              placesAutorisees: 0,
-              pmr: 0,
-              lgbt: 0,
-              fvvTeh: 0,
-            })),
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
+      const { container } = renderFieldSet({ structureTypologies: filledYears });
 
       // index 0 = 2026 (≥ seuil) verrouillé, index 1 = 2025 éditable.
       expect(
@@ -314,32 +158,18 @@ describe("FieldSetTypePlaces", () => {
   });
 
   describe("Data for multiple years", () => {
-    it("gère des valeurs différentes pour chaque année", async () => {
-      const { container } = render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: [
-              {
-                year: 2026,
-                placesAutorisees: 100,
-                pmr: 10,
-                lgbt: 5,
-                fvvTeh: 3,
-              },
-              { year: 2025, placesAutorisees: 95, pmr: 8, lgbt: 4, fvvTeh: 2 },
-              { year: 2024, placesAutorisees: 90, pmr: 7, lgbt: 3, fvvTeh: 1 },
-              { year: 2023, placesAutorisees: 90, pmr: 7, lgbt: 3, fvvTeh: 1 },
-            ],
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={{
-              ...structure,
-              isCurrentVersionFromTransformation: true,
-            }}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
+    it("gère des valeurs différentes pour chaque année", () => {
+      const { container } = renderFieldSet(
+        {
+          structureTypologies: [
+            { year: 2026, placesAutorisees: 100, pmr: 10, lgbt: 5, fvvTeh: 3 },
+            { year: 2025, placesAutorisees: 95, pmr: 8, lgbt: 4, fvvTeh: 2 },
+            { year: 2024, placesAutorisees: 90, pmr: 7, lgbt: 3, fvvTeh: 1 },
+            { year: 2023, placesAutorisees: 90, pmr: 7, lgbt: 3, fvvTeh: 1 },
+          ],
+        },
+        // Transfo en cours : le mirror est coupé, chaque cellule garde sa valeur.
+        { isCurrentVersionFromTransformation: true }
       );
 
       const inputs = [0, 1, 2].map((index) => ({
@@ -352,9 +182,6 @@ describe("FieldSetTypePlaces", () => {
         lgbt: container.querySelector(
           `[name="structureTypologies.${index}.lgbt"]`
         ) as HTMLInputElement,
-        fvvTeh: container.querySelector(
-          `[name="structureTypologies.${index}.fvvTeh"]`
-        ) as HTMLInputElement,
       }));
 
       expect(inputs[0].placesAutorisees).toHaveValue("100");
@@ -365,21 +192,12 @@ describe("FieldSetTypePlaces", () => {
 
     it("reflète l'année legacy sur la cellule ≥ seuil hors transfo", async () => {
       const user = userEvent.setup();
-      const { container } = render(
-        <FormTestWrapper
-          defaultValues={{
-            structureTypologies: [
-              { year: 2026, placesAutorisees: 100, pmr: 0, lgbt: 0, fvvTeh: 0 },
-              { year: 2025, placesAutorisees: 95, pmr: 0, lgbt: 0, fvvTeh: 0 },
-            ],
-          }}
-        >
-          <FieldSetTypePlaces
-            structure={structure}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
+      const { container } = renderFieldSet({
+        structureTypologies: [
+          { year: 2026, placesAutorisees: 100, pmr: 0, lgbt: 0, fvvTeh: 0 },
+          { year: 2025, placesAutorisees: 95, pmr: 0, lgbt: 0, fvvTeh: 0 },
+        ],
+      });
 
       const places2026 = container.querySelector(
         '[name="structureTypologies.0.placesAutorisees"]'
@@ -389,7 +207,7 @@ describe("FieldSetTypePlaces", () => {
       ) as HTMLInputElement;
 
       // Au montage, la cellule 2026 (verrouillée) suit déjà 2025.
-      expect(places2026).toHaveValue("95");
+      await waitFor(() => expect(places2026).toHaveValue("95"));
 
       // Éditer 2025 met à jour 2026 en direct.
       await user.clear(places2025);
@@ -398,20 +216,24 @@ describe("FieldSetTypePlaces", () => {
     });
   });
 
-  describe("Hidden ID fields", () => {
-    it("rend des champs id cachés quand ils sont fournis", () => {
+  describe("Soumission", () => {
+    it("conserve id et year dans le payload sans champ caché rendu", async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+
       const { container } = render(
         <FormTestWrapper
           defaultValues={{
             structureTypologies: years.map((year, index) => ({
-              year,
               id: index + 1,
+              year,
               placesAutorisees: 0,
               pmr: 0,
               lgbt: 0,
               fvvTeh: 0,
             })),
           }}
+          onSubmit={onSubmit}
         >
           <FieldSetTypePlaces
             structure={structure}
@@ -420,10 +242,22 @@ describe("FieldSetTypePlaces", () => {
         </FormTestWrapper>
       );
 
-      years.forEach((_, index) => {
-        expect(
-          container.querySelector(`[name="structureTypologies.${index}.id"]`)
-        ).toBeInTheDocument();
+      expect(
+        container.querySelector('[name="structureTypologies.0.id"]')
+      ).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[name="structureTypologies.0.year"]')
+      ).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Valider" }));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledTimes(1);
+      });
+
+      const submitted = onSubmit.mock.calls[0][0].structureTypologies;
+      years.forEach((year, index) => {
+        expect(submitted[index]).toMatchObject({ id: index + 1, year });
       });
     });
   });

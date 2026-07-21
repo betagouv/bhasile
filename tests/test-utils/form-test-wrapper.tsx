@@ -1,16 +1,22 @@
 import { ReactNode } from "react";
-import { FormProvider as HookFormProvider, useForm } from "react-hook-form";
+import {
+  FieldValues,
+  FormProvider as HookFormProvider,
+  useForm,
+} from "react-hook-form";
 
 import { FormProvider } from "@/app/context/FormContext";
 
 type FormTestWrapperProps = {
   children: ReactNode;
   defaultValues?: Record<string, unknown>;
+  onSubmit?: (values: FieldValues) => void;
 };
 
 export function FormTestWrapper({
   children,
   defaultValues = {},
+  onSubmit,
 }: FormTestWrapperProps) {
   const methods = useForm({
     defaultValues,
@@ -19,7 +25,14 @@ export function FormTestWrapper({
 
   return (
     <HookFormProvider {...methods}>
-      <FormProvider formMethods={methods}>{children}</FormProvider>
+      <FormProvider formMethods={methods}>
+        {children}
+        {onSubmit && (
+          <button type="button" onClick={methods.handleSubmit(onSubmit)}>
+            Valider
+          </button>
+        )}
+      </FormProvider>
     </HookFormProvider>
   );
 }

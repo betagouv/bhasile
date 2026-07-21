@@ -3,14 +3,21 @@ import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Table } from "@/app/components/common/Table";
-import { cn } from "@/app/utils/classname.util";
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
-import { YearlyTypePlace } from "./YearlyTypePlace";
+import { getTypePlaceEditHeadings } from "./getTypePlaceEditHeadings";
+import { PlacesAutoriseesLine } from "./PlacesAutoriseesLine";
+import { TypePlaceLine } from "./TypePlaceLine";
+
+const TYPE_PLACE_LINES = [
+  { name: "pmr", label: "Places PMR" },
+  { name: "lgbt", label: "Places LGBT", subLabel: "(labellisées)" },
+  { name: "fvvTeh", label: "Places FVV/TEH", subLabel: "(spécialisées)" },
+];
 
 export const FieldSetTypePlaces = ({
   formKind = FormKind.FINALISATION,
@@ -33,7 +40,9 @@ export const FieldSetTypePlaces = ({
   const { years } = getTypePlacesYearRange();
 
   const startYear = getRealCreationYear(structure);
-  const yearsToDisplay = years.filter((year) => year >= startYear);
+  const yearsToDisplay = [...years]
+    .sort((firstYear, secondYear) => firstYear - secondYear)
+    .filter((year) => year >= startYear);
 
   return (
     <fieldset className="flex flex-col" ref={fieldsetRef}>
@@ -56,19 +65,19 @@ export const FieldSetTypePlaces = ({
       />
 
       <Table
-        headings={["Année", "Autorisées", "PMR", "LGBT", "FVV/TEH"]}
         ariaLabelledBy=""
-        className={cn(
-          "[&_th]:px-0 text-center w-fit",
-          hasErrors && "border-action-high-error"
-        )}
+        headings={getTypePlaceEditHeadings(yearsToDisplay)}
+        enableBorders
+        stickFirstColumn
+        hasErrors={hasErrors}
+        className="text-center"
       >
-        {yearsToDisplay.map((year) => (
-          <YearlyTypePlace
-            key={year}
-            year={year}
-            isCapacityLocked={structure.isCurrentVersionFromTransformation}
-          />
+        <PlacesAutoriseesLine
+          years={yearsToDisplay}
+          isCapacityLocked={structure.isCurrentVersionFromTransformation}
+        />
+        {TYPE_PLACE_LINES.map((line) => (
+          <TypePlaceLine key={line.name} line={line} years={yearsToDisplay} />
         ))}
       </Table>
       {hasErrors && (
