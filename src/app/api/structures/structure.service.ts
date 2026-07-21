@@ -1,3 +1,4 @@
+import { hasValidatedActualisation } from "@/app/utils/actualisationForm.util";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows } from "@/app/utils/list.util";
@@ -25,7 +26,6 @@ import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
-import { hasValidatedActualisation } from "./actualisation.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
@@ -41,7 +41,6 @@ import {
   updateOne,
 } from "./structure.repository";
 import {
-  buildStructureCampaigns,
   buildStructureHistory,
   buildUpcomingTransformations,
   computeStructureListRow,
@@ -101,7 +100,7 @@ export const updateActualisation = async (
   if (!existing) {
     throw new ApiDomainError(`Structure ${structure.id} introuvable`, 404);
   }
-  if (hasValidatedActualisation(existing.campaigns, year)) {
+  if (hasValidatedActualisation(existing.forms, year)) {
     throw new ApiDomainError(
       `Structure ${structure.id} déjà actualisée pour ${year}`,
       409
@@ -352,10 +351,6 @@ const dbStructureToApiRead = (
     ? undefined
     : buildUpcomingTransformations(dbStructure as StructureDbDetails, now);
 
-  const campaigns = simple
-    ? []
-    : buildStructureCampaigns((dbStructure as StructureDbDetails).forms);
-
   const structureTypologies = simple
     ? (dbStructure.structureTypologies ?? [])
     : resolveTypologiesPlacesAutorisees(
@@ -422,7 +417,6 @@ const dbStructureToApiRead = (
     isFinalised:
       bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
     isCurrentVersionFromTransformation,
-    campaigns,
     bornFromCreation: undefined,
     structureVersions: undefined,
   }) as StructureApiRead;

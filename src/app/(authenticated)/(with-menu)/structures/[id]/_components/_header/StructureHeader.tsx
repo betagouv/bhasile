@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
-import { hasOpenActualisation } from "@/app/api/structures/actualisation.util";
 import { Badge } from "@/app/components/common/Badge";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
+import { hasOpenActualisation } from "@/app/utils/actualisationForm.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActualisationHeader } from "./ActualisationHeader";
@@ -27,7 +27,7 @@ export const StructureHeader = ({
   const showActualisation =
     actualisationYear !== null &&
     structure.isFinalised &&
-    hasOpenActualisation(structure.campaigns, actualisationYear);
+    hasOpenActualisation(structure.forms, actualisationYear);
 
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();

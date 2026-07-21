@@ -15,7 +15,6 @@ import {
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
-import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
@@ -31,13 +30,13 @@ const agentDepartement75: SessionUser = {
   allowedDepartements: ["75"],
 };
 
-const actualisationCampaign = (
-  steps: StructureCampaignApiRead["formSteps"],
-  isValidated = false
-): StructureCampaignApiRead => ({
-  slug: getActualisationFormSlug(YEAR),
-  isValidated,
-  formSteps: steps,
+const actualisationStatusForm = (
+  formSteps: { status: StepStatus }[],
+  status = false
+) => ({
+  status,
+  formDefinition: { slug: getActualisationFormSlug(YEAR) },
+  formSteps,
 });
 
 describe("getInitialisationStatus", () => {
@@ -59,37 +58,32 @@ describe("getActualisationStatus", () => {
     expect(getActualisationStatus([], null)).toBe("A_DEBUTER");
   });
 
-  it("renvoie A_DEBUTER quand aucune campagne de l'année n'existe", () => {
+  it("renvoie A_DEBUTER quand aucun formulaire de l'année n'existe", () => {
     expect(getActualisationStatus([], YEAR)).toBe("A_DEBUTER");
   });
 
   it("renvoie A_DEBUTER quand tous les steps sont NON_COMMENCE", () => {
-    const campaigns = [
-      actualisationCampaign([
-        { slug: "01-places", status: StepStatus.NON_COMMENCE },
-      ]),
+    const forms = [
+      actualisationStatusForm([{ status: StepStatus.NON_COMMENCE }]),
     ];
-    expect(getActualisationStatus(campaigns, YEAR)).toBe("A_DEBUTER");
+    expect(getActualisationStatus(forms, YEAR)).toBe("A_DEBUTER");
   });
 
   it("renvoie EN_COURS quand au moins un step est démarré", () => {
-    const campaigns = [
-      actualisationCampaign([
-        { slug: "01-places", status: StepStatus.COMMENCE },
-        { slug: "02-documents-financiers", status: StepStatus.NON_COMMENCE },
+    const forms = [
+      actualisationStatusForm([
+        { status: StepStatus.COMMENCE },
+        { status: StepStatus.NON_COMMENCE },
       ]),
     ];
-    expect(getActualisationStatus(campaigns, YEAR)).toBe("EN_COURS");
+    expect(getActualisationStatus(forms, YEAR)).toBe("EN_COURS");
   });
 
-  it("renvoie FINALISEE quand la campagne est validée", () => {
-    const campaigns = [
-      actualisationCampaign(
-        [{ slug: "01-places", status: StepStatus.VALIDE }],
-        true
-      ),
+  it("renvoie FINALISEE quand le formulaire est validé", () => {
+    const forms = [
+      actualisationStatusForm([{ status: StepStatus.VALIDE }], true),
     ];
-    expect(getActualisationStatus(campaigns, YEAR)).toBe("FINALISEE");
+    expect(getActualisationStatus(forms, YEAR)).toBe("FINALISEE");
   });
 });
 
