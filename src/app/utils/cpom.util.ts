@@ -1,10 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomApiRead,
-  CpomDepartementApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomApiRead, CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
@@ -15,6 +12,21 @@ import { getBudgetsDefaultValues } from "./budget.util";
 
 export const getCpomDefaultValues = (cpom?: CpomApiRead): CpomFormValues => {
   const structureTypes = getCpomStructureTypes(cpom);
+
+  const actesAdministratifs =
+    cpom?.actesAdministratifs?.map((acteAdministratif) => ({
+      ...acteAdministratif,
+      startDate: acteAdministratif.startDate ?? undefined,
+      endDate: acteAdministratif.endDate ?? undefined,
+      date: acteAdministratif.date ?? undefined,
+    })) ?? [];
+
+  const hasContratCpom = actesAdministratifs.some(
+    (acteAdministratif) =>
+      acteAdministratif.category === "CONVENTION_CPOM" &&
+      !acteAdministratif.parentId
+  );
+
   return {
     ...cpom,
     name: cpom?.name ?? "",
@@ -37,14 +49,10 @@ export const getCpomDefaultValues = (cpom?: CpomApiRead): CpomFormValues => {
       })) ?? [],
     budgets: getCpomBudgetsDefaultValues(cpom?.budgets || [], structureTypes),
     documentsFinanciers: cpom?.documentsFinanciers ?? [],
-    actesAdministratifs: cpom?.actesAdministratifs?.length
-      ? cpom?.actesAdministratifs.map((acteAdministratif) => ({
-          ...acteAdministratif,
-          startDate: acteAdministratif.startDate ?? undefined,
-          endDate: acteAdministratif.endDate ?? undefined,
-          date: acteAdministratif.date ?? undefined,
-        }))
+    actesAdministratifs: hasContratCpom
+      ? actesAdministratifs
       : [
+          ...actesAdministratifs,
           {
             uuid: uuidv4(),
             category: "CONVENTION_CPOM" as ActeAdministratifCategory,
