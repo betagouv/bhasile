@@ -1843,12 +1843,12 @@ describe("transformation.repository db integration", () => {
   };
 
   it("résout le prédécesseur (init) sur structureVersion.structure quand la transfo est datée après lui", async () => {
-    const { structure, version } = await createStructureWithInitVersion(
+    const { structure } = await createStructureWithInitVersion(
       "2024-01-01T12:00:00.000Z",
       { nom: "Nom de la version source" }
     );
     await prisma.structureTypologie.create({
-      data: { structureVersionId: version.id, year: 2024, placesAutorisees: 30 },
+      data: { structureId: structure.id, year: 2024, placesAutorisees: 30 },
     });
 
     const transformationId = await createExtensionTransfo(

@@ -72,7 +72,6 @@ describe("structure.repository db integration", () => {
         adresses: { include: { adresseTypologies: true } },
         antennes: true,
         structureFinesses: { include: { finess: true } },
-        structureTypologies: true,
         dnaStructures: { include: { dna: true } },
       },
     });
@@ -476,14 +475,17 @@ describe("structure.repository db integration", () => {
 
     // WHEN: same year receives new values
     const newStructureTypologie = { year: 2024, placesAutorisees: 25, pmr: 2 };
-    const version = await updateStructureAndFetch(
+    const structureTypologies = await updateStructureAndFetch(
       structure.id,
       { structureTypologies: [newStructureTypologie] },
-      () => fetchCurrentVersion(structure.id)
+      () =>
+        prisma.structureTypologie.findMany({
+          where: { structureId: structure.id },
+        })
     );
 
-    expect(version.structureTypologies).toHaveLength(1);
-    expect(version.structureTypologies[0]).toMatchObject(newStructureTypologie);
+    expect(structureTypologies).toHaveLength(1);
+    expect(structureTypologies[0]).toMatchObject(newStructureTypologie);
   });
 
   it("reporte les places de l'année legacy sur la version de base, sans toucher une version de transfo", async () => {
