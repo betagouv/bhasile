@@ -55,7 +55,7 @@ export const TypePlaceHistory = (): ReactElement => {
     },
     {
       label: "Places LGBT",
-      subLabel: "(labelisées)",
+      subLabel: "(labellisées)",
       getValue: (year) => getStructureTypologie(year)?.lgbt,
     },
     {
