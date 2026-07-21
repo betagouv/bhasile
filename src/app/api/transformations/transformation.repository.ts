@@ -102,8 +102,8 @@ export const updateOne = async (
       });
       if (finalized.count === 0) {
         throw new ApiDomainError(
-        "Impossible de modifier une transformation finalisée"
-      );
+          "Impossible de modifier une transformation finalisée"
+        );
       }
     }
 
@@ -423,8 +423,6 @@ const createOrUpdateStructureVersionTransformation = async (
     structureVersionTransformationId,
   });
 
-  // Split précoce : le détail (pmr/lgbt/fvvTeh) déclaré par la transfo vit sur la SVT
-  // (registre permanent) ; les places sont sur le scalaire de la version ci-dessus.
   await createOrUpdateStructureTypologies(
     tx,
     structureVersionTransformation.structureTypologies,

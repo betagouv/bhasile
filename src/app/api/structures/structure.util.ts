@@ -329,8 +329,12 @@ export const computeStructureListRow = (
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
     placesAutorisees: currentVersion.placesAutorisees ?? null,
-    // TODO: redondant avec placesAutorisees depuis le scalaire de version — collapser en cleaning
-    latestNonNullPlacesAutorisees: currentVersion.placesAutorisees ?? null,
+    latestNonNullPlacesAutorisees:
+      currentVersion.placesAutorisees ??
+      structure.structureTypologies.find(
+        (typologie) => typologie.placesAutorisees != null
+      )?.placesAutorisees ??
+      null,
     finConvention: getDatesConvention(structure)[1],
     latitude: currentVersion.latitude,
     longitude: currentVersion.longitude,

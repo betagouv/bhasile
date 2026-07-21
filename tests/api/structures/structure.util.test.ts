@@ -104,6 +104,7 @@ const buildLightStructure = (
     operateur: { name: "Operateur Alpha" },
     forms: [],
     actesAdministratifs: [],
+    structureTypologies: [],
     structureVersions: [version],
     ...overrides,
   }) as unknown as StructureListLight;
@@ -204,6 +205,27 @@ describe("computeStructureListRow", () => {
     );
 
     expect(row?.placesAutorisees).toBe(null);
+  });
+
+  it("latestNonNullPlacesAutorisees retombe sur la place la plus récente non nulle des typologies quand la version n'en porte pas", () => {
+    const version = buildVersion({ placesAutorisees: null });
+    const row = computeStructureListRow(
+      buildLightStructure(
+        {
+          structureTypologies: [
+            { year: 2025, placesAutorisees: null },
+            { year: 2024, placesAutorisees: 30 },
+            { year: 2023, placesAutorisees: 20 },
+          ] as unknown as StructureListLight["structureTypologies"],
+        },
+        version
+      ),
+      version,
+      now
+    );
+
+    expect(row?.placesAutorisees).toBe(null);
+    expect(row?.latestNonNullPlacesAutorisees).toBe(30);
   });
 
   it("marque une fermeture finalisée comme fermée avec sa date et son motif", () => {
