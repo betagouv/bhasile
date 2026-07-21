@@ -26,8 +26,9 @@ export const PlacesAutoriseesLine = ({ years, isCapacityLocked }: Props) => {
     if (isCapacityLocked || legacyIndex === -1) {
       return;
     }
-    const currentTypologies: StructureTypologieApiType[] =
-      getValues("structureTypologies");
+    const currentTypologies: StructureTypologieApiType[] = getValues(
+      "structureTypologies"
+    );
     currentTypologies.forEach((typologie, index) => {
       if (typologie.year >= PLACES_VERSIONED_FROM_YEAR) {
         setValue(
@@ -36,11 +37,17 @@ export const PlacesAutoriseesLine = ({ years, isCapacityLocked }: Props) => {
         );
       }
     });
-  }, [isCapacityLocked, legacyIndex, legacyPlacesAutorisees, getValues, setValue]);
+  }, [
+    isCapacityLocked,
+    legacyIndex,
+    legacyPlacesAutorisees,
+    getValues,
+    setValue,
+  ]);
 
   return (
     <tr>
-      <td className="text-left! min-w-[240px]">
+      <td className="text-left! min-w-[280px]">
         <strong>Places autorisées</strong>
       </td>
       {years.map((year) => {
@@ -59,7 +66,7 @@ export const PlacesAutoriseesLine = ({ years, isCapacityLocked }: Props) => {
               min={0}
               label=""
               disabled={year >= PLACES_VERSIONED_FROM_YEAR}
-              className="mb-0 items-center [&_p]:hidden [&_input]:w-full"
+              className="mb-0 items-center [&_p]:hidden [&_input]:w-full w-24 mx-auto"
               variant="simple"
             />
           </td>

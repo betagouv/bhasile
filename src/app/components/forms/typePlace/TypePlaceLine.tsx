@@ -13,7 +13,7 @@ export const TypePlaceLine = ({ line, years }: Props) => {
 
   return (
     <tr>
-      <td className="text-left! min-w-[240px]">
+      <td className="text-left! min-w-[280px]">
         <strong>{line.label}</strong>
         {line.subLabel && (
           <>
@@ -37,7 +37,7 @@ export const TypePlaceLine = ({ line, years }: Props) => {
               type="number"
               min={0}
               label=""
-              className="mb-0 items-center [&_p]:hidden [&_input]:w-full"
+              className="mb-0 items-center [&_p]:hidden [&_input]:w-full w-24 mx-auto"
               variant="simple"
             />
           </td>

@@ -6,7 +6,7 @@ export const getTypePlaceEditHeadings = (years: number[]): ReactElement[] => {
       <span className="sr-only">Type de place</span>
     </th>,
     ...years.map((year) => (
-      <th key={year} scope="col" data-year={year}>
+      <th key={year} scope="col" data-year={year} className="bg-white">
         {year}
       </th>
     )),

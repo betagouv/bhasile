@@ -14,9 +14,21 @@ import { PlacesAutoriseesLine } from "./PlacesAutoriseesLine";
 import { TypePlaceLine } from "./TypePlaceLine";
 
 const TYPE_PLACE_LINES = [
-  { name: "pmr", label: "Places PMR" },
-  { name: "lgbt", label: "Places LGBT", subLabel: "(labellisées)" },
-  { name: "fvvTeh", label: "Places FVV/TEH", subLabel: "(spécialisées)" },
+  {
+    name: "pmr",
+    label: "Places PMR",
+    subLabel: "Personnes à Mobilité Réduite",
+  },
+  {
+    name: "lgbt",
+    label: "Places LGBT (labellisées)",
+    subLabel: "Lesbiennes, Gays, Bisexuels et Transgenres",
+  },
+  {
+    name: "fvvTeh",
+    label: "Places FVV/TEH (spécialisées)",
+    subLabel: "Femmes Victimes de Violences/Traîte des Êtres Humains",
+  },
 ];
 
 export const FieldSetTypePlaces = ({
@@ -54,16 +66,16 @@ export const FieldSetTypePlaces = ({
       <p>
         Veuillez renseigner l’historique du nombre de places pour chaque
         typologie au 31 décembre de ces dernières années.
-        <br /> À partir de {PLACES_VERSIONED_FROM_YEAR}, la modification du
-        nombre de places autorisées doit obligatoirement passer par une
-        contraction ou une extension de la structure.
+        <br />
       </p>
+
       <CustomNotice
         severity="info"
         className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
-        description="PMR : Personnes à Mobilité Réduite – LGBT : Lesbiennes, Gays, Bisexuels et Transgenres (ici places définies comme labellisées) – FVV : Femmes Victimes de Violences, TEH : Traîte des Êtres Humains (ici places définies comme spécialisées)"
+        description={`À partir de ${PLACES_VERSIONED_FROM_YEAR}, la modification du
+        nombre de places autorisées doit obligatoirement passer par une
+        contraction ou une extension de la structure.`}
       />
-
       <Table
         ariaLabelledBy=""
         headings={getTypePlaceEditHeadings(yearsToDisplay)}

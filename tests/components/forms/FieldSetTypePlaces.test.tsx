@@ -61,10 +61,19 @@ describe("FieldSetTypePlaces", () => {
       renderFieldSet({ structureTypologies: filledYears });
       expect(screen.getByText("Places autorisées")).toBeInTheDocument();
       expect(screen.getByText("Places PMR")).toBeInTheDocument();
-      expect(screen.getByText("Places LGBT")).toBeInTheDocument();
-      expect(screen.getByText("(labellisées)")).toBeInTheDocument();
-      expect(screen.getByText("Places FVV/TEH")).toBeInTheDocument();
-      expect(screen.getByText("(spécialisées)")).toBeInTheDocument();
+      expect(
+        screen.getByText("Personnes à Mobilité Réduite")
+      ).toBeInTheDocument();
+      expect(screen.getByText("Places LGBT (labellisées)")).toBeInTheDocument();
+      expect(
+        screen.getByText("Lesbiennes, Gays, Bisexuels et Transgenres")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Places FVV/TEH (spécialisées)")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Femmes Victimes de Violences/Traîte des Êtres Humains")
+      ).toBeInTheDocument();
     });
 
     it("affiche le texte d'instruction, y compris la règle contraction/extension", () => {
@@ -79,18 +88,6 @@ describe("FieldSetTypePlaces", () => {
       ).toBeInTheDocument();
     });
 
-    it("affiche la légende PMR/LGBT/FVV", () => {
-      renderFieldSet({ structureTypologies: [] });
-      expect(
-        screen.getByText(/PMR : Personnes à Mobilité Réduite/i)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/LGBT : Lesbiennes, Gays, Bisexuels et Transgenres/i)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/FVV : Femmes Victimes de Violences/i)
-      ).toBeInTheDocument();
-    });
   });
 
   describe("Rendering modification form", () => {
