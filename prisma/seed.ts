@@ -270,9 +270,6 @@ async function seed(): Promise<void> {
 
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
 
-  // État post-migration : la version de base reflète la dernière typologie legacy
-  // (invariant maintenu en prod par la cascade). Ainsi `prasd` seul produit un dev
-  // cohérent — les one-offs de shift/backfill sont la migration prod, PAS le dev.
   await mirrorLegacyPlacesToBaseVersions(prisma);
 
   await createFakeCpoms(prisma);
