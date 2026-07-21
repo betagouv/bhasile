@@ -10,6 +10,7 @@ import {
 } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { StructureType } from "@/types/structure.type";
 
 export const useActeAdministratifRadios = ({
   category,
@@ -17,6 +18,7 @@ export const useActeAdministratifRadios = ({
   additionalFieldsType,
   alternativeCategories,
   avenantAlternative,
+  structureScope,
 }: UseActeAdministratifRadiosArgs): UseActeAdministratifRadios => {
   const { watch, setValue } = useFormContext();
 
@@ -44,8 +46,12 @@ export const useActeAdministratifRadios = ({
     return acteCategory === category;
   };
 
+  const isInScope = (acte: ActeAdministratifFormValues) =>
+    structureScope === undefined ||
+    (acte.structureType ?? null) === structureScope;
+
   const actesOfCategory = actesAdministratifs.filter((acte) => {
-    if (!isInGroup(acte?.category)) {
+    if (!isInGroup(acte?.category) || !isInScope(acte)) {
       return false;
     }
     if (!acte.parentId && !acte.parentUuid) {
@@ -168,6 +174,7 @@ type UseActeAdministratifRadiosArgs = {
   additionalFieldsType?: AdditionalFieldsType;
   alternativeCategories?: ActeAdministratifCategory[];
   avenantAlternative?: AvenantAlternative;
+  structureScope?: StructureType | null;
 };
 
 type RadioConfig = {

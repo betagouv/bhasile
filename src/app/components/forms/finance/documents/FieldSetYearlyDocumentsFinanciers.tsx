@@ -1,19 +1,11 @@
-import { ReactElement, useCallback, useEffect, useRef } from "react";
-import { Control, useFieldArray, useFormContext } from "react-hook-form";
+import { ReactElement, useEffect, useRef } from "react";
+import { Control, useFormContext } from "react-hook-form";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
-import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
-import {
-  DocumentFinancierFlexibleFormValues,
-  DocumentsFinanciersFlexibleFormValues,
-} from "@/schemas/forms/base/documentFinancier.schema";
-import { FormKind } from "@/types/global";
+import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
-import { DocumentsFinanciersCheckboxIsInCpom } from "./DocumentsFinanciersCheckboxIsInCpom";
 import { DocumentsFinanciersCommentaire } from "./DocumentsFinanciersCommentaire";
-import { DocumentsFinanciersCpomDisclaimer } from "./DocumentsFinanciersCpomDisclaimer";
 import { DocumentsFinanciersList } from "./DocumentsFinanciersList";
 import { YearlyFileUpload } from "./YearlyFileUpload";
 
@@ -23,28 +15,14 @@ export const FieldSetYearlyDocumentsFinanciers = ({
   isAutorisee,
   control,
   hasAccordion,
-  formKind,
 }: Props): ReactElement | null => {
   const { watch, formState } = useFormContext();
-
-  const { deleteFile } = useFileUpload();
 
   const structureMillesimes = watch(
     "structureMillesimes"
   ) as StructureMillesimeApiType[];
 
   const index = getMillesimeIndexForAYear(structureMillesimes, year);
-
-  const documentsFinanciers: DocumentFinancierFlexibleFormValues[] = watch(
-    "documentsFinanciers"
-  );
-
-  const { remove } = useFieldArray({
-    control,
-    name: "documentsFinanciers",
-  });
-
-  const isInCpom = watch(`structureMillesimes.${index}.cpom`);
 
   const yearErrors =
     formState.errors?.documentsFinanciers?.[
@@ -61,35 +39,6 @@ export const FieldSetYearlyDocumentsFinanciers = ({
       });
     }
   }, [hasError]);
-
-  const removeCpomDocuments = useCallback(async () => {
-    const indicesToRemove: number[] = [];
-
-    for (const [index, document] of documentsFinanciers.entries()) {
-      if (
-        document.year === year &&
-        document.granularity &&
-        document.granularity !== "STRUCTURE"
-      ) {
-        if (document.fileUploads?.[0]?.key) {
-          await deleteFile(document.fileUploads?.[0]?.key);
-        }
-        indicesToRemove.push(index);
-      }
-    }
-
-    indicesToRemove.sort((a, b) => b - a);
-
-    indicesToRemove.forEach((indexToRemove) => {
-      remove(indexToRemove);
-    });
-  }, [documentsFinanciers, year, deleteFile, remove]);
-
-  useEffect(() => {
-    if (!isInCpom && documentsFinanciers?.length > 0) {
-      removeCpomDocuments();
-    }
-  }, [documentsFinanciers, isInCpom, removeCpomDocuments]);
 
   const shouldHide = startYear && Number(year) < startYear;
   if (shouldHide) {
@@ -116,25 +65,10 @@ export const FieldSetYearlyDocumentsFinanciers = ({
         </p>
       )}
 
-      {formKind === FormKind.AJOUT ? (
-        <DocumentsFinanciersCheckboxIsInCpom year={year} index={index} />
-      ) : (
-        <DocumentsFinanciersCpomDisclaimer year={year} />
-      )}
-
-      {isInCpom && (
-        <CustomNotice
-          severity="info"
-          className="rounded [&_p]:flex [&_p]:items-center mb-10"
-          description="Selon vos pratiques, les documents financiers de cette année peuvent être à l’échelle de la structure et/ou du CPOM et/ou regrouper les deux. Veuillez importer tous les documents en votre possession en précisant leur échelle."
-        />
-      )}
-
       <div className="grid grid-cols-2 gap-16 mb-10">
         <DocumentsFinanciersList isAutorisee={isAutorisee} year={year} />
         <YearlyFileUpload
           year={year}
-          index={index}
           isAutorisee={isAutorisee}
           control={control}
         />
@@ -155,5 +89,4 @@ type Props = {
   isAutorisee: boolean;
   control: Control<DocumentsFinanciersFlexibleFormValues>;
   hasAccordion?: boolean;
-  formKind?: FormKind;
 };

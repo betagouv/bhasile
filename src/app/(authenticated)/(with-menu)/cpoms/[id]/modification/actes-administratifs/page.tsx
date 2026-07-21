@@ -9,7 +9,7 @@ import FormWrapper, {
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
-import { getCpomDefaultValues } from "@/app/utils/cpom.util";
+import { getCpomDefaultValues, getCpomStructureTypes } from "@/app/utils/cpom.util";
 import { actesAdministratifsCpomSchema } from "@/schemas/forms/base/cpom.schema";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
@@ -24,6 +24,7 @@ export default function CpomModificationActesAdministratifs() {
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getCpomDefaultValues(cpom);
+  const structureTypes = getCpomStructureTypes(cpom);
 
   return (
     <>
@@ -43,7 +44,7 @@ export default function CpomModificationActesAdministratifs() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <FieldSetActesAdministratifs />
+        <FieldSetActesAdministratifs structureTypes={structureTypes} />
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/cpoms/${cpom.id}`}

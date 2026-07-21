@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import { DropZone } from "@/app/components/forms/DropZone";
 import {
-  granularities,
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
@@ -15,15 +14,11 @@ import {
   DocumentFinancierFlexibleFormValues,
   DocumentsFinanciersFlexibleFormValues,
 } from "@/schemas/forms/base/documentFinancier.schema";
-import {
-  DocumentFinancierCategory,
-  DocumentFinancierGranularity,
-} from "@/types/document-financier.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 import { StructureType } from "@/types/structure.type";
 
 export const YearlyFileUpload = ({
   year,
-  index,
   isAutorisee,
   control,
   structureType,
@@ -37,15 +32,11 @@ export const YearlyFileUpload = ({
     name: "documentsFinanciers",
   });
 
-  const isInCpom = watch(`structureMillesimes.${index}.cpom`);
-
   const documentTypes = isAutorisee
     ? structureAutoriseesDocuments
     : structureSubventionneesDocuments;
 
   const [shouldDisplayCategorySelect, setShouldDisplayCategorySelect] =
-    useState(false);
-  const [shouldDisplayGranularitySelect, setShouldDisplayGranularitySelect] =
     useState(false);
   const [shouldDisplayNameInput, setShouldDisplayNameInput] = useState(false);
   const [shouldDisplayAddButton, setShouldDisplayAddButton] = useState(false);
@@ -58,10 +49,6 @@ export const YearlyFileUpload = ({
   const [category, setCategory] = useState<
     DocumentFinancierCategory | undefined
   >();
-  const [granularity, setGranularity] = useState<
-    DocumentFinancierGranularity | undefined
-  >(isInCpom ? undefined : "STRUCTURE");
-
   const [name, setName] = useState<string | undefined>();
 
   useEffect(() => {
@@ -70,46 +57,19 @@ export const YearlyFileUpload = ({
       setShouldDisplayAddButton(true);
     } else {
       setShouldDisplayCategorySelect(false);
-      setShouldDisplayGranularitySelect(false);
       setShouldDisplayAddButton(false);
       setCategory(undefined);
-      setGranularity(isInCpom ? undefined : "STRUCTURE");
       setName(undefined);
     }
-  }, [key, isInCpom]);
+  }, [key]);
 
   useEffect(() => {
-    if (key) {
-      if (category === "AUTRE_FINANCIER") {
-        setShouldDisplayNameInput(true);
-      } else {
-        setShouldDisplayNameInput(false);
-      }
-      if (category && category !== "AUTRE_FINANCIER") {
-        setShouldDisplayGranularitySelect(true);
-      } else {
-        setShouldDisplayGranularitySelect(false);
-      }
-    } else {
-      setShouldDisplayNameInput(false);
-    }
+    setShouldDisplayNameInput(!!key && category === "AUTRE_FINANCIER");
   }, [key, category]);
 
   useEffect(() => {
-    if (key && category) {
-      if (category === "AUTRE_FINANCIER") {
-        setShouldEnableAddButton(true);
-      } else {
-        if (granularity) {
-          setShouldEnableAddButton(true);
-        } else {
-          setShouldEnableAddButton(false);
-        }
-      }
-    } else {
-      setShouldEnableAddButton(false);
-    }
-  }, [key, category, granularity, name]);
+    setShouldEnableAddButton(!!key && !!category);
+  }, [key, category]);
 
   const handleAddDocument = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -119,7 +79,6 @@ export const YearlyFileUpload = ({
         return (
           documentFinancier.year === year &&
           documentFinancier.category === category &&
-          documentFinancier.granularity === granularity &&
           documentFinancier.structureType === structureType
         );
       });
@@ -130,7 +89,6 @@ export const YearlyFileUpload = ({
       append({
         fileUploads: key ? [{ key }] : undefined,
         category,
-        granularity: granularity ?? "STRUCTURE",
         structureType,
         name,
         year,
@@ -138,22 +96,10 @@ export const YearlyFileUpload = ({
 
       setKey(undefined);
       setCategory(undefined);
-      setGranularity(isInCpom ? undefined : "STRUCTURE");
       setName(undefined);
       setDropZoneKey(uuidv4());
     },
-    [
-      append,
-      key,
-      category,
-      granularity,
-      name,
-      year,
-      documentsFinanciers,
-      remove,
-      isInCpom,
-      structureType,
-    ]
+    [append, key, category, name, year, documentsFinanciers, remove, structureType]
   );
 
   const handleFileChange = useCallback(
@@ -185,25 +131,6 @@ export const YearlyFileUpload = ({
             {documentTypes.map((document) => (
               <option key={document.value} value={document.value}>
                 {document.label}
-              </option>
-            ))}
-          </Select>
-        )}
-        {shouldDisplayGranularitySelect && isInCpom && (
-          <Select
-            label="Échelle"
-            className="w-80"
-            nativeSelectProps={{
-              onChange: (e) => {
-                setGranularity(e.target.value as DocumentFinancierGranularity);
-              },
-              value: granularity ?? "",
-            }}
-          >
-            <option value="">Sélectionnez une option</option>
-            {granularities.map((granularity) => (
-              <option key={granularity.value} value={granularity.value}>
-                {granularity.label}
               </option>
             ))}
           </Select>
@@ -244,7 +171,6 @@ export const YearlyFileUpload = ({
 
 type Props = {
   year: number;
-  index: number;
   isAutorisee: boolean;
   control: Control<DocumentsFinanciersFlexibleFormValues>;
   structureType?: StructureType;

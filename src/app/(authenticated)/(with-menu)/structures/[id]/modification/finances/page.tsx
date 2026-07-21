@@ -32,9 +32,7 @@ export default function ModificationFinanceForm() {
   const onSubmit = async (data: anyModificationFinanceFormValues) => {
     const documentsFinanciers = (data.documentsFinanciers?.filter(
       (documentFinancier) =>
-        documentFinancier.fileUploads?.[0]?.key &&
-        documentFinancier.category &&
-        documentFinancier.granularity
+        documentFinancier.fileUploads?.[0]?.key && documentFinancier.category
     ) ?? []) as DocumentFinancierApiType[];
 
     const structureMillesimes = data.structureMillesimes?.map((millesime) => ({
@@ -68,11 +66,7 @@ export default function ModificationFinanceForm() {
         onSubmit={onSubmit}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <DocumentsFinanciers
-          className="mb-6"
-          hasAccordion
-          formKind={FormKind.MODIFICATION}
-        />
+        <DocumentsFinanciers className="mb-6" hasAccordion />
         <IndicateursFinanciers />
         <hr />
 
