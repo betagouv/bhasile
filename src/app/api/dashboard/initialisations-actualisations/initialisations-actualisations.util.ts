@@ -1,14 +1,13 @@
-import {
-  FINALISATION_FORM_SLUG,
-  getActualisationFormSlug,
-} from "@/app/api/forms/form.constants";
+import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
-import { buildStructureCampaigns } from "@/app/api/structures/structure.util";
+import {
+  ActualisationStatusForm,
+  findActualisationForm,
+} from "@/app/utils/actualisationForm.util";
 import { paginateRows, sortRows } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
-import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
 
 import { DashboardStructure } from "./initialisations-actualisations.db.type";
@@ -29,22 +28,20 @@ export const getInitialisationStatus = (
 };
 
 export const getActualisationStatus = (
-  campaigns: StructureCampaignApiRead[],
+  forms: ActualisationStatusForm[],
   year: number | null
 ): ActualisationStatus => {
   if (year === null) {
     return "A_DEBUTER";
   }
-  const campaign = campaigns.find(
-    (candidate) => candidate.slug === getActualisationFormSlug(year)
-  );
-  if (!campaign) {
+  const form = findActualisationForm(forms, year);
+  if (!form) {
     return "A_DEBUTER";
   }
-  if (campaign.isValidated) {
+  if (form.status) {
     return "FINALISEE";
   }
-  const hasStartedStep = campaign.formSteps.some(
+  const hasStartedStep = form.formSteps.some(
     (formStep) => formStep.status !== "NON_COMMENCE"
   );
   return hasStartedStep ? "EN_COURS" : "A_DEBUTER";
@@ -142,8 +139,10 @@ export const buildDashboardRows = (
         (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG
       )
     );
-    const campaigns = buildStructureCampaigns(structure.forms);
-    const actualisationStatus = getActualisationStatus(campaigns, options.year);
+    const actualisationStatus = getActualisationStatus(
+      structure.forms,
+      options.year
+    );
 
     if (!isOpen(initialisationStatus, actualisationStatus)) {
       continue;

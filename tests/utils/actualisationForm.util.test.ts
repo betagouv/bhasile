@@ -1,43 +1,59 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  getActualisationCampaign,
+  findActualisationForm,
   getActualisationFormStepStatus,
   getActualisationNextRoute,
   isActualisationReadyToValidate,
 } from "@/app/utils/actualisationForm.util";
-import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
 import { createStructure } from "../test-utils/structure.factory";
 
-const structureAvecCampagne = (
+const structureAvecActualisation = (
   year: number,
-  formSteps: StructureCampaignApiRead["formSteps"]
-) => ({
+  formSteps: { slug: string; status: StepStatus }[]
+): StructureApiRead => ({
   ...createStructure({ id: 1 }),
-  campaigns: [{ slug: `actualisation-${year}`, isValidated: false, formSteps }],
+  forms: [
+    {
+      id: 1,
+      status: false,
+      formDefinition: {
+        id: 1,
+        slug: `actualisation-${year}`,
+        name: "actualisation",
+        version: 1,
+      },
+      formSteps: formSteps.map((step, index) => ({
+        id: index,
+        status: step.status,
+        stepDefinition: { id: index, slug: step.slug, label: step.slug },
+      })),
+    },
+  ],
 });
 
-describe("getActualisationCampaign", () => {
-  it("retourne la campagne de l'année demandée", () => {
-    const structure = structureAvecCampagne(2026, []);
+describe("findActualisationForm", () => {
+  it("retourne le formulaire d'actualisation de l'année demandée", () => {
+    const structure = structureAvecActualisation(2026, []);
 
-    expect(getActualisationCampaign(structure, 2026)?.slug).toBe(
-      "actualisation-2026"
-    );
+    expect(
+      findActualisationForm(structure.forms, 2026)?.formDefinition.slug
+    ).toBe("actualisation-2026");
   });
 
-  it("retourne undefined si aucune campagne pour l'année", () => {
-    const structure = structureAvecCampagne(2025, []);
+  it("retourne undefined si aucun formulaire pour l'année", () => {
+    const structure = structureAvecActualisation(2025, []);
 
-    expect(getActualisationCampaign(structure, 2026)).toBeUndefined();
+    expect(findActualisationForm(structure.forms, 2026)).toBeUndefined();
   });
 });
 
 describe("getActualisationFormStepStatus", () => {
   it("retourne le statut de l'étape trouvée", () => {
-    const structure = structureAvecCampagne(2026, [
+    const structure = structureAvecActualisation(2026, [
       { slug: "01-places", status: StepStatus.VALIDE },
     ]);
 
@@ -47,7 +63,7 @@ describe("getActualisationFormStepStatus", () => {
   });
 
   it("retourne NON_COMMENCE si l'étape est absente", () => {
-    const structure = structureAvecCampagne(2026, []);
+    const structure = structureAvecActualisation(2026, []);
 
     expect(getActualisationFormStepStatus("01-places", structure, 2026)).toBe(
       StepStatus.NON_COMMENCE
@@ -57,7 +73,7 @@ describe("getActualisationFormStepStatus", () => {
 
 describe("isActualisationReadyToValidate", () => {
   it("est prête quand toutes les étapes sont validées", () => {
-    const structure = structureAvecCampagne(2026, [
+    const structure = structureAvecActualisation(2026, [
       { slug: "01-places", status: StepStatus.VALIDE },
       { slug: "02-documents-financiers", status: StepStatus.VALIDE },
     ]);
@@ -66,7 +82,7 @@ describe("isActualisationReadyToValidate", () => {
   });
 
   it("n'est pas prête si une étape n'est pas validée", () => {
-    const structure = structureAvecCampagne(2026, [
+    const structure = structureAvecActualisation(2026, [
       { slug: "01-places", status: StepStatus.VALIDE },
       { slug: "02-documents-financiers", status: StepStatus.NON_COMMENCE },
     ]);
@@ -74,14 +90,8 @@ describe("isActualisationReadyToValidate", () => {
     expect(isActualisationReadyToValidate(structure, 2026)).toBe(false);
   });
 
-  it("n'est pas prête sans campagne", () => {
+  it("n'est pas prête sans formulaire d'actualisation", () => {
     const structure = createStructure({ id: 1 });
-
-    expect(isActualisationReadyToValidate(structure, 2026)).toBe(false);
-  });
-
-  it("n'est pas prête si la campagne n'a aucune étape", () => {
-    const structure = structureAvecCampagne(2026, []);
 
     expect(isActualisationReadyToValidate(structure, 2026)).toBe(false);
   });

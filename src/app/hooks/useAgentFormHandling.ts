@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
@@ -115,10 +116,9 @@ export const useAgentFormHandling = ({
   useEffect(() => {
     const finalisationForm = getFinalisationForm(structure);
 
-    const isFinalisationFormCompleted =
-      finalisationForm?.formSteps?.every(
-        (step) => step.status === StepStatus.VALIDE
-      ) || false;
+    const isFinalisationFormCompleted = areAllFormStepsValidated(
+      finalisationForm?.formSteps
+    );
 
     setIsStructureReadyToFinalise(isFinalisationFormCompleted);
   }, [structure]);

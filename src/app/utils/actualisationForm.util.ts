@@ -1,9 +1,8 @@
 import { getActualisationFormSlug } from "@/app/api/forms/form.constants";
-import {
-  StructureApiRead,
-  StructureCampaignApiRead,
-} from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
+
+import { areAllFormStepsValidated } from "./formStep.util";
 
 export const ACTUALISATION_STEPS: ActualisationStep[] = [
   { route: "01-places" },
@@ -12,35 +11,51 @@ export const ACTUALISATION_STEPS: ActualisationStep[] = [
   { route: "04-actes-administratifs" },
 ];
 
-export const getActualisationCampaign = (
-  structure: StructureApiRead,
+export const findActualisationForm = <
+  TForm extends { formDefinition: { slug: string } },
+>(
+  forms: TForm[] | undefined,
   year: number
-): StructureCampaignApiRead | undefined =>
-  structure.campaigns.find(
-    (campaign) => campaign.slug === getActualisationFormSlug(year)
+): TForm | undefined =>
+  forms?.find(
+    (form) => form.formDefinition.slug === getActualisationFormSlug(year)
   );
+
+export const hasOpenActualisation = (
+  forms: ActualisationStatusForm[] | undefined,
+  year: number
+): boolean => {
+  const form = findActualisationForm(forms, year);
+  return !!form && !form.status;
+};
+
+export const hasValidatedActualisation = (
+  forms: ActualisationStatusForm[] | undefined,
+  year: number
+): boolean => {
+  const form = findActualisationForm(forms, year);
+  return !!form && form.status;
+};
 
 export const getActualisationFormStepStatus = (
   route: string,
   structure: StructureApiRead,
   year: number
 ): StepStatus => {
-  const campaign = getActualisationCampaign(structure, year);
-  const formStep = campaign?.formSteps.find((step) => step.slug === route);
+  const form = findActualisationForm(structure.forms, year);
+  const formStep = form?.formSteps.find(
+    (step) => step.stepDefinition.slug === route
+  );
   return formStep?.status ?? StepStatus.NON_COMMENCE;
 };
 
 export const isActualisationReadyToValidate = (
   structure: StructureApiRead,
   year: number
-): boolean => {
-  const campaign = getActualisationCampaign(structure, year);
-  return (
-    !!campaign &&
-    campaign.formSteps.length > 0 &&
-    campaign.formSteps.every((step) => step.status === StepStatus.VALIDE)
+): boolean =>
+  areAllFormStepsValidated(
+    findActualisationForm(structure.forms, year)?.formSteps
   );
-};
 
 export const getActualisationNextRoute = (
   route: string
@@ -52,6 +67,12 @@ export const getActualisationNextRoute = (
     return undefined;
   }
   return ACTUALISATION_STEPS[currentIndex + 1].route;
+};
+
+export type ActualisationStatusForm = {
+  status: boolean;
+  formDefinition: { slug: string };
+  formSteps: { status: string }[];
 };
 
 type ActualisationStep = {

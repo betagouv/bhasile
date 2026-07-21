@@ -113,7 +113,6 @@ export const createStructure = ({
           form.status
       ),
     isCurrentVersionFromTransformation: false,
-    campaigns: [],
   };
 };
 

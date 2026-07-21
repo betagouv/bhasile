@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { areAllFormStepsValidated } from "@/app/api/forms/form.util";
+import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
 import { StepStatus } from "@/types/form.type";
 
 describe("areAllFormStepsValidated", () => {
+  it("renvoie false quand les étapes sont absentes (formulaire introuvable)", () => {
+    expect(areAllFormStepsValidated(undefined)).toBe(false);
+  });
+
   it("renvoie true quand le formulaire n'a aucune étape (rien à valider)", () => {
     expect(areAllFormStepsValidated([])).toBe(true);
   });
