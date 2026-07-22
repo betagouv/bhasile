@@ -54,12 +54,12 @@ export const TypePlaceHistory = (): ReactElement => {
     },
     {
       label: "Places LGBT",
-      subLabel: "(spécialisées)",
+      subLabel: "(labellisées)",
       getValue: (year) => getStructureTypologie(year)?.lgbt,
     },
     {
       label: "Places FVV/TEH",
-      subLabel: "(labelisées)",
+      subLabel: "(spécialisées)",
       getValue: (year) => getStructureTypologie(year)?.fvvTeh,
     },
     {

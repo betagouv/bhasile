@@ -74,13 +74,13 @@ export default function FormTypePlaces() {
 
             <p>
               Veuillez renseigner l’historique du nombre de places pour chaque
-              typologie au 1er janvier de ces dernières années.
+              typologie au 31 décembre de ces dernières années.
             </p>
 
             <CustomNotice
               severity="info"
               className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
-              description="PMR : Personnes à Mobilité Réduite – LGBT : Lesbiennes, Gays, Bisexuels et Transgenres (ici places définies comme spécialisées) – FVV : Femmes Victimes de Violences, TEH : Traîte des Êtres Humains (ici places définies comme labellisées)"
+              description="PMR : Personnes à Mobilité Réduite – LGBT : Lesbiennes, Gays, Bisexuels et Transgenres (ici places définies comme labellisées) – FVV : Femmes Victimes de Violences, TEH : Traîte des Êtres Humains (ici places définies comme spécialisées)"
             />
 
             <Table
