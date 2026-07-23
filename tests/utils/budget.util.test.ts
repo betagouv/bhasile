@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
+import {
+  getLatestBudgetExecutoireYear,
+  isInputDisabled,
+} from "@/app/utils/budget.util";
+import { CURRENT_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 const OPEN_YEAR = 2025;
@@ -51,6 +55,20 @@ describe("budget util", () => {
       expect(getLatestBudgetExecutoireYear(undefined, OPEN_YEAR)).toBe(
         OPEN_YEAR
       );
+    });
+  });
+
+  describe("isInputDisabled", () => {
+    it("grise le réalisé de l'année en cours pour les indicateurs financiers", () => {
+      expect(isInputDisabled(CURRENT_YEAR, "REALISE")).toBe(true);
+    });
+
+    it("laisse le prévisionnel de l'année en cours remplissable", () => {
+      expect(isInputDisabled(CURRENT_YEAR, "PREVISIONNEL")).toBe(false);
+    });
+
+    it("laisse le réalisé des années passées remplissable", () => {
+      expect(isInputDisabled(CURRENT_YEAR - 1, "REALISE")).toBe(false);
     });
   });
 });
