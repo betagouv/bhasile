@@ -4,6 +4,7 @@ import {
 } from "@/app/api/campaigns/campaign.constants";
 import { getActualisationYear } from "@/app/api/campaigns/campaign.util";
 import { parseCommaList } from "@/app/utils/string.util";
+import { InitialisationsActualisationsApiRead } from "@/types/dashboard.type";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
@@ -11,7 +12,6 @@ import {
   findCampaignDeadline,
   findDashboardStructures,
 } from "./initialisations-actualisations.repository";
-import { InitialisationsActualisationsApiRead } from "./initialisations-actualisations.type";
 import {
   buildDashboardRows,
   paginateDashboardRows,

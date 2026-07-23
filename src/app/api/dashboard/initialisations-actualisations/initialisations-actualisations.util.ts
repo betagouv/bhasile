@@ -6,14 +6,14 @@ import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
-import { SessionUser } from "@/types/global";
-
-import { DashboardStructure } from "./initialisations-actualisations.db.type";
 import {
   ActualisationStatus,
   DashboardStructureRow,
   InitialisationStatus,
-} from "./initialisations-actualisations.type";
+} from "@/types/dashboard.type";
+import { SessionUser } from "@/types/global";
+
+import { DashboardStructure } from "./initialisations-actualisations.db.type";
 
 export const getInitialisationStatus = (
   finalisationForms: { status: boolean }[]
