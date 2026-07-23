@@ -28,6 +28,7 @@
     "test:db": "npx dotenv -e .env.test -- vitest --run repository.test.ts",
     "one-off": "scripts/run-one-off.sh",
     "script": "SCRIPT_KIND=recurring scripts/run-one-off.sh",
+    "cronify": "scripts/cron.sh",
     "prepare": "husky || true",
     "pre-push": "yarn lint && yarn check:ts && yarn test && yarn sql:format:check",
     "apply-views": "npx tsx scripts/apply-views.ts",
