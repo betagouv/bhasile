@@ -2,6 +2,7 @@
 
 import { Fragment, ReactElement, useState } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import {
   TimePeriod,
@@ -26,12 +27,14 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
           <span>
             {Number(value)}{" "}
             <span className="text-disabled-grey pl-2">
-              {formatNumber(
-                Number(periodItem.partStructuresSansDeclarationEig),
-                {
-                  maximumFractionDigits: 2,
-                }
-              )}
+              <NumberDisplay
+                value={formatNumber(
+                  Number(periodItem.partStructuresSansDeclarationEig),
+                  {
+                    maximumFractionDigits: 2,
+                  }
+                )}
+              />
               &nbsp;%
             </span>
           </span>
@@ -40,10 +43,12 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Tous les EIG",
         key: "nbEig",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "EIG “comportement violent“",
         key: "nbEigComportementViolent",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Taux d'EIG “comportement violent“",
@@ -61,22 +66,27 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Structures évaluées",
         key: "nbStructuresEvaluees",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Moyenne totale",
         key: "noteGenerale",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Moyenne “La personne“",
         key: "notePersonne",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Moyenne “Les professionnels“",
         key: "notePro",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Moyenne “La structure",
         key: "noteStructure",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
     ],
   },

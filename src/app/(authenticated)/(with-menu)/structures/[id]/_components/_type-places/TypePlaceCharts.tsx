@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
 
@@ -22,7 +23,10 @@ export const TypePlaceCharts = ({
           options={{ showLabel: false }}
         ></PieChart>
         <div className="fr-pt-1w text-center">
-          <strong>{placesPmr}</strong> places PMR{" "}
+          <strong>
+            <NumberDisplay value={placesPmr} />
+          </strong>{" "}
+          places PMR{" "}
           <span className="text-mention-grey">
             ({getPercentage(placesPmr, placesAutorisees)})
           </span>
@@ -45,7 +49,10 @@ export const TypePlaceCharts = ({
           options={{ showLabel: false }}
         ></PieChart>
         <div className="fr-pt-1w text-center">
-          <strong>{placesLgbt}</strong> places LGBT{" "}
+          <strong>
+            <NumberDisplay value={placesLgbt} />
+          </strong>{" "}
+          places LGBT{" "}
           <span className="text-mention-grey">
             ({getPercentage(placesLgbt, placesAutorisees)})
           </span>{" "}
@@ -65,7 +72,10 @@ export const TypePlaceCharts = ({
           options={{ showLabel: false }}
         ></PieChart>
         <div className="fr-pt-1w text-center">
-          <strong>{placesQPV}</strong> places QPV{" "}
+          <strong>
+            <NumberDisplay value={placesQPV} />
+          </strong>{" "}
+          places QPV{" "}
           <span className="text-mention-grey">
             ({getPercentage(placesQPV, placesAutorisees)})
           </span>
@@ -86,7 +96,10 @@ export const TypePlaceCharts = ({
           options={{ showLabel: false }}
         ></PieChart>
         <div className="fr-pt-1w text-center">
-          <strong>{placesLogementsSociaux}</strong> places en logements sociaux{" "}
+          <strong>
+            <NumberDisplay value={placesLogementsSociaux} />
+          </strong>{" "}
+          places en logements sociaux{" "}
           <span className="text-mention-grey">
             ({getPercentage(placesLogementsSociaux, placesAutorisees)})
           </span>

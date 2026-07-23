@@ -37,12 +37,16 @@ export const BalanceChart = (): ReactElement => {
   const getChartData = () => {
     const labels = yearsWithBudget.map((budget) => budget.year.toString());
     const excendentCumule = getPropertySerie("excedentCumule");
-    const deficitCumule = getPropertySerie("deficitCumule");
+    const deficitCumuleBrut = getPropertySerie("deficitCumule");
     const cumul = excendentCumule.map(
-      (excedent, index) => excedent - deficitCumule[index]
+      (excedent, index) => excedent - deficitCumuleBrut[index]
     );
+    const deficitCumuleNegatif = deficitCumuleBrut.map(
+      (deficit) => -Math.abs(deficit)
+    );
+
     const series = {
-      barsSeries: [excendentCumule, deficitCumule],
+      barsSeries: [excendentCumule, deficitCumuleNegatif],
       lineSeries: cumul,
     };
 

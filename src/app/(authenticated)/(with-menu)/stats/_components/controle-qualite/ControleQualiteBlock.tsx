@@ -34,21 +34,46 @@ export const ControleQualiteBlock = (): ReactElement => {
       <div className="flex pb-16">
         <div>
           <InformationCard
-            primaryInformation={`${statistiques.controleQualite.eig.nbEig} EIG`}
-            secondaryInformation="pour 1000 places sur les 12 derniers mois"
+            primaryInformation={`${formatNumber(statistiques.controleQualite.eig.nbEig)} EIG`}
+            secondaryInformation={
+              <>
+                pour 1000 places
+                <br />
+                sur les 12 derniers mois
+              </>
+            }
           />
         </div>
         <InformationCardBridge />
         <div className="pr-4">
           <InformationCard
-            primaryInformation={`dont ${statistiques.controleQualite.eig.nbEigComportementViolent} (${tauxEigComportementViolent}%)`}
+            primaryInformation={
+              <>
+                dont {statistiques.controleQualite.eig.nbEigComportementViolent}{" "}
+                <span className="text-xl">
+                  ({tauxEigComportementViolent}&nbsp;%)
+                </span>
+              </>
+            }
             secondaryInformation="au motif de comportements violents"
           />
         </div>
         <div>
           <InformationCard
-            primaryInformation={`${statistiques.controleQualite.eig.moyenneEvaluationsLast12Months || "N/A"} / 4`}
-            secondaryInformation={`moyenne aux évaluations sur les 12 derniers mois`}
+            primaryInformation={
+              <>
+                {statistiques.controleQualite.eig
+                  .moyenneEvaluationsLast12Months || "N/A"}{" "}
+                <span className="text-xl">/&nbsp;4</span>
+              </>
+            }
+            secondaryInformation={
+              <>
+                moyenne aux évaluations
+                <br />
+                sur les 12 derniers mois
+              </>
+            }
           />
         </div>
       </div>

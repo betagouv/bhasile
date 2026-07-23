@@ -91,6 +91,7 @@ export const Table = ({
               "[&_tr>*:first-child]:before:content-[''] [&_tr>*:first-child]:before:pointer-events-none [&_tr>*:first-child]:before:absolute [&_tr>*:first-child]:before:right-[-6em] [&_tr>*:first-child]:before:top-0 [&_tr>*:first-child]:before:bottom-0 [&_tr>*:first-child]:before:w-[6em]",
               "[&_tr>*:first-child]:before:bg-linear-to-l [&_tr>*:first-child]:before:from-transparent [&_tr>*:first-child]:before:to-white",
               "[&_tr>*:first-child]:before:opacity-100 [&_tr>*:first-child]:before:transition-opacity [&_tr>*:first-child]:before:duration-30",
+              "[&_tr>*:first-child]:after:content-[''] [&_tr>*:first-child]:after:pointer-events-none [&_tr>*:first-child]:after:absolute [&_tr>*:first-child]:after:right-0 [&_tr>*:first-child]:after:top-0 [&_tr>*:first-child]:after:bottom-0 [&_tr>*:first-child]:after:border-r [&_tr>*:first-child]:after:border-default-grey",
             ],
             stickFirstColumn &&
               scrollReachedEnd &&
