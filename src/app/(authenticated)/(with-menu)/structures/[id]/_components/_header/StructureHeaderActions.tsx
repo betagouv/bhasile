@@ -5,10 +5,7 @@ import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
 import { UpcomingTransformationBadge } from "@/app/components/structures/UpcomingTransformationBadge";
-import {
-  CAMPAIGN_SAVE_KEY,
-  useActualisationFormHandling,
-} from "@/app/hooks/useActualisationFormHandling";
+import { ACTUALISATION_SAVE_KEY, useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { isActualisationReadyToValidate } from "@/app/utils/actualisationForm.util";
 
@@ -67,7 +64,7 @@ export const StructureHeaderActions = ({
     return (
       <div className="flex items-center gap-3">
         <AutoSaveStatus
-          fetchStateKey={CAMPAIGN_SAVE_KEY}
+          fetchStateKey={ACTUALISATION_SAVE_KEY}
           onStatusClick={() => autoSaveModal.open()}
         />
         <Button

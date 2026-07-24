@@ -42,6 +42,24 @@ export const useStructures = (): UseStructureResult => {
     }
   };
 
+  const updateActualisation = async (
+    structureId: number,
+    structure: unknown,
+    setStructure: (structure: StructureApiRead) => void
+  ): Promise<void> => {
+    const response = await fetch(
+      `/api/structures/${structureId}/actualisation`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ ...(structure as object), id: structureId }),
+      }
+    );
+    if (!response.ok) {
+      throw new ApiError(await extractApiError(response), response.status);
+    }
+    await refreshBestEffort(`/api/structures/${structureId}`, setStructure);
+  };
+
   const updateAndRefreshStructure = async (
     structureId: number,
     structure: unknown,
@@ -55,6 +73,7 @@ export const useStructures = (): UseStructureResult => {
     addStructure,
     updateStructure,
     updateAndRefreshStructure,
+    updateActualisation,
   };
 };
 
@@ -62,6 +81,11 @@ type UseStructureResult = {
   addStructure: (values: AjoutFormValues) => Promise<void>;
   updateStructure: (values: unknown) => Promise<void>;
   updateAndRefreshStructure: (
+    structureId: number,
+    values: unknown,
+    setStructure: (structure: StructureApiRead) => void
+  ) => Promise<void>;
+  updateActualisation: (
     structureId: number,
     values: unknown,
     setStructure: (structure: StructureApiRead) => void

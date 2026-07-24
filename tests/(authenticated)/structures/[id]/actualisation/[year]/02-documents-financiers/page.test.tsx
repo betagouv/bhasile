@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ActualisationDocumentsFinanciers from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/02-documents-financiers/page";
 
+import { createActualisationForm } from "../../../../../../test-utils/factories/actualisation-form.factory";
 import { createFinalisationDocumentsFinanciersValidStructure } from "../../../../../../test-utils/structure.factory";
 import {
   clickButtonByName,
@@ -19,17 +20,23 @@ vi.mock("@/app/components/forms/AutoSave", () => ({ AutoSave: () => null }));
 
 const docsStructure = () => ({
   ...createFinalisationDocumentsFinanciersValidStructure(1),
-  campaigns: [
-    { slug: "actualisation-2026", isValidated: false, formSteps: [] },
-  ],
+  forms: [createActualisationForm(2026)],
 });
 
-const findCampaignPut = (fetchMock: ReturnType<typeof vi.fn>) =>
+const findActualisationPut = (fetchMock: ReturnType<typeof vi.fn>) =>
   fetchMock.mock.calls.find(
     (call) =>
-      call[0] === "/api/campaigns" &&
+      call[0] === "/api/structures/1/actualisation" &&
       (call[1] as RequestInit | undefined)?.method === "PUT"
   );
+
+const stepStatusInPayload = (put: unknown[] | undefined, slug: string) => {
+  const payload = JSON.parse((put?.[1] as RequestInit).body as string);
+  return payload.forms[0].formSteps.find(
+    (formStep: { stepDefinition: { slug: string } }) =>
+      formStep.stepDefinition.slug === slug
+  )?.status;
+};
 
 describe("Page actualisation 02-documents-financiers", () => {
   beforeEach(() => {
@@ -37,7 +44,7 @@ describe("Page actualisation 02-documents-financiers", () => {
     global.fetch = vi.fn();
   });
 
-  it("valide l'étape documents vers /api/campaigns", async () => {
+  it("valide l'étape documents via la sous-route actualisation", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockResolvedValue({
       ok: true,
@@ -51,13 +58,8 @@ describe("Page actualisation 02-documents-financiers", () => {
 
     await clickButtonByName("Valider");
 
-    const campaignPut = findCampaignPut(fetchMock);
-    expect(campaignPut).toBeDefined();
-    const payload = JSON.parse((campaignPut?.[1] as RequestInit).body as string);
-    expect(payload).toMatchObject({
-      structureId: 1,
-      year: 2026,
-      step: { slug: "02-documents-financiers", status: "VALIDE" },
-    });
+    const put = findActualisationPut(fetchMock);
+    expect(put).toBeDefined();
+    expect(stepStatusInPayload(put, "02-documents-financiers")).toBe("VALIDE");
   });
 });

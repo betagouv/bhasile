@@ -1,4 +1,4 @@
-import { actualisationCampaignDefinitionSlug } from "@/app/api/campaigns/campaign.constants";
+import { getActualisationFormSlug } from "@/app/api/forms/form.constants";
 import {
   StructureApiRead,
   StructureCampaignApiRead,
@@ -17,7 +17,7 @@ export const getActualisationCampaign = (
   year: number
 ): StructureCampaignApiRead | undefined =>
   structure.campaigns.find(
-    (campaign) => campaign.slug === actualisationCampaignDefinitionSlug(year)
+    (campaign) => campaign.slug === getActualisationFormSlug(year)
   );
 
 export const getActualisationFormStepStatus = (

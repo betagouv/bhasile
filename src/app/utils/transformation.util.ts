@@ -8,7 +8,6 @@ import {
 import { CURRENT_YEAR } from "@/constants";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
-  StructureVersionApiRead,
   StructureVersionTransformationApiRead,
   StructureVersionTransformationApiUpdate,
   TransformationApiRead,
@@ -214,9 +213,8 @@ const getStructureVersionTransformationFormStepStatus = (
     return StepStatus.NON_COMMENCE;
   }
   return (
-    form.formSteps.find(
-      (formStep) => formStep.stepDefinition.slug === stepSlug
-    )?.status ?? StepStatus.NON_COMMENCE
+    form.formSteps.find((formStep) => formStep.stepDefinition.slug === stepSlug)
+      ?.status ?? StepStatus.NON_COMMENCE
   );
 };
 
@@ -251,7 +249,10 @@ const getStepsByType = (
     case StructureVersionTransformationType.CONTRACTION:
     case StructureVersionTransformationType.CREATION:
       return [
-        buildStep(StructureVersionTransformationStep.DESCRIPTION, "Description"),
+        buildStep(
+          StructureVersionTransformationStep.DESCRIPTION,
+          "Description"
+        ),
         buildStep(
           StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
           "Places et hébergement"
@@ -263,7 +264,10 @@ const getStepsByType = (
       ];
     case StructureVersionTransformationType.FERMETURE:
       return [
-        buildStep(StructureVersionTransformationStep.DESCRIPTION, "Description"),
+        buildStep(
+          StructureVersionTransformationStep.DESCRIPTION,
+          "Description"
+        ),
       ];
   }
 };
@@ -384,25 +388,25 @@ const resolveSourceTypologie = <T extends { year: number }>(
 
 export const getPlacesSource = (
   structureVersionTransformation: StructureVersionTransformationApiRead
-): number | undefined => {
-  const structureVersion = structureVersionTransformation.structureVersion;
-  const typologies = structureVersion?.structure?.structureTypologies;
-  const year = getEffectiveYear(structureVersion?.effectiveDate);
-  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? undefined;
-};
+): number | undefined =>
+  structureVersionTransformation.structureVersion?.structure
+    ?.placesAutorisees ?? undefined;
 
 export const buildTransformationTypologie = (
-  structureVersion?: StructureVersionApiRead
+  structureVersionTransformation?: StructureVersionTransformationApiRead
 ) => {
-  const typologies = structureVersion?.structureTypologies;
+  const structureVersion = structureVersionTransformation?.structureVersion;
   const year = getEffectiveYear(structureVersion?.effectiveDate);
-  const sourceTypologie = resolveSourceTypologie(typologies, year);
+  const declared = resolveSourceTypologie(
+    structureVersionTransformation?.structureTypologies,
+    year
+  );
   return {
     year,
-    placesAutorisees: sourceTypologie?.placesAutorisees,
-    pmr: sourceTypologie?.pmr,
-    lgbt: sourceTypologie?.lgbt,
-    fvvTeh: sourceTypologie?.fvvTeh,
+    placesAutorisees: structureVersion?.placesAutorisees ?? undefined,
+    pmr: declared?.pmr,
+    lgbt: declared?.lgbt,
+    fvvTeh: declared?.fvvTeh,
   };
 };
 
@@ -425,7 +429,9 @@ export const getTransformationDefaultValues = <T>({
     type: structureVersionTransformation.structureType,
     adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
     operateur: structureVersionTransformation.operateur,
-    structureTypologies: [buildTransformationTypologie(structureVersion)],
+    structureTypologies: [
+      buildTransformationTypologie(structureVersionTransformation),
+    ],
     actesAdministratifs: getActesAdministratifsDefaultValues(
       structureVersionTransformation.actesAdministratifs,
       categoryDisplayRules

@@ -86,6 +86,8 @@ const dbTransformationToApiRead = (
                   structure: resolvedSourceStructure
                     ? {
                         ...resolvedSourceStructure,
+                        placesAutorisees:
+                          referenceVersion?.placesAutorisees ?? null,
                         adresseAdministrativeComplete:
                           buildAdresseAdministrativeComplete(
                             resolvedSourceStructure

@@ -43,10 +43,6 @@ export type ResolvableVersion = {
   structureVersionTransformation: {
     transformation: { form: { status: boolean | null } | null } | null;
   } | null;
-  campaignId: number | null;
-  campaign: {
-    form: { status: boolean | null } | null;
-  } | null;
 };
 
 export const isVersionValid = (version: ResolvableVersion): boolean => {

@@ -47,12 +47,7 @@ const buildCompleteStructureVersionTransformation = (
       codeBhasile: "BHA-NOR-025",
       operateur: { id: 10, name: "Groupe SOS" },
     },
-    structureTypologies: [
-      {
-        year: 2026,
-        placesAutorisees: 47,
-      },
-    ],
+    placesAutorisees: 47,
   },
   ...overrides,
 });
@@ -240,9 +235,9 @@ describe("StructureVersionTransformationItem", () => {
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
   });
 
-  it("affiche la ligne des places fermées pour une FERMETURE à partir de la typologie au niveau structure", () => {
-    // GIVEN — a closure: places come from the predecessor (structure-level)
-    // typology resolved at the effective year, not the version-level one
+  it("affiche la ligne des places fermées pour une FERMETURE depuis le scalaire de la structure source", () => {
+    // GIVEN — une fermeture : les places fermées viennent du scalaire de la
+    // structure source (résolu par le serveur), pas d'une typologie par année.
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       type: StructureVersionTransformationType.FERMETURE,
       structureVersion: {
@@ -250,7 +245,7 @@ describe("StructureVersionTransformationItem", () => {
         structure: {
           codeBhasile: "BHA-NOR-025",
           operateur: { id: 10, name: "Groupe SOS" },
-          structureTypologies: [{ year: 2026, placesAutorisees: 47 }],
+          placesAutorisees: 47,
         },
       },
     });
@@ -269,9 +264,8 @@ describe("StructureVersionTransformationItem", () => {
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
   });
 
-  it("masque la ligne des places fermées pour une FERMETURE quand la typologie structure la plus récente est déjà à zéro", () => {
-    // GIVEN — no typology for the closure year (2026); the most-recent
-    // millesime fallback lands on a post-closure year zeroed at 0 places
+  it("masque la ligne des places fermées pour une FERMETURE quand la structure source est déjà à zéro place", () => {
+    // GIVEN — la structure source ne porte aucune place (scalaire à 0).
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       type: StructureVersionTransformationType.FERMETURE,
       structureVersion: {
@@ -279,7 +273,7 @@ describe("StructureVersionTransformationItem", () => {
         structure: {
           codeBhasile: "BHA-NOR-025",
           operateur: { id: 10, name: "Groupe SOS" },
-          structureTypologies: [{ year: 2027, placesAutorisees: 0 }],
+          placesAutorisees: 0,
         },
       },
     });
@@ -321,12 +315,12 @@ describe("StructureVersionTransformationItem", () => {
     }
   );
 
-  it("masque la ligne placesAutorisees quand aucune typologie ne correspond à l'année d'effectiveDate", () => {
-    // GIVEN — effectiveDate is 2026 but typology is for 2025
+  it("masque la ligne placesAutorisees quand la version n'en porte pas (fermeture)", () => {
+    // GIVEN — une FERMETURE ne porte aucune place sur sa version.
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       structureVersion: {
         ...buildCompleteStructureVersionTransformation().structureVersion,
-        structureTypologies: [{ year: 2025, placesAutorisees: 47 }],
+        placesAutorisees: undefined,
       },
     });
 

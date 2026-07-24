@@ -1,79 +1,83 @@
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
-import { CampaignApiWrite } from "@/schemas/api/campaign.schema";
-import { FetchState } from "@/types/fetch-state.type";
+import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
 import { useStructureContext } from "../(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
-import { useFetchState } from "../context/FetchStateContext";
+import { getActualisationFormSlug } from "../api/forms/form.constants";
 import { getActualisationNextRoute } from "../utils/actualisationForm.util";
-import { useCampaigns } from "./useCampaigns";
+import { useSaveMutation } from "./useSaveMutation";
+import { useStructures } from "./useStructures";
 
-export const CAMPAIGN_SAVE_KEY = "campaign-save";
+export const ACTUALISATION_SAVE_KEY = "actualisation-save";
 
-type CampaignDataSlice = Omit<
-  CampaignApiWrite,
-  "structureId" | "year" | "step" | "validate"
+type ActualisationData = Pick<
+  StructureAgentUpdateApiClient,
+  | "structureTypologies"
+  | "budgets"
+  | "indicateursFinanciers"
+  | "documentsFinanciers"
+  | "actesAdministratifs"
 >;
 
 export const useActualisationFormHandling = ({ year, currentStep }: Props) => {
   const router = useRouter();
   const { structure, setStructure } = useStructureContext();
-  const { updateAndRefreshCampaign } = useCampaigns();
-  const { setFetchState } = useFetchState();
+  const { updateActualisation } = useStructures();
+  const { mutate } = useSaveMutation(
+    ACTUALISATION_SAVE_KEY,
+    (payload: unknown) =>
+      updateActualisation(structure.id, payload, setStructure)
+  );
 
-  const save = async (payload: CampaignApiWrite): Promise<void> => {
-    setFetchState(CAMPAIGN_SAVE_KEY, FetchState.LOADING);
-    try {
-      const result = await updateAndRefreshCampaign(
-        structure.id,
-        payload,
-        setStructure
-      );
-      if (result !== "OK") {
-        throw new Error(result);
-      }
-      setFetchState(CAMPAIGN_SAVE_KEY, FetchState.IDLE);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(message);
-      setFetchState(CAMPAIGN_SAVE_KEY, FetchState.ERROR, message);
-      throw error;
-    }
-  };
+  const slug = getActualisationFormSlug(year);
+
+  const buildForms = (options: {
+    currentStepStatus?: StepStatus;
+    validate?: boolean;
+  }) =>
+    structure.forms
+      ?.filter((form) => form.formDefinition.slug === slug)
+      .map((form) => ({
+        ...form,
+        ...(options.validate ? { status: true } : {}),
+        formSteps: form.formSteps.map((formStep) =>
+          options.currentStepStatus !== undefined &&
+          formStep.stepDefinition.slug === currentStep
+            ? { ...formStep, status: options.currentStepStatus }
+            : formStep
+        ),
+      }));
 
   const handleAutoSave = async (
-    data: CampaignDataSlice,
+    data: ActualisationData,
     strictSchema: z.ZodTypeAny,
     values: unknown
   ): Promise<void> => {
-    const status = strictSchema.safeParse(values).success
+    const currentStepStatus = strictSchema.safeParse(values).success
       ? StepStatus.VALIDE
       : StepStatus.NON_COMMENCE;
-
-    await save({
-      structureId: structure.id,
-      year,
+    await mutate({
+      id: structure.id,
       ...data,
-      ...(currentStep ? { step: { slug: currentStep, status } } : {}),
+      forms: buildForms({ currentStepStatus }),
     });
   };
 
-  const handleValidateStep = async (data: CampaignDataSlice): Promise<void> => {
-    await save({
-      structureId: structure.id,
-      year,
+  const handleValidateStep = async (data: ActualisationData): Promise<void> => {
+    const result = await mutate({
+      id: structure.id,
       ...data,
-      ...(currentStep
-        ? { step: { slug: currentStep, status: StepStatus.VALIDE } }
-        : {}),
+      forms: buildForms({ currentStepStatus: StepStatus.VALIDE }),
     });
+    if (result === null) {
+      return;
+    }
 
     const nextRoute = currentStep
       ? getActualisationNextRoute(currentStep)
       : undefined;
-
     if (nextRoute) {
       router.push(
         `/structures/${structure.id}/actualisation/${year}/${nextRoute}`
@@ -84,7 +88,7 @@ export const useActualisationFormHandling = ({ year, currentStep }: Props) => {
   };
 
   const handleValidateActualisation = async (): Promise<void> => {
-    await save({ structureId: structure.id, year, validate: true });
+    await mutate({ id: structure.id, forms: buildForms({ validate: true }) });
   };
 
   return {
