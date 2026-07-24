@@ -66,6 +66,7 @@ model FormStep {
 
 enum StepStatus {
   NON_COMMENCE
+  PRE_REMPLI
   COMMENCE
   A_VERIFIER
   FINALISE
