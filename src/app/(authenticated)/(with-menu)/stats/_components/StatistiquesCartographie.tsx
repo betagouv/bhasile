@@ -1,7 +1,15 @@
 import { ReactElement } from "react";
 
-import { WorkInProgress } from "@/app/components/WorkInProgress";
+import { CartographieMenu } from "./cartographie/CartographieMenu";
+import { FranceMap } from "./cartographie/FranceMap";
 
 export const StatistiquesCartographie = (): ReactElement => {
-  return <WorkInProgress />;
+  return (
+    <div className="flex">
+      <CartographieMenu />
+      <div className="w-full h-full">
+        <FranceMap />
+      </div>
+    </div>
+  );
 };

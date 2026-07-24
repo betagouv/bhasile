@@ -78,7 +78,7 @@ export default async function StatistiquesPage({
 
   return (
     <StatistiquesProvider statistiques={statistiques}>
-      <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
+      <div className="flex flex-col h-full bg-alt-grey">
         <StatistiquesContent />
       </div>
     </StatistiquesProvider>
