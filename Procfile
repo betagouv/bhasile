@@ -1,1 +1,1 @@
-postdeploy: yarn delete-views && yarn prisma:deploy && yarn apply-views
+postdeploy: ./scripts/postdeploy.sh
