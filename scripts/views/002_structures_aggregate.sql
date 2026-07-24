@@ -23,7 +23,7 @@ WITH
       public."ActeAdministratif" aa
     WHERE
       aa."cpomId" IS NOT NULL
-      AND aa."category" = 'CONVENTION'
+      AND aa."category" = 'CONVENTION_CPOM'
       AND aa."parentId" IS NULL
       AND aa."startDate" IS NOT NULL
       AND aa."endDate" IS NOT NULL

@@ -10,6 +10,7 @@ model Cpom {
   operateur           Operateur           @relation(fields: [operateurId], references: [id])
   operateurId         Int
   actesAdministratifs ActeAdministratif[]
+  documentsFinanciers DocumentFinancier[]
   userActions         UserAction[]
 
   createdAt DateTime @default(now())

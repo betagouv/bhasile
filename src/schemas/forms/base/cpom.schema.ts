@@ -84,7 +84,7 @@ export const financesCpomSchema = z.object({
 
 export const actesAdministratifsCpomSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey(["CONVENTION"]),
+    filterActesWithKey(["CONVENTION_CPOM"]),
     z.array(acteAdministratifCpomSchema).optional()
   ),
 });
@@ -142,7 +142,7 @@ export const cpomSchema = descriptionCpomSchema
         (acteAdministratif) =>
           !acteAdministratif.parentId &&
           !acteAdministratif.parentUuid &&
-          acteAdministratif.category === "CONVENTION"
+          acteAdministratif.category === "CONVENTION_CPOM"
       );
       if (!convention) {
         return true;

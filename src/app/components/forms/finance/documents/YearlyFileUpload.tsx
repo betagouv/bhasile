@@ -19,12 +19,14 @@ import {
   DocumentFinancierCategory,
   DocumentFinancierGranularity,
 } from "@/types/document-financier.type";
+import { StructureType } from "@/types/structure.type";
 
 export const YearlyFileUpload = ({
   year,
   index,
   isAutorisee,
   control,
+  structureType,
 }: Props): ReactElement => {
   const { watch } = useFormContext();
   const documentsFinanciers: DocumentFinancierFlexibleFormValues[] = watch(
@@ -117,7 +119,8 @@ export const YearlyFileUpload = ({
         return (
           documentFinancier.year === year &&
           documentFinancier.category === category &&
-          documentFinancier.granularity === granularity
+          documentFinancier.granularity === granularity &&
+          documentFinancier.structureType === structureType
         );
       });
       if (index !== -1 && category !== "AUTRE_FINANCIER") {
@@ -128,6 +131,7 @@ export const YearlyFileUpload = ({
         fileUploads: key ? [{ key }] : undefined,
         category,
         granularity: granularity ?? "STRUCTURE",
+        structureType,
         name,
         year,
       });
@@ -148,6 +152,7 @@ export const YearlyFileUpload = ({
       documentsFinanciers,
       remove,
       isInCpom,
+      structureType,
     ]
   );
 
@@ -242,4 +247,5 @@ type Props = {
   index: number;
   isAutorisee: boolean;
   control: Control<DocumentsFinanciersFlexibleFormValues>;
+  structureType?: StructureType;
 };

@@ -7,11 +7,13 @@ import {
 } from "@/app/utils/zodCustomFields";
 import { fileApiSchema } from "@/schemas/api/file.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { StructureType } from "@/types/structure.type";
 
 const acteAdministratifAutoSaveSchema = z.object({
   id: zId(),
   uuid: z.string().optional(), // The uuid is used to identify the acte administratif when it is not saved in the database (and so does not have an id)
   category: z.enum(ActeAdministratifCategory).optional(),
+  structureType: z.enum(StructureType).nullish(),
   date: optionalFrenchDateToISO(),
   startDate: optionalFrenchDateToISO(),
   endDate: nullishFrenchDateToISO(),
@@ -141,7 +143,7 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
 export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   (data) => {
     const isNotAvenant = !data.parentId && !data.parentUuid;
-    if (data.category === "CONVENTION" && isNotAvenant) {
+    if (data.category === "CONVENTION_CPOM" && isNotAvenant) {
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;

@@ -6,6 +6,7 @@ import {
   zId,
 } from "@/app/utils/zodCustomFields";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { StructureType } from "@/types/structure.type";
 
 import { fileApiSchema } from "./file.schema";
 
@@ -15,6 +16,7 @@ export const acteAdministratifApiSchema = z.object({
   structureDnaCode: z.string().optional(),
   cpomId: zId(),
   operateurId: zId(),
+  structureType: z.enum(StructureType).nullish(),
   date: optionalFrenchDateToISO(),
   startDate: optionalFrenchDateToISO(),
   endDate: nullishFrenchDateToISO(),

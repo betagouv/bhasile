@@ -110,12 +110,18 @@ describe("sortValueForCpomColumn", () => {
     });
   });
 
-  it("dérive les colonnes de date de l'acte CONVENTION en millisecondes epoch", () => {
+  it("dérive les colonnes de date de l'acte CONVENTION_CPOM en millisecondes epoch", () => {
     const startDate = new Date("2023-01-01T00:00:00.000Z");
     const endDate = new Date("2026-01-01T00:00:00.000Z");
     const cpom = makeCpom({
       actesAdministratifs: [
-        { id: 1, category: "CONVENTION", parentId: null, startDate, endDate },
+        {
+          id: 1,
+          category: "CONVENTION_CPOM",
+          parentId: null,
+          startDate,
+          endDate,
+        },
       ],
     });
     expect(sortValueForCpomColumn(cpom, "dateStart")).toEqual({
