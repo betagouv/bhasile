@@ -1,9 +1,6 @@
 import z from "zod";
 
-import {
-  emptyValuesToUndefined,
-  frenchDateToISO,
-} from "@/app/utils/zodCustomFields";
+import { emptyValuesToUndefined } from "@/app/utils/zodCustomFields";
 import {
   adresseAdministrativeAutoSaveSchema,
   adresseAdministrativeSchema,
@@ -20,6 +17,7 @@ import {
   dnaStructuresAutoSaveSchema,
   dnaStructuresSchema,
 } from "@/schemas/forms/base/dna.schema";
+import { effectiveDateSchema } from "@/schemas/forms/base/effectiveDate.schema";
 import {
   structureFinessesAutoSaveSchema,
   structureFinessesSchema,
@@ -29,7 +27,7 @@ import { structureBaseSchema } from "@/schemas/forms/base/structure.base.schema"
 
 const baseCreationIdentificationSchema = structureBaseSchema.extend({
   operateur: operateurSchema,
-  effectiveDate: frenchDateToISO(),
+  effectiveDate: effectiveDateSchema,
   filiale: z.string().optional(),
 });
 

@@ -128,6 +128,28 @@ describe("ExistingStructureIdentificationForm (intégration jusqu'au fetch)", ()
     ).toBeUndefined();
   });
 
+  it("bloque la sauvegarde quand la date d'effet précède le seuil de versionnement", async () => {
+    // GIVEN a source version whose effectiveDate predates the versioning threshold
+    renderForm({
+      id: 999,
+      structureId: 42,
+      nom: "Les Mimosas",
+      effectiveDate: "2025-12-31T12:00:00.000Z",
+    });
+
+    // WHEN the agent submits the step
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN nothing reaches the API (le cas 2026 juste au-dessus atteint le PUT
+    // dans les mêmes conditions de timing : seule la date change)
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      `/api/transformations/${TRANSFORMATION_ID}`,
+      expect.objectContaining({ method: "PUT" })
+    );
+  });
+
   it("sauvegarde même quand tous les champs sont vides (null venant de la BDD)", async () => {
     // GIVEN a source version whose nullable columns are still null
     renderForm({

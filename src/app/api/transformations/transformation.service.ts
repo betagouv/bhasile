@@ -39,6 +39,7 @@ import {
 } from "./transformation.repository";
 import {
   applyPrefill,
+  checkEffectiveDatesAreValid,
   checkNoDuplicateStructureIds,
   checkUniqueDepartement,
 } from "./transformation.util";
@@ -131,6 +132,7 @@ const prepareStructureVersionTransformations = async (
   structureVersionTransformations: StructureVersionTransformationApiCreate[]
 ): Promise<StructureVersionTransformationApiCreate[]> => {
   checkNoDuplicateStructureIds(structureVersionTransformations);
+  checkEffectiveDatesAreValid(structureVersionTransformations);
 
   const structureVersionTransformationsWithSource = await Promise.all(
     structureVersionTransformations.map(
@@ -197,6 +199,8 @@ const enrichStructureVersionTransformationFromSource = async (
 export const updateTransformation = async (
   input: TransformationApiUpdate
 ): Promise<number> => {
+  checkEffectiveDatesAreValid(input.structureVersionTransformations ?? []);
+
   return updateOne(input);
 };
 

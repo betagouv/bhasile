@@ -1,22 +1,20 @@
 import z from "zod";
 
-import {
-  emptyValuesToUndefined,
-  frenchDateToISO,
-} from "@/app/utils/zodCustomFields";
+import { emptyValuesToUndefined } from "@/app/utils/zodCustomFields";
 import {
   actesAdministratifsAutoSaveSchema,
   actesAdministratifsFermetureSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
+import { effectiveDateSchema } from "@/schemas/forms/base/effectiveDate.schema";
 
 export const fermetureSchema = z
-  .object({ effectiveDate: frenchDateToISO() })
+  .object({ effectiveDate: effectiveDateSchema })
   .and(actesAdministratifsFermetureSchema);
 
 export const fermetureDraftSchema = z.preprocess(
   emptyValuesToUndefined,
   z
-    .object({ effectiveDate: frenchDateToISO().optional() })
+    .object({ effectiveDate: effectiveDateSchema.optional() })
     .and(actesAdministratifsAutoSaveSchema)
 );
 
