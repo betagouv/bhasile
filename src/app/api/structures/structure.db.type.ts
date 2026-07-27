@@ -43,6 +43,10 @@ export const structureListLightSelect = {
       endDate: true,
     },
   },
+  structureTypologies: {
+    select: { year: true, placesAutorisees: true },
+    orderBy: { year: "desc" },
+  },
   structureVersions: { select: structureListLightVersionSelect },
 } satisfies Prisma.StructureSelect;
 

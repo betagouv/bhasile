@@ -3,7 +3,7 @@ import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
 import { ControleQualiteEvaluationStat } from "@/schemas/api/statistique.schema";
 
 import type { StatistiqueDbEvaluation } from "../statistiques.db.type";
-import { filterByActiveStructureId } from "../statistiques.utils";
+import { filterByActiveStructureId } from "../statistiques.util";
 
 export const filterEvaluationsInScope = (
   evaluations: StatistiqueDbEvaluation[],

@@ -1,13 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import ActualisationDocumentsFinanciers from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/02-documents-financiers/page";
-
-import { createActualisationForm } from "../../../../../../test-utils/factories/actualisation-form.factory";
-import { createFinalisationDocumentsFinanciersValidStructure } from "../../../../../../test-utils/structure.factory";
+import { createActualisationForm } from "tests/test-utils/factories/actualisation-form.factory";
+import { createFinalisationDocumentsFinanciersValidStructure } from "tests/test-utils/structure.factory";
 import {
   clickButtonByName,
   renderWithStructurePageProviders,
-} from "../../../../../../test-utils/structure-page-test.helpers";
+} from "tests/test-utils/structure-page-test.helpers";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import ActualisationDocumentsFinanciers from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/02-documents-financiers/page";
 
 const mockRouterPush = vi.fn();
 

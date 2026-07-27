@@ -23,9 +23,9 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
+import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
-import { hasValidatedActualisation } from "./actualisation.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
@@ -38,6 +38,7 @@ import {
   findOneOperateur,
   findStructureDepartement,
   findStructuresByIds,
+  findValidatedActualisationForm,
   updateOne,
 } from "./structure.repository";
 import {
@@ -97,11 +98,11 @@ export const updateActualisation = async (
   structure: StructureAgentUpdateApiType,
   year: number
 ): Promise<Structure> => {
-  const existing = await getFullStructure(structure.id);
-  if (!existing) {
-    throw new ApiDomainError(`Structure ${structure.id} introuvable`, 404);
-  }
-  if (hasValidatedActualisation(existing.campaigns, year)) {
+  const alreadyValidated = await findValidatedActualisationForm(
+    structure.id,
+    getActualisationFormSlug(year)
+  );
+  if (alreadyValidated) {
     throw new ApiDomainError(
       `Structure ${structure.id} déjà actualisée pour ${year}`,
       409

@@ -35,7 +35,7 @@ import {
   getTypologieYears,
   parseStatistiquesPerimeterFilters,
   type StatistiquesResolvedPerimeterFilters,
-} from "./statistiques.utils";
+} from "./statistiques.util";
 import { computeStructuresStatistiques } from "./structures/structures.util";
 
 /** Résout les filiales des `operateurs` filtrés (seul point d'accès BDD du filtrage). */
