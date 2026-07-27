@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyPrefill,
+  checkEffectiveDatesAreValid,
   checkNoDuplicateStructureIds,
   checkUniqueDepartement,
 } from "@/app/api/transformations/transformation.util";
@@ -259,6 +260,74 @@ describe("checkUniqueDepartement", () => {
 
     expect(() =>
       checkUniqueDepartement(structureVersionTransformations)
+    ).not.toThrow();
+  });
+});
+
+describe("checkEffectiveDatesAreValid", () => {
+  it("rejette une date d'effet antérieure au seuil de versionnement", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
+      [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: { effectiveDate: "2025-12-31T12:00:00.000Z" },
+        },
+      ];
+
+    expect(() =>
+      checkEffectiveDatesAreValid(structureVersionTransformations)
+    ).toThrow(ApiDomainError);
+    expect(() =>
+      checkEffectiveDatesAreValid(structureVersionTransformations)
+    ).toThrow(
+      "Il n'est pas possible de déclarer une date d'effet antérieure à 2026 sur Bhasile"
+    );
+  });
+
+  it("rejette dès qu'un seul bloc porte une date antérieure au seuil", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
+      [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: { effectiveDate: "2026-03-01T12:00:00.000Z" },
+        },
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { effectiveDate: "2024-06-01T12:00:00.000Z" },
+        },
+      ];
+
+    expect(() =>
+      checkEffectiveDatesAreValid(structureVersionTransformations)
+    ).toThrow(ApiDomainError);
+  });
+
+  it("laisse passer une date d'effet au seuil", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
+      [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: { effectiveDate: "2026-01-01T12:00:00.000Z" },
+        },
+      ];
+
+    expect(() =>
+      checkEffectiveDatesAreValid(structureVersionTransformations)
+    ).not.toThrow();
+  });
+
+  it("ignore les blocs sans date d'effet", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
+      [
+        { type: StructureVersionTransformationType.CREATION },
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { effectiveDate: null },
+        },
+      ];
+
+    expect(() =>
+      checkEffectiveDatesAreValid(structureVersionTransformations)
     ).not.toThrow();
   });
 });
