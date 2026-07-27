@@ -6,6 +6,7 @@ import {
   ACTUALISATION_FORM_STEP_SLUGS,
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
+import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -268,6 +269,8 @@ async function seed(): Promise<void> {
   }
 
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
+
+  await mirrorLegacyPlacesToBaseVersions(prisma);
 
   await createFakeCpoms(prisma);
 

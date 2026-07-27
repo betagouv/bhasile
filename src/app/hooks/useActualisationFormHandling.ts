@@ -87,9 +87,8 @@ export const useActualisationFormHandling = ({ year, currentStep }: Props) => {
     }
   };
 
-  const handleValidateActualisation = async (): Promise<void> => {
-    await mutate({ id: structure.id, forms: buildForms({ validate: true }) });
-  };
+  const handleValidateActualisation = () =>
+    mutate({ id: structure.id, forms: buildForms({ validate: true }) });
 
   return {
     handleAutoSave,

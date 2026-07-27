@@ -1,15 +1,14 @@
 import { screen } from "@testing-library/react";
+import { createActualisationForm } from "tests/test-utils/factories/actualisation-form.factory";
+import { createStructure } from "tests/test-utils/structure.factory";
+import {
+  clickButtonByName,
+  renderWithStructurePageProviders,
+} from "tests/test-utils/structure-page-test.helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ActualisationPlaces from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/01-places/page";
 import { StructureType } from "@/types/structure.type";
-
-import { createActualisationForm } from "../../../../../../test-utils/factories/actualisation-form.factory";
-import { createStructure } from "../../../../../../test-utils/structure.factory";
-import {
-  clickButtonByName,
-  renderWithStructurePageProviders,
-} from "../../../../../../test-utils/structure-page-test.helpers";
 
 const mockRouterPush = vi.fn();
 
@@ -88,7 +87,7 @@ describe("Page actualisation 01-places", () => {
     );
   });
 
-  it("valide même quand la capacité projetée ≥ seuil est vide (cellule verrouillée)", async () => {
+  it("valide même quand la capacité projetée supérieure ou égale au seuil est vide (cellule verrouillée)", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     const structureSansCapacite2026 = {
       ...actualisationStructure(),
