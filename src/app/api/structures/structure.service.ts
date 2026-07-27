@@ -41,7 +41,6 @@ import {
   updateOne,
 } from "./structure.repository";
 import {
-  buildStructureCampaigns,
   buildStructureHistory,
   buildUpcomingTransformations,
   computeStructureListRow,
@@ -338,10 +337,6 @@ const dbStructureToApiRead = (
     ? undefined
     : buildUpcomingTransformations(dbStructure as StructureDbDetails, now);
 
-  const campaigns = simple
-    ? []
-    : buildStructureCampaigns((dbStructure as StructureDbDetails).forms);
-
   const structureTypologies = simple
     ? (dbStructure.structureTypologies ?? [])
     : resolveTypologiesPlacesAutorisees(
@@ -408,7 +403,6 @@ const dbStructureToApiRead = (
     isFinalised:
       bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
     isCurrentVersionFromTransformation,
-    campaigns,
     bornFromCreation: undefined,
     structureVersions: undefined,
   }) as StructureApiRead;

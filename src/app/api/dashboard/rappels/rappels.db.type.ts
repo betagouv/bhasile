@@ -25,8 +25,6 @@ export const rappelStructureSelect = {
           transformation: { select: { form: { select: { status: true } } } },
         },
       },
-      campaignId: true,
-      campaign: { select: { form: { select: { status: true } } } },
     },
   },
   operateur: { select: { id: true, name: true } },
