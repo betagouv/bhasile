@@ -1,5 +1,6 @@
 import {
   endOfYearUtc,
+  getNow,
   startOfNextUtcDay,
   startOfUtcDay,
 } from "@/app/utils/date.util";
@@ -283,7 +284,7 @@ export const filterByEffectiveVersionAtDate = <
   structureIds: Iterable<number>,
   date: Date,
   timeline: StatistiqueDbStructureVersionTimeline[],
-  now: Date = new Date()
+  now: Date = getNow()
 ): Row[] => {
   const cappedDate = date < now ? date : now;
   const effectiveVersionIdByStructureId = new Map<number, number>();

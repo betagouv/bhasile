@@ -4,6 +4,7 @@ import {
 } from "@/app/api/actes-administratifs/acte-administratif.util";
 import { getDatesConvention as getCpomDatesConvention } from "@/app/api/cpoms/cpom.util";
 import { getCoordinates } from "@/app/utils/adresse.util";
+import { getNow } from "@/app/utils/date.util";
 import {
   getYearFromDate,
   getYearRange,
@@ -701,7 +702,7 @@ const buildCpomEvents = (
 export const buildStructureHistory = (
   structure: StructureDbDetails,
   cpomStructures: CpomStructureApiRead[],
-  now: Date = new Date()
+  now: Date = getNow()
 ): HistoryEvent[] => {
   const validVersions = getValidVersions(
     structure.structureVersions ?? [],
@@ -719,7 +720,7 @@ export const buildStructureHistory = (
 
 export const buildUpcomingTransformations = (
   structure: StructureDbDetails,
-  now: Date = new Date()
+  now: Date = getNow()
 ): UpcomingTransformation[] => {
   const lowerBound = startOfNextUtcDay(now);
 

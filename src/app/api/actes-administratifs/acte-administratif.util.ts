@@ -14,7 +14,9 @@ export type ActeAdministratifDates = {
   endDate: Date | null;
 };
 
-const getMostRecentByEndDate = <ActeWithEndDate extends { endDate: Date | null }>(
+const getMostRecentByEndDate = <
+  ActeWithEndDate extends { endDate: Date | null },
+>(
   actes: ActeWithEndDate[]
 ): ActeWithEndDate | undefined => {
   let mostRecentActe: ActeWithEndDate | undefined;
@@ -67,8 +69,5 @@ export const getDatesOfCurrentActeAdministratif = (
     return [null, null];
   }
 
-  return [
-    currentActeAdministratif.startDate,
-    currentActeAdministratif.endDate,
-  ];
+  return [currentActeAdministratif.startDate, currentActeAdministratif.endDate];
 };

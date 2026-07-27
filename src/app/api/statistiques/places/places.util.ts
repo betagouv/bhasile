@@ -1,4 +1,4 @@
-import { endOfYearUtc } from "@/app/utils/date.util";
+import { endOfYearUtc, getNow } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
@@ -157,7 +157,7 @@ export const computePlacesStatistiques = (
     structureVersionTimeline,
   } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
-  const now = new Date();
+  const now = getNow();
 
   return {
     ...computePlacesIndicators(

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 
+import { getNow } from "@/app/utils/date.util";
+
 import { getBoundsPlacesAutorisees } from "../structure.service";
 
 export async function GET() {
-  const now = new Date();
+  const now = getNow();
   const { min: minPlacesAutorisees, max: maxPlacesAutorisees } =
     await getBoundsPlacesAutorisees(now);
 

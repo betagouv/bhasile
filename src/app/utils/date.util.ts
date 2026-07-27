@@ -6,6 +6,11 @@ import { CURRENT_YEAR, START_YEAR } from "@/constants";
 
 dayjs.locale("fr");
 
+export function getNow(): Date {
+  const emulated = process.env.NEXT_PUBLIC_EMULATED_NOW;
+  return emulated ? new Date(emulated) : new Date();
+}
+
 export const formatDate = (
   date: Date | string | number | undefined,
   options: Intl.DateTimeFormatOptions = {}
@@ -58,7 +63,7 @@ export const formatDateToIsoString = (
   return undefined;
 };
 
-export const startOfUtcDay = (reference: Date = new Date()): Date => {
+export const startOfUtcDay = (reference: Date = getNow()): Date => {
   const startDay = new Date(reference);
   startDay.setUTCHours(0, 0, 0, 0);
   return startDay;

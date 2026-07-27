@@ -1,4 +1,5 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { getNow } from "@/app/utils/date.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
@@ -111,14 +112,14 @@ export const getTransformation = async (
   if (!dbTransformation) {
     return null;
   }
-  return dbTransformationToApiRead(dbTransformation, new Date());
+  return dbTransformationToApiRead(dbTransformation, getNow());
 };
 
 export const getOngoingTransformationsForUser = async (
   user: SessionUser
 ): Promise<TransformationApiRead[]> => {
   const dbTransformations = await findAll();
-  const now = new Date();
+  const now = getNow();
   return dbTransformations
     .map((dbTransformation) => dbTransformationToApiRead(dbTransformation, now))
     .filter((transformation) =>

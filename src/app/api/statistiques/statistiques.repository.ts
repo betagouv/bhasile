@@ -1,4 +1,5 @@
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
+import { getNow } from "@/app/utils/date.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
@@ -56,7 +57,7 @@ export const findOperateurFiliales = async (
 
 export const findPerimeterStructures = async (
   resolved: StatistiquesResolvedPerimeterFilters,
-  reference: Date = new Date()
+  reference: Date = getNow()
 ): Promise<StatistiqueDbStructure[]> =>
   prisma.structure.findMany({
     where: {
@@ -263,7 +264,7 @@ export const findEigs = async (
   if (dnaCodes.length === 0) {
     return [];
   }
-  const currentYear = new Date().getUTCFullYear();
+  const currentYear = getNow().getUTCFullYear();
   return prisma.evenementIndesirableGrave.findMany({
     where: {
       dnaCode: { in: dnaCodes },

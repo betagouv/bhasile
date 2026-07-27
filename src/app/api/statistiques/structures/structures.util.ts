@@ -1,6 +1,7 @@
 import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
 import type { StructureDbList } from "@/app/api/structures/structure.db.type";
 import { isStructureInCpom } from "@/app/api/structures/structure.util";
+import { getNow } from "@/app/utils/date.util";
 import { startOfUtcDay } from "@/app/utils/date.util";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 import {
@@ -175,7 +176,7 @@ const computeActiveCpomStats = (
   cpomLinks: StatistiqueDbCpomStructure[],
   activeStructureIds: number[]
 ): { totalCpoms: number; structuresAvecCpom: number } => {
-  const now = new Date();
+  const now = getNow();
   const activeStructureIdSet = new Set(activeStructureIds);
   const activeCpomIds = new Set<number>();
   const structureIdsWithActiveCpom = new Set<number>();
@@ -371,7 +372,7 @@ export const computeStructuresStatistiques = (
     structureVersionTimeline,
   } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
-  const now = new Date();
+  const now = getNow();
   // Le bâti (vue globale et byYear) reflète l'adresse actuelle : `adresses` remonte
   // désormais tout l'historique des versions, on résout ici la version effective à date.
   const currentAdresses = filterByEffectiveVersionAtDate(

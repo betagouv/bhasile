@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+import { getNow } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
@@ -159,7 +160,7 @@ export const getCurrentCpomStructure = (
     if (!dateStart || !dateEnd) {
       return false;
     }
-    const now = new Date().toISOString();
+    const now = getNow().toISOString();
     return dateStart <= now && dateEnd >= now;
   });
 };

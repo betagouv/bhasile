@@ -10,6 +10,7 @@ import {
   getActesAdministratifsDefaultValues,
   resolveAvenantParentIds,
 } from "@/app/utils/acteAdministratif.util";
+import { getNow } from "@/app/utils/date.util";
 import { getTransformationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
@@ -42,7 +43,7 @@ export const TransformationActesAdministratifsForm = ({
 
   const effectiveDate =
     structureVersionTransformation.structureVersion?.effectiveDate;
-  const referenceDate = effectiveDate ? new Date(effectiveDate) : new Date();
+  const referenceDate = effectiveDate ? new Date(effectiveDate) : getNow();
 
   const categoryDisplayRules = resolveAvenantParentIds(
     getTransformationActesAdministratifsCategoryToDisplay(

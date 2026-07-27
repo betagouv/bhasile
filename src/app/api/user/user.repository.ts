@@ -1,3 +1,4 @@
+import { getNow } from "@/app/utils/date.util";
 import prisma from "@/lib/prisma";
 
 const UPDATE_INTERVAL_MINUTES = 60;
@@ -7,7 +8,7 @@ export const upsertUser = async ({
   email,
   emailPattern,
 }: UpsertUserArgs): Promise<void> => {
-  const now = new Date();
+  const now = getNow();
   const threshold = new Date(
     now.getTime() - UPDATE_INTERVAL_MINUTES * 60 * 1000
   );

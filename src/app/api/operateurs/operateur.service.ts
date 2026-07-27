@@ -1,3 +1,4 @@
+import { getNow } from "@/app/utils/date.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows, sortRows } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
@@ -30,7 +31,7 @@ export const getOperateurs = async ({
   page: number | null;
   search: string | null;
 }): Promise<{ operateurs: OperateurListItem[]; totalOperateurs: number }> => {
-  const now = new Date();
+  const now = getNow();
   const [structures, operateurs] = await Promise.all([
     findAllStructures(),
     findAllOperateurs(),
