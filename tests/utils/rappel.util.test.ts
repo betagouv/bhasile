@@ -88,11 +88,9 @@ describe("groupRappels", () => {
     expect(cpomNode.urgentCount).toBe(1);
     expect(cpomNode.importantCount).toBe(1);
 
-    if (!("children" in cpomNode)) {
-      throw new Error("le nœud CPOM doit avoir des enfants structure");
-    }
-    expect(cpomNode.children).toHaveLength(2);
-    const structureChild = cpomNode.children.find(
+    const structureChildren = "children" in cpomNode ? cpomNode.children : [];
+    expect(structureChildren).toHaveLength(2);
+    const structureChild = structureChildren.find(
       (child) => child.key === "structure-1"
     )!;
     expect("rappels" in structureChild).toBe(true);
@@ -192,10 +190,8 @@ describe("groupRappels", () => {
     ];
 
     const [node] = groupRappels(rappels, "STRUCTURE", "STRUCTURE");
-    if (!("rappels" in node)) {
-      throw new Error("nœud feuille attendu");
-    }
-    expect(node.rappels.map((rappel) => rappel.id)).toEqual([
+    const leafRappels = "rappels" in node ? node.rappels : [];
+    expect(leafRappels.map((rappel) => rappel.id)).toEqual([
       "urgent",
       "important",
     ]);
