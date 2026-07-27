@@ -1,4 +1,5 @@
 import { FiltersDepartement } from "@/app/components/filters/FiltersDepartement";
+import { buildZoneSummary } from "@/app/utils/zone.util";
 
 import { FilterDropdown } from "./FilterDropdown";
 import { FilterOperateur } from "./FilterOperateur";
@@ -11,6 +12,7 @@ export const HeaderFilters = () => {
         label="Zone"
         placeholder="Toute la France"
         filterId="departements"
+        getSummaryLabel={buildZoneSummary}
       >
         <FiltersDepartement />
       </FilterDropdown>

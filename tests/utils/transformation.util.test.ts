@@ -12,6 +12,7 @@ import {
   getTransformationOriginRoute,
   getTransformationSteps,
   isCreation,
+  isEffectiveDateValid,
   isTransformationSurStructureExistante,
   setStructureVersionTransformationFormStepStatus,
   Step,
@@ -1220,5 +1221,15 @@ describe("getStructureVersionTransformationDepartement", () => {
         structureVersionTransformation
       )
     ).toBeUndefined();
+  });
+});
+
+describe("isEffectiveDateValid", () => {
+  it("refuse le dernier jour précédant le seuil de versionnement", () => {
+    expect(isEffectiveDateValid("2025-12-31T12:00:00.000Z")).toBe(false);
+  });
+
+  it("accepte le premier jour du seuil de versionnement", () => {
+    expect(isEffectiveDateValid("2026-01-01T12:00:00.000Z")).toBe(true);
   });
 });

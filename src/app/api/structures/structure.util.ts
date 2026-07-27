@@ -25,10 +25,8 @@ import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
-  StructureCampaignApiRead,
 } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
-import { StepStatus } from "@/types/form.type";
 import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import {
@@ -38,10 +36,7 @@ import {
 } from "@/types/structure-history.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
 
-import {
-  ACTUALISATION_FORM_SLUG_PREFIX,
-  FINALISATION_FORM_SLUG,
-} from "../forms/form.constants";
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
   getValidVersions,
@@ -239,29 +234,6 @@ export const isFinalisationFormValidated = (
   forms?.some(
     (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG && form.status
   ) ?? false;
-
-export const buildStructureCampaigns = (
-  forms: {
-    status: boolean;
-    formDefinition: { slug: string };
-    formSteps: {
-      status: string;
-      stepDefinition: { slug: string };
-    }[];
-  }[]
-): StructureCampaignApiRead[] =>
-  forms
-    .filter((form) =>
-      form.formDefinition.slug.startsWith(ACTUALISATION_FORM_SLUG_PREFIX)
-    )
-    .map((form) => ({
-      slug: form.formDefinition.slug,
-      isValidated: form.status === true,
-      formSteps: form.formSteps.map((formStep) => ({
-        slug: formStep.stepDefinition.slug,
-        status: formStep.status as StepStatus,
-      })),
-    }));
 
 export const isBornFromCreation = (
   versions:

@@ -63,17 +63,10 @@ export async function authenticateWithProConnect(
   await page.waitForURL(
     (url) =>
       url.hostname === appHost &&
-      (url.pathname.includes("/structures") ||
-        url.pathname.startsWith("/api/auth/callback")),
+      !url.pathname.startsWith("/connexion") &&
+      !url.pathname.startsWith("/api/auth"),
     { timeout: 120_000 }
   );
-
-  if (page.url().includes("/api/auth/callback")) {
-    await page.waitForURL(
-      (url) => url.hostname === appHost && url.pathname.includes("/structures"),
-      { timeout: 120_000 }
-    );
-  }
 }
 
 async function clickPrimaryLoginSubmit(page: Page): Promise<void> {

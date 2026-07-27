@@ -6,10 +6,6 @@ import { HeaderFilters } from "@/app/components/header-filters/HeaderFilters";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 
-type Props = {
-  prenom?: string;
-};
-
 export const DashboardHeader = ({ prenom }: Props): ReactElement => {
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
@@ -31,4 +27,8 @@ export const DashboardHeader = ({ prenom }: Props): ReactElement => {
       </div>
     </div>
   );
+};
+
+type Props = {
+  prenom?: string;
 };

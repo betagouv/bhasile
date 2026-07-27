@@ -1,4 +1,5 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { EntityId } from "@/types/Entity.type";
@@ -9,7 +10,7 @@ import {
   FINALISATION_FORM_SLUG,
   STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS,
 } from "./form.constants";
-import { areAllFormStepsValidated, convertToStepStatus } from "./form.util";
+import { convertToStepStatus } from "./form.util";
 
 export const createOrUpdateForms = async (
   tx: PrismaTransaction,

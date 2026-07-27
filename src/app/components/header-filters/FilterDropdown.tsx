@@ -2,16 +2,22 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useSearchParams } from "next/navigation";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 
+import { parseCommaList } from "@/app/utils/string.util";
+
 export const FilterDropdown = ({
   label,
   placeholder = "Sélectionner une...",
   filterId,
+  getSummaryLabel,
   children,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
-  const appliedFilters = searchParams.get(filterId)?.split(",").filter(Boolean);
+  const appliedFilters = parseCommaList(searchParams.get(filterId));
+  const summaryLabel =
+    getSummaryLabel?.(appliedFilters) ??
+    `${appliedFilters.length} filtre(s) sélectionné(s)`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -41,7 +47,7 @@ export const FilterDropdown = ({
           </div>
           <div className="flex">
             <div className="truncate">
-              {Number(appliedFilters?.length) > 0 ? (
+              {appliedFilters.length > 0 ? (
                 <Tag
                   linkProps={{
                     href: "#",
@@ -49,7 +55,7 @@ export const FilterDropdown = ({
                   small
                   className="pointer-none"
                 >
-                  {appliedFilters?.length} filtre(s) sélectionné(s)
+                  {summaryLabel}
                 </Tag>
               ) : (
                 placeholder
@@ -73,4 +79,5 @@ type Props = PropsWithChildren<{
   label: string;
   placeholder?: string;
   filterId: string;
+  getSummaryLabel?: (appliedFilters: string[]) => string | undefined;
 }>;

@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 
+import { getTypePlacesYearRange } from "@/app/utils/date.util";
+
 import { expect } from "../fixtures/test";
 
 const STEP_SLUGS = [
@@ -23,10 +25,16 @@ export class ActualisationPage {
   }
 
   async expectBannerVisible(): Promise<void> {
+    // Juste après la navigation, un doublon transitoire du bandeau (hydratation
+    // SSR + useHideOnScroll) peut coexister brièvement : on cible la seule
+    // occurrence visible pour éviter une violation du strict mode.
     await expect(
-      this.page.getByText(
-        new RegExp(`campagne d.actualisation ${this.year} est ouverte`, "i")
-      )
+      this.page
+        .getByText(
+          new RegExp(`campagne d.actualisation ${this.year} est ouverte`, "i")
+        )
+        .filter({ visible: true })
+        .first()
     ).toBeVisible();
   }
 
@@ -48,7 +56,10 @@ export class ActualisationPage {
   }
 
   async setPmr(value: number): Promise<void> {
-    await this.page.getByLabel(/Nombre de places PMR/).fill(String(value));
+    const yearRowIndex = getTypePlacesYearRange().years.indexOf(this.year);
+    await this.page
+      .locator(`input[id="structureTypologies.${yearRowIndex}.pmr"]`)
+      .fill(String(value));
   }
 
   async validateAllSteps(): Promise<void> {
