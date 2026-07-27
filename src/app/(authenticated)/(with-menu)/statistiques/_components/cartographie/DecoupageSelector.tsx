@@ -1,22 +1,24 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 
 const options = [
   { label: "Régions", value: "reg" },
   { label: "Départements", value: "dep" },
 ];
 
-export const DecoupageSelector = (): ReactElement => {
-  const [decoupage, setDecoupage] = useState("2026");
-
+export const DecoupageSelector = ({
+  decoupage,
+  setDecoupage,
+}: Props): ReactElement => {
   return (
     <Select
       label="Découpage"
+      className="mb-0"
       nativeSelectProps={{
         name: "decoupage",
         id: "decoupage",
         value: decoupage,
-        onChange: (event) => setDecoupage(event.target.value),
+        onChange: (event) => setDecoupage(event.target.value as "dep" | "reg"),
       }}
     >
       {options.map((option) => (
@@ -26,4 +28,9 @@ export const DecoupageSelector = (): ReactElement => {
       ))}
     </Select>
   );
+};
+
+type Props = {
+  decoupage: "dep" | "reg";
+  setDecoupage: (decoupage: "dep" | "reg") => void;
 };

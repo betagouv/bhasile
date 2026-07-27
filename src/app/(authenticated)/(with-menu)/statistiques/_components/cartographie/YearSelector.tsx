@@ -13,6 +13,7 @@ export const YearSelector = (): ReactElement => {
   return (
     <Select
       label="Année"
+      className="mb-0"
       nativeSelectProps={{
         name: "annee",
         id: "annee",

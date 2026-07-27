@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 export const ZoneIndicator = ({ x, y, value }: Props): ReactElement => {
   return (
     <div
-      className="absolute bg-white rounded-3xl gap-1 flex items-center py-1 px-2.5 text-xs font-bold -translate-1/2 pointer-events-none border-[#e0e0e0]"
+      className="absolute bg-white rounded-3xl gap-1 flex items-center justify-center p-1 text-xs -translate-1/2 pointer-events-none"
       style={{
         left: `${x}px`,
         top: `${y}px`,
@@ -11,7 +11,7 @@ export const ZoneIndicator = ({ x, y, value }: Props): ReactElement => {
     >
       {value}
       {/* TODO: Changer la direction de la flèche en fonction de la progression */}
-      <span className="fr-icon-arrow-up-line text-title-blue-france" />
+      <span className="fr-icon-arrow-up-line text-title-blue-france before:w-2 before:h-2 flex" />
     </div>
   );
 };

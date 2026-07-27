@@ -90,7 +90,7 @@ export const CartographieMenu = (): ReactElement => {
   const [activeItem, setActiveItem] = useState("nbStructures");
 
   return (
-    <aside className="bg-white w-120 border-r border-default-grey sticky overflow-y-auto top-16 max-h-[calc(100vh-64px)]">
+    <aside className="bg-white w-120 border-r border-default-grey sticky overflow-y-auto max-h-[calc(100vh-70px)]">
       {sections.map((section, index) => (
         <div key={section.title} className="px-5 pt-5">
           <h2 className="text-lg font-bold text-title-blue-france flex items-center">

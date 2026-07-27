@@ -1,6 +1,6 @@
 "use client";
 
-// import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
+import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
@@ -12,7 +12,7 @@ import { useStatistiquesContext } from "../_context/StatistiquesClientContext";
 
 export const StatistiquesHeader = ({
   visualization,
-  // setVisualization,
+  setVisualization,
 }: Props): ReactElement | null => {
   const { statistiques } = useStatistiquesContext();
 
@@ -32,8 +32,7 @@ export const StatistiquesHeader = ({
             <h2 className="text-title-blue-france fr-h5 mb-0 pr-4">
               Statistiques
             </h2>
-            {/* TODO : à remettre quand la carto sera finalisée */}
-            {/* <SegmentedControl
+            <SegmentedControl
               small
               legend=""
               inlineLegend
@@ -58,7 +57,7 @@ export const StatistiquesHeader = ({
                   },
                 },
               ]}
-            /> */}
+            />
           </div>
           <HeaderFilters />
         </div>
