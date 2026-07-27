@@ -4,7 +4,6 @@ import {
 } from "@/app/api/actes-administratifs/acte-administratif.util";
 import { getDatesConvention as getCpomDatesConvention } from "@/app/api/cpoms/cpom.util";
 import { getCoordinates } from "@/app/utils/adresse.util";
-import { getNow } from "@/app/utils/date.util";
 import {
   getYearFromDate,
   getYearRange,
@@ -12,6 +11,7 @@ import {
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
+import { getNow } from "@/app/utils/now.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
 import { CURRENT_YEAR } from "@/constants";
 import {

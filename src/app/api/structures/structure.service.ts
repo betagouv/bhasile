@@ -1,6 +1,7 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import { getNow, recursivelySerializeDates } from "@/app/utils/date.util";
+import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows } from "@/app/utils/list.util";
+import { getNow } from "@/app/utils/now.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,

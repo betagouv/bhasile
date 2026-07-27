@@ -1,8 +1,8 @@
 import {
   getEffectiveEndDate,
-  getNow,
   isCurrentlyInEffect,
 } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export type ActeDateTuple = [Date | null, Date | null];

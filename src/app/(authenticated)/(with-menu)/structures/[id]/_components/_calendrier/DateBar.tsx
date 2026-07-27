@@ -4,11 +4,8 @@ import dayjs from "dayjs";
 import { ReactElement, useEffect, useState } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
-import {
-  formatDate,
-  getElapsedPercentage,
-  getNow,
-} from "@/app/utils/date.util";
+import { formatDate, getElapsedPercentage } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 
 export const DateBar = ({ datePair }: Props): ReactElement => {
   const [percentage, setPercentage] = useState<number | null>(null);

@@ -1,4 +1,4 @@
-import { getNow } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 import prisma from "@/lib/prisma";
 
 const UPDATE_INTERVAL_MINUTES = 60;

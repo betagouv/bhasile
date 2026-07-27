@@ -1,5 +1,6 @@
-import { endOfYearUtc, getNow } from "@/app/utils/date.util";
+import { endOfYearUtc } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
+import { getNow } from "@/app/utils/now.util";
 import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
   PlacesByYearStat,

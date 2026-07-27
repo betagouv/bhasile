@@ -1,8 +1,8 @@
 import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
 import type { StructureDbList } from "@/app/api/structures/structure.db.type";
 import { isStructureInCpom } from "@/app/api/structures/structure.util";
-import { getNow } from "@/app/utils/date.util";
 import { startOfUtcDay } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 import {
   BatiStat,

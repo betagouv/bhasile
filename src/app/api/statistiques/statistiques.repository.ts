@@ -1,6 +1,6 @@
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
-import { getNow } from "@/app/utils/date.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 

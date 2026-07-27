@@ -4,12 +4,9 @@ import dayjs from "dayjs";
 
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
 
-dayjs.locale("fr");
+import { getNow } from "./now.util";
 
-export function getNow(): Date {
-  const emulated = process.env.NEXT_PUBLIC_EMULATED_NOW;
-  return emulated ? new Date(emulated) : new Date();
-}
+dayjs.locale("fr");
 
 export const formatDate = (
   date: Date | string | number | undefined,

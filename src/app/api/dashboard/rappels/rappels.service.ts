@@ -1,6 +1,6 @@
 import { findAllCpoms } from "@/app/api/cpoms/cpom.repository";
-import { getNow } from "@/app/utils/date.util";
 import { paginateRows } from "@/app/utils/list.util";
+import { getNow } from "@/app/utils/now.util";
 import { groupRappels } from "@/app/utils/rappel.util";
 import { parseCommaList } from "@/app/utils/string.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";

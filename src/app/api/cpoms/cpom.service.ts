@@ -1,6 +1,6 @@
-import { getNow } from "@/app/utils/date.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows, sortRows } from "@/app/utils/list.util";
+import { getNow } from "@/app/utils/now.util";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 

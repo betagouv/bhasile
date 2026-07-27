@@ -1,10 +1,10 @@
 import {
   endOfYearUtc,
-  getNow,
   startOfNextUtcDay,
   startOfUtcDay,
 } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
+import { getNow } from "@/app/utils/now.util";
 import {
   EXCLUDED_STRUCTURE_TYPES,
   PLACES_VERSIONED_FROM_YEAR,

@@ -1,4 +1,4 @@
-import { getNow } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 import { Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getNow } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 
 import { getBoundsPlacesAutorisees } from "../structure.service";
 

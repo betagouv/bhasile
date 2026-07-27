@@ -10,7 +10,7 @@ import {
   getActesAdministratifsDefaultValues,
   resolveAvenantParentIds,
 } from "@/app/utils/acteAdministratif.util";
-import { getNow } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 import { getTransformationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
