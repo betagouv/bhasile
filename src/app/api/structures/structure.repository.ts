@@ -92,6 +92,15 @@ export const findStructureDepartement = async (
   };
 };
 
+export const findValidatedActualisationForm = (
+  structureId: number,
+  slug: string
+): Promise<{ id: number } | null> =>
+  prisma.form.findFirst({
+    where: { structureId, status: true, formDefinition: { slug } },
+    select: { id: true },
+  });
+
 export const findOne = async (id: number) => {
   const structure = await prisma.structure.findFirstOrThrow({
     where: {

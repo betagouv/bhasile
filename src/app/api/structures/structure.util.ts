@@ -18,14 +18,15 @@ import {
   StructureType,
   StructureVersionTransformationType,
 } from "@/generated/prisma/client";
+import { canUpdateStructure } from "@/lib/casl/abilities";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import {
   StructureAgentUpdateApiType,
-  StructureCampaignApiRead,
+  StructureApiRead,
 } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
-import { StepStatus } from "@/types/form.type";
+import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import {
   CpomRef,
@@ -34,10 +35,7 @@ import {
 } from "@/types/structure-history.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
 
-import {
-  ACTUALISATION_FORM_SLUG_PREFIX,
-  FINALISATION_FORM_SLUG,
-} from "../forms/form.constants";
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
   getValidVersions,
@@ -56,6 +54,30 @@ const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
   famille: PublicType.FAMILLE,
   "personnes isolées": PublicType.PERSONNES_ISOLEES,
+};
+
+export const getReadableNotes = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["notes"] =>
+  user && canUpdateStructure(user, structure) ? structure.notes : null;
+
+export const getReadableAdresses = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["adresses"] => {
+  if (user && canUpdateStructure(user, structure)) {
+    return structure.adresses;
+  }
+
+  return structure.adresses?.map((adresse) => ({
+    ...adresse,
+    adresse: "",
+    adresseComplete: [adresse.codePostal, adresse.commune]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+  }));
 };
 
 export const convertToPublicType = (
@@ -212,29 +234,6 @@ export const isFinalisationFormValidated = (
     (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG && form.status
   ) ?? false;
 
-export const buildStructureCampaigns = (
-  forms: {
-    status: boolean;
-    formDefinition: { slug: string };
-    formSteps: {
-      status: string;
-      stepDefinition: { slug: string };
-    }[];
-  }[]
-): StructureCampaignApiRead[] =>
-  forms
-    .filter((form) =>
-      form.formDefinition.slug.startsWith(ACTUALISATION_FORM_SLUG_PREFIX)
-    )
-    .map((form) => ({
-      slug: form.formDefinition.slug,
-      isValidated: form.status === true,
-      formSteps: form.formSteps.map((formStep) => ({
-        slug: formStep.stepDefinition.slug,
-        status: formStep.status as StepStatus,
-      })),
-    }));
-
 export const isBornFromCreation = (
   versions:
     | {
@@ -329,8 +328,12 @@ export const computeStructureListRow = (
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
     placesAutorisees: currentVersion.placesAutorisees ?? null,
-    // TODO: redondant avec placesAutorisees depuis le scalaire de version — collapser en cleaning
-    latestNonNullPlacesAutorisees: currentVersion.placesAutorisees ?? null,
+    latestNonNullPlacesAutorisees:
+      currentVersion.placesAutorisees ??
+      structure.structureTypologies.find(
+        (typologie) => typologie.placesAutorisees != null
+      )?.placesAutorisees ??
+      null,
     finConvention: getDatesConvention(structure)[1],
     latitude: currentVersion.latitude,
     longitude: currentVersion.longitude,

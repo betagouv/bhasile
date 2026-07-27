@@ -7,6 +7,7 @@ import { ActiviteApiType } from "@/schemas/api/activite.schema";
 import { ActiviteByMonthStat } from "@/schemas/api/statistique.schema";
 
 import { typesActivite } from "../../(authenticated)/(with-menu)/structures/[id]/_components/_activite/activite.constants";
+import { NumberDisplay } from "../common/NumberDisplay";
 
 export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
   const getActiviteFor = (
@@ -128,7 +129,9 @@ export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
               className="min-w-[132px] whitespace-nowrap"
             >
               <span className="inline-flex items-center gap-6">
-                <span>{activite?.toString()}</span>
+                <span>
+                  <NumberDisplay value={activite} />
+                </span>
                 {activiteType.seuil && (
                   <Badge
                     type={getBadgeType(

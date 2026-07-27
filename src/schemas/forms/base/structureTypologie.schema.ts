@@ -47,8 +47,6 @@ export const structureTypologiesAutoSaveSchema = z.object({
   ),
 });
 
-// Transfo : une seule année (celle de la transfo, ≥ seuil), la capacité est un
-// input éditable et requis (la nouvelle capacité déclarée), pas une dérivée.
 export const transformationTypologieSchema = structureTypologieSchema.extend({
   placesAutorisees: zSafePositiveInteger(),
 });

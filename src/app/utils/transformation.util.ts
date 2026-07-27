@@ -25,6 +25,7 @@ import {
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getYearFromDate } from "./date.util";
+import { areAllFormStepsValidated } from "./formStep.util";
 import {
   getMillesimeIndexForAYear,
   getMostRecentMillesime,
@@ -501,9 +502,7 @@ export const setStructureVersionTransformationFormStepStatus = (
       : formStep
   );
 
-  const allFormStepsValidated = formSteps.every(
-    (formStep) => formStep.status === StepStatus.VALIDE
-  );
+  const allFormStepsValidated = areAllFormStepsValidated(formSteps);
 
   return {
     ...form,

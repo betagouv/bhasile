@@ -49,10 +49,8 @@ export const FieldSetTypePlaces = ({
     }
   }, [formState]);
 
-  const { years } = getTypePlacesYearRange();
-
   const startYear = getRealCreationYear(structure);
-  const yearsToDisplay = [...years]
+  const years = [...getTypePlacesYearRange().years]
     .sort((firstYear, secondYear) => firstYear - secondYear)
     .filter((year) => year >= startYear);
 
@@ -78,18 +76,18 @@ export const FieldSetTypePlaces = ({
       />
       <Table
         ariaLabelledBy=""
-        headings={getTypePlaceEditHeadings(yearsToDisplay)}
+        headings={getTypePlaceEditHeadings(years)}
         enableBorders
         stickFirstColumn
         hasErrors={hasErrors}
         className="text-center"
       >
         <PlacesAutoriseesLine
-          years={yearsToDisplay}
+          years={years}
           isCapacityLocked={structure.isCurrentVersionFromTransformation}
         />
         {TYPE_PLACE_LINES.map((line) => (
-          <TypePlaceLine key={line.name} line={line} years={yearsToDisplay} />
+          <TypePlaceLine key={line.name} line={line} years={years} />
         ))}
       </Table>
       {hasErrors && (

@@ -187,7 +187,7 @@ describe("FieldSetTypePlaces", () => {
       expect(inputs[2].lgbt).toHaveValue("3");
     });
 
-    it("reflète l'année legacy sur la cellule ≥ seuil hors transfo", async () => {
+    it("reflète l'année legacy sur la cellule supérieure ou égale au seuil hors transfo", async () => {
       const user = userEvent.setup();
       const { container } = renderFieldSet({
         structureTypologies: [

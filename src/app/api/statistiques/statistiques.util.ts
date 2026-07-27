@@ -1,4 +1,8 @@
-import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
+import {
+  endOfYearUtc,
+  startOfNextUtcDay,
+  startOfUtcDay,
+} from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import {
   EXCLUDED_STRUCTURE_TYPES,
@@ -153,9 +157,6 @@ export const trimesterKeyToDate = (trimesterKey: string): Date =>
 export const yearKeyToDate = (yearKey: string): Date =>
   new Date(Date.UTC(Number(yearKey), 0, 1));
 
-export const endOfYearUtc = (year: number): Date =>
-  new Date(Date.UTC(year, 11, 31));
-
 const getMonthPeriodBounds = (monthKey: string): { start: Date; end: Date } => {
   const [year, month] = monthKey.split("-").map(Number);
   return {
@@ -255,7 +256,7 @@ export const applyVersionedPlacesToTypologies = (
     ) {
       return typologie;
     }
-    const asOfDate = new Date(Date.UTC(typologie.year, 11, 31));
+    const asOfDate = endOfYearUtc(typologie.year);
     const cappedDate = asOfDate < now ? asOfDate : now;
     const effectiveVersion = getEffectiveStructureVersionAtDate(
       typologie.structureId,

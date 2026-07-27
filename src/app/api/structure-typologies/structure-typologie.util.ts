@@ -1,3 +1,4 @@
+import { endOfYearUtc } from "@/app/utils/date.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 
 import {
@@ -20,8 +21,9 @@ export const resolvePlacesAutoriseesForYear = (
   if (year < versionedFromYear) {
     return legacyPlacesAutorisees ?? undefined;
   }
-  const yearEndUtcMs = Date.UTC(year, 11, 31);
-  const referenceDate = new Date(Math.min(yearEndUtcMs, now.getTime()));
+  const referenceDate = new Date(
+    Math.min(endOfYearUtc(year).getTime(), now.getTime())
+  );
   return (
     resolveCurrentVersion(versions, referenceDate)?.placesAutorisees ??
     undefined

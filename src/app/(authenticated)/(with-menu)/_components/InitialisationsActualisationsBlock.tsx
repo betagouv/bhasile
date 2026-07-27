@@ -6,8 +6,9 @@ import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
-import { ActualisationsPagination } from "./ActualisationsPagination";
+import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
+import { DashboardPagination } from "./DashboardPagination";
 import { InitialisationActualisationRow } from "./InitialisationActualisationRow";
 
 export const InitialisationsActualisationsBlock = async ({
@@ -20,16 +21,14 @@ export const InitialisationsActualisationsBlock = async ({
   const rows = data.rows;
 
   return (
-    <section className="m-6 rounded-lg border border-default-grey bg-white">
-      <div className="flex items-center gap-2 p-4">
-        <BlockTitle
-          title="Initialisation et actualisations de structures"
-          total={data.total}
-          iconClassName="fr-icon-refresh-line"
-        />
-      </div>
+    <Block>
+      <BlockTitle
+        title="Initialisation et actualisations de structures"
+        total={data.total}
+        iconClassName="fr-icon-refresh-line"
+      />
 
-      <div className="grid grid-cols-[repeat(4,max-content)_minmax(0,1fr)_max-content_max-content_auto] gap-x-4 px-4">
+      <div className="grid grid-cols-[repeat(4,max-content)_minmax(0,1fr)_max-content_max-content_auto] gap-x-4">
         <div className="col-span-full grid grid-cols-subgrid pb-2 text-xs font-bold text-mention-grey">
           <div className="col-start-6 text-center">
             <span className="uppercase">Initialisation</span>
@@ -57,11 +56,14 @@ export const InitialisationsActualisationsBlock = async ({
       )}
 
       {data.total > MIDDLE_PAGE_SIZE && (
-        <div className="flex justify-center border-t border-default-grey p-4">
-          <ActualisationsPagination total={data.total} />
+        <div className="flex justify-center mt-4">
+          <DashboardPagination
+            total={data.total}
+            pageParam="actualisationsPage"
+          />
         </div>
       )}
-    </section>
+    </Block>
   );
 };
 

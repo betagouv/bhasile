@@ -12,7 +12,7 @@ import type {
   StatistiqueDbEig,
   StatistiqueDbStructureVersionTimeline,
 } from "../statistiques.db.type";
-import { lookupStructureIdsForDnaAtDate } from "../statistiques.utils";
+import { lookupStructureIdsForDnaAtDate } from "../statistiques.util";
 
 const sumEigCounts = (eigs: StatistiqueDbEig[]): EigCountTotalsStat => {
   let nbEigComportementViolent = 0;
