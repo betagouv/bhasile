@@ -23,6 +23,7 @@ export type StructureCandidate = {
   codeBhasile: string;
   type: DbStructureType | null;
   fermetureDate: Date | null;
+  operateurId: number | null;
 };
 
 export const hasExpectedType = (
@@ -44,6 +45,7 @@ export const describeClosure = (
 export type ResolvedHuda = {
   structureId: number;
   codeBhasile: string;
+  operateurId: number | null;
   via: "code-bhasile" | "codes-dna"; // Comment le rattachement a été obtenu
 };
 
@@ -59,6 +61,7 @@ const structureSelect = {
   codeBhasile: true,
   type: true,
   fermetureDate: true,
+  operateurId: true,
 } as const;
 
 const checkHuda = (structure: StructureCandidate): string | null => {
@@ -95,6 +98,7 @@ export const resolveHuda = async (
             huda: {
               structureId: structure.id,
               codeBhasile: structure.codeBhasile,
+              operateurId: structure.operateurId,
               via: "code-bhasile",
             },
           };
@@ -149,6 +153,7 @@ export const resolveHuda = async (
     huda: {
       structureId: structure.id,
       codeBhasile: structure.codeBhasile,
+      operateurId: structure.operateurId,
       via: "codes-dna",
     },
   };

@@ -26,6 +26,7 @@ import {
   describeType,
   findExistingHudaCadaTransformation,
   hasExpectedType,
+  ResolvedHuda,
   resolveHuda,
 } from "../utils/transfo-huda-cada.resolve";
 import {
@@ -50,6 +51,14 @@ const HUDA_DNA_LABEL = "Code(s) DNA de l'HUDA";
 const CADA_BHASILE_LABEL = "Code Bhasile du CADA";
 const DATE_PREVISIONNELLE_LABEL = "Date prévisionnelle de la transformation";
 const DATE_EFFECTIVE_LABEL = "Date effective de la transformation";
+
+/* La section « nouveau CADA » ne comporte pas de capacité propre bien remplie :
+ * on retombe sur le nombre de places transformées, renseigné dans la majorité
+ * des dossiers. */
+const CADA_NOUVEAU_CAPACITE_LABELS = [
+  "Nombre de places de l'établissement transformé",
+  "Capacité du nouveau CADA créé dans le cadre de la transformation",
+];
 
 type HudaCadaDossierNode = DNDossierNode & { champs: DNColumn[] };
 
@@ -80,10 +89,29 @@ const resolveEffectiveDate = (dossier: HudaCadaDossierNode): Date | null =>
   parseFrenchDate(champValue(dossier, DATE_EFFECTIVE_LABEL)) ??
   parseFrenchDate(champValue(dossier, DATE_PREVISIONNELLE_LABEL));
 
+const parsePositiveInt = (raw: string): number | null => {
+  const value = Number.parseInt(raw.trim(), 10);
+  return Number.isFinite(value) && value > 0 ? value : null;
+};
+
+/* Le premier libellé renseigné l'emporte. */
+const resolveNewCadaCapacite = (
+  dossier: HudaCadaDossierNode
+): number | null => {
+  for (const label of CADA_NOUVEAU_CAPACITE_LABELS) {
+    const capacite = parsePositiveInt(champValue(dossier, label));
+    if (capacite !== null) {
+      return capacite;
+    }
+  }
+  return null;
+};
+
 const buildCadaBrique = async (
   dossier: HudaCadaDossierNode,
   type: TransformationType,
-  effectiveDate: Date
+  effectiveDate: Date,
+  huda: ResolvedHuda
 ): Promise<
   | { ok: true; brique: StructureVersionTransformationApiCreate }
   | { ok: false; reason: string }
@@ -93,12 +121,19 @@ const buildCadaBrique = async (
   if (
     type === TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
   ) {
+    const capacite = resolveNewCadaCapacite(dossier);
+    /* « Même opérateur » : le nouveau CADA reprend l'opérateur de l'HUDA fermé,
+     * plus fiable qu'un rapprochement sur le SIRET du dossier. */
     return {
       ok: true,
       brique: {
         type: StructureVersionTransformationType.CREATION,
+        operateurId: huda.operateurId ?? undefined,
         structureType: StructureType.CADA,
-        structureVersion: { effectiveDate: effectiveDateIso },
+        structureVersion: {
+          effectiveDate: effectiveDateIso,
+          placesAutorisees: capacite ?? undefined,
+        },
       },
     };
   }
@@ -115,7 +150,13 @@ const buildCadaBrique = async (
 
   const cada = await prisma.structure.findUnique({
     where: { codeBhasile },
-    select: { id: true, codeBhasile: true, type: true, fermetureDate: true },
+    select: {
+      id: true,
+      codeBhasile: true,
+      type: true,
+      fermetureDate: true,
+      operateurId: true,
+    },
   });
   if (!cada) {
     return { ok: false, reason: `CADA cible : ${codeBhasile} inconnu en base` };
@@ -143,18 +184,20 @@ const buildCadaBrique = async (
   };
 };
 
-/* Seule cette étape est alimentée par le script (structure et date d'effet).
- * TODO: intégrer reste des champs
- */
-const IDENTIFICATION_STEP_SLUG = "01-identification";
+/* Étapes alimentées par le script :
+ * - identification (toutes briques) : structure, date d'effet, opérateur ;
+ * - places-hébergement : capacité (recopiée depuis Bhasile pour l'extension,
+ *   issue du dossier DN pour la création). La brique fermeture n'a pas cette
+ *   étape, l'updateMany ne la touche donc pas. */
+const PREFILLED_STEP_SLUGS = ["01-identification", "02-places-hebergement"];
 
-const markIdentificationPrefilled = async (
+const markStepsPrefilled = async (
   transformationId: number
 ): Promise<number> => {
   const { count } = await prisma.formStep.updateMany({
     where: {
       status: StepStatus.NON_COMMENCE,
-      stepDefinition: { slug: IDENTIFICATION_STEP_SLUG },
+      stepDefinition: { slug: { in: PREFILLED_STEP_SLUGS } },
       form: { structureVersionTransformation: { transformationId } },
     },
     data: { status: StepStatus.PRE_REMPLI },
@@ -181,7 +224,7 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
   });
   if (existing) {
     /* Le marquage est hors de la transaction de création : on le rejoue tant qu'il n'a pas pris. */
-    await markIdentificationPrefilled(existing.id);
+    await markStepsPrefilled(existing.id);
     return;
   }
 
@@ -231,7 +274,7 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     return;
   }
 
-  const cadaBrique = await buildCadaBrique(dossier, type, effectiveDate);
+  const cadaBrique = await buildCadaBrique(dossier, type, effectiveDate, huda);
   if (!cadaBrique.ok) {
     skip(cadaBrique.reason);
     return;
@@ -253,7 +296,7 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     },
     String(dossier.number)
   );
-  const steps = await markIdentificationPrefilled(id);
+  const steps = await markStepsPrefilled(id);
   imported.push(
     `#${dossier.number} -> transfo #${id} (${huda.codeBhasile}, ${steps} étape(s) pré-remplie(s))`
   );
