@@ -376,7 +376,7 @@ const getEffectiveYear = (effectiveDate: string | null | undefined): number =>
   getYearFromDate(effectiveDate) || CURRENT_YEAR;
 
 export const isEffectiveDateValid = (isoDate: string): boolean =>
-  new Date(isoDate).getUTCFullYear() >= PLACES_VERSIONED_FROM_YEAR;
+  getYearFromDate(isoDate) >= PLACES_VERSIONED_FROM_YEAR;
 
 const resolveSourceTypologie = <T extends { year: number }>(
   typologies: T[] | undefined,

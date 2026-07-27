@@ -142,8 +142,10 @@ describe("ExistingStructureIdentificationForm (intégration jusqu'au fetch)", ()
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN nothing reaches the API (le cas 2026 juste au-dessus atteint le PUT
-    // dans les mêmes conditions de timing : seule la date change)
+    // THEN the resolver rejects the step and nothing reaches the API
+    expect(
+      await screen.findByText(/Certains champs sont manquants ou invalides/)
+    ).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalledWith(
       `/api/transformations/${TRANSFORMATION_ID}`,
       expect.objectContaining({ method: "PUT" })

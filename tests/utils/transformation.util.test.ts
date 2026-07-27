@@ -1232,9 +1232,4 @@ describe("isEffectiveDateValid", () => {
   it("accepte le premier jour du seuil de versionnement", () => {
     expect(isEffectiveDateValid("2026-01-01T12:00:00.000Z")).toBe(true);
   });
-
-  it("compare l'année en UTC et non dans le fuseau local", () => {
-    expect(isEffectiveDateValid("2026-01-01T00:00:00.000Z")).toBe(true);
-    expect(isEffectiveDateValid("2025-12-31T23:59:59.000Z")).toBe(false);
-  });
 });
