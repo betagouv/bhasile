@@ -1,3 +1,4 @@
+import { endOfYearUtc } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
@@ -17,7 +18,6 @@ import type {
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
-  endOfYearUtc,
   filterByEffectiveVersionAtDate,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,

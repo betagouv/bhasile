@@ -189,7 +189,17 @@ export const findStructureVersionTimeline = async (
   }
 
   return prisma.structureVersion.findMany({
-    where: { structureId: { in: structureIds } },
+    where: {
+      structureId: { in: structureIds },
+      OR: [
+        { structureVersionTransformationId: null },
+        {
+          structureVersionTransformation: {
+            transformation: { form: { status: true } },
+          },
+        },
+      ],
+    },
     select: {
       id: true,
       structureId: true,
