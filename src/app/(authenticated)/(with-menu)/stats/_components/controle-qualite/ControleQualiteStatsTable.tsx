@@ -2,7 +2,12 @@
 
 import { Fragment, ReactElement, useState } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
+import {
+  TimePeriod,
+  TimePeriodSelector,
+} from "@/app/components/common/TimePeriodSelector";
 import { formatNumber } from "@/app/utils/number.util";
 import {
   ControleQualitePeriodStat,
@@ -10,7 +15,6 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
-import { TimePeriod, TimePeriodSelector } from "./TimePeriodSelector";
 
 const sectionsConfig: ControleQualiteSectionConfig[] = [
   {
@@ -23,12 +27,14 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
           <span>
             {Number(value)}{" "}
             <span className="text-disabled-grey pl-2">
-              {formatNumber(
-                Number(periodItem.partStructuresSansDeclarationEig),
-                {
-                  maximumFractionDigits: 2,
-                }
-              )}
+              <NumberDisplay
+                value={formatNumber(
+                  Number(periodItem.partStructuresSansDeclarationEig),
+                  {
+                    maximumFractionDigits: 2,
+                  }
+                )}
+              />
               &nbsp;%
             </span>
           </span>
@@ -37,10 +43,12 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Tous les EIG",
         key: "nbEig",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "EIG “comportement violent“",
         key: "nbEigComportementViolent",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Taux d'EIG “comportement violent“",
@@ -58,22 +66,27 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Structures évaluées",
         key: "nbStructuresEvaluees",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Moyenne totale",
         key: "noteGenerale",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Moyenne “La personne“",
         key: "notePersonne",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Moyenne “Les professionnels“",
         key: "notePro",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
         label: "Moyenne “La structure",
         key: "noteStructure",
+        format: (value) => <NumberDisplay value={Number(value)} />,
       },
     ],
   },
@@ -171,7 +184,7 @@ export const ControleQualiteStatsTable = (): ReactElement => {
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
                 colSpan={totalColumns}
               >
-                <span className="sticky left-4 inline-block">
+                <span className="sticky left-4 inline-block h-8 leading-8">
                   {section.title}
                 </span>
               </td>

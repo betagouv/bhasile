@@ -16,7 +16,7 @@ export const StructuresStatsTable = (): ReactElement => {
       ),
     },
     {
-      label: "CPOMs complets ou partiels",
+      label: "CPOM complets ou partiels",
       value: statistiques.structures.byYear.map(
         (yearItem) => yearItem.totalCpoms
       ),
@@ -116,7 +116,7 @@ export const StructuresStatsTable = (): ReactElement => {
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
                 colSpan={statistiques.structures.byYear.length + 1}
               >
-                <span className="sticky left-4 inline-block">
+                <span className="sticky left-4 inline-block h-8 leading-8">
                   {section.title}
                 </span>
               </td>

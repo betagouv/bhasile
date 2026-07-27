@@ -1,10 +1,13 @@
 import { ReactElement, useMemo, useState } from "react";
 
-import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
+import { DoubleYAxisBarLineChart } from "@/app/components/common/DoubleYAxisBarLineChart";
+import {
+  TimePeriod,
+  TimePeriodSelector,
+} from "@/app/components/common/TimePeriodSelector";
 import { getYearRange } from "@/app/utils/date.util";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
-import { TimePeriod, TimePeriodSelector } from "./TimePeriodSelector";
 
 const MAX_DISPLAYED_TIME_PERIODS = 10;
 
@@ -35,10 +38,12 @@ export const EvaluationChart = (): ReactElement => {
       const date = new Date(item.date);
 
       if (timePeriod === "byMonth") {
-        return date.toLocaleDateString("fr-FR", {
-          month: "short",
-          year: "numeric",
-        });
+        return date
+          .toLocaleDateString("fr-FR", {
+            month: "short",
+            year: "numeric",
+          })
+          .toLocaleUpperCase();
       }
 
       if (timePeriod === "byTrimester") {
@@ -79,7 +84,12 @@ export const EvaluationChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarLineChart data={chartData} colors={colors} />
+          <DoubleYAxisBarLineChart
+            data={chartData}
+            colors={colors}
+            leftAxisLabel="note"
+            rightAxisLabel="structures"
+          />
         </div>
         <div>
           <TimePeriodSelector

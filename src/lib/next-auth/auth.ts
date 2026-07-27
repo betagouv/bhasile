@@ -61,6 +61,7 @@ export const authOptions: NextAuthOptions = {
             ...session.user,
             role: role.name,
             allowedDepartements: role.allowedDepartements,
+            prenom: token.prenom,
           },
           id_token: token.id_token,
           provider: token.provider,

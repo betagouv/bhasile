@@ -9,7 +9,7 @@ export const HeaderFilters = () => {
     <div className="flex">
       <FilterDropdown
         label="Zone"
-        placeholder="Sélectionnez une zone"
+        placeholder="Toute la France"
         filterId="departements"
       >
         <FiltersDepartement />
@@ -17,7 +17,7 @@ export const HeaderFilters = () => {
 
       <FilterDropdown
         label="Opérateurs"
-        placeholder="Sélectionnez un opérateur"
+        placeholder="Tous les opérateurs"
         filterId="operateurs"
       >
         <FilterOperateur />
@@ -25,7 +25,7 @@ export const HeaderFilters = () => {
 
       <FilterDropdown
         label="Types Structure"
-        placeholder="Sélectionnez un type de structure"
+        placeholder="Tous les types de structure"
         filterId="type"
       >
         <FilterTypeStructure />

@@ -28,8 +28,10 @@ import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
+  StructureCampaignApiRead,
 } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
+import { StepStatus } from "@/types/form.type";
 import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import {
@@ -239,6 +241,38 @@ export const isFinalisationFormValidated = (
   forms?.some(
     (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG && form.status
   ) ?? false;
+
+export const buildStructureCampaigns = (
+  versions: {
+    campaign?: {
+      form: {
+        status: boolean;
+        formSteps: {
+          status: string;
+          stepDefinition: { slug: string };
+        }[];
+      } | null;
+      campaignDefinition: { slug: string } | null;
+    } | null;
+  }[]
+): StructureCampaignApiRead[] =>
+  versions.flatMap((version) => {
+    const campaign = version.campaign;
+    if (!campaign || !campaign.campaignDefinition) {
+      return [];
+    }
+    return [
+      {
+        slug: campaign.campaignDefinition.slug,
+        isValidated: campaign.form?.status === true,
+        formSteps:
+          campaign.form?.formSteps.map((formStep) => ({
+            slug: formStep.stepDefinition.slug,
+            status: formStep.status as StepStatus,
+          })) ?? [],
+      },
+    ];
+  });
 
 export const isBornFromCreation = (
   versions:

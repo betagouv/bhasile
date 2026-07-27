@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { FiltersTypesCheckbox } from "@/app/components/filters/FiltersTypesCheckbox";
+import { deletePaginationParams } from "@/app/utils/searchParams.util";
 import { StructureType } from "@/types/structure.type";
 
 const ALL_STRUCTURE_TYPES: StructureType[] = [
@@ -32,6 +33,7 @@ export const FilterTypeStructure = () => {
       params.delete("type");
     }
 
+    deletePaginationParams(params);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 

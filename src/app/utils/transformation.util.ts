@@ -54,6 +54,12 @@ export const getStructureVersionTransformationDepartement = (
     ?.departementAdministratif ??
   undefined;
 
+export const getStructureVersionTransformationOperateur = (
+  structureVersionTransformation?: StructureVersionTransformationApiRead
+): { id: number; name: string } | undefined =>
+  structureVersionTransformation?.operateur ??
+  structureVersionTransformation?.structureVersion?.structure?.operateur;
+
 export const getReferenceStructureVersionTransformation = (
   transformation: TransformationApiRead
 ): StructureVersionTransformationApiRead | undefined =>

@@ -8,6 +8,7 @@ import {
 } from "@/app/api/structures/structure.db.type";
 import { SearchProps } from "@/app/api/structures/structure.service";
 import {
+  buildStructureCampaigns,
   computeStructureListRow,
   filterStructureRows,
   getDatesConvention,
@@ -21,6 +22,7 @@ import {
 } from "@/app/api/structures/structure.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
+import { StepStatus } from "@/types/form.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
@@ -660,5 +662,80 @@ describe("getReadableAdresses", () => {
         adresseComplete: "69001",
       },
     ]);
+  });
+});
+
+describe("buildStructureCampaigns", () => {
+  const version = (
+    campaign: {
+      form: {
+        status: boolean;
+        formSteps: { status: StepStatus; stepDefinition: { slug: string } }[];
+      } | null;
+      campaignDefinition: { slug: string } | null;
+    } | null
+  ) => ({ campaign });
+
+  it("projette slug + isValidated + formSteps depuis la campagne", () => {
+    const campaigns = buildStructureCampaigns([
+      version({
+        form: {
+          status: true,
+          formSteps: [
+            {
+              status: StepStatus.VALIDE,
+              stepDefinition: { slug: "01-places" },
+            },
+          ],
+        },
+        campaignDefinition: { slug: "actualisation-2026" },
+      }),
+    ]);
+
+    expect(campaigns).toEqual([
+      {
+        slug: "actualisation-2026",
+        isValidated: true,
+        formSteps: [{ slug: "01-places", status: StepStatus.VALIDE }],
+      },
+    ]);
+  });
+
+  it("marque isValidated=false quand le form n'est pas validé", () => {
+    const campaigns = buildStructureCampaigns([
+      version({
+        form: { status: false, formSteps: [] },
+        campaignDefinition: { slug: "actualisation-2026" },
+      }),
+    ]);
+
+    expect(campaigns).toEqual([
+      { slug: "actualisation-2026", isValidated: false, formSteps: [] },
+    ]);
+  });
+
+  it("formSteps vides quand la campagne n'a pas de form (initialisation)", () => {
+    const campaigns = buildStructureCampaigns([
+      version({ form: null, campaignDefinition: { slug: "initialisation" } }),
+    ]);
+
+    expect(campaigns).toEqual([
+      { slug: "initialisation", isValidated: false, formSteps: [] },
+    ]);
+  });
+
+  it("ignore une version sans campagne", () => {
+    expect(buildStructureCampaigns([version(null)])).toEqual([]);
+  });
+
+  it("ignore une campagne sans définition", () => {
+    expect(
+      buildStructureCampaigns([
+        version({
+          form: { status: true, formSteps: [] },
+          campaignDefinition: null,
+        }),
+      ])
+    ).toEqual([]);
   });
 });

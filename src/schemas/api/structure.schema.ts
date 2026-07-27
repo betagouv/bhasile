@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { Repartition } from "@/types/adresse.type";
+import { StepStatus } from "@/types/form.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 import { HistoryEvent } from "@/types/structure-history.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
@@ -135,6 +136,12 @@ export type StructureApiWrite = z.infer<typeof structureApiSchema>;
 
 export type StructureApiWriteClient = z.input<typeof structureApiSchema>;
 
+export type StructureCampaignApiRead = {
+  slug: string;
+  isValidated: boolean;
+  formSteps: { slug: string; status: StepStatus }[];
+};
+
 export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   fermetureDate: string | null;
   debutConvention: string | null;
@@ -155,6 +162,7 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   isInCpom: boolean;
   isInCpomPerYear: Record<number, boolean>;
   isFinalised: boolean;
+  campaigns: StructureCampaignApiRead[];
   nom: string;
   adresseAdministrativeComplete: string;
   isMultiAntenne: boolean;

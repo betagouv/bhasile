@@ -3,6 +3,7 @@ export type EntityId = {
   structureVersionId?: number;
   structureVersionTransformationId?: number;
   transformationId?: number;
+  campaignId?: number;
   cpomId?: number;
   operateurId?: number;
 };

@@ -8,7 +8,6 @@ import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import { ListLoader } from "@/app/components/lists/ListLoader";
-import { OngoingTransformationsBanner } from "@/app/components/transformations/OngoingTransformationsBanner";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 
@@ -89,7 +88,7 @@ export default function Structures(): ReactElement {
   }, []);
 
   return (
-    <div className="h-full w-full flex flex-col bg-alt-grey">
+    <div className="h-full w-full flex flex-col">
       <div className="flex justify-between items-center px-6 border-b border-b-border-default-grey min-h-[4.35rem] sticky top-0 bg-lifted-grey z-10">
         <SegmentedControl
           key={selectedVisualization}
@@ -125,8 +124,6 @@ export default function Structures(): ReactElement {
           </div>
         )}
       </div>
-
-      <OngoingTransformationsBanner />
 
       {selectedVisualization === "tableau" && (
         <>

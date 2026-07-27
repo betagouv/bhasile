@@ -173,18 +173,45 @@ export const filterActesWithKey =
         )
       : val;
 
-export const actesAdministratifsAutoriseesSchema = z.object({
-  actesAdministratifs: z.preprocess(
-    filterActesWithKey(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION"]),
-    z.array(acteAdministratifAutoriseesSchema).optional()
-  ),
-});
-export const actesAdministratifsSubventionneesSchema = z.object({
-  actesAdministratifs: z.preprocess(
-    filterActesWithKey(["CONVENTION"]),
-    z.array(acteAdministratifSubventionneesSchema).optional()
-  ),
-});
+const hasMandatoryNonAvenant = (
+  actesAdministratifs: ActeAdministratifFormValues[] | undefined,
+  category: ActeAdministratifCategory
+): boolean =>
+  !!actesAdministratifs?.some(
+    (acteAdministratif) =>
+      acteAdministratif.category === category &&
+      !acteAdministratif.parentId &&
+      !acteAdministratif.parentUuid
+  );
+
+export const actesAdministratifsAutoriseesSchema = z
+  .object({
+    actesAdministratifs: z.preprocess(
+      filterActesWithKey(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION"]),
+      z.array(acteAdministratifAutoriseesSchema).optional()
+    ),
+  })
+  .refine(
+    (data) => hasMandatoryNonAvenant(data.actesAdministratifs, "ARRETE_TARIFICATION"),
+    {
+      message: "Un arrêté de tarification est obligatoire.",
+      path: ["actesAdministratifs"],
+    }
+  );
+export const actesAdministratifsSubventionneesSchema = z
+  .object({
+    actesAdministratifs: z.preprocess(
+      filterActesWithKey(["CONVENTION"]),
+      z.array(acteAdministratifSubventionneesSchema).optional()
+    ),
+  })
+  .refine(
+    (data) => hasMandatoryNonAvenant(data.actesAdministratifs, "CONVENTION"),
+    {
+      message: "Une convention est obligatoire.",
+      path: ["actesAdministratifs"],
+    }
+  );
 
 export const actesAdministratifsTransformationSchema = z.object({
   actesAdministratifs: z.preprocess(

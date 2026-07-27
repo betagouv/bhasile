@@ -29,11 +29,13 @@ export const TypesPlacesBlock = (): ReactElement => {
             secondaryInformation="places autorisées"
           />
         </div>
-        <InformationCard
-          primaryInformation={`${formatNumber(Number(statistiques.places.tauxEquipement) * 1000)} ‰`}
-          secondaryInformation="taux d'équipement"
-          tertiaryInformation="nombre de places divisé par le nombre d'habitants"
-        />
+        <div>
+          <InformationCard
+            primaryInformation={`${formatNumber(Number(statistiques.places.tauxEquipement) * 1000)} ‰`}
+            secondaryInformation="taux d'équipement"
+            tertiaryInformation="nombre de places divisé par le nombre d'habitants"
+          />
+        </div>
       </div>
       <div className="pb-16">
         <TypePlaceCharts
@@ -47,7 +49,8 @@ export const TypesPlacesBlock = (): ReactElement => {
       </div>
       <TypesPlacesStatsTable />
       <div className="italic text-sm pt-3">
-        Les chiffres correspondent au 31 décembre de chaque année.
+        Les chiffres correspondent au 31 décembre de chaque année, et à la
+        dernière mise à jour pour l’année en cours.
       </div>
     </div>
   );

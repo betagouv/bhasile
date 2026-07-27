@@ -44,6 +44,10 @@ Par souci de clarté, deux routes sont possibles selon le cas décrit dessus :
    ```
    ⚠️ Certains scripts nécessitent un second argument comme le nom du fichier source.
 
+## Crons
+
+Les crons sont déclarés dans `cron.json` à la racine et exécutés par Scalingo. Chaque job passe par `yarn cronify` qui ne lance le script que si la variable d'environnement `CRON_ENABLED=true` est présente (en prod donc).
+
 ## Bonnes pratiques
 
 - **Idempotence** : Le script doit pouvoir s'exécuter plusieurs fois sans effet de bord.

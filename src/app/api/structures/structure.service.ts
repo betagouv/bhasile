@@ -37,6 +37,7 @@ import {
   updateOne,
 } from "./structure.repository";
 import {
+  buildStructureCampaigns,
   buildStructureHistory,
   buildUpcomingTransformations,
   computeStructureListRow,
@@ -314,6 +315,12 @@ const dbStructureToApiRead = (
     ? undefined
     : buildUpcomingTransformations(dbStructure as StructureDbDetails, now);
 
+  const campaigns = simple
+    ? []
+    : buildStructureCampaigns(
+        (dbStructure as StructureDbDetails).structureVersions
+      );
+
   return recursivelySerializeDates({
     ...dbStructure,
     debutConvention,
@@ -363,6 +370,7 @@ const dbStructureToApiRead = (
     adresses,
     isFinalised:
       bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    campaigns,
     bornFromCreation: undefined,
     structureVersions: undefined,
   }) as StructureApiRead;

@@ -14,8 +14,8 @@ export const filterEvaluationsInScope = (
 export const computeEvaluationGlobalSummary = (
   evaluations: StatistiqueDbEvaluation[],
   aggregation: NumericAggregation
-): { moyenneEvaluationsCurrentYear: number | null } => ({
-  moyenneEvaluationsCurrentYear: roundStatsNumber(
+): { moyenneEvaluationsLast12Months: number | null } => ({
+  moyenneEvaluationsLast12Months: roundStatsNumber(
     aggregateValues(
       evaluations.map((evaluation) => evaluation.note),
       aggregation

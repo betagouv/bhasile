@@ -4,10 +4,10 @@ import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
+import { HeaderFilters } from "@/app/components/header-filters/HeaderFilters";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 
-import { HeaderFilters } from "../../../../components/header-filters/HeaderFilters";
 import { useStatistiquesContext } from "../_context/StatistiquesClientContext";
 
 export const StatistiquesHeader = ({

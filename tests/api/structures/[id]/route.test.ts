@@ -46,6 +46,7 @@ vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
   return {
     getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
       mockGetAdresseAdministrativeCoordinates(...args),
+    buildStructureCampaigns: vi.fn().mockReturnValue([]),
     buildStructureHistory: vi.fn().mockReturnValue([]),
     buildUpcomingTransformations: vi.fn().mockReturnValue([]),
     getCpomStructuresWithDates: vi.fn().mockReturnValue([]),
@@ -172,6 +173,7 @@ describe("GET /api/structures/[id]", () => {
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,
+      campaigns: [],
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockFindOneOperateur).not.toHaveBeenCalled();

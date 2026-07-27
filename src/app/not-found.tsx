@@ -33,15 +33,15 @@ export default function NotFound(): ReactElement {
               Sinon contactez-nous pour que l’on puisse vous rediriger vers la
               bonne information.
             </p>
-            <Link className="fr-btn" href="/">
+            <Link className="fr-btn mb-8" href="/">
               Page d’accueil
             </Link>
-            <div className="pt-10">
-              <span className="pr-4">Un problème technique ?</span>
-              <Link className="fr-btn" href="/deconnexion">
+            <p className="text-sm">
+              <span className="">Un problème technique ?</span>{" "}
+              <Link className="fr-link underline text-sm" href="/deconnexion">
                 Se déconnecter
               </Link>
-            </div>
+            </p>
           </div>
           <div className="fr-col-12 fr-col-md-3 fr-col-offset-md-1 fr-px-6w fr-px-md-0 fr-py-0">
             <svg

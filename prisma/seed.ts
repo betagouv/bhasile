@@ -2,6 +2,15 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
+import {
+  actualisationCampaignDefinitionSlug,
+  INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
+  INITIALISATION_DEADLINE,
+} from "@/app/api/campaigns/campaign.constants";
+import {
+  ACTUALISATION_FORM_SLUG,
+  ACTUALISATION_FORM_STEP_SLUGS,
+} from "@/app/api/forms/form.constants";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -30,6 +39,8 @@ import {
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
 import {
+  COLOCATED_COORDINATES,
+  COLOCATED_STRUCTURES_COUNT,
   FormDefLookup,
   SeededStructure,
   seedStructureWithVersions,
@@ -115,6 +126,36 @@ async function seed(): Promise<void> {
     `✅ ${formFinalisationStepDefinitions.count} FormStepDefinitions créées pour le formulaire finalisation`
   );
 
+  const actualisationFormDefinition = await prisma.formDefinition.create({
+    data: { name: "actualisation", slug: ACTUALISATION_FORM_SLUG, version: 1 },
+  });
+  await prisma.formStepDefinition.createMany({
+    data: ACTUALISATION_FORM_STEP_SLUGS.map((slug) => ({
+      formDefinitionId: actualisationFormDefinition.id,
+      label: slug,
+      slug,
+    })),
+  });
+
+  const initialisationCampaignDefinition =
+    await prisma.campaignDefinition.create({
+      data: {
+        name: "Initialisation",
+        slug: INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
+        version: 1,
+        deadline: INITIALISATION_DEADLINE,
+      },
+    });
+  await prisma.campaignDefinition.create({
+    data: {
+      name: "Actualisation 2026",
+      slug: actualisationCampaignDefinitionSlug(2026),
+      version: 1,
+      deadline: new Date(Date.UTC(2026, 11, 31)),
+    },
+  });
+  console.log("✅ CampaignDefinitions créées (initialisation + actualisation)");
+
   const formDefinitions = await prisma.formDefinition.findMany({
     include: { stepsDefinition: { select: { id: true } } },
   });
@@ -165,6 +206,7 @@ async function seed(): Promise<void> {
 
   const now = new Date();
   const seededStructures: SeededStructure[] = [];
+  let colocatedLeft = COLOCATED_STRUCTURES_COUNT;
 
   for (const operateurToInsert of operateursToInsert) {
     const createdOperateur = await prisma.operateur.create({
@@ -191,6 +233,11 @@ async function seed(): Promise<void> {
       const departementAdministratif = randomDepartement();
       const codeBhasile = nextCodeBhasile(departementAdministratif);
 
+      const colocated = !ofii && colocatedLeft > 0;
+      if (colocated) {
+        colocatedLeft--;
+      }
+
       const seeded = await seedStructureWithVersions(prisma, {
         operateurId: createdOperateur.id,
         codeBhasile,
@@ -202,6 +249,8 @@ async function seed(): Promise<void> {
         formDefs,
         finalisationFormDefId: formFinalisationDefinition.id,
         finalisationStepDefinitions: stepDefinitions,
+        initialisationCampaignDefinitionId: initialisationCampaignDefinition.id,
+        coordinates: colocated ? COLOCATED_COORDINATES : undefined,
       });
       seededStructures.push(seeded);
       operateurStructureIds.push(seeded.structureId);

@@ -16,11 +16,11 @@ Fenêtre 12 mois : `filterByTwelveMonthWindow` (`statistiques.utils`).
 | Champ                                                                        | Calcul                           |
 | ---------------------------------------------------------------------------- | -------------------------------- |
 | `tauxEig`, `nbEig`, `nbEigComportementViolent`, `tauxEigComportementViolent` | `computeEigRates`                |
-| `moyenneEvaluationsCurrentYear`                                              | `computeEvaluationGlobalSummary` |
+| `moyenneEvaluationsLast12Months`                                             | `computeEvaluationGlobalSummary` |
 
 ## TODO (métier)
 
-Confirmer que `moyenneEvaluationsCurrentYear` doit bien être sur **12 mois glissants** (comme les EIG) et non sur l'année civile en cours (ex. 2026). À date, même jour - 1 an dans les deux cas.
+Confirmer que `moyenneEvaluationsLast12Months` doit bien être sur **12 mois glissants** (comme les EIG) et non sur l'année civile en cours (ex. 2026). À date, même jour - 1 an dans les deux cas.
 
 ## `byMonth` / `byTrimester` / `byYear`
 

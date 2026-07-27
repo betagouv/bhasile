@@ -12,6 +12,11 @@ export const Menu = (): ReactElement => {
 
   const menuItems = [
     {
+      icon: "ri-speed-up-line",
+      label: "Tableau de bord",
+      url: "/",
+    },
+    {
       icon: "fr-icon-community-line",
       label: "Structures d’hébergement",
       url: "/structures",
@@ -38,24 +43,32 @@ export const Menu = (): ReactElement => {
     },
   ];
 
+  const isMenuItemActive = (
+    url: string,
+    subItems?: { url: string }[]
+  ): boolean => {
+    const matchesPath = (candidate: string): boolean =>
+      candidate === "/"
+        ? pathname === "/"
+        : Boolean(pathname?.includes(candidate));
+    return (
+      matchesPath(url) ||
+      Boolean(subItems?.some((subItem) => matchesPath(subItem.url)))
+    );
+  };
+
   const getActiveClass = (
     url: string,
     subItems?: { url: string }[]
   ): string => {
-    const isActive =
-      pathname?.includes(url) ||
-      subItems?.some((subItem) => pathname?.includes(subItem.url));
-    return isActive ? "fr-sidemenu__item--active" : "";
+    return isMenuItemActive(url, subItems) ? "fr-sidemenu__item--active" : "";
   };
 
   const getAriaCurrent = (
     url: string,
     subItems?: { url: string }[]
   ): "page" | boolean => {
-    const isActive =
-      pathname?.includes(url) ||
-      subItems?.some((subItem) => pathname?.includes(subItem.url));
-    return isActive ? "page" : false;
+    return isMenuItemActive(url, subItems) ? "page" : false;
   };
 
   return (
@@ -67,7 +80,7 @@ export const Menu = (): ReactElement => {
       <ul className="fr-sidemenu__list p-4">
         {menuItems.map((menuItem) => (
           <li
-            className={`fr-sidemenu__item ${getActiveClass(menuItem.url, menuItem.subItems)}`}
+            className={`fr-sidemenu__item before:content-none ${getActiveClass(menuItem.url, menuItem.subItems)}`}
             key={menuItem.label}
           >
             <Link
