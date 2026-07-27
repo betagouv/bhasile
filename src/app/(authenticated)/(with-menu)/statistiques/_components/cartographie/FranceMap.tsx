@@ -3,17 +3,22 @@ import { ReactElement, useMemo } from "react";
 
 import Loader from "@/app/components/ui/Loader";
 
-const DsfrMap = dynamic(() => import("@/app/components/DsfrMap"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-full w-full">
-      <Loader />
-    </div>
-  ),
-});
+const DsfrMap = dynamic(
+  () =>
+    import("@/app/(authenticated)/(with-menu)/statistiques/_components/cartographie/DsfrMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full w-full">
+        <Loader />
+      </div>
+    ),
+  }
+);
 
 export const FranceMap = (): ReactElement => {
-  const REGIONS_DATA: Record<string, number> = useMemo(
+  // TODO : remplacer avec les vraies données
+  const FAKE_REGIONS_DATA: Record<string, number> = useMemo(
     () => ({
       ARA: 32,
       BFC: 8,
@@ -27,7 +32,6 @@ export const FranceMap = (): ReactElement => {
       OCC: 78,
       PDL: 95,
       PAC: 101,
-      "20R": 14,
       "971": 21,
       "972": 32,
       "973": 45,
@@ -37,5 +41,5 @@ export const FranceMap = (): ReactElement => {
     []
   );
 
-  return <DsfrMap zoneData={REGIONS_DATA} />;
+  return <DsfrMap zoneData={FAKE_REGIONS_DATA} />;
 };

@@ -1,14 +1,14 @@
 "use client";
 
-import "../../../node_modules/@gouvfr/dsfr-chart/dist/MapChart/MapChart.css";
+import "../../../../../../../node_modules/@gouvfr/dsfr-chart/dist/MapChart/MapChart.css";
 
 import { useEffect, useRef, useState } from "react";
 
-import { DecoupageSelector } from "../(authenticated)/(with-menu)/stats/_components/cartographie/DecoupageSelector";
-import { MoyenneIndicator } from "../(authenticated)/(with-menu)/stats/_components/cartographie/MoyenneIndicator";
-import { YearSelector } from "../(authenticated)/(with-menu)/stats/_components/cartographie/YearSelector";
-import { ZoneIndicator } from "../(authenticated)/(with-menu)/stats/_components/cartographie/ZoneIndicator";
+import { DecoupageSelector } from "./DecoupageSelector";
 import { MapLegend } from "./MapLegend";
+import { MoyenneIndicator } from "./MoyenneIndicator";
+import { YearSelector } from "./YearSelector";
+import { ZoneIndicator } from "./ZoneIndicator";
 
 type ZoneLabel = {
   code: string;
@@ -65,9 +65,6 @@ export default function DsfrMap({ zoneData }: Props) {
 
         if (frClass) {
           const regionCode = frClass.replace("FR-", "");
-          if (regionCode === "20R") {
-            return;
-          }
           const value = zoneData[regionCode];
 
           if (value !== undefined) {

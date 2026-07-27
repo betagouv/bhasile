@@ -109,7 +109,7 @@ export const CartographieMenu = (): ReactElement => {
                   priority="tertiary no outline"
                   className={`
                     w-full font-normal! py-2! m-0! text-sm whitespace-normal
-                    ${isActive ? "bg-[#eee]! text-black! font-semibold" : "text-[#3a3a3a]!"}
+                    ${isActive ? "bg-alt-grey! text-black!" : "text-title-grey!"}
                   `}
                   style={{
                     textAlign: "left",
