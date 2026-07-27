@@ -44,9 +44,12 @@ Par souci de clarté, deux routes sont possibles selon le cas décrit dessus :
    ```
    ⚠️ Certains scripts nécessitent un second argument comme le nom du fichier source.
 
-## Crons
+## Crons et postdeploy
 
-Les crons sont déclarés dans `cron.json` à la racine et exécutés par Scalingo. Chaque job passe par `yarn cronify` qui ne lance le script que si la variable d'environnement `CRON_ENABLED=true` est présente (en prod donc).
+Les crons sont déclarés dans `cron.json` à la racine et exécutés par Scalingo. Chaque job passe par `yarn cronify` qui ne lance le script que si la variable d'environnement `IS_PRODUCTION=true` est présente (en prod donc).
+
+Le postdeploy (`scripts/postdeploy.sh` : suppression/recréation des vues + `prisma migrate deploy`) peut être sauté sur un déploiement en posant `SKIP_POSTDEPLOY=1`, puis en la retirant.
+Garde-fou : le skip est ignoré si `IS_PRODUCTION=true` : la prod est toujours migrée, même si la variable a été écrite par erreur.
 
 ## Bonnes pratiques
 
