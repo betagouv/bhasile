@@ -18,14 +18,17 @@ import {
   StructureType,
   StructureVersionTransformationType,
 } from "@/generated/prisma/client";
+import { canUpdateStructure } from "@/lib/casl/abilities";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import {
   StructureAgentUpdateApiType,
+  StructureApiRead,
   StructureCampaignApiRead,
 } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StepStatus } from "@/types/form.type";
+import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import {
   CpomRef,
@@ -56,6 +59,30 @@ const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
   famille: PublicType.FAMILLE,
   "personnes isolées": PublicType.PERSONNES_ISOLEES,
+};
+
+export const getReadableNotes = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["notes"] =>
+  user && canUpdateStructure(user, structure) ? structure.notes : null;
+
+export const getReadableAdresses = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["adresses"] => {
+  if (user && canUpdateStructure(user, structure)) {
+    return structure.adresses;
+  }
+
+  return structure.adresses?.map((adresse) => ({
+    ...adresse,
+    adresse: "",
+    adresseComplete: [adresse.codePostal, adresse.commune]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+  }));
 };
 
 export const convertToPublicType = (
@@ -329,8 +356,12 @@ export const computeStructureListRow = (
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
     placesAutorisees: currentVersion.placesAutorisees ?? null,
-    // TODO: redondant avec placesAutorisees depuis le scalaire de version — collapser en cleaning
-    latestNonNullPlacesAutorisees: currentVersion.placesAutorisees ?? null,
+    latestNonNullPlacesAutorisees:
+      currentVersion.placesAutorisees ??
+      structure.structureTypologies.find(
+        (typologie) => typologie.placesAutorisees != null
+      )?.placesAutorisees ??
+      null,
     finConvention: getDatesConvention(structure)[1],
     latitude: currentVersion.latitude,
     longitude: currentVersion.longitude,

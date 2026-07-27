@@ -29,6 +29,10 @@ export const endOfMonthUtcFromMonth = (year: number, month: number): Date =>
 export const endOfMonthUtcFromDate = (date: Date): Date =>
   endOfMonthUtcFromMonth(date.getUTCFullYear(), date.getUTCMonth() + 1);
 
+/** 31 décembre à minuit UTC de l'année. */
+export const endOfYearUtc = (year: number): Date =>
+  new Date(Date.UTC(year, 11, 31));
+
 export const formatDateToIsoString = (
   val: string | undefined | null
 ): string | undefined => {

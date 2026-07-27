@@ -43,6 +43,10 @@ export const structureListLightSelect = {
       endDate: true,
     },
   },
+  structureTypologies: {
+    select: { year: true, placesAutorisees: true },
+    orderBy: { year: "desc" },
+  },
   structureVersions: { select: structureListLightVersionSelect },
 } satisfies Prisma.StructureSelect;
 
@@ -104,10 +108,6 @@ export const structureListInclude = {
 } satisfies Prisma.StructureInclude;
 
 export const structureDetailsInclude = {
-  userNotes: {
-    orderBy: { createdAt: "desc" },
-    select: { text: true },
-  },
   dnaStructures: {
     orderBy: { dna: { code: "asc" } },
     include: {

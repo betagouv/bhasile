@@ -1,6 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import {
   ActeAdministratifCategory,
   Prisma,
@@ -128,7 +129,11 @@ const planStructureHistory = (
   const endsInFuture =
     nbTransfos > 0 && faker.datatype.boolean({ probability: 0.27 });
 
-  let cursor = creationDate;
+  const versionRegimeStart = new Date(
+    Date.UTC(PLACES_VERSIONED_FROM_YEAR, 0, 1)
+  );
+  let cursor =
+    creationDate > versionRegimeStart ? creationDate : versionRegimeStart;
   for (let index = 0; index < nbTransfos; index++) {
     const isLast = index === nbTransfos - 1;
 

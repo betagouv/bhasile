@@ -14,7 +14,7 @@ import {
   parseStatistiquesPerimeterFilters,
   sliceStatistiquesContext,
   structuresActiveInPeriod,
-} from "@/app/api/statistiques/statistiques.utils";
+} from "@/app/api/statistiques/statistiques.util";
 import { StructureType } from "@/types/structure.type";
 
 import {

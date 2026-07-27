@@ -6,12 +6,12 @@ Structures actives avec typologie (≥1 `StructureTypologie`). Places EIG = somm
 
 - EIG : `EvenementIndesirableGrave` via `dnaCode`, restreints de 2015 à `CURRENT_YEAR`
 - Évaluations : `Evaluation` par `structureId`
-- Lien DNA : `lookupStructureIdsForDnaAtDate` (`statistiques.utils`) - version effective à la date de l'événement (`structureVersionTimeline`)
+- Lien DNA : `lookupStructureIdsForDnaAtDate` (`statistiques.util`) - version effective à la date de l'événement (`structureVersionTimeline`)
 - Violent : sous-chaîne `comportement violent` (insensible à la casse, espaces normalisés) - `isEigComportementViolent`
 
 ## Vue globale `eig` (12 mois glissants)
 
-Fenêtre 12 mois : `filterByTwelveMonthWindow` (`statistiques.utils`).
+Fenêtre 12 mois : `filterByTwelveMonthWindow` (`statistiques.util`).
 
 | Champ                                                                        | Calcul                           |
 | ---------------------------------------------------------------------------- | -------------------------------- |
