@@ -19,12 +19,3 @@ export const hasOpenActualisation = (
     (campaign) =>
       campaign.slug === getActualisationFormSlug(year) && !campaign.isValidated
   );
-
-export const hasValidatedActualisation = (
-  campaigns: StructureCampaignApiRead[],
-  year: number
-): boolean =>
-  campaigns.some(
-    (campaign) =>
-      campaign.slug === getActualisationFormSlug(year) && campaign.isValidated
-  );

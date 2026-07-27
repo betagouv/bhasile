@@ -250,6 +250,7 @@ const copyStructureTypologiesToStructures = async (
         structureTypologies: {
           select: {
             year: true,
+            placesAutorisees: true,
             pmr: true,
             lgbt: true,
             fvvTeh: true,
@@ -273,6 +274,7 @@ const copyStructureTypologiesToStructures = async (
       tx,
       structureVersionTransformation.structureTypologies.map((typologie) => ({
         year: typologie.year,
+        placesAutorisees: typologie.placesAutorisees ?? undefined,
         pmr: typologie.pmr ?? undefined,
         lgbt: typologie.lgbt ?? undefined,
         fvvTeh: typologie.fvvTeh ?? undefined,

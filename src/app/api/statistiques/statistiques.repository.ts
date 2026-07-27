@@ -1,4 +1,3 @@
-import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
@@ -30,12 +29,7 @@ const FINALIZED_VERSION_WHERE: Prisma.StructureVersionWhereInput = {
     { structureVersionTransformationId: null },
     {
       structureVersionTransformation: {
-        transformation: {
-          form: {
-            status: true,
-            formDefinition: { slug: FINALISATION_FORM_SLUG },
-          },
-        },
+        transformation: { form: { status: true } },
       },
     },
   ],
@@ -191,14 +185,7 @@ export const findStructureVersionTimeline = async (
   return prisma.structureVersion.findMany({
     where: {
       structureId: { in: structureIds },
-      OR: [
-        { structureVersionTransformationId: null },
-        {
-          structureVersionTransformation: {
-            transformation: { form: { status: true } },
-          },
-        },
-      ],
+      ...FINALIZED_VERSION_WHERE,
     },
     select: {
       id: true,

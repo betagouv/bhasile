@@ -13,6 +13,7 @@ import {
   resetTransformationSelection,
 } from "@/app/api/transformations/transformation.service";
 import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
@@ -1390,6 +1391,73 @@ describe("transformation.repository db integration", () => {
       where: { structureId: sourceStructure.id, year: 2024 },
     });
     expect(liveTypologie.lgbt).toBe(0);
+  });
+
+  it("crée le millésime sur la structure et y reporte les places autorisées quand l'année précède le versionnement", async () => {
+    const sourceStructure = await createStructure();
+    const transformationId = await createOne({
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: "2024-06-01T00:00:00.000Z",
+          },
+          structureTypologies: [
+            { year: 2024, placesAutorisees: 80, pmr: 7, lgbt: 8, fvvTeh: 9 },
+          ],
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const liveTypologie = await prisma.structureTypologie.findFirstOrThrow({
+      where: { structureId: sourceStructure.id, year: 2024 },
+    });
+    expect(liveTypologie).toMatchObject({
+      placesAutorisees: 80,
+      pmr: 7,
+      lgbt: 8,
+      fvvTeh: 9,
+    });
+  });
+
+  it("laisse les places autorisées nulles sur le millésime reporté quand l'année est versionnée", async () => {
+    const sourceStructure = await createStructure();
+    const transformationId = await createOne({
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: `${PLACES_VERSIONED_FROM_YEAR}-06-01T00:00:00.000Z`,
+          },
+          structureTypologies: [
+            {
+              year: PLACES_VERSIONED_FROM_YEAR,
+              placesAutorisees: 80,
+              pmr: 7,
+            },
+          ],
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const liveTypologie = await prisma.structureTypologie.findFirstOrThrow({
+      where: {
+        structureId: sourceStructure.id,
+        year: PLACES_VERSIONED_FROM_YEAR,
+      },
+    });
+    expect(liveTypologie.placesAutorisees).toBeNull();
+    expect(liveTypologie.pmr).toBe(7);
   });
 
   it("définit Structure.fermetureDate à partir de l'effectiveDate de la version lors de la finalisation d'un bloc FERMETURE", async () => {

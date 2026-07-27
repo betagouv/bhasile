@@ -147,8 +147,8 @@ const getCurrentPlacesByProperty = (
   structure: StructureDbDetails | StructureDbList,
   accessor: keyof AdresseTypologieApiType
 ): number => {
-  const mostRecentYearTypologies = structure.adresses?.map((adresse) =>
-    getMostRecentMillesime(adresse.adresseTypologies)
+  const mostRecentYearTypologies = structure.adresses?.map(
+    (adresse) => adresse.adresseTypologies?.[0]
   );
   const placesByAccessor = mostRecentYearTypologies?.reduce(
     (totalCount, currentTypologie) =>

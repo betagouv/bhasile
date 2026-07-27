@@ -35,13 +35,12 @@ export const getPlacesByCommunes = (
       (commune) => commune === adresse.commune
     );
 
-    const placesAutorisees =
-      getMostRecentMillesime(adresse.adresseTypologies)?.placesAutorisees || 0;
-
     if (!existingCommune) {
-      placesByCommune[adresse.commune ?? ""] = placesAutorisees;
+      placesByCommune[adresse.commune ?? ""] =
+        adresse.adresseTypologies?.[0]?.placesAutorisees || 0;
     } else {
-      placesByCommune[adresse.commune ?? ""] += placesAutorisees;
+      placesByCommune[adresse.commune ?? ""] +=
+        adresse.adresseTypologies?.[0]?.placesAutorisees || 0;
     }
   }
 
