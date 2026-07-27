@@ -30,7 +30,7 @@ const finalizedTransfo = (
 describe("resolvePlacesAutoriseesForYear", () => {
   const now = new Date("2028-07-01T12:00:00Z");
 
-  it("renvoie la valeur legacy figée pour une année < seuil", () => {
+  it("renvoie la valeur legacy figée pour une année inférieure au seuil", () => {
     expect(resolvePlacesAutoriseesForYear(2024, 80, [], now)).toBe(80);
   });
 

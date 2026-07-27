@@ -17,7 +17,7 @@ import {
   toYearKey,
   trimesterKeyToDate,
   yearKeyToDate,
-} from "../statistiques.utils";
+} from "../statistiques.util";
 
 type RmuTotals = {
   referesEngages: number;

@@ -24,7 +24,7 @@ import {
   getTypologieMapForExactYear,
   mapTypologieYears,
   resolveStructuresWithTypologieForYear,
-} from "../statistiques.utils";
+} from "../statistiques.util";
 
 type PlacesSpeciales = {
   pmr: number;
