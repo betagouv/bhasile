@@ -40,24 +40,30 @@ vi.mock("@/app/api/activites/activite.util", () => ({
   processActivitesForStructure: vi.fn().mockReturnValue([]),
 }));
 
-vi.mock("@/app/api/structures/structure.util", () => ({
-  getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
-    mockGetAdresseAdministrativeCoordinates(...args),
-  buildStructureHistory: vi.fn().mockReturnValue([]),
-  buildUpcomingTransformations: vi.fn().mockReturnValue([]),
-  getCpomStructuresWithDates: vi.fn().mockReturnValue([]),
-  getCurrentPlacesAutorisees: vi.fn().mockReturnValue(10),
-  getCurrentPlacesLogementsSociaux: vi.fn().mockReturnValue(2),
-  getCurrentPlacesQpv: vi.fn().mockReturnValue(3),
-  getOperateurLabel: vi.fn().mockReturnValue("Adoma"),
-  getTypeBati: vi.fn().mockReturnValue("DIFFUS"),
-  isStructureInCpom: vi.fn().mockReturnValue(false),
-  isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
-  getDatesConvention: vi.fn().mockReturnValue([null, null]),
-  getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
-  isBornFromCreation: vi.fn().mockReturnValue(false),
-  isFinalisationFormValidated: vi.fn().mockReturnValue(false),
-}));
+vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/app/api/structures/structure.util")>();
+  return {
+    getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
+      mockGetAdresseAdministrativeCoordinates(...args),
+    buildStructureHistory: vi.fn().mockReturnValue([]),
+    buildUpcomingTransformations: vi.fn().mockReturnValue([]),
+    getCpomStructuresWithDates: vi.fn().mockReturnValue([]),
+    getCurrentPlacesAutorisees: vi.fn().mockReturnValue(10),
+    getCurrentPlacesLogementsSociaux: vi.fn().mockReturnValue(2),
+    getCurrentPlacesQpv: vi.fn().mockReturnValue(3),
+    getOperateurLabel: vi.fn().mockReturnValue("Adoma"),
+    getReadableAdresses: actual.getReadableAdresses,
+    getReadableNotes: (structure: { notes: string | null }) => structure.notes,
+    getTypeBati: vi.fn().mockReturnValue("DIFFUS"),
+    isStructureInCpom: vi.fn().mockReturnValue(false),
+    isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
+    getDatesConvention: vi.fn().mockReturnValue([null, null]),
+    getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
+    isBornFromCreation: vi.fn().mockReturnValue(false),
+    isFinalisationFormValidated: vi.fn().mockReturnValue(false),
+  };
+});
 
 vi.mock("@/app/api/antennes/antenne.util", () => ({
   getAntennesApiRead: vi.fn().mockReturnValue(undefined),

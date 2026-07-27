@@ -12,7 +12,7 @@ import {
   buildStatistiquesActivityContext,
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
-} from "@/app/api/statistiques/statistiques.utils";
+} from "@/app/api/statistiques/statistiques.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 

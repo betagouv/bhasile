@@ -1,4 +1,3 @@
-import { hasValidatedActualisation } from "@/app/utils/actualisationForm.util";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows } from "@/app/utils/list.util";
@@ -7,7 +6,6 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { Structure } from "@/generated/prisma/client";
-import { canUpdateStructure } from "@/lib/casl/abilities";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
@@ -24,6 +22,7 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
+import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
@@ -38,6 +37,7 @@ import {
   findOneOperateur,
   findStructureDepartement,
   findStructuresByIds,
+  findValidatedActualisationForm,
   updateOne,
 } from "./structure.repository";
 import {
@@ -54,6 +54,8 @@ import {
   getDatesPeriodeAutorisation,
   getFermetureHistory,
   getOperateurLabel,
+  getReadableAdresses,
+  getReadableNotes,
   getTypeBati,
   isBornFromCreation,
   isFinalisationFormValidated,
@@ -96,11 +98,11 @@ export const updateActualisation = async (
   structure: StructureAgentUpdateApiType,
   year: number
 ): Promise<Structure> => {
-  const existing = await getFullStructure(structure.id);
-  if (!existing) {
-    throw new ApiDomainError(`Structure ${structure.id} introuvable`, 404);
-  }
-  if (hasValidatedActualisation(existing.forms, year)) {
+  const alreadyValidated = await findValidatedActualisationForm(
+    structure.id,
+    getActualisationFormSlug(year)
+  );
+  if (alreadyValidated) {
     throw new ApiDomainError(
       `Structure ${structure.id} déjà actualisée pour ${year}`,
       409
@@ -202,6 +204,7 @@ export const getFullStructures = async (
       );
       structure.currentPlaces.placesAutorisees = row.placesAutorisees ?? 0;
       structure.adresses = getReadableAdresses(structure, user);
+      structure.notes = null;
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);
       }
@@ -249,26 +252,9 @@ export const getFullStructure = async (
     isBornFromCreation(resolvedDbStructure.structureVersions, now)
   );
   structure.adresses = getReadableAdresses(structure, user);
+  structure.notes = getReadableNotes(structure, user);
 
   return structure;
-};
-
-const getReadableAdresses = (
-  structure: StructureApiRead,
-  user?: SessionUser
-): StructureApiRead["adresses"] => {
-  if (user && canUpdateStructure(user, structure)) {
-    return structure.adresses;
-  }
-
-  return structure.adresses?.map((adresse) => ({
-    ...adresse,
-    adresse: "",
-    adresseComplete: [adresse.codePostal, adresse.commune]
-      .filter(Boolean)
-      .join(" ")
-      .trim(),
-  }));
 };
 
 export const getStructureForOperateur = async (

@@ -5,7 +5,7 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { getYearRange } from "@/app/utils/date.util";
+import { formatDate, getYearRange } from "@/app/utils/date.util";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
@@ -36,10 +36,10 @@ export const EIGChart = (): ReactElement => {
       const date = new Date(periodStat.date);
 
       if (timePeriod === "byMonth") {
-        return date.toLocaleDateString("fr-FR", {
+        return formatDate(date, {
           month: "short",
           year: "numeric",
-        });
+        }).toLocaleUpperCase();
       }
 
       if (timePeriod === "byTrimester") {

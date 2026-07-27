@@ -19,7 +19,7 @@ import type {
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
-import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.utils";
+import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 
 /** Année plancher des EIG remontés dans les stats (borne haute = année courante). */
 const EIG_STATS_MIN_YEAR = 2015;
@@ -189,7 +189,17 @@ export const findStructureVersionTimeline = async (
   }
 
   return prisma.structureVersion.findMany({
-    where: { structureId: { in: structureIds } },
+    where: {
+      structureId: { in: structureIds },
+      OR: [
+        { structureVersionTransformationId: null },
+        {
+          structureVersionTransformation: {
+            transformation: { form: { status: true } },
+          },
+        },
+      ],
+    },
     select: {
       id: true,
       structureId: true,

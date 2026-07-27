@@ -29,7 +29,7 @@ import {
   lookupStructureIdsForDnaAtDate,
   monthKeyToDate,
   toMonthKey,
-} from "../statistiques.utils";
+} from "../statistiques.util";
 
 type ActiviteTotals = {
   placesEnregistreesDna: number;
