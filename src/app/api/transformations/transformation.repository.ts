@@ -20,6 +20,7 @@ import {
   createOrUpdateForm,
   initializeStructureVersionTransformationDefaultForms,
 } from "../forms/form.repository";
+import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { transformationInclude } from "./transformation.db.type";
 
@@ -101,8 +102,8 @@ export const updateOne = async (
       });
       if (finalized.count === 0) {
         throw new ApiDomainError(
-        "Impossible de modifier une transformation finalisée"
-      );
+          "Impossible de modifier une transformation finalisée"
+        );
       }
     }
 
@@ -421,6 +422,12 @@ const createOrUpdateStructureVersionTransformation = async (
   await createOrUpdateForm(tx, structureVersionTransformation.form, {
     structureVersionTransformationId,
   });
+
+  await createOrUpdateStructureTypologies(
+    tx,
+    structureVersionTransformation.structureTypologies,
+    { structureVersionTransformationId }
+  );
 
   await createOrUpdateActesAdministratifs(
     tx,

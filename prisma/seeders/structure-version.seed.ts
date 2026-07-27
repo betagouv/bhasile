@@ -54,7 +54,6 @@ export type SeedStructureParams = {
   formDefs: FormDefLookup;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
-  initialisationCampaignDefinitionId: number;
   coordinates?: Coordinates;
 };
 
@@ -63,7 +62,7 @@ export type SeededStructure = { structureId: number; currentVersionId: number };
 type TransfoKind = "EXTENSION" | "CONTRACTION" | "FERMETURE";
 
 type VersionSpec =
-  | { provenance: "CAMPAIGN" | "CREATION"; effectiveDate: Date; places: number }
+  | { provenance: "INITIALE" | "CREATION"; effectiveDate: Date; places: number }
   | {
       provenance: "TRANSFO";
       transfoType: TransfoKind;
@@ -106,7 +105,7 @@ const planStructureHistory = (
     return {
       creationDate,
       versions: [
-        { provenance: "CAMPAIGN", effectiveDate: creationDate, places: 0 },
+        { provenance: "INITIALE", effectiveDate: creationDate, places: 0 },
       ],
     };
   }
@@ -117,7 +116,7 @@ const planStructureHistory = (
   let places = faker.number.int({ min: 20, max: 150 });
   const versions: VersionSpec[] = [
     {
-      provenance: startsByCreationTranformation ? "CREATION" : "CAMPAIGN",
+      provenance: startsByCreationTranformation ? "CREATION" : "INITIALE",
       effectiveDate: creationDate,
       places,
     },
@@ -281,28 +280,21 @@ const buildVersionCommon = (
   scalars: VersionScalars,
   effectiveDate: Date,
   places: number,
-  typologieSpecs: TypologieSpec[],
   contacts: StableContacts,
-  ofii: boolean
+  ofii: boolean,
+  placesAutorisees: number | null = places
 ) => {
-  const base = { effectiveDate, ...scalars };
+  const base = { effectiveDate, placesAutorisees, ...scalars };
 
   if (ofii) {
     return base;
   }
 
-  const typologies = typologieSpecs.map((spec) =>
-    createFakeStructureTypologie({
-      year: spec.year,
-      placesAutorisees: spec.placesAutorisees,
-    })
-  );
   const adresses = createFakeAdresses({ placesAutorisees: places });
 
   return {
     ...base,
     contacts: { create: contacts.map(stripVersionId) },
-    structureTypologies: { create: typologies.map(stripVersionId) },
     adresses: {
       create: adresses.map(({ adresseTypologies, ...adresse }) => ({
         ...stripVersionId(adresse),
@@ -380,6 +372,7 @@ const buildNonVersionedRelations = (params: {
   creationDate: Date;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
+  typologieSpecs: TypologieSpec[];
 }): Record<string, unknown> => {
   const finalisationForm = createFakeFormWithSteps(
     params.finalisationFormDefId,
@@ -394,6 +387,12 @@ const buildNonVersionedRelations = (params: {
       createFakeDocumentFinancier()
     ),
     forms: [finalisationForm],
+    structureTypologies: params.typologieSpecs.map((spec) =>
+      createFakeStructureTypologie({
+        year: spec.year,
+        placesAutorisees: spec.placesAutorisees,
+      })
+    ),
   };
 
   if (!params.isFinalised) {
@@ -452,7 +451,6 @@ const persistTransformation = async (
     effectiveDate: Date;
     places: number;
     scalars: VersionScalars;
-    typologieSpecs: TypologieSpec[];
     contacts: StableContacts;
     formDefs: FormDefLookup;
   }
@@ -469,9 +467,9 @@ const persistTransformation = async (
     params.scalars,
     params.effectiveDate,
     params.places,
-    params.typologieSpecs,
     params.contacts,
-    false
+    false,
+    params.svtType === "FERMETURE" ? null : params.places
   );
 
   const structureVersion: Prisma.StructureVersionUncheckedCreateWithoutStructureVersionTransformationInput =
@@ -570,18 +568,14 @@ export const seedStructureWithVersions = async (
         createFakeContact()
       );
 
-  const typologieSpecsUpTo = (versionIndex: number): TypologieSpec[] =>
-    params.ofii
-      ? []
-      : buildTypologieSpecs(
-          plan.versions.slice(0, versionIndex + 1),
-          plan.creationDate,
-          params.now
-        );
+  const typologieSpecs: TypologieSpec[] = params.ofii
+    ? []
+    : buildTypologieSpecs(plan.versions, plan.creationDate, params.now);
 
   const nonVersioned = params.ofii
     ? {}
     : buildNonVersionedRelations({
+        typologieSpecs,
         type: params.type,
         isFinalised: params.isFinalised,
         creationDate: plan.creationDate,
@@ -594,15 +588,11 @@ export const seedStructureWithVersions = async (
 
   let structureId: number;
 
-  if (initial.provenance === "CAMPAIGN") {
-    const campaign = await prisma.campaign.create({
-      data: { campaignDefinitionId: params.initialisationCampaignDefinitionId },
-    });
+  if (initial.provenance === "INITIALE") {
     const versionCommon = buildVersionCommon(
       scalars,
       initial.effectiveDate,
       initial.places,
-      typologieSpecsUpTo(0),
       contacts,
       params.ofii
     );
@@ -614,7 +604,7 @@ export const seedStructureWithVersions = async (
       type: params.type,
       ...convertToPrismaObject(nonVersioned),
       structureVersions: {
-        create: [{ campaignId: campaign.id, ...versionCommon }],
+        create: [versionCommon],
       },
     };
     const structure = await prisma.structure.create({
@@ -653,7 +643,6 @@ export const seedStructureWithVersions = async (
       effectiveDate: initial.effectiveDate,
       places: initial.places,
       scalars,
-      typologieSpecs: typologieSpecsUpTo(0),
       contacts,
       formDefs: params.formDefs,
     });
@@ -673,7 +662,6 @@ export const seedStructureWithVersions = async (
       effectiveDate: transfo.effectiveDate,
       places: transfo.places,
       scalars,
-      typologieSpecs: typologieSpecsUpTo(transfoIndex + 1),
       contacts,
       formDefs: params.formDefs,
     });

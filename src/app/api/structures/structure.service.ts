@@ -1,3 +1,4 @@
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows } from "@/app/utils/list.util";
 import {
@@ -22,6 +23,8 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
+import { getActualisationFormSlug } from "../forms/form.constants";
+import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
@@ -35,6 +38,7 @@ import {
   findOneOperateur,
   findStructureDepartement,
   findStructuresByIds,
+  findValidatedActualisationForm,
   updateOne,
 } from "./structure.repository";
 import {
@@ -88,6 +92,24 @@ export const updateStructureAgent = async (
     },
     false
   );
+};
+
+export const updateActualisation = async (
+  structure: StructureAgentUpdateApiType,
+  year: number
+): Promise<Structure> => {
+  const alreadyValidated = await findValidatedActualisationForm(
+    structure.id,
+    getActualisationFormSlug(year)
+  );
+  if (alreadyValidated) {
+    throw new ApiDomainError(
+      `Structure ${structure.id} déjà actualisée pour ${year}`,
+      409
+    );
+  }
+
+  return updateOne(structure, false, { skipActesOrphanDelete: true });
 };
 export const updateStructureOperateur = async (
   structure: StructureAgentUpdateApiType
@@ -180,6 +202,7 @@ export const getFullStructures = async (
         true,
         row.bornFromCreation
       );
+      structure.currentPlaces.placesAutorisees = row.placesAutorisees ?? 0;
       structure.adresses = getReadableAdresses(structure, user);
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);
@@ -332,12 +355,26 @@ const dbStructureToApiRead = (
 
   const campaigns = simple
     ? []
-    : buildStructureCampaigns(
-        (dbStructure as StructureDbDetails).structureVersions
+    : buildStructureCampaigns((dbStructure as StructureDbDetails).forms);
+
+  const structureTypologies = simple
+    ? (dbStructure.structureTypologies ?? [])
+    : resolveTypologiesPlacesAutorisees(
+        dbStructure.structureTypologies ?? [],
+        (dbStructure as StructureDbDetails).structureVersions ?? [],
+        now
       );
+
+  const isCurrentVersionFromTransformation = simple
+    ? false
+    : resolveCurrentVersion(
+        (dbStructure as StructureDbDetails).structureVersions ?? [],
+        now
+      )?.structureVersionTransformationId != null;
 
   return recursivelySerializeDates({
     ...dbStructure,
+    structureTypologies,
     debutConvention,
     finConvention,
     debutPeriodeAutorisation,
@@ -385,6 +422,7 @@ const dbStructureToApiRead = (
     adresses,
     isFinalised:
       bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    isCurrentVersionFromTransformation,
     campaigns,
     bornFromCreation: undefined,
     structureVersions: undefined,

@@ -1,4 +1,3 @@
-import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { Prisma } from "@/generated/prisma/client";
 
 export const dashboardStructureSelect = {
@@ -7,8 +6,16 @@ export const dashboardStructureSelect = {
   type: true,
   operateur: { select: { id: true, name: true } },
   forms: {
-    where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
-    select: { status: true },
+    select: {
+      status: true,
+      formDefinition: { select: { slug: true } },
+      formSteps: {
+        select: {
+          status: true,
+          stepDefinition: { select: { slug: true } },
+        },
+      },
+    },
   },
   structureVersions: {
     select: {
@@ -21,23 +28,6 @@ export const dashboardStructureSelect = {
         select: {
           type: true,
           transformation: { select: { form: { select: { status: true } } } },
-        },
-      },
-      campaignId: true,
-      campaign: {
-        select: {
-          campaignDefinition: { select: { slug: true } },
-          form: {
-            select: {
-              status: true,
-              formSteps: {
-                select: {
-                  status: true,
-                  stepDefinition: { select: { slug: true } },
-                },
-              },
-            },
-          },
         },
       },
     },

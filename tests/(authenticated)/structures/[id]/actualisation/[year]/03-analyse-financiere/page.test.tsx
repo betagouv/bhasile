@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ActualisationAnalyseFinanciere from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/03-analyse-financiere/page";
 
+import { createActualisationForm } from "../../../../../../test-utils/factories/actualisation-form.factory";
 import { createFinalisationFinanceValidStructure } from "../../../../../../test-utils/structure.factory";
 import {
   clickButtonByName,
@@ -20,17 +21,23 @@ vi.mock("@/app/components/forms/AutoSave", () => ({ AutoSave: () => null }));
 
 const financeStructure = () => ({
   ...createFinalisationFinanceValidStructure(1),
-  campaigns: [
-    { slug: "actualisation-2026", isValidated: false, formSteps: [] },
-  ],
+  forms: [createActualisationForm(2026)],
 });
 
-const findCampaignPut = (fetchMock: ReturnType<typeof vi.fn>) =>
+const findActualisationPut = (fetchMock: ReturnType<typeof vi.fn>) =>
   fetchMock.mock.calls.find(
     (call) =>
-      call[0] === "/api/campaigns" &&
+      call[0] === "/api/structures/1/actualisation" &&
       (call[1] as RequestInit | undefined)?.method === "PUT"
   );
+
+const stepStatusInPayload = (put: unknown[] | undefined, slug: string) => {
+  const payload = JSON.parse((put?.[1] as RequestInit).body as string);
+  return payload.forms[0].formSteps.find(
+    (formStep: { stepDefinition: { slug: string } }) =>
+      formStep.stepDefinition.slug === slug
+  )?.status;
+};
 
 describe("Page actualisation 03-analyse-financiere", () => {
   beforeEach(() => {
@@ -38,7 +45,7 @@ describe("Page actualisation 03-analyse-financiere", () => {
     global.fetch = vi.fn();
   });
 
-  it("valide l'étape finance vers /api/campaigns", async () => {
+  it("valide l'étape finance via la sous-route actualisation", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockResolvedValue({
       ok: true,
@@ -52,14 +59,9 @@ describe("Page actualisation 03-analyse-financiere", () => {
 
     await clickButtonByName("Valider");
 
-    const campaignPut = findCampaignPut(fetchMock);
-    expect(campaignPut).toBeDefined();
-    const payload = JSON.parse((campaignPut?.[1] as RequestInit).body as string);
-    expect(payload).toMatchObject({
-      structureId: 1,
-      year: 2026,
-      step: { slug: "03-analyse-financiere", status: "VALIDE" },
-    });
+    const put = findActualisationPut(fetchMock);
+    expect(put).toBeDefined();
+    expect(stepStatusInPayload(put, "03-analyse-financiere")).toBe("VALIDE");
   });
 
   it("affiche l'erreur d'obligation et bloque quand le réalisé du cutoff manque", async () => {
@@ -83,6 +85,6 @@ describe("Page actualisation 03-analyse-financiere", () => {
     expect(
       screen.getByText(/réalisé 2024.*obligatoire/i)
     ).toBeInTheDocument();
-    expect(findCampaignPut(fetchMock)).toBeUndefined();
+    expect(findActualisationPut(fetchMock)).toBeUndefined();
   });
 });

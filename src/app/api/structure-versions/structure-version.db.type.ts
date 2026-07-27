@@ -38,9 +38,6 @@ export const structureVersionDetailsInclude = {
   structureFinesses: {
     include: { finess: true },
   },
-  structureTypologies: {
-    orderBy: { year: "desc" },
-  },
   dnaStructures: {
     orderBy: { dna: { code: "asc" } },
     include: {
@@ -72,16 +69,6 @@ export const structureVersionDetailsInclude = {
               },
             },
           },
-        },
-      },
-    },
-  },
-  campaign: {
-    include: {
-      campaignDefinition: true,
-      form: {
-        include: {
-          formSteps: { include: { stepDefinition: true } },
         },
       },
     },
@@ -118,9 +105,6 @@ export type StructureVersionDbTransformation =
       antennes: true;
       dnaStructures: {
         include: { dna: true };
-      };
-      structureTypologies: {
-        orderBy: { year: "desc" };
       };
     };
   }>;

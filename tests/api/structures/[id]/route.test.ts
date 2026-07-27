@@ -158,6 +158,7 @@ describe("GET /api/structures/[id]", () => {
       fvvTeh: false,
       antennes: undefined,
       structureFinesses: undefined,
+      structureTypologies: [],
       public: undefined,
       currentPlaces: {
         placesAutorisees: 10,
@@ -167,6 +168,7 @@ describe("GET /api/structures/[id]", () => {
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,
+      isCurrentVersionFromTransformation: false,
       campaigns: [],
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
@@ -176,18 +178,13 @@ describe("GET /api/structures/[id]", () => {
   it("déduit les vulnérabilités lgbt/fvvTeh des places du dernier millésime", async () => {
     // GIVEN : le millésime le plus récent (2024) a des places LGBT mais pas FVV/TEH,
     // un millésime antérieur (2023) avait des places FVV/TEH -> ne doit pas fuiter.
-    // Les typologies vivent sur la version courante : la dérivation doit passer par
-    // mergeStructureWithVersion (chemin de prod), pas par un accès direct sur Structure.
+    // Les typologies sont dé-versionnées : elles vivent sur la Structure.
     const currentVersion = {
       id: 20,
       effectiveDate: new Date("2021-01-01"),
       structureVersionTransformationId: null,
       structureVersionTransformation: null,
       dnaStructures: [],
-      structureTypologies: [
-        { year: 2024, lgbt: 5, fvvTeh: 0 },
-        { year: 2023, lgbt: 0, fvvTeh: 9 },
-      ],
     };
     const dbStructure = {
       id: 2,
@@ -199,6 +196,10 @@ describe("GET /api/structures/[id]", () => {
       date303: null,
       latitude: 48.86,
       longitude: 2.34,
+      structureTypologies: [
+        { year: 2024, lgbt: 5, fvvTeh: 0 },
+        { year: 2023, lgbt: 0, fvvTeh: 9 },
+      ],
       structureVersions: [currentVersion],
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });

@@ -7,7 +7,6 @@ import { antenneApiSchema } from "./antenne.schema";
 import { contactApiSchema } from "./contact.schema";
 import { dnaStructureApiSchema } from "./dna-structure.schema";
 import { structureFinessApiPartialSchema } from "./finess.schema";
-import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
 export const structureVersionApiSchema = z.object({
   id: z.number().optional(),
@@ -33,9 +32,8 @@ export const structureVersionApiSchema = z.object({
   antennes: z.array(antenneApiSchema.partial()).optional(),
   structureFinesses: z.array(structureFinessApiPartialSchema).optional(),
   dnaStructures: z.array(dnaStructureApiSchema.partial()).optional(),
-  structureTypologies: z
-    .array(structureTypologieApiSchema.partial().required({ year: true }))
-    .optional(),
+
+  placesAutorisees: z.number().int().nullish(),
 });
 
 export type StructureVersionApiType = z.infer<typeof structureVersionApiSchema>;

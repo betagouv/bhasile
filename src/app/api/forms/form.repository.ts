@@ -1,3 +1,4 @@
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { EntityId } from "@/types/Entity.type";
@@ -5,11 +6,10 @@ import { StepStatus } from "@/types/form.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import {
-  ACTUALISATION_FORM_SLUG,
   FINALISATION_FORM_SLUG,
   STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS,
 } from "./form.constants";
-import { convertToStepStatus } from "./form.util";
+import { areAllFormStepsValidated, convertToStepStatus } from "./form.util";
 
 export const createOrUpdateForms = async (
   tx: PrismaTransaction,
@@ -38,37 +38,6 @@ export const createOrUpdateForm = async (
   await createOrUpdateCompleteFormWithSteps(tx, entityId, form);
 };
 
-export const setCampaignFormStepStatus = async (
-  tx: PrismaTransaction,
-  formId: number,
-  stepSlug: string,
-  status: StepStatus
-): Promise<void> => {
-  const stepDefinition = await tx.formStepDefinition.findFirst({
-    where: {
-      slug: stepSlug,
-      formDefinition: { slug: ACTUALISATION_FORM_SLUG },
-    },
-  });
-  if (!stepDefinition) {
-    throw new Error(`FormStepDefinition ${stepSlug} not found`);
-  }
-  await tx.formStep.update({
-    where: {
-      formId_stepDefinitionId: { formId, stepDefinitionId: stepDefinition.id },
-    },
-    data: { status },
-  });
-};
-
-export const setCampaignFormStatus = async (
-  tx: PrismaTransaction,
-  formId: number,
-  status: boolean
-): Promise<void> => {
-  await tx.form.update({ where: { id: formId }, data: { status } });
-};
-
 const getFormUniqueWhere = (
   entityId: EntityId,
   formDefinitionId: number
@@ -87,15 +56,7 @@ const getFormUniqueWhere = (
         transformationId: number;
         formDefinitionId: number;
       };
-    }
-  | {
-      campaignId: number;
     } => {
-  if (entityId.campaignId !== undefined) {
-    return {
-      campaignId: entityId.campaignId,
-    };
-  }
   if (entityId.structureId !== undefined) {
     return {
       structureId_formDefinitionId: {
@@ -186,6 +147,22 @@ const createOrUpdateCompleteFormWithSteps = async (
         });
       })
     );
+  }
+
+  // Un formulaire à étapes ne peut être validé (status = true) que si toutes ses
+  // étapes le sont. Les formulaires sans étape (transformation parente, complétée
+  // via sa date d'effet) passent : rien à valider.
+  if (form.status === true) {
+    const persistedSteps = await tx.formStep.findMany({
+      where: { formId: formEntity.id },
+      select: { status: true },
+    });
+    if (!areAllFormStepsValidated(persistedSteps)) {
+      throw new ApiDomainError(
+        `Toutes les étapes doivent être validées avant de valider le formulaire ${form.formDefinition.slug}`,
+        409
+      );
+    }
   }
 };
 

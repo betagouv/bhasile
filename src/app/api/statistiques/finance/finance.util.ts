@@ -24,7 +24,7 @@ import {
   collectDistinctYears,
   filterByActiveStructureId,
   lookupActiveStructureIds,
-} from "../statistiques.utils";
+} from "../statistiques.util";
 
 type FinanceScope = keyof Omit<FinanceByYearStat, "year">;
 

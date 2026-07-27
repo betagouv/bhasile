@@ -5,7 +5,6 @@ import { StructureType } from "@/types/structure.type";
 
 import {
   createActualisationStructureForTest,
-  deleteActualisationCampaign,
   SeededActualisationStructure,
 } from "../seed/actualisation.seed";
 import {
@@ -88,7 +87,6 @@ export const test = base.extend<Fixtures>({
     try {
       await use(structure);
     } finally {
-      await deleteActualisationCampaign(structure.campaignId);
       await deleteStructureByCode(structure.codeBhasile).catch(() => {});
     }
   },
@@ -100,7 +98,6 @@ export const test = base.extend<Fixtures>({
     try {
       await use(structure);
     } finally {
-      await deleteActualisationCampaign(structure.campaignId);
       await deleteStructureByCode(structure.codeBhasile).catch(() => {});
     }
   },

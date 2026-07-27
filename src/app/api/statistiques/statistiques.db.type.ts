@@ -84,6 +84,7 @@ export type StatistiqueDbStructureVersionTimeline = {
   id: number;
   structureId: number | null;
   effectiveDate: Date | null;
+  placesAutorisees: number | null;
 };
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{

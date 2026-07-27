@@ -1,15 +1,15 @@
 import {
-  actualisationCampaignDefinitionSlug,
-  INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
-} from "@/app/api/campaigns/campaign.constants";
-import { getActualisationYear } from "@/app/api/campaigns/campaign.util";
+  FINALISATION_FORM_SLUG,
+  getActualisationFormSlug,
+} from "@/app/api/forms/form.constants";
+import { getActualisationYear } from "@/app/api/structures/actualisation.util";
 import { parseCommaList } from "@/app/utils/string.util";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
 import {
-  findCampaignDeadline,
   findDashboardStructures,
+  findFormDefinitionDeadline,
 } from "./initialisations-actualisations.repository";
 import { InitialisationsActualisationsApiRead } from "./initialisations-actualisations.type";
 import {
@@ -38,10 +38,10 @@ export const getInitialisationsActualisations = async (
 
   const [initialisationDefinition, actualisationDefinition] = await Promise.all(
     [
-      findCampaignDeadline(INITIALISATION_CAMPAIGN_DEFINITION_SLUG),
+      findFormDefinitionDeadline(FINALISATION_FORM_SLUG),
       year === null
         ? Promise.resolve(null)
-        : findCampaignDeadline(actualisationCampaignDefinitionSlug(year)),
+        : findFormDefinitionDeadline(getActualisationFormSlug(year)),
     ]
   );
 

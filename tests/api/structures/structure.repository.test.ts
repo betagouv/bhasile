@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { afterAll, describe, expect, it } from "vitest";
 
+import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { updateOne } from "@/app/api/structures/structure.repository";
 import {
   getFullStructure,
@@ -12,6 +13,7 @@ import {
 } from "@/app/api/structures/structure.service";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import prisma from "@/lib/prisma";
+import { FormApiType } from "@/schemas/api/form.schema";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
 import { StepStatus } from "@/types/form.type";
@@ -70,7 +72,6 @@ describe("structure.repository db integration", () => {
         adresses: { include: { adresseTypologies: true } },
         antennes: true,
         structureFinesses: { include: { finess: true } },
-        structureTypologies: true,
         dnaStructures: { include: { dna: true } },
       },
     });
@@ -474,14 +475,68 @@ describe("structure.repository db integration", () => {
 
     // WHEN: same year receives new values
     const newStructureTypologie = { year: 2024, placesAutorisees: 25, pmr: 2 };
-    const version = await updateStructureAndFetch(
+    const structureTypologies = await updateStructureAndFetch(
       structure.id,
       { structureTypologies: [newStructureTypologie] },
-      () => fetchCurrentVersion(structure.id)
+      () =>
+        prisma.structureTypologie.findMany({
+          where: { structureId: structure.id },
+        })
     );
 
-    expect(version.structureTypologies).toHaveLength(1);
-    expect(version.structureTypologies[0]).toMatchObject(newStructureTypologie);
+    expect(structureTypologies).toHaveLength(1);
+    expect(structureTypologies[0]).toMatchObject(newStructureTypologie);
+  });
+
+  it("reporte les places de l'année legacy sur la version de base, sans toucher une version de transfo", async () => {
+    const structure = await createStructure();
+
+    // Version de transfo, plus récente, avec sa propre capacité : intouchable
+    // par un write non-transfo.
+    const transformation = await prisma.transformation.create({
+      data: { type: "EXTENSION_EX_NIHILO" },
+    });
+    const structureVersionTransformation =
+      await prisma.structureVersionTransformation.create({
+        data: { transformationId: transformation.id, type: "EXTENSION" },
+      });
+    const transfoVersion = await prisma.structureVersion.create({
+      data: {
+        structureId: structure.id,
+        effectiveDate: new Date("2027-06-01T12:00:00.000Z"),
+        placesAutorisees: 200,
+        structureVersionTransformationId: structureVersionTransformation.id,
+      },
+    });
+
+    await updateOne({
+      id: structure.id,
+      structureTypologies: [
+        { year: 2025, placesAutorisees: 100, pmr: 1, lgbt: 1, fvvTeh: 1 },
+        { year: 2026, placesAutorisees: 50, pmr: 1, lgbt: 1, fvvTeh: 1 },
+      ],
+    });
+
+    const baseVersion = await prisma.structureVersion.findFirstOrThrow({
+      where: {
+        structureId: structure.id,
+        structureVersionTransformationId: null,
+      },
+    });
+    const refreshedTransfoVersion =
+      await prisma.structureVersion.findUniqueOrThrow({
+        where: { id: transfoVersion.id },
+      });
+    const typologie2026 = await prisma.structureTypologie.findFirstOrThrow({
+      where: { structureId: structure.id, year: 2026 },
+    });
+
+    // La cascade recale la version de base sur ST[2025]...
+    expect(baseVersion.placesAutorisees).toBe(100);
+    // ...laisse la version de transfo intacte...
+    expect(refreshedTransfoVersion.placesAutorisees).toBe(200);
+    // ...et la typologie ≥ seuil ne porte pas les places (elles vivent sur la SV).
+    expect(typologie2026.placesAutorisees).toBeNull();
   });
 
   it("remplace la liste des adresses et leurs typologies sur la version courante", async () => {
@@ -967,7 +1022,7 @@ describe("structure.repository db integration", () => {
     // WHEN: form status and first step are updated by slug
     const newForm = {
       id: 0,
-      status: true,
+      status: false,
       formDefinition: {
         id: formDefinition.id,
         slug: formDefinition.slug,
@@ -1142,7 +1197,7 @@ describe("structure.repository db integration", () => {
             ],
           },
         ],
-        structureTypologies: [{ year: 2026, placesAutorisees: 42 }],
+        structureTypologies: [{ year: 2025, placesAutorisees: 42 }],
         dnaStructures: [{ dna: { code: dnaCode } }],
       });
 
@@ -1676,6 +1731,75 @@ describe("structure.repository db integration", () => {
         .find((linked) => linked.structure?.id === partnerStructure.id);
       expect(linkedPartner?.structure?.type).toBe(StructureType.CADA);
       expect(linkedPartner?.structure?.communeAdministrative).toBe("Lyon");
+    });
+  });
+
+  describe("validation des formulaires de structure", () => {
+    const FINALISATION_STEP_SLUGS = [
+      "01-identification",
+      "02-documents-financiers",
+      "03-finance",
+      "04-controles",
+      "05-documents",
+      "06-notes",
+    ];
+
+    const buildFinalisationForm = (
+      steps: { slug: string; status: StepStatus }[],
+      status: boolean
+    ): FormApiType => ({
+      id: 0,
+      status,
+      formDefinition: {
+        id: 0,
+        slug: FINALISATION_FORM_SLUG,
+        name: "finalisation",
+        version: 1,
+      },
+      formSteps: steps.map((step, index) => ({
+        id: index,
+        status: step.status,
+        stepDefinition: { id: index, slug: step.slug, label: step.slug },
+      })),
+    });
+
+    it("rejette la validation d'un formulaire dont une étape n'est pas validée", async () => {
+      const structure = await createStructure();
+
+      await expect(
+        updateOne({
+          id: structure.id,
+          forms: [
+            buildFinalisationForm(
+              [{ slug: "01-identification", status: StepStatus.NON_COMMENCE }],
+              true
+            ),
+          ],
+        })
+      ).rejects.toThrow(/étapes doivent être validées/);
+    });
+
+    it("valide un formulaire quand toutes ses étapes sont validées", async () => {
+      const structure = await createStructure();
+
+      await updateOne({
+        id: structure.id,
+        forms: [
+          buildFinalisationForm(
+            FINALISATION_STEP_SLUGS.map((slug) => ({
+              slug,
+              status: StepStatus.VALIDE,
+            })),
+            true
+          ),
+        ],
+      });
+
+      const form = await prisma.form.findFirstOrThrow({
+        where: { structureId: structure.id },
+        select: { status: true },
+      });
+      expect(form.status).toBe(true);
     });
   });
 });

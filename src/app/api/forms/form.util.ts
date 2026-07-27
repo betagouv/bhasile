@@ -17,3 +17,8 @@ export const convertToStepStatus = (
     stepStatuses[stepStatus.trim().toLowerCase()] || StepStatus.NON_COMMENCE
   );
 };
+
+export const areAllFormStepsValidated = (
+  formSteps: { status: string }[]
+): boolean =>
+  formSteps.every((formStep) => formStep.status === StepStatus.VALIDE);

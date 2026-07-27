@@ -1,4 +1,7 @@
-import { actualisationCampaignDefinitionSlug } from "@/app/api/campaigns/campaign.constants";
+import {
+  FINALISATION_FORM_SLUG,
+  getActualisationFormSlug,
+} from "@/app/api/forms/form.constants";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import { buildStructureCampaigns } from "@/app/api/structures/structure.util";
 import { paginateRows, sortRows } from "@/app/utils/list.util";
@@ -33,7 +36,7 @@ export const getActualisationStatus = (
     return "A_DEBUTER";
   }
   const campaign = campaigns.find(
-    (candidate) => candidate.slug === actualisationCampaignDefinitionSlug(year)
+    (candidate) => candidate.slug === getActualisationFormSlug(year)
   );
   if (!campaign) {
     return "A_DEBUTER";
@@ -134,8 +137,12 @@ export const buildDashboardRows = (
       continue;
     }
 
-    const initialisationStatus = getInitialisationStatus(structure.forms);
-    const campaigns = buildStructureCampaigns(structure.structureVersions);
+    const initialisationStatus = getInitialisationStatus(
+      structure.forms.filter(
+        (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG
+      )
+    );
+    const campaigns = buildStructureCampaigns(structure.forms);
     const actualisationStatus = getActualisationStatus(campaigns, options.year);
 
     if (!isOpen(initialisationStatus, actualisationStatus)) {

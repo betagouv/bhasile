@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { getActualisationYear } from "@/app/api/campaigns/campaign.util";
+import { getActualisationYear } from "@/app/api/structures/actualisation.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructureHeader } from "./_components/_header/StructureHeader";
