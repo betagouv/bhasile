@@ -67,19 +67,19 @@ export const structureSubventionneesDocuments: StructureDocument[] = [
   {
     label: "Demande de subvention",
     value: "DEMANDE_SUBVENTION",
-    yearIndex: baseYearIndex + 1,
+    yearIndex: baseYearIndex + 2,
     required: true,
   },
   {
     label: "Compte-rendu financier",
     value: "COMPTE_RENDU_FINANCIER",
-    yearIndex: baseYearIndex + 1,
+    yearIndex: baseYearIndex + 2,
     required: true,
   },
   {
     label: "Rapport d'activité de l'opérateur",
     value: "RAPPORT_ACTIVITE_OPERATEUR",
-    yearIndex: baseYearIndex + 1,
+    yearIndex: baseYearIndex + 2,
     required: true,
   },
   {

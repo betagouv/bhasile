@@ -2,13 +2,19 @@ import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
-export const NotesBlock = (): ReactElement => {
+export const NotesBlock = (): ReactElement | null => {
   const { structure } = useStructureContext();
+  const canEdit = useCanUpdateStructure(structure);
 
   const router = useRouter();
+
+  if (!canEdit) {
+    return null;
+  }
 
   return (
     <Block

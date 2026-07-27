@@ -18,7 +18,7 @@ import type {
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
-import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.utils";
+import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 
 /** Année plancher des EIG remontés dans les stats (borne haute = année courante). */
 const EIG_STATS_MIN_YEAR = 2015;

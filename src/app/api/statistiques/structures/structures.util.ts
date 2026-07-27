@@ -32,7 +32,7 @@ import {
   getTypologieMapForExactYear,
   mapTypologieYears,
   resolveStructuresWithTypologieForYear,
-} from "../statistiques.utils";
+} from "../statistiques.util";
 
 const getRepartitionFromRepartitions = (
   repartitions: (Repartition | null | undefined)[]
