@@ -23,11 +23,20 @@ const prisma = createPrismaClient();
 async function main() {
   console.log("🚀 Capture des années d'origine dans yearOrigin...");
 
-  const captured = await prisma.$executeRaw`
-    UPDATE "StructureTypologie"
-    SET "yearOrigin" = "year"
-    WHERE "yearOrigin" IS NULL AND "structureId" IS NOT NULL
-  `;
+  const toCapture = await prisma.structureTypologie.findMany({
+    where: { yearOrigin: null, structureId: { not: null } },
+    select: { id: true, year: true },
+  });
+
+  await prisma.$transaction(
+    toCapture.map((typologie) =>
+      prisma.structureTypologie.update({
+        where: { id: typologie.id },
+        data: { yearOrigin: typologie.year },
+      })
+    )
+  );
+  const captured = toCapture.length;
 
   console.log(`📌 ${captured} année(s) d'origine figée(s).`);
   console.log(

@@ -10,7 +10,7 @@
 //    référence n'est correcte qu'une fois le décalage 1er-janv → 31-déc fait).
 // Idempotent : le report est une fonction pure de ST[seuil-1] ; le vidage ≥ seuil
 // est rejouable.
-// Usage: yarn one-off 20260717-backfill-structure-version-places-autorisees
+// Usage: yarn one-off 20260719-backfill-structure-version-places-autorisees
 
 import "dotenv/config";
 
@@ -22,7 +22,16 @@ const prisma = createPrismaClient();
 
 async function main() {
   console.log("🚀 Backfill des places autorisées sur StructureVersion...");
-  console.log(`   Année legacy de référence : ${PLACES_VERSIONED_FROM_YEAR - 1}`);
+  console.log(`Année legacy de référence : ${PLACES_VERSIONED_FROM_YEAR - 1}`);
+
+  const notShifted = await prisma.structureTypologie.count({
+    where: { yearOrigin: null, structureId: { not: null } },
+  });
+  if (notShifted > 0) {
+    throw new Error(
+      `${notShifted} typologie(s) legacy sans yearOrigin : lancer d'abord 20260718-capture-typologie-year-origin puis 20260718-shift-typologie-years-to-december. Sans décalage, l'année legacy de référence lue ici serait fausse.`
+    );
+  }
 
   const filledVersions = await mirrorLegacyPlacesToBaseVersions(prisma);
   console.log(`✅ ${filledVersions} version(s) de base alignée(s).`);
@@ -38,12 +47,13 @@ async function main() {
     );
   }
 
-  const cleared = await prisma.$executeRaw`
-    UPDATE "StructureTypologie"
-    SET "placesAutorisees" = NULL
-    WHERE "year" >= ${PLACES_VERSIONED_FROM_YEAR}
-      AND "placesAutorisees" IS NOT NULL
-  `;
+  const { count: cleared } = await prisma.structureTypologie.updateMany({
+    where: {
+      year: { gte: PLACES_VERSIONED_FROM_YEAR },
+      placesAutorisees: { not: null },
+    },
+    data: { placesAutorisees: null },
+  });
   console.log(
     `🧹 ${cleared} typologie(s) ≥ ${PLACES_VERSIONED_FROM_YEAR} vidée(s) de leurs places.`
   );
