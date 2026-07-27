@@ -16,7 +16,6 @@ export const NotificationsCarousel = ({
     goToNext,
     handleKeyDown,
     getSlideAnimationClassName,
-    clearPreviousOnAnimationEnd,
   } = useCarousel(notifications.length);
   const hasMultiple = notifications.length > 1;
 
@@ -64,16 +63,12 @@ export const NotificationsCarousel = ({
           <div
             key={notification.id}
             className={cn(
-              "col-start-1 row-start-1 border-l-4 border-default-blue-france ml-8 pl-8 text-sm text-text-default-grey [&_a]:text-title-blue-france [&_a]:underline",
+              "col-start-1 row-start-1 border-l-4 border-default-blue-france ml-8 pl-8 text-sm text-text-default-grey",
               getSlideAnimationClassName(slideIndex)
             )}
             aria-hidden={slideIndex !== index}
-            onAnimationEnd={clearPreviousOnAnimationEnd(slideIndex)}
           >
-            <div
-              className="max-w-3xl"
-              dangerouslySetInnerHTML={{ __html: notification.content }}
-            />
+            <p className="max-w-3xl">{notification.content}</p>
           </div>
         ))}
       </div>

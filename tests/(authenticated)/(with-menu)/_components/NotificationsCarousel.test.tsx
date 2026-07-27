@@ -1,13 +1,14 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NotificationsCarousel } from "@/app/(authenticated)/(with-menu)/_components/NotificationsCarousel";
+import { SLIDE_ANIMATION_DURATION_MS } from "@/app/hooks/useCarousel";
 import { DashboardNotification } from "@/types/dashboard.type";
 
 const notifications: DashboardNotification[] = [
-  { id: 1, content: "<p>Alpha</p>" },
-  { id: 2, content: "<p>Bravo</p>" },
-  { id: 3, content: "<p>Charlie</p>" },
+  { id: 1, content: "Alpha" },
+  { id: 2, content: "Bravo" },
+  { id: 3, content: "Charlie" },
 ];
 
 const renderCarousel = (
@@ -23,6 +24,10 @@ const activeSlideText = (): string =>
     ?.textContent ?? "";
 
 describe("NotificationsCarousel", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("affiche la première notification et le compteur", () => {
     renderCarousel();
 
@@ -68,8 +73,14 @@ describe("NotificationsCarousel", () => {
     expect(activeSlideText()).toBe("Charlie");
   });
 
+  it("affiche le contenu en texte brut sans interpréter le HTML", () => {
+    renderCarousel([{ id: 1, content: "<strong>Alerte</strong>" }]);
+
+    expect(activeSlideText()).toBe("<strong>Alerte</strong>");
+  });
+
   it("masque les contrôles quand il n'y a qu'une seule notification", () => {
-    renderCarousel([{ id: 1, content: "<p>Seule</p>" }]);
+    renderCarousel([{ id: 1, content: "Seule" }]);
 
     expect(
       screen.queryByRole("button", { name: "Notification suivante" })
@@ -105,5 +116,20 @@ describe("NotificationsCarousel", () => {
     expect(
       container.querySelector(".animate-slide-out-right")
     ).toBeInTheDocument();
+  });
+
+  it("masque la slide sortante une fois la durée d'animation écoulée", () => {
+    vi.useFakeTimers();
+    const { container } = renderCarousel();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Notification suivante" })
+    );
+    act(() => {
+      vi.advanceTimersByTime(SLIDE_ANIMATION_DURATION_MS);
+    });
+
+    expect(container.querySelector(".animate-slide-out-left")).toBeNull();
+    expect(container.querySelectorAll(".invisible")).toHaveLength(2);
   });
 });

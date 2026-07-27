@@ -5,19 +5,19 @@ const addDaysToNow = (days: number): Date =>
 
 export const createNotificationsList = (): Omit<Notification, "id">[] => [
   {
-    content: `<p>La date limite pour <strong>l’initialisation des structures dans l’outil Bhasile</strong> est prévue au 31/08/2026. Passé cette date, ce sont les agents qui seront responsables de la saisie de l’ensemble des données des structures non initialisées.</p>`,
+    content: `La date limite pour l’initialisation des structures dans l’outil Bhasile est prévue au 31/08/2026. Passé cette date, ce sont les agents qui seront responsables de la saisie de l’ensemble des données des structures non initialisées.`,
     startDate: addDaysToNow(-2),
     endDate: addDaysToNow(20),
     createdAt: addDaysToNow(-2),
   },
   {
-    content: `<p>La maintenance planifiée est terminée.</p><hr/><p>Merci de votre patience.</p>`,
+    content: `La maintenance planifiée est terminée. Merci de votre patience.`,
     startDate: null,
     endDate: null,
     createdAt: addDaysToNow(-10),
   },
   {
-    content: `<p>Cette notification ne s'affiche pas.</p>`,
+    content: `Cette notification ne s'affiche pas.`,
     startDate: addDaysToNow(-30),
     endDate: addDaysToNow(-5),
     createdAt: addDaysToNow(-30),

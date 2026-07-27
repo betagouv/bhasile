@@ -1,6 +1,8 @@
-import { KeyboardEvent, useState } from "react";
+import { KeyboardEvent, useEffect, useState } from "react";
 
 type CarouselDirection = "next" | "prev";
+
+export const SLIDE_ANIMATION_DURATION_MS = 300;
 
 const prefersReducedMotion = (): boolean =>
   typeof window !== "undefined" &&
@@ -21,6 +23,17 @@ export const useCarousel = (length: number) => {
     setPreviousIndex(index);
     setIndex(nextIndex);
   };
+
+  useEffect(() => {
+    if (previousIndex === null) {
+      return;
+    }
+    const timeoutId = setTimeout(
+      () => setPreviousIndex(null),
+      SLIDE_ANIMATION_DURATION_MS
+    );
+    return () => clearTimeout(timeoutId);
+  }, [previousIndex]);
 
   const goToPrevious = (): void => goTo((index - 1 + length) % length, "prev");
   const goToNext = (): void => goTo((index + 1) % length, "next");
@@ -49,17 +62,11 @@ export const useCarousel = (length: number) => {
     return "invisible";
   };
 
-  const clearPreviousOnAnimationEnd = (
-    slideIndex: number
-  ): (() => void) | undefined =>
-    slideIndex === previousIndex ? () => setPreviousIndex(null) : undefined;
-
   return {
     index,
     goToPrevious,
     goToNext,
     handleKeyDown,
     getSlideAnimationClassName,
-    clearPreviousOnAnimationEnd,
   };
 };
