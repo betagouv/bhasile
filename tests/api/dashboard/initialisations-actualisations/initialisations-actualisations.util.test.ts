@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { DashboardStructure } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.db.type";
-import { DashboardStructureRow } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.type";
 import {
   buildDashboardRows,
   getActualisationStatus,
@@ -15,6 +14,7 @@ import {
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
+import { DashboardStructureRow } from "@/types/dashboard.type";
 import { StepStatus } from "@/types/form.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
