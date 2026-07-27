@@ -1,5 +1,5 @@
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
+import { CURRENT_YEAR, PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { minioClient } from "@/lib/minio";
 import { ControleType } from "@/types/controle.type";
 
@@ -12,8 +12,14 @@ import {
   seedValidStructureTypologies,
 } from "../seed/structure.seed";
 
+// Les places ≥ PLACES_VERSIONED_FROM_YEAR sont désormais gérées via
+// contraction/extension : leur cellule est désactivée dans le tableau. Seules
+// les années légères (< seuil) restent éditables ici.
 const TYPE_PLACES_CURRENT_YEAR_ROW_INDEX =
   getTypePlacesYearRange().years.indexOf(CURRENT_YEAR);
+const TYPE_PLACES_EDITABLE_YEAR = PLACES_VERSIONED_FROM_YEAR - 1;
+const TYPE_PLACES_EDITABLE_YEAR_ROW_INDEX =
+  getTypePlacesYearRange().years.indexOf(TYPE_PLACES_EDITABLE_YEAR);
 const FINANCE_CURRENT_YEAR_ROW_INDEX =
   getYearRange().years.indexOf(CURRENT_YEAR);
 
@@ -77,16 +83,21 @@ test.describe("Structure modification", () => {
     const newPlacesAutorisees = 42;
 
     await modification.goto("type-places");
+    // L'année courante (≥ seuil) est verrouillée : elle ne se modifie que par
+    // contraction/extension.
+    await expect(
+      modification.placesAutoriseesInput(TYPE_PLACES_CURRENT_YEAR_ROW_INDEX)
+    ).toBeDisabled();
     await modification.fillPlacesAutorisees(
-      TYPE_PLACES_CURRENT_YEAR_ROW_INDEX,
+      TYPE_PLACES_EDITABLE_YEAR_ROW_INDEX,
       newPlacesAutorisees
     );
     await modification.submitAndWaitForSave();
 
     const persisted = await prisma.structureTypologie.findFirstOrThrow({
       where: {
-        structureVersionId: seededStructure.structureVersionId,
-        year: CURRENT_YEAR,
+        structureId: seededStructure.id,
+        year: TYPE_PLACES_EDITABLE_YEAR,
       },
       select: { placesAutorisees: true },
     });
