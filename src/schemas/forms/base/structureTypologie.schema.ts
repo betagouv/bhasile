@@ -7,6 +7,12 @@ import {
 } from "@/app/utils/zodCustomFields";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 
+// Cas commun (tableau par année : modif / actualisation / finalisation) :
+// placesAutorisees ≥ seuil est dérivée de la version courante et affichée en
+// lecture seule → nullable. L'exigence « rempli pour les années legacy » est
+// portée par le wrapper structureTypologiesSchema (superRefine), pas ici : un
+// refine transformerait cet objet en ZodEffects et casserait le .partial() de
+// l'autosave.
 export const structureTypologieSchema = z.object({
   id: zId(),
   placesAutorisees: zSafePositiveInteger().nullish(),
