@@ -130,6 +130,7 @@ export const updateOne = async (
 
     if (isFinalizing) {
       await createStructuresForCreationBlocks(tx, input.id);
+      await copyStructureTypologiesToStructures(tx, input.id);
       await moveActesAdministratifsToStructures(tx, input.id);
       await endDnaStructuresForFermetureBlocks(tx, input.id);
       await setFermetureDates(tx, input.id);
@@ -234,6 +235,52 @@ const endDnaStructuresForFermetureBlocks = async (
       where: { structureVersionId: structureVersion.id, endDate: null },
       data: { endDate: structureVersion.effectiveDate },
     });
+  }
+};
+
+const copyStructureTypologiesToStructures = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const structureVersionTransformations =
+    await tx.structureVersionTransformation.findMany({
+      where: { transformationId },
+      select: {
+        structureVersion: { select: { structureId: true } },
+        structureTypologies: {
+          select: {
+            year: true,
+            placesAutorisees: true,
+            pmr: true,
+            lgbt: true,
+            fvvTeh: true,
+          },
+        },
+      },
+    });
+
+  for (const structureVersionTransformation of structureVersionTransformations) {
+    const structureId =
+      structureVersionTransformation.structureVersion?.structureId ?? null;
+
+    if (
+      !structureId ||
+      !structureVersionTransformation.structureTypologies.length
+    ) {
+      continue;
+    }
+
+    await createOrUpdateStructureTypologies(
+      tx,
+      structureVersionTransformation.structureTypologies.map((typologie) => ({
+        year: typologie.year,
+        placesAutorisees: typologie.placesAutorisees ?? undefined,
+        pmr: typologie.pmr ?? undefined,
+        lgbt: typologie.lgbt ?? undefined,
+        fvvTeh: typologie.fvvTeh ?? undefined,
+      })),
+      { structureId }
+    );
   }
 };
 

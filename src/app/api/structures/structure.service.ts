@@ -2,6 +2,7 @@ import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows } from "@/app/utils/list.util";
 import {
+  getMostRecentMillesime,
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
@@ -315,7 +316,10 @@ const dbStructureToApiRead = (
     buildAdresseAdministrativeComplete(dbStructure);
   const typeBati = getTypeBati(dbStructure);
 
-  const latestTypologie = dbStructure.structureTypologies?.[0];
+  const latestTypologie = getMostRecentMillesime(
+    dbStructure.structureTypologies,
+    { currentYear: now.getFullYear() }
+  );
   const lgbt = (latestTypologie?.lgbt ?? 0) > 0;
   const fvvTeh = (latestTypologie?.fvvTeh ?? 0) > 0;
 

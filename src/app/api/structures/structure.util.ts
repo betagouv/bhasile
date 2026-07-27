@@ -12,6 +12,7 @@ import {
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
+import { getMostRecentMillesime } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
   PublicType,
@@ -330,8 +331,11 @@ export const computeStructureListRow = (
     placesAutorisees: currentVersion.placesAutorisees ?? null,
     latestNonNullPlacesAutorisees:
       currentVersion.placesAutorisees ??
-      structure.structureTypologies.find(
-        (typologie) => typologie.placesAutorisees != null
+      getMostRecentMillesime(
+        structure.structureTypologies.filter(
+          (typologie) => typologie.placesAutorisees != null
+        ),
+        { currentYear: now.getFullYear() }
       )?.placesAutorisees ??
       null,
     finConvention: getDatesConvention(structure)[1],

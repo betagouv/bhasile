@@ -387,7 +387,9 @@ const resolveSourceTypologie = <T extends { year: number }>(
     return undefined;
   }
   const index = getMillesimeIndexForAYear(typologies, year);
-  return index >= 0 ? typologies[index] : getMostRecentMillesime(typologies);
+  return index >= 0
+    ? typologies[index]
+    : getMostRecentMillesime(typologies, { canBeFuture: true });
 };
 
 export const getPlacesSource = (

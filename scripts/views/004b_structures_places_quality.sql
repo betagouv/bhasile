@@ -60,6 +60,12 @@ WITH
     FROM
 :"SCHEMA"."structures_core" sc
       INNER JOIN public."StructureTypologie" st ON st."structureId" = sc."id"
+    WHERE
+      st."year" <= EXTRACT(
+        YEAR
+        FROM
+          CURRENT_DATE
+      )
     GROUP BY
       sc."id"
   ),
@@ -75,6 +81,12 @@ WITH
     FROM
 :"SCHEMA"."structures_core" sc
       INNER JOIN public."StructureTypologie" st ON st."structureId" = sc."id"
+    WHERE
+      st."year" <= EXTRACT(
+        YEAR
+        FROM
+          CURRENT_DATE
+      )
     GROUP BY
       sc."id"
   )

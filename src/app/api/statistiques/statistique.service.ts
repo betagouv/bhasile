@@ -89,7 +89,7 @@ export const buildStatistiquesContext = async (
     ]);
 
   const resolvedTypologies = applyVersionedPlacesToTypologies(
-    typologies,
+    typologies.filter((typologie) => typologie.year <= referenceYear),
     structureVersionTimeline,
     now
   );
