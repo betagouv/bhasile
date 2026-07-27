@@ -22,7 +22,7 @@ export const CpomDocumentsFinanciers = ({
   const startYear = getYearFromDate(cpom.dateStart);
 
   return (
-    <div>
+    <>
       <MaxSizeNotice />
       {years.map((year) => (
         <DocumentsFinanciersAccordion
@@ -47,7 +47,7 @@ export const CpomDocumentsFinanciers = ({
           </div>
         </DocumentsFinanciersAccordion>
       ))}
-    </div>
+    </>
   );
 };
 
