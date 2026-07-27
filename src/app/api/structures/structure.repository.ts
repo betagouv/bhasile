@@ -1,3 +1,4 @@
+import { getNow } from "@/app/utils/now.util";
 import { Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
@@ -125,7 +126,7 @@ const writeToCurrentVersion = async (
   const currentVersion = await tx.structureVersion.findFirst({
     where: {
       structureId: structure.id,
-      ...currentVersionWhere(new Date()),
+      ...currentVersionWhere(getNow()),
     },
     orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
     select: { id: true, effectiveDate: true },

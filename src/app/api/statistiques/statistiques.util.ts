@@ -4,6 +4,7 @@ import {
   startOfUtcDay,
 } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
+import { getNow } from "@/app/utils/now.util";
 import {
   EXCLUDED_STRUCTURE_TYPES,
   PLACES_VERSIONED_FROM_YEAR,
@@ -283,7 +284,7 @@ export const filterByEffectiveVersionAtDate = <
   structureIds: Iterable<number>,
   date: Date,
   timeline: StatistiqueDbStructureVersionTimeline[],
-  now: Date = new Date()
+  now: Date = getNow()
 ): Row[] => {
   const cappedDate = date < now ? date : now;
   const effectiveVersionIdByStructureId = new Map<number, number>();

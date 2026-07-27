@@ -2,6 +2,7 @@ import {
   getEffectiveEndDate,
   isCurrentlyInEffect,
 } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export type ActeDateTuple = [Date | null, Date | null];
@@ -14,7 +15,9 @@ export type ActeAdministratifDates = {
   endDate: Date | null;
 };
 
-const getMostRecentByEndDate = <ActeWithEndDate extends { endDate: Date | null }>(
+const getMostRecentByEndDate = <
+  ActeWithEndDate extends { endDate: Date | null },
+>(
   actes: ActeWithEndDate[]
 ): ActeWithEndDate | undefined => {
   let mostRecentActe: ActeWithEndDate | undefined;
@@ -59,7 +62,7 @@ export const getDatesOfCurrentActeAdministratif = (
 
   const currentActeAdministratif = current
     ? (periods.find((period) =>
-        isCurrentlyInEffect(period.startDate, period.endDate, new Date())
+        isCurrentlyInEffect(period.startDate, period.endDate, getNow())
       ) ?? getMostRecentByEndDate(periods))
     : periods[0];
 
@@ -67,8 +70,5 @@ export const getDatesOfCurrentActeAdministratif = (
     return [null, null];
   }
 
-  return [
-    currentActeAdministratif.startDate,
-    currentActeAdministratif.endDate,
-  ];
+  return [currentActeAdministratif.startDate, currentActeAdministratif.endDate];
 };

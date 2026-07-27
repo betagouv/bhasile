@@ -1,6 +1,7 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows } from "@/app/utils/list.util";
+import { getNow } from "@/app/utils/now.util";
 import {
   getMostRecentMillesime,
   isStructureAutorisee,
@@ -147,7 +148,7 @@ export const getFullStructures = async (
   structures: StructureApiRead[];
   totalStructures: number;
 }> => {
-  const now = new Date();
+  const now = getNow();
   const rows = await computeAllStructureRows(now);
 
   const filtered = filterStructureRows(rows, props, {
@@ -220,7 +221,7 @@ export const getFullStructures = async (
 
 export const getResolvedStructure = async (
   id: number,
-  now: Date = new Date()
+  now: Date = getNow()
 ): Promise<StructureDbDetails | null> => {
   const dbStructure = await findOne(id);
   if (!dbStructure) {
@@ -239,7 +240,7 @@ export const getFullStructure = async (
   id: number,
   user?: SessionUser
 ): Promise<StructureApiRead | null> => {
-  const now = new Date();
+  const now = getNow();
   const resolvedDbStructure = await getResolvedStructure(id, now);
 
   if (!resolvedDbStructure) {
@@ -267,7 +268,7 @@ export const getStructureDepartement = async (
 ): Promise<string | null> => {
   const { departementAdministratif } = await findStructureDepartement(
     id,
-    new Date()
+    getNow()
   );
   return departementAdministratif;
 };

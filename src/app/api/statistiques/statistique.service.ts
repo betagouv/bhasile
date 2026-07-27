@@ -1,3 +1,4 @@
+import { getNow } from "@/app/utils/now.util";
 import {
   StatistiqueApiRead,
   StatistiquesFilters,
@@ -61,7 +62,7 @@ const resolveStatistiquesPerimeterFilters = async (
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters
 ): Promise<StatistiquesContext | null> => {
-  const now = new Date();
+  const now = getNow();
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);

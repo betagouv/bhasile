@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+import { getNow } from "@/app/utils/now.util";
 import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
@@ -121,7 +122,7 @@ export const getLastVisitInMonths = (
       ? dayjs(controles[0]?.date)
       : dayjs(evaluations[0]?.date);
   }
-  return dayjs().diff(mostRecentVisit, "month");
+  return dayjs(getNow()).diff(mostRecentVisit, "month");
 };
 
 export const isStructureAutorisee = (
@@ -157,7 +158,7 @@ export const getCurrentCpomStructure = (
     if (!dateStart || !dateEnd) {
       return false;
     }
-    const now = new Date().toISOString();
+    const now = getNow().toISOString();
     return dateStart <= now && dateEnd >= now;
   });
 };

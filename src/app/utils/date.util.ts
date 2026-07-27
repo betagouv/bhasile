@@ -4,6 +4,8 @@ import dayjs from "dayjs";
 
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
 
+import { getNow } from "./now.util";
+
 dayjs.locale("fr");
 
 export const formatDate = (
@@ -58,7 +60,7 @@ export const formatDateToIsoString = (
   return undefined;
 };
 
-export const startOfUtcDay = (reference: Date = new Date()): Date => {
+export const startOfUtcDay = (reference: Date = getNow()): Date => {
   const startDay = new Date(reference);
   startDay.setUTCHours(0, 0, 0, 0);
   return startDay;
@@ -91,7 +93,7 @@ export const getMonthsBetween = (
 
 export const getLastMonths = (numberOfMonths: number): dayjs.Dayjs[] => {
   return Array.from({ length: numberOfMonths }, (_, index) => {
-    return dayjs().subtract(index, "month");
+    return dayjs(getNow()).subtract(index, "month");
   }).reverse();
 };
 
@@ -194,7 +196,7 @@ export const getElapsedPercentage = ({
   dateStart: string;
   dateEnd: string;
 }): number => {
-  const now = dayjs();
+  const now = dayjs(getNow());
   const start = dayjs(dateStart);
   const end = dayjs(dateEnd);
 

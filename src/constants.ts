@@ -1,3 +1,4 @@
+import { getNow } from "./app/utils/now.util";
 import { Departement, Region } from "./types/departement.type";
 import { StructureType } from "./types/structure.type";
 
@@ -26,7 +27,7 @@ export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 
 export const START_YEAR = 2021;
 
-export const CURRENT_YEAR = new Date().getFullYear();
+export const CURRENT_YEAR = getNow().getFullYear();
 
 export const PLACES_VERSIONED_FROM_YEAR =
   Number(process.env.NEXT_PUBLIC_PLACES_VERSIONED_FROM_YEAR) || 2026;
