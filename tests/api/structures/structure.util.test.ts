@@ -8,7 +8,6 @@ import {
 } from "@/app/api/structures/structure.db.type";
 import { SearchProps } from "@/app/api/structures/structure.service";
 import {
-  buildStructureCampaigns,
   computeStructureListRow,
   filterStructureRows,
   getDatesConvention,
@@ -22,7 +21,6 @@ import {
 } from "@/app/api/structures/structure.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
-import { StepStatus } from "@/types/form.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
@@ -605,9 +603,7 @@ describe("getReadableNotes", () => {
 });
 
 describe("getReadableAdresses", () => {
-  const buildStructure = (
-    adresse: Record<string, unknown>
-  ): StructureApiRead =>
+  const buildStructure = (adresse: Record<string, unknown>): StructureApiRead =>
     ({
       departementAdministratif: "75",
       adresses: [adresse],
@@ -674,51 +670,6 @@ describe("getReadableAdresses", () => {
         commune: null,
         adresseComplete: "69001",
       },
-    ]);
-  });
-});
-
-describe("buildStructureCampaigns", () => {
-  const form = (
-    slug: string,
-    status: boolean,
-    formSteps: { status: StepStatus; stepDefinition: { slug: string } }[] = []
-  ) => ({ status, formDefinition: { slug }, formSteps });
-  it("projette slug + isValidated + formSteps depuis le form d'actualisation", () => {
-    const campaigns = buildStructureCampaigns([
-      form("actualisation-2026", true, [
-        { status: StepStatus.VALIDE, stepDefinition: { slug: "01-places" } },
-      ]),
-    ]);
-
-    expect(campaigns).toEqual([
-      {
-        slug: "actualisation-2026",
-        isValidated: true,
-        formSteps: [{ slug: "01-places", status: StepStatus.VALIDE }],
-      },
-    ]);
-  });
-
-  it("marque isValidated=false quand le form n'est pas validé", () => {
-    expect(
-      buildStructureCampaigns([form("actualisation-2026", false)])
-    ).toEqual([{ slug: "actualisation-2026", isValidated: false, formSteps: [] }]);
-  });
-
-  it("ignore les forms qui ne sont pas des actualisations", () => {
-    expect(buildStructureCampaigns([form("finalisation-v1", true)])).toEqual([]);
-  });
-
-  it("expose une entrée par année d'actualisation", () => {
-    const campaigns = buildStructureCampaigns([
-      form("actualisation-2026", true),
-      form("actualisation-2027", false),
-    ]);
-
-    expect(campaigns.map((campaign) => campaign.slug)).toEqual([
-      "actualisation-2026",
-      "actualisation-2027",
     ]);
   });
 });
