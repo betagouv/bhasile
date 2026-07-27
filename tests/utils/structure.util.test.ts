@@ -11,6 +11,7 @@ import {
   getFermetureEvent,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
+  getMostRecentMillesime,
   getPlacesByCommunes,
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -92,9 +93,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 1, adresses: [] });
 
       // WHEN
-      const typeBati = getTypeBati(
-        structure as unknown as StructureDbDetails
-      );
+      const typeBati = getTypeBati(structure as unknown as StructureDbDetails);
 
       // THEN
       expect(typeBati).toBeUndefined();
@@ -108,9 +107,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 2, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(
-        structure as unknown as StructureDbDetails
-      );
+      const typeBati = getTypeBati(structure as unknown as StructureDbDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.COLLECTIF);
@@ -124,9 +121,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 3, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(
-        structure as unknown as StructureDbDetails
-      );
+      const typeBati = getTypeBati(structure as unknown as StructureDbDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.DIFFUS);
@@ -139,9 +134,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 4, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(
-        structure as unknown as StructureDbDetails
-      );
+      const typeBati = getTypeBati(structure as unknown as StructureDbDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.MIXTE);
@@ -1372,6 +1365,57 @@ describe("structure util", () => {
 
     it("retourne undefined quand history est absent", () => {
       expect(getFermetureEvent(buildStructure())).toBeUndefined();
+    });
+  });
+
+  describe("getMostRecentMillesime", () => {
+    const millesimes = [
+      { year: 2024, placesAutorisees: 10 },
+      { year: 2026, placesAutorisees: 30 },
+      { year: 2025, placesAutorisees: 20 },
+    ];
+
+    it("retourne le millésime le plus récent sans dépendre de l'ordre du tableau", () => {
+      expect(getMostRecentMillesime(millesimes, { currentYear: 2026 })).toEqual(
+        {
+          year: 2026,
+          placesAutorisees: 30,
+        }
+      );
+    });
+
+    it("ignore les millésimes d'années futures", () => {
+      expect(getMostRecentMillesime(millesimes, { currentYear: 2025 })).toEqual(
+        {
+          year: 2025,
+          placesAutorisees: 20,
+        }
+      );
+    });
+
+    it("retourne le millésime futur quand canBeFuture est activé", () => {
+      expect(
+        getMostRecentMillesime(millesimes, {
+          currentYear: 2024,
+          canBeFuture: true,
+        })
+      ).toEqual({ year: 2026, placesAutorisees: 30 });
+    });
+
+    it("retourne undefined quand tous les millésimes sont futurs", () => {
+      expect(
+        getMostRecentMillesime(millesimes, { currentYear: 2023 })
+      ).toBeUndefined();
+    });
+
+    it("retourne undefined pour un tableau vide", () => {
+      expect(getMostRecentMillesime([], { currentYear: 2026 })).toBeUndefined();
+    });
+
+    it("retourne undefined quand les millésimes sont absents", () => {
+      expect(
+        getMostRecentMillesime(undefined, { currentYear: 2026 })
+      ).toBeUndefined();
     });
   });
 });

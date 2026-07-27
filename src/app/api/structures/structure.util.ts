@@ -12,6 +12,7 @@ import {
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
+import { getMostRecentMillesime } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
   PublicType,
@@ -146,8 +147,8 @@ const getCurrentPlacesByProperty = (
   structure: StructureDbDetails | StructureDbList,
   accessor: keyof AdresseTypologieApiType
 ): number => {
-  const mostRecentYearTypologies = structure.adresses?.map(
-    (adresse) => adresse.adresseTypologies?.[0]
+  const mostRecentYearTypologies = structure.adresses?.map((adresse) =>
+    getMostRecentMillesime(adresse.adresseTypologies)
   );
   const placesByAccessor = mostRecentYearTypologies?.reduce(
     (totalCount, currentTypologie) =>
@@ -331,8 +332,11 @@ export const computeStructureListRow = (
     placesAutorisees: currentVersion.placesAutorisees ?? null,
     latestNonNullPlacesAutorisees:
       currentVersion.placesAutorisees ??
-      structure.structureTypologies.find(
-        (typologie) => typologie.placesAutorisees != null
+      getMostRecentMillesime(
+        structure.structureTypologies.filter(
+          (typologie) => typologie.placesAutorisees != null
+        ),
+        { currentYear: now.getFullYear() }
       )?.placesAutorisees ??
       null,
     finConvention: getDatesConvention(structure)[1],

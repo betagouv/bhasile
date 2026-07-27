@@ -179,7 +179,9 @@ describe("transformation.repository db integration", () => {
     const transformation = await prisma.transformation.findUniqueOrThrow({
       where: { id: transformationId },
       include: {
-        structureVersionTransformations: { include: { structureVersion: true } },
+        structureVersionTransformations: {
+          include: { structureVersion: true },
+        },
         form: { include: { formDefinition: true } },
       },
     });
@@ -191,7 +193,8 @@ describe("transformation.repository db integration", () => {
       StructureVersionTransformationType.EXTENSION
     );
     expect(
-      transformation.structureVersionTransformations[0].structureVersion?.structureId
+      transformation.structureVersionTransformations[0].structureVersion
+        ?.structureId
     ).toBe(structure.id);
     expect(transformation.form).not.toBeNull();
     expect(transformation.form?.formDefinition.slug).toBe("transformation-v1");
@@ -201,8 +204,12 @@ describe("transformation.repository db integration", () => {
     const { transformationId } = await createBareTransformation();
     const row = await findOne(transformationId);
     expect(row.id).toBe(transformationId);
-    expect(row.structureVersionTransformations.length).toBeGreaterThanOrEqual(1);
-    expect(row.structureVersionTransformations[0].structureVersion).toBeDefined();
+    expect(row.structureVersionTransformations.length).toBeGreaterThanOrEqual(
+      1
+    );
+    expect(
+      row.structureVersionTransformations[0].structureVersion
+    ).toBeDefined();
     expect(
       row.structureVersionTransformations[0].structureVersion?.structure
     ).toBeDefined();
@@ -236,8 +243,11 @@ describe("transformation.repository db integration", () => {
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
     const departement = await prisma.departement.findFirstOrThrow();
 
     await updateOne({
@@ -283,8 +293,11 @@ describe("transformation.repository db integration", () => {
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
     const fermetureDate = "2024-09-30T00:00:00.000Z";
 
     await updateOne({
@@ -308,8 +321,11 @@ describe("transformation.repository db integration", () => {
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
     await prisma.contact.create({
       data: {
         structureVersionId,
@@ -350,8 +366,11 @@ describe("transformation.repository db integration", () => {
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
     const oldAdresse = await prisma.adresse.create({
       data: {
         structureVersionId,
@@ -394,8 +413,11 @@ describe("transformation.repository db integration", () => {
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
     await prisma.antenne.create({
       data: {
         structureVersionId,
@@ -427,8 +449,11 @@ describe("transformation.repository db integration", () => {
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
     await prisma.structureFiness.create({
       data: {
         structureVersion: { connect: { id: structureVersionId } },
@@ -462,8 +487,11 @@ describe("transformation.repository db integration", () => {
   });
 
   it("répartit les places sur la version et le détail sur la SVT (split précoce)", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
 
     await updateOne({
       id: transformationId,
@@ -474,9 +502,7 @@ describe("transformation.repository db integration", () => {
             id: structureVersionId,
             placesAutorisees: 33,
           },
-          structureTypologies: [
-            { year: 2024, pmr: 4, lgbt: 1, fvvTeh: 0 },
-          ],
+          structureTypologies: [{ year: 2024, pmr: 4, lgbt: 1, fvvTeh: 0 }],
         },
       ],
     });
@@ -503,8 +529,11 @@ describe("transformation.repository db integration", () => {
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
     const oldDna = await prisma.dna.create({
       data: { code: `DNA-TF-TEST-OLD-${randomUUID()}` },
     });
@@ -642,7 +671,9 @@ describe("transformation.repository db integration", () => {
         where: { transformationId },
       });
     const structureVersion = await prisma.structureVersion.findFirst({
-      where: { structureVersionTransformationId: structureVersionTransformation.id },
+      where: {
+        structureVersionTransformationId: structureVersionTransformation.id,
+      },
     });
     expect(structureVersion).toBeNull();
   });
@@ -661,7 +692,9 @@ describe("transformation.repository db integration", () => {
         where: { transformationId },
       });
     const formCount = await prisma.form.count({
-      where: { structureVersionTransformationId: structureVersionTransformation.id },
+      where: {
+        structureVersionTransformationId: structureVersionTransformation.id,
+      },
     });
     expect(formCount).toBeGreaterThan(0);
   });
@@ -686,12 +719,15 @@ describe("transformation.repository db integration", () => {
 
     await updateOne({
       id: transformationId,
-      structureVersionTransformations: [{ id: st.id, operateurId: operateurB.id }],
+      structureVersionTransformations: [
+        { id: st.id, operateurId: operateurB.id },
+      ],
     });
 
-    const updated = await prisma.structureVersionTransformation.findUniqueOrThrow({
-      where: { id: st.id },
-    });
+    const updated =
+      await prisma.structureVersionTransformation.findUniqueOrThrow({
+        where: { id: st.id },
+      });
     expect(updated.operateurId).toBe(operateurB.id);
   });
 
@@ -717,9 +753,10 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [{ id: st.id, operateurId: null }],
     });
 
-    const updated = await prisma.structureVersionTransformation.findUniqueOrThrow({
-      where: { id: st.id },
-    });
+    const updated =
+      await prisma.structureVersionTransformation.findUniqueOrThrow({
+        where: { id: st.id },
+      });
     expect(updated.operateurId).toBeNull();
   });
 
@@ -743,12 +780,15 @@ describe("transformation.repository db integration", () => {
     // Update some other field without touching operateurId
     await updateOne({
       id: transformationId,
-      structureVersionTransformations: [{ id: st.id, motif: "Untouched operateur" }],
+      structureVersionTransformations: [
+        { id: st.id, motif: "Untouched operateur" },
+      ],
     });
 
-    const updated = await prisma.structureVersionTransformation.findUniqueOrThrow({
-      where: { id: st.id },
-    });
+    const updated =
+      await prisma.structureVersionTransformation.findUniqueOrThrow({
+        where: { id: st.id },
+      });
     expect(updated.operateurId).toBe(operateur.id);
     expect(updated.motif).toBe("Untouched operateur");
   });
@@ -850,13 +890,14 @@ describe("transformation.repository db integration", () => {
 
     // read back through the findOne include
     const row = await findOne(transformationId);
-    const structureVersionTransformation = row.structureVersionTransformations.find(
-      (candidate) => candidate.id === structureVersionTransformationId
-    );
+    const structureVersionTransformation =
+      row.structureVersionTransformations.find(
+        (candidate) => candidate.id === structureVersionTransformationId
+      );
     expect(structureVersionTransformation?.actesAdministratifs).toHaveLength(1);
-    expect(structureVersionTransformation?.actesAdministratifs[0].category).toBe(
-      "ARRETE_AUTORISATION"
-    );
+    expect(
+      structureVersionTransformation?.actesAdministratifs[0].category
+    ).toBe("ARRETE_AUTORISATION");
     expect(
       structureVersionTransformation?.actesAdministratifs[0].fileUploads
     ).toMatchObject([{ key: file.key }]);
@@ -1013,10 +1054,14 @@ describe("transformation.repository db integration", () => {
     });
     createdTransformationIds.push(transformationId);
 
-    const fermeture = await prisma.structureVersionTransformation.findFirstOrThrow({
-      where: { transformationId, type: StructureVersionTransformationType.FERMETURE },
-      include: versionRelationsInclude,
-    });
+    const fermeture =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: {
+          transformationId,
+          type: StructureVersionTransformationType.FERMETURE,
+        },
+        include: versionRelationsInclude,
+      });
     const version = fermeture.structureVersion;
     if (!version) {
       throw new Error("La version de la fermeture devrait exister");
@@ -1067,10 +1112,14 @@ describe("transformation.repository db integration", () => {
     });
     createdTransformationIds.push(transformationId);
 
-    const creation = await prisma.structureVersionTransformation.findFirstOrThrow({
-      where: { transformationId, type: StructureVersionTransformationType.CREATION },
-      include: versionRelationsInclude,
-    });
+    const creation =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: {
+          transformationId,
+          type: StructureVersionTransformationType.CREATION,
+        },
+        include: versionRelationsInclude,
+      });
     const version = creation.structureVersion;
     if (!version) {
       throw new Error("La version de la création devrait exister");
@@ -1104,10 +1153,14 @@ describe("transformation.repository db integration", () => {
     });
     createdTransformationIds.push(transformationId);
 
-    const creation = await prisma.structureVersionTransformation.findFirstOrThrow({
-      where: { transformationId, type: StructureVersionTransformationType.CREATION },
-      include: versionRelationsInclude,
-    });
+    const creation =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: {
+          transformationId,
+          type: StructureVersionTransformationType.CREATION,
+        },
+        include: versionRelationsInclude,
+      });
 
     expect(creation.structureVersion?.contacts).toHaveLength(2);
     expect(creation.structureVersion?.antennes).toHaveLength(2);
@@ -1119,9 +1172,10 @@ describe("transformation.repository db integration", () => {
       await createBareTransformation();
 
     const row = await findOne(transformationId);
-    const structureVersionTransformation = row.structureVersionTransformations.find(
-      (candidate) => candidate.id === structureVersionTransformationId
-    );
+    const structureVersionTransformation =
+      row.structureVersionTransformations.find(
+        (candidate) => candidate.id === structureVersionTransformationId
+      );
     const creationForm = structureVersionTransformation?.form;
     expect(creationForm).toBeDefined();
     expect(
@@ -1225,6 +1279,117 @@ describe("transformation.repository db integration", () => {
     // creationDate immuable : dérivée de l'effectiveDate de la version, posée sur la Structure
     expect(structure.creationDate?.toISOString()).toBe(creationDate);
     expect(structure.date303).toBeNull();
+  });
+
+  it("reporte les détails de places déclarés sur la structure à la finalisation, sans toucher au registre de la transformation", async () => {
+    const sourceStructure = await createStructure();
+    await prisma.structureTypologie.create({
+      data: {
+        structureId: sourceStructure.id,
+        year: 2024,
+        pmr: 1,
+        lgbt: 2,
+        fvvTeh: 3,
+      },
+    });
+    const transformationId = await createOne({
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: "2024-06-01T00:00:00.000Z",
+          },
+          structureTypologies: [{ year: 2024, pmr: 7, lgbt: 8, fvvTeh: 9 }],
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const liveTypologie = await prisma.structureTypologie.findFirstOrThrow({
+      where: { structureId: sourceStructure.id, year: 2024 },
+    });
+    expect(liveTypologie).toMatchObject({ pmr: 7, lgbt: 8, fvvTeh: 9 });
+
+    const registryTypologie = await prisma.structureTypologie.findFirstOrThrow({
+      where: {
+        structureVersionTransformation: { transformationId },
+        year: 2024,
+      },
+    });
+    expect(registryTypologie.structureId).toBeNull();
+    expect(registryTypologie).toMatchObject({ pmr: 7, lgbt: 8, fvvTeh: 9 });
+  });
+
+  it("préserve les détails déjà connus de la structure quand la transformation ne les déclare pas", async () => {
+    const sourceStructure = await createStructure();
+    await prisma.structureTypologie.create({
+      data: {
+        structureId: sourceStructure.id,
+        year: 2024,
+        pmr: 4,
+        lgbt: 5,
+        fvvTeh: 6,
+      },
+    });
+    const transformationId = await createOne({
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: "2024-06-01T00:00:00.000Z",
+          },
+          structureTypologies: [{ year: 2024, lgbt: 8 }],
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const liveTypologie = await prisma.structureTypologie.findFirstOrThrow({
+      where: { structureId: sourceStructure.id, year: 2024 },
+    });
+    expect(liveTypologie).toMatchObject({ pmr: 4, lgbt: 8, fvvTeh: 6 });
+  });
+
+  it("reporte un détail déclaré à zéro sur la structure", async () => {
+    const sourceStructure = await createStructure();
+    await prisma.structureTypologie.create({
+      data: {
+        structureId: sourceStructure.id,
+        year: 2024,
+        pmr: 4,
+        lgbt: 5,
+        fvvTeh: 6,
+      },
+    });
+    const transformationId = await createOne({
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: "2024-06-01T00:00:00.000Z",
+          },
+          structureTypologies: [{ year: 2024, lgbt: 0 }],
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const liveTypologie = await prisma.structureTypologie.findFirstOrThrow({
+      where: { structureId: sourceStructure.id, year: 2024 },
+    });
+    expect(liveTypologie.lgbt).toBe(0);
   });
 
   it("définit Structure.fermetureDate à partir de l'effectiveDate de la version lors de la finalisation d'un bloc FERMETURE", async () => {
@@ -1353,7 +1518,9 @@ describe("transformation.repository db integration", () => {
     });
     const structureId = block.structureVersion?.structureId;
     if (!structureId) {
-      throw new Error("La structureVersion devrait être rattachée à une structure");
+      throw new Error(
+        "La structureVersion devrait être rattachée à une structure"
+      );
     }
     createdStructureIds.push(structureId);
 
@@ -1535,7 +1702,10 @@ describe("transformation.repository db integration", () => {
         {
           id: block.id,
           actesAdministratifs: [
-            { category: "ARRETE_AUTORISATION", fileUploads: [{ key: file.key }] },
+            {
+              category: "ARRETE_AUTORISATION",
+              fileUploads: [{ key: file.key }],
+            },
           ],
         },
       ],
@@ -1736,14 +1906,16 @@ describe("transformation.repository db integration", () => {
 
     await finalizeTransformation(transformationId);
 
-    const creationBlocks = await prisma.structureVersionTransformation.findMany({
-      where: {
-        transformationId,
-        type: StructureVersionTransformationType.CREATION,
-        structureType: StructureType.CADA,
-      },
-      include: { structureVersion: true },
-    });
+    const creationBlocks = await prisma.structureVersionTransformation.findMany(
+      {
+        where: {
+          transformationId,
+          type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
+        },
+        include: { structureVersion: true },
+      }
+    );
     const structureIds = creationBlocks
       .map((creationBlock) => creationBlock.structureVersion?.structureId)
       .filter((structureId): structureId is number => structureId != null);
@@ -1861,7 +2033,9 @@ describe("transformation.repository db integration", () => {
       transformation?.structureVersionTransformations[0].structureVersion
         ?.structure;
     expect(sourceStructure?.nom).toBe("Nom de la version source");
-    expect(sourceStructure?.structureTypologies?.[0]?.placesAutorisees).toBe(30);
+    expect(sourceStructure?.structureTypologies?.[0]?.placesAutorisees).toBe(
+      30
+    );
   });
 
   it("ne résout aucun prédécesseur quand la transfo est datée avant la version init", async () => {
@@ -1886,8 +2060,11 @@ describe("transformation.repository db integration", () => {
   // --- Reset de sélection : full replace + cascade ---
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
-    const { transformationId, structureVersionTransformationId, structureVersionId } =
-      await createBareTransformation();
+    const {
+      transformationId,
+      structureVersionTransformationId,
+      structureVersionId,
+    } = await createBareTransformation();
     const oldActe = await prisma.acteAdministratif.create({
       data: {
         structureVersionTransformationId,
@@ -1936,10 +2113,14 @@ describe("transformation.repository db integration", () => {
     const transformation = await prisma.transformation.findUniqueOrThrow({
       where: { id: transformationId },
       include: {
-        structureVersionTransformations: { include: { structureVersion: true } },
+        structureVersionTransformations: {
+          include: { structureVersion: true },
+        },
       },
     });
-    expect(transformation.type).toBe(TransformationType.FERMETURE_SANS_TRANSFERT);
+    expect(transformation.type).toBe(
+      TransformationType.FERMETURE_SANS_TRANSFERT
+    );
     expect(transformation.structureVersionTransformations).toHaveLength(1);
     expect(transformation.structureVersionTransformations[0].type).toBe(
       StructureVersionTransformationType.FERMETURE
@@ -1993,7 +2174,9 @@ describe("transformation.repository db integration", () => {
     expect(afterBlock.structureVersion?.structureId).toBe(structure.id);
     if (oldVersionId) {
       expect(
-        await prisma.structureVersion.findUnique({ where: { id: oldVersionId } })
+        await prisma.structureVersion.findUnique({
+          where: { id: oldVersionId },
+        })
       ).toBeNull();
     }
     // Version fraîche re-copiée depuis la structure source.

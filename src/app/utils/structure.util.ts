@@ -35,12 +35,13 @@ export const getPlacesByCommunes = (
       (commune) => commune === adresse.commune
     );
 
+    const placesAutorisees =
+      getMostRecentMillesime(adresse.adresseTypologies)?.placesAutorisees || 0;
+
     if (!existingCommune) {
-      placesByCommune[adresse.commune ?? ""] =
-        adresse.adresseTypologies?.[0]?.placesAutorisees || 0;
+      placesByCommune[adresse.commune ?? ""] = placesAutorisees;
     } else {
-      placesByCommune[adresse.commune ?? ""] +=
-        adresse.adresseTypologies?.[0]?.placesAutorisees || 0;
+      placesByCommune[adresse.commune ?? ""] += placesAutorisees;
     }
   }
 
@@ -145,9 +146,7 @@ export const isStructureEligibleForActiviteIndisponibilite = (
 export const isStructureEligibleForActivitePresencesIndues = (
   type: StructureType | string | undefined | null
 ): boolean =>
-  type != null &&
-  type !== StructureType.CAES &&
-  type !== StructureType.CPH;
+  type != null && type !== StructureType.CAES && type !== StructureType.CPH;
 
 export const getCurrentCpomStructure = (
   structure: StructureApiRead
@@ -205,11 +204,24 @@ export const getMillesimeIndexForAYear = <
   }) ?? -1;
 
 export const getMostRecentMillesime = <T extends { year: number }>(
-  millesimes: T[]
-): T =>
-  millesimes.reduce((mostRecent, millesime) =>
+  millesimes: T[] | undefined,
+  {
+    canBeFuture = false,
+    currentYear = CURRENT_YEAR,
+  }: { canBeFuture?: boolean; currentYear?: number } = {}
+): T | undefined => {
+  const eligibleMillesimes = canBeFuture
+    ? millesimes
+    : millesimes?.filter((millesime) => millesime.year <= currentYear);
+
+  if (!eligibleMillesimes?.length) {
+    return undefined;
+  }
+
+  return eligibleMillesimes.reduce((mostRecent, millesime) =>
     millesime.year > mostRecent.year ? millesime : mostRecent
   );
+};
 
 export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
   cpomStructures: CpomStructureApiRead[] | CpomStructureApiWrite[],

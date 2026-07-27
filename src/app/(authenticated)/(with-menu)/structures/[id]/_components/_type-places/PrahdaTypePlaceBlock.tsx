@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
+import { getMostRecentMillesime } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -19,7 +20,8 @@ export const PrahdaTypePlaceBlock = (): ReactElement => {
     >
       <InformationCard
         primaryInformation={
-          structure.structureTypologies?.[0]?.placesAutorisees || "N/A"
+          getMostRecentMillesime(structure.structureTypologies)
+            ?.placesAutorisees || "N/A"
         }
         secondaryInformation="places autorisées"
       />
