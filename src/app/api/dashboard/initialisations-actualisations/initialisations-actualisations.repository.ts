@@ -5,8 +5,8 @@ import { dashboardStructureSelect } from "./initialisations-actualisations.db.ty
 export const findDashboardStructures = () =>
   prisma.structure.findMany({ select: dashboardStructureSelect });
 
-export const findCampaignDeadline = (slug: string) =>
-  prisma.campaignDefinition.findUnique({
+export const findFormDefinitionDeadline = (slug: string) =>
+  prisma.formDefinition.findUnique({
     where: { slug },
     select: { deadline: true },
   });

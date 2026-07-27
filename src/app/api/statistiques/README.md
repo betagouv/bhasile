@@ -19,7 +19,7 @@ Le service est découpé par "bloc fonctionnel" avec un socle commun
 
 ```
 route.ts -> statistique.service.ts
-        ├── statistiques.repository.ts | statistiques.utils.ts
+        ├── statistiques.repository.ts | statistiques.util.ts
         └── structures/ | places/ | finance/ | controle-qualite/ | activite/ | rmu/
               └── *.util.ts   compute*(context[, aggregation])
 ```

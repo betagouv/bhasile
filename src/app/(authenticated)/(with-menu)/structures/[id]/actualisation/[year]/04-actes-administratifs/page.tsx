@@ -27,7 +27,7 @@ export default function ActualisationActesAdministratifs() {
   const { structure } = useStructureContext();
   const year = Number(useParams().year);
 
-  const defaultValues = getActualisationDefaultValues({ structure, year });
+  const defaultValues = getActualisationDefaultValues({ structure });
 
   const strictSchema = structure.isAutorisee
     ? actesAdministratifsAutoriseesSchema

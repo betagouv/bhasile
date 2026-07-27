@@ -8,7 +8,7 @@ import { AutoSave } from "@/app/components/forms/AutoSave";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { CurrentYearPlaces } from "@/app/components/forms/typePlace/CurrentYearPlaces";
+import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
@@ -26,7 +26,7 @@ export default function ActualisationPlaces() {
   const { structure } = useStructureContext();
   const year = Number(useParams().year);
 
-  const defaultValues = getActualisationDefaultValues({ structure, year });
+  const defaultValues = getActualisationDefaultValues({ structure });
 
   const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
     year,
@@ -69,7 +69,10 @@ export default function ActualisationPlaces() {
           schema={structureTypologiesAutoSaveSchema}
           onSave={onAutoSave}
         />
-        <CurrentYearPlaces formKind={FormKind.ACTUALISATION} />
+        <FieldSetTypePlaces
+          structure={structure}
+          formKind={FormKind.ACTUALISATION}
+        />
       </FormWrapper>
     </div>
   );

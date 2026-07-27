@@ -19,7 +19,6 @@ import {
   fetchTransformationGraph,
   type TransformationGraph,
 } from "../seed/transformation-assert";
-import { SOURCE_PLACES_AUTORISEES } from "../seed/transformation-source.seed";
 
 const EFFECTIVE_YEAR = Number(
   TRANSFORMATION_TEST_VALUES.effectiveDate.slice(0, 4)
@@ -28,27 +27,9 @@ const EFFECTIVE_YEAR = Number(
 type StructureVersionTransformationGraph =
   TransformationGraph["structureVersionTransformations"][number];
 
-const placesForEffectiveYear = (
+const getVersionPlacesAutorisees = (
   svt: StructureVersionTransformationGraph | undefined
-): number | null | undefined =>
-  svt?.structureVersion?.structureTypologies.find(
-    (typologie) => typologie.year === EFFECTIVE_YEAR
-  )?.placesAutorisees;
-
-const historicalYearsUnchanged = (
-  svt: StructureVersionTransformationGraph | undefined
-): boolean => {
-  const historical =
-    svt?.structureVersion?.structureTypologies.filter(
-      (typologie) => typologie.year !== EFFECTIVE_YEAR
-    ) ?? [];
-  return (
-    historical.length > 0 &&
-    historical.every(
-      (typologie) => typologie.placesAutorisees === SOURCE_PLACES_AUTORISEES
-    )
-  );
-};
+): number | null | undefined => svt?.structureVersion?.placesAutorisees;
 
 test.describe("Transformations — flux finalisés", () => {
   test.beforeEach(async ({ page }) => {
@@ -117,14 +98,12 @@ test.describe("Transformations — flux finalisés", () => {
     expect(contraction?.structureVersion?.structureId).toBe(
       contractionSources[0].id
     );
-    expect(placesForEffectiveYear(extension)).toBe(
+    expect(getVersionPlacesAutorisees(extension)).toBe(
       TRANSFORMATION_TEST_VALUES.extensionPlaces
     );
-    expect(placesForEffectiveYear(contraction)).toBe(
+    expect(getVersionPlacesAutorisees(contraction)).toBe(
       TRANSFORMATION_TEST_VALUES.contractionPlaces
     );
-    expect(historicalYearsUnchanged(extension)).toBe(true);
-    expect(historicalYearsUnchanged(contraction)).toBe(true);
   });
 
   test("HUDA vers CADA existant", async ({
@@ -154,10 +133,9 @@ test.describe("Transformations — flux finalisés", () => {
     expect(fermetures).toHaveLength(hudaSources.length);
     expect(extensions).toHaveLength(1);
     expect(extensions[0]?.structureVersion?.structureId).toBe(cadaTarget.id);
-    expect(placesForEffectiveYear(extensions[0])).toBe(
+    expect(getVersionPlacesAutorisees(extensions[0])).toBe(
       TRANSFORMATION_TEST_VALUES.extensionPlaces
     );
-    expect(historicalYearsUnchanged(extensions[0])).toBe(true);
   });
 
   // Flux créant une structure (bloc CREATION → getNextBhasileCode) : sérialisés
@@ -189,7 +167,7 @@ test.describe("Transformations — flux finalisés", () => {
       expect(version?.public).toBeTruthy();
       expect(version?.adresseAdministrative).toBe(PARIS_ADDRESS.adresse);
       expect(version?.communeAdministrative).toBe(PARIS_ADDRESS.commune);
-      expect(placesForEffectiveYear(creation)).toBe(
+      expect(getVersionPlacesAutorisees(creation)).toBe(
         TRANSFORMATION_TEST_VALUES.creationPlaces
       );
 
@@ -244,7 +222,7 @@ test.describe("Transformations — flux finalisés", () => {
       expect(creationVersion?.structure?.codeBhasile).toBeTruthy();
       expect(creationVersion?.nom).toContain("E2E-");
       expect(creations[0]?.structureType).toBe(StructureType.CADA);
-      expect(placesForEffectiveYear(creations[0])).toBe(
+      expect(getVersionPlacesAutorisees(creations[0])).toBe(
         TRANSFORMATION_TEST_VALUES.creationPlaces
       );
     });

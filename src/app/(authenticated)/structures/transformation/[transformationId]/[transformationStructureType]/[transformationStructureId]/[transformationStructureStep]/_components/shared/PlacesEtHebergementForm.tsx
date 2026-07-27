@@ -59,8 +59,9 @@ export const PlacesEtHebergementForm = ({
       id: structureVersionTransformation.structureVersion?.id,
       public: data.public,
       adresses: data.adresses,
-      structureTypologies: data.structureTypologies,
+      placesAutorisees: data.structureTypologies?.[0]?.placesAutorisees,
     } as StructureVersionTransformationApiUpdateClient["structureVersion"],
+    structureTypologies: data.structureTypologies,
   });
 
   return (

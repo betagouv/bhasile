@@ -3,6 +3,7 @@
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { ReactElement, useState } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
 import { BatiStat, TypeStructureStat } from "@/schemas/api/statistique.schema";
@@ -92,7 +93,9 @@ export const GenericTypeChart = ({
                   style={{ backgroundColor: colors[index] }}
                 />
                 <span className="whitespace-nowrap">
-                  <strong>{statItem[typeStructureAccessor]}</strong>{" "}
+                  <strong>
+                    <NumberDisplay value={statItem[typeStructureAccessor]} />
+                  </strong>{" "}
                   {visualization === "structures"
                     ? "structures "
                     : "places en "}

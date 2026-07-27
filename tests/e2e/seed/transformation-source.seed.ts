@@ -128,7 +128,7 @@ export const createTransformationSource = async (
     dnaCodes: [{ code: dnaCode }],
   });
 
-  await seedValidStructureTypologies(structure.structureVersionId);
+  await seedValidStructureTypologies(structure.id);
   await seedContacts(structure.structureVersionId);
   await seedAntennes(structure.id);
   await seedAdresses(structure.structureVersionId);

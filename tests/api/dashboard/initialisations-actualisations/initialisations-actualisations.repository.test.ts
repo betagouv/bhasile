@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
-  findCampaignDeadline,
   findDashboardStructures,
+  findFormDefinitionDeadline,
 } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.repository";
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import prisma from "@/lib/prisma";
@@ -25,7 +25,7 @@ describe("initialisations-actualisations.repository db integration", () => {
     });
     finalisationFormDefinitionId = finalisationDefinition.id;
 
-    const deadlineDefinition = await prisma.campaignDefinition.create({
+    const deadlineDefinition = await prisma.formDefinition.create({
       data: {
         slug: deadlineSlug,
         name: "Test échéance dashboard",
@@ -40,7 +40,7 @@ describe("initialisations-actualisations.repository db integration", () => {
     await prisma.structure.deleteMany({
       where: { id: { in: createdStructureIds } },
     });
-    await prisma.campaignDefinition.delete({
+    await prisma.formDefinition.delete({
       where: { id: deadlineDefinitionId },
     });
     await prisma.$disconnect();
@@ -72,13 +72,19 @@ describe("initialisations-actualisations.repository db integration", () => {
 
     expect(found).toBeDefined();
     expect(found?.type).toBe(StructureType.CADA);
-    expect(found?.forms).toEqual([{ status: true }]);
+    expect(found?.forms).toEqual([
+      {
+        status: true,
+        formDefinition: { slug: FINALISATION_FORM_SLUG },
+        formSteps: [],
+      },
+    ]);
     expect(found?.structureVersions).toHaveLength(1);
     expect(found?.structureVersions[0]?.communeAdministrative).toBe("Avranches");
   });
 
-  it("récupère l'échéance d'une campagne par slug", async () => {
-    const definition = await findCampaignDeadline(deadlineSlug);
+  it("récupère l'échéance d'une FormDefinition par slug", async () => {
+    const definition = await findFormDefinitionDeadline(deadlineSlug);
 
     expect(definition?.deadline?.toISOString()).toBe(deadline.toISOString());
   });

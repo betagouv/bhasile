@@ -3,14 +3,10 @@ import "dotenv/config";
 import { fakerFR as faker } from "@faker-js/faker";
 
 import {
-  actualisationCampaignDefinitionSlug,
-  INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
-  INITIALISATION_DEADLINE,
-} from "@/app/api/campaigns/campaign.constants";
-import {
-  ACTUALISATION_FORM_SLUG,
   ACTUALISATION_FORM_STEP_SLUGS,
+  getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
+import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -128,7 +124,11 @@ async function seed(): Promise<void> {
   );
 
   const actualisationFormDefinition = await prisma.formDefinition.create({
-    data: { name: "actualisation", slug: ACTUALISATION_FORM_SLUG, version: 1 },
+    data: {
+      name: "Actualisation 2026",
+      slug: getActualisationFormSlug(2026),
+      version: 1,
+    },
   });
   await prisma.formStepDefinition.createMany({
     data: ACTUALISATION_FORM_STEP_SLUGS.map((slug) => ({
@@ -137,25 +137,6 @@ async function seed(): Promise<void> {
       slug,
     })),
   });
-
-  const initialisationCampaignDefinition =
-    await prisma.campaignDefinition.create({
-      data: {
-        name: "Initialisation",
-        slug: INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
-        version: 1,
-        deadline: INITIALISATION_DEADLINE,
-      },
-    });
-  await prisma.campaignDefinition.create({
-    data: {
-      name: "Actualisation 2026",
-      slug: actualisationCampaignDefinitionSlug(2026),
-      version: 1,
-      deadline: new Date(Date.UTC(2026, 11, 31)),
-    },
-  });
-  console.log("✅ CampaignDefinitions créées (initialisation + actualisation)");
 
   const formDefinitions = await prisma.formDefinition.findMany({
     include: { stepsDefinition: { select: { id: true } } },
@@ -250,7 +231,6 @@ async function seed(): Promise<void> {
         formDefs,
         finalisationFormDefId: formFinalisationDefinition.id,
         finalisationStepDefinitions: stepDefinitions,
-        initialisationCampaignDefinitionId: initialisationCampaignDefinition.id,
         coordinates: colocated ? COLOCATED_COORDINATES : undefined,
       });
       seededStructures.push(seeded);
@@ -290,6 +270,8 @@ async function seed(): Promise<void> {
   }
 
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
+
+  await mirrorLegacyPlacesToBaseVersions(prisma);
 
   await createFakeCpoms(prisma);
 

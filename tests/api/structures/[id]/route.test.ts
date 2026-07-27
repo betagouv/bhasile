@@ -40,25 +40,31 @@ vi.mock("@/app/api/activites/activite.util", () => ({
   processActivitesForStructure: vi.fn().mockReturnValue([]),
 }));
 
-vi.mock("@/app/api/structures/structure.util", () => ({
-  getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
-    mockGetAdresseAdministrativeCoordinates(...args),
-  buildStructureCampaigns: vi.fn().mockReturnValue([]),
-  buildStructureHistory: vi.fn().mockReturnValue([]),
-  buildUpcomingTransformations: vi.fn().mockReturnValue([]),
-  getCpomStructuresWithDates: vi.fn().mockReturnValue([]),
-  getCurrentPlacesAutorisees: vi.fn().mockReturnValue(10),
-  getCurrentPlacesLogementsSociaux: vi.fn().mockReturnValue(2),
-  getCurrentPlacesQpv: vi.fn().mockReturnValue(3),
-  getOperateurLabel: vi.fn().mockReturnValue("Adoma"),
-  getTypeBati: vi.fn().mockReturnValue("DIFFUS"),
-  isStructureInCpom: vi.fn().mockReturnValue(false),
-  isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
-  getDatesConvention: vi.fn().mockReturnValue([null, null]),
-  getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
-  isBornFromCreation: vi.fn().mockReturnValue(false),
-  isFinalisationFormValidated: vi.fn().mockReturnValue(false),
-}));
+vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/app/api/structures/structure.util")>();
+  return {
+    getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
+      mockGetAdresseAdministrativeCoordinates(...args),
+    buildStructureCampaigns: vi.fn().mockReturnValue([]),
+    buildStructureHistory: vi.fn().mockReturnValue([]),
+    buildUpcomingTransformations: vi.fn().mockReturnValue([]),
+    getCpomStructuresWithDates: vi.fn().mockReturnValue([]),
+    getCurrentPlacesAutorisees: vi.fn().mockReturnValue(10),
+    getCurrentPlacesLogementsSociaux: vi.fn().mockReturnValue(2),
+    getCurrentPlacesQpv: vi.fn().mockReturnValue(3),
+    getOperateurLabel: vi.fn().mockReturnValue("Adoma"),
+    getReadableAdresses: actual.getReadableAdresses,
+    getReadableNotes: (structure: { notes: string | null }) => structure.notes,
+    getTypeBati: vi.fn().mockReturnValue("DIFFUS"),
+    isStructureInCpom: vi.fn().mockReturnValue(false),
+    isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
+    getDatesConvention: vi.fn().mockReturnValue([null, null]),
+    getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
+    isBornFromCreation: vi.fn().mockReturnValue(false),
+    isFinalisationFormValidated: vi.fn().mockReturnValue(false),
+  };
+});
 
 vi.mock("@/app/api/antennes/antenne.util", () => ({
   getAntennesApiRead: vi.fn().mockReturnValue(undefined),
@@ -158,6 +164,7 @@ describe("GET /api/structures/[id]", () => {
       fvvTeh: false,
       antennes: undefined,
       structureFinesses: undefined,
+      structureTypologies: [],
       public: undefined,
       currentPlaces: {
         placesAutorisees: 10,
@@ -167,6 +174,7 @@ describe("GET /api/structures/[id]", () => {
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,
+      isCurrentVersionFromTransformation: false,
       campaigns: [],
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
@@ -176,18 +184,13 @@ describe("GET /api/structures/[id]", () => {
   it("déduit les vulnérabilités lgbt/fvvTeh des places du dernier millésime", async () => {
     // GIVEN : le millésime le plus récent (2024) a des places LGBT mais pas FVV/TEH,
     // un millésime antérieur (2023) avait des places FVV/TEH -> ne doit pas fuiter.
-    // Les typologies vivent sur la version courante : la dérivation doit passer par
-    // mergeStructureWithVersion (chemin de prod), pas par un accès direct sur Structure.
+    // Les typologies sont dé-versionnées : elles vivent sur la Structure.
     const currentVersion = {
       id: 20,
       effectiveDate: new Date("2021-01-01"),
       structureVersionTransformationId: null,
       structureVersionTransformation: null,
       dnaStructures: [],
-      structureTypologies: [
-        { year: 2024, lgbt: 5, fvvTeh: 0 },
-        { year: 2023, lgbt: 0, fvvTeh: 9 },
-      ],
     };
     const dbStructure = {
       id: 2,
@@ -199,6 +202,10 @@ describe("GET /api/structures/[id]", () => {
       date303: null,
       latitude: 48.86,
       longitude: 2.34,
+      structureTypologies: [
+        { year: 2024, lgbt: 5, fvvTeh: 0 },
+        { year: 2023, lgbt: 0, fvvTeh: 9 },
+      ],
       structureVersions: [currentVersion],
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });

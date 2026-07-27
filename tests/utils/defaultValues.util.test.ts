@@ -22,7 +22,6 @@ describe("getActualisationDefaultValues", () => {
 
     const defaultValues = getActualisationDefaultValues({
       structure,
-      year: 2026,
     });
     const convention = defaultValues.actesAdministratifs?.find(
       (acteAdministratif) => acteAdministratif.category === "CONVENTION"
@@ -47,7 +46,6 @@ describe("getActualisationDefaultValues", () => {
 
     const defaultValues = getActualisationDefaultValues({
       structure,
-      year: 2026,
     });
     const convention = defaultValues.actesAdministratifs?.find(
       (acteAdministratif) => acteAdministratif.category === "CONVENTION"
@@ -72,7 +70,6 @@ describe("getActualisationDefaultValues", () => {
 
     const defaultValues = getActualisationDefaultValues({
       structure,
-      year: 2026,
     });
 
     expect(

@@ -87,10 +87,8 @@ type StructureDefaultValues = Omit<
 
 export const getActualisationDefaultValues = ({
   structure,
-  year,
 }: {
   structure: StructureApiRead;
-  year: number;
 }): Partial<StructureDefaultValues> => {
   const structureCreationYear = getRealCreationYear(structure);
 
@@ -102,9 +100,10 @@ export const getActualisationDefaultValues = ({
     structure?.indicateursFinanciers || [],
     structureCreationYear
   );
-  const structureTypologies = [
-    getActualisationTypology(structure.structureTypologies ?? [], year),
-  ];
+  const structureTypologies = getStructureTypologyDefaultValues(
+    structure?.structureTypologies || [],
+    structureCreationYear
+  );
   const structureMillesimes = getStructureMillesimeDefaultValues(
     structure?.structureMillesimes || [],
     structureCreationYear
@@ -133,27 +132,5 @@ export const getActualisationDefaultValues = ({
     structureTypologies,
     structureMillesimes,
     actesAdministratifs,
-  };
-};
-
-const getActualisationTypology = (
-  structureTypologies: StructureApiRead["structureTypologies"],
-  year: number
-): StructureTypologieSchemaTypeFormValues => {
-  const currentYear = structureTypologies.find(
-    (typologie) => typologie.year === year
-  );
-  const source =
-    currentYear ??
-    [...structureTypologies]
-      .filter((typologie) => typologie.year < year)
-      .sort((first, second) => second.year - first.year)[0];
-
-  return {
-    year,
-    placesAutorisees: source?.placesAutorisees ?? undefined,
-    pmr: source?.pmr ?? undefined,
-    lgbt: source?.lgbt ?? undefined,
-    fvvTeh: source?.fvvTeh ?? undefined,
   };
 };

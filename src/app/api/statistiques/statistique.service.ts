@@ -27,6 +27,7 @@ import {
   findStructureVersionTimeline,
 } from "./statistiques.repository";
 import {
+  applyVersionedPlacesToTypologies,
   buildActivityIndex,
   buildStatistiquesActivityContext,
   collectDistinctYears,
@@ -34,7 +35,7 @@ import {
   getTypologieYears,
   parseStatistiquesPerimeterFilters,
   type StatistiquesResolvedPerimeterFilters,
-} from "./statistiques.utils";
+} from "./statistiques.util";
 import { computeStructuresStatistiques } from "./structures/structures.util";
 
 /** Résout les filiales des `operateurs` filtrés (seul point d'accès BDD du filtrage). */
@@ -87,6 +88,12 @@ export const buildStatistiquesContext = async (
       findStructureVersionTimeline(allStructureIds),
     ]);
 
+  const resolvedTypologies = applyVersionedPlacesToTypologies(
+    typologies,
+    structureVersionTimeline,
+    now
+  );
+
   const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
@@ -121,7 +128,7 @@ export const buildStatistiquesContext = async (
     activeStructureIdsByPeriod,
     {
       referenceDate: now,
-      typologieYears: getTypologieYears(typologies),
+      typologieYears: getTypologieYears(resolvedTypologies),
       referenceYear,
       periodDates: [
         ...eigs.map((eig) => eig.evenementDate),
@@ -142,7 +149,7 @@ export const buildStatistiquesContext = async (
     activeStructureIdsByPeriod,
     eigs,
     evaluations,
-    typologies,
+    typologies: resolvedTypologies,
     adresses,
     cpomLinks,
     dnaLinks,

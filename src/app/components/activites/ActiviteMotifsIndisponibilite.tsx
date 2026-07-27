@@ -2,6 +2,8 @@ import { ReactElement } from "react";
 
 import { Table } from "@/app/components/common/Table";
 
+import { NumberDisplay } from "../common/NumberDisplay";
+
 export const ActiviteMotifsIndisponibilite = ({
   desinsectisation,
   remiseEnEtat,
@@ -25,7 +27,9 @@ export const ActiviteMotifsIndisponibilite = ({
       {motifsIndisponibilite.map((motifIndisponibilite) => (
         <tr key={motifIndisponibilite.label}>
           <td className="text-left! py-3!">{motifIndisponibilite.label}</td>
-          <td className="py-3!">{motifIndisponibilite.value}</td>
+          <td className="py-3!">
+            <NumberDisplay value={motifIndisponibilite.value} />
+          </td>
         </tr>
       ))}
     </Table>

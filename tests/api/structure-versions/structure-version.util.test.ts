@@ -13,8 +13,6 @@ const baseVersion = {
   effectiveDate: new Date("2026-01-01"),
   structureVersionTransformationId: null,
   structureVersionTransformation: null,
-  campaignId: null,
-  campaign: null,
 };
 
 describe("isVersionValid", () => {
@@ -46,45 +44,14 @@ describe("isVersionValid", () => {
     ).toBe(false);
   });
 
-  it("valide une campagne d'initialisation (sans form)", () => {
-    expect(
-      isVersionValid({
-        ...baseVersion,
-        campaignId: 3,
-        campaign: { form: null },
-      })
-    ).toBe(true);
-  });
-
-  it("valide une SV de campagne quel que soit le statut du form (form.status n'est qu'une métrique)", () => {
-    expect(
-      isVersionValid({
-        ...baseVersion,
-        campaignId: 3,
-        campaign: { form: { status: false } },
-      })
-    ).toBe(true);
-  });
-
-  it("valide une actualisation validée (form status true)", () => {
-    expect(
-      isVersionValid({
-        ...baseVersion,
-        campaignId: 3,
-        campaign: { form: { status: true } },
-      })
-    ).toBe(true);
-  });
 });
 
-describe("resolveCurrentVersion — invariant coquille d'actualisation", () => {
-  it("exclut une coquille à effectiveDate null même quand isVersionValid la jugerait valide", () => {
+describe("resolveCurrentVersion", () => {
+  it("exclut une version à effectiveDate null même quand isVersionValid la jugerait valide", () => {
     const stub = {
       ...baseVersion,
       id: 20,
       effectiveDate: null,
-      campaignId: 5,
-      campaign: { form: null },
     };
     const predecessor = {
       ...baseVersion,

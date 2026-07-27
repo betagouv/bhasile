@@ -1,6 +1,6 @@
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
 
-import { actualisationCampaignDefinitionSlug } from "./campaign.constants";
+import { getActualisationFormSlug } from "../forms/form.constants";
 
 export const getActualisationYear = (): number | null => {
   const raw = process.env.ACTUALISATION_YEAR;
@@ -17,6 +17,14 @@ export const hasOpenActualisation = (
 ): boolean =>
   campaigns.some(
     (campaign) =>
-      campaign.slug === actualisationCampaignDefinitionSlug(year) &&
-      !campaign.isValidated
+      campaign.slug === getActualisationFormSlug(year) && !campaign.isValidated
+  );
+
+export const hasValidatedActualisation = (
+  campaigns: StructureCampaignApiRead[],
+  year: number
+): boolean =>
+  campaigns.some(
+    (campaign) =>
+      campaign.slug === getActualisationFormSlug(year) && campaign.isValidated
   );

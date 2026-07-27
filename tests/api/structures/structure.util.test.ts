@@ -14,12 +14,16 @@ import {
   getDatesConvention,
   getDatesPeriodeAutorisation,
   getFermetureHistory,
+  getReadableAdresses,
+  getReadableNotes,
   isBornFromCreation,
   sortStructureRows,
   StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StepStatus } from "@/types/form.type";
+import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
@@ -104,6 +108,7 @@ const buildLightStructure = (
     operateur: { name: "Operateur Alpha" },
     forms: [],
     actesAdministratifs: [],
+    structureTypologies: [],
     structureVersions: [version],
     ...overrides,
   }) as unknown as StructureListLight;
@@ -136,10 +141,7 @@ describe("computeStructureListRow", () => {
         { repartition: Repartition.COLLECTIF },
         { repartition: Repartition.DIFFUS },
       ] as unknown as StructureListLightVersion["adresses"],
-      structureTypologies: [
-        { year: 2025, placesAutorisees: 42 },
-        { year: 2024, placesAutorisees: 30 },
-      ] as unknown as StructureListLightVersion["structureTypologies"],
+      placesAutorisees: 42,
     });
     const row = computeStructureListRow(
       buildLightStructure({}, version),
@@ -198,15 +200,30 @@ describe("computeStructureListRow", () => {
     expect(row?.finConvention).toEqual(new Date("2027-12-31T00:00:00.000Z"));
   });
 
-  it("expose les dernières places non nulles pour les bornes même quand l'année la plus récente est nulle", () => {
-    const version = buildVersion({
-      structureTypologies: [
-        { year: 2025, placesAutorisees: null },
-        { year: 2024, placesAutorisees: 30 },
-      ] as unknown as StructureListLightVersion["structureTypologies"],
-    });
+  it("n'expose aucune place pour une version qui n'en porte pas (fermeture)", () => {
+    const version = buildVersion({ placesAutorisees: null });
     const row = computeStructureListRow(
       buildLightStructure({}, version),
+      version,
+      now
+    );
+
+    expect(row?.placesAutorisees).toBe(null);
+  });
+
+  it("latestNonNullPlacesAutorisees retombe sur la place la plus récente non nulle des typologies quand la version n'en porte pas", () => {
+    const version = buildVersion({ placesAutorisees: null });
+    const row = computeStructureListRow(
+      buildLightStructure(
+        {
+          structureTypologies: [
+            { year: 2025, placesAutorisees: null },
+            { year: 2024, placesAutorisees: 30 },
+            { year: 2023, placesAutorisees: 20 },
+          ] as unknown as StructureListLight["structureTypologies"],
+        },
+        version
+      ),
       version,
       now
     );
@@ -546,31 +563,133 @@ describe("getFermetureHistory", () => {
   });
 });
 
-describe("buildStructureCampaigns", () => {
-  const version = (
-    campaign: {
-      form: {
-        status: boolean;
-        formSteps: { status: StepStatus; stepDefinition: { slug: string } }[];
-      } | null;
-      campaignDefinition: { slug: string } | null;
-    } | null
-  ) => ({ campaign });
+describe("getReadableNotes", () => {
+  const structureParis = {
+    departementAdministratif: "75",
+    notes: "Note 1",
+  } as StructureApiRead;
 
-  it("projette slug + isValidated + formSteps depuis la campagne", () => {
+  it("renvoie les notes à un agent qui peut éditer la structure de son département", () => {
+    const agentParis = {
+      id: "agent-paris",
+      role: "DEPARTEMENT_PARIS",
+      allowedDepartements: ["75"],
+    } as SessionUser;
+
+    expect(getReadableNotes(structureParis, agentParis)).toBe("Note 1");
+  });
+
+  it("renvoie les notes à un agent NATIONAL", () => {
+    const agentNational = {
+      id: "agent-national",
+      role: "NATIONAL",
+      allowedDepartements: [] as string[],
+    } as SessionUser;
+
+    expect(getReadableNotes(structureParis, agentNational)).toBe("Note 1");
+  });
+
+  it("masque les notes à un agent d'un autre département", () => {
+    const agentRhone = {
+      id: "agent-rhone",
+      role: "DEPARTEMENT_RHONE",
+      allowedDepartements: ["69"],
+    } as SessionUser;
+
+    expect(getReadableNotes(structureParis, agentRhone)).toBeNull();
+  });
+
+  it("masque les notes à un utilisateur non authentifié", () => {
+    expect(getReadableNotes(structureParis, undefined)).toBeNull();
+  });
+});
+
+describe("getReadableAdresses", () => {
+  const buildStructure = (
+    adresse: Record<string, unknown>
+  ): StructureApiRead =>
+    ({
+      departementAdministratif: "75",
+      adresses: [adresse],
+    }) as unknown as StructureApiRead;
+
+  const adresseComplete = {
+    id: 1,
+    adresse: "12 rue Secrète",
+    codePostal: "75011",
+    commune: "Paris",
+    adresseComplete: "12 rue Secrète, 75011 Paris",
+  };
+
+  const agentParis = {
+    id: "agent-paris",
+    role: "DEPARTEMENT_PARIS",
+    allowedDepartements: ["75"],
+  } as SessionUser;
+
+  const agentRhone = {
+    id: "agent-rhone",
+    role: "DEPARTEMENT_RHONE",
+    allowedDepartements: ["69"],
+  } as SessionUser;
+
+  it("renvoie l'adresse exacte à un agent qui peut éditer la structure", () => {
+    const structure = buildStructure(adresseComplete);
+
+    expect(getReadableAdresses(structure, agentParis)).toEqual([
+      adresseComplete,
+    ]);
+  });
+
+  it("masque la rue mais conserve code postal et commune pour un agent d'un autre département", () => {
+    const structure = buildStructure(adresseComplete);
+
+    expect(getReadableAdresses(structure, agentRhone)).toEqual([
+      { ...adresseComplete, adresse: "", adresseComplete: "75011 Paris" },
+    ]);
+  });
+
+  it("masque la rue pour un utilisateur non authentifié", () => {
+    const structure = buildStructure(adresseComplete);
+
+    expect(getReadableAdresses(structure, undefined)).toEqual([
+      { ...adresseComplete, adresse: "", adresseComplete: "75011 Paris" },
+    ]);
+  });
+
+  it("ignore les composantes vides en reconstruisant l'adresse masquée", () => {
+    const structure = buildStructure({
+      id: 2,
+      adresse: "3 impasse Cachée",
+      codePostal: "69001",
+      commune: null,
+      adresseComplete: "3 impasse Cachée, 69001",
+    });
+
+    expect(getReadableAdresses(structure, agentRhone)).toEqual([
+      {
+        id: 2,
+        adresse: "",
+        codePostal: "69001",
+        commune: null,
+        adresseComplete: "69001",
+      },
+    ]);
+  });
+});
+
+describe("buildStructureCampaigns", () => {
+  const form = (
+    slug: string,
+    status: boolean,
+    formSteps: { status: StepStatus; stepDefinition: { slug: string } }[] = []
+  ) => ({ status, formDefinition: { slug }, formSteps });
+
+  it("projette slug + isValidated + formSteps depuis le form d'actualisation", () => {
     const campaigns = buildStructureCampaigns([
-      version({
-        form: {
-          status: true,
-          formSteps: [
-            {
-              status: StepStatus.VALIDE,
-              stepDefinition: { slug: "01-places" },
-            },
-          ],
-        },
-        campaignDefinition: { slug: "actualisation-2026" },
-      }),
+      form("actualisation-2026", true, [
+        { status: StepStatus.VALIDE, stepDefinition: { slug: "01-places" } },
+      ]),
     ]);
 
     expect(campaigns).toEqual([
@@ -583,40 +702,24 @@ describe("buildStructureCampaigns", () => {
   });
 
   it("marque isValidated=false quand le form n'est pas validé", () => {
-    const campaigns = buildStructureCampaigns([
-      version({
-        form: { status: false, formSteps: [] },
-        campaignDefinition: { slug: "actualisation-2026" },
-      }),
-    ]);
-
-    expect(campaigns).toEqual([
-      { slug: "actualisation-2026", isValidated: false, formSteps: [] },
-    ]);
-  });
-
-  it("formSteps vides quand la campagne n'a pas de form (initialisation)", () => {
-    const campaigns = buildStructureCampaigns([
-      version({ form: null, campaignDefinition: { slug: "initialisation" } }),
-    ]);
-
-    expect(campaigns).toEqual([
-      { slug: "initialisation", isValidated: false, formSteps: [] },
-    ]);
-  });
-
-  it("ignore une version sans campagne", () => {
-    expect(buildStructureCampaigns([version(null)])).toEqual([]);
-  });
-
-  it("ignore une campagne sans définition", () => {
     expect(
-      buildStructureCampaigns([
-        version({
-          form: { status: true, formSteps: [] },
-          campaignDefinition: null,
-        }),
-      ])
-    ).toEqual([]);
+      buildStructureCampaigns([form("actualisation-2026", false)])
+    ).toEqual([{ slug: "actualisation-2026", isValidated: false, formSteps: [] }]);
+  });
+
+  it("ignore les forms qui ne sont pas des actualisations", () => {
+    expect(buildStructureCampaigns([form("finalisation-v1", true)])).toEqual([]);
+  });
+
+  it("expose une entrée par année d'actualisation", () => {
+    const campaigns = buildStructureCampaigns([
+      form("actualisation-2026", true),
+      form("actualisation-2027", false),
+    ]);
+
+    expect(campaigns.map((campaign) => campaign.slug)).toEqual([
+      "actualisation-2026",
+      "actualisation-2027",
+    ]);
   });
 });

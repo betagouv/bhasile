@@ -44,10 +44,6 @@ export const cpomDetailsInclude = {
                   },
                 },
               },
-              campaignId: true,
-              campaign: {
-                select: { form: { select: { status: true } } },
-              },
             },
           },
         },

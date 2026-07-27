@@ -3,6 +3,7 @@ model FormDefinition {
   name            String
   version         Int
   slug            String               @unique
+  deadline        DateTime?
   stepsDefinition FormStepDefinition[]
 
   forms Form[]
@@ -31,8 +32,6 @@ model Form {
   transformationId                 Int?                            @unique
   structureVersionTransformation   StructureVersionTransformation? @relation(fields: [structureVersionTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureVersionTransformationId Int?                            @unique
-  campaign                         Campaign?                       @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  campaignId                       Int?                            @unique
   formDefinitionId                 Int
   status                           Boolean                         @default(false) // Lié au bouton "Finaliser"
 

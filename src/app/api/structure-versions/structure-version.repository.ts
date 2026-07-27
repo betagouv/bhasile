@@ -1,3 +1,4 @@
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { EntityId } from "@/types/Entity.type";
@@ -8,16 +9,44 @@ import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
 import { createOrUpdateStructureFinesses } from "../finesses/finess.repository";
-import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { convertToPublicType } from "../structures/structure.util";
 import {
   checkCreatedStructureDepartement,
   checkNoDepartementAdministratifChange,
 } from "./structure-version.util";
 
+export const mirrorLegacyPlacesToBaseVersions = async (
+  tx: PrismaTransaction,
+  options: { structureId?: number } = {}
+): Promise<number> => {
+  const legacyTypologies = await tx.structureTypologie.findMany({
+    where: {
+      year: PLACES_VERSIONED_FROM_YEAR - 1,
+      structureId: options.structureId ?? { not: null },
+    },
+    select: { structureId: true, placesAutorisees: true },
+  });
+
+  let alignedVersions = 0;
+  for (const legacyTypologie of legacyTypologies) {
+    if (legacyTypologie.structureId === null) {
+      continue;
+    }
+    const { count } = await tx.structureVersion.updateMany({
+      where: {
+        structureId: legacyTypologie.structureId,
+        structureVersionTransformationId: null,
+      },
+      data: { placesAutorisees: legacyTypologie.placesAutorisees },
+    });
+    alignedVersions += count;
+  }
+  return alignedVersions;
+};
+
 type StructureVersionParent = Pick<
   EntityId,
-  "structureId" | "structureVersionTransformationId" | "campaignId"
+  "structureId" | "structureVersionTransformationId"
 >;
 
 const getScalarData = (version: StructureVersionApiType) => ({
@@ -33,6 +62,7 @@ const getScalarData = (version: StructureVersionApiType) => ({
   notes: version.notes ?? undefined,
   nomOfii: version.nomOfii ?? undefined,
   directionTerritoriale: version.directionTerritoriale ?? undefined,
+  placesAutorisees: version.placesAutorisees ?? undefined,
 });
 
 const createOneStructureVersion = async (
@@ -53,7 +83,6 @@ const createOneStructureVersion = async (
     ...getScalarData(version),
     structureId: parent.structureId,
     structureVersionTransformationId: parent.structureVersionTransformationId,
-    campaignId: parent.campaignId,
   };
 
   const created = await tx.structureVersion.create({ data });
@@ -182,11 +211,6 @@ const persistRelations = async (
   await createOrUpdateStructureFinesses(
     tx,
     version.structureFinesses,
-    entityId
-  );
-  await createOrUpdateStructureTypologies(
-    tx,
-    version.structureTypologies,
     entityId
   );
   await createOrUpdateDnaStructures(tx, version.dnaStructures, entityId);
