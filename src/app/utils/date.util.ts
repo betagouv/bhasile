@@ -96,7 +96,7 @@ export const getMonthsBetween = (
 
 export const getLastMonths = (numberOfMonths: number): dayjs.Dayjs[] => {
   return Array.from({ length: numberOfMonths }, (_, index) => {
-    return dayjs().subtract(index, "month");
+    return dayjs(getNow()).subtract(index, "month");
   }).reverse();
 };
 
@@ -199,7 +199,7 @@ export const getElapsedPercentage = ({
   dateStart: string;
   dateEnd: string;
 }): number => {
-  const now = dayjs();
+  const now = dayjs(getNow());
   const start = dayjs(dateStart);
   const end = dayjs(dateEnd);
 

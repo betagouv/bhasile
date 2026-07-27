@@ -1,4 +1,5 @@
 import { findAllCpoms } from "@/app/api/cpoms/cpom.repository";
+import { getNow } from "@/app/utils/date.util";
 import { paginateRows } from "@/app/utils/list.util";
 import { groupRappels } from "@/app/utils/rappel.util";
 import { parseCommaList } from "@/app/utils/string.util";
@@ -29,7 +30,7 @@ export const getDashboardRappels = async (
     return { rappelCount: 0, totalNodes: 0, nodes: [] };
   }
 
-  const now = new Date();
+  const now = getNow();
   const [structures, cpoms] = await Promise.all([
     findRappelStructures(),
     findAllCpoms(),

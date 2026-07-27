@@ -1,5 +1,4 @@
-import { getNow } from "@/app/utils/date.util";
-import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { getNow, recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows, sortRows } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Operateur } from "@/generated/prisma/client";

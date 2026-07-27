@@ -122,7 +122,7 @@ export const getLastVisitInMonths = (
       ? dayjs(controles[0]?.date)
       : dayjs(evaluations[0]?.date);
   }
-  return dayjs().diff(mostRecentVisit, "month");
+  return dayjs(getNow()).diff(mostRecentVisit, "month");
 };
 
 export const isStructureAutorisee = (

@@ -1,5 +1,6 @@
 import {
   getEffectiveEndDate,
+  getNow,
   isCurrentlyInEffect,
 } from "@/app/utils/date.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
@@ -61,7 +62,7 @@ export const getDatesOfCurrentActeAdministratif = (
 
   const currentActeAdministratif = current
     ? (periods.find((period) =>
-        isCurrentlyInEffect(period.startDate, period.endDate, new Date())
+        isCurrentlyInEffect(period.startDate, period.endDate, getNow())
       ) ?? getMostRecentByEndDate(periods))
     : periods[0];
 

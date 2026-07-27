@@ -5,6 +5,7 @@ import { ReactElement } from "react";
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
+import { getNow } from "@/app/utils/date.util";
 import { getLastVisitInMonths } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -24,7 +25,7 @@ export const ControlesBlock = (): ReactElement => {
     structure.evenementsIndesirablesGraves || [];
 
   const last12MonthsEIG = evenementsIndesirablesGraves.filter((eig) =>
-    dayjs(eig.evenementDate).isAfter(dayjs().subtract(12, "month"))
+    dayjs(eig.evenementDate).isAfter(dayjs(getNow()).subtract(12, "month"))
   );
 
   return (
