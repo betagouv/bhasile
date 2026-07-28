@@ -8,7 +8,11 @@ export const createFakeStructureTypologie = ({
   year,
 }: CreateFakeStructureTypologieOptions): Omit<
   StructureTypologie,
-  "id" | "structureDnaCode" | "structureId" | "structureVersionTransformationId"
+  | "id"
+  | "structureDnaCode"
+  | "structureId"
+  | "structureVersionId"
+  | "structureVersionTransformationId"
 > => {
   const lgbt = faker.number.int({ min: 0, max: placesAutorisees });
 

@@ -26,6 +26,16 @@ yarn test:e2e -g notes # filtre par grep
 - DB Postgres accessible via `DATABASE_URL` (lecture/écriture).
 - Variables d'env : `E2E_AGENT_EMAIL`, `E2E_AGENT_PASSWORD` pour ProConnect. `E2E_WORKERS` définit le nombre de tests en parallèle
 
+## 🔐 Re-vérification ProConnect
+
+Périodiquement, ProConnect exige de reconfirmer l'adresse email via un code à 10 chiffres envoyé par mail : le login headless ne peut pas passer cette étape et le setup s'arrête avec un message explicite. Débloquer en saisissant le code une fois à la main :
+
+```bash
+E2E_AUTH_HEADED=1 yarn test:e2e
+```
+
+Un navigateur s'ouvre, on saisit le code, la session est enregistrée dans `playwright/.auth/agent.json` et réutilisée pendant 12h.
+
 ## 🧱 Principes
 
 - **Fixtures Playwright** (`fixtures/test.ts`) pour le setup/teardown — pas de `try/finally` impératif.
