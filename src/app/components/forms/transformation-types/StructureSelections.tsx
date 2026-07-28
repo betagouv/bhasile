@@ -101,5 +101,5 @@ const getConstraintSublabel = (
   block: StructureSelectionBlock
 ): string | undefined =>
   block.matchDepartureType && block.matchDepartureDepartement
-    ? "La structure doit se situer dans le même département et avoir le même type."
+    ? "La structure doit se situer dans le même département et avoir le même type"
     : undefined;

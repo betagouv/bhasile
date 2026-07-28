@@ -64,7 +64,7 @@ export const StructureSearch = ({
           {label}
         </h3>
       )}
-      {sublabel && (
+      {label && sublabel && (
         <p className="text-sm text-mention-grey mb-4">{sublabel}</p>
       )}
       <div className="grid grid-cols-3 gap-6 mb-2">
