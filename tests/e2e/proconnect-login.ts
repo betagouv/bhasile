@@ -57,6 +57,17 @@ export async function authenticateWithProConnect(
 
   await maybeClickOAuthConsent(page);
 
+  const isManualAuth = process.env.E2E_AUTH_HEADED === "1";
+
+  if (page.url().includes("/users/verify-email")) {
+    if (!isManualAuth) {
+      throw new Error(
+        "ProConnect demande une re-vérification de l'adresse email (code à 10 chiffres envoyé par mail). "
+      );
+    }
+    console.log("ProConnect demande un code de confirmation.");
+  }
+
   const appOrigin = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
   const appHost = new URL(appOrigin).hostname;
 
@@ -65,7 +76,7 @@ export async function authenticateWithProConnect(
       url.hostname === appHost &&
       !url.pathname.startsWith("/connexion") &&
       !url.pathname.startsWith("/api/auth"),
-    { timeout: 120_000 }
+    { timeout: isManualAuth ? 600_000 : 120_000 }
   );
 }
 
