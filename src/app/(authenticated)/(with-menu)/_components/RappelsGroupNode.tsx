@@ -4,12 +4,20 @@ import { ReactElement, ReactNode, useState } from "react";
 
 import { cn } from "@/app/utils/classname.util";
 import { getRappelCriticiteLabel } from "@/app/utils/rappel.util";
-import { RappelGroupHeader, RappelGroupNode } from "@/types/dashboard.type";
+import {
+  RappelGroupBy,
+  RappelGroupHeader,
+  RappelGroupNode,
+} from "@/types/dashboard.type";
 
 import { RappelRow } from "./RappelRow";
 import { RappelsCountBadge } from "./RappelsCountBadge";
 
-export const RappelsGroupNode = ({ node, depth = 0 }: Props): ReactElement => {
+export const RappelsGroupNode = ({
+  node,
+  groupBy,
+  depth = 0,
+}: Props): ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -46,6 +54,7 @@ export const RappelsGroupNode = ({ node, depth = 0 }: Props): ReactElement => {
               <RappelsGroupNode
                 key={child.key}
                 node={child}
+                groupBy={groupBy}
                 depth={depth + 1}
               />
             ))}
@@ -56,7 +65,7 @@ export const RappelsGroupNode = ({ node, depth = 0 }: Props): ReactElement => {
             style={{ marginLeft: depth * 24 + 24, paddingLeft: 24 }}
           >
             {node.rappels.map((rappel) => (
-              <RappelRow key={rappel.id} rappel={rappel} />
+              <RappelRow key={rappel.id} rappel={rappel} groupBy={groupBy} />
             ))}
           </div>
         ))}
@@ -95,5 +104,6 @@ const renderHeaderLabel = (header: RappelGroupHeader): ReactNode => {
 
 type Props = {
   node: RappelGroupNode;
+  groupBy: RappelGroupBy;
   depth?: number;
 };

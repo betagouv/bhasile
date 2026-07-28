@@ -49,7 +49,7 @@ export const RappelsBlock = async ({
 
       <div>
         {nodes.map((node) => (
-          <RappelsGroupNode key={node.key} node={node} />
+          <RappelsGroupNode key={node.key} node={node} groupBy={groupBy} />
         ))}
 
         {nodes.length === 0 && (
