@@ -7,19 +7,7 @@ import { TIMEOUTS } from "./constants";
 import { SELECTORS } from "./selectors";
 import { getActesCategoryRegex } from "./shared-utils";
 import { ActeAdministratifData } from "./test-data/types";
-
-// L'autosave agent se déclenche 500 ms après la dernière modification du
-// formulaire (AutoSave.tsx). Sa réponse change les ids d'actes, ce qui remonte
-// le FormWrapper : un upload en vol au même moment perd sa clé. On laisse donc
-// l'autosave des dates retomber avant de déposer le fichier.
-const AUTOSAVE_SETTLE_MS = 800;
-
-async function waitForAutoSaveToSettle(page: Page): Promise<void> {
-  await page.waitForTimeout(AUTOSAVE_SETTLE_MS);
-  await page
-    .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
-    .catch(() => {});
-}
+import { WaitHelper } from "./wait-helper";
 
 /**
  * Resolves file path to absolute (handles relative paths from project root).
@@ -101,6 +89,7 @@ async function addAndFillActe(
   page: Page,
   acte: ActeAdministratifData
 ): Promise<void> {
+  const waitHelper = new WaitHelper(page);
   const groupLabel = getActesCategoryRegex(acte.category);
   const group = page.getByRole("group", { name: groupLabel });
   if ((await group.count()) === 0) {
@@ -111,7 +100,7 @@ async function addAndFillActe(
     .getByRole("button", { name: /Ajouter/i })
     .filter({ hasNotText: "+ Ajouter un avenant" });
   await addButton.click();
-  await waitForAutoSaveToSettle(page);
+  await waitHelper.waitForAutosave();
 
   const fileInputs = group.locator(SELECTORS.FILE_INPUT);
   const count = await fileInputs.count();
@@ -157,6 +146,8 @@ async function addAndFillActe(
   await expect(keyInputs.last()).toHaveValue(/.+/, {
     timeout: TIMEOUTS.FILE_UPLOAD,
   });
+
+  await waitHelper.waitForAutosave();
 }
 
 async function fillActeFieldsAtGroupIndex(
@@ -165,6 +156,8 @@ async function fillActeFieldsAtGroupIndex(
   index: number,
   acte: ActeAdministratifData
 ): Promise<void> {
+  const waitHelper = new WaitHelper(page);
+
   if (acte.startDate) {
     await fillIfExistsAtIndex(
       group,
@@ -190,7 +183,7 @@ async function fillActeFieldsAtGroupIndex(
     );
   }
 
-  await waitForAutoSaveToSettle(page);
+  await waitHelper.waitForAutosave();
 
   const fileInput = group.locator(SELECTORS.FILE_INPUT).nth(index);
   await fileInput.waitFor({
@@ -209,6 +202,11 @@ async function fillActeFieldsAtGroupIndex(
   await expect(keyInputInGroup).toHaveValue(/.+/, {
     timeout: TIMEOUTS.FILE_UPLOAD,
   });
+
+  // L'upload déclenche à son tour un autosave : sans cette attente, sa réponse
+  // remonte le formulaire pendant la saisie de l'acte suivant et efface ce
+  // qu'on vient d'y taper.
+  await waitHelper.waitForAutosave();
 }
 
 async function fillIfExistsAtIndex(
