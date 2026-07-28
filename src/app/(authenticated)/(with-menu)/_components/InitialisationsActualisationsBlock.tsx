@@ -8,6 +8,7 @@ import { SessionUser } from "@/types/global";
 
 import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
+import { INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER } from "./dashboardBlocks";
 import { DashboardPagination } from "./DashboardPagination";
 import { InitialisationActualisationRow } from "./InitialisationActualisationRow";
 
@@ -23,9 +24,9 @@ export const InitialisationsActualisationsBlock = async ({
   return (
     <Block>
       <BlockTitle
-        title="Initialisation et actualisations de structures"
+        title={INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER.title}
         total={data.total}
-        iconClassName="fr-icon-refresh-line"
+        iconClassName={INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER.icon}
       />
 
       <div className="grid grid-cols-[repeat(4,max-content)_minmax(0,1fr)_max-content_max-content_auto] gap-x-4">

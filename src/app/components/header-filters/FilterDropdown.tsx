@@ -2,7 +2,11 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useSearchParams } from "next/navigation";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 
-import { parseCommaList } from "@/app/utils/string.util";
+import {
+  formatPlural,
+  parseCommaList,
+  pluralize,
+} from "@/app/utils/string.util";
 
 export const FilterDropdown = ({
   label,
@@ -17,7 +21,10 @@ export const FilterDropdown = ({
   const appliedFilters = parseCommaList(searchParams.get(filterId));
   const summaryLabel =
     getSummaryLabel?.(appliedFilters) ??
-    `${appliedFilters.length} filtre(s) sélectionné(s)`;
+    `${formatPlural(appliedFilters.length, "filtre")} ${pluralize(
+      appliedFilters.length,
+      "sélectionné"
+    )}`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

@@ -6,6 +6,7 @@ import { SessionUser } from "@/types/global";
 
 import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
+import { TRANSFORMATIONS_BLOCK_HEADER } from "./dashboardBlocks";
 import { TransformationRow } from "./TransformationRow";
 
 export const TransformationsBlock = async ({
@@ -17,9 +18,9 @@ export const TransformationsBlock = async ({
   return (
     <Block>
       <BlockTitle
-        title="Créations, transformations et fermetures de structures"
+        title={TRANSFORMATIONS_BLOCK_HEADER.title}
         total={rows.length}
-        iconClassName="fr-icon-community-line"
+        iconClassName={TRANSFORMATIONS_BLOCK_HEADER.icon}
       />
 
       <div className="grid grid-cols-[max-content_max-content_max-content_minmax(0,1fr)_max-content_auto] gap-x-4">

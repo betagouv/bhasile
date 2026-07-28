@@ -21,18 +21,28 @@ const renderWithTotal = (
   );
 
 describe("CurrentYearPlaces", () => {
-  it("affiche le delta « nouvelle(s) place(s) » pour une extension", () => {
+  it("affiche le delta « nouvelles places » pour une extension", () => {
     renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 50);
 
-    expect(
-      screen.getByText(/soit 3 nouvelle\(s\) place\(s\)/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/soit 3 nouvelles places/)).toBeInTheDocument();
   });
 
-  it("affiche le delta « place(s) en moins » pour une contraction", () => {
+  it("accorde le delta au singulier pour une extension d'une seule place", () => {
+    renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 48);
+
+    expect(screen.getByText(/soit 1 nouvelle place/)).toBeInTheDocument();
+  });
+
+  it("affiche le delta « places en moins » pour une contraction", () => {
     renderWithTotal({ formKind: FormKind.CONTRACTION, originalPlaces: 47 }, 40);
 
-    expect(screen.getByText(/soit 7 place\(s\) en moins/)).toBeInTheDocument();
+    expect(screen.getByText(/soit 7 places en moins/)).toBeInTheDocument();
+  });
+
+  it("accorde le delta au singulier pour une contraction d'une seule place", () => {
+    renderWithTotal({ formKind: FormKind.CONTRACTION, originalPlaces: 47 }, 46);
+
+    expect(screen.getByText(/soit 1 place en moins/)).toBeInTheDocument();
   });
 
   it("n'affiche aucun message sans originalPlaces (création)", () => {

@@ -1,6 +1,7 @@
 import { useFormContext, useWatch } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
+import { formatPlural, pluralize } from "@/app/utils/string.util";
 import {
   getTransformationNounAvecArticle,
   isTransformationSurStructureExistante,
@@ -140,7 +141,9 @@ const getPlacesDiffMessage = (
   totalPlaces: number
 ): string => {
   if (formKind === FormKind.CONTRACTION) {
-    return `soit ${originalPlaces - totalPlaces} place(s) en moins`;
+    const diff = originalPlaces - totalPlaces;
+    return `soit ${formatPlural(diff, "place")} en moins`;
   }
-  return `soit ${totalPlaces - originalPlaces} nouvelle(s) place(s)`;
+  const diff = totalPlaces - originalPlaces;
+  return `soit ${formatPlural(diff, "nouvelle")} ${pluralize(diff, "place")}`;
 };

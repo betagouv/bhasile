@@ -81,13 +81,15 @@ export const StructureHeaderActions = ({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      {structure.upcomingTransformations?.map((transformation) => (
-        <UpcomingTransformationBadge
-          key={`${transformation.kind}-${transformation.date}`}
-          transformation={transformation}
-        />
-      ))}
+    <div className="flex items-center gap-2 min-w-0">
+      <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
+        {structure.upcomingTransformations?.map((transformation) => (
+          <UpcomingTransformationBadge
+            key={`${transformation.kind}-${transformation.date}`}
+            transformation={transformation}
+          />
+        ))}
+      </div>
       <StructureMenu structureId={structure.id} />
     </div>
   );

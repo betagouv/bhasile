@@ -258,10 +258,33 @@ describe("StructureVersionTransformationItem", () => {
     );
 
     // THEN
-    expect(
-      screen.getByText("47 place(s) fermée(s)")
-    ).toBeInTheDocument();
+    expect(screen.getByText("47 places fermées")).toBeInTheDocument();
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
+  });
+
+  it("accorde la ligne des places fermées au singulier pour une seule place", () => {
+    // GIVEN — la structure source ne porte qu'une seule place.
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      type: StructureVersionTransformationType.FERMETURE,
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: {
+          codeBhasile: "BHA-NOR-025",
+          operateur: { id: 10, name: "Groupe SOS" },
+          placesAutorisees: 1,
+        },
+      },
+    });
+
+    // WHEN
+    render(
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
+      />
+    );
+
+    // THEN
+    expect(screen.getByText("1 place fermée")).toBeInTheDocument();
   });
 
   it("masque la ligne des places fermées pour une FERMETURE quand la structure source est déjà à zéro place", () => {
@@ -286,7 +309,7 @@ describe("StructureVersionTransformationItem", () => {
     );
 
     // THEN
-    expect(screen.queryByText(/place\(s\) fermée\(s\)/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/places? fermées?/)).not.toBeInTheDocument();
   });
 
   it.each([
