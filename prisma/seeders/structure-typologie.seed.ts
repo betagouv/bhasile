@@ -18,7 +18,6 @@ export const createFakeStructureTypologie = ({
 
   return {
     year,
-    yearOrigin: null,
     pmr: faker.number.int({ min: 0, max: placesAutorisees }),
     lgbt,
     fvvTeh: faker.number.int({ min: 0, max: placesAutorisees - lgbt }),

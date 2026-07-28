@@ -64,7 +64,6 @@ model StructureTypologie {
   structureVersion                 StructureVersion?               @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TEMP : pont pour 20260717-backfill-typologie-structure-id. Drop en PR cleaning.
   structureVersionId               Int?
   year                             Int
-  yearOrigin                       Int? // TEMP : année 1er-janvier saisie par l'opérateur, avant décalage au 31 déc. Drop en PR cleaning.
   placesAutorisees                 Int?
   pmr                              Int?
   lgbt                             Int?
