@@ -21,8 +21,6 @@ model StructureVersion {
   latitude                 Decimal?
   longitude                Decimal?
   nom                      String?
-  creationDate             DateTime? // TODO: drop — immutable, remis sur Structure
-  date303                  DateTime? // TODO: drop — immutable, remis sur Structure
   lgbt                     Boolean? // TODO: remove after quality check
   fvvTeh                   Boolean? // TODO: remove after quality check
   public                   PublicType?
