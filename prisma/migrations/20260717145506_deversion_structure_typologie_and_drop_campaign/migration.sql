@@ -8,9 +8,6 @@ ALTER TABLE "Campaign" DROP CONSTRAINT "Campaign_campaignDefinitionId_fkey";
 ALTER TABLE "Form" DROP CONSTRAINT "Form_campaignId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "StructureTypologie" DROP CONSTRAINT "StructureTypologie_structureVersionId_fkey";
-
--- DropForeignKey
 ALTER TABLE "StructureVersion" DROP CONSTRAINT "StructureVersion_campaignId_fkey";
 
 -- DropIndex
@@ -26,8 +23,7 @@ DROP INDEX "StructureVersion_campaignId_key";
 ALTER TABLE "Form" DROP COLUMN "campaignId";
 
 -- AlterTable
-ALTER TABLE "StructureTypologie" DROP COLUMN "structureVersionId",
-ADD COLUMN     "structureVersionTransformationId" INTEGER,
+ALTER TABLE "StructureTypologie" ADD COLUMN     "structureVersionTransformationId" INTEGER,
 ADD COLUMN     "yearOrigin" INTEGER;
 
 -- AlterTable
