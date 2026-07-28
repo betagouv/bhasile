@@ -9,12 +9,18 @@ import {
 } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
+import { VersionedScalarKey } from "../structures/structure.constants";
 import type { StructureDbDetails } from "../structures/structure.db.type";
 import { getTypeBati } from "../structures/structure.util";
 import { StructureVersionDbTransformation } from "./structure-version.db.type";
 
+import type { StructureVersion } from "@/generated/prisma/client";
+
+type ResolvedStructureDetails = StructureDbDetails &
+  Partial<Pick<StructureVersion, VersionedScalarKey>>;
+
 const mapVersionFields = (
-  source: StructureDbDetails | StructureVersionDbTransformation
+  source: ResolvedStructureDetails | StructureVersionDbTransformation
 ): Pick<
   StructureVersionApiType,
   | "public"
@@ -76,7 +82,7 @@ export const dbStructureVersionToApiRead = (
 };
 
 export const copyStructureVersion = (
-  structure: StructureDbDetails,
+  structure: ResolvedStructureDetails,
   overrides: Partial<StructureVersionApiType> = {}
 ): StructureVersionApiType => ({
   ...mapVersionFields(structure),

@@ -21,3 +21,16 @@ export const VERSIONED_FIELD_KEYS = [
   "dnaStructures",
 ] as const satisfies readonly (keyof StructureAgentUpdateApiType &
   keyof StructureVersionDbDetails)[];
+
+// Scalaires migrés de Structure vers StructureVersion : réinjectés depuis la version courante à la lecture.
+export type VersionedScalarKey =
+  | "nom"
+  | "adresseAdministrative"
+  | "codePostalAdministratif"
+  | "communeAdministrative"
+  | "latitude"
+  | "longitude"
+  | "notes"
+  | "nomOfii"
+  | "directionTerritoriale"
+  | "public";

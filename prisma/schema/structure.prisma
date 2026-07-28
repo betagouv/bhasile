@@ -2,28 +2,15 @@ model Structure {
   id                       Int                   @id @default(autoincrement())
   codeBhasile              String                @unique
   filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
-  // TODO: remove after backfill of structure version — champs migrés sur StructureVersion
   type                     StructureType?
-  adresseAdministrative    String? // TODO: remove after backfill of structure version
-  codePostalAdministratif  String? // TODO: remove after backfill of structure version
-  communeAdministrative    String? // TODO: remove after backfill of structure version
-  departementAdministratif String?
-  latitude                 Decimal? // TODO: remove after backfill of structure version
-  longitude                Decimal? // TODO: remove after backfill of structure version
-  nom                      String? // TODO: remove after backfill of structure version
+  departementAdministratif String? // TODO: migré sur StructureVersion — à retirer avec la relation departement (cascade Departement.structures)
   debutConvention          DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   finConvention            DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   creationDate             DateTime?
   fermetureDate            DateTime?
   date303                  DateTime?
-  lgbt                     Boolean? // TODO: remove after backfill of structure version
-  fvvTeh                   Boolean? // TODO: remove after backfill of structure version
-  public                   PublicType? // TODO: remove after backfill of structure version
   debutPeriodeAutorisation DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   finPeriodeAutorisation   DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
-  notes                    String? // TODO: remove after backfill of structure version
-  nomOfii                  String? // TODO: remove after backfill of structure version
-  directionTerritoriale    String? // TODO: remove after backfill of structure version
   dnaStructures            DnaStructure[] // TODO: remove after backfill of structure version
   controles                Controle[]
   evaluations              Evaluation[]

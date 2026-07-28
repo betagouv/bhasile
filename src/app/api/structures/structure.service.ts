@@ -7,7 +7,7 @@ import {
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import { Structure } from "@/generated/prisma/client";
+import { Structure, StructureVersion } from "@/generated/prisma/client";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
@@ -27,7 +27,7 @@ import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
-import { VERSIONED_FIELD_KEYS } from "./structure.constants";
+import { VERSIONED_FIELD_KEYS, VersionedScalarKey } from "./structure.constants";
 import {
   StructureDbDetails,
   StructureDbList,
@@ -276,15 +276,16 @@ export const getStructureDepartement = async (
 export const mergeStructureWithVersion = <T>(
   dbStructure: T,
   version: Record<(typeof VERSIONED_FIELD_KEYS)[number], unknown>
-): T => {
+): T & Pick<StructureVersion, VersionedScalarKey> => {
   const versionedOverlay = Object.fromEntries(
     VERSIONED_FIELD_KEYS.map((key) => [key, version[key]])
-  ) as Partial<T>;
+  ) as Partial<T> & Pick<StructureVersion, VersionedScalarKey>;
   return { ...dbStructure, ...versionedOverlay };
 };
 
 const dbStructureToApiRead = (
-  dbStructure: StructureDbDetails | StructureDbList,
+  dbStructure: (StructureDbDetails | StructureDbList) &
+    Partial<Pick<StructureVersion, VersionedScalarKey>>,
   now: Date,
   simple: boolean = false,
   bornFromCreation: boolean = false

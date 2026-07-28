@@ -269,34 +269,28 @@ export const createMinimalStructure = async (
     throw new Error("This function is only used in e2e tests");
   }
 
+  // Scalaires versionnés (nom, adresse…) portés par StructureVersion : voir createMinimalStructureVersion.
+  const structureData = {
+    codeBhasile: structure.codeBhasile,
+    type: structure.type,
+    operateurId: structure.operateurId,
+    departementAdministratif: structure.departementAdministratif,
+  };
+  const dnaStructures = {
+    create: dnaCodes.map(({ code }) => ({
+      dna: {
+        connectOrCreate: {
+          where: { code },
+          create: { code },
+        },
+      },
+    })),
+  };
+
   const upsertedStructure = await prisma.structure.upsert({
     where: { codeBhasile: structure.codeBhasile },
-    update: {
-      ...structure,
-      dnaStructures: {
-        create: dnaCodes.map(({ code }) => ({
-          dna: {
-            connectOrCreate: {
-              where: { code },
-              create: { code },
-            },
-          },
-        })),
-      },
-    },
-    create: {
-      ...structure,
-      dnaStructures: {
-        create: dnaCodes.map(({ code }) => ({
-          dna: {
-            connectOrCreate: {
-              where: { code },
-              create: { code },
-            },
-          },
-        })),
-      },
-    },
+    update: { ...structureData, dnaStructures },
+    create: { ...structureData, dnaStructures },
   });
 
   return upsertedStructure;
