@@ -7,6 +7,11 @@ import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
 import { BlockSkeleton } from "./_components/BlockSkeleton";
+import {
+  INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER,
+  RAPPELS_BLOCK_HEADER,
+  TRANSFORMATIONS_BLOCK_HEADER,
+} from "./_components/dashboardBlocks";
 import { DashboardHeader } from "./_components/DashboardHeader";
 import { InitialisationsActualisationsBlock } from "./_components/InitialisationsActualisationsBlock";
 import { RappelsBlock } from "./_components/RappelsBlock";
@@ -36,20 +41,14 @@ export default async function DashboardPage({
       <div className="flex flex-col gap-3 max-w-7xl mx-auto p-3">
         <Suspense
           fallback={
-            <BlockSkeleton
-              title="Rappels contractualisation et évaluations"
-              icon="ri-list-check-3"
-            />
+            <BlockSkeleton {...RAPPELS_BLOCK_HEADER} />
           }
         >
           <RappelsBlock filters={filters} user={user} searchParams={params} />
         </Suspense>
         <Suspense
           fallback={
-            <BlockSkeleton
-              title="Créations, transformations et fermetures de structures"
-              icon="fr-icon-community-line"
-            />
+            <BlockSkeleton {...TRANSFORMATIONS_BLOCK_HEADER} />
           }
         >
           <TransformationsBlock filters={filters} user={user} />
@@ -57,8 +56,7 @@ export default async function DashboardPage({
         <Suspense
           fallback={
             <BlockSkeleton
-              title="Initialisation et actualisations de structures"
-              icon="fr-icon-refresh-line"
+              {...INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER}
             />
           }
         >

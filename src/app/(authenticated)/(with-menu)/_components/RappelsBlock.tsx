@@ -12,6 +12,7 @@ import { SessionUser } from "@/types/global";
 
 import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
+import { RAPPELS_BLOCK_HEADER } from "./dashboardBlocks";
 import { DashboardPagination } from "./DashboardPagination";
 import { RappelsControls } from "./RappelsControls";
 import { RappelsGroupNode } from "./RappelsGroupNode";
@@ -40,9 +41,9 @@ export const RappelsBlock = async ({
     <Block>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <BlockTitle
-          title="Rappels contractualisation et évaluations"
+          title={RAPPELS_BLOCK_HEADER.title}
           total={rappelCount}
-          iconClassName="ri-list-check-3"
+          iconClassName={RAPPELS_BLOCK_HEADER.icon}
         />
         <RappelsControls echelle={echelle} groupBy={groupBy} />
       </div>
