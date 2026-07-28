@@ -2,7 +2,7 @@ import { useParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import {
-  isDocumentOpenForYear,
+  isDocumentRequiredForYear,
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
@@ -42,7 +42,7 @@ export const DocumentsFinanciers = (): ReactElement => {
     const documentsFinanciers = localStorageValues?.documentsFinanciers ?? [];
 
     return documents.filter((document) => {
-      if (!document.required || !isDocumentOpenForYear(document, year)) {
+      if (!isDocumentRequiredForYear(document, year)) {
         return false;
       }
 

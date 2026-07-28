@@ -90,10 +90,10 @@ export const structureSubventionneesDocuments: StructureDocument[] = [
   },
 ];
 
-export const isDocumentOpenForYear = (
+export const isDocumentRequiredForYear = (
   document: StructureDocument,
   year: number
-): boolean => year <= CURRENT_YEAR - document.yearIndex;
+): boolean => document.required && year <= CURRENT_YEAR - document.yearIndex;
 
 export const granularities: DocumentGranularity[] = [
   {
