@@ -3,11 +3,13 @@ import { ReactElement } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
-import { CURRENT_YEAR } from "@/constants";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
 import { DocumentsFinanciersItem } from "./DocumentsFinanciersItem";
-import { StructureDocument } from "./documentsStructures";
+import {
+  isDocumentOpenForYear,
+  StructureDocument,
+} from "./documentsStructures";
 
 export const DocumentsFinanciersCategory = ({
   documentType,
@@ -27,7 +29,7 @@ export const DocumentsFinanciersCategory = ({
     ) || [];
 
   const isFilled = documentsFinanciersOfCategory.length > 0;
-  const isAllowedYear = year <= CURRENT_YEAR - documentType.yearIndex;
+  const isAllowedYear = isDocumentOpenForYear(documentType, year);
 
   return (
     <Accordion
