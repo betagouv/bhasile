@@ -39,7 +39,7 @@
     "prisma:deploy": "prisma migrate deploy && prisma generate",
     "prisma:seed": "prisma db seed && yarn script fill-roles",
     "prisma:studio": "prisma studio",
-    "prisma:reset": "prisma migrate reset && prisma generate",
+    "prisma:reset": "scripts/guard-for-production.sh && prisma migrate reset && prisma generate",
     "prisma:reset-and-seed": "yarn install --production=false && yarn prisma:reset && yarn prisma:seed && yarn apply-views",
     "prisma:reset-and-seed:dev": "yarn prisma:reset && yarn prisma:seed && yarn apply-views:dev",
     "prasd": "yarn prisma:reset-and-seed:dev",
