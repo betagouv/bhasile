@@ -1,7 +1,9 @@
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
+import { buildRequiredDocumentsFinanciers } from "./documents-financiers";
 import { TestStructureScenario } from "./types";
+import { mirrorVersionedPlaces } from "./typologies";
 
 export const cada2: TestStructureScenario = {
   name: "CADA 2 - Single dna, recent, diffus, multiple addresses, multiple antennes, most documents at finalisation, three contacts, recent eval, no optional actes administratifs",
@@ -83,28 +85,17 @@ export const cada2: TestStructureScenario = {
         name: "Antenne 2",
       },
     ],
-    structureTypologies: [
+    structureTypologies: mirrorVersionedPlaces([
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 48, pmr: 5, lgbt: 10, fvvTeh: 8 },
-    ],
+    ]),
     documentsFinanciers: {
       allAddedViaAjout: false,
-      fileUploads: [
-        {
-          year: "2025",
-          category: "Budget prévisionnel demandé",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-        {
-          year: "2025",
-          category: "Budget prévisionnel retenu (ou exécutoire)",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-      ],
+      fileUploads: buildRequiredDocumentsFinanciers({
+        structureType: StructureType.CADA,
+        startYear: 2025,
+        resolveFormKind: () => "finalisation",
+      }),
     },
     finances: {
       2026: {
@@ -154,10 +145,10 @@ export const cada2: TestStructureScenario = {
     public: "Personnes isolées",
     contacts: [{ email: "modif-cada2@example.com" }],
     notes: "Notes modification CADA 2 - évolution structure.",
-    structureTypologies: [
+    structureTypologies: mirrorVersionedPlaces([
       { placesAutorisees: 55, pmr: 7, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 53, pmr: 7, lgbt: 11, fvvTeh: 9 },
-    ],
+    ]),
     finances: {
       2026: {
         ETP: "10",

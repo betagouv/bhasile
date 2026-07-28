@@ -1,6 +1,7 @@
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
+import { buildRequiredDocumentsFinanciers } from "./documents-financiers";
 import { TestStructureScenario } from "./types";
 
 export const caes1: TestStructureScenario = {
@@ -61,92 +62,9 @@ export const caes1: TestStructureScenario = {
     ],
     documentsFinanciers: {
       allAddedViaAjout: true,
-      fileUploads: [
-        {
-          year: "2024",
-          category: "Demande de subvention",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2024",
-          category: "Compte-rendu financier",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2024",
-          category: "Rapport d'activité de l'opérateur",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Demande de subvention",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Compte-rendu financier",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Rapport d'activité de l'opérateur",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2022",
-          category: "Demande de subvention",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2022",
-          category: "Compte-rendu financier",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2022",
-          category: "Rapport d'activité de l'opérateur",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2021",
-          category: "Demande de subvention",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2021",
-          category: "Compte-rendu financier",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2021",
-          category: "Rapport d'activité de l'opérateur",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-      ],
+      fileUploads: buildRequiredDocumentsFinanciers({
+        structureType: StructureType.CAES,
+      }),
     },
     finances: {
       2026: {
@@ -162,6 +80,12 @@ export const caes1: TestStructureScenario = {
         coutJournalier: "23,75",
         dotationDemandee: "120000",
         dotationAccordee: "110000",
+        totalProduits: "130000",
+        totalCharges: "125000",
+        repriseEtat: "0",
+        excedentRecupere: "0",
+        excedentDeduit: "0",
+        fondsDedies: "0",
       },
       2024: {
         ETP: 9,
@@ -182,6 +106,9 @@ export const caes1: TestStructureScenario = {
         reserveCompensationAmortissements: "50",
         reportANouveau: "500",
         autre: "25",
+        excedentRecupere: "0",
+        excedentDeduit: "0",
+        fondsDedies: "0",
       },
       2023: {
         ETP: "10",

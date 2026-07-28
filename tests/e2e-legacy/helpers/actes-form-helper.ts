@@ -8,6 +8,19 @@ import { SELECTORS } from "./selectors";
 import { getActesCategoryRegex } from "./shared-utils";
 import { ActeAdministratifData } from "./test-data/types";
 
+// L'autosave agent se déclenche 500 ms après la dernière modification du
+// formulaire (AutoSave.tsx). Sa réponse change les ids d'actes, ce qui remonte
+// le FormWrapper : un upload en vol au même moment perd sa clé. On laisse donc
+// l'autosave des dates retomber avant de déposer le fichier.
+const AUTOSAVE_SETTLE_MS = 800;
+
+async function waitForAutoSaveToSettle(page: Page): Promise<void> {
+  await page.waitForTimeout(AUTOSAVE_SETTLE_MS);
+  await page
+    .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
+    .catch(() => {});
+}
+
 /**
  * Resolves file path to absolute (handles relative paths from project root).
  */
@@ -98,6 +111,7 @@ async function addAndFillActe(
     .getByRole("button", { name: /Ajouter/i })
     .filter({ hasNotText: "+ Ajouter un avenant" });
   await addButton.click();
+  await waitForAutoSaveToSettle(page);
 
   const fileInputs = group.locator(SELECTORS.FILE_INPUT);
   const count = await fileInputs.count();
@@ -175,6 +189,8 @@ async function fillActeFieldsAtGroupIndex(
       acte.name
     );
   }
+
+  await waitForAutoSaveToSettle(page);
 
   const fileInput = group.locator(SELECTORS.FILE_INPUT).nth(index);
   await fileInput.waitFor({
