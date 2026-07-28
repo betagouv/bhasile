@@ -304,6 +304,26 @@ Une introduction orpheline.
       );
     });
 
+    it("rejette deux sous-titres identiques dans un onglet", () => {
+      // GIVEN
+      const source = `${FILES_FRONTMATTER}
+## Actes administratifs
+
+### Structures autorisées
+
+- [Arrêté](/arrete.odt)
+
+### Structures autorisées
+
+- [Convention](/convention.odt)
+`;
+
+      // WHEN / THEN
+      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
+        /deux sous-titres identiques/
+      );
+    });
+
     it("rejette deux questions formulées à l’identique dans un onglet", () => {
       // GIVEN
       const source = `${FAQ_FRONTMATTER}

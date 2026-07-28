@@ -1,8 +1,8 @@
-import prettyBytes from "pretty-bytes";
 
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
+import { formatBytes } from "@/app/utils/number.util";
 import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
@@ -74,7 +74,7 @@ export const DownloadItem = ({
           </div>
         )}
         {getFileType(item.fileUploads?.[0].originalName || "")} -{" "}
-        {prettyBytes(item.fileUploads?.[0].fileSize || 0)}
+        {formatBytes(item.fileUploads?.[0].fileSize)}
       </div>
     </div>
   );

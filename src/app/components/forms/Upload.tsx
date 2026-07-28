@@ -3,13 +3,13 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import autoAnimate from "@formkit/auto-animate";
-import prettyBytes from "pretty-bytes";
 import { InputHTMLAttributes, useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import Loader from "@/app/components/ui/Loader";
 import { FileUploadResponse, useFileUpload } from "@/app/hooks/useFileUpload";
 import { cn } from "@/app/utils/classname.util";
+import { formatBytes } from "@/app/utils/number.util";
 
 import { DeleteButton } from "../common/DeleteButton";
 
@@ -201,7 +201,7 @@ const Upload = ({
               </a>
               {file?.fileSize && (
                 <span className="text-xs text-default-grey tabular-nums">
-                  {prettyBytes(file?.fileSize, { locale: "fr" })}
+                  {formatBytes(file?.fileSize)}
                 </span>
               )}
             </span>

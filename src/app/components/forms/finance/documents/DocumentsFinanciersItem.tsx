@@ -1,11 +1,11 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import prettyBytes from "pretty-bytes";
 import { ReactElement, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { DeleteButton } from "@/app/components/common/DeleteButton";
 import { FileUploadWithLink, useFileUpload } from "@/app/hooks/useFileUpload";
 import { getShortDisplayedName } from "@/app/utils/file-upload.util";
+import { formatBytes } from "@/app/utils/number.util";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
 import { granularities } from "./documentsStructures";
@@ -87,7 +87,7 @@ export const DocumentsFinanciersItem = ({
       <span>
         (
         {fileData?.fileSize
-          ? prettyBytes(fileData?.fileSize, { locale: "fr" })
+          ? formatBytes(fileData?.fileSize)
           : ""}
         )
       </span>

@@ -1,9 +1,9 @@
-import prettyBytes from "pretty-bytes";
 import { useRef, useState } from "react";
 
 import { FileUploadWithLink, useFileUpload } from "@/app/hooks/useFileUpload";
 import { cn } from "@/app/utils/classname.util";
 import { getShortDisplayedName } from "@/app/utils/file-upload.util";
+import { formatBytes } from "@/app/utils/number.util";
 
 import { DeleteButton } from "../common/DeleteButton";
 import Loader from "../ui/Loader";
@@ -110,7 +110,7 @@ export const DropZone = ({ className, onChange, children }: Props) => {
             <span>{getShortDisplayedName(fileData?.originalName)}</span>
             <span className="text-disabled-grey text-xs block">
               {fileData?.fileSize
-                ? prettyBytes(fileData?.fileSize, { locale: "fr" })
+                ? formatBytes(fileData?.fileSize)
                 : ""}
             </span>
           </p>

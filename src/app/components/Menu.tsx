@@ -41,6 +41,11 @@ export const Menu = (): ReactElement => {
       label: "Statistiques",
       url: "/statistiques",
     },
+    {
+      icon: "fr-icon-book-2-line",
+      label: "Modèles et ressources",
+      url: "/ressources",
+    },
   ];
 
   const isMenuItemActive = (
