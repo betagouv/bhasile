@@ -11,7 +11,7 @@ export const StructureMenu = ({ structureId }: Props) => {
   }
 
   return (
-    <div className="relative" ref={panelRef}>
+    <div className="relative shrink-0" ref={panelRef}>
       <Button
         priority="tertiary no outline"
         iconId="ri-more-2-fill"
