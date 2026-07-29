@@ -1,7 +1,7 @@
 model Structure {
   id                       Int                   @id @default(autoincrement())
   codeBhasile              String                @unique
-  filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
+  filiale                  String? // TODO: retirer après phase d'initialisation + backfill des filiales en DB
   type                     StructureType?
   departementAdministratif String? // TODO: migré sur StructureVersion — à retirer avec la relation departement (cascade Departement.structures)
   debutConvention          DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
@@ -18,8 +18,8 @@ model Structure {
   documentsFinanciers      DocumentFinancier[]
   cpomStructures           CpomStructure[]
   structureMillesimes      StructureMillesime[]
-  budgets                  Budget[] // TODO: remove after backfill of structure version — via StructureMillesime uniquement
-  indicateursFinanciers    IndicateurFinancier[] // TODO: remove after backfill of structure version
+  budgets                  Budget[]
+  indicateursFinanciers    IndicateurFinancier[]
   operateur                Operateur?            @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]
