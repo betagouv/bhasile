@@ -26,35 +26,8 @@ export const createStructureForTest = async (
       codeBhasile: input.codeBhasile,
       type: input.type,
       operateurId: input.operateurId,
-      nom: input.nom,
-      adresseAdministrative: input.adresseAdministrative,
-      codePostalAdministratif: input.codePostalAdministratif,
-      communeAdministrative: input.communeAdministrative,
       departementAdministratif: input.departementAdministratif,
       creationDate: effectiveDate,
-      public: input.public,
-      dnaStructures: {
-        create: input.dnaCodes.map(({ code }) => ({
-          dna: {
-            connectOrCreate: {
-              where: { code },
-              create: { code },
-            },
-          },
-        })),
-      },
-      structureFinesses: {
-        create: [
-          {
-            finess: {
-              connectOrCreate: {
-                where: { code: input.finessCode },
-                create: { code: input.finessCode },
-              },
-            },
-          },
-        ],
-      },
     },
   });
 
@@ -76,7 +49,17 @@ export const createStructureForTest = async (
           dna: {
             connectOrCreate: {
               where: { code },
-              create: { code },
+              create: {
+                code,
+                type: input.type,
+                nom: `DNA ${code}`,
+                nomOfii: `DNA ${code}`,
+                directionTerritoriale: "DT",
+                operateur: { connect: { id: input.operateurId } },
+                departement: {
+                  connect: { numero: input.departementAdministratif },
+                },
+              },
             },
           },
         })),
@@ -100,7 +83,7 @@ export const createStructureForTest = async (
     id: structure.id,
     structureVersionId: structureVersion.id,
     codeBhasile: structure.codeBhasile,
-    nom: structure.nom ?? input.nom,
+    nom: input.nom,
     type: input.type,
     operateurId: input.operateurId,
   };
