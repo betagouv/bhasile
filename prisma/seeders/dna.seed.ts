@@ -14,7 +14,6 @@ export const createDnaList = (count: number): Omit<Dna, "id">[] => {
 
     dnaList.push({
       code,
-      description: null,
       activeInOfiiFileSince:
         faker.helpers.maybe(() => faker.date.past({ years: 4 }), {
           probability: 0.1,
