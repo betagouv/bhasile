@@ -29,6 +29,7 @@ import {
   createFakeStructureVersionTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
 import { createNotesList } from "./seeders/note.seed";
+import { createNotificationsList } from "./seeders/notification.seed";
 import {
   createFakeFiliale,
   createFakeOperateur,
@@ -282,6 +283,11 @@ async function seed(): Promise<void> {
   });
   await prisma.note.createMany({ data: notesToCreate });
   console.log(`✅ ${notesToCreate.length} notes créées`);
+
+  console.log("📣 Seed des notifications");
+  const notificationsToCreate = createNotificationsList();
+  await prisma.notification.createMany({ data: notificationsToCreate });
+  console.log(`✅ ${notificationsToCreate.length} notifications créées`);
 
   console.log("🏥 Création et liaison des codes FINESS...");
   const finessList = createFinessList(

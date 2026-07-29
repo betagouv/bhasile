@@ -14,6 +14,7 @@ import {
 } from "./_components/dashboardBlocks";
 import { DashboardHeader } from "./_components/DashboardHeader";
 import { InitialisationsActualisationsBlock } from "./_components/InitialisationsActualisationsBlock";
+import { NotificationsBlock } from "./_components/NotificationsBlock";
 import { RappelsBlock } from "./_components/RappelsBlock";
 import { TransformationsBlock } from "./_components/TransformationsBlock";
 
@@ -39,6 +40,9 @@ export default async function DashboardPage({
     <>
       <DashboardHeader prenom={user?.prenom} />
       <div className="flex flex-col gap-3 max-w-7xl mx-auto p-3">
+        <Suspense fallback={null}>
+          <NotificationsBlock />
+        </Suspense>
         <Suspense
           fallback={
             <BlockSkeleton {...INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER} />

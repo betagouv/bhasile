@@ -36,6 +36,71 @@ hr {
   animation: fade-in 1s ease-in-out forwards;
 }
 
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-in-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s ease-in-out forwards;
+}
+
+.animate-slide-out-left {
+  animation: slide-out-left 0.3s ease-in-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in-right,
+  .animate-slide-in-left,
+  .animate-slide-out-left,
+  .animate-slide-out-right {
+    animation: none;
+  }
+}
+
 .fr-table > table thead {
   background-image: linear-gradient(
     0deg,
