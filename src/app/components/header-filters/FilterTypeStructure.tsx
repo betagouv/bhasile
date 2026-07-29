@@ -18,7 +18,7 @@ export const FilterTypeStructure = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const urlTypes = searchParams.get("type")?.split(",").filter(Boolean);
+  const urlTypes = searchParams.get("types")?.split(",").filter(Boolean);
   const currentTypes =
     urlTypes && urlTypes.length > 0 ? urlTypes : ALL_STRUCTURE_TYPES;
 
@@ -28,9 +28,9 @@ export const FilterTypeStructure = () => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (newTypes.length > 0 && newTypes.length < ALL_STRUCTURE_TYPES.length) {
-      params.set("type", newTypes.join(","));
+      params.set("types", newTypes.join(","));
     } else {
-      params.delete("type");
+      params.delete("types");
     }
 
     deletePaginationParams(params);

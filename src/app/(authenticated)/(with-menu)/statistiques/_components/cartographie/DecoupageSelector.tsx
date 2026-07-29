@@ -1,4 +1,7 @@
+"use client";
+
 import Select from "@codegouvfr/react-dsfr/Select";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 const options = [
@@ -6,10 +9,28 @@ const options = [
   { label: "Départements", value: "dep" },
 ];
 
-export const DecoupageSelector = ({
-  decoupage,
-  setDecoupage,
-}: Props): ReactElement => {
+export const DecoupageSelector = (): ReactElement => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const currentGranularite = searchParams.get("granularite") || "region";
+  const currentValue = currentGranularite === "departement" ? "dep" : "reg";
+
+  const handleDecoupageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const selectedValue = event.target.value;
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set(
+      "granularite",
+      selectedValue === "dep" ? "departement" : "region"
+    );
+
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <Select
       label="Découpage"
@@ -17,8 +38,8 @@ export const DecoupageSelector = ({
       nativeSelectProps={{
         name: "decoupage",
         id: "decoupage",
-        value: decoupage,
-        onChange: (event) => setDecoupage(event.target.value as "dep" | "reg"),
+        value: currentValue,
+        onChange: handleDecoupageChange,
       }}
     >
       {options.map((option) => (
@@ -28,9 +49,4 @@ export const DecoupageSelector = ({
       ))}
     </Select>
   );
-};
-
-type Props = {
-  decoupage: "dep" | "reg";
-  setDecoupage: (decoupage: "dep" | "reg") => void;
 };

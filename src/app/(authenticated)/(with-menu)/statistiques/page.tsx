@@ -4,18 +4,19 @@ import { notFound } from "next/navigation";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
+import { StatistiquesHeader } from "./_components/StatistiquesHeader";
 import { StatistiquesProvider } from "./_context/StatistiquesContext";
 
 type GetStatistiquesArgs = {
   departements?: string;
   operateurs?: string;
-  type?: string;
+  types?: string;
 };
 
 async function getStatistiques({
   departements,
   operateurs,
-  type,
+  types,
 }: GetStatistiquesArgs): Promise<StatistiqueApiRead> {
   try {
     const baseUrl = process.env.NEXT_URL || "";
@@ -26,8 +27,8 @@ async function getStatistiques({
     if (operateurs) {
       params.append("operateurs", operateurs);
     }
-    if (type) {
-      params.append("types", type);
+    if (types) {
+      params.append("types", types);
     }
 
     const result = await fetch(
@@ -65,20 +66,21 @@ export default async function StatistiquesPage({
     typeof awaitedSearchParams.operateurs === "string"
       ? awaitedSearchParams.operateurs
       : undefined;
-  const type =
-    typeof awaitedSearchParams.type === "string"
-      ? awaitedSearchParams.type
+  const types =
+    typeof awaitedSearchParams.types === "string"
+      ? awaitedSearchParams.types
       : undefined;
 
   const statistiques = await getStatistiques({
     departements,
     operateurs,
-    type,
+    types,
   });
 
   return (
     <StatistiquesProvider statistiques={statistiques}>
       <div className="flex flex-col h-full">
+        <StatistiquesHeader />
         <StatistiquesContent />
       </div>
     </StatistiquesProvider>

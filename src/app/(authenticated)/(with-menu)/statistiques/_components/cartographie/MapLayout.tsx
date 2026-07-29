@@ -3,7 +3,9 @@
 import "../../../../../../../node_modules/@gouvfr/dsfr-chart/dist/MapChart/MapChart.css";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+
+import Loader from "@/app/components/ui/Loader";
 
 import { DecoupageSelector } from "./DecoupageSelector";
 import { IdfMap } from "./IdfMap";
@@ -17,15 +19,16 @@ export const MapLayout = ({
   zoneData,
   departementsData,
   decoupage,
-  setDecoupage,
+  selectedRegion,
+  setSelectedRegion,
+  isLoadingRegion,
+  departementsEvolutionData,
 }: Props) => {
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-
   useEffect(() => {
     if (decoupage === "dep") {
       setSelectedRegion(null);
     }
-  }, [decoupage]);
+  }, [decoupage, setSelectedRegion]);
 
   return (
     <div className="relative w-full h-full">
@@ -34,10 +37,7 @@ export const MapLayout = ({
           <div className="pr-4">
             <YearSelector />
           </div>
-          <DecoupageSelector
-            decoupage={decoupage}
-            setDecoupage={setDecoupage}
-          />
+          <DecoupageSelector />
           {decoupage === "reg" && selectedRegion && (
             <Button
               className="ml-4 underline font-normal"
@@ -49,8 +49,7 @@ export const MapLayout = ({
             </Button>
           )}
         </div>
-        {/* TODO : mettre des vraies valeurs ici */}
-        <MoyenneIndicator value={42} trend="up" />
+        <MoyenneIndicator selectedRegion={selectedRegion} />
       </div>
 
       <div className="absolute top-4 right-4 z-20">
@@ -58,10 +57,18 @@ export const MapLayout = ({
       </div>
 
       {decoupage === "reg" && selectedRegion ? (
-        <RegionDetailsMap
-          regionCode={selectedRegion}
-          zoneData={departementsData}
-        />
+        <div className="relative w-full h-full">
+          {isLoadingRegion && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+              <Loader />
+            </div>
+          )}
+          <RegionDetailsMap
+            regionCode={selectedRegion}
+            zoneData={departementsData}
+            evolutionData={departementsEvolutionData}
+          />
+        </div>
       ) : (
         <>
           {decoupage === "dep" && (
@@ -85,5 +92,11 @@ type Props = {
   zoneData: Record<string, number>;
   departementsData: Record<string, number>;
   decoupage: "dep" | "reg";
-  setDecoupage: (decoupage: "dep" | "reg") => void;
+  selectedRegion: string | null;
+  setSelectedRegion: (region: string | null) => void;
+  isLoadingRegion?: boolean;
+  departementsEvolutionData: Record<
+    string,
+    { delta?: number; direction?: string | null }
+  >;
 };

@@ -1,27 +1,30 @@
+"use client";
+
 import Button from "@codegouvfr/react-dsfr/Button";
-import { ReactElement, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 const sections = [
   {
     title: "Structures",
     icon: "fr-icon-community-line",
     items: [
-      { label: "Nombre de structures", value: "totalStructures" },
-      { label: "Nombre de structures en CPOM", value: "totalStructuresCpom" },
+      { label: "Nombre de structures", value: "structures.total" },
+      { label: "Nombre de structures en CPOM", value: "structures.avecCpom" },
     ],
   },
   {
     title: "Types de places",
     icon: "fr-icon-map-pin-2-line",
     items: [
-      { label: "Nombre de places autorisées", value: "placesAutorisees" },
-      { label: "Nombre de places PMR", value: "placesPmr" },
-      { label: "Nombre de places LGBT", value: "placesLgbt" },
-      { label: "Nombre de places FVV-TEH", value: "placesFvvTeh" },
-      { label: "Nombre de places en QPV", value: "placesQpv" },
+      { label: "Nombre de places autorisées", value: "places.autorisees" },
+      { label: "Nombre de places PMR", value: "places.pmr" },
+      { label: "Nombre de places LGBT", value: "places.lgbt" },
+      { label: "Nombre de places FVV-TEH", value: "places.fvvTeh" },
+      { label: "Nombre de places en QPV", value: "places.qpv" },
       {
         label: "Nombre de places en logement social",
-        value: "placesLogementSocial",
+        value: "places.logementsSociaux",
       },
     ],
   },
@@ -31,14 +34,14 @@ const sections = [
     items: [
       {
         label: "Dotation annuelle totale versée par l’État",
-        value: "dotationAccordee",
+        value: "finance.dotationAccordee",
       },
-      { label: "Nombre d’ETP", value: "ETP" },
-      { label: "Taux d’encadrement", value: "tauxEncadrement" },
-      { label: "Coût journalier", value: "coutJournalier" },
+      { label: "Nombre d’ETP", value: "finance.etp" },
+      { label: "Taux d’encadrement", value: "finance.tauxEncadrement" },
+      { label: "Coût journalier", value: "finance.coutJournalier" },
       {
         label: "Excédents et déficits",
-        value: "excedentsDeficits",
+        value: "finance.resultatNet",
       },
     ],
   },
@@ -46,12 +49,15 @@ const sections = [
     title: "Contrôle qualité",
     icon: "fr-icon-search-line",
     items: [
-      { label: "Nombre d’EIG", value: "nbEig" },
+      { label: "Nombre d’EIG", value: "controleQualite.nbEig" },
       {
         label: "Pourcentage d’EIG au motif de comportement violent",
-        value: "percentageEigComportementViolent",
+        value: "controleQualite.tauxEigComportementViolent",
       },
-      { label: "Moyenne aux évaluations", value: "moyenneEvaluations" },
+      {
+        label: "Moyenne aux évaluations",
+        value: "controleQualite.moyenneEvaluations",
+      },
     ],
   },
   {
@@ -60,14 +66,17 @@ const sections = [
     items: [
       {
         label: "Nombre de places enregistrées dans le DNA",
-        value: "placesEnregistreesDna",
+        value: "activite.placesDna",
       },
       {
         label: "Nombre de places indisponibles",
-        value: "placesIndisponibles",
+        value: "activite.placesIndisponibles",
       },
-      { label: "Nombre de places occupées", value: "placesOccupees" },
-      { label: "Nombre de places en présence indue", value: "presencesIndues" },
+      { label: "Nombre de places occupées", value: "activite.placesOccupees" },
+      {
+        label: "Nombre de places en présence indue",
+        value: "activite.presencesIndues",
+      },
     ],
   },
   {
@@ -76,18 +85,28 @@ const sections = [
     items: [
       {
         label: "Nombre de référés mesures utiles engagés",
-        value: "rmuEngages",
+        value: "rmu.referesEngages",
       },
       {
         label: "Nombre de référés mesures utiles exécutés",
-        value: "rmuExecutes",
+        value: "rmu.referesExecutes",
       },
     ],
   },
 ];
 
 export const CartographieMenu = (): ReactElement => {
-  const [activeItem, setActiveItem] = useState("nbStructures");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const currentIndicator = searchParams.get("indicateur") || "structures.total";
+
+  const handleIndicatorChange = (indicatorValue: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("indicateur", indicatorValue);
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <aside className="bg-white w-120 border-r border-default-grey overflow-y-auto max-h-[calc(100vh-var(--structure-header-height))]">
@@ -99,11 +118,11 @@ export const CartographieMenu = (): ReactElement => {
           </h2>
           <div className="flex flex-col pl-2">
             {section.items.map((item) => {
-              const isActive = activeItem === item.value;
+              const isActive = currentIndicator === item.value;
               return (
                 <Button
                   key={item.value}
-                  onClick={() => setActiveItem(item.value)}
+                  onClick={() => handleIndicatorChange(item.value)}
                   iconId="fr-icon-arrow-right-line"
                   iconPosition="right"
                   priority="tertiary no outline"

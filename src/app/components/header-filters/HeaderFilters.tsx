@@ -28,7 +28,7 @@ export const HeaderFilters = () => {
       <FilterDropdown
         label="Types Structure"
         placeholder="Tous les types de structure"
-        filterId="type"
+        filterId="types"
       >
         <FilterTypeStructure />
       </FilterDropdown>

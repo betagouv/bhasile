@@ -1,26 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 
-import { ZoneLabel } from "@/types/map.type";
-
-interface UseMapLabelsProps {
-  zoneData: Record<string, number>;
-  dependencyTrigger?: string;
-  onPathFound?: (path: SVGPathElement, code: string) => boolean | void;
-}
+import { ZoneDataInfo, ZoneLabelWithTrend } from "@/types/map.type";
 
 export const useMapLabels = ({
   zoneData,
   dependencyTrigger,
   onPathFound,
-}: UseMapLabelsProps) => {
+}: UseMapLabelsArgs) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLElement>(null);
-  const [labels, setLabels] = useState<ZoneLabel[]>([]);
+  const [labels, setLabels] = useState<ZoneLabelWithTrend[]>([]);
 
   useEffect(() => {
-    const clickListeners: { element: SVGPathElement; handler: () => void }[] =
-      [];
-
     const calculatePositions = () => {
       if (!mapRef.current || !containerRef.current) {
         return;
@@ -35,7 +26,7 @@ export const useMapLabels = ({
       }
 
       const containerRect = containerRef.current.getBoundingClientRect();
-      const newLabels: ZoneLabel[] = [];
+      const newLabels: ZoneLabelWithTrend[] = [];
 
       paths.forEach((path) => {
         const className = path.getAttribute("class") || "";
@@ -45,7 +36,7 @@ export const useMapLabels = ({
 
         if (frClass) {
           const code = frClass.replace("FR-", "");
-          const value = zoneData[code];
+          const zoneInfo = zoneData[code];
 
           if (onPathFound) {
             const shouldInclude = onPathFound(path, code);
@@ -54,11 +45,13 @@ export const useMapLabels = ({
             }
           }
 
-          if (value !== undefined) {
+          if (zoneInfo !== undefined) {
             const pathRect = path.getBoundingClientRect();
             newLabels.push({
               code,
-              value,
+              value: zoneInfo.value,
+              delta: zoneInfo.delta,
+              direction: zoneInfo.direction,
               x: pathRect.left - containerRect.left + pathRect.width / 2,
               y: pathRect.top - containerRect.top + pathRect.height / 2,
             });
@@ -79,11 +72,14 @@ export const useMapLabels = ({
     return () => {
       clearTimeout(timeoutId);
       resizeObserver.disconnect();
-      clickListeners.forEach(({ element, handler }) => {
-        element.removeEventListener("click", handler);
-      });
     };
   }, [zoneData, dependencyTrigger, onPathFound]);
 
   return { containerRef, mapRef, labels };
+};
+
+type UseMapLabelsArgs = {
+  zoneData: Record<string, ZoneDataInfo>;
+  dependencyTrigger?: string;
+  onPathFound?: (path: SVGPathElement, code: string) => boolean | void;
 };

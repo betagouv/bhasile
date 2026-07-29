@@ -1,16 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Loader from "@/app/components/ui/Loader";
 import { useMapLabels } from "@/app/hooks/useMapLabels";
 
+import { useStatistiquesCartographieContext } from "../../_context/StatistiquesCartographieClientContext";
 import { ZoneIndicator } from "./ZoneIndicator";
 
 const IDF_DEPARTEMENTS = ["75", "77", "78", "91", "92", "93", "94", "95"];
 
 export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
   const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
+
+  const { statistiques } = useStatistiquesCartographieContext();
+  const zones = useMemo(() => statistiques?.zones || [], [statistiques?.zones]);
+
+  const richZoneData = useMemo(() => {
+    return zones.reduce(
+      (accumulator, zone) => {
+        const cleanCode = zone.code.replace(/^FR-/, "");
+        accumulator[cleanCode] = {
+          value: zone.value ?? 0,
+          delta: zone.evolution?.delta,
+          direction: zone.evolution?.direction,
+        };
+        return accumulator;
+      },
+      {} as Record<
+        string,
+        { value: number; delta?: number; direction?: string | null }
+      >
+    );
+  }, [zones]);
 
   useEffect(() => {
     import("@gouvfr/dsfr-chart")
@@ -42,7 +64,7 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
   );
 
   const { containerRef, mapRef, labels } = useMapLabels({
-    zoneData,
+    zoneData: richZoneData,
     dependencyTrigger: decoupage,
     onPathFound: isLibraryLoaded ? handlePathFound : undefined,
   });
@@ -81,6 +103,8 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
           value={label.value}
           x={label.x}
           y={label.y}
+          delta={label.delta}
+          direction={label.direction}
         />
       ))}
     </div>

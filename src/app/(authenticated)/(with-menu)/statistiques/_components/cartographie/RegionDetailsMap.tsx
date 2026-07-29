@@ -1,12 +1,44 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useMapLabels } from "@/app/hooks/useMapLabels";
 
+import { useStatistiquesCartographieContext } from "../../_context/StatistiquesCartographieClientContext";
 import { ZoneIndicator } from "./ZoneIndicator";
 
-export const RegionDetailsMap = ({ regionCode, zoneData }: Props) => {
+export const RegionDetailsMap = ({
+  regionCode,
+  zoneData,
+  evolutionData,
+}: Props) => {
+  const { statistiques } = useStatistiquesCartographieContext();
+  const zones = useMemo(() => statistiques?.zones || [], [statistiques?.zones]);
+
+  const richZoneData = useMemo(() => {
+    return Object.keys(zoneData).reduce(
+      (accumulator, code) => {
+        const localEvolution = evolutionData?.[code];
+        const matchingZone = zones.find(
+          (zone) => zone.code.replace(/^FR-/, "") === code
+        );
+
+        accumulator[code] = {
+          value: zoneData[code],
+          delta: localEvolution?.delta ?? matchingZone?.evolution?.delta,
+          direction:
+            localEvolution?.direction ?? matchingZone?.evolution?.direction,
+        };
+        return accumulator;
+      },
+      {} as Record<
+        string,
+        { value: number; delta?: number; direction?: string | null }
+      >
+    );
+  }, [zoneData, evolutionData, zones]);
   const { containerRef, mapRef, labels } = useMapLabels({
-    zoneData,
+    zoneData: richZoneData,
     dependencyTrigger: regionCode,
   });
 
@@ -35,6 +67,8 @@ export const RegionDetailsMap = ({ regionCode, zoneData }: Props) => {
           value={label.value}
           x={label.x}
           y={label.y}
+          delta={label.delta}
+          direction={label.direction}
         />
       ))}
     </div>
@@ -44,4 +78,5 @@ export const RegionDetailsMap = ({ regionCode, zoneData }: Props) => {
 type Props = {
   regionCode: string;
   zoneData: Record<string, number>;
+  evolutionData?: Record<string, { delta?: number; direction?: string | null }>;
 };

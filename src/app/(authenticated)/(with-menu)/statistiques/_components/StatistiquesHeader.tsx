@@ -1,6 +1,7 @@
 "use client";
 
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
@@ -8,18 +9,31 @@ import { HeaderFilters } from "@/app/components/header-filters/HeaderFilters";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 
-import { useStatistiquesContext } from "../_context/StatistiquesClientContext";
-
-export const StatistiquesHeader = ({
-  visualization,
-  setVisualization,
-}: Props): ReactElement | null => {
-  const { statistiques } = useStatistiquesContext();
-
+export const StatistiquesHeader = (): ReactElement | null => {
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
 
-  return statistiques ? (
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const isCartographie = pathname.includes("cartographie");
+  const visualization = isCartographie ? "cartographie" : "tableaux";
+
+  const handleVisualizationChange = (
+    newVisualization: "tableaux" | "cartographie"
+  ) => {
+    const query = searchParams.toString();
+    const suffix = query ? `?${query}` : "";
+
+    if (newVisualization === "tableaux") {
+      router.push(`/statistiques${suffix}`);
+    } else {
+      router.push(`/statistiques/cartographie${suffix}`);
+    }
+  };
+
+  return (
     <div
       className={`sticky top-0 z-50 bg-lifted-grey transition-transform duration-300 ease-in-out ${
         isHidden ? "-translate-y-full" : "translate-y-0"
@@ -44,7 +58,7 @@ export const StatistiquesHeader = ({
                   nativeInputProps: {
                     value: "tableaux",
                     checked: visualization === "tableaux",
-                    onChange: () => setVisualization("tableaux"),
+                    onChange: () => handleVisualizationChange("tableaux"),
                   },
                 },
                 {
@@ -53,8 +67,7 @@ export const StatistiquesHeader = ({
                   nativeInputProps: {
                     value: "cartographie",
                     checked: visualization === "cartographie",
-                    onChange: () => setVisualization("cartographie"),
-                    disabled: true,
+                    onChange: () => handleVisualizationChange("cartographie"),
                   },
                 },
               ]}
@@ -66,38 +79,15 @@ export const StatistiquesHeader = ({
       {visualization === "tableaux" && (
         <NavigationMenu
           menuElements={[
-            {
-              label: "Structures",
-              section: "#structures",
-            },
-            {
-              label: "Types de places",
-              section: "#types-places",
-            },
-            {
-              label: "Finance",
-              section: "#finance",
-            },
-            {
-              label: "Contrôle qualité",
-              section: "#controle-qualite",
-            },
-            {
-              label: "Activité",
-              section: "#activite",
-            },
-            {
-              label: "RMU",
-              section: "#rmu",
-            },
+            { label: "Structures", section: "#structures" },
+            { label: "Types de places", section: "#types-places" },
+            { label: "Finance", section: "#finance" },
+            { label: "Contrôle qualité", section: "#controle-qualite" },
+            { label: "Activité", section: "#activite" },
+            { label: "RMU", section: "#rmu" },
           ]}
         />
       )}
     </div>
-  ) : null;
-};
-
-type Props = {
-  visualization: "tableaux" | "cartographie";
-  setVisualization: (visualization: "tableaux" | "cartographie") => void;
+  );
 };
