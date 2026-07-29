@@ -26,7 +26,7 @@ export const StatistiquesContent = (): ReactElement => {
         setVisualization={setVisualization}
       />
       {visualization === "tableaux" && (
-        <div className="flex flex-col gap-3 px-3">
+        <div className="flex flex-col gap-3 px-3 pt-3">
           <CustomNotice
             severity="warning"
             description="Les structures non finalisées et les PRAHDA ne sont pas comptabilisés ici."

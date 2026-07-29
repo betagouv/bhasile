@@ -75,3 +75,8 @@ hr {
 .fr-notice__desc {
   color: var(--text-default-grey);
 }
+
+/* stylelint-disable-next-line selector-class-pattern */
+map-chart .FR-20R, .map_info {
+  display: none !important;
+}

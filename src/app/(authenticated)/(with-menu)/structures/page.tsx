@@ -8,6 +8,7 @@ import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import { ListLoader } from "@/app/components/lists/ListLoader";
+import Loader from "@/app/components/ui/Loader";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 
@@ -39,9 +40,9 @@ export default function Structures(): ReactElement {
     () =>
       dynamic(() => import("./_components/StructuresMap"), {
         loading: () => (
-          <p className="h-full w-full flex items-center justify-center">
-            Chargement de la carte en cours...
-          </p>
+          <div className="flex items-center justify-center h-full w-full">
+            <Loader />
+          </div>
         ),
         ssr: false,
       }),
