@@ -20,6 +20,7 @@ const PUBLIC_DIR = "public";
 const SUGGESTIONS_FILE = "_suggestions.md";
 const BLOCK_FILE_PATTERN = /^\d+-.+\.md$/;
 const ABSOLUTE_URL_PATTERN = /^[a-z][a-z0-9+.-]*:/i;
+const HEADING_TOKEN_COUNT = 3;
 
 const markdown = new MarkdownIt();
 
@@ -166,54 +167,49 @@ const splitFrontmatter = (
 };
 
 const groupByTab = (tokens: Token[]): TabGroup[] => {
-  const groups: TabGroup[] = [];
-  let target: Token[] | null = null;
+  const { before, sections: tabs } = splitOnHeading(tokens, "h2");
+
+  if (before.length > 0) {
+    throw new Error(
+      "Contenu placé avant le premier onglet : tout doit être placé sous un titre de niveau 2 (##)."
+    );
+  }
+
+  return tabs.map((tab) => {
+    const { before: rootTokens, sections: subSections } = splitOnHeading(
+      tab.tokens,
+      "h3"
+    );
+    return { title: tab.title, tokens: rootTokens, subSections };
+  });
+};
+
+const splitOnHeading = (tokens: Token[], tag: "h2" | "h3"): HeadingSplit => {
+  const before: Token[] = [];
+  const sections: HeadingSplit["sections"] = [];
+  let target = before;
   let index = 0;
 
   while (index < tokens.length) {
     const token = tokens[index];
 
-    if (token.type === "heading_open" && token.tag === "h2") {
-      const tab = {
-        title: readHeadingText(tokens, index),
+    if (token.type === "heading_open" && token.tag === tag) {
+      const section = {
+        title: tokens[index + 1]?.content.trim() ?? "",
         tokens: [],
-        subSections: [],
       };
-      groups.push(tab);
-      target = tab.tokens;
-      index += 3;
+      sections.push(section);
+      target = section.tokens;
+      index += HEADING_TOKEN_COUNT;
       continue;
-    }
-
-    if (token.type === "heading_open" && token.tag === "h3") {
-      const currentTab = groups.at(-1);
-      if (!currentTab) {
-        throw new Error(
-          `Sous-titre « ${readHeadingText(tokens, index)} » placé avant tout onglet : un ### doit suivre un ##.`
-        );
-      }
-      const subSection = { title: readHeadingText(tokens, index), tokens: [] };
-      currentTab.subSections.push(subSection);
-      target = subSection.tokens;
-      index += 3;
-      continue;
-    }
-
-    if (!target) {
-      throw new Error(
-        "Contenu placé avant le premier titre de niveau 2 (##) : il ne serait affiché nulle part."
-      );
     }
 
     target.push(token);
     index += 1;
   }
 
-  return groups;
+  return { before, sections };
 };
-
-const readHeadingText = (tokens: Token[], headingIndex: number): string =>
-  tokens[headingIndex + 1]?.content.trim() ?? "";
 
 const buildFilesTab = (
   group: TabGroup,
@@ -348,7 +344,9 @@ const extractText = (tokens: Token[]): string =>
     .filter((token) => token.type === "inline")
     .map((token) =>
       (token.children ?? [])
-        .filter((child) => child.type === "text" || child.type === "code_inline")
+        .filter(
+          (child) => child.type === "text" || child.type === "code_inline"
+        )
         .map((child) => child.content)
         .join(" ")
     )
@@ -366,4 +364,9 @@ type TabGroup = {
   title: string;
   tokens: Token[];
   subSections: { title: string; tokens: Token[] }[];
+};
+
+type HeadingSplit = {
+  before: Token[];
+  sections: { title: string; tokens: Token[] }[];
 };

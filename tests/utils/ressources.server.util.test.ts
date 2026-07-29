@@ -268,7 +268,7 @@ Une introduction orpheline.
 
       // WHEN / THEN
       expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /avant le premier titre/
+        /avant le premier onglet/
       );
     });
 
@@ -282,7 +282,7 @@ Une introduction orpheline.
 
       // WHEN / THEN
       expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /avant tout onglet/
+        /avant le premier onglet/
       );
     });
 
