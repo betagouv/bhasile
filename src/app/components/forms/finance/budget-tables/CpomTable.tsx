@@ -13,7 +13,7 @@ import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 import { getBudgetTableLines } from "./getBudgetTableLines";
 
-export const CpomTable = ({ type, showTitle }: Props) => {
+export const CpomTable = ({ type, ariaLabelledBy }: Props) => {
   const { watch } = useFormContext();
   const budgets = watch("budgets") as BudgetApiType[];
 
@@ -41,13 +41,8 @@ export const CpomTable = ({ type, showTitle }: Props) => {
 
   return (
     <div>
-      {showTitle && (
-        <h2 className="text-title-blue-france text-lg mb-8 text-left font-bold">
-          Gestion budgétaire ({type})
-        </h2>
-      )}
       <Table
-        ariaLabelledBy="gestionBudgetaire"
+        ariaLabelledBy={ariaLabelledBy}
         headings={getBudgetTableHeading({ years: yearsInCpom })}
         enableBorders
         stickFirstColumn
@@ -74,5 +69,5 @@ export const CpomTable = ({ type, showTitle }: Props) => {
 
 type Props = {
   type: StructureType;
-  showTitle: boolean;
+  ariaLabelledBy: string;
 };

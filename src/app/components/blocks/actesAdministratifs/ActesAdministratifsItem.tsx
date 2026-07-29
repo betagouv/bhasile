@@ -4,11 +4,13 @@ import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema
 type Props = {
   acteAdministratif: ActeAdministratifApiType;
   allActesAdministratifs: ActeAdministratifApiType[];
+  showCpomBadge?: boolean;
 };
 
 export const ActesAdministratifsItem = ({
   acteAdministratif,
   allActesAdministratifs,
+  showCpomBadge = true,
 }: Props) => {
   const avenantsOfItem = allActesAdministratifs
     .filter((avenant) => avenant.parentId === acteAdministratif.id)
@@ -22,7 +24,7 @@ export const ActesAdministratifsItem = ({
       <div>
         <DownloadItem
           item={acteAdministratif}
-          cpomInherited={acteAdministratif.cpomId != null}
+          cpomInherited={showCpomBadge && acteAdministratif.cpomId != null}
         />
       </div>
       {avenantsOfItem.map((avenant) => (
@@ -31,7 +33,7 @@ export const ActesAdministratifsItem = ({
             key={avenant.id}
             item={avenant}
             index={avenant.index}
-            cpomInherited={avenant.cpomId != null}
+            cpomInherited={showCpomBadge && avenant.cpomId != null}
           />
         </div>
       ))}

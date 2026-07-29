@@ -1,16 +1,16 @@
-import { StructureType } from "@/types/structure.type";
+import { CpomActeScope } from "@/app/utils/cpom.util";
 
 import { DatesAndDocuments } from "./DatesAndDocuments";
 
-export const FieldSetActesAdministratifs = ({ structureTypes }: Props) => {
+export const FieldSetActesAdministratifs = ({ currentScope }: Props) => {
   return (
     <fieldset className="flex flex-col gap-6">
-      <DatesAndDocuments structureTypes={structureTypes} />
+      <DatesAndDocuments currentScope={currentScope} />
       <hr />
     </fieldset>
   );
 };
 
 type Props = {
-  structureTypes: StructureType[];
+  currentScope?: CpomActeScope;
 };

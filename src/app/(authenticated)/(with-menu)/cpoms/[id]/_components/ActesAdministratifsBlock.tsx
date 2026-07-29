@@ -1,76 +1,63 @@
 "use client";
 
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
+import { ActesAdministratifsCategory } from "@/app/components/blocks/actesAdministratifs/ActesAdministratifsCategory";
 import { Block } from "@/app/components/common/Block";
-import { DownloadItem } from "@/app/components/common/DownloadItem";
-import { getCpomStructureTypes } from "@/app/utils/cpom.util";
-import { StructureType } from "@/types/structure.type";
+import { getActesCategoriesToDisplay } from "@/app/utils/acteAdministratif.util";
+import { CpomActeScope, getCpomActesScopes } from "@/app/utils/cpom.util";
+import { ACTE_ADMINISTRATIF_CATEGORY_LABELS } from "@/config/acte-administratif.config";
 
 import { useCpomContext } from "../_context/CpomClientContext";
-
-const CPOM_SCOPE = "CPOM";
+import { ActesScopeSwitch } from "./ActesScopeSwitch";
 
 export const ActesAdministratifsBlock = () => {
   const { cpom } = useCpomContext();
   const router = useRouter();
 
-  const actesAdministratifs = cpom.actesAdministratifs ?? [];
-  const scopes: (StructureType | typeof CPOM_SCOPE)[] = [
-    CPOM_SCOPE,
-    ...getCpomStructureTypes(cpom),
-  ];
+  const scopes = getCpomActesScopes(cpom);
 
-  const getScopeActes = (scope: StructureType | typeof CPOM_SCOPE) => {
-    const structureType = scope === CPOM_SCOPE ? null : scope;
-    return actesAdministratifs.filter(
-      (acteAdministratif) =>
-        (acteAdministratif.structureType ?? null) === structureType
-    );
-  };
+  const [currentScope, setCurrentScope] = useState<CpomActeScope>(
+    scopes[0].scope
+  );
+
+  const currentScopeActes =
+    scopes.find((scopeEntry) => scopeEntry.scope === currentScope)
+      ?.actesAdministratifs ?? [];
+  const categoriesToDisplay = getActesCategoriesToDisplay(currentScopeActes);
 
   return (
     <Block
-      title="Actes administratifs du CPOM"
+      title="Actes administratifs"
       iconClass="fr-icon-file-text-line"
+      titleAside={
+        scopes.length > 1 ? (
+          <ActesScopeSwitch
+            scopes={scopes}
+            currentScope={currentScope}
+            handleChange={setCurrentScope}
+          />
+        ) : undefined
+      }
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/actes-administratifs`);
       }}
       entity={cpom}
       entityType="Cpom"
     >
-      {actesAdministratifs.length === 0 ? (
-        <>Aucun document importé</>
+      {categoriesToDisplay.length === 0 ? (
+        <p className="text-disabled-grey mb-0">Aucun document importé</p>
       ) : (
-        scopes.map((scope) => {
-          const scopeActes = getScopeActes(scope);
-          if (scopeActes.length === 0) {
-            return null;
-          }
-          const conventions = scopeActes.filter(
-            (acteAdministratif) => !acteAdministratif.parentId
-          );
-          const avenants = scopeActes.filter(
-            (acteAdministratif) => acteAdministratif.parentId
-          );
-          return (
-            <Accordion label={scope} key={scope}>
-              <div className="grid grid-cols-3 gap-5">
-                {conventions.map((convention) => (
-                  <div key={convention.id}>
-                    <DownloadItem item={convention} />
-                  </div>
-                ))}
-                {avenants.map((avenant, index) => (
-                  <div key={avenant.id}>
-                    <DownloadItem item={avenant} index={index + 1} />
-                  </div>
-                ))}
-              </div>
-            </Accordion>
-          );
-        })
+        categoriesToDisplay.map((category) => (
+          <ActesAdministratifsCategory
+            key={category}
+            category={category}
+            title={ACTE_ADMINISTRATIF_CATEGORY_LABELS[category]}
+            actesAdministratifs={currentScopeActes}
+            showCpomBadge={false}
+          />
+        ))
       )}
     </Block>
   );

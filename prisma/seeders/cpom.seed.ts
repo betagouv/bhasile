@@ -1,5 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   ActeAdministratifCategory,
   type PrismaClient,
@@ -17,6 +18,83 @@ const buildStructureMillesimeYears = (start: number, end: number): number[] => {
   }
 
   return years;
+};
+
+const createActeWithAvenants = async (
+  prisma: PrismaClient,
+  data: {
+    cpomId: number;
+    category: ActeAdministratifCategory;
+    structureType: StructureType | null;
+    avenantCount: number;
+    dateStart: Date;
+    dateEnd: Date;
+  }
+): Promise<void> => {
+  const parent = await prisma.acteAdministratif.create({
+    data: {
+      cpomId: data.cpomId,
+      category: data.category,
+      structureType: data.structureType,
+      startDate: data.dateStart,
+      endDate: data.dateEnd,
+      fileUploads: { create: createFakeFileUpload() },
+    },
+  });
+
+  for (let avenantIndex = 0; avenantIndex < data.avenantCount; avenantIndex++) {
+    await prisma.acteAdministratif.create({
+      data: {
+        cpomId: data.cpomId,
+        category: data.category,
+        parentId: parent.id,
+        date: faker.date.between({ from: data.dateStart, to: data.dateEnd }),
+        fileUploads: { create: createFakeFileUpload() },
+      },
+    });
+  }
+};
+
+// Deux cas doivent rester couverts : un parent portant plusieurs avenants, et
+// deux parents portant chacun le leur dans un même périmètre — c'est là que se
+// voit une numérotation des avenants calculée globalement au lieu de par parent.
+const createCpomActesAdministratifs = async (
+  prisma: PrismaClient,
+  data: {
+    cpomId: number;
+    structureTypes: StructureType[];
+    dateStart: Date;
+    dateEnd: Date;
+  }
+): Promise<void> => {
+  await createActeWithAvenants(prisma, {
+    cpomId: data.cpomId,
+    category: ActeAdministratifCategory.CONVENTION_CPOM,
+    structureType: null,
+    avenantCount: 2,
+    dateStart: data.dateStart,
+    dateEnd: data.dateEnd,
+  });
+
+  for (const structureType of data.structureTypes) {
+    const secondCategory = isStructureAutorisee(structureType)
+      ? ActeAdministratifCategory.ARRETE_AUTORISATION
+      : ActeAdministratifCategory.CONVENTION;
+
+    for (const category of [
+      ActeAdministratifCategory.CONVENTION,
+      secondCategory,
+    ]) {
+      await createActeWithAvenants(prisma, {
+        cpomId: data.cpomId,
+        category,
+        structureType,
+        avenantCount: 1,
+        dateStart: data.dateStart,
+        dateEnd: data.dateEnd,
+      });
+    }
+  }
 };
 
 export const createFakeCpoms = async (
@@ -176,20 +254,6 @@ export const createFakeCpoms = async (
                 })),
             }
           : undefined,
-        ...(isUiInitialized
-          ? {
-              actesAdministratifs: {
-                create: {
-                  category: ActeAdministratifCategory.CONVENTION_CPOM,
-                  startDate: dateStart,
-                  endDate: dateEnd,
-                  fileUploads: {
-                    create: createFakeFileUpload(),
-                  },
-                },
-              },
-            }
-          : undefined),
         budgets: {
           create: budgetYears.flatMap((budgetYear) => {
             return structureTypes.map((structureType) => {
@@ -259,6 +323,15 @@ export const createFakeCpoms = async (
         },
       },
     });
+
+    if (isUiInitialized) {
+      await createCpomActesAdministratifs(prisma, {
+        cpomId: cpom.id,
+        structureTypes,
+        dateStart,
+        dateEnd,
+      });
+    }
 
     console.log(
       `🍏 CPOM créé : ${cpomName} avec ${selectedStructures.length} structures`

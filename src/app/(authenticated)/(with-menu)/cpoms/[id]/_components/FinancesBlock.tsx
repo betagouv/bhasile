@@ -38,33 +38,35 @@ export const FinancesBlock = () => {
 
   return (
     <Block
-      title="Finances"
+      title="Finance"
       iconClass="fr-icon-money-euro-box-line"
+      titleAside={
+        cpomStructureTypes.length > 1 ? (
+          <FinanceTypeSwitch
+            cpomStructureTypes={cpomStructureTypes}
+            currentType={currentType}
+            handleChange={(value) => setCurrentType(value as StructureType)}
+          />
+        ) : undefined
+      }
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/finances`);
       }}
       entity={cpom}
       entityType="Cpom"
     >
-      {cpomStructureTypes.length > 1 && (
-        <FinanceTypeSwitch
-          cpomStructureTypes={cpomStructureTypes}
-          currentType={currentType}
-          handleChange={(value) => setCurrentType(value as StructureType)}
-        />
-      )}
       <h4
         className="text-title-blue-france text-lg pr-6"
         id="gestionBudgetaire"
       >
-        Gestion budgétaire
+        Gestion budgétaire ({currentType})
       </h4>
       <p className="max-w-4xl mb-6">
         Dans cette vue, l’ensemble des montants correspond à la gestion
         budgétaire{" "}
         <strong>
           à l’échelle du CPOM en prenant en compte toutes les structures d’un
-          même type (ici {currentType}).
+          même type.
         </strong>{" "}
         Aussi, le tableau des affectations reflète uniquement des flux annuels.
         Les chiffres ne sont en aucun cas une estimation du stock.

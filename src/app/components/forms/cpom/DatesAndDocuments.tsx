@@ -1,15 +1,14 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { SegmentedControl } from "@/app/components/common/SegmentedControl";
+import { CPOM_ACTE_SCOPE, CpomActeScope } from "@/app/utils/cpom.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { AdditionalFieldsType } from "@/config/acte-administratif.config";
 import { getCpomActesAdministratifsCategoryToDisplay } from "@/config/cpom-acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
-import { StructureType } from "@/types/structure.type";
 
 import { ActesAdministratifs } from "../actesAdministratifs/ActesAdministratifs";
 import FieldSetActeAdministratif from "../actesAdministratifs/FieldSetActeAdministratif";
@@ -18,12 +17,10 @@ import { MaxSizeNotice } from "../MaxSizeNotice";
 
 dayjs.extend(customParseFormat);
 
-const CPOM_SCOPE = "CPOM";
-
-export const DatesAndDocuments = ({ structureTypes }: Props) => {
+export const DatesAndDocuments = ({
+  currentScope = CPOM_ACTE_SCOPE,
+}: Props) => {
   const { watch, control, setValue, formState } = useFormContext();
-
-  const [currentScope, setCurrentScope] = useState<StructureType | null>(null);
 
   const errorMessages = getErrorMessages(formState, "actesAdministratifs");
 
@@ -79,31 +76,6 @@ export const DatesAndDocuments = ({ structureTypes }: Props) => {
 
   return (
     <>
-      {structureTypes.length > 0 && (
-        <SegmentedControl
-          name="cpomDocumentScope"
-          options={[
-            {
-              id: CPOM_SCOPE,
-              label: CPOM_SCOPE,
-              value: CPOM_SCOPE,
-              isChecked: currentScope === null,
-            },
-            ...structureTypes.map((structureType) => ({
-              id: structureType,
-              label: structureType,
-              value: structureType,
-              isChecked: currentScope === structureType,
-            })),
-          ]}
-          onChange={(value) =>
-            setCurrentScope(
-              value === CPOM_SCOPE ? null : (value as StructureType)
-            )
-          }
-          className="mb-6"
-        />
-      )}
       <div className="flex gap-2">
         <InputWithValidation
           id="dateStart"
@@ -120,12 +92,12 @@ export const DatesAndDocuments = ({ structureTypes }: Props) => {
           type="hidden"
         />
       </div>
-      {currentScope === null ? (
+      {currentScope === CPOM_ACTE_SCOPE ? (
         <>
           <FieldSetActeAdministratif
             category="CONVENTION_CPOM"
             categoryShortName="CPOM"
-            title="Contrat CPOM"
+            title="Conventions CPOM"
             canAddFile={false}
             canAddAvenant={true}
             avenantCanExtendDateEnd={true}
@@ -168,5 +140,5 @@ export const DatesAndDocuments = ({ structureTypes }: Props) => {
 };
 
 type Props = {
-  structureTypes: StructureType[];
+  currentScope?: CpomActeScope;
 };

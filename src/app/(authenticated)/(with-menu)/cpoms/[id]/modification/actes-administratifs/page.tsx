@@ -9,9 +9,15 @@ import FormWrapper, {
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
-import { getCpomDefaultValues, getCpomStructureTypes } from "@/app/utils/cpom.util";
+import {
+  CPOM_ACTE_SCOPE,
+  CpomActeScope,
+  getCpomActesScopes,
+  getCpomDefaultValues,
+} from "@/app/utils/cpom.util";
 import { actesAdministratifsCpomSchema } from "@/schemas/forms/base/cpom.schema";
 
+import { ActesScopeSwitch } from "../../_components/ActesScopeSwitch";
 import { useCpomContext } from "../../_context/CpomClientContext";
 
 export default function CpomModificationActesAdministratifs() {
@@ -22,14 +28,25 @@ export default function CpomModificationActesAdministratifs() {
     nextRoute: `/cpoms/${cpom.id}`,
   });
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
+  const [currentScope, setCurrentScope] =
+    useState<CpomActeScope>(CPOM_ACTE_SCOPE);
 
   const defaultValues = getCpomDefaultValues(cpom);
-  const structureTypes = getCpomStructureTypes(cpom);
+  const scopes = getCpomActesScopes(cpom);
 
   return (
     <>
       <ModificationTitle
         step="Actes administratifs"
+        titleAside={
+          scopes.length > 1 ? (
+            <ActesScopeSwitch
+              scopes={scopes}
+              currentScope={currentScope}
+              handleChange={setCurrentScope}
+            />
+          ) : undefined
+        }
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
@@ -44,7 +61,7 @@ export default function CpomModificationActesAdministratifs() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <FieldSetActesAdministratifs structureTypes={structureTypes} />
+        <FieldSetActesAdministratifs currentScope={currentScope} />
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/cpoms/${cpom.id}`}
