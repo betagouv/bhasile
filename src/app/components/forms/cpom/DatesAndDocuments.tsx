@@ -98,6 +98,7 @@ export const DatesAndDocuments = ({
             category="CONVENTION_CPOM"
             categoryShortName="CPOM"
             title="Conventions CPOM"
+            isTitleHidden
             canAddFile={false}
             canAddAvenant={true}
             avenantCanExtendDateEnd={true}
