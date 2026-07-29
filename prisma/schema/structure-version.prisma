@@ -34,9 +34,7 @@ model StructureVersion {
   adresses            Adresse[]
   antennes            Antenne[]
   structureFinesses   StructureFiness[]
-  finesses            Finess[] // TODO: remove after backfill structure finess
   dnaStructures       DnaStructure[]
-  structureTypologies StructureTypologie[] // Drop en PR cleaning.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

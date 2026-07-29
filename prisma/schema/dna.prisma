@@ -59,8 +59,6 @@ model Finess {
   code               String?           @unique //TODO Rendre obligatoire après le backfill
   description        String? // TODO: remove after backfill code-link descriptions
   structureFinesses  StructureFiness[]
-  structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill structure finess
-  structureVersionId Int? // TODO: remove after backfill structure finess
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
 
