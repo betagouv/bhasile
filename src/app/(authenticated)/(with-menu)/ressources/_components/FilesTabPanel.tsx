@@ -11,7 +11,7 @@ export const FilesTabPanel = ({ tab }: Props): ReactElement[] => {
       className={index > 0 ? "border-t border-default-grey pt-6 mt-6" : ""}
     >
       {section.title && (
-        <h4 className="fr-h6 text-title-blue-france">{section.title}</h4>
+        <h4 className="mb-8 text-lg text-title-blue-france">{section.title}</h4>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {section.links.map((link) => (
