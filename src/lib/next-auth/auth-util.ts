@@ -32,30 +32,30 @@ export const getRoleFromSession = async (
   session: Session
 ): Promise<RoleWithDepartements> => {
   const userEmail = session.user?.email;
-  const databaseUser = await getUserByEmail({ email: userEmail });
-  const anonymousRole = await getAnonymousRole();
-  const anonymousRoleWithDepartements = {
-    ...anonymousRole,
-    allowedDepartements: [],
-  };
-  if (!userEmail || !databaseUser) {
-    return anonymousRoleWithDepartements;
-  }
-  if (databaseUser.role) {
+  const databaseUser = userEmail
+    ? await getUserByEmail({ email: userEmail })
+    : null;
+
+  if (databaseUser?.role) {
     return {
       ...databaseUser.role,
-      allowedDepartements: databaseUser.role?.roleDepartements.map(
+      allowedDepartements: databaseUser.role.roleDepartements.map(
         (roleDepartement) => roleDepartement.departement.numero
       ),
     };
-  } else if (databaseUser.emailPattern?.roleId) {
+  }
+  if (databaseUser?.emailPattern?.roleId) {
     return {
       ...databaseUser.emailPattern.role,
       allowedDepartements: databaseUser.emailPattern.role?.roleDepartements.map(
         (roleDepartement) => roleDepartement.departement.numero
       ),
     };
-  } else {
-    return anonymousRoleWithDepartements;
   }
+
+  const anonymousRole = await getAnonymousRole();
+  return {
+    ...anonymousRole,
+    allowedDepartements: [],
+  };
 };

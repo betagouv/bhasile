@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getToken } from "next-auth/jwt";
 import { withAuth } from "next-auth/middleware";
 
-import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,
   passwordProtectedPages,
-  proConnectProtectedPages,
+  publicPages,
 } from "./proxy/auth-config";
 import { getApiRouteProtection } from "./proxy/auth-util";
 
@@ -21,17 +20,21 @@ const proConnectPagesProxy = withAuth(() => NextResponse.next(), {
   },
 });
 
+const getHasPassword = (request: NextRequest): boolean => {
+  const passwordCookie = request.cookies.get("mot-de-passe");
+  const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
+    (password) => password.trim()
+  );
+  return !!passwordCookie && !!passwords?.includes(passwordCookie.value.trim());
+};
+
 const passwordPagesProxy = (request: NextRequest): NextResponse | null => {
   const url = request.nextUrl;
 
   if (!passwordProtectedPages.some((path) => url.pathname.startsWith(path))) {
     return null;
   }
-  const passwordCookie = request.cookies.get("mot-de-passe");
-  const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
-    (password) => password.trim()
-  );
-  if (!passwordCookie || !passwords?.includes(passwordCookie?.value?.trim())) {
+  if (!getHasPassword(request)) {
     const loginUrl = new URL(noProtectionPage, request.url);
     loginUrl.searchParams.set("from", url.pathname);
     return NextResponse.redirect(loginUrl);
@@ -43,18 +46,13 @@ const protectApiWithAuth = async (
   request: NextRequest
 ): Promise<NextResponse | null> => {
   const protection = getApiRouteProtection(request, request.nextUrl.pathname);
-  const session = await getServerSession(authOptions);
-  const hasProconnectSession = !!session?.user;
-  const passwordCookie = request.cookies.get("mot-de-passe");
-  const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
-    (password) => password.trim()
-  );
-  const hasPassword =
-    passwordCookie && passwords?.includes(passwordCookie?.value?.trim());
 
-  if (protection === "none" || request.nextUrl.pathname === noProtectionPage) {
-    return NextResponse.next();
+  if (protection === "none") {
+    return null;
   }
+
+  const hasProconnectSession = !!(await getToken({ req: request }));
+  const hasPassword = getHasPassword(request);
 
   const isUnauthenticated =
     protection === null ||
@@ -71,8 +69,8 @@ const protectApiWithAuth = async (
 
 export async function proxy(request: NextRequest) {
   const doBypass =
-    process.env.DEV_AUTH_BYPASS ||
-    (process.env.NODE_ENV !== "production" &&
+    process.env.NODE_ENV !== "production" &&
+    (process.env.DEV_AUTH_BYPASS ||
       request.headers.get("x-dev-auth-bypass") === "1");
 
   if (doBypass) {
@@ -80,14 +78,16 @@ export async function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
-  const isProtected = proConnectProtectedPages.some((path) =>
-    path === "/" ? pathname === "/" : pathname.startsWith(path)
-  );
 
-  if (isProtected) {
-    return (proConnectPagesProxy as (request: NextRequest) => NextResponse)(
-      request
-    );
+  if (pathname.startsWith("/api/")) {
+    return (await protectApiWithAuth(request)) ?? NextResponse.next();
+  }
+
+  const isPublicPage = publicPages.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+  if (isPublicPage) {
+    return NextResponse.next();
   }
 
   const passwordResult = passwordPagesProxy(request);
@@ -95,25 +95,11 @@ export async function proxy(request: NextRequest) {
     return passwordResult;
   }
 
-  const apiAuthResult = await protectApiWithAuth(request);
-  if (apiAuthResult) {
-    return apiAuthResult;
-  }
-
-  return NextResponse.next();
+  return (proConnectPagesProxy as (request: NextRequest) => NextResponse)(
+    request
+  );
 }
 
 export const config = {
-  matcher: [
-    // Pages
-    "/",
-    "/structures/:path*",
-    "/operateurs/:path*",
-    "/statistiques/:path*",
-    "/ajout-structure/:path*",
-    "/ajout-adresses/:path*",
-    "/mot-de-passe",
-    // Routes API
-    "/api/:path*",
-  ],
+  matcher: ["/((?!_next/|[^/]+\\.[a-z0-9]+$).*)"],
 };
