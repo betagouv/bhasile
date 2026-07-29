@@ -23,8 +23,8 @@ export const ResourceBlock = ({ block }: Props): ReactElement | null => {
     tabViews.find((tabView) => tabView.id === chosenTabId) ?? tabViews[0];
 
   return (
-    <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
-      <div className="flex mb-6">
+    <div className="bg-white pt-6 border border-default-grey rounded-[10px] border-solid overflow-hidden">
+      <div className="flex mx-6 mb-8">
         <span className={`text-title-blue-france mr-3 ${block.icon}`} />
         <h3 className="text-title-blue-france fr-h6 mb-0">{block.title}</h3>
       </div>
@@ -41,6 +41,7 @@ export const ResourceBlock = ({ block }: Props): ReactElement | null => {
             </span>
           ),
         }))}
+        className="-mx-0.5"
       >
         {activeTabView.panel}
       </Tabs>
