@@ -18,7 +18,7 @@ describe("number util", () => {
       expect(formatBytes(360375)).toBe("360 kB");
     });
 
-    it("distingue une taille nulle d’une taille absente", () => {
+    it("affiche 0 B pour une taille nulle comme pour une taille absente", () => {
       expect(formatBytes(0)).toBe("0 B");
       expect(formatBytes(null)).toBe("0 B");
       expect(formatBytes(undefined)).toBe("0 B");
