@@ -22,6 +22,8 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
+import { createReferentialDna } from "../../test-utils/referential-dna";
+
 describe("transformation.repository db integration", () => {
   const createdStructureIds: number[] = [];
   const createdTransformationIds: number[] = [];
@@ -534,9 +536,9 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformationId,
       structureVersionId,
     } = await createBareTransformation();
-    const oldDna = await prisma.dna.create({
-      data: { code: `DNA-TF-TEST-OLD-${randomUUID()}` },
-    });
+    const oldDna = await createReferentialDna(
+      `DNA-TF-TEST-OLD-${randomUUID()}`
+    );
     await prisma.dnaStructure.create({
       data: {
         structureVersionId,
@@ -994,9 +996,7 @@ describe("transformation.repository db integration", () => {
         isLogementSocial: false,
       },
     });
-    const dna = await prisma.dna.create({
-      data: { code: `DNA-TF-TEST-${randomUUID()}` },
-    });
+    const dna = await createReferentialDna(`DNA-TF-TEST-${randomUUID()}`);
     await prisma.dnaStructure.create({
       data: { structureId: structure.id, dnaId: dna.id },
     });
