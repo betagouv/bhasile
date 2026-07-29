@@ -41,11 +41,15 @@ export const Menu = (): ReactElement => {
       label: "Statistiques",
       url: "/statistiques",
     },
-    {
-      icon: "fr-icon-book-2-line",
-      label: "Modèles et ressources",
-      url: "/ressources",
-    },
+    ...(process.env.NEXT_PUBLIC_SHOW_RESSOURCES === "true" //TODO: remove this once the ressources page is ready
+      ? [
+          {
+            icon: "fr-icon-book-shelf-line",
+            label: "Modèles et ressources",
+            url: "/ressources",
+          },
+        ]
+      : []),
   ];
 
   const isMenuItemActive = (
