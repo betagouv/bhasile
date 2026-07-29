@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-import { ZoneLabel } from "@/types/map.type";
+import { useMapLabels } from "@/app/hooks/useMapLabels";
 
 import { ZoneIndicator } from "./ZoneIndicator";
 
@@ -14,53 +12,7 @@ const OFFSETS: Record<string, { offsetX: number; offsetY: number }> = {
 };
 
 export const IdfMap = ({ zoneData }: Props) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<HTMLElement>(null);
-  const [labels, setLabels] = useState<ZoneLabel[]>([]);
-
-  useEffect(() => {
-    const calculatePositions = () => {
-      if (!mapRef.current || !containerRef.current) {
-        return;
-      }
-      const root = mapRef.current.shadowRoot || mapRef.current;
-      const paths = root.querySelectorAll<SVGPathElement>("path");
-
-      if (paths.length === 0) {
-        requestAnimationFrame(calculatePositions);
-        return;
-      }
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const newLabels: ZoneLabel[] = [];
-
-      paths.forEach((path) => {
-        const className = path.getAttribute("class") || "";
-        const frClass = className
-          .split(" ")
-          .find((classname) => classname.startsWith("FR-"));
-
-        if (frClass) {
-          const code = frClass.replace("FR-", "");
-          const value = zoneData[code];
-
-          if (value !== undefined) {
-            const rect = path.getBoundingClientRect();
-            newLabels.push({
-              code,
-              value,
-              x: rect.left - containerRect.left + rect.width / 2,
-              y: rect.top - containerRect.top + rect.height / 2,
-            });
-          }
-        }
-      });
-      setLabels(newLabels);
-    };
-
-    const timeoutId = setTimeout(calculatePositions, 300);
-    return () => clearTimeout(timeoutId);
-  }, [zoneData]);
+  const { containerRef, mapRef, labels } = useMapLabels({ zoneData });
 
   return (
     <div ref={containerRef} className="relative w-48 h-48">
