@@ -11,7 +11,14 @@ export const TypePlaceCharts = ({
   placesFvvTeh,
   placesQPV,
   placesLogementsSociaux,
-}: Props): ReactElement => {
+}: Props): ReactElement | null => {
+  const totalPlacesSpeciales =
+    placesPmr + placesLgbt + placesFvvTeh + placesQPV + placesLogementsSociaux;
+
+  if (!placesAutorisees || !totalPlacesSpeciales) {
+    return null;
+  }
+
   return (
     <div className="grid grid-cols-5 gap-10">
       <div className="col-span-1">
