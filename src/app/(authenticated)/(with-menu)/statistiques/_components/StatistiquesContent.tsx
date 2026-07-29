@@ -17,7 +17,8 @@ import { TypesPlacesBlock } from "./type-places/TypesPlacesBlock";
 export const StatistiquesContent = (): ReactElement => {
   const [visualization, setVisualization] = useState<
     "tableaux" | "cartographie"
-  >("tableaux");
+    //TODO : remettre "tableaux"
+  >("cartographie");
 
   return (
     <>

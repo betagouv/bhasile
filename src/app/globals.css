@@ -77,6 +77,6 @@ hr {
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
-map-chart .FR-20R, .map_info {
+map-chart .FR-20R, .FR-2A, .FR-2B, .map_info {
   display: none !important;
 }
