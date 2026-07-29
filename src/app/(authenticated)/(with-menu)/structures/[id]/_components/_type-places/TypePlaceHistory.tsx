@@ -20,23 +20,6 @@ export const TypePlaceHistory = (): ReactElement => {
   const markers = getTransformationMarkers(structure.history, years);
 
   const structureTypologies = structure.structureTypologies ?? [];
-  const adresseTypologies = (structure.adresses ?? []).flatMap(
-    (adresse) => adresse.adresseTypologies
-  );
-
-  const adressePlacesByYear = new Map<
-    number,
-    { qpv: number; logementSocial: number }
-  >();
-  for (const adresseTypologie of adresseTypologies) {
-    const aggregated = adressePlacesByYear.get(adresseTypologie.year) ?? {
-      qpv: 0,
-      logementSocial: 0,
-    };
-    aggregated.qpv += adresseTypologie.qpv;
-    aggregated.logementSocial += adresseTypologie.logementSocial;
-    adressePlacesByYear.set(adresseTypologie.year, aggregated);
-  }
 
   const getStructureTypologie = (year: number) =>
     structureTypologies.find(
@@ -62,14 +45,6 @@ export const TypePlaceHistory = (): ReactElement => {
       label: "Places FVV/TEH",
       subLabel: "(spécialisées)",
       getValue: (year) => getStructureTypologie(year)?.fvvTeh,
-    },
-    {
-      label: "Places en QPV",
-      getValue: (year) => adressePlacesByYear.get(year)?.qpv,
-    },
-    {
-      label: "Places en logements sociaux",
-      getValue: (year) => adressePlacesByYear.get(year)?.logementSocial,
     },
   ];
 

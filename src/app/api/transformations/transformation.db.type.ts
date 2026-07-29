@@ -61,13 +61,7 @@ export const transformationInclude = {
             },
           },
           contacts: true,
-          adresses: {
-            include: {
-              adresseTypologies: {
-                orderBy: { year: "desc" },
-              },
-            },
-          },
+          adresses: true,
           structureFinesses: {
             include: { finess: true },
           },

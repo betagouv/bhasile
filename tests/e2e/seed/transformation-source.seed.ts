@@ -1,4 +1,3 @@
-import { CURRENT_YEAR } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -100,18 +99,8 @@ const seedAdresses = async (structureVersionId: number): Promise<void> => {
         commune: "Paris",
         repartition: Repartition.COLLECTIF,
         placesAutorisees: SOURCE_PLACES_AUTORISEES,
-        qpv: 0,
-        logementSocial: 0,
-        adresseTypologies: {
-          create: [
-            {
-              year: CURRENT_YEAR,
-              placesAutorisees: SOURCE_PLACES_AUTORISEES,
-              qpv: 0,
-              logementSocial: 0,
-            },
-          ],
-        },
+        isQpv: false,
+        isLogementSocial: false,
       },
     });
   }

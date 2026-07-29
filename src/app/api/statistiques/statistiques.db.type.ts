@@ -39,8 +39,8 @@ export type StatistiqueDbAdresse = Omit<
       structureVersionId: true;
       repartition: true;
       placesAutorisees: true;
-      qpv: true;
-      logementSocial: true;
+      isQpv: true;
+      isLogementSocial: true;
     };
   }>,
   "structureId" | "structureVersionId"

@@ -385,9 +385,9 @@ describe("transformation.repository db integration", () => {
       codePostal: "31000",
       commune: "Toulouse",
       repartition: Repartition.DIFFUS,
-      adresseTypologies: [
-        { year: 2026, placesAutorisees: 20, qpv: 1, logementSocial: 2 },
-      ],
+      placesAutorisees: 20,
+      isQpv: true,
+      isLogementSocial: true,
     };
     await updateOne({
       id: transformationId,
@@ -403,7 +403,6 @@ describe("transformation.repository db integration", () => {
     });
     const adresses = await prisma.adresse.findMany({
       where: { structureVersionId },
-      include: { adresseTypologies: true },
     });
     expect(adresses).toHaveLength(1);
     expect(adresses[0].id).not.toBe(oldAdresse.id);
@@ -983,7 +982,7 @@ describe("transformation.repository db integration", () => {
         departement: "50",
       },
     });
-    const adresse = await prisma.adresse.create({
+    await prisma.adresse.create({
       data: {
         structureId: structure.id,
         adresse: "3 rue C",
@@ -991,17 +990,8 @@ describe("transformation.repository db integration", () => {
         commune: "Avranches",
         repartition: Repartition.COLLECTIF,
         placesAutorisees: 10,
-        qpv: 0,
-        logementSocial: 0,
-      },
-    });
-    await prisma.adresseTypologie.create({
-      data: {
-        adresseId: adresse.id,
-        placesAutorisees: 10,
-        year: 2024,
-        qpv: 0,
-        logementSocial: 0,
+        isQpv: false,
+        isLogementSocial: false,
       },
     });
     const dna = await prisma.dna.create({
@@ -1032,7 +1022,7 @@ describe("transformation.repository db integration", () => {
       include: {
         contacts: true,
         antennes: true,
-        adresses: { include: { adresseTypologies: true } },
+        adresses: true,
         dnaStructures: true,
         structureFinesses: true,
       },
@@ -1074,7 +1064,7 @@ describe("transformation.repository db integration", () => {
     expect(version.antennes).toHaveLength(1);
     expect(version.antennes[0].id).not.toBe(antenneId);
     expect(version.adresses).toHaveLength(1);
-    expect(version.adresses[0].adresseTypologies).toHaveLength(1);
+    expect(version.adresses[0].placesAutorisees).toBe(10);
 
     // dnaStructures : nouvelle ligne de jonction, mais même Dna réutilisé.
     expect(version.dnaStructures).toHaveLength(1);
@@ -1131,7 +1121,7 @@ describe("transformation.repository db integration", () => {
     expect(version.antennes).toHaveLength(1);
     expect(version.antennes[0].name).toBe("Avranches Nord");
     expect(version.adresses).toHaveLength(1);
-    expect(version.adresses[0].adresseTypologies).toHaveLength(1);
+    expect(version.adresses[0].placesAutorisees).toBe(10);
   });
 
   it("accumule additivement les données de plusieurs structures fermées (couche B)", async () => {

@@ -41,15 +41,15 @@ export const testTypologie = (
 export const testAdresse = (
   id: number,
   structureId: number,
-  qpv: number
+  placesAutorisees: number
 ): StatistiqueDbAdresse => ({
   id,
   structureId,
   structureVersionId: structureId,
   repartition: Repartition.COLLECTIF,
-  placesAutorisees: 0,
-  qpv,
-  logementSocial: 0,
+  placesAutorisees,
+  isQpv: true,
+  isLogementSocial: false,
 });
 
 type BuildTestStructureVersionTimelineEntry = {

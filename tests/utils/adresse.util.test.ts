@@ -87,18 +87,13 @@ describe("adresse util", () => {
       expect(isAdresseEmpty(makeEmptyAdresse())).toBe(true);
     });
 
-    it("retourne true quand la typologie est présente mais ne porte aucune valeur", () => {
+    it("retourne true quand les places et les particularités sont vides", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
-            adresseTypologies: [
-              {
-                year: 2026,
-                placesAutorisees: null,
-                logementSocial: false,
-                qpv: false,
-              },
-            ],
+            placesAutorisees: null,
+            isLogementSocial: false,
+            isQpv: false,
           })
         )
       ).toBe(true);
@@ -142,7 +137,7 @@ describe("adresse util", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
-            adresseTypologies: [{ year: 2026, placesAutorisees: 10 }],
+            placesAutorisees: 10,
           })
         )
       ).toBe(false);
@@ -152,30 +147,20 @@ describe("adresse util", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
-            adresseTypologies: [{ year: 2026, placesAutorisees: 0 }],
+            placesAutorisees: 0,
           })
         )
       ).toBe(false);
     });
 
-    it("retourne false quand logementSocial est true", () => {
+    it("retourne false quand isLogementSocial est true", () => {
       expect(
-        isAdresseEmpty(
-          makeEmptyAdresse({
-            adresseTypologies: [{ year: 2026, logementSocial: true }],
-          })
-        )
+        isAdresseEmpty(makeEmptyAdresse({ isLogementSocial: true }))
       ).toBe(false);
     });
 
-    it("retourne false quand qpv est true", () => {
-      expect(
-        isAdresseEmpty(
-          makeEmptyAdresse({
-            adresseTypologies: [{ year: 2026, qpv: true }],
-          })
-        )
-      ).toBe(false);
+    it("retourne false quand isQpv est true", () => {
+      expect(isAdresseEmpty(makeEmptyAdresse({ isQpv: true }))).toBe(false);
     });
   });
 });

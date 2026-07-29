@@ -300,12 +300,7 @@ const buildVersionCommon = (
   return {
     ...base,
     contacts: { create: contacts.map(stripVersionId) },
-    adresses: {
-      create: adresses.map(({ adresseTypologies, ...adresse }) => ({
-        ...stripVersionId(adresse),
-        adresseTypologies: { create: adresseTypologies },
-      })),
-    },
+    adresses: { create: adresses.map(stripVersionId) },
   };
 };
 
