@@ -24,10 +24,17 @@ const HEADING_TOKEN_COUNT = 3;
 
 const markdown = new MarkdownIt();
 
+const BLOCK_ICONS = [
+  "fr-icon-article-line",
+  "fr-icon-file-text-line",
+  "fr-icon-folder-2-line",
+  "fr-icon-question-answer-line",
+] as const;
+
 const FrontmatterSchema = z.object({
   type: z.enum(["fichiers", "faq"]),
   titre: z.string().min(1),
-  icone: z.string().min(1),
+  icone: z.enum(BLOCK_ICONS),
 });
 
 export const parseBlock = (
