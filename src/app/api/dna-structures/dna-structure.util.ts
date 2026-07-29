@@ -1,12 +1,7 @@
-import {
-  StructureDbDetails,
-  StructureDbList,
-} from "../structures/structure.db.type";
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 
 export const getDnaStructuresApiRead = (
-  dnaStructures?:
-    | StructureDbDetails["dnaStructures"]
-    | StructureDbList["dnaStructures"]
+  dnaStructures?: StructureVersionDbDetails["dnaStructures"]
 ) =>
   dnaStructures?.map((dnaStructure) => ({
     id: dnaStructure.id,

@@ -7,7 +7,7 @@ import {
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import { Structure, StructureVersion } from "@/generated/prisma/client";
+import { Structure } from "@/generated/prisma/client";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
@@ -26,9 +26,11 @@ import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
+import type { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
-import { VERSIONED_FIELD_KEYS, VersionedScalarKey } from "./structure.constants";
+import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
+  ResolvedStructureDetails,
   StructureDbDetails,
   StructureDbList,
   StructureDbOperateur,
@@ -222,7 +224,7 @@ export const getFullStructures = async (
 export const getResolvedStructure = async (
   id: number,
   now: Date = getNow()
-): Promise<StructureDbDetails | null> => {
+): Promise<ResolvedStructureDetails | null> => {
   const dbStructure = await findOne(id);
   if (!dbStructure) {
     return null;
@@ -231,9 +233,10 @@ export const getResolvedStructure = async (
     dbStructure.structureVersions,
     now
   );
+  // Backfill terminé : toute structure a une version courante ; le fallback ne sert que de garde de type.
   return currentVersion
     ? mergeStructureWithVersion(dbStructure, currentVersion)
-    : dbStructure;
+    : (dbStructure as ResolvedStructureDetails);
 };
 
 export const getFullStructure = async (
@@ -276,16 +279,16 @@ export const getStructureDepartement = async (
 export const mergeStructureWithVersion = <T>(
   dbStructure: T,
   version: Record<(typeof VERSIONED_FIELD_KEYS)[number], unknown>
-): T & Pick<StructureVersion, VersionedScalarKey> => {
+): T & Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]> => {
   const versionedOverlay = Object.fromEntries(
     VERSIONED_FIELD_KEYS.map((key) => [key, version[key]])
-  ) as Partial<T> & Pick<StructureVersion, VersionedScalarKey>;
+  ) as Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>;
   return { ...dbStructure, ...versionedOverlay };
 };
 
 const dbStructureToApiRead = (
   dbStructure: (StructureDbDetails | StructureDbList) &
-    Partial<Pick<StructureVersion, VersionedScalarKey>>,
+    Partial<Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>>,
   now: Date,
   simple: boolean = false,
   bornFromCreation: boolean = false
@@ -295,25 +298,29 @@ const dbStructureToApiRead = (
     getDatesPeriodeAutorisation(dbStructure);
   const allActivites = simple
     ? []
-    : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
+    : (dbStructure as ResolvedStructureDetails).dnaStructures.flatMap(
         (dnaStructure) => dnaStructure.dna.activites
       );
   const activites = processActivitesForStructure(allActivites);
 
   const aggregatedEIGs = simple
     ? []
-    : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
+    : (dbStructure as ResolvedStructureDetails).dnaStructures.flatMap(
         (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
       );
 
   const antennes = getAntennesApiRead(
-    (dbStructure as StructureDbDetails).antennes
+    (dbStructure as ResolvedStructureDetails).antennes
   );
-  const dnaStructures = getDnaStructuresApiRead(dbStructure.dnaStructures);
+  const dnaStructures = getDnaStructuresApiRead(
+    (dbStructure as ResolvedStructureDetails).dnaStructures
+  );
   const structureFinesses = getStructureFinessesApiRead(
-    (dbStructure as StructureDbDetails).structureFinesses
+    (dbStructure as ResolvedStructureDetails).structureFinesses
   );
-  const adresses = getAdressesApiRead(dbStructure.adresses);
+  const adresses = getAdressesApiRead(
+    (dbStructure as ResolvedStructureDetails).adresses
+  );
   const adresseAdministrativeComplete =
     buildAdresseAdministrativeComplete(dbStructure);
   const typeBati = getTypeBati(dbStructure);
@@ -393,7 +400,7 @@ const dbStructureToApiRead = (
     codePostalAdministratif: dbStructure.codePostalAdministratif ?? "",
     communeAdministrative: dbStructure.communeAdministrative ?? "",
     departementAdministratif: dbStructure.departementAdministratif ?? "",
-    contacts: (dbStructure as StructureDbDetails).contacts ?? [],
+    contacts: (dbStructure as ResolvedStructureDetails).contacts ?? [],
     documentsFinanciers:
       (dbStructure as StructureDbDetails).documentsFinanciers ?? [],
     adresseAdministrativeComplete,

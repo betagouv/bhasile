@@ -12,14 +12,11 @@ export const findAll = async ({
   operateurId?: number;
   transformationId?: number;
 } = {}): Promise<{ code: string }[]> => {
-  const { structureId, structureVersionId } = entityId;
+  const { structureVersionId } = entityId;
 
   const ownershipFilters: Prisma.DnaWhereInput[] = [
     { dnaStructures: { none: {} } },
   ];
-  if (structureId) {
-    ownershipFilters.push({ dnaStructures: { some: { structureId } } });
-  }
   if (structureVersionId) {
     ownershipFilters.push({
       dnaStructures: { some: { structureVersionId } },

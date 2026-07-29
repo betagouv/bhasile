@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-import { StructureDbDetails } from "@/app/api/structures/structure.db.type";
+import { ResolvedStructureDetails } from "@/app/api/structures/structure.db.type";
 import {
   getTypeBati,
   isStructureInCpom,
@@ -79,7 +79,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 1, adresses: [] });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as StructureDbDetails);
+      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
 
       // THEN
       expect(typeBati).toBeUndefined();
@@ -93,7 +93,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 2, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as StructureDbDetails);
+      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.COLLECTIF);
@@ -107,7 +107,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 3, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as StructureDbDetails);
+      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.DIFFUS);
@@ -120,7 +120,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 4, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as StructureDbDetails);
+      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.MIXTE);
@@ -319,7 +319,7 @@ describe("structure util", () => {
 
       // WHEN
       const result = isStructureInCpom(
-        structure as unknown as StructureDbDetails
+        structure as unknown as ResolvedStructureDetails
       );
 
       // THEN
@@ -360,7 +360,7 @@ describe("structure util", () => {
 
       // WHEN
       const result = isStructureInCpom(
-        structure as unknown as StructureDbDetails
+        structure as unknown as ResolvedStructureDetails
       );
 
       // THEN
@@ -377,7 +377,7 @@ describe("structure util", () => {
 
       // WHEN
       const result = isStructureInCpom(
-        structure as unknown as StructureDbDetails
+        structure as unknown as ResolvedStructureDetails
       );
 
       // THEN
@@ -393,7 +393,7 @@ describe("structure util", () => {
 
       // WHEN
       const result = isStructureInCpom(
-        structure as unknown as StructureDbDetails
+        structure as unknown as ResolvedStructureDetails
       );
 
       // THEN
@@ -472,7 +472,7 @@ describe("structure util", () => {
 
       // WHEN
       const result = isStructureInCpom(
-        structure as unknown as StructureDbDetails
+        structure as unknown as ResolvedStructureDetails
       );
 
       // THEN
@@ -534,10 +534,10 @@ describe("structure util", () => {
 
       // WHEN
       const result1 = isStructureInCpom(
-        structure1 as unknown as StructureDbDetails
+        structure1 as unknown as ResolvedStructureDetails
       );
       const result2 = isStructureInCpom(
-        structure2 as unknown as StructureDbDetails
+        structure2 as unknown as ResolvedStructureDetails
       );
 
       // THEN

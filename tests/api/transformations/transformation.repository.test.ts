@@ -1069,20 +1069,18 @@ describe("transformation.repository db integration", () => {
     // dnaStructures : nouvelle ligne de jonction, mais même Dna réutilisé.
     expect(version.dnaStructures).toHaveLength(1);
     expect(version.dnaStructures[0].dnaId).toBe(dnaId);
-    expect(version.dnaStructures[0].structureId).toBeNull();
     const dnaCount = await prisma.dna.count({ where: { id: dnaId } });
     expect(dnaCount).toBe(1);
 
     // structureFinesses : nouvelle ligne de jonction, mais même Finess réutilisé.
     expect(version.structureFinesses).toHaveLength(1);
     expect(version.structureFinesses[0].finessId).toBe(finessId);
-    expect(version.structureFinesses[0].structureId).toBeNull();
     const finessCount = await prisma.finess.count({ where: { id: finessId } });
     expect(finessCount).toBe(1);
 
     // La structure source n'est pas modifiée.
     const sourceContacts = await prisma.contact.findMany({
-      where: { structureId: structure.id },
+      where: { structureVersion: { structureId: structure.id } },
     });
     expect(sourceContacts).toHaveLength(1);
     expect(sourceContacts[0].id).toBe(contactId);

@@ -11,11 +11,8 @@ model Structure {
   date303                  DateTime?
   debutPeriodeAutorisation DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   finPeriodeAutorisation   DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
-  dnaStructures            DnaStructure[] // TODO: remove after backfill of structure version
   controles                Controle[]
   evaluations              Evaluation[]
-  adresses                 Adresse[] // TODO: remove after backfill of structure version
-  contacts                 Contact[] // TODO: remove after backfill of structure version
   structureTypologies      StructureTypologie[] // TODO: remove after backfill of structure version
   actesAdministratifs      ActeAdministratif[]
   documentsFinanciers      DocumentFinancier[]
@@ -26,9 +23,6 @@ model Structure {
   operateur                Operateur?            @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]
-  antennes                 Antenne[] // TODO: remove after backfill of structure version
-  structureFinesses        StructureFiness[] // TODO: remove after backfill of structure version
-  finesses                 Finess[] // TODO: remove after backfill structure finess
   departement              Departement?          @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
   userNotes                Note[]

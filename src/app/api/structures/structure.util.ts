@@ -166,7 +166,8 @@ export const getDatesPeriodeAutorisation = (structure: {
   );
 
 const sumPlaces = (
-  structure: StructureDbDetails | StructureDbList,
+  structure: (StructureDbDetails | StructureDbList) &
+    Partial<Pick<StructureVersionDbDetails, "adresses">>,
   isCounted: (adresse: { isQpv: boolean; isLogementSocial: boolean }) => boolean
 ): number =>
   structure.adresses?.reduce(

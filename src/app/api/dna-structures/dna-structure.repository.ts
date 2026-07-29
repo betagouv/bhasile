@@ -93,9 +93,6 @@ const buildDnaStructureWhere = (
       },
     };
   }
-  if (entityId.structureId != null) {
-    return { structureId_dnaId: { structureId: entityId.structureId, dnaId } };
-  }
   return { id: 0 };
 };
 
