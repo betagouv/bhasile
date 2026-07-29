@@ -1,7 +1,3 @@
-// Phase 1 (hors transfo) : StructureVersion + FK optionnelles pour backfill.
-// TODO: retirer les liens à structureId après backfill, et rendre structureVersionId obligatoire sur les tables liées
-// Retirer les FK / scalaires redondants sur Structure.
-
 model StructureVersion {
   id          Int        @id @default(autoincrement())
   structureId Int?
@@ -21,8 +17,8 @@ model StructureVersion {
   latitude                 Decimal?
   longitude                Decimal?
   nom                      String?
-  lgbt                     Boolean? // TODO: remove after quality check
-  fvvTeh                   Boolean? // TODO: remove after quality check
+  lgbt                     Boolean? // TODO: remove after quality check between boolean and integer on adresses
+  fvvTeh                   Boolean? // TODO: remove after quality check between boolean and integer on adresses
   public                   PublicType?
   notes                    String?
   nomOfii                  String?
