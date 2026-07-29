@@ -1,8 +1,8 @@
-import { normalizeForSearch } from "@/app/utils/string.util";
+import { normalizeWords } from "@/app/utils/string.util";
 import { Block, FilesTab } from "@/types/ressources.type";
 
 export const filterBlocks = (blocks: Block[], search: string): Block[] => {
-  const words = normalizeForSearch(search).split(" ").filter(Boolean);
+  const words = normalizeWords(search).split(" ").filter(Boolean);
 
   if (words.length === 0) {
     return blocks;

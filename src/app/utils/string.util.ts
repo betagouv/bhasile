@@ -5,7 +5,7 @@ export const normalizeAccents = (stringToNormalize: string) => {
     .toLowerCase();
 };
 
-export const normalizeForSearch = (stringToNormalize: string): string =>
+export const normalizeWords = (stringToNormalize: string): string =>
   normalizeAccents(stringToNormalize)
     .replace(/[^a-z0-9]+/g, " ")
     .trim();

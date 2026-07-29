@@ -4,7 +4,7 @@ import type Token from "markdown-it/lib/token.mjs";
 import path from "path";
 import { z } from "zod";
 
-import { normalizeAccents, normalizeForSearch } from "@/app/utils/string.util";
+import { normalizeWords } from "@/app/utils/string.util";
 import {
   Block,
   FaqTab,
@@ -353,12 +353,10 @@ const extractText = (tokens: Token[]): string =>
     .join(" ");
 
 const buildSearchText = (fragments: string[]): string =>
-  normalizeForSearch(fragments.filter(Boolean).join(" "));
+  normalizeWords(fragments.filter(Boolean).join(" "));
 
 const slugify = (value: string): string =>
-  normalizeAccents(value)
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  normalizeWords(value).replaceAll(" ", "-");
 
 type TabGroup = {
   title: string;
