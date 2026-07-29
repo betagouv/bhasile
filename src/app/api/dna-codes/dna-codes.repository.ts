@@ -46,8 +46,8 @@ export const findAll = async ({
   });
 };
 
-// Un DNA n'existe que via l'import du référentiel OFII. On se contente donc de résoudre le code existant
-export const upsertDna = async (
+// Un DNA n'existe que via l'import du référentiel OFII : on résout le code existant, on n'en crée jamais.
+export const resolveDnaByCode = async (
   tx: PrismaTransaction,
   dna: { code?: string | null } | undefined | null
 ): Promise<Dna | null> => {

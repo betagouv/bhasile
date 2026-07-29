@@ -193,9 +193,7 @@ export type StructureDbDetails = Prisma.StructureGetPayload<{
   include: typeof structureDetailsInclude;
 }>;
 
-// Structure résolue à la lecture : les champs versionnés (scalaires + relations
-// contacts/adresses/antennes/structureFinesses/dnaStructures) sont réinjectés
-// depuis la version courante par mergeStructureWithVersion.
+// Structure enrichie des champs versionnés résolus depuis sa version courante.
 export type ResolvedStructureDetails = StructureDbDetails &
   Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>;
 

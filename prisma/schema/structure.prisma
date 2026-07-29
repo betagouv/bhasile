@@ -3,7 +3,7 @@ model Structure {
   codeBhasile              String                @unique
   filiale                  String? // TODO: retirer après phase d'initialisation + backfill des filiales en DB
   type                     StructureType?
-  departementAdministratif String? // TODO: migré sur StructureVersion — à retirer avec la relation departement (cascade Departement.structures)
+  departementAdministratif String? // Correspond au département de référence de la structure immuable
   debutConvention          DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   finConvention            DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   creationDate             DateTime?
@@ -13,7 +13,7 @@ model Structure {
   finPeriodeAutorisation   DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   controles                Controle[]
   evaluations              Evaluation[]
-  structureTypologies      StructureTypologie[] // TODO: remove after backfill of structure version
+  structureTypologies      StructureTypologie[]
   actesAdministratifs      ActeAdministratif[]
   documentsFinanciers      DocumentFinancier[]
   cpomStructures           CpomStructure[]

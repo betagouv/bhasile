@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import prisma from "@/lib/prisma";
 import { StructureType } from "@/types/structure.type";
 
-// Champs texte d'un DNA "référentiel"
-export const referentialDnaScalars = () => ({
+// Champs texte requis d'un DNA (en plus des FK opérateur/département).
+const referentialDnaScalars = () => ({
   type: StructureType.CADA,
   nom: "DNA référentiel test",
   nomOfii: "DNA OFII test",

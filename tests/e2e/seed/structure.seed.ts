@@ -26,8 +26,13 @@ export const createStructureForTest = async (
       codeBhasile: input.codeBhasile,
       type: input.type,
       operateurId: input.operateurId,
+      nom: input.nom,
+      adresseAdministrative: input.adresseAdministrative,
+      codePostalAdministratif: input.codePostalAdministratif,
+      communeAdministrative: input.communeAdministrative,
       departementAdministratif: input.departementAdministratif,
       creationDate: effectiveDate,
+      public: input.public,
       dnaStructures: {
         create: input.dnaCodes.map(({ code }) => ({
           dna: {
@@ -95,7 +100,7 @@ export const createStructureForTest = async (
     id: structure.id,
     structureVersionId: structureVersion.id,
     codeBhasile: structure.codeBhasile,
-    nom: input.nom,
+    nom: structure.nom ?? input.nom,
     type: input.type,
     operateurId: input.operateurId,
   };

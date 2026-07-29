@@ -233,7 +233,7 @@ export const getResolvedStructure = async (
     dbStructure.structureVersions,
     now
   );
-  // Backfill terminé : toute structure a une version courante ; le fallback ne sert que de garde de type.
+  // Toute structure a une version courante ; le fallback n'est qu'une garde de type.
   return currentVersion
     ? mergeStructureWithVersion(dbStructure, currentVersion)
     : (dbStructure as ResolvedStructureDetails);

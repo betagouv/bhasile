@@ -4,7 +4,7 @@ import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { upsertDna } from "../dna-codes/dna-codes.repository";
+import { resolveDnaByCode } from "../dna-codes/dna-codes.repository";
 import {
   currentVersionArgs,
   currentVersionWhere,
@@ -129,19 +129,19 @@ export const createOrUpdateDnaStructures = async (
   //TODO: Once structureVersion is implemented, check for DNA associated to other structures
 
   for (const dnaStructure of dnaStructures) {
-    const upsertedDna = await upsertDna(tx, dnaStructure.dna);
-    if (!upsertedDna) {
+    const resolvedDna = await resolveDnaByCode(tx, dnaStructure.dna);
+    if (!resolvedDna) {
       continue;
     }
     await tx.dnaStructure.upsert({
-      where: buildDnaStructureWhere(dnaStructure.id, entityId, upsertedDna.id),
+      where: buildDnaStructureWhere(dnaStructure.id, entityId, resolvedDna.id),
       update: {
-        dnaId: upsertedDna.id,
+        dnaId: resolvedDna.id,
         description: dnaStructure.description,
       },
       create: {
         ...entityId,
-        dnaId: upsertedDna.id,
+        dnaId: resolvedDna.id,
         description: dnaStructure.description,
       },
     });

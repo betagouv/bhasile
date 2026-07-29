@@ -13,7 +13,7 @@ model StructureVersion {
   adresseAdministrative    String?
   codePostalAdministratif  String?
   communeAdministrative    String?
-  departementAdministratif String?
+  departementAdministratif String? // Correspond au département associé à l'adresse administrative versionnée (in app on bloque le fait de pouvoir le modifier)
   latitude                 Decimal?
   longitude                Decimal?
   nom                      String?
