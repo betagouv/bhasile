@@ -57,7 +57,6 @@ model Antenne {
 model Finess {
   id                 Int               @id @default(autoincrement())
   code               String           @unique
-  description        String? // TODO: remove after backfill code-link descriptions
   structureFinesses  StructureFiness[]
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
