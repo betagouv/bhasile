@@ -122,8 +122,6 @@ export const copyStructureVersion = (
     dna: {
       code: dnaStructure.dna.code,
     },
-    startDate: dnaStructure.startDate?.toISOString() ?? undefined,
-    endDate: dnaStructure.endDate?.toISOString() ?? undefined,
   })),
   ...overrides,
 });

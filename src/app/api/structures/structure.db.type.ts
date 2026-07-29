@@ -2,9 +2,9 @@ import { Form, Prisma, StructureType } from "@/generated/prisma/client";
 
 import {
   resolvableVersionSelect,
+  type StructureVersionDbDetails,
   structureVersionDetailsInclude,
   transformationStatusSelect,
-  type StructureVersionDbDetails,
 } from "../structure-versions/structure-version.db.type";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 
