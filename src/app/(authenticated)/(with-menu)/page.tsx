@@ -41,23 +41,7 @@ export default async function DashboardPage({
       <div className="flex flex-col gap-3 max-w-7xl mx-auto p-3">
         <Suspense
           fallback={
-            <BlockSkeleton {...RAPPELS_BLOCK_HEADER} />
-          }
-        >
-          <RappelsBlock filters={filters} user={user} searchParams={params} />
-        </Suspense>
-        <Suspense
-          fallback={
-            <BlockSkeleton {...TRANSFORMATIONS_BLOCK_HEADER} />
-          }
-        >
-          <TransformationsBlock filters={filters} user={user} />
-        </Suspense>
-        <Suspense
-          fallback={
-            <BlockSkeleton
-              {...INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER}
-            />
+            <BlockSkeleton {...INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER} />
           }
         >
           <InitialisationsActualisationsBlock
@@ -65,6 +49,14 @@ export default async function DashboardPage({
             user={user}
             page={page}
           />
+        </Suspense>
+        <Suspense
+          fallback={<BlockSkeleton {...TRANSFORMATIONS_BLOCK_HEADER} />}
+        >
+          <TransformationsBlock filters={filters} user={user} />
+        </Suspense>
+        <Suspense fallback={<BlockSkeleton {...RAPPELS_BLOCK_HEADER} />}>
+          <RappelsBlock filters={filters} user={user} searchParams={params} />
         </Suspense>
       </div>
     </>
