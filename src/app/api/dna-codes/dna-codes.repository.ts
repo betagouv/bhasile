@@ -1,3 +1,4 @@
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { Dna, Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { EntityId } from "@/types/Entity.type";
@@ -60,7 +61,7 @@ export const resolveDnaByCode = async (
     where: { code: normalizedCode },
   });
   if (!existing) {
-    throw new Error(
+    throw new ApiDomainError(
       `Code DNA inconnu du référentiel : ${normalizedCode}. Un DNA ne peut être créé que par l'import du référentiel OFII.`
     );
   }

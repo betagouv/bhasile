@@ -19,6 +19,26 @@ export const getDepartementFromCodePostal = (codePostal: string) =>
     ? (codePostal?.trim().slice(0, 3) ?? "")
     : (codePostal?.trim().slice(0, 2) ?? "")) || "";
 
+// TODO: Adaptateur localStorage : les navigateurs peuvent encore contenir l'ancien
+// format `adresseTypologies`. Supprimer à la fin de phase d'initialisation
+export const migrateLegacyAdresseTypologies = (
+  adresses?: LegacyFormAdresse[]
+): FormAdresse[] | undefined =>
+  adresses?.map(({ adresseTypologies, ...adresse }) => {
+    const legacyTypologie = adresseTypologies?.[0];
+
+    if (!legacyTypologie) {
+      return adresse;
+    }
+
+    return {
+      ...adresse,
+      placesAutorisees: legacyTypologie.placesAutorisees,
+      isQpv: !!legacyTypologie.qpv,
+      isLogementSocial: !!legacyTypologie.logementSocial,
+    };
+  });
+
 /**
  * Formate un nom de ville selon les règles de typographie françaises :
  * https://www.amf.asso.fr/documents-noms-communes-nouvelles-les-regles-respecter/24266
@@ -127,6 +147,14 @@ export const isAdresseEmpty = (adresse: FormAdresse): boolean =>
   isBlank(adresse.placesAutorisees) &&
   !adresse.isLogementSocial &&
   !adresse.isQpv;
+
+type LegacyFormAdresse = FormAdresse & {
+  adresseTypologies?: {
+    placesAutorisees?: number | null;
+    qpv?: boolean;
+    logementSocial?: boolean;
+  }[];
+};
 
 type Coordinates = {
   latitude: number | undefined;

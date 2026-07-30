@@ -27,7 +27,10 @@ import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import type { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
-import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
+import {
+  resolveCurrentVersion,
+  resolveDisplayVersion,
+} from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   ResolvedStructureDetails,
@@ -229,13 +232,12 @@ export const getResolvedStructure = async (
   if (!dbStructure) {
     return null;
   }
-  const currentVersion = resolveCurrentVersion(
+  const displayVersion = resolveDisplayVersion(
     dbStructure.structureVersions,
     now
   );
-  // Toute structure a une version courante ; le fallback n'est qu'une garde de type.
-  return currentVersion
-    ? mergeStructureWithVersion(dbStructure, currentVersion)
+  return displayVersion
+    ? mergeStructureWithVersion(dbStructure, displayVersion)
     : (dbStructure as ResolvedStructureDetails);
 };
 
@@ -279,7 +281,8 @@ export const getStructureDepartement = async (
 export const mergeStructureWithVersion = <T>(
   dbStructure: T,
   version: Record<(typeof VERSIONED_FIELD_KEYS)[number], unknown>
-): T & Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]> => {
+): T &
+  Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]> => {
   const versionedOverlay = Object.fromEntries(
     VERSIONED_FIELD_KEYS.map((key) => [key, version[key]])
   ) as Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>;
@@ -288,7 +291,9 @@ export const mergeStructureWithVersion = <T>(
 
 const dbStructureToApiRead = (
   dbStructure: (StructureDbDetails | StructureDbList) &
-    Partial<Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>>,
+    Partial<
+      Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>
+    >,
   now: Date,
   simple: boolean = false,
   bornFromCreation: boolean = false

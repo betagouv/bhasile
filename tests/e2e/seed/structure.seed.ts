@@ -43,7 +43,6 @@ export const createStructureForTest = async (
       codePostalAdministratif: input.codePostalAdministratif,
       communeAdministrative: input.communeAdministrative,
       departementAdministratif: input.departementAdministratif,
-      creationDate: effectiveDate,
       dnaStructures: {
         create: input.dnaCodes.map(({ code }) => ({
           dna: {
