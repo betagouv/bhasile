@@ -32,6 +32,7 @@
   - You are about to drop the column `yearOrigin` on the `StructureTypologie` table. All the data in the column will be lost.
   - You are about to drop the column `creationDate` on the `StructureVersion` table. All the data in the column will be lost.
   - You are about to drop the column `date303` on the `StructureVersion` table. All the data in the column will be lost.
+  - You are about to drop the `AdresseTypologie` table. If the table is not empty, all the data it contains will be lost.
   - You are about to drop the `CpomMillesime` table. If the table is not empty, all the data it contains will be lost.
   - Made the column `departementAdministratif` on table `Dna` required. This step will fail if there are existing NULL values in that column.
   - Made the column `directionTerritoriale` on table `Dna` required. This step will fail if there are existing NULL values in that column.
@@ -44,6 +45,9 @@
 */
 -- DropForeignKey
 ALTER TABLE "Adresse" DROP CONSTRAINT "Adresse_structureId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "AdresseTypologie" DROP CONSTRAINT "AdresseTypologie_adresseId_fkey";
 
 -- DropForeignKey
 ALTER TABLE "Antenne" DROP CONSTRAINT "Antenne_structureId_fkey";
@@ -135,6 +139,9 @@ DROP COLUMN "yearOrigin";
 -- AlterTable
 ALTER TABLE "StructureVersion" DROP COLUMN "creationDate",
 DROP COLUMN "date303";
+
+-- DropTable
+DROP TABLE "AdresseTypologie";
 
 -- DropTable
 DROP TABLE "CpomMillesime";
