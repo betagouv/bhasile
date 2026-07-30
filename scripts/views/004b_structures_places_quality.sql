@@ -7,34 +7,18 @@
 -- - Compares places between structure and addresses (difference > 10%)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_places_quality" AS
 WITH
-  -- Last typology by address
-  adresse_typologie_dernier_millesime AS (
-    SELECT DISTINCT
-      ON (aty."adresseId") sc."id" AS "structureId",
-      a."id" AS "adresse_id",
-      aty."placesAutorisees",
-      aty."qpv",
-      aty."logementSocial",
-      aty."year"
-    FROM
-      public."AdresseTypologie" aty
-      JOIN public."Adresse" a ON a."id" = aty."adresseId"
-      JOIN:"SCHEMA"."structures_core" sc ON sc."structure_version_id" = a."structureVersionId"
-    WHERE
-      aty."placesAutorisees" IS NOT NULL
-    ORDER BY
-      aty."adresseId",
-      aty."year" DESC
-  ),
-  -- Aggregate by structure on the last typologies of addresses
+  -- Aggregate authorized places by structure, from its addresses
   adresses_agregees AS (
     SELECT
-      adm."structureId",
-      SUM(adm."placesAutorisees") AS places_autorisees_adresse
+      sc."id" AS "structureId",
+      SUM(a."placesAutorisees") AS places_autorisees_adresse
     FROM
-      adresse_typologie_dernier_millesime adm
+      public."Adresse" a
+      JOIN:"SCHEMA"."structures_core" sc ON sc."structure_version_id" = a."structureVersionId"
+    WHERE
+      a."placesAutorisees" IS NOT NULL
     GROUP BY
-      adm."structureId"
+      sc."id"
   ),
   -- Places comparison: structure vs addresses
   places_comparison AS (

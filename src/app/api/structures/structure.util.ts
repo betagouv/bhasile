@@ -21,7 +21,6 @@ import {
   StructureVersionTransformationType,
 } from "@/generated/prisma/client";
 import { canUpdateStructure } from "@/lib/casl/abilities";
-import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import {
   StructureAgentUpdateApiType,
@@ -166,33 +165,27 @@ export const getDatesPeriodeAutorisation = (structure: {
     "ARRETE_AUTORISATION"
   );
 
-const getCurrentPlacesByProperty = (
+const sumPlaces = (
   structure: StructureDbDetails | StructureDbList,
-  accessor: keyof AdresseTypologieApiType
-): number => {
-  const mostRecentYearTypologies = structure.adresses?.map(
-    (adresse) => adresse.adresseTypologies?.[0]
-  );
-  const placesByAccessor = mostRecentYearTypologies?.reduce(
-    (totalCount, currentTypologie) =>
-      totalCount + ((currentTypologie?.[accessor] as number) || 0),
+  isCounted: (adresse: { isQpv: boolean; isLogementSocial: boolean }) => boolean
+): number =>
+  structure.adresses?.reduce(
+    (totalCount, adresse) =>
+      totalCount + (isCounted(adresse) ? (adresse.placesAutorisees ?? 0) : 0),
     0
-  );
-
-  return placesByAccessor || 0;
-};
+  ) || 0;
 
 export const getCurrentPlacesAutorisees = (
   structure: StructureDbDetails | StructureDbList
-) => getCurrentPlacesByProperty(structure, "placesAutorisees");
+) => sumPlaces(structure, () => true);
 
 export const getCurrentPlacesQpv = (
   structure: StructureDbDetails | StructureDbList
-) => getCurrentPlacesByProperty(structure, "qpv");
+) => sumPlaces(structure, (adresse) => adresse.isQpv);
 
 export const getCurrentPlacesLogementsSociaux = (
   structure: StructureDbDetails | StructureDbList
-) => getCurrentPlacesByProperty(structure, "logementSocial");
+) => sumPlaces(structure, (adresse) => adresse.isLogementSocial);
 
 export const isStructureInCpom = (
   structure: StructureDbDetails | StructureDbList,

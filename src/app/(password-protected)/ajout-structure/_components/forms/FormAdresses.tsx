@@ -6,9 +6,12 @@ import { useEffect, useMemo, useState } from "react";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { CURRENT_YEAR } from "@/constants";
+import { migrateLegacyAdresseTypologies } from "@/app/utils/adresse.util";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
-import { typeBatiAndAdressesSchema } from "@/schemas/forms/base/adresse.schema";
+import {
+  FormAdresse,
+  typeBatiAndAdressesSchema,
+} from "@/schemas/forms/base/adresse.schema";
 import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 
 import { AdressesList } from "../../[id]/02-adresses/AdressesList";
@@ -35,14 +38,9 @@ export default function FormAdresses() {
           commune: "",
           departement: "",
           repartition: Repartition.DIFFUS,
-          adresseTypologies: [
-            {
-              year: CURRENT_YEAR,
-              placesAutorisees: undefined as unknown as number,
-              logementSocial: false,
-              qpv: false,
-            },
-          ],
+          placesAutorisees: undefined as unknown as number,
+          isLogementSocial: false,
+          isQpv: false,
         },
       ],
     }),
@@ -66,6 +64,10 @@ export default function FormAdresses() {
     return {
       ...defaultValues,
       ...localStorageValues,
+      adresses:
+        migrateLegacyAdresseTypologies(
+          localStorageValues.adresses as FormAdresse[]
+        ) ?? defaultValues.adresses,
     };
   }, [localStorageValues, defaultValues]);
 
@@ -107,14 +109,9 @@ export default function FormAdresses() {
                   codePostal: "",
                   commune: "",
                   repartition: value as Repartition,
-                  adresseTypologies: [
-                    {
-                      placesAutorisees: undefined as unknown as number,
-                      year: CURRENT_YEAR,
-                      logementSocial: false,
-                      qpv: false,
-                    },
-                  ],
+                  placesAutorisees: undefined as unknown as number,
+                  isLogementSocial: false,
+                  isQpv: false,
                 },
               ],
               { shouldValidate: false }

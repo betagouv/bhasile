@@ -8,7 +8,6 @@ import {
   getTransformationNounAvecArticle,
   isTransformationSurStructureExistante,
 } from "@/app/utils/transformation.util";
-import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
@@ -48,14 +47,9 @@ export const FieldSetHebergement = ({
       departement: "",
       repartition:
         typeBati === Repartition.MIXTE ? Repartition.DIFFUS : typeBati,
-      adresseTypologies: [
-        {
-          placesAutorisees: null,
-          year: CURRENT_YEAR,
-          logementSocial: false,
-          qpv: false,
-        },
-      ],
+      placesAutorisees: null,
+      isLogementSocial: false,
+      isQpv: false,
     }),
     [id, typeBati]
   );

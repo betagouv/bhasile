@@ -77,8 +77,9 @@ const sumAdressePlacesSpeciales = (
   let logementsSociaux = 0;
 
   for (const adresse of adressesInScope) {
-    qpv += adresse.qpv ?? 0;
-    logementsSociaux += adresse.logementSocial ?? 0;
+    const places = adresse.placesAutorisees ?? 0;
+    qpv += adresse.isQpv ? places : 0;
+    logementsSociaux += adresse.isLogementSocial ? places : 0;
   }
 
   return { qpv, logementsSociaux };
@@ -210,9 +211,9 @@ export const computeTypologieFieldForYear = (
   );
 };
 
-type PlacesAdresseField = "qpv" | "logementSocial";
+type PlacesAdresseField = "isQpv" | "isLogementSocial";
 
-/** Computes a single adresse field (qpv/logementSocial) for one year, for cartographie one-indicator requests. */
+/** Computes a single adresse field (isQpv/isLogementSocial) for one year, for cartographie one-indicator requests. */
 export const computeAdresseFieldForYear = (
   context: StatistiquesAdresseYearContext,
   year: number,
@@ -230,5 +231,11 @@ export const computeAdresseFieldForYear = (
     context.structureVersionTimeline
   );
 
-  return sumValues(adressesInScope.map((adresse) => adresse[field])) ?? 0;
+  return (
+    sumValues(
+      adressesInScope.map((adresse) =>
+        adresse[field] ? (adresse.placesAutorisees ?? 0) : 0
+      )
+    ) ?? 0
+  );
 };

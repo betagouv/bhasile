@@ -396,7 +396,7 @@ describe("PUT /api/structures/[id]", () => {
     );
   });
 
-  it("convertit les booléens qpv/logementSocial de l'adresse en nombres via le transform du schéma", async () => {
+  it("transmet les particularités booléennes de l'adresse au service", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindStructureDepartement.mockResolvedValueOnce({
@@ -416,14 +416,9 @@ describe("PUT /api/structures/[id]", () => {
             codePostal: "75011",
             commune: "Paris",
             repartition: "DIFFUS",
-            adresseTypologies: [
-              {
-                year: 2024,
-                placesAutorisees: 10,
-                qpv: true,
-                logementSocial: false,
-              },
-            ],
+            placesAutorisees: 10,
+            isQpv: true,
+            isLogementSocial: false,
           },
         ],
       }),
@@ -434,20 +429,14 @@ describe("PUT /api/structures/[id]", () => {
       params: Promise.resolve({ id: "4" }),
     });
 
-    // THEN — the route's zod parse converts the booleans:
-    // qpv true → placesAutorisees (10), logementSocial false → 0
     expect(response.status).toBe(200);
     expect(mockUpdateOne).toHaveBeenCalledWith(
       expect.objectContaining({
         adresses: [
           expect.objectContaining({
-            adresseTypologies: [
-              expect.objectContaining({
-                placesAutorisees: 10,
-                qpv: 10,
-                logementSocial: 0,
-              }),
-            ],
+            placesAutorisees: 10,
+            isQpv: true,
+            isLogementSocial: false,
           }),
         ],
       }),

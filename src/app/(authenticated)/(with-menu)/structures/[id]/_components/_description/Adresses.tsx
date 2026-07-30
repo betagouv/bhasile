@@ -37,7 +37,7 @@ export const Adresses = (): ReactElement => {
             </td>
             <td className="py-3 pr-8">
               <NumberDisplay
-                value={adresse.adresseTypologies?.[0]?.placesAutorisees}
+                value={adresse.placesAutorisees}
               />{" "}
               places
             </td>
@@ -45,12 +45,12 @@ export const Adresses = (): ReactElement => {
               {adresse.repartition ? RepartitionLabel[adresse.repartition] : ""}
             </td>
             <td className="py-3 w-full">
-              {adresse.adresseTypologies?.[0]?.qpv ? (
+              {adresse.isQpv ? (
                 <span className="pr-1">
                   <Badge type="purple">QPV</Badge>
                 </span>
               ) : null}
-              {adresse.adresseTypologies?.[0]?.logementSocial ? (
+              {adresse.isLogementSocial ? (
                 <Badge type="purple">Logement social</Badge>
               ) : null}
             </td>

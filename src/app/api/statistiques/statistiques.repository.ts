@@ -137,8 +137,8 @@ export const findStructureAdresses = async (
       structureVersion: { select: { structureId: true } },
       repartition: true,
       placesAutorisees: true,
-      qpv: true,
-      logementSocial: true,
+      isQpv: true,
+      isLogementSocial: true,
     },
   });
 
@@ -148,8 +148,8 @@ export const findStructureAdresses = async (
     structureVersionId: row.structureVersionId!,
     repartition: row.repartition,
     placesAutorisees: row.placesAutorisees,
-    qpv: row.qpv,
-    logementSocial: row.logementSocial,
+    isQpv: row.isQpv,
+    isLogementSocial: row.isLogementSocial,
   }));
 };
 

@@ -10,7 +10,6 @@ import { ImportOptionNotices } from "@/app/components/forms/hebergement/ImportOp
 import { ManualOptionNotices } from "@/app/components/forms/hebergement/ManualOptionNotices";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
-import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { AdresseAdministrativeFormValues } from "@/schemas/forms/base/adresseAdministrative.schema";
 import { Repartition, RepartitionLabel } from "@/types/adresse.type";
@@ -39,14 +38,9 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
       departement: "",
       repartition:
         typeBati === Repartition.MIXTE ? Repartition.DIFFUS : typeBati,
-      adresseTypologies: [
-        {
-          placesAutorisees: undefined as unknown as number,
-          year: CURRENT_YEAR,
-          logementSocial: false,
-          qpv: false,
-        },
-      ],
+      placesAutorisees: undefined as unknown as number,
+      isLogementSocial: false,
+      isQpv: false,
     };
     const currentAddresses = getValues("adresses") || [];
     const updatedAddresses = [...currentAddresses, newAddress];
@@ -150,8 +144,8 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
               disabled={sameAddress}
             />
             <InputWithValidation
-              name={`adresses.${index}.adresseTypologies.0.placesAutorisees`}
-              id={`adresses.${index}.adresseTypologies.0.placesAutorisees`}
+              name={`adresses.${index}.placesAutorisees`}
+              id={`adresses.${index}.placesAutorisees`}
               control={control}
               type="number"
               min={0}
@@ -182,7 +176,7 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
               <div className="flex w-full gap-4 items-center min-h-[2.6rem]">
                 <Controller
                   control={control}
-                  name={`adresses.${index}.adresseTypologies.0.logementSocial`}
+                  name={`adresses.${index}.isLogementSocial`}
                   render={({ field }) => (
                     <Checkbox
                       options={[
@@ -200,7 +194,7 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
                 />
                 <Controller
                   control={control}
-                  name={`adresses.${index}.adresseTypologies.0.qpv`}
+                  name={`adresses.${index}.isQpv`}
                   render={({ field }) => (
                     <Checkbox
                       options={[

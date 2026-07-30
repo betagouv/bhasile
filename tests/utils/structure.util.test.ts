@@ -28,7 +28,6 @@ import { HistoryEvent } from "@/types/structure-history.type";
 
 import { Repartition } from "../../src/types/adresse.type";
 import { createAdresse } from "../test-utils/factories/adresse.factory";
-import { createAdresseTypologie } from "../test-utils/factories/adresse-typologie.factory";
 import { createControle } from "../test-utils/factories/controle.factory";
 import { createEvaluation } from "../test-utils/factories/evaluation.factory";
 import { createStructureTypologie } from "../test-utils/factories/structure-typologie.factory";
@@ -59,24 +58,11 @@ describe("structure util", () => {
     });
     it("ventile correctement les places par commune quand on passe un tableau d'adresses", () => {
       // GIVEN
-      const typologie1 = createAdresseTypologie({
-        placesAutorisees: 2,
-      });
-      const typologie2 = createAdresseTypologie({
-        placesAutorisees: 3,
-      });
-      const typologie3 = createAdresseTypologie({
-        placesAutorisees: 1,
-      });
-      const typologie4 = createAdresseTypologie({
-        placesAutorisees: 1,
-      });
-
       const adresses: AdresseApiType[] = [
-        createAdresse({ id: 1, commune: "Paris", typologies: [typologie1] }),
-        createAdresse({ id: 2, commune: "Paris", typologies: [typologie2] }),
-        createAdresse({ id: 3, commune: "Rouen", typologies: [typologie3] }),
-        createAdresse({ id: 4, commune: "Rouen", typologies: [typologie4] }),
+        createAdresse({ id: 1, commune: "Paris", placesAutorisees: 2 }),
+        createAdresse({ id: 2, commune: "Paris", placesAutorisees: 3 }),
+        createAdresse({ id: 3, commune: "Rouen", placesAutorisees: 1 }),
+        createAdresse({ id: 4, commune: "Rouen", placesAutorisees: 1 }),
       ];
 
       // WHEN

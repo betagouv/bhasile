@@ -69,7 +69,7 @@ describe("structure.repository db integration", () => {
       orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
       include: {
         contacts: true,
-        adresses: { include: { adresseTypologies: true } },
+        adresses: true,
         antennes: true,
         structureFinesses: { include: { finess: true } },
         dnaStructures: { include: { dna: true } },
@@ -562,16 +562,16 @@ describe("structure.repository db integration", () => {
       codePostal: "31000",
       commune: "Toulouse",
       repartition: Repartition.DIFFUS,
-      adresseTypologies: [
-        { year: 2026, placesAutorisees: 11, qpv: 2, logementSocial: 3 },
-      ],
+      placesAutorisees: 11,
+      isQpv: true,
+      isLogementSocial: true,
     };
     await updateOne({
       id: structure.id,
       adresses: [newAdresse],
     });
 
-    // THEN: old address is removed and new one created with typology
+    // THEN: old address is removed and new one created
     const version = await fetchCurrentVersion(structure.id);
     expect(version.adresses).toHaveLength(1);
     expect(version.adresses[0].id).not.toBe(oldAdresseId);
@@ -580,11 +580,10 @@ describe("structure.repository db integration", () => {
       codePostal: newAdresse.codePostal,
       commune: newAdresse.commune,
       repartition: "DIFFUS",
+      placesAutorisees: 11,
+      isQpv: true,
+      isLogementSocial: true,
     });
-    expect(version.adresses[0].adresseTypologies).toHaveLength(1);
-    expect(version.adresses[0].adresseTypologies[0]).toMatchObject(
-      newAdresse.adresseTypologies[0]
-    );
   });
 
   it("remplace la liste des antennes sur la version courante", async () => {
@@ -1192,9 +1191,9 @@ describe("structure.repository db integration", () => {
             codePostal: "75001",
             commune: "Paris",
             repartition: Repartition.DIFFUS,
-            adresseTypologies: [
-              { year: 2026, placesAutorisees: 42, qpv: 0, logementSocial: 0 },
-            ],
+            placesAutorisees: 42,
+            isQpv: false,
+            isLogementSocial: false,
           },
         ],
         structureTypologies: [{ year: 2025, placesAutorisees: 42 }],

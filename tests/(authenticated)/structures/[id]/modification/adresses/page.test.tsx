@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationAdressesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/adresses/page";
-import { CURRENT_YEAR } from "@/constants";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createModificationAdressesValidStructure } from "../../../../../test-utils/structure.factory";
@@ -47,12 +46,9 @@ describe("ModificationAdresses page integration", () => {
         commune: string;
         codePostal: string;
         repartition: string;
-        adresseTypologies?: Array<{
-          year: number;
-          placesAutorisees: number;
-          qpv: boolean;
-          logementSocial: boolean;
-        }>;
+        placesAutorisees?: number;
+        isQpv?: boolean;
+        isLogementSocial?: boolean;
       }>;
     }>(mockedFetch);
     expect(body.id).toBe(77);
@@ -64,17 +60,13 @@ describe("ModificationAdresses page integration", () => {
           commune: "Paris",
           codePostal: "75011",
           repartition: "COLLECTIF",
-          adresseTypologies: expect.arrayContaining([
-            expect.objectContaining({
-              placesAutorisees: 10,
-              qpv: false,
-              logementSocial: false,
-            }),
-          ]),
+          placesAutorisees: 10,
+          isQpv: false,
+          isLogementSocial: false,
         }),
       ])
     );
-    expect(body.adresses[0]?.adresseTypologies?.[0]?.placesAutorisees).toBe(10);
+    expect(body.adresses[0]?.placesAutorisees).toBe(10);
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 
@@ -85,14 +77,9 @@ describe("ModificationAdresses page integration", () => {
       adresses: [
         {
           ...createModificationAdressesValidStructure(78).adresses[0],
-          adresseTypologies: [
-            {
-              year: CURRENT_YEAR,
-              placesAutorisees: 0,
-              qpv: 0,
-              logementSocial: 0,
-            },
-          ],
+          placesAutorisees: 0,
+          isQpv: false,
+          isLogementSocial: false,
         },
       ],
     };

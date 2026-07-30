@@ -22,7 +22,7 @@ describe("applyPrefill", () => {
           structureVersion: {
             contacts: [{ prenom: "Nicolas", nom: "Leboeuf" }],
             antennes: [{ name: "Avranches Nord" }],
-            adresses: [{ adresse: "1 rue A", adresseTypologies: [] }],
+            adresses: [{ adresse: "1 rue A" }],
           },
         },
         {
@@ -30,7 +30,7 @@ describe("applyPrefill", () => {
           structureVersion: {
             contacts: [{ prenom: "Chloé", nom: "Pouillevet" }],
             antennes: [{ name: "Avranches Sud" }],
-            adresses: [{ adresse: "2 rue B", adresseTypologies: [] }],
+            adresses: [{ adresse: "2 rue B" }],
           },
         },
         { type: StructureVersionTransformationType.CREATION },

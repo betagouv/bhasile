@@ -113,12 +113,9 @@ export const copyStructureVersion = (
     codePostal: adresse.codePostal,
     commune: adresse.commune,
     repartition: adresse.repartition,
-    adresseTypologies: adresse.adresseTypologies.map((typologie) => ({
-      placesAutorisees: typologie.placesAutorisees,
-      year: typologie.year,
-      qpv: typologie.qpv,
-      logementSocial: typologie.logementSocial,
-    })),
+    placesAutorisees: adresse.placesAutorisees,
+    isQpv: adresse.isQpv,
+    isLogementSocial: adresse.isLogementSocial,
   })),
   dnaStructures: structure.dnaStructures.map((dnaStructure) => ({
     description: dnaStructure.description ?? undefined,

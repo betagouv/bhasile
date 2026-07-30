@@ -52,13 +52,7 @@ export const structureListLightSelect = {
 
 export const structureListVersionInclude = {
   contacts: true,
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   antennes: true,
   structureFinesses: {
     include: { finess: true },
@@ -70,13 +64,7 @@ export const structureListVersionInclude = {
 } satisfies Prisma.StructureVersionInclude;
 
 export const structureListInclude = {
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   cpomStructures: {
     include: {
       cpom: {
@@ -126,13 +114,7 @@ export const structureDetailsInclude = {
   structureFinesses: {
     include: { finess: true },
   },
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   antennes: true,
   contacts: true,
   structureTypologies: {
