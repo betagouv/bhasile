@@ -53,7 +53,7 @@ export const MoyenneIndicator = ({ selectedRegion }: Props): ReactElement => {
         {selectedZone ? "Valeur régionale" : "Moyenne"}
       </span>
       <div className="bg-white rounded-full px-4 py-2 w-fit text-sm flex items-center gap-2 font-medium">
-        <NumberDisplay value={displayValue} />
+        <NumberDisplay value={displayValue} compact />
         {displayDelta > 0 && (
           <span
             className="fr-icon-arrow-up-line text-title-blue-france"

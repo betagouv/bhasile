@@ -2,20 +2,27 @@
 
 import Select from "@codegouvfr/react-dsfr/Select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ReactElement } from "react";
+import { ReactElement, useMemo } from "react";
 
 import { getYearRange } from "@/app/utils/date.util";
 import { DEFAULT_CARTOGRAPHIE_ANNEE, START_YEAR } from "@/constants";
-
-const options = getYearRange({
-  startYear: START_YEAR,
-  endYear: DEFAULT_CARTOGRAPHIE_ANNEE,
-}).years.map((year) => ({ label: year.toString(), value: year.toString() }));
 
 export const YearSelector = (): ReactElement => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const options = useMemo(
+    () =>
+      getYearRange({
+        startYear: START_YEAR,
+        endYear: DEFAULT_CARTOGRAPHIE_ANNEE,
+      }).years.map((year) => ({
+        label: year.toString(),
+        value: year.toString(),
+      })),
+    []
+  );
 
   const currentYear =
     searchParams.get("annee") ?? String(DEFAULT_CARTOGRAPHIE_ANNEE);
