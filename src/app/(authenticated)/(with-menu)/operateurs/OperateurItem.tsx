@@ -86,6 +86,7 @@ export const OperateurItem = ({
               du parc en nombre de places
             </span>
           </div>
+          {/* fix here? v */}
           <Link
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
             title={`Détails de l'operateur ${name}`}
