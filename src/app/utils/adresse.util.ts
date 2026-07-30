@@ -21,17 +21,9 @@ export const getDepartementFromCodePostal = (codePostal: string) =>
 
 // TODO: supprimer avec AdresseTypologie.
 export const migrateLegacyAdresseTypologies = (
-  adresses?: FormAdresse[]
+  adresses?: LegacyFormAdresse[]
 ): FormAdresse[] | undefined =>
-  adresses?.map((adresse) => {
-    const { adresseTypologies, ...adresseWithoutTypologies } =
-      adresse as FormAdresse & {
-        adresseTypologies?: {
-          placesAutorisees?: number | null;
-          qpv?: boolean;
-          logementSocial?: boolean;
-        }[];
-      };
+  adresses?.map(({ adresseTypologies, ...adresse }) => {
     const legacyTypologie = adresseTypologies?.[0];
 
     if (!legacyTypologie) {
@@ -39,7 +31,7 @@ export const migrateLegacyAdresseTypologies = (
     }
 
     return {
-      ...adresseWithoutTypologies,
+      ...adresse,
       placesAutorisees: legacyTypologie.placesAutorisees,
       isQpv: !!legacyTypologie.qpv,
       isLogementSocial: !!legacyTypologie.logementSocial,
@@ -154,6 +146,15 @@ export const isAdresseEmpty = (adresse: FormAdresse): boolean =>
   isBlank(adresse.placesAutorisees) &&
   !adresse.isLogementSocial &&
   !adresse.isQpv;
+
+// TODO: supprimer avec AdresseTypologie.
+type LegacyFormAdresse = FormAdresse & {
+  adresseTypologies?: {
+    placesAutorisees?: number | null;
+    qpv?: boolean;
+    logementSocial?: boolean;
+  }[];
+};
 
 type Coordinates = {
   latitude: number | undefined;

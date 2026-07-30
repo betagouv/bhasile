@@ -4,7 +4,6 @@
 //
 // ⚠️ À lancer IMMÉDIATEMENT après le déploiement de la bascule : entre les deux, toute
 //    édition d'adresse écrit dans Adresse et sera écrasée ici par son AT périmée.
-// Idempotent : Adresse ← f(AdresseTypologie), et rien n'écrit dans AdresseTypologie.
 // Usage: yarn one-off 20260729-backfill-adresse-scalaires
 
 import "dotenv/config";
