@@ -1,7 +1,11 @@
 import { headers } from "next/headers";
 
-import { CURRENT_YEAR } from "@/constants";
-import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.schema";
+import { DEFAULT_CARTOGRAPHIE_ANNEE } from "@/constants";
+import {
+  CartographieApiRead,
+  DEFAULT_CARTOGRAPHIE_GRANULARITE,
+  DEFAULT_CARTOGRAPHIE_INDICATEUR,
+} from "@/schemas/api/statistique-cartographie.schema";
 
 import { StatistiquesCartographie } from "../_components/StatistiquesCartographie";
 import { StatistiquesHeader } from "../_components/StatistiquesHeader";
@@ -80,17 +84,17 @@ export default async function CartographiePage({
   const granularite =
     typeof awaitedSearchParams.granularite === "string"
       ? awaitedSearchParams.granularite
-      : "region";
+      : DEFAULT_CARTOGRAPHIE_GRANULARITE;
 
   const indicateur =
     typeof awaitedSearchParams.indicateur === "string"
       ? awaitedSearchParams.indicateur
-      : "structures.total";
+      : DEFAULT_CARTOGRAPHIE_INDICATEUR;
 
   const annee =
     typeof awaitedSearchParams.annee === "string"
       ? awaitedSearchParams.annee
-      : String(CURRENT_YEAR - 1);
+      : String(DEFAULT_CARTOGRAPHIE_ANNEE);
 
   const statistiques = await getStatistiquesCartographie({
     departements,

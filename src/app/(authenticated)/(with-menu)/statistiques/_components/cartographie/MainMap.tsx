@@ -32,12 +32,11 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
         return false;
       }
 
-      if (onRegionClick) {
+      if (onRegionClick && path.dataset.regionClickBound !== "true") {
+        path.dataset.regionClickBound = "true";
         path.style.cursor = "pointer";
         path.classList.add("hover:opacity-80", "transition-opacity");
-
-        const handler = () => onRegionClick(code);
-        path.addEventListener("click", handler);
+        path.addEventListener("click", () => onRegionClick(code));
       }
       return true;
     },

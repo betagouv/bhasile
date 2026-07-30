@@ -4,6 +4,8 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
+import { DEFAULT_CARTOGRAPHIE_INDICATEUR } from "@/schemas/api/statistique-cartographie.schema";
+
 const sections = [
   {
     title: "Structures",
@@ -100,7 +102,8 @@ export const CartographieMenu = (): ReactElement => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const currentIndicator = searchParams.get("indicateur") || "structures.total";
+  const currentIndicator =
+    searchParams.get("indicateur") || DEFAULT_CARTOGRAPHIE_INDICATEUR;
 
   const handleIndicatorChange = (indicatorValue: string) => {
     const params = new URLSearchParams(searchParams.toString());

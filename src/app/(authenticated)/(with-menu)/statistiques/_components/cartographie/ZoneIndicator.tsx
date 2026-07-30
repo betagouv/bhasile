@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { EvolutionDirection } from "@/types/map.type";
 
 export const ZoneIndicator = ({
@@ -22,7 +23,7 @@ export const ZoneIndicator = ({
         top: `${y}px`,
       }}
     >
-      {value}
+      <NumberDisplay value={value} compact />
       {isUp && (
         <span className="fr-icon-arrow-up-line text-title-blue-france before:w-2 before:h-2 flex" />
       )}

@@ -1,5 +1,4 @@
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
 
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
@@ -18,37 +17,29 @@ async function getStatistiques({
   operateurs,
   types,
 }: GetStatistiquesArgs): Promise<StatistiqueApiRead> {
-  try {
-    const baseUrl = process.env.NEXT_URL || "";
-    const params = new URLSearchParams();
-    if (departements) {
-      params.append("departements", departements);
-    }
-    if (operateurs) {
-      params.append("operateurs", operateurs);
-    }
-    if (types) {
-      params.append("types", types);
-    }
-
-    const result = await fetch(
-      `${baseUrl}/api/statistiques?${params.toString()}`,
-      {
-        cache: "no-store",
-        // Requête côté serveur donc il faut appeler les headers manuellement
-        headers: await headers(),
-      }
-    );
-    if (!result.ok) {
-      throw new Error(
-        `Impossible de récupérer les statistiques : ${result.status}`
-      );
-    }
-    return await result.json();
-  } catch (error) {
-    console.error(error);
-    notFound();
+  const baseUrl = process.env.NEXT_URL || "";
+  const params = new URLSearchParams();
+  if (departements) {
+    params.append("departements", departements);
   }
+  if (operateurs) {
+    params.append("operateurs", operateurs);
+  }
+  if (types) {
+    params.append("types", types);
+  }
+
+  const result = await fetch(`${baseUrl}/api/statistiques?${params.toString()}`, {
+    cache: "no-store",
+    // Requête côté serveur donc il faut appeler les headers manuellement
+    headers: await headers(),
+  });
+  if (!result.ok) {
+    throw new Error(
+      `Impossible de récupérer les statistiques : ${result.status}`
+    );
+  }
+  return await result.json();
 }
 
 export default async function StatistiquesPage({

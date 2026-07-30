@@ -40,6 +40,22 @@ export const FranceMap = (): ReactElement => {
       return;
     }
 
+    const regionNumeros = getDepartementNumerosForRegion(selectedRegion);
+    const activeDepartements = searchParams
+      .get("departements")
+      ?.split(",")
+      .filter(Boolean);
+    const scopedNumeros =
+      activeDepartements && activeDepartements.length > 0
+        ? regionNumeros.filter((numero) => activeDepartements.includes(numero))
+        : regionNumeros;
+
+    if (scopedNumeros.length === 0) {
+      setDepartementsData({});
+      setRegionError(null);
+      return;
+    }
+
     let cancelled = false;
 
     const fetchRegionDepartements = async () => {
@@ -50,18 +66,6 @@ export const FranceMap = (): ReactElement => {
         params.set("granularite", "departement");
         params.set("annee", statistiques.annee.toString());
         params.set("indicateur", statistiques.indicateur);
-
-        const regionNumeros = getDepartementNumerosForRegion(selectedRegion);
-        const activeDepartements = params
-          .get("departements")
-          ?.split(",")
-          .filter(Boolean);
-        const scopedNumeros =
-          activeDepartements && activeDepartements.length > 0
-            ? regionNumeros.filter((numero) =>
-                activeDepartements.includes(numero)
-              )
-            : regionNumeros;
         params.set("departements", scopedNumeros.join(","));
 
         const response = await fetch(

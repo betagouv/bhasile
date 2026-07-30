@@ -4,6 +4,8 @@ import Select from "@codegouvfr/react-dsfr/Select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
+import { DEFAULT_CARTOGRAPHIE_GRANULARITE } from "@/schemas/api/statistique-cartographie.schema";
+
 const options = [
   { label: "Régions", value: "reg" },
   { label: "Départements", value: "dep" },
@@ -14,7 +16,8 @@ export const DecoupageSelector = (): ReactElement => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const currentGranularite = searchParams.get("granularite") || "region";
+  const currentGranularite =
+    searchParams.get("granularite") || DEFAULT_CARTOGRAPHIE_GRANULARITE;
   const currentValue = currentGranularite === "departement" ? "dep" : "reg";
 
   const handleDecoupageChange = (

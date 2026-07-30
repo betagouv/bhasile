@@ -5,11 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import { DEFAULT_CARTOGRAPHIE_ANNEE, START_YEAR } from "@/constants";
 
 const options = getYearRange({
   startYear: START_YEAR,
-  endYear: CURRENT_YEAR - 1,
+  endYear: DEFAULT_CARTOGRAPHIE_ANNEE,
 }).years.map((year) => ({ label: year.toString(), value: year.toString() }));
 
 export const YearSelector = (): ReactElement => {
@@ -17,7 +17,8 @@ export const YearSelector = (): ReactElement => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const currentYear = searchParams.get("annee") ?? String(CURRENT_YEAR - 1);
+  const currentYear =
+    searchParams.get("annee") ?? String(DEFAULT_CARTOGRAPHIE_ANNEE);
 
   const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedYear = event.target.value;

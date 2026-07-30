@@ -25,13 +25,13 @@ export const MoyenneIndicator = ({ selectedRegion }: Props): ReactElement => {
     displayDelta = (selectedZone.value ?? 0) - (previous ?? 0);
   } else {
     displayValue = average(zones.map((zone) => zone.value));
-    const averagePrevious = average(
-      zones.map((zone) => zone.evolution?.previousValue ?? zone.value)
-    );
-    displayDelta =
-      displayValue !== null && averagePrevious !== null
-        ? displayValue - averagePrevious
-        : 0;
+    const zoneDeltas = zones.map((zone) => {
+      const previous = zone.evolution?.previousValue;
+      return zone.value !== null && previous !== undefined
+        ? zone.value - previous
+        : null;
+    });
+    displayDelta = average(zoneDeltas) ?? 0;
   }
 
   if (displayValue === null) {
