@@ -31,7 +31,8 @@ export const MapLayout = ({
           <div className="pr-4">
             <YearSelector />
           </div>
-          <DecoupageSelector />
+          {/* Masqué à l'échelle d'une région tant qu'on n'a pas l'échelle arrondissement. */}
+          {!(decoupage === "reg" && selectedRegion) && <DecoupageSelector />}
           {decoupage === "reg" && selectedRegion && (
             <Button
               className="ml-4 underline font-normal"
