@@ -10,7 +10,6 @@ import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSet
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useStructures } from "@/app/hooks/useStructures";
-import { migrateLegacyAdresseTypologies } from "@/app/utils/adresse.util";
 import { ApiError } from "@/app/utils/apiError.util";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
 import {
@@ -37,7 +36,7 @@ export const AdressesRecovery = ({ id }: { id: number }) => {
     return localStorageValues && Object.keys(localStorageValues).length > 0
       ? {
           typeBati: localStorageValues.typeBati,
-          adresses: migrateLegacyAdresseTypologies(localStorageValues.adresses),
+          adresses: localStorageValues.adresses,
         }
       : {
           typeBati: undefined,

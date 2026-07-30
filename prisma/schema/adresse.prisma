@@ -9,28 +9,10 @@ model Adresse {
   placesAutorisees   Int?
   isQpv              Boolean            @default(false)
   isLogementSocial   Boolean            @default(false)
-  adresseTypologies  AdresseTypologie[] // TODO: remove after migration
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@schema("public")
-}
-
-// TODO: remove model after migration 
-model AdresseTypologie {
-  id               Int     @id @default(autoincrement())
-  adresse          Adresse @relation(fields: [adresseId], references: [id], onDelete: Cascade)
-  adresseId        Int
-  placesAutorisees Int
-  year             Int
-  qpv              Int
-  logementSocial   Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([adresseId, year])
   @@schema("public")
 }
 

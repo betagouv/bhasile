@@ -4,7 +4,6 @@ import { ReactElement } from "react";
 
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { migrateLegacyAdresseTypologies } from "@/app/utils/adresse.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
@@ -63,7 +62,7 @@ export const ValidationButtonWithHook = ({
 
     updateAdresses({
       ...localAdressesValue,
-      adresses: migrateLegacyAdresseTypologies(localAdressesValue?.adresses),
+      adresses: localAdressesValue?.adresses,
     });
 
     updateTypePlaces({

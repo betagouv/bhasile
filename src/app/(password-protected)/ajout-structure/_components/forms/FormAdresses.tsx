@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { migrateLegacyAdresseTypologies } from "@/app/utils/adresse.util";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import {
   FormAdresse,
@@ -65,9 +64,8 @@ export default function FormAdresses() {
       ...defaultValues,
       ...localStorageValues,
       adresses:
-        migrateLegacyAdresseTypologies(
-          localStorageValues.adresses as FormAdresse[]
-        ) ?? defaultValues.adresses,
+        (localStorageValues.adresses as FormAdresse[]) ??
+        defaultValues.adresses,
     };
   }, [localStorageValues, defaultValues]);
 

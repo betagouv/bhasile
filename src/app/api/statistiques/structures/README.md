@@ -22,4 +22,4 @@ Millésime exact `StructureTypologie` : structures **avec** typologie sur l'ann�
 
 ## Sources
 
-`Structure`, `StructureTypologie`, `Adresse`, `CpomStructure`, `ActeAdministratif`. `AdresseTypologie` déprécié, non utilisé.
+`Structure`, `StructureTypologie`, `Adresse`, `CpomStructure`, `ActeAdministratif`.
