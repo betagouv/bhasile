@@ -55,9 +55,6 @@ const createActeWithAvenants = async (
   }
 };
 
-// Deux cas doivent rester couverts : un parent portant plusieurs avenants, et
-// deux parents portant chacun le leur dans un même périmètre — c'est là que se
-// voit une numérotation des avenants calculée globalement au lieu de par parent.
 const createCpomActesAdministratifs = async (
   prisma: PrismaClient,
   data: {
