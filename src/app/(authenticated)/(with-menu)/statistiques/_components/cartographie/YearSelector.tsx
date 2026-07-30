@@ -17,7 +17,7 @@ export const YearSelector = (): ReactElement => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const currentYear = searchParams.get("annee") || CURRENT_YEAR - 1;
+  const currentYear = searchParams.get("annee") ?? String(CURRENT_YEAR - 1);
 
   const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedYear = event.target.value;

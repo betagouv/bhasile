@@ -1,10 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { useMapLabels } from "@/app/hooks/useMapLabels";
 
-import { useStatistiquesCartographieContext } from "../../_context/StatistiquesCartographieClientContext";
+import { useCartographieRichZoneData } from "./useCartographieRichZoneData";
 import { ZoneIndicator } from "./ZoneIndicator";
 
 const OFFSETS: Record<string, { offsetX: number; offsetY: number }> = {
@@ -15,26 +13,7 @@ const OFFSETS: Record<string, { offsetX: number; offsetY: number }> = {
 };
 
 export const IdfMap = ({ zoneData }: Props) => {
-  const { statistiques } = useStatistiquesCartographieContext();
-  const zones = useMemo(() => statistiques?.zones || [], [statistiques?.zones]);
-
-  const richZoneData = useMemo(() => {
-    return zones.reduce(
-      (accumulator, zone) => {
-        const cleanCode = zone.code.replace(/^FR-/, "");
-        accumulator[cleanCode] = {
-          value: zone.value ?? 0,
-          delta: zone.evolution?.delta,
-          direction: zone.evolution?.direction,
-        };
-        return accumulator;
-      },
-      {} as Record<
-        string,
-        { value: number; delta?: number; direction?: string | null }
-      >
-    );
-  }, [zones]);
+  const richZoneData = useCartographieRichZoneData();
 
   const { containerRef, mapRef, labels } = useMapLabels({
     zoneData: richZoneData,

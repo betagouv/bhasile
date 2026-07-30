@@ -1,5 +1,4 @@
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
 
 import { CURRENT_YEAR } from "@/constants";
 import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.schema";
@@ -25,42 +24,37 @@ async function getStatistiquesCartographie({
   indicateur,
   annee,
 }: GetStatistiquesCartographieArgs): Promise<CartographieApiRead> {
-  try {
-    const baseUrl = process.env.NEXT_URL || "";
-    const params = new URLSearchParams();
+  const baseUrl = process.env.NEXT_URL || "";
+  const params = new URLSearchParams();
 
-    if (departements) {
-      params.append("departements", departements);
-    }
-    if (operateurs) {
-      params.append("operateurs", operateurs);
-    }
-    if (types) {
-      params.append("types", types);
-    }
-
-    params.append("granularite", granularite);
-    params.append("indicateur", indicateur);
-    params.append("annee", annee);
-
-    const result = await fetch(
-      `${baseUrl}/api/statistiques/cartographie?${params.toString()}`,
-      {
-        cache: "no-store",
-        headers: await headers(),
-      }
-    );
-
-    if (!result.ok) {
-      throw new Error(
-        `Impossible de récupérer les statistiques de cartographie : ${result.status}`
-      );
-    }
-    return await result.json();
-  } catch (error) {
-    console.error(error);
-    notFound();
+  if (departements) {
+    params.append("departements", departements);
   }
+  if (operateurs) {
+    params.append("operateurs", operateurs);
+  }
+  if (types) {
+    params.append("types", types);
+  }
+
+  params.append("granularite", granularite);
+  params.append("indicateur", indicateur);
+  params.append("annee", annee);
+
+  const result = await fetch(
+    `${baseUrl}/api/statistiques/cartographie?${params.toString()}`,
+    {
+      cache: "no-store",
+      headers: await headers(),
+    }
+  );
+
+  if (!result.ok) {
+    throw new Error(
+      `Impossible de récupérer les statistiques de cartographie : ${result.status}`
+    );
+  }
+  return await result.json();
 }
 
 export default async function CartographiePage({

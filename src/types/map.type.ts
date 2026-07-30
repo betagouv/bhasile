@@ -1,3 +1,7 @@
+import { CartographieEvolutionStat } from "@/schemas/api/statistique-cartographie.schema";
+
+export type EvolutionDirection = CartographieEvolutionStat["direction"];
+
 export type ZoneLabel = {
   code: string;
   value: number;
@@ -7,11 +11,11 @@ export type ZoneLabel = {
 
 export type ZoneLabelWithTrend = ZoneLabel & {
   delta?: number;
-  direction?: string | null;
+  direction?: EvolutionDirection | null;
 };
 
 export type ZoneDataInfo = {
   value: number;
   delta?: number;
-  direction?: string | null;
+  direction?: EvolutionDirection | null;
 };

@@ -3,7 +3,15 @@
 import { useSearchParams } from "next/navigation";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 
+import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.schema";
+import { ZoneDataInfo } from "@/types/map.type";
+
 import { useStatistiquesCartographieContext } from "../../_context/StatistiquesCartographieClientContext";
+import {
+  getDepartementNumerosForRegion,
+  zonesToRichRecord,
+  zonesToValueRecord,
+} from "./cartographie.util";
 import { MapLayout } from "./MapLayout";
 
 export const FranceMap = (): ReactElement => {
@@ -15,49 +23,46 @@ export const FranceMap = (): ReactElement => {
 
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [departementsData, setDepartementsData] = useState<
-    Record<string, number>
+    Record<string, ZoneDataInfo>
   >({});
-
-  const [departementsEvolutionData, setDepartementsEvolutionData] = useState<
-    Record<string, { delta?: number; direction?: string | null }>
-  >({});
-
   const [isLoadingRegion, setIsLoadingRegion] = useState(false);
+  const [regionError, setRegionError] = useState<string | null>(null);
 
-  const zoneData = useMemo(() => {
-    if (!statistiques?.zones) {
-      return {};
-    }
-
-    return statistiques.zones.reduce(
-      (accumulator, zone) => {
-        const cleanCode = zone.code.replace(/^FR-/, "");
-        accumulator[cleanCode] = zone.value ?? 0;
-        return accumulator;
-      },
-      {} as Record<string, number>
-    );
-  }, [statistiques]);
+  const zoneData = useMemo(
+    () => zonesToValueRecord(statistiques.zones),
+    [statistiques.zones]
+  );
 
   useEffect(() => {
     if (!selectedRegion) {
       setDepartementsData({});
-      setDepartementsEvolutionData({});
+      setRegionError(null);
       return;
     }
 
-    const fetchAllDepartements = async () => {
+    let cancelled = false;
+
+    const fetchRegionDepartements = async () => {
       setIsLoadingRegion(true);
+      setRegionError(null);
       try {
         const params = new URLSearchParams(searchParams.toString());
         params.set("granularite", "departement");
+        params.set("annee", statistiques.annee.toString());
+        params.set("indicateur", statistiques.indicateur);
 
-        if (!params.has("annee") && statistiques?.annee) {
-          params.set("annee", statistiques.annee.toString());
-        }
-        if (!params.has("indicateur") && statistiques?.indicateur) {
-          params.set("indicateur", statistiques.indicateur);
-        }
+        const regionNumeros = getDepartementNumerosForRegion(selectedRegion);
+        const activeDepartements = params
+          .get("departements")
+          ?.split(",")
+          .filter(Boolean);
+        const scopedNumeros =
+          activeDepartements && activeDepartements.length > 0
+            ? regionNumeros.filter((numero) =>
+                activeDepartements.includes(numero)
+              )
+            : regionNumeros;
+        params.set("departements", scopedNumeros.join(","));
 
         const response = await fetch(
           `/api/statistiques/cartographie?${params.toString()}`
@@ -66,54 +71,39 @@ export const FranceMap = (): ReactElement => {
           throw new Error("Erreur lors du chargement des départements");
         }
 
-        const data = await response.json();
-
-        const valuesRecord: Record<string, number> = {};
-        const evolutionsRecord: Record<
-          string,
-          { delta?: number; direction?: string | null }
-        > = {};
-
-        data.zones.forEach(
-          (zone: {
-            code: string;
-            value: number;
-            evolution: {
-              delta: number;
-              direction: string;
-            };
-          }) => {
-            const cleanCode = zone.code.replace(/^FR-/, "");
-
-            valuesRecord[cleanCode] = zone.value ?? 0;
-
-            evolutionsRecord[cleanCode] = {
-              delta: zone.evolution?.delta,
-              direction: zone.evolution?.direction,
-            };
-          }
-        );
-        setDepartementsData(valuesRecord);
-        setDepartementsEvolutionData(evolutionsRecord);
+        const data: CartographieApiRead = await response.json();
+        if (!cancelled) {
+          setDepartementsData(zonesToRichRecord(data.zones));
+        }
       } catch (error) {
         console.error("Erreur cartographie :", error);
+        if (!cancelled) {
+          setDepartementsData({});
+          setRegionError("Impossible de charger le détail de la région.");
+        }
       } finally {
-        setIsLoadingRegion(false);
+        if (!cancelled) {
+          setIsLoadingRegion(false);
+        }
       }
     };
 
-    fetchAllDepartements();
+    fetchRegionDepartements();
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedRegion, searchParams, statistiques]);
 
   return (
     <MapLayout
       zoneData={zoneData}
-      departementsData={decoupage === "dep" ? zoneData : departementsData}
-      departementsEvolutionData={departementsEvolutionData}
+      departementsData={departementsData}
       decoupage={decoupage}
       selectedRegion={selectedRegion}
       setSelectedRegion={setSelectedRegion}
       isLoadingRegion={isLoadingRegion}
+      regionError={regionError}
     />
   );
 };

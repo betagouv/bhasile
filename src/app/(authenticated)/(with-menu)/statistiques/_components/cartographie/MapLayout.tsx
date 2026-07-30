@@ -6,6 +6,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 
 import Loader from "@/app/components/ui/Loader";
+import { ZoneDataInfo } from "@/types/map.type";
 
 import { DecoupageSelector } from "./DecoupageSelector";
 import { IdfMap } from "./IdfMap";
@@ -22,7 +23,7 @@ export const MapLayout = ({
   selectedRegion,
   setSelectedRegion,
   isLoadingRegion,
-  departementsEvolutionData,
+  regionError,
 }: Props) => {
   useEffect(() => {
     if (decoupage === "dep") {
@@ -63,10 +64,16 @@ export const MapLayout = ({
               <Loader />
             </div>
           )}
+          {regionError && !isLoadingRegion && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+              <p className="text-sm text-default-error font-medium">
+                {regionError}
+              </p>
+            </div>
+          )}
           <RegionDetailsMap
             regionCode={selectedRegion}
             zoneData={departementsData}
-            evolutionData={departementsEvolutionData}
           />
         </div>
       ) : (
@@ -90,13 +97,10 @@ export const MapLayout = ({
 
 type Props = {
   zoneData: Record<string, number>;
-  departementsData: Record<string, number>;
+  departementsData: Record<string, ZoneDataInfo>;
   decoupage: "dep" | "reg";
   selectedRegion: string | null;
   setSelectedRegion: (region: string | null) => void;
   isLoadingRegion?: boolean;
-  departementsEvolutionData: Record<
-    string,
-    { delta?: number; direction?: string | null }
-  >;
+  regionError?: string | null;
 };

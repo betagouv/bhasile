@@ -23,14 +23,22 @@ export const StatistiquesHeader = (): ReactElement | null => {
   const handleVisualizationChange = (
     newVisualization: "tableaux" | "cartographie"
   ) => {
-    const query = searchParams.toString();
-    const suffix = query ? `?${query}` : "";
+    const params = new URLSearchParams(searchParams.toString());
 
     if (newVisualization === "tableaux") {
-      router.push(`/statistiques${suffix}`);
-    } else {
-      router.push(`/statistiques/cartographie${suffix}`);
+      ["granularite", "indicateur", "annee"].forEach((key) =>
+        params.delete(key)
+      );
     }
+
+    const query = params.toString();
+    const suffix = query ? `?${query}` : "";
+    const path =
+      newVisualization === "tableaux"
+        ? "/statistiques"
+        : "/statistiques/cartographie";
+
+    router.push(`${path}${suffix}`);
   };
 
   return (

@@ -34,12 +34,6 @@ export function StatistiquesCartographieClientProvider({
 export function useStatistiquesCartographieContext(): StatistiquesCartographieContextType {
   const context = useContext(StatistiquesCartographieContextInternal);
 
-  if (context === undefined) {
-    throw new Error(
-      "useStatistiquesCartographieContext doit être utilisé à l'intérieur d'un StatistiquesCartographieProvider"
-    );
-  }
-
   if (context.statistiques === null) {
     throw new Error(
       "Statistiques de cartographie indisponibles dans le contexte"

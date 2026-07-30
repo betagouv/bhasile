@@ -3,53 +3,48 @@
 import { ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
+import { average } from "@/app/utils/math.util";
 
 import { useStatistiquesCartographieContext } from "../../_context/StatistiquesCartographieClientContext";
+import { cleanZoneCode } from "./cartographie.util";
 
 export const MoyenneIndicator = ({ selectedRegion }: Props): ReactElement => {
   const { statistiques } = useStatistiquesCartographieContext();
-  const zones = statistiques?.zones || [];
+  const zones = statistiques.zones;
 
-  if (zones.length === 0) {
+  const selectedZone = selectedRegion
+    ? zones.find((zone) => cleanZoneCode(zone.code) === selectedRegion)
+    : null;
+
+  let displayValue: number | null;
+  let displayDelta = 0;
+
+  if (selectedZone) {
+    displayValue = selectedZone.value;
+    const previous = selectedZone.evolution?.previousValue ?? selectedZone.value;
+    displayDelta = (selectedZone.value ?? 0) - (previous ?? 0);
+  } else {
+    displayValue = average(zones.map((zone) => zone.value));
+    const averagePrevious = average(
+      zones.map((zone) => zone.evolution?.previousValue ?? zone.value)
+    );
+    displayDelta =
+      displayValue !== null && averagePrevious !== null
+        ? displayValue - averagePrevious
+        : 0;
+  }
+
+  if (displayValue === null) {
     return (
       <div className="flex flex-col gap-2">
         <span className="uppercase text-xs font-bold text-mention-grey">
-          Moyenne
+          {selectedZone ? "Valeur régionale" : "Moyenne"}
         </span>
         <div className="bg-white rounded-full px-4 py-2 w-fit text-sm text-mention-grey">
           —
         </div>
       </div>
     );
-  }
-
-  const selectedZone = selectedRegion
-    ? zones.find((z) => z.code.replace(/^FR-/, "") === selectedRegion)
-    : null;
-
-  let displayValue = 0;
-  let displayDelta = 0;
-
-  if (selectedZone) {
-    displayValue = selectedZone.value ?? 0;
-
-    const previous =
-      selectedZone.evolution?.previousValue ?? selectedZone.value ?? 0;
-    displayDelta = displayValue - previous;
-  } else {
-    const totalCurrent = zones.reduce(
-      (sum, zone) => sum + (zone.value ?? 0),
-      0
-    );
-    displayValue = totalCurrent / zones.length;
-
-    const totalPrevious = zones.reduce((sum, zone) => {
-      const previous = zone.evolution?.previousValue ?? zone.value ?? 0;
-      return sum + previous;
-    }, 0);
-    const averagePrevious = totalPrevious / zones.length;
-
-    displayDelta = displayValue - averagePrevious;
   }
 
   return (

@@ -1,5 +1,7 @@
 import { ReactElement } from "react";
 
+import { EvolutionDirection } from "@/types/map.type";
+
 export const ZoneIndicator = ({
   x,
   y,
@@ -43,6 +45,6 @@ type Props = {
   x: number;
   y: number;
   value: number;
-  direction?: "hausse" | "baisse" | "stable" | string | null;
+  direction?: EvolutionDirection | null;
   delta?: number;
 };
