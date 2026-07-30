@@ -54,6 +54,7 @@ export const StatistiquesHeader = ({
                     value: "cartographie",
                     checked: visualization === "cartographie",
                     onChange: () => setVisualization("cartographie"),
+                    disabled: true,
                   },
                 },
               ]}
