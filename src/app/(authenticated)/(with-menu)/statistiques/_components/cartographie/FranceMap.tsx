@@ -1,7 +1,13 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { ReactElement, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.schema";
 import { ZoneDataInfo } from "@/types/map.type";
@@ -16,12 +22,29 @@ import { MapLayout } from "./MapLayout";
 
 export const FranceMap = (): ReactElement => {
   const { statistiques } = useStatistiquesCartographieContext();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const decoupage =
     searchParams.get("granularite") === "departement" ? "dep" : "reg";
 
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const selectedRegion =
+    decoupage === "reg" ? searchParams.get("region") : null;
+
+  const setSelectedRegion = useCallback(
+    (region: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (region) {
+        params.set("region", region);
+      } else {
+        params.delete("region");
+      }
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [router, pathname, searchParams]
+  );
+
   const [departementsData, setDepartementsData] = useState<
     Record<string, ZoneDataInfo>
   >({});

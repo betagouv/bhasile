@@ -3,7 +3,6 @@
 import "../../../../../../../node_modules/@gouvfr/dsfr-chart/dist/MapChart/MapChart.css";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useEffect } from "react";
 
 import Loader from "@/app/components/ui/Loader";
 import { ZoneDataInfo } from "@/types/map.type";
@@ -25,12 +24,6 @@ export const MapLayout = ({
   isLoadingRegion,
   regionError,
 }: Props) => {
-  useEffect(() => {
-    if (decoupage === "dep") {
-      setSelectedRegion(null);
-    }
-  }, [decoupage, setSelectedRegion]);
-
   return (
     <div className="relative w-full h-full">
       <div className="flex flex-col absolute top-4 left-4 z-20">

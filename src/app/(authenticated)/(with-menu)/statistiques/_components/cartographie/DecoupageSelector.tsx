@@ -30,6 +30,7 @@ export const DecoupageSelector = (): ReactElement => {
       "granularite",
       selectedValue === "dep" ? "departement" : "region"
     );
+    params.delete("region");
 
     router.push(`${pathname}?${params.toString()}`);
   };

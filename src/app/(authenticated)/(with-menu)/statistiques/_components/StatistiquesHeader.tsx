@@ -26,7 +26,7 @@ export const StatistiquesHeader = (): ReactElement | null => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (newVisualization === "tableaux") {
-      ["granularite", "indicateur", "annee"].forEach((key) =>
+      ["granularite", "indicateur", "annee", "region"].forEach((key) =>
         params.delete(key)
       );
     }
