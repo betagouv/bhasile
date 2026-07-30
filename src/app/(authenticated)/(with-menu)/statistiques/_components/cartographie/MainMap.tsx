@@ -5,12 +5,15 @@ import { useCallback, useEffect, useState } from "react";
 import Loader from "@/app/components/ui/Loader";
 import { useMapLabels } from "@/app/hooks/useMapLabels";
 
+import { useCartographieRichZoneData } from "./useCartographieRichZoneData";
 import { ZoneIndicator } from "./ZoneIndicator";
 
 const IDF_DEPARTEMENTS = ["75", "77", "78", "91", "92", "93", "94", "95"];
 
 export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
   const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
+
+  const richZoneData = useCartographieRichZoneData();
 
   useEffect(() => {
     import("@gouvfr/dsfr-chart")
@@ -29,12 +32,11 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
         return false;
       }
 
-      if (onRegionClick) {
+      if (onRegionClick && path.dataset.regionClickBound !== "true") {
+        path.dataset.regionClickBound = "true";
         path.style.cursor = "pointer";
         path.classList.add("hover:opacity-80", "transition-opacity");
-
-        const handler = () => onRegionClick(code);
-        path.addEventListener("click", handler);
+        path.addEventListener("click", () => onRegionClick(code));
       }
       return true;
     },
@@ -42,7 +44,7 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
   );
 
   const { containerRef, mapRef, labels } = useMapLabels({
-    zoneData,
+    zoneData: richZoneData,
     dependencyTrigger: decoupage,
     onPathFound: isLibraryLoaded ? handlePathFound : undefined,
   });
@@ -81,6 +83,8 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
           value={label.value}
           x={label.x}
           y={label.y}
+          delta={label.delta}
+          direction={label.direction}
         />
       ))}
     </div>

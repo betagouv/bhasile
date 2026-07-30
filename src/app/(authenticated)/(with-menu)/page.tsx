@@ -32,7 +32,7 @@ export default async function DashboardPage({
   const filters: Filters = {
     departements: getFirstParam(params.departements),
     operateurs: getFirstParam(params.operateurs),
-    type: getFirstParam(params.type),
+    type: getFirstParam(params.types),
   };
   const page = Number(getFirstParam(params.actualisationsPage)) || 0;
 

@@ -1,15 +1,40 @@
+"use client";
+
 import Select from "@codegouvfr/react-dsfr/Select";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
+
+import { DEFAULT_CARTOGRAPHIE_GRANULARITE } from "@/schemas/api/statistique-cartographie.schema";
 
 const options = [
   { label: "Régions", value: "reg" },
   { label: "Départements", value: "dep" },
 ];
 
-export const DecoupageSelector = ({
-  decoupage,
-  setDecoupage,
-}: Props): ReactElement => {
+export const DecoupageSelector = (): ReactElement => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const currentGranularite =
+    searchParams.get("granularite") || DEFAULT_CARTOGRAPHIE_GRANULARITE;
+  const currentValue = currentGranularite === "departement" ? "dep" : "reg";
+
+  const handleDecoupageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const selectedValue = event.target.value;
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set(
+      "granularite",
+      selectedValue === "dep" ? "departement" : "region"
+    );
+    params.delete("region");
+
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <Select
       label="Découpage"
@@ -17,8 +42,8 @@ export const DecoupageSelector = ({
       nativeSelectProps={{
         name: "decoupage",
         id: "decoupage",
-        value: decoupage,
-        onChange: (event) => setDecoupage(event.target.value as "dep" | "reg"),
+        value: currentValue,
+        onChange: handleDecoupageChange,
       }}
     >
       {options.map((option) => (
@@ -28,9 +53,4 @@ export const DecoupageSelector = ({
       ))}
     </Select>
   );
-};
-
-type Props = {
-  decoupage: "dep" | "reg";
-  setDecoupage: (decoupage: "dep" | "reg") => void;
 };

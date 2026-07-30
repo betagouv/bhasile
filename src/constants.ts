@@ -29,6 +29,8 @@ export const START_YEAR = 2021;
 
 export const CURRENT_YEAR = getNow().getFullYear();
 
+export const DEFAULT_CARTOGRAPHIE_ANNEE = CURRENT_YEAR - 1;
+
 export const PLACES_VERSIONED_FROM_YEAR =
   Number(process.env.NEXT_PUBLIC_PLACES_VERSIONED_FROM_YEAR) || 2026;
 
