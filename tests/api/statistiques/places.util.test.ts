@@ -175,7 +175,7 @@ describe("places - agrégés sur le périmètre ouvert à la date de référence
     expect(result.logementsSociaux).toBe(3); // Partir un jour
   });
 
-  it("ignore les adresses rattachées à une structure sans typologie dans le périmètre", () => {
+  it("compte les adresses QPV même pour une structure sans typologie (snapshot décorrélé)", () => {
     const result = computePlacesStatistiques(
       buildTestStatistiquesContext({
         structures: [
@@ -191,8 +191,10 @@ describe("places - agrégés sur le périmètre ouvert à la date de référence
       })
     );
 
+    // Places autorisées (typologie) : seule la structure 1 compte.
     expect(result.totalPlaces).toBe(100);
-    expect(result.qpv).toBe(5);
+    // QPV (snapshot adresse) : les deux adresses, y compris la structure sans typologie.
+    expect(result.qpv).toBe(104);
   });
 });
 

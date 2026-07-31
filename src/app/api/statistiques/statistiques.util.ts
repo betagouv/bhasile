@@ -268,13 +268,16 @@ export const buildDnaStructureIdsResolver = (
   dnaLinks: StatistiqueDbDnaLink[],
   timeline: StatistiqueDbStructureVersionTimeline[]
 ): DnaStructureIdsResolver => {
-  const linksByCode = new Map<string, StatistiqueDbDnaLink[]>();
+  const linksByCode = new Map<
+    string,
+    (StatistiqueDbDnaLink & { structureId: number })[]
+  >();
   for (const link of dnaLinks) {
     if (link.structureId === null) {
       continue;
     }
     const links = linksByCode.get(link.dna.code) ?? [];
-    links.push(link);
+    links.push({ ...link, structureId: link.structureId });
     linksByCode.set(link.dna.code, links);
   }
 
@@ -302,9 +305,6 @@ export const buildDnaStructureIdsResolver = (
     const cutoff = startOfNextUtcDay(date);
     const structureIds = new Set<number>();
     for (const link of linksByCode.get(dnaCode) ?? []) {
-      if (link.structureId === null) {
-        continue;
-      }
       const effectiveVersion = pickEffectiveVersion(
         timelineByStructureId.get(link.structureId) ?? [],
         cutoff
@@ -331,9 +331,10 @@ export const resolveDnaEventStructureIds = (
   const structureIds = resolver
     ? resolver(dnaCode, date)
     : lookupStructureIdsForDnaAtDate(dnaCode, date, dnaLinks, timeline);
+  // Copie défensive : `resolver` peut renvoyer le tableau du cache par référence.
   return activeStructureIds
     ? structureIds.filter((id) => activeStructureIds.has(id))
-    : structureIds;
+    : [...structureIds];
 };
 
 export const applyVersionedPlacesToTypologies = (

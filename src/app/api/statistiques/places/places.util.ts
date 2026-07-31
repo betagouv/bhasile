@@ -132,21 +132,17 @@ const computePlacesTypologieIndicators = (
   };
 };
 
-// QPV / logement social : pas d'historique conservé → snapshot à date (version courante).
+// QPV / logement social : pas d'historique conservé → snapshot à date (version
+// courante), sur toutes les structures du périmètre (indépendant de la typologie).
 const computeAdressePlacesSpecialesSnapshot = (
   structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologieValues>,
   adresses: StatistiqueDbAdresse[],
   structureVersionTimeline: StatistiqueDbStructureVersionTimeline[],
   now: Date
 ): PlacesSpecialesAdresse => {
-  const structuresWithTypologie = filterStructuresWithTypologie(
-    structures,
-    typologieMap
-  );
   const adressesInScope = filterByEffectiveVersionAtDate(
     adresses,
-    structuresWithTypologie.map((structure) => structure.id),
+    structures.map((structure) => structure.id),
     now,
     structureVersionTimeline,
     now
@@ -173,7 +169,6 @@ export const computePlacesStatistiques = (
     ...computePlacesTypologieIndicators(structures, typologieMap, departements),
     ...computeAdressePlacesSpecialesSnapshot(
       structures,
-      typologieMap,
       adresses,
       structureVersionTimeline,
       now
@@ -221,7 +216,6 @@ export const computeAdresseSnapshot = (
 ): number =>
   computeAdressePlacesSpecialesSnapshot(
     context.structures,
-    getLastTypologiePerStructure(context.typologies),
     context.adresses,
     context.structureVersionTimeline,
     getNow()

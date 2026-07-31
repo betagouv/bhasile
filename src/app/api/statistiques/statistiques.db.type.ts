@@ -236,7 +236,7 @@ export type StatistiquesAdresseYearContext = StatistiquesTypologieYearContext &
 /** Structures actives + adresses, pour le snapshot QPV / logement social à date. */
 export type StatistiquesAdresseSnapshotContext = Pick<
   StatistiquesContext,
-  "structures" | "typologies" | "adresses" | "structureVersionTimeline"
+  "structures" | "adresses" | "structureVersionTimeline"
 >;
 
 /** Minimal slice of StatistiquesContext needed to compute the current activite snapshot. */

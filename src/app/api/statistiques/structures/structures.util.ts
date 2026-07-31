@@ -422,6 +422,11 @@ export const computeStructuresIndicatorForYear = (
   year: number,
   field: StructuresYearIndicatorField
 ): number | null => {
+  // Année hors index d'activité (aucune donnée) → pas de valeur, pas d'évolution.
+  if (!context.activeStructureIdsByPeriod.year.has(String(year))) {
+    return null;
+  }
+
   const structuresForYear = structuresActiveInPeriod(
     context.allStructures,
     context.activeStructureIdsByPeriod,
