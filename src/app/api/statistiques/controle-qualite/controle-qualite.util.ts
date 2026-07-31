@@ -50,6 +50,7 @@ const computePeriodSeries = (
     evaluations,
     dnaLinks,
     structureVersionTimeline,
+    resolveDnaStructureIds,
     activeStructureIdsByPeriod,
   } = context;
   const eigsByPeriod = groupByPeriodKey(
@@ -82,7 +83,8 @@ const computePeriodSeries = (
           eigsByPeriod.get(periodKey) ?? [],
           activeStructureIds,
           dnaLinks,
-          structureVersionTimeline
+          structureVersionTimeline,
+          resolveDnaStructureIds
         ),
         ...sumEvaluationNotes(evaluationsForPeriod, aggregation),
       };

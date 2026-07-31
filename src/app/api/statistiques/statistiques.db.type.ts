@@ -213,7 +213,11 @@ export type StatistiquesContext = {
   indicateurs: StatistiqueDbIndicateurFinancier[];
   activites: StatistiqueDbActivite[];
   rmus: StatistiqueDbRmu[] | null;
+  /** Résolveur `dnaCode → structures` mémoïsé, partagé entre zones (cf. cartographie). */
+  resolveDnaStructureIds?: DnaStructureIdsResolver;
 };
+
+export type DnaStructureIdsResolver = (dnaCode: string, date: Date) => number[];
 
 /** Minimal slice of StatistiquesContext needed to resolve structures + typologie for a given year. */
 export type StatistiquesTypologieYearContext = Pick<
@@ -235,6 +239,7 @@ export type StatistiquesActiviteSummaryContext = Pick<
   | "activites"
   | "dnaLinks"
   | "structureVersionTimeline"
+  | "resolveDnaStructureIds"
   | "allStructures"
   | "structures"
 >;
@@ -245,6 +250,7 @@ export type StatistiquesActiviteByMonthContext = Pick<
   | "activites"
   | "dnaLinks"
   | "structureVersionTimeline"
+  | "resolveDnaStructureIds"
   | "allStructures"
   | "activeStructureIdsByPeriod"
 >;

@@ -30,6 +30,7 @@ import {
 import {
   applyVersionedPlacesToTypologies,
   buildActivityIndex,
+  buildDnaStructureIdsResolver,
   buildStatistiquesActivityContext,
   collectDistinctYears,
   createEmptyActiveStructureIdsByPeriod,
@@ -160,6 +161,10 @@ export const buildStatistiquesContext = async (
     indicateurs,
     activites,
     rmus,
+    resolveDnaStructureIds: buildDnaStructureIdsResolver(
+      dnaLinks,
+      structureVersionTimeline
+    ),
   };
 };
 

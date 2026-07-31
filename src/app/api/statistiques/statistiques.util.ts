@@ -13,6 +13,7 @@ import { StructureType } from "@/generated/prisma/client";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
 import type {
+  DnaStructureIdsResolver,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
@@ -213,23 +214,14 @@ export const filterByTwelveMonthWindow = <Item>(
   });
 };
 
-/**
- * Version effective d'une structure à `date` : la version datée (transfo) la
- * plus récente dont la date d'effet est inf à `date`, sinon, la version socle.
- */
-export const getEffectiveStructureVersionAtDate = (
-  structureId: number,
-  date: Date,
-  timeline: StatistiqueDbStructureVersionTimeline[]
+const pickEffectiveVersion = (
+  versions: StatistiqueDbStructureVersionTimeline[],
+  cutoff: Date
 ): StatistiqueDbStructureVersionTimeline | null => {
-  const cutoff = startOfNextUtcDay(date);
   let dated: StatistiqueDbStructureVersionTimeline | null = null;
   let socle: StatistiqueDbStructureVersionTimeline | null = null;
 
-  for (const version of timeline) {
-    if (version.structureId !== structureId) {
-      continue;
-    }
+  for (const version of versions) {
     if (version.effectiveDate === null) {
       if (socle === null || version.id > socle.id) {
         socle = version;
@@ -250,6 +242,98 @@ export const getEffectiveStructureVersionAtDate = (
   }
 
   return dated ?? socle;
+};
+
+/**
+ * Version effective d'une structure à `date` : la version datée (transfo) la
+ * plus récente dont la date d'effet est inf à `date`, sinon, la version socle.
+ */
+export const getEffectiveStructureVersionAtDate = (
+  structureId: number,
+  date: Date,
+  timeline: StatistiqueDbStructureVersionTimeline[]
+): StatistiqueDbStructureVersionTimeline | null =>
+  pickEffectiveVersion(
+    timeline.filter((version) => version.structureId === structureId),
+    startOfNextUtcDay(date)
+  );
+
+/**
+ * Résolveur `dnaCode → structures` pré-indexé et mémoïsé par `(dnaCode, date)`.
+ * Construit une fois par requête : la cartographie découpe le contexte par zone
+ * mais réutilise ce même résolveur (recopié par le slice), d'où un cache partagé
+ * qui évite de re-résoudre chaque évènement pour chaque zone.
+ */
+export const buildDnaStructureIdsResolver = (
+  dnaLinks: StatistiqueDbDnaLink[],
+  timeline: StatistiqueDbStructureVersionTimeline[]
+): DnaStructureIdsResolver => {
+  const linksByCode = new Map<string, StatistiqueDbDnaLink[]>();
+  for (const link of dnaLinks) {
+    if (link.structureId === null) {
+      continue;
+    }
+    const links = linksByCode.get(link.dna.code) ?? [];
+    links.push(link);
+    linksByCode.set(link.dna.code, links);
+  }
+
+  const timelineByStructureId = new Map<
+    number,
+    StatistiqueDbStructureVersionTimeline[]
+  >();
+  for (const version of timeline) {
+    if (version.structureId === null) {
+      continue;
+    }
+    const versions = timelineByStructureId.get(version.structureId) ?? [];
+    versions.push(version);
+    timelineByStructureId.set(version.structureId, versions);
+  }
+
+  const cache = new Map<string, number[]>();
+
+  return (dnaCode, date) => {
+    const key = `${dnaCode}|${date.getTime()}`;
+    const cached = cache.get(key);
+    if (cached) {
+      return cached;
+    }
+    const cutoff = startOfNextUtcDay(date);
+    const structureIds = new Set<number>();
+    for (const link of linksByCode.get(dnaCode) ?? []) {
+      if (link.structureId === null) {
+        continue;
+      }
+      const effectiveVersion = pickEffectiveVersion(
+        timelineByStructureId.get(link.structureId) ?? [],
+        cutoff
+      );
+      if (effectiveVersion?.id === link.structureVersionId) {
+        structureIds.add(link.structureId);
+      }
+    }
+    const result = [...structureIds];
+    cache.set(key, result);
+    return result;
+  };
+};
+
+/** Résout un évènement DNA (activité/EIG) via le résolveur mémoïsé, sinon en direct. */
+export const resolveDnaEventStructureIds = (
+  dnaCode: string,
+  date: Date,
+  dnaLinks: StatistiqueDbDnaLink[],
+  timeline: StatistiqueDbStructureVersionTimeline[],
+  resolver: DnaStructureIdsResolver | undefined,
+  activeStructureIds?: Set<number>
+): number[] => {
+  const structureIds = resolver
+    ? resolver(dnaCode, date)
+    : lookupStructureIdsForDnaAtDate(dnaCode, date, dnaLinks, timeline);
+  return activeStructureIds
+    ? structureIds.filter((id) => activeStructureIds.has(id))
+    : structureIds;
 };
 
 export const applyVersionedPlacesToTypologies = (

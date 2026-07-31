@@ -26,8 +26,8 @@ import type {
 } from "../statistiques.db.type";
 import {
   lookupActiveStructureIds,
-  lookupStructureIdsForDnaAtDate,
   monthKeyToDate,
+  resolveDnaEventStructureIds,
   toMonthKey,
 } from "../statistiques.util";
 
@@ -121,17 +121,19 @@ const resolveActiviteStructureIds = (
   activite: StatistiqueDbActivite,
   dnaLinks: StatistiquesContext["dnaLinks"],
   structureVersionTimeline: StatistiquesContext["structureVersionTimeline"],
+  resolveDnaStructureIds: StatistiquesContext["resolveDnaStructureIds"],
   structureIdsInScope: Set<number>
 ): number[] => {
   if (!activite.dnaCode || !activite.date) {
     return [];
   }
 
-  return lookupStructureIdsForDnaAtDate(
+  return resolveDnaEventStructureIds(
     activite.dnaCode,
     new Date(activite.date),
     dnaLinks,
     structureVersionTimeline,
+    resolveDnaStructureIds,
     structureIdsInScope
   );
 };
@@ -180,6 +182,7 @@ const buildLatestActiviteByStructureId = (
   activites: StatistiqueDbActivite[],
   dnaLinks: StatistiquesContext["dnaLinks"],
   structureVersionTimeline: StatistiquesContext["structureVersionTimeline"],
+  resolveDnaStructureIds: StatistiquesContext["resolveDnaStructureIds"],
   structureIdsInScope: Set<number>
 ): Map<number, StatistiqueDbActivite> => {
   const latestByStructureId = new Map<number, StatistiqueDbActivite>();
@@ -192,6 +195,7 @@ const buildLatestActiviteByStructureId = (
       activite,
       dnaLinks,
       structureVersionTimeline,
+      resolveDnaStructureIds,
       structureIdsInScope
     )) {
       if (!latestByStructureId.has(structureId)) {
@@ -207,7 +211,13 @@ const accumulateActiviteSummaryTotals = (
   context: StatistiquesActiviteSummaryContext,
   structureTypeById: Map<number, StatistiqueDbStructure["type"]>
 ): ActiviteTotals => {
-  const { activites, dnaLinks, structureVersionTimeline, structures } = context;
+  const {
+    activites,
+    dnaLinks,
+    structureVersionTimeline,
+    resolveDnaStructureIds,
+    structures,
+  } = context;
   const structureIdsNow = new Set(structures.map((structure) => structure.id));
 
   const summaryTotals = emptyActiviteTotals();
@@ -215,6 +225,7 @@ const accumulateActiviteSummaryTotals = (
     activites,
     dnaLinks,
     structureVersionTimeline,
+    resolveDnaStructureIds,
     structureIdsNow
   );
 
@@ -243,6 +254,7 @@ const computeActiviteByMonthTotals = (
     activites,
     dnaLinks,
     structureVersionTimeline,
+    resolveDnaStructureIds,
     activeStructureIdsByPeriod,
   } = context;
   const byMonth = new Map<string, ActiviteTotals>();
@@ -258,6 +270,7 @@ const computeActiviteByMonthTotals = (
       activite,
       dnaLinks,
       structureVersionTimeline,
+      resolveDnaStructureIds,
       activeStructureIdsForMonth
     );
     if (structureIds.length === 0) {

@@ -8,11 +8,12 @@ import type {
 } from "@/schemas/api/statistique.schema";
 
 import type {
+  DnaStructureIdsResolver,
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbStructureVersionTimeline,
 } from "../statistiques.db.type";
-import { lookupStructureIdsForDnaAtDate } from "../statistiques.util";
+import { resolveDnaEventStructureIds } from "../statistiques.util";
 
 const sumEigCounts = (eigs: StatistiqueDbEig[]): EigCountTotalsStat => {
   let nbEigComportementViolent = 0;
@@ -51,7 +52,8 @@ export const computeEigPeriodMetrics = (
   eigsForPeriod: StatistiqueDbEig[],
   activeStructureIds: Set<number>,
   dnaLinks: StatistiqueDbDnaLink[],
-  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[]
+  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[],
+  resolveDnaStructureIds: DnaStructureIdsResolver | undefined
 ): EigPeriodStat => {
   // Un EIG est rattaché à une zone via son dnaCode : on ne compte que ceux qui
   // résolvent vers une structure active en scope à leur date. Sans ça, les
@@ -64,11 +66,12 @@ export const computeEigPeriodMetrics = (
     if (!eig.dnaCode || !eig.evenementDate) {
       continue;
     }
-    const structureIds = lookupStructureIdsForDnaAtDate(
+    const structureIds = resolveDnaEventStructureIds(
       eig.dnaCode,
       new Date(eig.evenementDate),
       dnaLinks,
       structureVersionTimeline,
+      resolveDnaStructureIds,
       activeStructureIds
     );
     if (structureIds.length === 0) {
