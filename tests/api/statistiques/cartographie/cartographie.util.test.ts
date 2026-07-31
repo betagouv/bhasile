@@ -197,7 +197,7 @@ describe("computeEvolution", () => {
 });
 
 describe("computeIndicateurValues - un seul indicateur calculé, pas le bloc entier", () => {
-  it("structures.total : lit uniquement totalStructures par année, ignore les autres années", () => {
+  it("structures.total : compte les structures actives l'année, même sans millésime de typologie", () => {
     const { activeStructureIdsNow, activeStructureIdsByPeriod } =
       buildTestActivityIndex([1], {
         typologieYears: [2024, 2025],
@@ -221,8 +221,9 @@ describe("computeIndicateurValues - un seul indicateur calculé, pas le bloc ent
       "moyenne"
     );
 
+    // Active en 2024 comme en 2025, bien que la typologie n'existe qu'en 2025.
     expect(result.value).toBe(1);
-    expect(result.previousValue).toBeNull(); // pas de typologie 2024
+    expect(result.previousValue).toBe(1);
   });
 
   it("structures.avecCpom : compte les structures (pas les contrats) couvertes par un CPOM actif l'année", () => {

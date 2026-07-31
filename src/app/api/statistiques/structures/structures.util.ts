@@ -32,7 +32,7 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   mapTypologieYears,
-  resolveStructuresWithTypologieForYear,
+  structuresActiveInPeriod,
 } from "../statistiques.util";
 
 const getRepartitionFromRepartitions = (
@@ -411,24 +411,31 @@ export const computeStructuresStatistiques = (
 export type StructuresYearIndicatorField =
   "totalStructures" | "structuresAvecCpom";
 
-/** Computes a single byYear field for one year, for the cartographie one-indicator requests. */
+/**
+ * Computes a single byYear field for one year, for the cartographie one-indicator requests.
+ * Le comptage porte sur les structures actives l'année (existence structurelle),
+ * indépendamment de la présence d'un millésime de typologie — aligné sur les
+ * indicateurs finance/activité (cf. incohérence "0 structure mais ETP non nul").
+ */
 export const computeStructuresIndicatorForYear = (
   context: StatistiquesCpomYearContext,
   year: number,
   field: StructuresYearIndicatorField
 ): number | null => {
-  const resolved = resolveStructuresWithTypologieForYear(context, year);
-  if (!resolved) {
-    return null;
-  }
+  const structuresForYear = structuresActiveInPeriod(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    "year",
+    String(year)
+  );
 
   if (field === "totalStructures") {
-    return resolved.structures.length;
+    return structuresForYear.length;
   }
 
   return countStructuresAvecCpomForYear(
     context.cpomLinks,
-    new Set(resolved.structures.map((structure) => structure.id)),
+    new Set(structuresForYear.map((structure) => structure.id)),
     year
   );
 };
