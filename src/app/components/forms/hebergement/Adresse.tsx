@@ -31,8 +31,8 @@ export const AdresseComponent = ({
         disabled={sameAddress}
       />
       <InputWithValidation
-        name={`adresses.${index}.adresseTypologies.0.placesAutorisees`}
-        id={`adresses.${index}.adresseTypologies.0.placesAutorisees`}
+        name={`adresses.${index}.placesAutorisees`}
+        id={`adresses.${index}.placesAutorisees`}
         control={control}
         type="number"
         min={0}
@@ -57,13 +57,13 @@ export const AdresseComponent = ({
           ))}
       </SelectWithValidation>
       <div className="flex grow flex-col gap-2">
-        <label htmlFor={`adresses.${index}.adresseTypologies`}>
+        <label htmlFor={`adresses.${index}.particularites`}>
           Particularités
         </label>
         <div className="flex w-full gap-4 items-center min-h-[2.6rem] [&_label]:whitespace-nowrap">
           <Controller
             control={control}
-            name={`adresses.${index}.adresseTypologies.0.logementSocial`}
+            name={`adresses.${index}.isLogementSocial`}
             render={({ field }) => (
               <Checkbox
                 options={[
@@ -81,7 +81,7 @@ export const AdresseComponent = ({
           />
           <Controller
             control={control}
-            name={`adresses.${index}.adresseTypologies.0.qpv`}
+            name={`adresses.${index}.isQpv`}
             render={({ field }) => (
               <Checkbox
                 options={[

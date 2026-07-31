@@ -1,17 +1,30 @@
-import Badge from "@codegouvfr/react-dsfr/Badge";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useSearchParams } from "next/navigation";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
+
+import {
+  formatPlural,
+  parseCommaList,
+  pluralize,
+} from "@/app/utils/string.util";
 
 export const FilterDropdown = ({
   label,
   placeholder = "Sélectionner une...",
   filterId,
+  getSummaryLabel,
   children,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
-  const appliedFilters = searchParams.get(filterId)?.split(",").filter(Boolean);
+  const appliedFilters = parseCommaList(searchParams.get(filterId));
+  const summaryLabel =
+    getSummaryLabel?.(appliedFilters) ??
+    `${formatPlural(appliedFilters.length, "filtre")} ${pluralize(
+      appliedFilters.length,
+      "sélectionné"
+    )}`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,7 +42,7 @@ export const FilterDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className="w-[200px] border-x border-default-grey relative"
+      className="w-[200px] border-l border-default-grey relative"
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -41,10 +54,16 @@ export const FilterDropdown = ({
           </div>
           <div className="flex">
             <div className="truncate">
-              {Number(appliedFilters?.length) > 0 ? (
-                <Badge className="rounded" severity="info" small noIcon>
-                  {appliedFilters?.length} filtre(s) sélectionné(s)
-                </Badge>
+              {appliedFilters.length > 0 ? (
+                <Tag
+                  linkProps={{
+                    href: "#",
+                  }}
+                  small
+                  className="pointer-none"
+                >
+                  {summaryLabel}
+                </Tag>
               ) : (
                 placeholder
               )}
@@ -67,4 +86,5 @@ type Props = PropsWithChildren<{
   label: string;
   placeholder?: string;
   filterId: string;
+  getSummaryLabel?: (appliedFilters: string[]) => string | undefined;
 }>;

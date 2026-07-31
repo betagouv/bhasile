@@ -16,6 +16,7 @@ export const StructureSearch = ({
   setStructureType,
   multiple = false,
   label,
+  sublabel,
   operateurName,
   setOperateurName,
   departementNumero,
@@ -55,9 +56,16 @@ export const StructureSearch = ({
   return (
     <div className="bg-white p-6 rounded-lg mb-2">
       {label && (
-        <h3 className="text-base font-bold mb-4 text-title-blue-france">
+        <h3
+          className={`text-base font-bold text-title-blue-france ${
+            sublabel ? "mb-1" : "mb-4"
+          }`}
+        >
           {label}
         </h3>
+      )}
+      {label && sublabel && (
+        <p className="text-sm text-mention-grey mb-4">{sublabel}</p>
       )}
       <div className="grid grid-cols-3 gap-6 mb-2">
         {!fixedType && (
@@ -121,6 +129,7 @@ export type StructureSearchProps = {
   fixedType?: StructureType;
   multiple?: boolean;
   label?: string;
+  sublabel?: string;
   fixedOperateurName?: string;
   fixedDepartementNumero?: string;
   finalisedOnly?: boolean;

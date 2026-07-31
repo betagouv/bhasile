@@ -9,8 +9,8 @@ model Adresse {
   commune            String?
   repartition        Repartition?
   placesAutorisees   Int?
-  qpv                Int?
-  logementSocial     Int?
+  isQpv              Boolean            @default(false)
+  isLogementSocial   Boolean            @default(false)
   adresseTypologies  AdresseTypologie[] // TODO: remove after migration
 
   createdAt DateTime @default(now())

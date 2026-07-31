@@ -2,6 +2,11 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
+import {
+  ACTUALISATION_FORM_STEP_SLUGS,
+  getActualisationFormSlug,
+} from "@/app/api/forms/form.constants";
+import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -24,12 +29,15 @@ import {
   createFakeStructureVersionTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
 import { createNotesList } from "./seeders/note.seed";
+import { createNotificationsList } from "./seeders/notification.seed";
 import {
   createFakeFiliale,
   createFakeOperateur,
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
 import {
+  COLOCATED_COORDINATES,
+  COLOCATED_STRUCTURES_COUNT,
   FormDefLookup,
   SeededStructure,
   seedStructureWithVersions,
@@ -115,6 +123,21 @@ async function seed(): Promise<void> {
     `✅ ${formFinalisationStepDefinitions.count} FormStepDefinitions créées pour le formulaire finalisation`
   );
 
+  const actualisationFormDefinition = await prisma.formDefinition.create({
+    data: {
+      name: "Actualisation 2026",
+      slug: getActualisationFormSlug(2026),
+      version: 1,
+    },
+  });
+  await prisma.formStepDefinition.createMany({
+    data: ACTUALISATION_FORM_STEP_SLUGS.map((slug) => ({
+      formDefinitionId: actualisationFormDefinition.id,
+      label: slug,
+      slug,
+    })),
+  });
+
   const formDefinitions = await prisma.formDefinition.findMany({
     include: { stepsDefinition: { select: { id: true } } },
   });
@@ -165,6 +188,7 @@ async function seed(): Promise<void> {
 
   const now = new Date();
   const seededStructures: SeededStructure[] = [];
+  let colocatedLeft = COLOCATED_STRUCTURES_COUNT;
 
   for (const operateurToInsert of operateursToInsert) {
     const createdOperateur = await prisma.operateur.create({
@@ -191,6 +215,11 @@ async function seed(): Promise<void> {
       const departementAdministratif = randomDepartement();
       const codeBhasile = nextCodeBhasile(departementAdministratif);
 
+      const colocated = !ofii && colocatedLeft > 0;
+      if (colocated) {
+        colocatedLeft--;
+      }
+
       const seeded = await seedStructureWithVersions(prisma, {
         operateurId: createdOperateur.id,
         codeBhasile,
@@ -202,6 +231,7 @@ async function seed(): Promise<void> {
         formDefs,
         finalisationFormDefId: formFinalisationDefinition.id,
         finalisationStepDefinitions: stepDefinitions,
+        coordinates: colocated ? COLOCATED_COORDINATES : undefined,
       });
       seededStructures.push(seeded);
       operateurStructureIds.push(seeded.structureId);
@@ -241,6 +271,8 @@ async function seed(): Promise<void> {
 
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
 
+  await mirrorLegacyPlacesToBaseVersions(prisma);
+
   await createFakeCpoms(prisma);
 
   console.log("🗒️ Seed des notes");
@@ -251,6 +283,11 @@ async function seed(): Promise<void> {
   });
   await prisma.note.createMany({ data: notesToCreate });
   console.log(`✅ ${notesToCreate.length} notes créées`);
+
+  console.log("📣 Seed des notifications");
+  const notificationsToCreate = createNotificationsList();
+  await prisma.notification.createMany({ data: notificationsToCreate });
+  console.log(`✅ ${notificationsToCreate.length} notifications créées`);
 
   console.log("🏥 Création et liaison des codes FINESS...");
   const finessList = createFinessList(

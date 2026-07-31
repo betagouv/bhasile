@@ -1,7 +1,10 @@
+import { CURRENT_YEAR } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
+import { buildRequiredDocumentsFinanciers } from "./documents-financiers";
 import { TestStructureScenario } from "./types";
+import { mirrorVersionedPlaces } from "./typologies";
 
 export const caes2: TestStructureScenario = {
   name: "CAES 2 - Multiple antennes, mixte, multiple addresses with repartition, four contacts, mixed docs, controls",
@@ -111,100 +114,19 @@ export const caes2: TestStructureScenario = {
         repartition: Repartition.COLLECTIF,
       },
     ],
-    structureTypologies: [
+    structureTypologies: mirrorVersionedPlaces([
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 48, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 45, pmr: 4, lgbt: 8, fvvTeh: 7 },
       { placesAutorisees: 43, pmr: 4, lgbt: 8, fvvTeh: 7 },
-    ],
+    ]),
     documentsFinanciers: {
       allAddedViaAjout: false,
-      fileUploads: [
-        {
-          year: "2024",
-          category: "Demande de subvention",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2024",
-          category: "Compte-rendu financier",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2024",
-          category: "Rapport d'activité de l'opérateur",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Demande de subvention",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Compte-rendu financier",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-        {
-          year: "2023",
-          category: "Rapport d'activité de l'opérateur",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-        {
-          year: "2022",
-          category: "Demande de subvention",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-        {
-          year: "2022",
-          category: "Compte-rendu financier",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-        {
-          year: "2022",
-          category: "Rapport d'activité de l'opérateur",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-        {
-          year: "2021",
-          category: "Demande de subvention",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-        {
-          year: "2021",
-          category: "Compte-rendu financier",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-        {
-          year: "2021",
-          category: "Rapport d'activité de l'opérateur",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "finalisation",
-        },
-      ],
+      fileUploads: buildRequiredDocumentsFinanciers({
+        structureType: StructureType.CAES,
+        resolveFormKind: (document) =>
+          Number(document.year) >= CURRENT_YEAR - 2 ? "ajout" : "finalisation",
+      }),
     },
     finances: {
       2026: {
@@ -220,6 +142,12 @@ export const caes2: TestStructureScenario = {
         coutJournalier: "23,75",
         dotationDemandee: "120000",
         dotationAccordee: "110000",
+        totalProduits: "130000",
+        totalCharges: "125000",
+        repriseEtat: "0",
+        excedentRecupere: "0",
+        excedentDeduit: "0",
+        fondsDedies: "0",
       },
       2024: {
         ETP: 9,
@@ -240,6 +168,9 @@ export const caes2: TestStructureScenario = {
         reserveCompensationAmortissements: "50",
         reportANouveau: "500",
         autre: "25",
+        excedentRecupere: "0",
+        excedentDeduit: "0",
+        fondsDedies: "0",
       },
       2023: {
         ETP: "10",
@@ -326,12 +257,12 @@ export const caes2: TestStructureScenario = {
     public: "Tout public",
     contacts: [{ email: "modif-caes2@example.com" }],
     notes: "Notes modification CAES 2 - mixte.",
-    structureTypologies: [
+    structureTypologies: mirrorVersionedPlaces([
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 47, pmr: 5, lgbt: 9, fvvTeh: 8 },
       { placesAutorisees: 45, pmr: 5, lgbt: 9, fvvTeh: 8 },
-    ],
+    ]),
     finances: {
       2026: {
         ETP: "10",

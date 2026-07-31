@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/05-documents/page";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationValidStructure } from "../../../../../test-utils/structure.factory";
@@ -117,6 +118,27 @@ describe("FinalisationDocuments page integration", () => {
 
     // THEN
     expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+  });
+
+  it("refuse de valider l'étape documents sans convention pour une structure subventionnée", async () => {
+    // GIVEN
+    const base = createFinalisationValidStructure(80);
+    const structure = {
+      ...base,
+      type: StructureType.HUDA,
+      isAutorisee: false,
+      isSubventionnee: true,
+      actesAdministratifs: [],
+    };
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
+    // WHEN
+    await clickButtonByName("Je valide la saisie de cette page");
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
+    expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
   it("sauvegarde automatiquement les données des documents après le debounce", async () => {

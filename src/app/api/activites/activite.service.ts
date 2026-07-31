@@ -1,3 +1,5 @@
+import { getNow } from "@/app/utils/now.util";
+
 import { findAllStructures } from "../structures/structure.repository";
 import { findActivitesByDnaCodesAndDate } from "./activite.repository";
 import { ActiviteStats } from "./activite.type";
@@ -21,7 +23,7 @@ export const getAverageDepartementPlaces = async (
     return null;
   }
 
-  const now = new Date();
+  const now = getNow();
   const structures = await findAllStructures();
   const dnaCodes = collectCurrentDnaCodesInDepartement(
     structures,

@@ -12,7 +12,7 @@ import {
   buildStatistiquesActivityContext,
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
-} from "@/app/api/statistiques/statistiques.utils";
+} from "@/app/api/statistiques/statistiques.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -41,21 +41,22 @@ export const testTypologie = (
 export const testAdresse = (
   id: number,
   structureId: number,
-  qpv: number
+  placesAutorisees: number
 ): StatistiqueDbAdresse => ({
   id,
   structureId,
   structureVersionId: structureId,
   repartition: Repartition.COLLECTIF,
-  placesAutorisees: 0,
-  qpv,
-  logementSocial: 0,
+  placesAutorisees,
+  isQpv: true,
+  isLogementSocial: false,
 });
 
 type BuildTestStructureVersionTimelineEntry = {
   structureId: number;
   structureVersionId?: number;
   effectiveDate?: Date;
+  placesAutorisees?: number | null;
 };
 
 export const buildTestStructureVersionTimeline = (
@@ -72,6 +73,7 @@ export const buildTestStructureVersionTimeline = (
     id: entry.structureVersionId ?? entry.structureId,
     structureId: entry.structureId,
     effectiveDate: entry.effectiveDate ?? defaultEffectiveDate,
+    placesAutorisees: entry.placesAutorisees ?? null,
   }));
 };
 

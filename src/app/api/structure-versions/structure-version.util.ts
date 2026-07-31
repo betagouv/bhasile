@@ -46,13 +46,13 @@ export type ResolvableVersion = {
 };
 
 export const isVersionValid = (version: ResolvableVersion): boolean => {
-  if (version.structureVersionTransformationId === null) {
-    return true;
+  if (version.structureVersionTransformationId !== null) {
+    return (
+      version.structureVersionTransformation?.transformation?.form?.status ===
+      true
+    );
   }
-  return (
-    version.structureVersionTransformation?.transformation?.form?.status ===
-    true
-  );
+  return true;
 };
 
 const sortValidVersionsBefore = <TVersion extends ResolvableVersion>(

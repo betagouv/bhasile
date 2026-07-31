@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
-import { CURRENT_YEAR } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 
@@ -25,14 +24,9 @@ const buildEmptyAdresse = () => ({
   commune: "",
   departement: "",
   repartition: Repartition.DIFFUS,
-  adresseTypologies: [
-    {
-      year: CURRENT_YEAR,
-      placesAutorisees: undefined,
-      logementSocial: false,
-      qpv: false,
-    },
-  ],
+  placesAutorisees: undefined,
+  isLogementSocial: false,
+  isQpv: false,
 });
 
 const buildFilledAdresse = (

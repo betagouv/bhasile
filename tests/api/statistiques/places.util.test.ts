@@ -50,16 +50,19 @@ const testAdresse = (
   id: number,
   structureId: number,
   overrides: Partial<
-    Pick<StatistiqueDbAdresse, "qpv" | "logementSocial" | "structureVersionId">
+    Pick<
+      StatistiqueDbAdresse,
+      "placesAutorisees" | "isQpv" | "isLogementSocial" | "structureVersionId"
+    >
   > = {}
 ): StatistiqueDbAdresse => ({
   id,
   structureId,
   structureVersionId: overrides.structureVersionId ?? structureId,
   repartition: Repartition.COLLECTIF,
-  placesAutorisees: 0,
-  qpv: overrides.qpv ?? 0,
-  logementSocial: overrides.logementSocial ?? 0,
+  placesAutorisees: overrides.placesAutorisees ?? 0,
+  isQpv: overrides.isQpv ?? false,
+  isLogementSocial: overrides.isLogementSocial ?? false,
 });
 
 const testDepartements = (): StatistiqueDbDepartement[] => [
@@ -157,8 +160,12 @@ describe("places - agrégés sur le périmètre ouvert à la date de référence
           testTypologie(2, 2, 2025, 50),
         ],
         adresses: [
-          testAdresse(10, 1, { qpv: 5, logementSocial: 2 }),
-          testAdresse(11, 2, { qpv: 3, logementSocial: 1 }),
+          testAdresse(10, 1, { placesAutorisees: 5, isQpv: true }),
+          testAdresse(11, 2, {
+            placesAutorisees: 3,
+            isQpv: true,
+            isLogementSocial: true,
+          }),
         ],
         departements: testDepartements().slice(0, 1),
       })
@@ -177,8 +184,8 @@ describe("places - agrégés sur le périmètre ouvert à la date de référence
         ],
         typologies: [testTypologie(1, 1, 2025, 100)],
         adresses: [
-          testAdresse(10, 1, { qpv: 5 }),
-          testAdresse(11, 2, { qpv: 99 }),
+          testAdresse(10, 1, { placesAutorisees: 5, isQpv: true }),
+          testAdresse(11, 2, { placesAutorisees: 99, isQpv: true }),
         ],
         departements: testDepartements().slice(0, 1),
       })
@@ -338,7 +345,7 @@ describe("places - indicateurs annuels (byYear)", () => {
           testTypologie(1, 1, 2023, 80),
           testTypologie(2, 1, 2024, 100),
         ],
-        adresses: [testAdresse(10, 1, { qpv: 7 })],
+        adresses: [testAdresse(10, 1, { placesAutorisees: 7, isQpv: true })],
         departements: testDepartements().slice(0, 1),
       })
     );
@@ -378,8 +385,16 @@ describe("places - indicateurs annuels (byYear)", () => {
           testTypologie(3, 1, 2023, 100),
         ],
         adresses: [
-          testAdresse(10, 1, { qpv: 5, structureVersionId: 101 }),
-          testAdresse(11, 1, { qpv: 9, structureVersionId: 102 }),
+          testAdresse(10, 1, {
+            placesAutorisees: 5,
+            isQpv: true,
+            structureVersionId: 101,
+          }),
+          testAdresse(11, 1, {
+            placesAutorisees: 9,
+            isQpv: true,
+            structureVersionId: 102,
+          }),
         ],
         departements: testDepartements().slice(0, 1),
       })

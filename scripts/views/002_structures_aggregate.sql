@@ -1,18 +1,13 @@
 -- Objective: per-structure impact inputs (places + budget hors CPOM)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_aggregates" AS
 WITH
-  structure_typologie_dernier_millesime AS (
-    SELECT DISTINCT
-      ON (sc."id") sc."id" AS "structureId",
-      st."placesAutorisees"
+  structure_places_autorisees AS (
+    SELECT
+      sc."id" AS "structureId",
+      sv."placesAutorisees"
     FROM
 :"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
-    WHERE
-      st."placesAutorisees" IS NOT NULL
-    ORDER BY
-      sc."id",
-      st."year" DESC
+      INNER JOIN public."StructureVersion" sv ON sv."id" = sc."structure_version_id"
   ),
   cpom_convention_dates AS (
     SELECT DISTINCT
@@ -98,5 +93,5 @@ SELECT
 FROM
 :"SCHEMA"."structures_core" sc
   LEFT JOIN:"SCHEMA"."structures_filling" sf ON sf."id" = sc."id"
-  LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = sc."id"
+  LEFT JOIN structure_places_autorisees sdm ON sdm."structureId" = sc."id"
   LEFT JOIN budget_dernier_millesime bdm ON bdm."structureId" = sc."id";

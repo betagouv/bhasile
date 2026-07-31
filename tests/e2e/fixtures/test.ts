@@ -4,6 +4,10 @@ import { test as base } from "@playwright/test";
 import { StructureType } from "@/types/structure.type";
 
 import {
+  createActualisationStructureForTest,
+  SeededActualisationStructure,
+} from "../seed/actualisation.seed";
+import {
   deleteCpomById,
   deleteStructureByCode,
   deleteTransformationGraph,
@@ -22,6 +26,8 @@ import {
 export type Fixtures = {
   seededStructure: SeededStructure;
   seededSubventionneeStructure: SeededStructure;
+  seededActualisationAutorisee: SeededActualisationStructure;
+  seededActualisationSubventionnee: SeededActualisationStructure;
   seededCpom: SeededCpom;
   seededCpomWithDates: SeededCpom;
   structuresPool: SeededStructure[];
@@ -65,6 +71,28 @@ export const test = base.extend<Fixtures>({
 
   seededSubventionneeStructure: async ({}, use) => {
     const structure = await createStructureForTest({
+      type: StructureType.HUDA,
+    });
+    try {
+      await use(structure);
+    } finally {
+      await deleteStructureByCode(structure.codeBhasile).catch(() => {});
+    }
+  },
+
+  seededActualisationAutorisee: async ({}, use) => {
+    const structure = await createActualisationStructureForTest({
+      type: StructureType.CADA,
+    });
+    try {
+      await use(structure);
+    } finally {
+      await deleteStructureByCode(structure.codeBhasile).catch(() => {});
+    }
+  },
+
+  seededActualisationSubventionnee: async ({}, use) => {
+    const structure = await createActualisationStructureForTest({
       type: StructureType.HUDA,
     });
     try {

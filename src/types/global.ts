@@ -19,6 +19,7 @@ export const FormKind = {
   AJOUT: "ajout",
   MODIFICATION: "modification",
   FINALISATION: "finalisation",
+  ACTUALISATION: "actualisation",
   ADRESSES_RECOVERY: "adresses-recovery",
   OUVERTURE_EX_NIHILO: "ouverture-ex-nihilo",
   OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES:
@@ -32,6 +33,7 @@ export type FormKind = (typeof FormKind)[keyof typeof FormKind];
 export type SessionUser = {
   id: string;
   name: string;
+  prenom: string;
   email: string;
   role: string;
   allowedDepartements: string[];

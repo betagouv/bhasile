@@ -10,10 +10,9 @@ model StructureVersion {
   structureVersionTransformationId Int?                            @unique
   structureVersionTransformation   StructureVersionTransformation? @relation(fields: [structureVersionTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  campaignId Int?      @unique
-  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
   effectiveDate DateTime?
+
+  placesAutorisees Int?
 
   adresseAdministrative    String?
   codePostalAdministratif  String?
@@ -35,11 +34,11 @@ model StructureVersion {
 
   contacts            Contact[]
   adresses            Adresse[]
-  structureTypologies StructureTypologie[]
   antennes            Antenne[]
   structureFinesses   StructureFiness[]
   finesses            Finess[] // TODO: remove after backfill structure finess
   dnaStructures       DnaStructure[]
+  structureTypologies StructureTypologie[] // Drop en PR cleaning.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

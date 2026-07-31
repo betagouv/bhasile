@@ -1,21 +1,11 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import {
-  Adresse,
-  AdresseTypologie,
-  Repartition,
-} from "@/generated/prisma/client";
-
-import { createFakeAdresseTypologie } from "./adresse-typologie.seed";
-
-export type AdresseWithTypologies = Adresse & {
-  adresseTypologies: Omit<AdresseTypologie, "id" | "adresseId">[];
-};
+import { Adresse, Repartition } from "@/generated/prisma/client";
 
 export const createFakeAdresses = ({
   placesAutorisees,
 }: CreateFakeAdressesArgs): Omit<
-  AdresseWithTypologies,
+  Adresse,
   "id" | "structureDnaCode" | "structureId" | "structureVersionTransformationId"
 >[] => {
   const count = faker.number.int({ min: 1, max: 10 });
@@ -37,28 +27,20 @@ const createFakeAdresse = ({
   placesAutorisees,
   repartition,
 }: CreateFakeAdresseArgs): Omit<
-  AdresseWithTypologies,
+  Adresse,
   "id" | "structureDnaCode" | "structureId" | "structureVersionTransformationId"
-> => {
-  const typologieCourante = createFakeAdresseTypologie({
-    year: 2025,
-    placesAutorisees,
-  });
-
-  return {
-    adresse: faker.location.streetAddress(),
-    codePostal: faker.location.zipCode(),
-    commune: faker.location.city(),
-    repartition,
-    placesAutorisees: typologieCourante.placesAutorisees,
-    qpv: typologieCourante.qpv,
-    logementSocial: typologieCourante.logementSocial,
-    adresseTypologies: [typologieCourante],
-    structureVersionId: null,
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.past(),
-  };
-};
+> => ({
+  adresse: faker.location.streetAddress(),
+  codePostal: faker.location.zipCode(),
+  commune: faker.location.city(),
+  repartition,
+  placesAutorisees,
+  isQpv: faker.datatype.boolean(),
+  isLogementSocial: faker.datatype.boolean(),
+  structureVersionId: null,
+  createdAt: faker.date.past(),
+  updatedAt: faker.date.past(),
+});
 
 type CreateFakeAdressesArgs = {
   placesAutorisees: number;

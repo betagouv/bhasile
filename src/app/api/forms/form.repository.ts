@@ -1,3 +1,5 @@
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { EntityId } from "@/types/Entity.type";
@@ -74,7 +76,8 @@ const getFormUniqueWhere = (
   }
   if (entityId.structureVersionTransformationId !== undefined) {
     return {
-      structureVersionTransformationId: entityId.structureVersionTransformationId,
+      structureVersionTransformationId:
+        entityId.structureVersionTransformationId,
     };
   }
   throw new Error(
@@ -145,6 +148,22 @@ const createOrUpdateCompleteFormWithSteps = async (
         });
       })
     );
+  }
+
+  // Un formulaire à étapes ne peut être validé (status = true) que si toutes ses
+  // étapes le sont. Les formulaires sans étape (transformation parente, complétée
+  // via sa date d'effet) passent : rien à valider.
+  if (form.status === true) {
+    const persistedSteps = await tx.formStep.findMany({
+      where: { formId: formEntity.id },
+      select: { status: true },
+    });
+    if (!areAllFormStepsValidated(persistedSteps)) {
+      throw new ApiDomainError(
+        `Toutes les étapes doivent être validées avant de valider le formulaire ${form.formDefinition.slug}`,
+        409
+      );
+    }
   }
 };
 

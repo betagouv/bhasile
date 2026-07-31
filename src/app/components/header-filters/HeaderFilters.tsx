@@ -1,4 +1,5 @@
 import { FiltersDepartement } from "@/app/components/filters/FiltersDepartement";
+import { buildZoneSummary } from "@/app/utils/zone.util";
 
 import { FilterDropdown } from "./FilterDropdown";
 import { FilterOperateur } from "./FilterOperateur";
@@ -9,15 +10,16 @@ export const HeaderFilters = () => {
     <div className="flex">
       <FilterDropdown
         label="Zone"
-        placeholder="Sélectionnez une zone"
+        placeholder="Toute la France"
         filterId="departements"
+        getSummaryLabel={buildZoneSummary}
       >
         <FiltersDepartement />
       </FilterDropdown>
 
       <FilterDropdown
         label="Opérateurs"
-        placeholder="Sélectionnez un opérateur"
+        placeholder="Tous les opérateurs"
         filterId="operateurs"
       >
         <FilterOperateur />
@@ -25,8 +27,8 @@ export const HeaderFilters = () => {
 
       <FilterDropdown
         label="Types Structure"
-        placeholder="Sélectionnez un type de structure"
-        filterId="type"
+        placeholder="Tous les types de structure"
+        filterId="types"
       >
         <FilterTypeStructure />
       </FilterDropdown>

@@ -24,6 +24,7 @@ model StructureVersionTransformation {
   operateur   Operateur? @relation(fields: [operateurId], references: [id])
 
   actesAdministratifs ActeAdministratif[]
+  structureTypologies StructureTypologie[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

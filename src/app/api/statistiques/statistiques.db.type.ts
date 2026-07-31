@@ -39,8 +39,8 @@ export type StatistiqueDbAdresse = Omit<
       structureVersionId: true;
       repartition: true;
       placesAutorisees: true;
-      qpv: true;
-      logementSocial: true;
+      isQpv: true;
+      isLogementSocial: true;
     };
   }>,
   "structureId" | "structureVersionId"
@@ -84,6 +84,7 @@ export type StatistiqueDbStructureVersionTimeline = {
   id: number;
   structureId: number | null;
   effectiveDate: Date | null;
+  placesAutorisees: number | null;
 };
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
