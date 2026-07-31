@@ -16,7 +16,7 @@ export const ControleQualiteBlock = (): ReactElement => {
 
   const tauxEigComportementViolent = formatPercentage(
     statistiques.controleQualite.eig.tauxEigComportementViolent,
-    { maximumFractionDigits: 1 }
+    { maximumFractionDigits: 0 }
   );
 
   return (

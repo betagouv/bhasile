@@ -29,7 +29,7 @@ export const InformationCard = ({
       )}
       {!showDetails && (
         <>
-          <div className="text-2xl font-bold mb-0">
+          <div className="text-2xl font-bold mb-0 text-center">
             {typeof primaryInformation === "number" ? (
               <NumberDisplay value={primaryInformation} />
             ) : (
