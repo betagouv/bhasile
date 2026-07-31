@@ -132,19 +132,18 @@ Pour aller plus loin avec Prisma : 👉 [Source](https://www.prisma.io/docs/orm/
 
 ## Budget de connexions
 
-Le plan Scalingo `postgresql-starter-512` expose `max_connections = 50`, dont `superuser_reserved_connections = 20` (Patroni, backups, supervision). **Le budget réel de l'app est donc de 30 connexions**, pas 50.
+Le plan `postgresql-starter-512` expose `max_connections = 50`, dont 20 réservées à Scalingo : **le budget de l'app est de 30 connexions**, pas 50. Répartition :
 
-Prisma 7 utilise le driver adapter `@prisma/adapter-pg` : la taille du pool se règle sur l'adapter (`prisma/client.ts`), pas via `connection_limit` dans `DATABASE_URL` — ce paramètre était celui du pool Rust de Prisma 6 et est ignoré aujourd'hui.
+| Consommateur           | Pool                                     | Pire cas                      |
+| ---------------------- | ---------------------------------------- | ----------------------------- |
+| Container web          | `DATABASE_POOL_MAX` (10)                 | 20 (×2 pendant un déploiement) |
+| Container one-off/cron | 3 (posé par `scripts/run-one-off.sh`)    | 3                             |
+| `postdeploy`           | `psql` + `prisma migrate deploy`         | 3                             |
 
-Répartition visée :
+Deux règles à respecter :
 
-| Consommateur          | Pool                                | Pire cas |
-| --------------------- | ----------------------------------- | -------- |
-| Container web         | `DATABASE_POOL_MAX` (10)            | 20 (×2 pendant un déploiement) |
-| Container one-off/cron| 3 (posé par `scripts/run-one-off.sh`)| 3        |
-| `postdeploy`          | `psql` + `prisma migrate deploy`    | 3        |
-
-⚠️ `src/lib/prisma.ts` doit garder son singleton `globalThis` **y compris en production** : Turbopack duplique le module dans chaque layer de bundle (proxy, route handlers, RSC), et sans le singleton chaque layer ouvre son propre pool.
+- Le pool se règle sur l'adapter dans `prisma/client.ts`, pas via `connection_limit` dans `DATABASE_URL` (paramètre Prisma 6, ignoré par les driver adapters).
+- Le client Prisma est un singleton porté par `globalThis`, en dev **comme en production** : Next instancie ce module dans chaque layer de bundle (proxy, route handlers, RSC), et sans le singleton chacun ouvre son propre pool.
 
 Pour inspecter les connexions en cours :
 
