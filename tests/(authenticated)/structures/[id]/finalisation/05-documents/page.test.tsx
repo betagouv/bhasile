@@ -141,6 +141,41 @@ describe("FinalisationDocuments page integration", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
+  it("valide l'étape sans convention propre quand le CPOM porte celle du type de la structure", async () => {
+    // GIVEN
+    const base = createFinalisationValidStructure(81);
+    const structure = {
+      ...base,
+      type: StructureType.HUDA,
+      isAutorisee: false,
+      isSubventionnee: true,
+      actesAdministratifs: [],
+      cpomStructures: [
+        {
+          cpom: {
+            actesAdministratifs: [
+              {
+                id: 12,
+                category: "CONVENTION" as const,
+                structureType: StructureType.HUDA,
+                parentId: null,
+                fileUploads: [{ id: 12, key: "convention-cpom" }],
+              },
+            ],
+          },
+        },
+      ] as unknown as StructureApiRead["cpomStructures"],
+    };
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
+    // WHEN
+    await clickButtonByName("Je valide la saisie de cette page");
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+  });
+
   it("sauvegarde automatiquement les données des documents après le debounce", async () => {
     // GIVEN
     const base = createFinalisationValidStructure(79);

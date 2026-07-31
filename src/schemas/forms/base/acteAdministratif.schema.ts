@@ -108,8 +108,6 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     }
   );
 
-// coveredCategories : catégories déjà portées par un CPOM de la structure, qui
-// cessent donc d'être exigées d'elle.
 const getActeAdministratifAutoriseesSchema = (
   coveredCategories: Set<ActeAdministratifCategory>
 ) =>
@@ -188,9 +186,6 @@ export const filterActesWithKey =
         )
       : val;
 
-// Une catégorie exigée garde sa ligne vide pour être contrôlée ; une catégorie
-// dispensée retombe sur la règle commune et sa ligne vide est écartée — le
-// formulaire pose sinon un fileUploads: [{ id: "" }] qui échoue au typage.
 const getRequiredCategories = (
   categories: ActeAdministratifCategory[],
   coveredCategories: Set<ActeAdministratifCategory>
@@ -208,8 +203,6 @@ const hasMandatoryNonAvenant = (
       !acteAdministratif.parentUuid
   );
 
-// Une catégorie portée par le CPOM n'a plus de ligne dans le tableau : exiger
-// sa présence annulerait la dispense.
 const isMandatoryCategorySatisfied = (
   actesAdministratifs: ActeAdministratifFormValues[] | undefined,
   category: ActeAdministratifCategory,

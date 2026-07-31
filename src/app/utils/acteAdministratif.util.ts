@@ -56,9 +56,6 @@ export const getCpomInheritedActes = (
   };
 };
 
-// Un acte porté par le CPOM pour le type de la structure dispense celle-ci de
-// le fournir. Seuls les actes de premier niveau et effectivement documentés
-// comptent : un avenant ou une ligne sans fichier ne prouve rien.
 export const getCpomCoveredActeCategories = (
   structure: StructureApiRead
 ): Set<ActeAdministratifCategory> =>
@@ -168,7 +165,6 @@ export const getCurrentStructureParentActe = (
   };
 };
 
-// TODO: Faire en sorte de chercher le parent dans TOUS les actes administratifs, autres transformations comprises
 export const resolveAvenantParentIds = (
   categoryRules: CategoryDisplayRules,
   structureActes: StructureParentActe[] | undefined,
