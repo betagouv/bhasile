@@ -1,9 +1,5 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
-import {
-  OrderableStructureVersion,
-  sortStructureVersionsBefore,
-} from "@/app/utils/structureVersion.util";
 
 export const checkNoDepartementAdministratifChange = (
   structureDepartement: string | null | undefined,
@@ -40,7 +36,12 @@ type VersionFields = {
   communeAdministrative: string | null;
 };
 
-export type ResolvableVersion = OrderableStructureVersion & {
+export type OrderableVersion = {
+  id: number;
+  effectiveDate: Date | null;
+};
+
+export type ResolvableVersion = OrderableVersion & {
   structureVersionTransformationId: number | null;
   structureVersionTransformation: {
     transformation: { form: { status: boolean | null } | null } | null;
@@ -57,11 +58,60 @@ export const isVersionValid = (version: ResolvableVersion): boolean => {
   return true;
 };
 
+// Le socle est toujours éligible, mais supplanté par n'importe quelle version datée déjà effective.
+const compareMostRecentFirst = (
+  first: OrderableVersion,
+  second: OrderableVersion
+): number => {
+  if (first.effectiveDate === null || second.effectiveDate === null) {
+    if (first.effectiveDate === second.effectiveDate) {
+      return second.id - first.id;
+    }
+    return first.effectiveDate === null ? 1 : -1;
+  }
+  const dateDiff =
+    second.effectiveDate.getTime() - first.effectiveDate.getTime();
+  return dateDiff !== 0 ? dateDiff : second.id - first.id;
+};
+
+const isEligibleBefore = (
+  version: OrderableVersion,
+  cutoffMs: number
+): boolean =>
+  version.effectiveDate === null || version.effectiveDate.getTime() < cutoffMs;
+
+const sortVersionsBefore = <TVersion extends OrderableVersion>(
+  versions: TVersion[],
+  cutoffMs: number
+): TVersion[] =>
+  versions
+    .filter((version) => isEligibleBefore(version, cutoffMs))
+    .sort(compareMostRecentFirst);
+
+/* `sortVersionsBefore(...)[0]`, en un passage. */
+export const pickVersionBefore = <TVersion extends OrderableVersion>(
+  versions: TVersion[],
+  cutoffMs: number
+): TVersion | null => {
+  let best: TVersion | null = null;
+
+  for (const version of versions) {
+    if (!isEligibleBefore(version, cutoffMs)) {
+      continue;
+    }
+    if (best === null || compareMostRecentFirst(version, best) < 0) {
+      best = version;
+    }
+  }
+
+  return best;
+};
+
 const sortValidVersionsBefore = <TVersion extends ResolvableVersion>(
   versions: TVersion[],
   upperBoundMs: number
 ): TVersion[] =>
-  sortStructureVersionsBefore(versions.filter(isVersionValid), upperBoundMs);
+  sortVersionsBefore(versions.filter(isVersionValid), upperBoundMs);
 
 export const getValidVersions = <TVersion extends ResolvableVersion>(
   versions: TVersion[],

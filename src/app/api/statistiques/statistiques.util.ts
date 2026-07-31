@@ -5,7 +5,6 @@ import {
 } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
-import { pickStructureVersionBefore } from "@/app/utils/structureVersion.util";
 import {
   EXCLUDED_STRUCTURE_TYPES,
   PLACES_VERSIONED_FROM_YEAR,
@@ -13,6 +12,7 @@ import {
 import { StructureType } from "@/generated/prisma/client";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
+import { pickVersionBefore } from "../structure-versions/structure-version.util";
 import type {
   DnaStructureIdsResolver,
   StatistiqueDbDnaLink,
@@ -244,7 +244,7 @@ const pickEffectiveVersionFromIndex = (
   structureId: number,
   date: Date
 ): StatistiqueDbStructureVersionTimeline | null =>
-  pickStructureVersionBefore(
+  pickVersionBefore(
     timelineByStructureId.get(structureId) ?? [],
     startOfNextUtcDay(date).getTime()
   );
@@ -255,7 +255,7 @@ export const getEffectiveStructureVersionAtDate = (
   date: Date,
   timeline: StatistiqueDbStructureVersionTimeline[]
 ): StatistiqueDbStructureVersionTimeline | null =>
-  pickStructureVersionBefore(
+  pickVersionBefore(
     timeline.filter((version) => version.structureId === structureId),
     startOfNextUtcDay(date).getTime()
   );
