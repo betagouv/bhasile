@@ -411,18 +411,12 @@ export const computeStructuresStatistiques = (
 export type StructuresYearIndicatorField =
   "totalStructures" | "structuresAvecCpom";
 
-/**
- * Computes a single byYear field for one year, for the cartographie one-indicator requests.
- * Le comptage porte sur les structures actives l'année (existence structurelle),
- * indépendamment de la présence d'un millésime de typologie — aligné sur les
- * indicateurs finance/activité (cf. incohérence "0 structure mais ETP non nul").
- */
+/* Computes a single byYear field for one year, for the cartographie one-indicator requests. */
 export const computeStructuresIndicatorForYear = (
   context: StatistiquesCpomYearContext,
   year: number,
   field: StructuresYearIndicatorField
 ): number | null => {
-  // Année hors index d'activité (aucune donnée) → pas de valeur, pas d'évolution.
   if (!context.activeStructureIdsByPeriod.year.has(String(year))) {
     return null;
   }

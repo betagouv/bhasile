@@ -132,8 +132,7 @@ const computePlacesTypologieIndicators = (
   };
 };
 
-// QPV / logement social : pas d'historique conservé → snapshot à date (version
-// courante), sur toutes les structures du périmètre (indépendant de la typologie).
+// QPV / logement social :  snapshot à date (version courante)
 const computeAdressePlacesSpecialesSnapshot = (
   structures: StatistiqueDbStructure[],
   adresses: StatistiqueDbAdresse[],

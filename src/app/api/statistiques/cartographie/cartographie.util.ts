@@ -141,7 +141,7 @@ const yearOverPreviousYear =
     previousValue: compute(context, annee - 1),
   });
 
-// Indicateur en snapshot à date (sans année, donc sans évolution).
+// Indicateur snapshot (sans année, donc sans évolution).
 const snapshotValue =
   (
     compute: (context: StatistiquesContext) => number | null

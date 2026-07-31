@@ -213,8 +213,8 @@ export type StatistiquesContext = {
   indicateurs: StatistiqueDbIndicateurFinancier[];
   activites: StatistiqueDbActivite[];
   rmus: StatistiqueDbRmu[] | null;
-  /** Résolveur `dnaCode → structures` mémoïsé, partagé entre zones (cf. cartographie). */
-  resolveDnaStructureIds?: DnaStructureIdsResolver;
+  /** Résolveur `dnaCode x structures` mémoïsé, partagé entre zones. */
+  resolveDnaStructureIds: DnaStructureIdsResolver;
 };
 
 export type DnaStructureIdsResolver = (dnaCode: string, date: Date) => number[];
@@ -229,11 +229,7 @@ export type StatistiquesTypologieYearContext = Pick<
 export type StatistiquesCpomYearContext = StatistiquesTypologieYearContext &
   Pick<StatistiquesContext, "cpomLinks">;
 
-/** Adds adresses + version timeline, for indicators resolved from the effective adresse of a year. */
-export type StatistiquesAdresseYearContext = StatistiquesTypologieYearContext &
-  Pick<StatistiquesContext, "adresses" | "structureVersionTimeline">;
-
-/** Structures actives + adresses, pour le snapshot QPV / logement social à date. */
+/** Structures actives + adresses, pour le snapshot QPV / logement social. */
 export type StatistiquesAdresseSnapshotContext = Pick<
   StatistiquesContext,
   "structures" | "adresses" | "structureVersionTimeline"
@@ -242,20 +238,13 @@ export type StatistiquesAdresseSnapshotContext = Pick<
 /** Minimal slice of StatistiquesContext needed to compute the current activite snapshot. */
 export type StatistiquesActiviteSummaryContext = Pick<
   StatistiquesContext,
-  | "activites"
-  | "dnaLinks"
-  | "structureVersionTimeline"
-  | "resolveDnaStructureIds"
-  | "allStructures"
-  | "structures"
+  "activites" | "resolveDnaStructureIds" | "allStructures" | "structures"
 >;
 
 /** Minimal slice of StatistiquesContext needed to compute the activite monthly series. */
 export type StatistiquesActiviteByMonthContext = Pick<
   StatistiquesContext,
   | "activites"
-  | "dnaLinks"
-  | "structureVersionTimeline"
   | "resolveDnaStructureIds"
   | "allStructures"
   | "activeStructureIdsByPeriod"

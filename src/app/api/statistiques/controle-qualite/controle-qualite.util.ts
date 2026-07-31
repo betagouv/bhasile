@@ -48,8 +48,6 @@ const computePeriodSeries = (
   const {
     eigs,
     evaluations,
-    dnaLinks,
-    structureVersionTimeline,
     resolveDnaStructureIds,
     activeStructureIdsByPeriod,
   } = context;
@@ -82,8 +80,6 @@ const computePeriodSeries = (
         ...computeEigPeriodMetrics(
           eigsByPeriod.get(periodKey) ?? [],
           activeStructureIds,
-          dnaLinks,
-          structureVersionTimeline,
           resolveDnaStructureIds
         ),
         ...sumEvaluationNotes(evaluationsForPeriod, aggregation),

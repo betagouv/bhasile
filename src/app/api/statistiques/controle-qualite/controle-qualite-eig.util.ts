@@ -9,9 +9,7 @@ import type {
 
 import type {
   DnaStructureIdsResolver,
-  StatistiqueDbDnaLink,
   StatistiqueDbEig,
-  StatistiqueDbStructureVersionTimeline,
 } from "../statistiques.db.type";
 import { resolveDnaEventStructureIds } from "../statistiques.util";
 
@@ -51,9 +49,7 @@ export const computeEigRates = (
 export const computeEigPeriodMetrics = (
   eigsForPeriod: StatistiqueDbEig[],
   activeStructureIds: Set<number>,
-  dnaLinks: StatistiqueDbDnaLink[],
-  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[],
-  resolveDnaStructureIds: DnaStructureIdsResolver | undefined
+  resolveDnaStructureIds: DnaStructureIdsResolver
 ): EigPeriodStat => {
   // Un EIG est rattaché à une zone via son dnaCode : on ne compte que ceux qui
   // résolvent vers une structure active en scope à leur date. Sans ça, les
@@ -67,11 +63,9 @@ export const computeEigPeriodMetrics = (
       continue;
     }
     const structureIds = resolveDnaEventStructureIds(
+      resolveDnaStructureIds,
       eig.dnaCode,
       new Date(eig.evenementDate),
-      dnaLinks,
-      structureVersionTimeline,
-      resolveDnaStructureIds,
       activeStructureIds
     );
     if (structureIds.length === 0) {
