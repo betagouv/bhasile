@@ -1,6 +1,18 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { Prisma } from "@/generated/prisma/client";
 
+/** Une version liée à une transformation non finalisée n'est jamais "effective". */
+export const finalizedVersionWhere: Prisma.StructureVersionWhereInput = {
+  OR: [
+    { structureVersionTransformationId: null },
+    {
+      structureVersionTransformation: {
+        transformation: { form: { status: true } },
+      },
+    },
+  ],
+};
+
 export const currentVersionWhere = (
   now: Date
 ): Prisma.StructureVersionWhereInput => ({
@@ -11,16 +23,7 @@ export const currentVersionWhere = (
         { effectiveDate: { lt: startOfNextUtcDay(now) } },
       ],
     },
-    {
-      OR: [
-        { structureVersionTransformationId: null },
-        {
-          structureVersionTransformation: {
-            transformation: { form: { status: true } },
-          },
-        },
-      ],
-    },
+    finalizedVersionWhere,
   ],
 });
 

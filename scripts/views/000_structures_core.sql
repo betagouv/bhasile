@@ -19,8 +19,12 @@ WITH
       LEFT JOIN public."Form" f ON f."transformationId" = svt."transformationId"
     WHERE
       sv."structureId" IS NOT NULL
-      AND sv."effectiveDate" < (
-        (DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC') + INTERVAL '1 day') AT TIME ZONE 'UTC'
+      -- Le socle (effectiveDate NULL) est la baseline : toujours eligible
+      AND (
+        sv."effectiveDate" IS NULL
+        OR sv."effectiveDate" < (
+          (DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC') + INTERVAL '1 day') AT TIME ZONE 'UTC'
+        )
       )
       AND (
         -- Filter out structures versions linked to a non finished transformation
@@ -29,7 +33,7 @@ WITH
       )
     ORDER BY
       sv."structureId",
-      sv."effectiveDate" DESC,
+      sv."effectiveDate" DESC NULLS LAST,
       sv."id" DESC
   ),
   dna_codes_by_version AS (
