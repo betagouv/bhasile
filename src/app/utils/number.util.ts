@@ -43,6 +43,26 @@ export const formatCurrency = (
 };
 
 /**
+ * Formats a ratio (0-1) as a French percentage
+ * @param value - The ratio to format
+ * @returns Formatted percentage string (e.g., "97,3 %")
+ */
+export const formatPercentage = (
+  value: number | string | null | undefined,
+  options?: Intl.NumberFormatOptions
+): string => {
+  if (value === null || value === undefined || isNaN(Number(value))) {
+    return "0 %";
+  }
+
+  return new Intl.NumberFormat("fr-FR", {
+    style: "percent",
+    maximumFractionDigits: 2,
+    ...options,
+  }).format(Number(value));
+};
+
+/**
  * Parses a French-formatted number string back to a number
  * Handles both "1 234,56" and "1234.56" formats
  * @param value - The formatted string to parse

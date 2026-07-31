@@ -8,7 +8,7 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { formatDate } from "@/app/utils/date.util";
-import { formatNumber } from "@/app/utils/number.util";
+import { formatPercentage } from "@/app/utils/number.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import {
   RmuPeriodStat,
@@ -27,10 +27,7 @@ const rmuLines: RMULine[] = [
   {
     label: "Taux de RMU exécuté",
     key: "tauxExecute",
-    format: (value) =>
-      `${formatNumber(Number(value), {
-        maximumFractionDigits: 2,
-      })} %`,
+    format: (value) => formatPercentage(Number(value)),
   },
 ];
 

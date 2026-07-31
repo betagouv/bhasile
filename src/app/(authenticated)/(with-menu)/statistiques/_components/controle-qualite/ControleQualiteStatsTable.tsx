@@ -8,7 +8,7 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { formatNumber } from "@/app/utils/number.util";
+import { formatPercentage } from "@/app/utils/number.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import {
   ControleQualitePeriodStat,
@@ -26,15 +26,7 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
           <span>
             {Number(value)}{" "}
             <span className="text-disabled-grey pl-2">
-              <NumberDisplay
-                value={formatNumber(
-                  Number(periodItem.partStructuresSansDeclarationEig),
-                  {
-                    maximumFractionDigits: 2,
-                  }
-                )}
-              />
-              &nbsp;%
+              {formatPercentage(periodItem.partStructuresSansDeclarationEig)}
             </span>
           </span>
         ),
@@ -52,10 +44,7 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Taux d'EIG “comportement violent“",
         key: "tauxEigComportementViolent",
-        format: (value) =>
-          `${formatNumber(Number(value), {
-            maximumFractionDigits: 2,
-          })} %`,
+        format: (value) => formatPercentage(Number(value)),
       },
     ],
   },
