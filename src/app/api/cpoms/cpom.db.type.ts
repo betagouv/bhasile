@@ -1,5 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 
+import { resolvableVersionSelect } from "../structure-versions/structure-version.db.type";
+
 export const cpomListInclude = {
   structures: true,
   budgets: true,
@@ -33,17 +35,8 @@ export const cpomDetailsInclude = {
           forms: true,
           structureVersions: {
             select: {
-              id: true,
-              effectiveDate: true,
+              ...resolvableVersionSelect,
               communeAdministrative: true,
-              structureVersionTransformationId: true,
-              structureVersionTransformation: {
-                select: {
-                  transformation: {
-                    select: { form: { select: { status: true } } },
-                  },
-                },
-              },
             },
           },
         },

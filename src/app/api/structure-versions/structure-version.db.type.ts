@@ -40,6 +40,19 @@ export const currentVersionArgs = (now: Date) =>
     "where" | "orderBy" | "take"
   >;
 
+/** Seul champ de la transfo consommé par isVersionValid. */
+export const transformationStatusSelect = {
+  transformation: { select: { form: { select: { status: true } } } },
+} satisfies Prisma.StructureVersionTransformationSelect;
+
+/** Champs exigés par ResolvableVersion à étendre selon les besoins de l'appelant. */
+export const resolvableVersionSelect = {
+  id: true,
+  effectiveDate: true,
+  structureVersionTransformationId: true,
+  structureVersionTransformation: { select: transformationStatusSelect },
+} satisfies Prisma.StructureVersionSelect;
+
 export const structureVersionDetailsInclude = {
   contacts: true,
   adresses: true,

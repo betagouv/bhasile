@@ -1,11 +1,13 @@
 import { Form, Prisma, StructureType } from "@/generated/prisma/client";
 
-import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
+import {
+  resolvableVersionSelect,
+  structureVersionDetailsInclude,
+  transformationStatusSelect,
+} from "../structure-versions/structure-version.db.type";
 
 export const structureListLightVersionSelect = {
-  id: true,
-  effectiveDate: true,
-  structureVersionTransformationId: true,
+  ...resolvableVersionSelect,
   nom: true,
   departementAdministratif: true,
   communeAdministrative: true,
@@ -13,11 +15,7 @@ export const structureListLightVersionSelect = {
   latitude: true,
   longitude: true,
   structureVersionTransformation: {
-    select: {
-      type: true,
-      motif: true,
-      transformation: { select: { form: { select: { status: true } } } },
-    },
+    select: { type: true, motif: true, ...transformationStatusSelect },
   },
   placesAutorisees: true,
   adresses: { select: { repartition: true } },
@@ -140,17 +138,8 @@ export const structureDetailsInclude = {
                   forms: true,
                   structureVersions: {
                     select: {
-                      id: true,
-                      effectiveDate: true,
+                      ...resolvableVersionSelect,
                       communeAdministrative: true,
-                      structureVersionTransformationId: true,
-                      structureVersionTransformation: {
-                        select: {
-                          transformation: {
-                            select: { form: { select: { status: true } } },
-                          },
-                        },
-                      },
                     },
                   },
                 },
