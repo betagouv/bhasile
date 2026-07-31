@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import { getCpomCoveredDocumentsFinanciers } from "@/app/utils/documentFinancier.util";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
 import { DocumentsFinanciersAccordion } from "./DocumentsFinanciersAccordion";
@@ -12,6 +13,8 @@ export const DocumentsFinanciers = ({ hasAccordion, className }: Props) => {
   const { structure } = useStructureContext();
   const { control } = useFormContext<DocumentsFinanciersFlexibleFormValues>();
   const isAutorisee = structure?.isAutorisee ?? false;
+  const coveredDocumentsFinanciers =
+    getCpomCoveredDocumentsFinanciers(structure);
 
   const startYear = getYearFromDate(
     structure?.date303 || structure?.creationDate
@@ -43,6 +46,7 @@ export const DocumentsFinanciers = ({ hasAccordion, className }: Props) => {
             isAutorisee={isAutorisee}
             control={control}
             hasAccordion={hasAccordion}
+            coveredDocumentsFinanciers={coveredDocumentsFinanciers}
           />
         </DocumentsFinanciersAccordion>
       ))}

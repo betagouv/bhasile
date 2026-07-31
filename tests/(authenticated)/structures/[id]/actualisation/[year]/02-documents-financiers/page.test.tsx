@@ -7,6 +7,7 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ActualisationDocumentsFinanciers from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/02-documents-financiers/page";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 const mockRouterPush = vi.fn();
 
@@ -21,6 +22,26 @@ const docsStructure = () => ({
   ...createFinalisationDocumentsFinanciersValidStructure(1),
   forms: [createActualisationForm(2026)],
 });
+
+const docsStructureCoveredByCpom = () => {
+  const base = docsStructure();
+  return {
+    ...base,
+    documentsFinanciers: [],
+    cpomStructures: [
+      {
+        cpom: {
+          documentsFinanciers: base.documentsFinanciers.map(
+            (documentFinancier) => ({
+              ...documentFinancier,
+              structureType: base.type,
+            })
+          ),
+        },
+      },
+    ] as unknown as StructureApiRead["cpomStructures"],
+  };
+};
 
 const findActualisationPut = (fetchMock: ReturnType<typeof vi.fn>) =>
   fetchMock.mock.calls.find(
@@ -52,6 +73,25 @@ describe("Page actualisation 02-documents-financiers", () => {
 
     renderWithStructurePageProviders(
       docsStructure(),
+      <ActualisationDocumentsFinanciers />
+    );
+
+    await clickButtonByName("Valider");
+
+    const put = findActualisationPut(fetchMock);
+    expect(put).toBeDefined();
+    expect(stepStatusInPayload(put, "02-documents-financiers")).toBe("VALIDE");
+  });
+
+  it("valide l'étape sans document propre quand le CPOM porte ceux du type de la structure", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => docsStructureCoveredByCpom(),
+    });
+
+    renderWithStructurePageProviders(
+      docsStructureCoveredByCpom(),
       <ActualisationDocumentsFinanciers />
     );
 

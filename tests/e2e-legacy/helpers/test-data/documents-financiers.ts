@@ -1,5 +1,5 @@
 import {
-  isDocumentRequiredForYear,
+  isDocumentStillRequired,
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
@@ -32,7 +32,7 @@ export const buildRequiredDocumentsFinanciers = ({
     .filter((year) => (startYear ? year >= startYear : true))
     .flatMap((year) =>
       documents
-        .filter((document) => isDocumentRequiredForYear(document, year))
+        .filter((document) => isDocumentStillRequired(document, year))
         .map((document) => {
           const upload: DocumentFinancierUpload = {
             year: String(year),
