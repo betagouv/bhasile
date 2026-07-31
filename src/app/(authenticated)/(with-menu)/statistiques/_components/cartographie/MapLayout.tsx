@@ -3,8 +3,13 @@
 import "../../../../../../../node_modules/@gouvfr/dsfr-chart/dist/MapChart/MapChart.css";
 
 import Button from "@codegouvfr/react-dsfr/Button";
+import { useSearchParams } from "next/navigation";
 
 import Loader from "@/app/components/ui/Loader";
+import {
+  DEFAULT_CARTOGRAPHIE_INDICATEUR,
+  isSnapshotCartographieIndicateur,
+} from "@/schemas/api/statistique-cartographie.schema";
 import { ZoneDataInfo } from "@/types/map.type";
 
 import { DecoupageSelector } from "./DecoupageSelector";
@@ -24,13 +29,20 @@ export const MapLayout = ({
   isLoadingRegion,
   regionError,
 }: Props) => {
+  const searchParams = useSearchParams();
+  const indicateur =
+    searchParams.get("indicateur") ?? DEFAULT_CARTOGRAPHIE_INDICATEUR;
+  const showYearSelector = !isSnapshotCartographieIndicateur(indicateur);
+
   return (
     <div className="relative w-full h-full">
       <div className="flex flex-col absolute top-4 left-4 z-20">
         <div className="flex items-end pb-4">
-          <div className="pr-4">
-            <YearSelector />
-          </div>
+          {showYearSelector && (
+            <div className="pr-4">
+              <YearSelector />
+            </div>
+          )}
           {/* Masqué à l'échelle d'une région tant qu'on n'a pas l'échelle arrondissement. */}
           {!(decoupage === "reg" && selectedRegion) && <DecoupageSelector />}
           {decoupage === "reg" && selectedRegion && (
