@@ -1,7 +1,6 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { Prisma } from "@/generated/prisma/client";
 
-// Le socle (`effectiveDate` null) est éligible comme version courante
 export const currentVersionWhere = (
   now: Date
 ): Prisma.StructureVersionWhereInput => ({

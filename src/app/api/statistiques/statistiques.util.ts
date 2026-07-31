@@ -230,8 +230,8 @@ export const getEffectiveStructureVersionAtDate = (
     if (version.structureId !== structureId) {
       continue;
     }
-    if (version.effectiveDate == null) {
-      if (socle == null || version.id > socle.id) {
+    if (version.effectiveDate === null) {
+      if (socle === null || version.id > socle.id) {
         socle = version;
       }
       continue;
@@ -240,7 +240,7 @@ export const getEffectiveStructureVersionAtDate = (
       continue;
     }
     if (
-      dated == null ||
+      dated === null ||
       version.effectiveDate > dated.effectiveDate! ||
       (version.effectiveDate.getTime() === dated.effectiveDate!.getTime() &&
         version.id > dated.id)

@@ -596,12 +596,13 @@ const buildCreationEvent = (
     };
   }
 
-  const fallbackDate =
-    structure.creationDate ??
-    validVersions[validVersions.length - 1]?.effectiveDate;
-
-  return fallbackDate
-    ? { kind: "CREATION", date: fallbackDate.toISOString(), sources: [] }
+  // Sans transformation de création, l'évènement est daté par la structure elle-même.
+  return structure.creationDate
+    ? {
+        kind: "CREATION",
+        date: structure.creationDate.toISOString(),
+        sources: [],
+      }
     : null;
 };
 
