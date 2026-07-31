@@ -10,14 +10,17 @@ import { typesActivite } from "../../(authenticated)/(with-menu)/structures/[id]
 import { NumberDisplay } from "../common/NumberDisplay";
 
 export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
+  const sortedActivites = [...(activites ?? [])].sort(
+    (activiteA, activiteB) =>
+      dayjs(activiteA.date).valueOf() - dayjs(activiteB.date).valueOf()
+  );
+
   const getActiviteFor = (
     key: keyof ActiviteApiType | keyof ActiviteByMonthStat
   ) => {
-    return activites
-      ?.map((activite) => {
-        return (activite as Record<string, string | number | null>)[key];
-      })
-      .reverse();
+    return sortedActivites.map((activite) => {
+      return (activite as Record<string, string | number | null>)[key];
+    });
   };
 
   const activiteTypes: ActiviteType[] = [
@@ -56,21 +59,18 @@ export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
   ];
 
   const getHeadings = () => {
-    const dates =
-      activites
-        ?.map((activite) => {
-          const date = dayjs(activite.date);
-          const month = date.format("MMMM").toUpperCase();
-          const year = date.format("YYYY");
-          return (
-            <th scope="col" key={`${month}-${year}`}>
-              {month}
-              <br />
-              {year}
-            </th>
-          );
-        })
-        .reverse() ?? [];
+    const dates = sortedActivites.map((activite) => {
+      const date = dayjs(activite.date);
+      const month = date.format("MMMM").toUpperCase();
+      const year = date.format("YYYY");
+      return (
+        <th scope="col" key={`${month}-${year}`}>
+          {month}
+          <br />
+          {year}
+        </th>
+      );
+    });
 
     return [
       <th scope="col" key="heading-label" className="min-w-[240px]">
