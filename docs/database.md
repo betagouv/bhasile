@@ -129,3 +129,25 @@ yarn prisma:apply-views
 - Éviter de commit les fichiers générés si on utilise l'introspection
 
 Pour aller plus loin avec Prisma : 👉 [Source](https://www.prisma.io/docs/orm/prisma-migrate/workflows/prototyping-your-schema)
+
+## Budget de connexions
+
+Le plan Scalingo `postgresql-starter-512` expose `max_connections = 50`, dont `superuser_reserved_connections = 20` (Patroni, backups, supervision). **Le budget réel de l'app est donc de 30 connexions**, pas 50.
+
+Prisma 7 utilise le driver adapter `@prisma/adapter-pg` : la taille du pool se règle sur l'adapter (`prisma/client.ts`), pas via `connection_limit` dans `DATABASE_URL` — ce paramètre était celui du pool Rust de Prisma 6 et est ignoré aujourd'hui.
+
+Répartition visée :
+
+| Consommateur          | Pool                                | Pire cas |
+| --------------------- | ----------------------------------- | -------- |
+| Container web         | `DATABASE_POOL_MAX` (10)            | 20 (×2 pendant un déploiement) |
+| Container one-off/cron| 3 (posé par `scripts/run-one-off.sh`)| 3        |
+| `postdeploy`          | `psql` + `prisma migrate deploy`    | 3        |
+
+⚠️ `src/lib/prisma.ts` doit garder son singleton `globalThis` **y compris en production** : Turbopack duplique le module dans chaque layer de bundle (proxy, route handlers, RSC), et sans le singleton chaque layer ouvre son propre pool.
+
+Pour inspecter les connexions en cours :
+
+```sql
+SELECT count(*), application_name, state FROM pg_stat_activity GROUP BY 2, 3 ORDER BY 1 DESC;
+```

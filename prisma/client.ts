@@ -9,6 +9,11 @@ export const createPrismaClient = () => {
     throw new Error("DATABASE_URL is required to initialize Prisma Client.");
   }
 
-  const adapter = new PrismaPg({ connectionString });
+  const adapter = new PrismaPg({
+    connectionString,
+    max: Number(process.env.DATABASE_POOL_MAX) || 10,
+    connectionTimeoutMillis: 5_000,
+    application_name: process.env.CONTAINER ?? "bhasile",
+  });
   return new PrismaClient({ adapter });
 };
