@@ -64,8 +64,16 @@ export const findPerimeterStructures = async (
         : {}),
       structureVersions: {
         some: {
-          ...FINALIZED_VERSION_WHERE,
-          effectiveDate: { lt: startOfNextUtcDay(reference) },
+          // Le socle (`effectiveDate` null) suffit à faire exister la structure.
+          AND: [
+            FINALIZED_VERSION_WHERE,
+            {
+              OR: [
+                { effectiveDate: null },
+                { effectiveDate: { lt: startOfNextUtcDay(reference) } },
+              ],
+            },
+          ],
         },
       },
     },

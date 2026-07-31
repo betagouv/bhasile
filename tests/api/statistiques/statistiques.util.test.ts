@@ -235,6 +235,33 @@ describe("socle - version effective à date (résolution adresses/typologies/DNA
       )
     ).toBeNull();
   });
+
+  it("retombe sur le socle (effectiveDate null) tant qu'aucune version datée n'est effective", () => {
+    const timelineWithSocle = [
+      { id: 10, structureId: 1, effectiveDate: null, placesAutorisees: null },
+      {
+        id: 11,
+        structureId: 1,
+        effectiveDate: new Date("2028-01-01T00:00:00.000Z"),
+        placesAutorisees: null,
+      },
+    ];
+
+    expect(
+      getEffectiveStructureVersionAtDate(
+        1,
+        new Date("2025-06-15T12:00:00.000Z"),
+        timelineWithSocle
+      )
+    ).toMatchObject({ id: 10 });
+    expect(
+      getEffectiveStructureVersionAtDate(
+        1,
+        new Date("2028-06-15T12:00:00.000Z"),
+        timelineWithSocle
+      )
+    ).toMatchObject({ id: 11 });
+  });
 });
 
 describe("socle - résolution DNA à date", () => {

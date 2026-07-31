@@ -128,7 +128,7 @@ const writeToCurrentVersion = async (
       structureId: structure.id,
       ...currentVersionWhere(getNow()),
     },
-    orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+    orderBy: [{ effectiveDate: { sort: "desc", nulls: "last" } }, { id: "desc" }],
     select: { id: true, effectiveDate: true },
   });
 

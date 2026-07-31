@@ -47,22 +47,26 @@ describe("isVersionValid", () => {
 });
 
 describe("resolveCurrentVersion", () => {
-  it("exclut une version à effectiveDate null même quand isVersionValid la jugerait valide", () => {
-    const stub = {
-      ...baseVersion,
-      id: 20,
-      effectiveDate: null,
-    };
-    const predecessor = {
-      ...baseVersion,
-      id: 10,
-      effectiveDate: new Date("2025-01-01"),
-    };
+  const socle = { ...baseVersion, id: 20, effectiveDate: null };
 
-    expect(isVersionValid(stub)).toBe(true);
+  it("retient le socle (effectiveDate null) en l'absence de version datée effective", () => {
     expect(
-      resolveCurrentVersion([stub, predecessor], new Date("2026-06-01"))?.id
+      resolveCurrentVersion([socle], new Date("2026-06-01"))?.id
+    ).toBe(20);
+  });
+
+  it("supplante le socle par une version datée déjà effective", () => {
+    const datee = { ...baseVersion, id: 10, effectiveDate: new Date("2025-01-01") };
+    expect(
+      resolveCurrentVersion([socle, datee], new Date("2026-06-01"))?.id
     ).toBe(10);
+  });
+
+  it("retombe sur le socle quand les versions datées sont dans le futur", () => {
+    const future = { ...baseVersion, id: 10, effectiveDate: new Date("2028-01-01") };
+    expect(
+      resolveCurrentVersion([socle, future], new Date("2026-06-01"))?.id
+    ).toBe(20);
   });
 });
 
