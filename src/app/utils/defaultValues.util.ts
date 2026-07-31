@@ -1,5 +1,8 @@
 import { getRealCreationYear } from "@/app/utils/structure.util";
-import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
+import {
+  getActualisationActesAdministratifsCategoryToDisplay,
+  getStructureActesAdministratifsCategoryToDisplay,
+} from "@/config/structure.config";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
@@ -9,7 +12,6 @@ import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
 import { StructureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
-import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getBudgetsDefaultValues } from "./budget.util";
 import { getControlesDefaultValues } from "./controle.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
@@ -24,7 +26,7 @@ export const getDefaultValues = ({
 }): Partial<StructureDefaultValues> => {
   const structureCreationYear = getRealCreationYear(structure);
 
-  const adresses = transformApiAdressesToFormAdresses(structure.adresses);
+  const adresses = structure.adresses as FormAdresse[] | undefined;
   const budgets = getBudgetsDefaultValues(
     structure?.budgets || [],
     structureCreationYear
@@ -80,4 +82,54 @@ type StructureDefaultValues = Omit<
   budgets: anyBudgetFormValues;
   structureTypologies: StructureTypologieSchemaTypeFormValues[];
   adresses: FormAdresse[];
+};
+
+export const getActualisationDefaultValues = ({
+  structure,
+}: {
+  structure: StructureApiRead;
+}): Partial<StructureDefaultValues> => {
+  const structureCreationYear = getRealCreationYear(structure);
+
+  const budgets = getBudgetsDefaultValues(
+    structure?.budgets || [],
+    structureCreationYear
+  );
+  const indicateursFinanciers = getIndicateursFinanciersDefaultValues(
+    structure?.indicateursFinanciers || [],
+    structureCreationYear
+  );
+  const structureTypologies = getStructureTypologyDefaultValues(
+    structure?.structureTypologies || [],
+    structureCreationYear
+  );
+  const structureMillesimes = getStructureMillesimeDefaultValues(
+    structure?.structureMillesimes || [],
+    structureCreationYear
+  );
+  const actualisationActesRules =
+    getActualisationActesAdministratifsCategoryToDisplay(structure);
+  const shownActeCategories = Object.entries(actualisationActesRules)
+    .filter(([, rules]) => rules?.shouldShow)
+    .map(([category]) => category);
+  const actesAdministratifs = getActesAdministratifsDefaultValues(
+    (structure.actesAdministratifs ?? []).filter(
+      (acteAdministratif) =>
+        acteAdministratif.category !== undefined &&
+        shownActeCategories.includes(acteAdministratif.category)
+    ),
+    actualisationActesRules
+  );
+
+  return {
+    ...structure,
+    adresses: [],
+    controles: [],
+    evaluations: [],
+    budgets,
+    indicateursFinanciers,
+    structureTypologies,
+    structureMillesimes,
+    actesAdministratifs,
+  };
 };

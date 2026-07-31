@@ -1,4 +1,4 @@
-import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
+import { INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR } from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierFormValues } from "@/schemas/forms/base/indicateurFinancier.schema";
 
@@ -15,7 +15,7 @@ export const getIndicateursFinanciersDefaultValues = (
     : years;
 
   const columns = yearsToDisplay.flatMap((year) => {
-    if (year >= INDICATEUR_FINANCIER_CUTOFF_YEAR) {
+    if (year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR) {
       return [
         {
           year,
@@ -61,19 +61,29 @@ export const getIndicateursFinanciersDefaultValues = (
   return indicateursFinanciers;
 };
 
-export const isYearRealisee = (
+const isYearTypeFilled = (
   indicateursFinanciers: IndicateurFinancierApiType[],
-  year: number
+  year: number,
+  type: "REALISE" | "PREVISIONNEL"
 ) => {
-  const indicateurFinancierRealise = indicateursFinanciers.find(
+  const indicateurFinancier = indicateursFinanciers.find(
     (indicateurFinancier) =>
-      indicateurFinancier.year === year &&
-      indicateurFinancier.type === "REALISE"
+      indicateurFinancier.year === year && indicateurFinancier.type === type
   );
 
   return (
-    !isNullOrUndefined(indicateurFinancierRealise?.ETP) &&
-    !isNullOrUndefined(indicateurFinancierRealise?.tauxEncadrement) &&
-    !isNullOrUndefined(indicateurFinancierRealise?.coutJournalier)
+    !isNullOrUndefined(indicateurFinancier?.ETP) &&
+    !isNullOrUndefined(indicateurFinancier?.tauxEncadrement) &&
+    !isNullOrUndefined(indicateurFinancier?.coutJournalier)
   );
 };
+
+export const isYearRealisee = (
+  indicateursFinanciers: IndicateurFinancierApiType[],
+  year: number
+) => isYearTypeFilled(indicateursFinanciers, year, "REALISE");
+
+export const isYearPrevisionnelle = (
+  indicateursFinanciers: IndicateurFinancierApiType[],
+  year: number
+) => isYearTypeFilled(indicateursFinanciers, year, "PREVISIONNEL");

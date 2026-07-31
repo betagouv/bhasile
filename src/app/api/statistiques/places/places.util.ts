@@ -1,4 +1,6 @@
+import { endOfYearUtc } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
+import { getNow } from "@/app/utils/now.util";
 import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
   PlacesByYearStat,
@@ -17,14 +19,13 @@ import type {
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
-  endOfYearUtc,
   filterByEffectiveVersionAtDate,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   mapTypologieYears,
   resolveStructuresWithTypologieForYear,
-} from "../statistiques.utils";
+} from "../statistiques.util";
 
 type PlacesSpeciales = {
   pmr: number;
@@ -76,8 +77,9 @@ const sumAdressePlacesSpeciales = (
   let logementsSociaux = 0;
 
   for (const adresse of adressesInScope) {
-    qpv += adresse.qpv ?? 0;
-    logementsSociaux += adresse.logementSocial ?? 0;
+    const places = adresse.placesAutorisees ?? 0;
+    qpv += adresse.isQpv ? places : 0;
+    logementsSociaux += adresse.isLogementSocial ? places : 0;
   }
 
   return { qpv, logementsSociaux };
@@ -157,7 +159,7 @@ export const computePlacesStatistiques = (
     structureVersionTimeline,
   } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
-  const now = new Date();
+  const now = getNow();
 
   return {
     ...computePlacesIndicators(
@@ -209,9 +211,9 @@ export const computeTypologieFieldForYear = (
   );
 };
 
-type PlacesAdresseField = "qpv" | "logementSocial";
+type PlacesAdresseField = "isQpv" | "isLogementSocial";
 
-/** Computes a single adresse field (qpv/logementSocial) for one year, for cartographie one-indicator requests. */
+/** Computes a single adresse field (isQpv/isLogementSocial) for one year, for cartographie one-indicator requests. */
 export const computeAdresseFieldForYear = (
   context: StatistiquesAdresseYearContext,
   year: number,
@@ -229,5 +231,11 @@ export const computeAdresseFieldForYear = (
     context.structureVersionTimeline
   );
 
-  return sumValues(adressesInScope.map((adresse) => adresse[field])) ?? 0;
+  return (
+    sumValues(
+      adressesInScope.map((adresse) =>
+        adresse[field] ? (adresse.placesAutorisees ?? 0) : 0
+      )
+    ) ?? 0
+  );
 };

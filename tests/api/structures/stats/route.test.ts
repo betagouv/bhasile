@@ -29,7 +29,7 @@ const lightStructureWithPlaces = (id: number, placesAutorisees: number) =>
         longitude: null,
         structureVersionTransformation: null,
         adresses: [],
-        structureTypologies: [{ year: 2024, placesAutorisees }],
+        placesAutorisees,
         dnaStructures: [],
         structureFinesses: [],
       },

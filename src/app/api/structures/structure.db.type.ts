@@ -19,11 +19,8 @@ export const structureListLightVersionSelect = {
       transformation: { select: { form: { select: { status: true } } } },
     },
   },
+  placesAutorisees: true,
   adresses: { select: { repartition: true } },
-  structureTypologies: {
-    orderBy: { year: "desc" },
-    select: { year: true, placesAutorisees: true },
-  },
   dnaStructures: { select: { dna: { select: { code: true } } } },
   structureFinesses: { select: { finess: { select: { code: true } } } },
 } satisfies Prisma.StructureVersionSelect;
@@ -46,24 +43,19 @@ export const structureListLightSelect = {
       endDate: true,
     },
   },
+  structureTypologies: {
+    select: { year: true, placesAutorisees: true },
+    orderBy: { year: "desc" },
+  },
   structureVersions: { select: structureListLightVersionSelect },
 } satisfies Prisma.StructureSelect;
 
 export const structureListVersionInclude = {
   contacts: true,
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   antennes: true,
   structureFinesses: {
     include: { finess: true },
-  },
-  structureTypologies: {
-    orderBy: { year: "desc" },
   },
   dnaStructures: {
     orderBy: { dna: { code: "asc" } },
@@ -72,13 +64,7 @@ export const structureListVersionInclude = {
 } satisfies Prisma.StructureVersionInclude;
 
 export const structureListInclude = {
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   cpomStructures: {
     include: {
       cpom: {
@@ -110,10 +96,6 @@ export const structureListInclude = {
 } satisfies Prisma.StructureInclude;
 
 export const structureDetailsInclude = {
-  userNotes: {
-    orderBy: { createdAt: "desc" },
-    select: { text: true },
-  },
   dnaStructures: {
     orderBy: { dna: { code: "asc" } },
     include: {
@@ -132,13 +114,7 @@ export const structureDetailsInclude = {
   structureFinesses: {
     include: { finess: true },
   },
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   antennes: true,
   contacts: true,
   structureTypologies: {

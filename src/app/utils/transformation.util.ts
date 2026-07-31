@@ -5,10 +5,9 @@ import {
   TRANSFORMATION_TYPE_SPECS,
   VERIFICATION_STEP_NAME,
 } from "@/config/transformation.config";
-import { CURRENT_YEAR } from "@/constants";
+import { CURRENT_YEAR, PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
-  StructureVersionApiRead,
   StructureVersionTransformationApiRead,
   StructureVersionTransformationApiUpdate,
   TransformationApiRead,
@@ -24,8 +23,8 @@ import {
 } from "@/types/transformation.type";
 
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
-import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getYearFromDate } from "./date.util";
+import { areAllFormStepsValidated } from "./formStep.util";
 import {
   getMillesimeIndexForAYear,
   getMostRecentMillesime,
@@ -53,6 +52,12 @@ export const getStructureVersionTransformationDepartement = (
   structureVersionTransformation?.structureVersion?.structure
     ?.departementAdministratif ??
   undefined;
+
+export const getStructureVersionTransformationOperateur = (
+  structureVersionTransformation?: StructureVersionTransformationApiRead
+): { id: number; name: string } | undefined =>
+  structureVersionTransformation?.operateur ??
+  structureVersionTransformation?.structureVersion?.structure?.operateur;
 
 export const getReferenceStructureVersionTransformation = (
   transformation: TransformationApiRead
@@ -208,9 +213,8 @@ const getStructureVersionTransformationFormStepStatus = (
     return StepStatus.NON_COMMENCE;
   }
   return (
-    form.formSteps.find(
-      (formStep) => formStep.stepDefinition.slug === stepSlug
-    )?.status ?? StepStatus.NON_COMMENCE
+    form.formSteps.find((formStep) => formStep.stepDefinition.slug === stepSlug)
+      ?.status ?? StepStatus.NON_COMMENCE
   );
 };
 
@@ -245,7 +249,10 @@ const getStepsByType = (
     case StructureVersionTransformationType.CONTRACTION:
     case StructureVersionTransformationType.CREATION:
       return [
-        buildStep(StructureVersionTransformationStep.DESCRIPTION, "Description"),
+        buildStep(
+          StructureVersionTransformationStep.DESCRIPTION,
+          "Description"
+        ),
         buildStep(
           StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
           "Places et hébergement"
@@ -257,7 +264,10 @@ const getStepsByType = (
       ];
     case StructureVersionTransformationType.FERMETURE:
       return [
-        buildStep(StructureVersionTransformationStep.DESCRIPTION, "Description"),
+        buildStep(
+          StructureVersionTransformationStep.DESCRIPTION,
+          "Description"
+        ),
       ];
   }
 };
@@ -365,6 +375,9 @@ export const getInitialAntennes = (
 const getEffectiveYear = (effectiveDate: string | null | undefined): number =>
   getYearFromDate(effectiveDate) || CURRENT_YEAR;
 
+export const isEffectiveDateValid = (isoDate: string): boolean =>
+  getYearFromDate(isoDate) >= PLACES_VERSIONED_FROM_YEAR;
+
 const resolveSourceTypologie = <T extends { year: number }>(
   typologies: T[] | undefined,
   year: number | undefined
@@ -373,30 +386,32 @@ const resolveSourceTypologie = <T extends { year: number }>(
     return undefined;
   }
   const index = getMillesimeIndexForAYear(typologies, year);
-  return index >= 0 ? typologies[index] : getMostRecentMillesime(typologies);
+  return index >= 0
+    ? typologies[index]
+    : getMostRecentMillesime(typologies, { canBeFuture: true });
 };
 
 export const getPlacesSource = (
   structureVersionTransformation: StructureVersionTransformationApiRead
-): number | undefined => {
-  const structureVersion = structureVersionTransformation.structureVersion;
-  const typologies = structureVersion?.structure?.structureTypologies;
-  const year = getEffectiveYear(structureVersion?.effectiveDate);
-  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? undefined;
-};
+): number | undefined =>
+  structureVersionTransformation.structureVersion?.structure
+    ?.placesAutorisees ?? undefined;
 
 export const buildTransformationTypologie = (
-  structureVersion?: StructureVersionApiRead
+  structureVersionTransformation?: StructureVersionTransformationApiRead
 ) => {
-  const typologies = structureVersion?.structureTypologies;
+  const structureVersion = structureVersionTransformation?.structureVersion;
   const year = getEffectiveYear(structureVersion?.effectiveDate);
-  const sourceTypologie = resolveSourceTypologie(typologies, year);
+  const declared = resolveSourceTypologie(
+    structureVersionTransformation?.structureTypologies,
+    year
+  );
   return {
     year,
-    placesAutorisees: sourceTypologie?.placesAutorisees,
-    pmr: sourceTypologie?.pmr,
-    lgbt: sourceTypologie?.lgbt,
-    fvvTeh: sourceTypologie?.fvvTeh,
+    placesAutorisees: structureVersion?.placesAutorisees ?? undefined,
+    pmr: declared?.pmr,
+    lgbt: declared?.lgbt,
+    fvvTeh: declared?.fvvTeh,
   };
 };
 
@@ -417,9 +432,11 @@ export const getTransformationDefaultValues = <T>({
   return {
     ...structureVersion,
     type: structureVersionTransformation.structureType,
-    adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
+    adresses: structureVersion?.adresses,
     operateur: structureVersionTransformation.operateur,
-    structureTypologies: [buildTransformationTypologie(structureVersion)],
+    structureTypologies: [
+      buildTransformationTypologie(structureVersionTransformation),
+    ],
     actesAdministratifs: getActesAdministratifsDefaultValues(
       structureVersionTransformation.actesAdministratifs,
       categoryDisplayRules
@@ -489,9 +506,7 @@ export const setStructureVersionTransformationFormStepStatus = (
       : formStep
   );
 
-  const allFormStepsValidated = formSteps.every(
-    (formStep) => formStep.status === StepStatus.VALIDE
-  );
+  const allFormStepsValidated = areAllFormStepsValidated(formSteps);
 
   return {
     ...form,

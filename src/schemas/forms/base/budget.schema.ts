@@ -90,27 +90,6 @@ export const budgetAutoriseeOpenSchema =
 export const budgetSubventionneeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
 export const budgetAutoriseeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
 
-export const budgetSubventionneeOpenYear1Schema = budgetBaseSchema.extend({
-  dotationDemandee: zSafePositiveDecimalsNullish(),
-  dotationAccordee: zSafePositiveDecimalsNullish(),
-  totalProduitsProposes: zSafePositiveDecimalsNullish(),
-  totalProduits: zSafePositiveDecimalsNullish(),
-  totalChargesProposees: zSafePositiveDecimalsNullish(),
-  totalCharges: zSafePositiveDecimalsNullish(),
-  repriseEtat: zSafeDecimalsNullish(),
-  excedentRecupere: zSafePositiveDecimalsNullish(),
-  excedentDeduit: zSafePositiveDecimalsNullish(),
-  fondsDedies: zSafePositiveDecimalsNullish(),
-  affectationReservesFondsDedies: zSafeDecimalsNullish(),
-  reserveInvestissement: zSafeDecimalsNullish(),
-  chargesNonReconductibles: zSafeDecimalsNullish(),
-  reserveCompensationDeficits: zSafeDecimalsNullish(),
-  reserveCompensationBFR: zSafeDecimalsNullish(),
-  reserveCompensationAmortissements: zSafeDecimalsNullish(),
-  reportANouveau: zSafeDecimalsNullish(),
-  autre: zSafeDecimalsNullish(),
-});
-
 export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
   dotationDemandee: zSafePositiveDecimals(),
   dotationAccordee: zSafePositiveDecimals(),
@@ -170,7 +149,6 @@ export type anyBudgetFormValues = Array<
   | z.infer<typeof budgetAutoriseeOpenSchema>
   | z.infer<typeof budgetSubventionneeNotOpenSchema>
   | z.infer<typeof budgetAutoriseeNotOpenSchema>
-  | z.infer<typeof budgetSubventionneeOpenYear1Schema>
   | z.infer<typeof budgetSubventionneeOpenSchema>
   | z.infer<typeof budgetAutoSaveSchema>
 >;

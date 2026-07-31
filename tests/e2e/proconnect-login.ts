@@ -57,23 +57,27 @@ export async function authenticateWithProConnect(
 
   await maybeClickOAuthConsent(page);
 
+  const isManualAuth = process.env.E2E_AUTH_HEADED === "1";
+
+  if (page.url().includes("/users/verify-email")) {
+    if (!isManualAuth) {
+      throw new Error(
+        "ProConnect demande une re-vérification de l'adresse email (code à 10 chiffres envoyé par mail). "
+      );
+    }
+    console.log("ProConnect demande un code de confirmation.");
+  }
+
   const appOrigin = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
   const appHost = new URL(appOrigin).hostname;
 
   await page.waitForURL(
     (url) =>
       url.hostname === appHost &&
-      (url.pathname.includes("/structures") ||
-        url.pathname.startsWith("/api/auth/callback")),
-    { timeout: 120_000 }
+      !url.pathname.startsWith("/connexion") &&
+      !url.pathname.startsWith("/api/auth"),
+    { timeout: isManualAuth ? 600_000 : 120_000 }
   );
-
-  if (page.url().includes("/api/auth/callback")) {
-    await page.waitForURL(
-      (url) => url.hostname === appHost && url.pathname.includes("/structures"),
-      { timeout: 120_000 }
-    );
-  }
 }
 
 async function clickPrimaryLoginSubmit(page: Page): Promise<void> {

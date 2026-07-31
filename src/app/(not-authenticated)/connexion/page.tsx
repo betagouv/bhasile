@@ -12,7 +12,7 @@ export default function Login(): ReactElement {
 
   const login = async (): Promise<void> => {
     signIn("proconnect", {
-      callbackUrl: `${process.env.NEXT_PUBLIC_URL}/structures`,
+      callbackUrl: process.env.NEXT_PUBLIC_URL,
     });
   };
 

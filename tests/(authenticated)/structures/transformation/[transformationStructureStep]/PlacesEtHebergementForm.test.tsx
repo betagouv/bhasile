@@ -58,14 +58,9 @@ const buildStructureVersion = () =>
         codePostal: "75011",
         commune: "Paris",
         repartition: Repartition.COLLECTIF,
-        adresseTypologies: [
-          {
-            year: CURRENT_YEAR,
-            placesAutorisees: 10,
-            qpv: false,
-            logementSocial: false,
-          },
-        ],
+        placesAutorisees: 10,
+        isQpv: false,
+        isLogementSocial: false,
       },
     ],
     structureTypologies: [
@@ -133,7 +128,7 @@ const submit = () =>
 
 const getPutPayloadPlaces = () =>
   getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID)
-    .structureVersion.structureTypologies[0].placesAutorisees;
+    .structureVersion.placesAutorisees;
 
 describe("PlacesEtHebergementForm — contrainte de variation des places", () => {
   beforeEach(() => {

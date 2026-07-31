@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+import { getNow } from "@/app/utils/now.util";
 import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
@@ -36,11 +37,9 @@ export const getPlacesByCommunes = (
     );
 
     if (!existingCommune) {
-      placesByCommune[adresse.commune ?? ""] =
-        adresse.adresseTypologies?.[0]?.placesAutorisees || 0;
+      placesByCommune[adresse.commune ?? ""] = adresse.placesAutorisees || 0;
     } else {
-      placesByCommune[adresse.commune ?? ""] +=
-        adresse.adresseTypologies?.[0]?.placesAutorisees || 0;
+      placesByCommune[adresse.commune ?? ""] += adresse.placesAutorisees || 0;
     }
   }
 
@@ -121,7 +120,7 @@ export const getLastVisitInMonths = (
       ? dayjs(controles[0]?.date)
       : dayjs(evaluations[0]?.date);
   }
-  return dayjs().diff(mostRecentVisit, "month");
+  return dayjs(getNow()).diff(mostRecentVisit, "month");
 };
 
 export const isStructureAutorisee = (
@@ -145,9 +144,7 @@ export const isStructureEligibleForActiviteIndisponibilite = (
 export const isStructureEligibleForActivitePresencesIndues = (
   type: StructureType | string | undefined | null
 ): boolean =>
-  type != null &&
-  type !== StructureType.CAES &&
-  type !== StructureType.CPH;
+  type != null && type !== StructureType.CAES && type !== StructureType.CPH;
 
 export const getCurrentCpomStructure = (
   structure: StructureApiRead
@@ -159,7 +156,7 @@ export const getCurrentCpomStructure = (
     if (!dateStart || !dateEnd) {
       return false;
     }
-    const now = new Date().toISOString();
+    const now = getNow().toISOString();
     return dateStart <= now && dateEnd >= now;
   });
 };
@@ -205,11 +202,24 @@ export const getMillesimeIndexForAYear = <
   }) ?? -1;
 
 export const getMostRecentMillesime = <T extends { year: number }>(
-  millesimes: T[]
-): T =>
-  millesimes.reduce((mostRecent, millesime) =>
+  millesimes: T[] | undefined,
+  {
+    canBeFuture = false,
+    currentYear = CURRENT_YEAR,
+  }: { canBeFuture?: boolean; currentYear?: number } = {}
+): T | undefined => {
+  const eligibleMillesimes = canBeFuture
+    ? millesimes
+    : millesimes?.filter((millesime) => millesime.year <= currentYear);
+
+  if (!eligibleMillesimes?.length) {
+    return undefined;
+  }
+
+  return eligibleMillesimes.reduce((mostRecent, millesime) =>
     millesime.year > mostRecent.year ? millesime : mostRecent
   );
+};
 
 export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
   cpomStructures: CpomStructureApiRead[] | CpomStructureApiWrite[],

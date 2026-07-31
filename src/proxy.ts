@@ -79,8 +79,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const { pathname } = request.nextUrl;
   const isProtected = proConnectProtectedPages.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
+    path === "/" ? pathname === "/" : pathname.startsWith(path)
   );
 
   if (isProtected) {
@@ -105,6 +106,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Pages
+    "/",
     "/structures/:path*",
     "/operateurs/:path*",
     "/statistiques/:path*",

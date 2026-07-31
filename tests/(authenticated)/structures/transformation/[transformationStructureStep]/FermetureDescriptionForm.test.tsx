@@ -94,7 +94,7 @@ describe("FermetureDescriptionForm (intégration jusqu'au fetch)", () => {
     );
 
     // WHEN the agent picks a closure date and submits
-    fillClosureDate(container, "2024-09-30");
+    fillClosureDate(container, "2026-09-30");
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
@@ -114,9 +114,33 @@ describe("FermetureDescriptionForm (intégration jusqu'au fetch)", () => {
     expect(structureVersionTransformation.structureVersion).toEqual({
       id: 12,
       structureId: 104,
-      effectiveDate: "2024-09-30T12:00:00.000Z",
+      effectiveDate: "2026-09-30T12:00:00.000Z",
     });
     expect(structureVersionTransformation.actesAdministratifs).toEqual([]);
+  });
+
+  it("refuse une date de fermeture antérieure au seuil de versionnement", async () => {
+    // GIVEN a fermeture the agent dates before the versioning threshold
+    const { container } = renderForm(
+      fermetureTransformation({ id: 12, structureId: 104 })
+    );
+
+    // WHEN the agent picks a 2025 closure date and submits
+    fillClosureDate(container, "2025-12-31");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN the step is refused inline and nothing reaches the API
+    expect(
+      await screen.findByText(
+        "Il n'est pas possible de déclarer une date d'effet antérieure à 2026 sur Bhasile"
+      )
+    ).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      `/api/transformations/${TRANSFORMATION_ID}`,
+      expect.objectContaining({ method: "PUT" })
+    );
   });
 
   it("navigue quand même vers l'étape suivante quand la date de fermeture est absente", async () => {
@@ -162,7 +186,7 @@ describe("FermetureDescriptionForm (intégration jusqu'au fetch)", () => {
     );
 
     // WHEN the agent picks a closure date and submits
-    fillClosureDate(container, "2024-09-30");
+    fillClosureDate(container, "2026-09-30");
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );

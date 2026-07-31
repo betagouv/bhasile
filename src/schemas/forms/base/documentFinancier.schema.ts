@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  isDocumentRequiredForYear,
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
@@ -93,11 +94,13 @@ export const DocumentsFinanciersStrictSchema = DocumentsFinanciersSchema.extend(
         getYearFromDate(data.date303 ?? data.creationDate)
       );
 
-      years.forEach((year, index) => {
+      years.forEach((year) => {
         if (year >= referenceYear) {
           documents.forEach((document) => {
-            const documentIsRequired =
-              document.required && index >= document.yearIndex;
+            const documentIsRequired = isDocumentRequiredForYear(
+              document,
+              year
+            );
             if (documentIsRequired) {
               const requiredDocument = data.documentsFinanciers?.find(
                 (documentFinancier) =>

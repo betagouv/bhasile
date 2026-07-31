@@ -50,8 +50,7 @@ export const groupStructureStatsByOperateur = (
       structure.structureVersions,
       now
     );
-    const places =
-      currentVersion?.structureTypologies[0]?.placesAutorisees ?? 0;
+    const places = currentVersion?.placesAutorisees ?? 0;
     globalPlaces += places;
 
     if (structure.operateurId === null) {

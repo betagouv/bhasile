@@ -100,13 +100,38 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     localStorage.clear();
   });
 
+  it("refuse une date d'ouverture antérieure au seuil de versionnement", async () => {
+    // GIVEN a creation whose effectiveDate predates the versioning threshold
+    renderForm(FormKind.OUVERTURE_EX_NIHILO, {
+      id: 999,
+      structureId: 42,
+      effectiveDate: "2025-12-31T12:00:00.000Z",
+    });
+
+    // WHEN the agent submits the step
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN the step is refused inline and nothing reaches the API
+    expect(
+      await screen.findByText(
+        "Il n'est pas possible de déclarer une date d'effet antérieure à 2026 sur Bhasile"
+      )
+    ).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      `/api/transformations/${TRANSFORMATION_ID}`,
+      expect.objectContaining({ method: "PUT" })
+    );
+  });
+
   it("lit la date depuis effectiveDate de la version et la renvoie sur effectiveDate (plus de creationDate sur la version)", async () => {
     // GIVEN a creation seeded from a structureVersion whose effectiveDate carries the creation date
     renderForm(FormKind.OUVERTURE_EX_NIHILO, {
       id: 999,
       structureId: 42,
       nom: "Les Coquelicots",
-      effectiveDate: "2024-01-01T00:00:00.000Z",
+      effectiveDate: "2026-01-01T00:00:00.000Z",
     });
 
     // WHEN the agent submits the step
@@ -136,7 +161,7 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     expect(structureVersionTransformation.structureVersion).toMatchObject({
       id: 999,
       nom: "Les Coquelicots",
-      effectiveDate: "2024-01-01T12:00:00.000Z",
+      effectiveDate: "2026-01-01T12:00:00.000Z",
     });
     expect(structureVersionTransformation.structureVersion).not.toHaveProperty(
       "creationDate"

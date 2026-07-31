@@ -51,15 +51,17 @@ export class StructureModificationPage {
     await this.page.getByLabel("Public").selectOption({ label });
   }
 
+  placesAutoriseesInput(yearRowIndex: number): Locator {
+    return this.page.locator(
+      `input[id="structureTypologies.${yearRowIndex}.placesAutorisees"]`
+    );
+  }
+
   async fillPlacesAutorisees(
     yearRowIndex: number,
     value: number
   ): Promise<void> {
-    await this.page
-      .locator(
-        `input[id="structureTypologies.${yearRowIndex}.placesAutorisees"]`
-      )
-      .fill(String(value));
+    await this.placesAutoriseesInput(yearRowIndex).fill(String(value));
   }
 
   async fillDotationDemandee(

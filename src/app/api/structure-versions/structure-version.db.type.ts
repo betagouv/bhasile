@@ -27,19 +27,10 @@ export const currentVersionArgs = (now: Date) =>
 
 export const structureVersionDetailsInclude = {
   contacts: true,
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   antennes: true,
   structureFinesses: {
     include: { finess: true },
-  },
-  structureTypologies: {
-    orderBy: { year: "desc" },
   },
   dnaStructures: {
     orderBy: { dna: { code: "asc" } },
@@ -91,15 +82,7 @@ export type StructureVersionDbTransformation =
         };
       };
       contacts: true;
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc";
-            };
-          };
-        };
-      };
+      adresses: true;
       structureFinesses: {
         include: {
           finess: true;
@@ -108,9 +91,6 @@ export type StructureVersionDbTransformation =
       antennes: true;
       dnaStructures: {
         include: { dna: true };
-      };
-      structureTypologies: {
-        orderBy: { year: "desc" };
       };
     };
   }>;

@@ -2,13 +2,13 @@ import { useParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import {
+  isDocumentRequiredForYear,
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
@@ -39,11 +39,10 @@ export const DocumentsFinanciers = (): ReactElement => {
   });
 
   const numberOfMissingDocuments = yearsToCheck.flatMap((year) => {
-    const yearIndex = DOCUMENTS_FINANCIERS_OPEN_YEAR - year + 1;
     const documentsFinanciers = localStorageValues?.documentsFinanciers ?? [];
 
     return documents.filter((document) => {
-      if (!document.required || document.yearIndex > yearIndex) {
+      if (!isDocumentRequiredForYear(document, year)) {
         return false;
       }
 

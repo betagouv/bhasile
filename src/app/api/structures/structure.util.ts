@@ -10,22 +10,24 @@ import {
   recursivelySerializeDates,
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
-import {
-  type SortKind,
-  sortRows,
-  type SortValue,
-} from "@/app/utils/list.util";
+import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
+import { getNow } from "@/app/utils/now.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
+import { getMostRecentMillesime } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
   PublicType,
   StructureType,
   StructureVersionTransformationType,
 } from "@/generated/prisma/client";
-import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
+import { canUpdateStructure } from "@/lib/casl/abilities";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
-import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import {
+  StructureAgentUpdateApiType,
+  StructureApiRead,
+} from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
+import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import {
   CpomRef,
@@ -53,6 +55,30 @@ const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
   famille: PublicType.FAMILLE,
   "personnes isolées": PublicType.PERSONNES_ISOLEES,
+};
+
+export const getReadableNotes = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["notes"] =>
+  user && canUpdateStructure(user, structure) ? structure.notes : null;
+
+export const getReadableAdresses = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["adresses"] => {
+  if (user && canUpdateStructure(user, structure)) {
+    return structure.adresses;
+  }
+
+  return structure.adresses?.map((adresse) => ({
+    ...adresse,
+    adresse: "",
+    adresseComplete: [adresse.codePostal, adresse.commune]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+  }));
 };
 
 export const convertToPublicType = (
@@ -139,33 +165,27 @@ export const getDatesPeriodeAutorisation = (structure: {
     "ARRETE_AUTORISATION"
   );
 
-const getCurrentPlacesByProperty = (
+const sumPlaces = (
   structure: StructureDbDetails | StructureDbList,
-  accessor: keyof AdresseTypologieApiType
-): number => {
-  const mostRecentYearTypologies = structure.adresses?.map(
-    (adresse) => adresse.adresseTypologies?.[0]
-  );
-  const placesByAccessor = mostRecentYearTypologies?.reduce(
-    (totalCount, currentTypologie) =>
-      totalCount + ((currentTypologie?.[accessor] as number) || 0),
+  isCounted: (adresse: { isQpv: boolean; isLogementSocial: boolean }) => boolean
+): number =>
+  structure.adresses?.reduce(
+    (totalCount, adresse) =>
+      totalCount + (isCounted(adresse) ? (adresse.placesAutorisees ?? 0) : 0),
     0
-  );
-
-  return placesByAccessor || 0;
-};
+  ) || 0;
 
 export const getCurrentPlacesAutorisees = (
   structure: StructureDbDetails | StructureDbList
-) => getCurrentPlacesByProperty(structure, "placesAutorisees");
+) => sumPlaces(structure, () => true);
 
 export const getCurrentPlacesQpv = (
   structure: StructureDbDetails | StructureDbList
-) => getCurrentPlacesByProperty(structure, "qpv");
+) => sumPlaces(structure, (adresse) => adresse.isQpv);
 
 export const getCurrentPlacesLogementsSociaux = (
   structure: StructureDbDetails | StructureDbList
-) => getCurrentPlacesByProperty(structure, "logementSocial");
+) => sumPlaces(structure, (adresse) => adresse.isLogementSocial);
 
 export const isStructureInCpom = (
   structure: StructureDbDetails | StructureDbList,
@@ -203,9 +223,7 @@ export const isStructureInCpomPerYear = (
 
 export const isFinalisationFormValidated = (
   forms:
-    | { status: boolean; formDefinition: { slug: string } }[]
-    | null
-    | undefined
+    { status: boolean; formDefinition: { slug: string } }[] | null | undefined
 ): boolean =>
   forms?.some(
     (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG && form.status
@@ -304,12 +322,16 @@ export const computeStructureListRow = (
     departementAdministratif: currentVersion.departementAdministratif,
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
-    placesAutorisees:
-      currentVersion.structureTypologies[0]?.placesAutorisees ?? null,
+    placesAutorisees: currentVersion.placesAutorisees ?? null,
     latestNonNullPlacesAutorisees:
-      currentVersion.structureTypologies.find(
-        (typologie) => typologie.placesAutorisees !== null
-      )?.placesAutorisees ?? null,
+      currentVersion.placesAutorisees ??
+      getMostRecentMillesime(
+        structure.structureTypologies.filter(
+          (typologie) => typologie.placesAutorisees != null
+        ),
+        { currentYear: now.getFullYear() }
+      )?.placesAutorisees ??
+      null,
     finConvention: getDatesConvention(structure)[1],
     latitude: currentVersion.latitude,
     longitude: currentVersion.longitude,
@@ -677,7 +699,7 @@ const buildCpomEvents = (
 export const buildStructureHistory = (
   structure: StructureDbDetails,
   cpomStructures: CpomStructureApiRead[],
-  now: Date = new Date()
+  now: Date = getNow()
 ): HistoryEvent[] => {
   const validVersions = getValidVersions(
     structure.structureVersions ?? [],
@@ -695,7 +717,7 @@ export const buildStructureHistory = (
 
 export const buildUpcomingTransformations = (
   structure: StructureDbDetails,
-  now: Date = new Date()
+  now: Date = getNow()
 ): UpcomingTransformation[] => {
   const lowerBound = startOfNextUtcDay(now);
 

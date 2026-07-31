@@ -1,5 +1,17 @@
+import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { DocumentFinancierCategory } from "@/types/document-financier.type";
+
+export const filterDocumentsFinanciersForApi = (
+  documentsFinanciers: DocumentsFinanciersFlexibleFormValues["documentsFinanciers"]
+): DocumentFinancierApiType[] =>
+  (documentsFinanciers?.filter(
+    (documentFinancier) =>
+      documentFinancier.fileUploads?.[0]?.key &&
+      documentFinancier.category &&
+      documentFinancier.granularity
+  ) ?? []) as DocumentFinancierApiType[];
 
 export const getCategoryLabel = (
   category: ActeAdministratifCategory | DocumentFinancierCategory | undefined

@@ -3,7 +3,6 @@ import readXlsxFile, {
   SchemaParseCellValueError,
 } from "read-excel-file/browser";
 
-import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 
@@ -37,14 +36,9 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
         departement: String(row.codePostal).substring(0, 2),
         repartition:
           repartitionColumnIndex === -1 ? Repartition.DIFFUS : row.repartition,
-        adresseTypologies: [
-          {
-            placesAutorisees: row.placesAutorisees,
-            year: CURRENT_YEAR,
-            qpv: row.qpv?.toLowerCase() === "oui",
-            logementSocial: row.logementSocial?.toLowerCase() === "oui",
-          },
-        ],
+        placesAutorisees: row.placesAutorisees,
+        isQpv: row.qpv?.toLowerCase() === "oui",
+        isLogementSocial: row.logementSocial?.toLowerCase() === "oui",
       } as unknown as FormAdresse;
       adresses.push(adresse);
     });

@@ -4,10 +4,13 @@ import dayjs from "dayjs";
 
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
 
+import { getNow } from "./now.util";
+
 dayjs.locale("fr");
 
 export const formatDate = (
-  date: Date | string | number | undefined
+  date: Date | string | number | undefined,
+  options: Intl.DateTimeFormatOptions = {}
 ): string => {
   if (!date) {
     return "N/D";
@@ -18,7 +21,7 @@ export const formatDate = (
     }
   }
   const dateObject = date instanceof Date ? date : new Date(date);
-  return dateObject.toLocaleDateString("fr-FR");
+  return dateObject.toLocaleDateString("fr-FR", options);
 };
 
 /** Dernier jour du mois à midi UTC (depuis date ou mois/année). */
@@ -27,6 +30,10 @@ export const endOfMonthUtcFromMonth = (year: number, month: number): Date =>
 
 export const endOfMonthUtcFromDate = (date: Date): Date =>
   endOfMonthUtcFromMonth(date.getUTCFullYear(), date.getUTCMonth() + 1);
+
+/** 31 décembre à minuit UTC de l'année. */
+export const endOfYearUtc = (year: number): Date =>
+  new Date(Date.UTC(year, 11, 31));
 
 export const formatDateToIsoString = (
   val: string | undefined | null
@@ -53,7 +60,7 @@ export const formatDateToIsoString = (
   return undefined;
 };
 
-export const startOfUtcDay = (reference: Date = new Date()): Date => {
+export const startOfUtcDay = (reference: Date = getNow()): Date => {
   const startDay = new Date(reference);
   startDay.setUTCHours(0, 0, 0, 0);
   return startDay;
@@ -86,7 +93,7 @@ export const getMonthsBetween = (
 
 export const getLastMonths = (numberOfMonths: number): dayjs.Dayjs[] => {
   return Array.from({ length: numberOfMonths }, (_, index) => {
-    return dayjs().subtract(index, "month");
+    return dayjs(getNow()).subtract(index, "month");
   }).reverse();
 };
 
@@ -189,7 +196,7 @@ export const getElapsedPercentage = ({
   dateStart: string;
   dateEnd: string;
 }): number => {
-  const now = dayjs();
+  const now = dayjs(getNow());
   const start = dayjs(dateStart);
   const end = dayjs(dateEnd);
 

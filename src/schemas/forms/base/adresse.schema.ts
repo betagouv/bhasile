@@ -1,18 +1,7 @@
 import z from "zod";
 
-import {
-  zId,
-  zSafePositiveIntegerNullish,
-  zSafeYear,
-} from "@/app/utils/zodCustomFields";
+import { zId, zSafePositiveIntegerNullish } from "@/app/utils/zodCustomFields";
 import { Repartition } from "@/types/adresse.type";
-
-const adresseTypologieSchema = z.object({
-  year: zSafeYear(),
-  placesAutorisees: zSafePositiveIntegerNullish(),
-  qpv: z.boolean().optional(),
-  logementSocial: z.boolean().optional(),
-});
 
 const adresseSchema = z.object({
   id: zId(),
@@ -23,7 +12,9 @@ const adresseSchema = z.object({
   commune: z.string().min(1),
   departement: z.string().optional(),
   repartition: z.enum(Repartition),
-  adresseTypologies: z.array(adresseTypologieSchema).optional(),
+  placesAutorisees: zSafePositiveIntegerNullish(),
+  isQpv: z.boolean().optional(),
+  isLogementSocial: z.boolean().optional(),
 });
 
 const adresseWithPlacesRequired = adresseSchema.check(
@@ -31,9 +22,9 @@ const adresseWithPlacesRequired = adresseSchema.check(
     if (
       adresse.adresseComplete &&
       adresse.adresseComplete.trim() !== "" &&
-      (adresse.adresseTypologies?.[0]?.placesAutorisees === undefined ||
-        adresse.adresseTypologies?.[0]?.placesAutorisees === null ||
-        adresse.adresseTypologies?.[0]?.placesAutorisees === 0)
+      (adresse.placesAutorisees === undefined ||
+        adresse.placesAutorisees === null ||
+        adresse.placesAutorisees === 0)
     ) {
       ctx.addIssue({
         code: "custom",
@@ -58,9 +49,9 @@ export const typeBatiAndAdressesSchema = typeBatiSchema
   .refine((data) => {
     return data.adresses.some(
       (adresse) =>
-        adresse.adresseTypologies?.[0]?.placesAutorisees !== undefined &&
-        adresse.adresseTypologies?.[0]?.placesAutorisees !== null &&
-        adresse.adresseTypologies?.[0]?.placesAutorisees !== 0
+        adresse.placesAutorisees !== undefined &&
+        adresse.placesAutorisees !== null &&
+        adresse.placesAutorisees !== 0
     );
   }, "Au moins une adresse doit avoir des places")
   .check(
@@ -93,7 +84,9 @@ const adresseAutoSaveSchema = z.object({
   commune: z.string().optional(),
   departement: z.string().optional(),
   repartition: z.enum(Repartition).optional(),
-  adresseTypologies: z.array(adresseTypologieSchema.partial()).optional(),
+  placesAutorisees: zSafePositiveIntegerNullish(),
+  isQpv: z.boolean().optional(),
+  isLogementSocial: z.boolean().optional(),
 });
 
 export const typeBatiAndAdressesAutoSaveSchema = z.object({
@@ -101,8 +94,6 @@ export const typeBatiAndAdressesAutoSaveSchema = z.object({
   sameAddress: z.boolean().optional(),
   adresses: z.array(adresseAutoSaveSchema).optional(),
 });
-
-export type FormAdresseTypologie = z.infer<typeof adresseTypologieSchema>;
 
 export type FormAdresse = z.infer<typeof adresseSchema>;
 

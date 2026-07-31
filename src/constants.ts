@@ -1,3 +1,4 @@
+import { getNow } from "./app/utils/now.util";
 import { Departement, Region } from "./types/departement.type";
 import { StructureType } from "./types/structure.type";
 
@@ -21,20 +22,36 @@ export const SHORT_PAGE_SIZE = 6;
 
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
-export const THREE_MONTHS_IN_SECONDS = 60 * 60 * 24 * 31 * 3;
 
 export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 
 export const START_YEAR = 2021;
 
-export const CURRENT_YEAR = new Date().getFullYear();
+export const CURRENT_YEAR = getNow().getFullYear();
 
-export const DOCUMENTS_FINANCIERS_OPEN_YEAR = 2025;
+export const DEFAULT_CARTOGRAPHIE_ANNEE = CURRENT_YEAR - 1;
 
-export const INDICATEUR_FINANCIER_CUTOFF_YEAR = 2024;
+export const PLACES_VERSIONED_FROM_YEAR =
+  Number(process.env.NEXT_PUBLIC_PLACES_VERSIONED_FROM_YEAR) || 2026;
 
-export const AUTORISEE_OPEN_YEAR = 2025;
-export const SUBVENTIONNEE_OPEN_YEAR = 2024;
+export const DOCUMENTS_FINANCIERS_OPEN_YEAR =
+  Number(process.env.NEXT_PUBLIC_DOCUMENTS_FINANCIERS_OPEN_YEAR) || 2025;
+
+export const INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR = 2024;
+
+export const INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE =
+  Number(process.env.NEXT_PUBLIC_INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE) ||
+  2024;
+
+export const INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE =
+  Number(
+    process.env.NEXT_PUBLIC_INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE
+  ) || 2024;
+
+export const AUTORISEE_OPEN_YEAR =
+  Number(process.env.NEXT_PUBLIC_AUTORISEE_OPEN_YEAR) || 2025;
+export const SUBVENTIONNEE_OPEN_YEAR =
+  Number(process.env.NEXT_PUBLIC_SUBVENTIONNEE_OPEN_YEAR) || 2024;
 
 export const EXCLUDED_STRUCTURE_TYPES = [StructureType.PRAHDA, "NH"] as const;
 

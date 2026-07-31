@@ -5,6 +5,7 @@ import { ReactElement, useEffect, useState } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
 import { formatDate, getElapsedPercentage } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 
 export const DateBar = ({ datePair }: Props): ReactElement => {
   const [percentage, setPercentage] = useState<number | null>(null);
@@ -14,8 +15,8 @@ export const DateBar = ({ datePair }: Props): ReactElement => {
     setPercentage(percentage);
   }, [datePair]);
 
-  const isLessThan3Months = dayjs(datePair.dateEnd).diff(dayjs(), "month") < 3;
-  const isConventionExpiree = dayjs(datePair.dateEnd).isBefore(dayjs());
+  const isLessThan3Months = dayjs(datePair.dateEnd).diff(dayjs(getNow()), "month") < 3;
+  const isConventionExpiree = dayjs(datePair.dateEnd).isBefore(dayjs(getNow()));
 
   return (
     <>
