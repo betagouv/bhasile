@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/05-documents/page";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationValidStructure } from "../../../../../test-utils/structure.factory";
@@ -76,6 +77,46 @@ describe("FinalisationDocuments page integration", () => {
       nextRoute: "06-notes",
       mockRouterPush,
     });
+  });
+
+  it("valide l'étape sans acte propre quand le CPOM porte déjà les arrêtés du type de la structure", async () => {
+    // GIVEN
+    const base = createFinalisationValidStructure(78);
+    const structure = {
+      ...base,
+      actesAdministratifs: [],
+      cpomStructures: [
+        {
+          cpom: {
+            actesAdministratifs: [
+              {
+                id: 10,
+                category: "ARRETE_AUTORISATION" as const,
+                structureType: base.type,
+                parentId: null,
+                fileUploads: [{ id: 10, key: "arrete-autorisation-cpom" }],
+              },
+              {
+                id: 11,
+                category: "ARRETE_TARIFICATION" as const,
+                structureType: base.type,
+                parentId: null,
+                fileUploads: [{ id: 11, key: "arrete-tarification-cpom" }],
+              },
+            ],
+          },
+        },
+      ] as unknown as StructureApiRead["cpomStructures"],
+    };
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
+
+    // WHEN
+    await clickButtonByName("Je valide la saisie de cette page");
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
   });
 
   it("sauvegarde automatiquement les données des documents après le debounce", async () => {

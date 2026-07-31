@@ -108,37 +108,50 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     }
   );
 
-const acteAdministratifAutoriseesSchema = acteAdministratifSchema.refine(
-  (data) => {
-    const isNotAvenant = !data.parentId && !data.parentUuid;
-    if (
-      (data.category === "ARRETE_AUTORISATION" ||
-        data.category === "ARRETE_TARIFICATION") &&
-      isNotAvenant
-    ) {
-      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+// coveredCategories : catégories déjà portées par un CPOM de la structure, qui
+// cessent donc d'être exigées d'elle.
+const getActeAdministratifAutoriseesSchema = (
+  coveredCategories: Set<ActeAdministratifCategory>
+) =>
+  acteAdministratifSchema.refine(
+    (data) => {
+      const isNotAvenant = !data.parentId && !data.parentUuid;
+      if (
+        (data.category === "ARRETE_AUTORISATION" ||
+          data.category === "ARRETE_TARIFICATION") &&
+        isNotAvenant &&
+        !coveredCategories.has(data.category)
+      ) {
+        return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+      }
+      return true;
+    },
+    {
+      error: "Ces documents sont obligatoires.",
+      path: ["fileUploads"],
     }
-    return true;
-  },
-  {
-    error: "Ces documents sont obligatoires.",
-    path: ["fileUploads"],
-  }
-);
+  );
 
-const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
-  (data) => {
-    const isNotAvenant = !data.parentId && !data.parentUuid;
-    if (data.category === "CONVENTION" && isNotAvenant) {
-      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+const getActeAdministratifSubventionneesSchema = (
+  coveredCategories: Set<ActeAdministratifCategory>
+) =>
+  acteAdministratifSchema.refine(
+    (data) => {
+      const isNotAvenant = !data.parentId && !data.parentUuid;
+      if (
+        data.category === "CONVENTION" &&
+        isNotAvenant &&
+        !coveredCategories.has(data.category)
+      ) {
+        return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+      }
+      return true;
+    },
+    {
+      error: "Ces documents sont obligatoires.",
+      path: ["fileUploads"],
     }
-    return true;
-  },
-  {
-    error: "Ces documents sont obligatoires.",
-    path: ["fileUploads"],
-  }
-);
+  );
 
 export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   (data) => {
@@ -175,18 +188,45 @@ export const filterActesWithKey =
         )
       : val;
 
-export const actesAdministratifsAutoriseesSchema = z.object({
-  actesAdministratifs: z.preprocess(
-    filterActesWithKey(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION"]),
-    z.array(acteAdministratifAutoriseesSchema).optional()
-  ),
-});
-export const actesAdministratifsSubventionneesSchema = z.object({
-  actesAdministratifs: z.preprocess(
-    filterActesWithKey(["CONVENTION"]),
-    z.array(acteAdministratifSubventionneesSchema).optional()
-  ),
-});
+// Une catégorie exigée garde sa ligne vide pour être contrôlée ; une catégorie
+// dispensée retombe sur la règle commune et sa ligne vide est écartée — le
+// formulaire pose sinon un fileUploads: [{ id: "" }] qui échoue au typage.
+const getRequiredCategories = (
+  categories: ActeAdministratifCategory[],
+  coveredCategories: Set<ActeAdministratifCategory>
+): ActeAdministratifCategory[] =>
+  categories.filter((category) => !coveredCategories.has(category));
+
+export const getActesAdministratifsAutoriseesSchema = (
+  coveredCategories: Set<ActeAdministratifCategory>
+) =>
+  z.object({
+    actesAdministratifs: z.preprocess(
+      filterActesWithKey(
+        getRequiredCategories(
+          ["ARRETE_AUTORISATION", "ARRETE_TARIFICATION"],
+          coveredCategories
+        )
+      ),
+      z
+        .array(getActeAdministratifAutoriseesSchema(coveredCategories))
+        .optional()
+    ),
+  });
+
+export const getActesAdministratifsSubventionneesSchema = (
+  coveredCategories: Set<ActeAdministratifCategory>
+) =>
+  z.object({
+    actesAdministratifs: z.preprocess(
+      filterActesWithKey(
+        getRequiredCategories(["CONVENTION"], coveredCategories)
+      ),
+      z
+        .array(getActeAdministratifSubventionneesSchema(coveredCategories))
+        .optional()
+    ),
+  });
 
 export const actesAdministratifsTransformationSchema = z.object({
   actesAdministratifs: z.preprocess(
@@ -221,8 +261,7 @@ export type ActeAdministratifFormValues = z.infer<
 >;
 
 export type ActesAdministratifsFormValues = z.infer<
-  | typeof actesAdministratifsAutoriseesSchema
-  | typeof actesAdministratifsSubventionneesSchema
+  ReturnType<typeof getActesAdministratifsAutoriseesSchema>
 >;
 
 export type ActesAdministratifsAutoSaveFormValues = z.infer<

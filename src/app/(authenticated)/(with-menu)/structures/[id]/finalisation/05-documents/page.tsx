@@ -7,16 +7,19 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
+import {
+  getCpomCoveredActeCategories,
+  relaxCoveredCategories,
+} from "@/app/utils/acteAdministratif.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
 import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
-  actesAdministratifsAutoriseesSchema,
   ActesAdministratifsAutoSaveFormValues,
   actesAdministratifsAutoSaveSchema,
-  actesAdministratifsSubventionneesSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
+import { getActesAdministratifsSchema } from "@/schemas/forms/base/getActesAdministratifsSchema";
 import { StepStatus } from "@/types/form.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -32,12 +35,7 @@ export default function FinalisationQualite() {
     structure
   );
 
-  let schema;
-  if (structure.isAutorisee) {
-    schema = actesAdministratifsAutoriseesSchema;
-  } else {
-    schema = actesAdministratifsSubventionneesSchema;
-  }
+  const schema = getActesAdministratifsSchema(structure);
 
   const { handleValidation, handleAutoSave } = useAgentFormHandling({
     currentStep,
@@ -63,8 +61,10 @@ export default function FinalisationQualite() {
     ?.sort((a, b) => `${a ?? ""}`.localeCompare(`${b ?? ""}`))
     ?.join(",");
 
-  const categoriesRules =
-    getStructureActesAdministratifsCategoryToDisplay(structure);
+  const categoriesRules = relaxCoveredCategories(
+    getStructureActesAdministratifsCategoryToDisplay(structure),
+    getCpomCoveredActeCategories(structure)
+  );
 
   return (
     <>

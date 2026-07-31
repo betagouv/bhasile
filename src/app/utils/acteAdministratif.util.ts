@@ -11,6 +11,7 @@ import {
   ResolvedAvenantParent,
 } from "@/config/acte-administratif.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import {
   ActeAdministratifCategory,
@@ -27,6 +28,61 @@ export const getActeDisplayCategory = (
 export const hasDownloadableFile = (
   acteAdministratif: ActeAdministratifApiType
 ): boolean => Boolean(acteAdministratif.fileUploads?.[0]?.key);
+
+export const getCpomInheritedActes = (
+  structure: StructureApiRead
+): {
+  cpomLevel: ActeAdministratifApiType[];
+  typeScoped: ActeAdministratifApiType[];
+} => {
+  const inheritedActes =
+    structure.cpomStructures
+      ?.flatMap(
+        (cpomStructure) => cpomStructure.cpom?.actesAdministratifs ?? []
+      )
+      .filter(
+        (acteAdministratif) =>
+          !acteAdministratif.structureType ||
+          acteAdministratif.structureType === structure.type
+      ) ?? [];
+
+  return {
+    cpomLevel: inheritedActes.filter(
+      (acteAdministratif) => !acteAdministratif.structureType
+    ),
+    typeScoped: inheritedActes.filter(
+      (acteAdministratif) => !!acteAdministratif.structureType
+    ),
+  };
+};
+
+// Un acte porté par le CPOM pour le type de la structure dispense celle-ci de
+// le fournir. Seuls les actes de premier niveau et effectivement documentés
+// comptent : un avenant ou une ligne sans fichier ne prouve rien.
+export const getCpomCoveredActeCategories = (
+  structure: StructureApiRead
+): Set<ActeAdministratifCategory> =>
+  new Set(
+    getCpomInheritedActes(structure)
+      .typeScoped.filter(
+        (acteAdministratif) =>
+          !acteAdministratif.parentId && hasDownloadableFile(acteAdministratif)
+      )
+      .map(getActeDisplayCategory)
+  );
+
+export const relaxCoveredCategories = (
+  categoryRules: CategoryDisplayRules,
+  coveredCategories: Set<ActeAdministratifCategory>
+): CategoryDisplayRules =>
+  Object.fromEntries(
+    Object.entries(categoryRules).map(([category, rule]) => [
+      category,
+      coveredCategories.has(category as ActeAdministratifCategory)
+        ? { ...rule, isOptional: true }
+        : rule,
+    ])
+  );
 
 export const getActesCategoriesToDisplay = (
   actesAdministratifs: ActeAdministratifApiType[] | undefined
