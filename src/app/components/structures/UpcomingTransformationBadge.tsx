@@ -16,7 +16,7 @@ export const UpcomingTransformationBadge = ({
   transformation,
 }: Props) => {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full bg-contrast-grey px-3 py-1 text-sm text-title-blue-france">
+    <span className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-contrast-grey px-3 py-1 text-sm text-title-blue-france">
       <StructureEventIcon kind={transformation.kind} size="sm" />
       <span>
         {LABEL_BY_KIND[transformation.kind]}{" "}

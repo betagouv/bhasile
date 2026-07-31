@@ -1,3 +1,4 @@
+import { getNow } from "@/app/utils/now.util";
 import { Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
@@ -15,11 +16,15 @@ import {
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
+import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import {
   currentVersionArgs,
   currentVersionWhere,
 } from "../structure-versions/structure-version.db.type";
-import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
+import {
+  createOrUpdateStructureVersion,
+  mirrorLegacyPlacesToBaseVersions,
+} from "../structure-versions/structure-version.repository";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbList,
@@ -88,6 +93,15 @@ export const findStructureDepartement = async (
   };
 };
 
+export const findValidatedActualisationForm = (
+  structureId: number,
+  slug: string
+): Promise<{ id: number } | null> =>
+  prisma.form.findFirst({
+    where: { structureId, status: true, formDefinition: { slug } },
+    select: { id: true },
+  });
+
 export const findOne = async (id: number) => {
   const structure = await prisma.structure.findFirstOrThrow({
     where: {
@@ -112,7 +126,7 @@ const writeToCurrentVersion = async (
   const currentVersion = await tx.structureVersion.findFirst({
     where: {
       structureId: structure.id,
-      ...currentVersionWhere(new Date()),
+      ...currentVersionWhere(getNow()),
     },
     orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
     select: { id: true, effectiveDate: true },
@@ -142,7 +156,8 @@ const writeToCurrentVersion = async (
 
 export const updateOne = async (
   structure: StructureAgentUpdateApiType,
-  isOperateurUpdate: boolean = false
+  isOperateurUpdate: boolean = false,
+  options: { skipActesOrphanDelete?: boolean } = {}
 ): Promise<Structure> => {
   const {
     budgets,
@@ -153,6 +168,7 @@ export const updateOne = async (
     evaluations,
     forms,
     structureMillesimes,
+    structureTypologies,
   } = structure;
 
   return await prisma.$transaction(
@@ -174,12 +190,23 @@ export const updateOne = async (
       await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
         structureId: structure.id,
       });
-      await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
-        structureId: structure.id,
-      });
+      await createOrUpdateActesAdministratifs(
+        tx,
+        actesAdministratifs,
+        { structureId: structure.id },
+        { skipOrphanDelete: options.skipActesOrphanDelete }
+      );
       await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
         structureId: structure.id,
       });
+      await createOrUpdateStructureTypologies(tx, structureTypologies, {
+        structureId: structure.id,
+      });
+      if (structureTypologies?.length) {
+        await mirrorLegacyPlacesToBaseVersions(tx, {
+          structureId: structure.id,
+        });
+      }
       await createOrUpdateControles(tx, controles, structure.id);
       await createOrUpdateForms(tx, forms, { structureId: structure.id });
       await createOrUpdateEvaluations(tx, evaluations, structure.id);

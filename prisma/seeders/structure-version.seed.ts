@@ -1,6 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import {
   ActeAdministratifCategory,
   Prisma,
@@ -27,6 +28,22 @@ import { createFakeStructureTypologie } from "./structure-typologie.seed";
 export type FormDefInfo = { id: number; stepDefinitionIds: number[] };
 export type FormDefLookup = Map<string, FormDefInfo>;
 
+export type Coordinates = { latitude: number; longitude: number };
+
+const STRUCTURE_ZONE = {
+  minLatitude: 43.550851,
+  maxLatitude: 49.131627,
+  minLongitude: -0.851371,
+  maxLongitude: 5.843377,
+};
+
+export const COLOCATED_COORDINATES: Coordinates = {
+  latitude: STRUCTURE_ZONE.maxLatitude - 0.05,
+  longitude: STRUCTURE_ZONE.minLongitude + 0.05,
+};
+
+export const COLOCATED_STRUCTURES_COUNT = 4;
+
 export type SeedStructureParams = {
   operateurId: number;
   codeBhasile: string;
@@ -38,6 +55,7 @@ export type SeedStructureParams = {
   formDefs: FormDefLookup;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
+  coordinates?: Coordinates;
 };
 
 export type SeededStructure = { structureId: number; currentVersionId: number };
@@ -45,7 +63,7 @@ export type SeededStructure = { structureId: number; currentVersionId: number };
 type TransfoKind = "EXTENSION" | "CONTRACTION" | "FERMETURE";
 
 type VersionSpec =
-  | { provenance: "CAMPAIGN" | "CREATION"; effectiveDate: Date; places: number }
+  | { provenance: "INITIALE" | "CREATION"; effectiveDate: Date; places: number }
   | {
       provenance: "TRANSFO";
       transfoType: TransfoKind;
@@ -88,7 +106,7 @@ const planStructureHistory = (
     return {
       creationDate,
       versions: [
-        { provenance: "CAMPAIGN", effectiveDate: creationDate, places: 0 },
+        { provenance: "INITIALE", effectiveDate: creationDate, places: 0 },
       ],
     };
   }
@@ -99,7 +117,7 @@ const planStructureHistory = (
   let places = faker.number.int({ min: 20, max: 150 });
   const versions: VersionSpec[] = [
     {
-      provenance: startsByCreationTranformation ? "CREATION" : "CAMPAIGN",
+      provenance: startsByCreationTranformation ? "CREATION" : "INITIALE",
       effectiveDate: creationDate,
       places,
     },
@@ -111,7 +129,11 @@ const planStructureHistory = (
   const endsInFuture =
     nbTransfos > 0 && faker.datatype.boolean({ probability: 0.27 });
 
-  let cursor = creationDate;
+  const versionRegimeStart = new Date(
+    Date.UTC(PLACES_VERSIONED_FROM_YEAR, 0, 1)
+  );
+  let cursor =
+    creationDate > versionRegimeStart ? creationDate : versionRegimeStart;
   for (let index = 0; index < nbTransfos; index++) {
     const isLast = index === nbTransfos - 1;
 
@@ -177,7 +199,8 @@ type VersionScalars = {
 
 const buildVersionScalars = (
   departementAdministratif: string,
-  ofii: boolean
+  ofii: boolean,
+  coordinates?: Coordinates
 ): VersionScalars => {
   const base: VersionScalars = {
     nom: faker.lorem.words(2),
@@ -196,10 +219,18 @@ const buildVersionScalars = (
     communeAdministrative: faker.location.city(),
     codePostalAdministratif: faker.location.zipCode(),
     latitude: new Prisma.Decimal(
-      faker.location.latitude({ min: 43.550851, max: 49.131627 })
+      coordinates?.latitude ??
+        faker.location.latitude({
+          min: STRUCTURE_ZONE.minLatitude,
+          max: STRUCTURE_ZONE.maxLatitude,
+        })
     ),
     longitude: new Prisma.Decimal(
-      faker.location.longitude({ min: -0.851371, max: 5.843377 })
+      coordinates?.longitude ??
+        faker.location.longitude({
+          min: STRUCTURE_ZONE.minLongitude,
+          max: STRUCTURE_ZONE.maxLongitude,
+        })
     ),
     public: faker.helpers.enumValue(PublicType),
     notes: faker.lorem.lines(2),
@@ -254,34 +285,22 @@ const buildVersionCommon = (
   scalars: VersionScalars,
   effectiveDate: Date,
   places: number,
-  typologieSpecs: TypologieSpec[],
   contacts: StableContacts,
-  ofii: boolean
+  ofii: boolean,
+  placesAutorisees: number | null = places
 ) => {
-  const base = { effectiveDate, ...scalars };
+  const base = { effectiveDate, placesAutorisees, ...scalars };
 
   if (ofii) {
     return base;
   }
 
-  const typologies = typologieSpecs.map((spec) =>
-    createFakeStructureTypologie({
-      year: spec.year,
-      placesAutorisees: spec.placesAutorisees,
-    })
-  );
   const adresses = createFakeAdresses({ placesAutorisees: places });
 
   return {
     ...base,
     contacts: { create: contacts.map(stripVersionId) },
-    structureTypologies: { create: typologies.map(stripVersionId) },
-    adresses: {
-      create: adresses.map(({ adresseTypologies, ...adresse }) => ({
-        ...stripVersionId(adresse),
-        adresseTypologies: { create: adresseTypologies },
-      })),
-    },
+    adresses: { create: adresses.map(stripVersionId) },
   };
 };
 
@@ -353,6 +372,7 @@ const buildNonVersionedRelations = (params: {
   creationDate: Date;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
+  typologieSpecs: TypologieSpec[];
 }): Record<string, unknown> => {
   const finalisationForm = createFakeFormWithSteps(
     params.finalisationFormDefId,
@@ -367,6 +387,12 @@ const buildNonVersionedRelations = (params: {
       createFakeDocumentFinancier()
     ),
     forms: [finalisationForm],
+    structureTypologies: params.typologieSpecs.map((spec) =>
+      createFakeStructureTypologie({
+        year: spec.year,
+        placesAutorisees: spec.placesAutorisees,
+      })
+    ),
   };
 
   if (!params.isFinalised) {
@@ -379,7 +405,7 @@ const buildNonVersionedRelations = (params: {
   relations.indicateursFinanciers = [
     createFakeIndicateurFinancier({ year: 2026, type: "PREVISIONNEL" }),
     createFakeIndicateurFinancier({ year: 2025, type: "PREVISIONNEL" }),
-    createFakeIndicateurFinancier({ year: 2024, type: "PREVISIONNEL" }),
+    createFakeIndicateurFinancier({ year: 2024, type: "REALISE" }),
     createFakeIndicateurFinancier({ year: 2023, type: "REALISE" }),
     createFakeIndicateurFinancier({ year: 2022, type: "REALISE" }),
     createFakeIndicateurFinancier({ year: 2021, type: "REALISE" }),
@@ -425,7 +451,6 @@ const persistTransformation = async (
     effectiveDate: Date;
     places: number;
     scalars: VersionScalars;
-    typologieSpecs: TypologieSpec[];
     contacts: StableContacts;
     formDefs: FormDefLookup;
   }
@@ -442,9 +467,9 @@ const persistTransformation = async (
     params.scalars,
     params.effectiveDate,
     params.places,
-    params.typologieSpecs,
     params.contacts,
-    false
+    false,
+    params.svtType === "FERMETURE" ? null : params.places
   );
 
   const structureVersion: Prisma.StructureVersionUncheckedCreateWithoutStructureVersionTransformationInput =
@@ -534,7 +559,8 @@ export const seedStructureWithVersions = async (
   const plan = planStructureHistory(params.ofii, params.now);
   const scalars = buildVersionScalars(
     params.departementAdministratif,
-    params.ofii
+    params.ofii,
+    params.coordinates
   );
   const contacts: StableContacts = params.ofii
     ? []
@@ -542,18 +568,14 @@ export const seedStructureWithVersions = async (
         createFakeContact()
       );
 
-  const typologieSpecsUpTo = (versionIndex: number): TypologieSpec[] =>
-    params.ofii
-      ? []
-      : buildTypologieSpecs(
-          plan.versions.slice(0, versionIndex + 1),
-          plan.creationDate,
-          params.now
-        );
+  const typologieSpecs: TypologieSpec[] = params.ofii
+    ? []
+    : buildTypologieSpecs(plan.versions, plan.creationDate, params.now);
 
   const nonVersioned = params.ofii
     ? {}
     : buildNonVersionedRelations({
+        typologieSpecs,
         type: params.type,
         isFinalised: params.isFinalised,
         creationDate: plan.creationDate,
@@ -566,15 +588,11 @@ export const seedStructureWithVersions = async (
 
   let structureId: number;
 
-  if (initial.provenance === "CAMPAIGN") {
-    const campaign = await prisma.campaign.create({
-      data: { name: "initialisation" },
-    });
+  if (initial.provenance === "INITIALE") {
     const versionCommon = buildVersionCommon(
       scalars,
       initial.effectiveDate,
       initial.places,
-      typologieSpecsUpTo(0),
       contacts,
       params.ofii
     );
@@ -586,7 +604,7 @@ export const seedStructureWithVersions = async (
       type: params.type,
       ...convertToPrismaObject(nonVersioned),
       structureVersions: {
-        create: [{ campaignId: campaign.id, ...versionCommon }],
+        create: [versionCommon],
       },
     };
     const structure = await prisma.structure.create({
@@ -625,7 +643,6 @@ export const seedStructureWithVersions = async (
       effectiveDate: initial.effectiveDate,
       places: initial.places,
       scalars,
-      typologieSpecs: typologieSpecsUpTo(0),
       contacts,
       formDefs: params.formDefs,
     });
@@ -645,7 +662,6 @@ export const seedStructureWithVersions = async (
       effectiveDate: transfo.effectiveDate,
       places: transfo.places,
       scalars,
-      typologieSpecs: typologieSpecsUpTo(transfoIndex + 1),
       contacts,
       formDefs: params.formDefs,
     });

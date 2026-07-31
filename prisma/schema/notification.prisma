@@ -1,0 +1,9 @@
+model Notification {
+  id        Int       @id @default(autoincrement())
+  content   String
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+
+  @@schema("public")
+}

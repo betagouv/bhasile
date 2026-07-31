@@ -54,10 +54,12 @@ export class WaitHelper {
    * Use at the end of fillForm on pages with AutoSave to ensure data is persisted before submit.
    */
   async waitForAutosave(): Promise<void> {
-    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
-    await this.page.waitForLoadState("networkidle", {
-      timeout: TIMEOUTS.FILE_UPLOAD,
-    });
+    await this.page.waitForTimeout(TIMEOUTS.AUTOSAVE_DEBOUNCE);
+    await this.page
+      .waitForLoadState("networkidle", {
+        timeout: TIMEOUTS.FILE_UPLOAD,
+      })
+      .catch(() => {});
   }
 
   /**

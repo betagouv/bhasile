@@ -16,6 +16,12 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/structures\/[^/]+\/actualisation$/,
+    routes: {
+      PUT: "proconnect",
+    },
+  },
+  {
     pattern: /^\/api\/structures\/[^/]+\/adresses$/,
     routes: {
       HEAD: "password",
@@ -141,6 +147,7 @@ export const protectedApiRoutes: ApiRoute[] = [
 ];
 
 export const proConnectProtectedPages = [
+  "/",
   "/structures",
   "/operateurs",
   "/statistiques",

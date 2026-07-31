@@ -3,7 +3,7 @@ import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
 import { ControleQualiteEvaluationStat } from "@/schemas/api/statistique.schema";
 
 import type { StatistiqueDbEvaluation } from "../statistiques.db.type";
-import { filterByActiveStructureId } from "../statistiques.utils";
+import { filterByActiveStructureId } from "../statistiques.util";
 
 export const filterEvaluationsInScope = (
   evaluations: StatistiqueDbEvaluation[],
@@ -14,8 +14,8 @@ export const filterEvaluationsInScope = (
 export const computeEvaluationGlobalSummary = (
   evaluations: StatistiqueDbEvaluation[],
   aggregation: NumericAggregation
-): { moyenneEvaluationsCurrentYear: number | null } => ({
-  moyenneEvaluationsCurrentYear: roundStatsNumber(
+): { moyenneEvaluationsLast12Months: number | null } => ({
+  moyenneEvaluationsLast12Months: roundStatsNumber(
     aggregateValues(
       evaluations.map((evaluation) => evaluation.note),
       aggregation

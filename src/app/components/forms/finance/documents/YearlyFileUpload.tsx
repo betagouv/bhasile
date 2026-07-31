@@ -79,7 +79,9 @@ export const YearlyFileUpload = ({
         return (
           documentFinancier.year === year &&
           documentFinancier.category === category &&
-          documentFinancier.structureType === structureType
+          // Un document déjà enregistré revient de l'API avec structureType à
+          // null, alors que le formulaire le laisse absent hors périmètre CPOM.
+          (documentFinancier.structureType ?? null) === (structureType ?? null)
         );
       });
       if (index !== -1 && category !== "AUTRE_FINANCIER") {

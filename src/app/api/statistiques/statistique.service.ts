@@ -1,3 +1,4 @@
+import { getNow } from "@/app/utils/now.util";
 import {
   StatistiqueApiRead,
   StatistiquesFilters,
@@ -27,6 +28,7 @@ import {
   findStructureVersionTimeline,
 } from "./statistiques.repository";
 import {
+  applyVersionedPlacesToTypologies,
   buildActivityIndex,
   buildStatistiquesActivityContext,
   collectDistinctYears,
@@ -34,7 +36,7 @@ import {
   getTypologieYears,
   parseStatistiquesPerimeterFilters,
   type StatistiquesResolvedPerimeterFilters,
-} from "./statistiques.utils";
+} from "./statistiques.util";
 import { computeStructuresStatistiques } from "./structures/structures.util";
 
 /** Résout les filiales des `operateurs` filtrés (seul point d'accès BDD du filtrage). */
@@ -49,7 +51,10 @@ const resolveStatistiquesPerimeterFilters = async (
     types: parsed.types,
     operateurIds:
       parsed.operateurIds.length > 0
-        ? new Set([...parsed.operateurIds, ...filiales.map((filiale) => filiale.id)])
+        ? new Set([
+            ...parsed.operateurIds,
+            ...filiales.map((filiale) => filiale.id),
+          ])
         : null,
   };
 };
@@ -57,7 +62,7 @@ const resolveStatistiquesPerimeterFilters = async (
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters
 ): Promise<StatistiquesContext | null> => {
-  const now = new Date();
+  const now = getNow();
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
@@ -84,6 +89,12 @@ export const buildStatistiquesContext = async (
       findStructureVersionTimeline(allStructureIds),
     ]);
 
+  const resolvedTypologies = applyVersionedPlacesToTypologies(
+    typologies.filter((typologie) => typologie.year <= referenceYear),
+    structureVersionTimeline,
+    now
+  );
+
   const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
@@ -108,7 +119,7 @@ export const buildStatistiquesContext = async (
     findBudgets(allStructureIds),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
-    resolvedFilters.operateurIds === null && resolvedFilters.types.size === 0
+    resolvedFilters.operateurIds === null && filters.types === null
       ? findRmus(resolvedFilters.departements)
       : Promise.resolve(null),
   ]);
@@ -118,7 +129,7 @@ export const buildStatistiquesContext = async (
     activeStructureIdsByPeriod,
     {
       referenceDate: now,
-      typologieYears: getTypologieYears(typologies),
+      typologieYears: getTypologieYears(resolvedTypologies),
       referenceYear,
       periodDates: [
         ...eigs.map((eig) => eig.evenementDate),
@@ -139,7 +150,7 @@ export const buildStatistiquesContext = async (
     activeStructureIdsByPeriod,
     eigs,
     evaluations,
-    typologies,
+    typologies: resolvedTypologies,
     adresses,
     cpomLinks,
     dnaLinks,

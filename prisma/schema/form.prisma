@@ -3,6 +3,7 @@ model FormDefinition {
   name            String
   version         Int
   slug            String               @unique
+  deadline        DateTime?
   stepsDefinition FormStepDefinition[]
 
   forms Form[]

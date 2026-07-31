@@ -181,16 +181,19 @@ export const fillPlacesHebergement = async (
     .locator(byId("structureTypologies.0.pmr"))
     .fill(options.withQpvPmr ? "2" : "0");
 
+  // pmr/lgbt/fvvTeh sont requis pour toutes les briques utilisant
+  // CurrentYearPlaces (création comme extension/contraction).
+  await page.locator(byId("structureTypologies.0.lgbt")).fill("0");
+  await page.locator(byId("structureTypologies.0.fvvTeh")).fill("0");
+
   if (brique === "creation") {
-    await page.locator(byId("structureTypologies.0.lgbt")).fill("0");
-    await page.locator(byId("structureTypologies.0.fvvTeh")).fill("0");
     await page.locator("#public").selectOption(PublicType.TOUT_PUBLIC);
     await page
       .locator("#typeBati")
       .selectOption(options.typeBati ?? Repartition.COLLECTIF);
     await fillAutocompleteAddress(page, byId("adresses.0.adresseComplete"));
     await page
-      .locator(byId("adresses.0.adresseTypologies.0.placesAutorisees"))
+      .locator(byId("adresses.0.placesAutorisees"))
       .fill(String(places));
   } else {
     // Structure existante : le type de bâti n'est pas un champ persisté

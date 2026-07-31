@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
 import { useStructureSelections } from "@/app/hooks/useStructureSelections";
+import { StructureSelectionBlock } from "@/config/transformation.config";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
@@ -64,6 +65,7 @@ export const StructureSelections = ({
             fixedType={getFixedType(block)}
             finalisedOnly
             label={block.label}
+            sublabel={getConstraintSublabel(block)}
             structureType={getEffectiveStructureType(block)}
             setStructureType={(v) => setStructureType(block.id, v)}
             fixedOperateurName={inheritedOperateur}
@@ -94,3 +96,10 @@ type Props = {
     areSelectionsComplete: boolean;
   }) => void;
 };
+
+const getConstraintSublabel = (
+  block: StructureSelectionBlock
+): string | undefined =>
+  block.matchDepartureType && block.matchDepartureDepartement
+    ? "La structure doit se situer dans le même département et avoir le même type"
+    : undefined;

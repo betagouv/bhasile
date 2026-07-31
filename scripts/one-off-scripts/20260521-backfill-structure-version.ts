@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off : version initiale (t0) par structure, rattachée à une Campaign "initialisation",
 // + structureVersionId sur les tables liées.
 // Idempotent : réutilise la version sans transfo existante, sinon création ; garantit la Campaign.

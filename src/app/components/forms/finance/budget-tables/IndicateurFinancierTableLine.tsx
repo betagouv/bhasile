@@ -3,7 +3,7 @@ import { useForm, useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
 import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
-import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
+import { INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR } from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 
@@ -89,7 +89,7 @@ const getEveryColumns = (
 ) => {
   if (canEdit) {
     return years.map((year) =>
-      year >= INDICATEUR_FINANCIER_CUTOFF_YEAR
+      year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR
         ? (["PREVISIONNEL", "REALISE"] as IndicateurFinancierType[])
         : (["REALISE"] as IndicateurFinancierType[])
     );

@@ -1,5 +1,6 @@
 import { StructureCard } from "@/app/components/StructureCard";
-import { formatDate, getYearFromDate } from "@/app/utils/date.util";
+import { formatDate } from "@/app/utils/date.util";
+import { pluralize } from "@/app/utils/string.util";
 import { getPlacesSource } from "@/app/utils/transformation.util";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
@@ -91,17 +92,17 @@ const getPlacesLine = (
     }
     return {
       count: placesFermees,
-      label: "place(s) fermée(s)",
+      label: `${pluralize(placesFermees, "place")} ${pluralize(
+        placesFermees,
+        "fermée"
+      )}`,
       icon: "fr-icon-close-line",
     };
   }
 
-  const year = getYearFromDate(effectiveDate);
   const placesAutorisees =
-    structureVersionTransformation.structureVersion?.structureTypologies?.find(
-      (structureTypology) => structureTypology.year === year
-    )?.placesAutorisees;
-  if (placesAutorisees === undefined) {
+    structureVersionTransformation.structureVersion?.placesAutorisees;
+  if (placesAutorisees === undefined || placesAutorisees === null) {
     return null;
   }
 

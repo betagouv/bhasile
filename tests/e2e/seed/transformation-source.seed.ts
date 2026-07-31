@@ -1,4 +1,3 @@
-import { CURRENT_YEAR } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -24,7 +23,9 @@ export type SeededTransformationSource = SeededStructure & {
   placesAutorisees: number;
 };
 
-const seedFinalisationForm = async (structureId: number): Promise<void> => {
+export const seedFinalisationForm = async (
+  structureId: number
+): Promise<void> => {
   const formDefinition = await prisma.formDefinition.findUnique({
     where: { slug: FINALISATION_FORM_SLUG },
   });
@@ -98,18 +99,8 @@ const seedAdresses = async (structureVersionId: number): Promise<void> => {
         commune: "Paris",
         repartition: Repartition.COLLECTIF,
         placesAutorisees: SOURCE_PLACES_AUTORISEES,
-        qpv: 0,
-        logementSocial: 0,
-        adresseTypologies: {
-          create: [
-            {
-              year: CURRENT_YEAR,
-              placesAutorisees: SOURCE_PLACES_AUTORISEES,
-              qpv: 0,
-              logementSocial: 0,
-            },
-          ],
-        },
+        isQpv: false,
+        isLogementSocial: false,
       },
     });
   }
@@ -126,7 +117,7 @@ export const createTransformationSource = async (
     dnaCodes: [{ code: dnaCode }],
   });
 
-  await seedValidStructureTypologies(structure.structureVersionId);
+  await seedValidStructureTypologies(structure.id);
   await seedContacts(structure.structureVersionId);
   await seedAntennes(structure.id);
   await seedAdresses(structure.structureVersionId);

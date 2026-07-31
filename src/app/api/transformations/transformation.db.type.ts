@@ -29,6 +29,9 @@ export const transformationInclude = {
       actesAdministratifs: {
         include: { fileUploads: true },
       },
+      structureTypologies: {
+        orderBy: { year: "desc" },
+      },
       structureVersion: {
         include: {
           structure: {
@@ -58,22 +61,13 @@ export const transformationInclude = {
             },
           },
           contacts: true,
-          adresses: {
-            include: {
-              adresseTypologies: {
-                orderBy: { year: "desc" },
-              },
-            },
-          },
+          adresses: true,
           structureFinesses: {
             include: { finess: true },
           },
           antennes: true,
           dnaStructures: {
             include: { dna: true },
-          },
-          structureTypologies: {
-            orderBy: { year: "desc" },
           },
         },
       },

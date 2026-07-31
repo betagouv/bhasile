@@ -1,6 +1,5 @@
 import { structureAutoriseesDocuments } from "@/app/components/forms/finance/documents/documentsStructures";
 import { getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
@@ -112,6 +111,7 @@ export const createStructure = ({
           form.formDefinition.version === 1 &&
           form.status
       ),
+    isCurrentVersionFromTransformation: false,
   };
 };
 
@@ -228,14 +228,9 @@ export const createModificationAdressesValidStructure = (id: number) => {
         commune: "Paris",
         departement: "75",
         repartition: Repartition.COLLECTIF,
-        adresseTypologies: [
-          {
-            year: CURRENT_YEAR,
-            placesAutorisees: 10,
-            qpv: 0,
-            logementSocial: 0,
-          },
-        ],
+        placesAutorisees: 10,
+        isQpv: false,
+        isLogementSocial: false,
       },
     ],
   };

@@ -5,7 +5,7 @@ import { zSafeYear } from "@/app/utils/zodCustomFields";
 export const structureTypologieApiSchema = z.object({
   id: z.number().optional(),
   year: zSafeYear(),
-  placesAutorisees: z.number().int(),
+  placesAutorisees: z.number().int().nullish(),
   pmr: z.number().int(),
   lgbt: z.number().int(),
   fvvTeh: z.number().int(),

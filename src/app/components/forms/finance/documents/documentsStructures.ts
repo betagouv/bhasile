@@ -87,6 +87,11 @@ export const structureSubventionneesDocuments: StructureDocument[] = [
   },
 ];
 
+export const isDocumentRequiredForYear = (
+  document: StructureDocument,
+  year: number
+): boolean => document.required && year <= CURRENT_YEAR - document.yearIndex;
+
 export type StructureDocument = {
   label: string;
   subLabel?: string;
