@@ -55,26 +55,32 @@ export const isVersionValid = (version: ResolvableVersion): boolean => {
   return true;
 };
 
+// Une version datée (transfo) prend effet à sa `effectiveDate`.
+// La version socle est la baseline de la structure
 const sortValidVersionsBefore = <TVersion extends ResolvableVersion>(
   versions: TVersion[],
   upperBoundMs: number
-): TVersion[] =>
-  versions
+): TVersion[] => {
+  const valid = versions.filter(isVersionValid);
+
+  const dated = valid
     .filter(
       (version) =>
         version.effectiveDate !== null &&
-        version.effectiveDate.getTime() < upperBoundMs &&
-        isVersionValid(version)
+        version.effectiveDate.getTime() < upperBoundMs
     )
     .sort((first, second) => {
       const dateDiff =
-        (second.effectiveDate?.getTime() ?? 0) -
-        (first.effectiveDate?.getTime() ?? 0);
-      if (dateDiff !== 0) {
-        return dateDiff;
-      }
-      return second.id - first.id;
+        second.effectiveDate!.getTime() - first.effectiveDate!.getTime();
+      return dateDiff !== 0 ? dateDiff : second.id - first.id;
     });
+
+  const socles = valid
+    .filter((version) => version.effectiveDate === null)
+    .sort((first, second) => second.id - first.id);
+
+  return [...dated, ...socles];
+};
 
 export const getValidVersions = <TVersion extends ResolvableVersion>(
   versions: TVersion[],

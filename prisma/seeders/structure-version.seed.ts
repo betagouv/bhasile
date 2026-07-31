@@ -283,7 +283,7 @@ const buildTypologieSpecs = (
 
 const buildVersionCommon = (
   scalars: VersionScalars,
-  effectiveDate: Date,
+  effectiveDate: Date | null,
   places: number,
   contacts: StableContacts,
   ofii: boolean,
@@ -537,19 +537,25 @@ const persistTransformation = async (
 };
 
 const resolveCurrentVersionId = (
-  versions: { id: number; effectiveDate: Date }[],
+  versions: { id: number; effectiveDate: Date | null }[],
   now: Date
 ): number => {
   const upperBound = now.getTime();
-  const candidates = versions.filter(
-    (version) => version.effectiveDate.getTime() <= upperBound
+  const dated = versions.filter(
+    (version): version is { id: number; effectiveDate: Date } =>
+      version.effectiveDate !== null &&
+      version.effectiveDate.getTime() <= upperBound
   );
-  const pool = candidates.length > 0 ? candidates : versions;
-  return pool.reduce((latest, version) =>
-    version.effectiveDate.getTime() >= latest.effectiveDate.getTime()
-      ? version
-      : latest
-  ).id;
+  if (dated.length > 0) {
+    return dated.reduce((latest, version) =>
+      version.effectiveDate.getTime() >= latest.effectiveDate.getTime()
+        ? version
+        : latest
+    ).id;
+  }
+  // Si aucune version datée effective le socle (effectiveDate null) fait foi.
+  const socle = versions.find((version) => version.effectiveDate === null);
+  return (socle ?? versions[0]).id;
 };
 
 export const seedStructureWithVersions = async (
@@ -584,14 +590,14 @@ export const seedStructureWithVersions = async (
       });
 
   const [initial, ...transfos] = plan.versions;
-  const versionRefs: { id: number; effectiveDate: Date }[] = [];
+  const versionRefs: { id: number; effectiveDate: Date | null }[] = [];
 
   let structureId: number;
 
   if (initial.provenance === "INITIALE") {
     const versionCommon = buildVersionCommon(
       scalars,
-      initial.effectiveDate,
+      null,
       initial.places,
       contacts,
       params.ofii
@@ -618,7 +624,7 @@ export const seedStructureWithVersions = async (
     versionRefs.push(
       ...structure.structureVersions.map((structureVersion) => ({
         id: structureVersion.id,
-        effectiveDate: structureVersion.effectiveDate!,
+        effectiveDate: structureVersion.effectiveDate,
       }))
     );
   } else {

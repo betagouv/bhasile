@@ -64,8 +64,15 @@ export const findPerimeterStructures = async (
         : {}),
       structureVersions: {
         some: {
-          ...FINALIZED_VERSION_WHERE,
-          effectiveDate: { lt: startOfNextUtcDay(reference) },
+          AND: [
+            FINALIZED_VERSION_WHERE,
+            {
+              OR: [
+                { effectiveDate: null },
+                { effectiveDate: { lt: startOfNextUtcDay(reference) } },
+              ],
+            },
+          ],
         },
       },
     },

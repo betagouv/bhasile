@@ -213,36 +213,43 @@ export const filterByTwelveMonthWindow = <Item>(
   });
 };
 
+/**
+ * Version effective d'une structure à `date` : la version datée (transfo) la
+ * plus récente dont la date d'effet est inf à `date`, sinon, la version socle.
+ */
 export const getEffectiveStructureVersionAtDate = (
   structureId: number,
   date: Date,
   timeline: StatistiqueDbStructureVersionTimeline[]
 ): StatistiqueDbStructureVersionTimeline | null => {
   const cutoff = startOfNextUtcDay(date);
-  let effectiveVersion: StatistiqueDbStructureVersionTimeline | null = null;
+  let dated: StatistiqueDbStructureVersionTimeline | null = null;
+  let socle: StatistiqueDbStructureVersionTimeline | null = null;
 
   for (const version of timeline) {
     if (version.structureId !== structureId) {
       continue;
     }
-    if (version.effectiveDate == null || version.effectiveDate >= cutoff) {
+    if (version.effectiveDate === null) {
+      if (socle === null || version.id > socle.id) {
+        socle = version;
+      }
       continue;
     }
-    if (effectiveVersion == null || effectiveVersion.effectiveDate == null) {
-      effectiveVersion = version;
+    if (version.effectiveDate >= cutoff) {
       continue;
     }
     if (
-      version.effectiveDate > effectiveVersion.effectiveDate ||
-      (version.effectiveDate.getTime() ===
-        effectiveVersion.effectiveDate.getTime() &&
-        version.id > effectiveVersion.id)
+      dated === null ||
+      version.effectiveDate > dated.effectiveDate! ||
+      (version.effectiveDate.getTime() === dated.effectiveDate!.getTime() &&
+        version.id > dated.id)
     ) {
-      effectiveVersion = version;
+      dated = version;
     }
   }
 
-  return effectiveVersion;
+  return dated ?? socle;
 };
 
 export const applyVersionedPlacesToTypologies = (

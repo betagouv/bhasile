@@ -4,13 +4,22 @@ import { Prisma } from "@/generated/prisma/client";
 export const currentVersionWhere = (
   now: Date
 ): Prisma.StructureVersionWhereInput => ({
-  effectiveDate: { lt: startOfNextUtcDay(now) },
-  OR: [
-    { structureVersionTransformationId: null },
+  AND: [
     {
-      structureVersionTransformation: {
-        transformation: { form: { status: true } },
-      },
+      OR: [
+        { effectiveDate: null },
+        { effectiveDate: { lt: startOfNextUtcDay(now) } },
+      ],
+    },
+    {
+      OR: [
+        { structureVersionTransformationId: null },
+        {
+          structureVersionTransformation: {
+            transformation: { form: { status: true } },
+          },
+        },
+      ],
     },
   ],
 });
@@ -18,7 +27,10 @@ export const currentVersionWhere = (
 export const currentVersionArgs = (now: Date) =>
   ({
     where: currentVersionWhere(now),
-    orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+    orderBy: [
+      { effectiveDate: { sort: "desc", nulls: "last" } },
+      { id: "desc" },
+    ],
     take: 1,
   }) satisfies Pick<
     Prisma.StructureVersionFindManyArgs,
