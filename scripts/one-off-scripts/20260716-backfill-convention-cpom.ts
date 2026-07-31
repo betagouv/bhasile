@@ -1,4 +1,3 @@
-// @ts-nocheck
 // One-off script: bascule les conventions portées par un CPOM en CONVENTION_CPOM
 // Les conventions de structure (transformations, vues qualité, stats) restent en CONVENTION.
 // À lancer juste après le déploiement : tant qu'il n'a pas tourné, les lectures CPOM
