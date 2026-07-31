@@ -120,7 +120,7 @@ export const YearlyFileUpload = ({
           documentFinancier.year === year &&
           documentFinancier.category === category &&
           documentFinancier.granularity === granularity &&
-          documentFinancier.structureType === structureType
+          (documentFinancier.structureType ?? null) === (structureType ?? null)
         );
       });
       if (index !== -1 && category !== "AUTRE_FINANCIER") {
