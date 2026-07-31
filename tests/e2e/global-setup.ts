@@ -37,7 +37,9 @@ async function globalSetup(config: FullConfig): Promise<void> {
     return;
   }
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    headless: process.env.E2E_AUTH_HEADED !== "1",
+  });
   const context = await browser.newContext({
     baseURL,
     ignoreHTTPSErrors: true,

@@ -21,7 +21,7 @@ import {
   toYearKey,
   trimesterKeyToDate,
   yearKeyToDate,
-} from "../statistiques.utils";
+} from "../statistiques.util";
 import {
   computeEigPeriodMetrics,
   computeEigRates,

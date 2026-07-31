@@ -1,5 +1,6 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateRows, sortRows } from "@/app/utils/list.util";
+import { getNow } from "@/app/utils/now.util";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
@@ -71,7 +72,7 @@ export const getCpomById = async (id: number): Promise<CpomApiRead | null> => {
   if (!cpom) {
     return null;
   }
-  const now = new Date();
+  const now = getNow();
   const resolvedCpom = {
     ...cpom,
     structures: cpom.structures.map((cpomStructure) =>

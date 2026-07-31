@@ -6,7 +6,7 @@ import {
 } from "@/schemas/api/statistique-cartographie.schema";
 
 import { buildStatistiquesContext } from "../statistique.service";
-import { sliceStatistiquesContext } from "../statistiques.utils";
+import { sliceStatistiquesContext } from "../statistiques.util";
 import { findAllDepartementsWithRegion } from "./cartographie.repository";
 import {
   buildZoneDefinitions,

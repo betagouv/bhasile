@@ -3,12 +3,14 @@ import { ReactElement } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
-import { CURRENT_YEAR } from "@/constants";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { DocumentsFinanciersItem } from "./DocumentsFinanciersItem";
-import { StructureDocument } from "./documentsStructures";
+import {
+  isDocumentRequiredForYear,
+  StructureDocument,
+} from "./documentsStructures";
 
 export const DocumentsFinanciersCategory = ({
   documentType,
@@ -31,8 +33,8 @@ export const DocumentsFinanciersCategory = ({
     ) || [];
 
   const isFilled = documentsFinanciersOfCategory.length > 0;
-  const isRequired = !hideRequirement && documentType.required;
-  const isAllowedYear = year <= CURRENT_YEAR - documentType.yearIndex;
+  const isRequiredThisYear =
+    !hideRequirement && isDocumentRequiredForYear(documentType, year);
 
   return (
     <Accordion
@@ -42,7 +44,7 @@ export const DocumentsFinanciersCategory = ({
           <div className={!isFilled ? "text-disabled-grey" : ""}>
             <div>
               <strong>{documentType.label}</strong>
-              {!(isRequired && isAllowedYear) && (
+              {!isRequiredThisYear && (
                 <span
                   className={cn(
                     isFilled ? "text-default-grey" : "text-disabled-grey",
@@ -56,7 +58,7 @@ export const DocumentsFinanciersCategory = ({
             </div>
             <span className="text-sm ">{documentType.subLabel}</span>
           </div>
-          {((isRequired && isAllowedYear) || isFilled) && (
+          {(isRequiredThisYear || isFilled) && (
             <div
               className={cn(
                 "uppercase text-[0.625rem]",

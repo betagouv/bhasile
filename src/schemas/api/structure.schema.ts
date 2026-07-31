@@ -76,7 +76,7 @@ export const structureOperateurUpdateApiSchema =
     structureTypologies: z.array(structureTypologieApiSchema),
     forms: z.array(formApiSchema).optional(),
     contacts: z.array(contactApiSchema),
-    documentsFinanciers: z.array(documentFinancierApiSchema),
+    documentsFinanciers: z.array(documentFinancierApiSchema).default([]),
   });
 
 const partialStructureOperateurUpdateApiSchema =
@@ -155,6 +155,7 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   isInCpom: boolean;
   isInCpomPerYear: Record<number, boolean>;
   isFinalised: boolean;
+  isCurrentVersionFromTransformation: boolean;
   nom: string;
   adresseAdministrativeComplete: string;
   isMultiAntenne: boolean;

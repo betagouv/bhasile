@@ -1,10 +1,15 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { isEffectiveDateValid } from "@/app/utils/transformation.util";
 import {
   PrefillField,
   TRANSFORMATION_TYPE_SPECS,
 } from "@/config/transformation.config";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
-import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import {
+  StructureVersionTransformationApiCreate,
+  StructureVersionTransformationApiUpdate,
+} from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
 export const checkNoDuplicateStructureIds = (
@@ -36,6 +41,23 @@ export const checkUniqueDepartement = (
   if (new Set(departements).size > 1) {
     throw new ApiDomainError(
       "Toutes les structures d'une transformation doivent appartenir au même département."
+    );
+  }
+};
+
+export const checkEffectiveDatesAreValid = (
+  structureVersionTransformations: StructureVersionTransformationApiUpdate[]
+): void => {
+  const hasInvalidEffectiveDate = structureVersionTransformations.some(
+    (structureVersionTransformation) => {
+      const effectiveDate =
+        structureVersionTransformation.structureVersion?.effectiveDate;
+      return effectiveDate != null && !isEffectiveDateValid(effectiveDate);
+    }
+  );
+  if (hasInvalidEffectiveDate) {
+    throw new ApiDomainError(
+      `Il n'est pas possible de déclarer une date d'effet antérieure à ${PLACES_VERSIONED_FROM_YEAR} sur Bhasile`
     );
   }
 };

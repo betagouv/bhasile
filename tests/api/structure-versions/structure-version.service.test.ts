@@ -190,18 +190,8 @@ const buildStructure = (): StructureDbDetails =>
         commune: "Avranches",
         repartition: "COLLECTIF",
         placesAutorisees: 10,
-        qpv: 0,
-        logementSocial: 0,
-        adresseTypologies: [
-          {
-            id: 99,
-            adresseId: 9,
-            placesAutorisees: 10,
-            year: 2024,
-            qpv: 0,
-            logementSocial: 0,
-          },
-        ],
+        isQpv: false,
+        isLogementSocial: false,
       },
     ],
     structureFinesses: [
@@ -270,11 +260,10 @@ describe("copyStructureVersion", () => {
     });
 
     expect(result.adresses?.[0]).not.toHaveProperty("id");
-    expect(result.adresses?.[0]?.adresseTypologies?.[0]).toEqual({
+    expect(result.adresses?.[0]).toMatchObject({
       placesAutorisees: 10,
-      year: 2024,
-      qpv: 0,
-      logementSocial: 0,
+      isQpv: false,
+      isLogementSocial: false,
     });
 
     expect(result.structureFinesses).toEqual([
@@ -283,10 +272,9 @@ describe("copyStructureVersion", () => {
         finess: { code: "FIN-1" },
       },
     ]);
-    expect(result.structureTypologies?.[0]).toMatchObject({
-      year: 2024,
-      placesAutorisees: 10,
-    });
+    // La copie ne porte jamais les places autorisées : elles sont posées
+    // explicitement par la transformation (garde FERMETURE).
+    expect(result.placesAutorisees).toBeUndefined();
 
     expect(result.dnaStructures?.[0]).not.toHaveProperty("id");
     expect(result.dnaStructures?.[0]?.description).toBe("DNA site d'Avranches");
@@ -337,9 +325,8 @@ const buildStructureVersion = (
       commune: "Avranches",
       repartition,
       placesAutorisees: 10,
-      qpv: 0,
-      logementSocial: 0,
-      adresseTypologies: [],
+      isQpv: false,
+      isLogementSocial: false,
     })),
   }) as unknown as StructureVersionDbTransformation;
 

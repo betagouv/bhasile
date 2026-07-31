@@ -48,7 +48,7 @@ export const StructureItem = ({
       ) : (
         <>
           <td className="text-left!">
-            {structure.structureTypologies?.[0]?.placesAutorisees}
+            {structure.currentPlaces.placesAutorisees || <EmptyCell />}
           </td>
           <td className="text-left!">
             {structure.finConvention ? (

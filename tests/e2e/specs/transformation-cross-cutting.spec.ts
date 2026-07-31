@@ -89,7 +89,7 @@ test.describe("Transformations — comportements transverses", () => {
     expect(draft.form?.status).toBe(false);
   });
 
-  test("le bandeau des transformations en cours s'affiche au-dessus de la liste", async ({
+  test("le tableau de bord liste les transformations en cours avec un lien vers la démarche", async ({
     page,
     closingStructure,
     registerTransformation,
@@ -100,15 +100,19 @@ test.describe("Transformations — comportements transverses", () => {
     );
     registerTransformation(transformationId);
 
-    await page.goto("/structures", { waitUntil: "domcontentloaded" });
-    const banner = page.getByText(
-      /créations, transformations et fermetures en cours/i
-    );
-    await expect(banner).toBeVisible();
-    await banner.click();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(
-      page.locator(`a[href="/structures/transformation/${transformationId}"]`)
-    ).toBeAttached();
+      page.getByRole("heading", {
+        name: /créations, transformations et fermetures de structures/i,
+      })
+    ).toBeVisible();
+    // Le streaming Next.js laisse transitoirement une copie masquée du bloc
+    // dans le DOM : on cible celle qui est réellement rendue à l'écran.
+    await expect(
+      page
+        .locator(`a[href="/structures/transformation/${transformationId}"]`)
+        .filter({ visible: true })
+    ).toBeVisible();
   });
 
   test("annuler la démarche supprime le brouillon", async ({

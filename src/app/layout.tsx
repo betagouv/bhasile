@@ -4,7 +4,6 @@ import "./globals.css"; // IMPORTANT cet import doit rester en premier pour que 
 import type { Metadata } from "next";
 import { PropsWithChildren, Suspense } from "react";
 
-import { NameChangeNotice } from "./components/NameChangeNotice";
 import { DsfrProvider, StartDsfrOnHydration } from "./dsfr-bootstrap";
 import {
   DsfrHead,
@@ -32,10 +31,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <DsfrProvider lang={lang}>
           <StartDsfrOnHydration />
           <Providers>
-            <Suspense>
-              <NameChangeNotice />
-              {children}
-            </Suspense>
+            <Suspense>{children}</Suspense>
           </Providers>
         </DsfrProvider>
       </body>

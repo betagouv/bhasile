@@ -5,7 +5,6 @@ import { PrismaClient } from "@/generated/prisma/client";
 // une base peuplée sans violer de contrainte de clé étrangère.
 export const wipeTables = async (prisma: PrismaClient) => {
   await prisma.rmu.deleteMany({});
-  await prisma.adresseTypologie.deleteMany({});
   await prisma.adresse.deleteMany({});
   await prisma.controle.deleteMany({});
   await prisma.evaluation.deleteMany({});
@@ -16,6 +15,7 @@ export const wipeTables = async (prisma: PrismaClient) => {
   await prisma.budget.deleteMany({});
   await prisma.structureMillesime.deleteMany({});
   await prisma.note.deleteMany({});
+  await prisma.notification.deleteMany({});
   await prisma.userAction.deleteMany({});
   await prisma.cpomStructure.deleteMany({});
   await prisma.cpom.deleteMany({});
@@ -38,6 +38,5 @@ export const wipeTables = async (prisma: PrismaClient) => {
   await prisma.role.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.departement.deleteMany({});
-  await prisma.campaign.deleteMany({});
   await prisma.region.deleteMany({});
 };

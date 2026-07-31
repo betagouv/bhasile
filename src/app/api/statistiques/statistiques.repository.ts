@@ -1,5 +1,5 @@
-import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
+import { getNow } from "@/app/utils/now.util";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
@@ -19,7 +19,7 @@ import type {
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
-import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.utils";
+import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 
 /** Année plancher des EIG remontés dans les stats (borne haute = année courante). */
 const EIG_STATS_MIN_YEAR = 2015;
@@ -30,12 +30,7 @@ const FINALIZED_VERSION_WHERE: Prisma.StructureVersionWhereInput = {
     { structureVersionTransformationId: null },
     {
       structureVersionTransformation: {
-        transformation: {
-          form: {
-            status: true,
-            formDefinition: { slug: FINALISATION_FORM_SLUG },
-          },
-        },
+        transformation: { form: { status: true } },
       },
     },
   ],
@@ -56,7 +51,7 @@ export const findOperateurFiliales = async (
 
 export const findPerimeterStructures = async (
   resolved: StatistiquesResolvedPerimeterFilters,
-  reference: Date = new Date()
+  reference: Date = getNow()
 ): Promise<StatistiqueDbStructure[]> =>
   prisma.structure.findMany({
     where: {
@@ -106,10 +101,10 @@ export const findStructureTypologies = async (
   structureIds: number[]
 ): Promise<StatistiqueDbTypologie[]> => {
   const rows = await prisma.structureTypologie.findMany({
-    where: structureVersionScope(structureIds),
+    where: { structureId: { in: structureIds } },
     select: {
       id: true,
-      structureVersion: { select: { structureId: true } },
+      structureId: true,
       year: true,
       placesAutorisees: true,
       pmr: true,
@@ -121,7 +116,7 @@ export const findStructureTypologies = async (
 
   return rows.map((row) => ({
     id: row.id,
-    structureId: structureIdFromVersion(row),
+    structureId: row.structureId!,
     year: row.year,
     placesAutorisees: row.placesAutorisees,
     pmr: row.pmr,
@@ -142,8 +137,8 @@ export const findStructureAdresses = async (
       structureVersion: { select: { structureId: true } },
       repartition: true,
       placesAutorisees: true,
-      qpv: true,
-      logementSocial: true,
+      isQpv: true,
+      isLogementSocial: true,
     },
   });
 
@@ -153,8 +148,8 @@ export const findStructureAdresses = async (
     structureVersionId: row.structureVersionId!,
     repartition: row.repartition,
     placesAutorisees: row.placesAutorisees,
-    qpv: row.qpv,
-    logementSocial: row.logementSocial,
+    isQpv: row.isQpv,
+    isLogementSocial: row.isLogementSocial,
   }));
 };
 
@@ -189,11 +184,15 @@ export const findStructureVersionTimeline = async (
   }
 
   return prisma.structureVersion.findMany({
-    where: { structureId: { in: structureIds } },
+    where: {
+      structureId: { in: structureIds },
+      ...FINALIZED_VERSION_WHERE,
+    },
     select: {
       id: true,
       structureId: true,
       effectiveDate: true,
+      placesAutorisees: true,
     },
     orderBy: [
       { structureId: "asc" },
@@ -252,7 +251,7 @@ export const findEigs = async (
   if (dnaCodes.length === 0) {
     return [];
   }
-  const currentYear = new Date().getUTCFullYear();
+  const currentYear = getNow().getUTCFullYear();
   return prisma.evenementIndesirableGrave.findMany({
     where: {
       dnaCode: { in: dnaCodes },

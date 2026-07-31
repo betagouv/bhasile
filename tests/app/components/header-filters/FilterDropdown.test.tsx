@@ -68,8 +68,24 @@ describe("FilterDropdown", () => {
     );
 
     expect(
-      screen.getByText("2 filtre(s) sélectionné(s)")
+      screen.getByText("2 filtres sélectionnés")
     ).toBeInTheDocument();
     expect(screen.queryByText("Sélectionnez une zone")).not.toBeInTheDocument();
+  });
+
+  it("accorde au singulier quand un seul filtre est sélectionné", () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("departements=75"));
+
+    render(
+      <FilterDropdown
+        label="Zone"
+        placeholder="Sélectionnez une zone"
+        filterId="departements"
+      >
+        <div />
+      </FilterDropdown>
+    );
+
+    expect(screen.getByText("1 filtre sélectionné")).toBeInTheDocument();
   });
 });

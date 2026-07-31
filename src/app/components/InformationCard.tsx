@@ -1,7 +1,9 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import { ReactElement, useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
+
+import { NumberDisplay } from "./common/NumberDisplay";
 
 export const InformationCard = ({
   primaryInformation,
@@ -11,9 +13,9 @@ export const InformationCard = ({
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="px-6 py-3 rounded-xl bg-alt-blue-france flex-col min-w-[220px] max-w-[240px] h-full flex justify-center items-center">
+    <div className="relative px-6 py-3 rounded-xl bg-alt-blue-france flex-col min-w-[220px] max-w-[240px] h-full flex justify-center items-center">
       {tertiaryInformation && (
-        <div className="flex justify-end w-full">
+        <div className="absolute top-1 right-1">
           <Button
             onClick={() => setShowDetails(!showDetails)}
             iconId={
@@ -27,7 +29,13 @@ export const InformationCard = ({
       )}
       {!showDetails && (
         <>
-          <div className="text-2xl font-bold mb-0">{primaryInformation}</div>
+          <div className="text-2xl font-bold mb-0">
+            {typeof primaryInformation === "number" ? (
+              <NumberDisplay value={primaryInformation} />
+            ) : (
+              primaryInformation
+            )}
+          </div>
           <div className="text-center">{secondaryInformation}</div>
         </>
       )}
@@ -39,7 +47,7 @@ export const InformationCard = ({
 };
 
 type Props = {
-  primaryInformation: string | number;
-  secondaryInformation: string;
+  primaryInformation: ReactNode;
+  secondaryInformation: ReactNode;
   tertiaryInformation?: string;
 };

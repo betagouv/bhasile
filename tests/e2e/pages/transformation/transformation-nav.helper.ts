@@ -39,6 +39,10 @@ export const gotoVerification = async (
   await expect(
     page.getByRole("button", { name: FINALIZE_BUTTON })
   ).toBeVisible();
+  // La modale de confirmation est pilotée par le runtime DSFR, initialisé après
+  // l'hydratation : cliquer trop tôt déclenche bien le PUT mais laisse la
+  // modale fermée.
+  await page.waitForLoadState("networkidle");
 };
 
 export const finalizeTransformation = async (page: Page): Promise<void> => {
@@ -70,7 +74,7 @@ export const annulerDemarche = async (page: Page): Promise<void> => {
   await expect(async () => {
     await page.getByRole("button", { name: "Annuler la démarche" }).click();
     await expect(
-      page.getByText(/vous êtes sur le point d.annuler/i)
+      page.getByRole("heading", { name: /vous êtes sur le point d.annuler/i })
     ).toBeVisible({ timeout: 2000 });
   }).toPass({ timeout: 15000 });
   const deletePromise = page.waitForResponse(

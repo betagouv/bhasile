@@ -37,9 +37,7 @@ const makeStructure = (
             effectiveDate: version.effectiveDate,
             structureVersionTransformationId: null,
             structureVersionTransformation: null,
-            structureTypologies: [
-              { year: 2024, placesAutorisees: version.placesAutorisees },
-            ],
+            placesAutorisees: version.placesAutorisees,
           },
         ]
       : [],

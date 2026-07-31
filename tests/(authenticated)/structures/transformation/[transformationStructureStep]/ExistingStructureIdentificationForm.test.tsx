@@ -128,6 +128,30 @@ describe("ExistingStructureIdentificationForm (intégration jusqu'au fetch)", ()
     ).toBeUndefined();
   });
 
+  it("bloque la sauvegarde quand la date d'effet précède le seuil de versionnement", async () => {
+    // GIVEN a source version whose effectiveDate predates the versioning threshold
+    renderForm({
+      id: 999,
+      structureId: 42,
+      nom: "Les Mimosas",
+      effectiveDate: "2025-12-31T12:00:00.000Z",
+    });
+
+    // WHEN the agent submits the step
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN the resolver rejects the step and nothing reaches the API
+    expect(
+      await screen.findByText(/Certains champs sont manquants ou invalides/)
+    ).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      `/api/transformations/${TRANSFORMATION_ID}`,
+      expect.objectContaining({ method: "PUT" })
+    );
+  });
+
   it("sauvegarde même quand tous les champs sont vides (null venant de la BDD)", async () => {
     // GIVEN a source version whose nullable columns are still null
     renderForm({

@@ -10,14 +10,9 @@ import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSet
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useStructures } from "@/app/hooks/useStructures";
+import { migrateLegacyAdresseTypologies } from "@/app/utils/adresse.util";
 import { ApiError } from "@/app/utils/apiError.util";
-import { getYearFromDate } from "@/app/utils/date.util";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
-import { CURRENT_YEAR } from "@/constants";
-import {
-  FormAdresse,
-  FormAdresseTypologie,
-} from "@/schemas/forms/base/adresse.schema";
 import {
   TypeBatiAndAdressesFormValues,
   typeBatiAndAdressesSchema,
@@ -42,24 +37,7 @@ export const AdressesRecovery = ({ id }: { id: number }) => {
     return localStorageValues && Object.keys(localStorageValues).length > 0
       ? {
           typeBati: localStorageValues.typeBati,
-          adresses: localStorageValues.adresses?.map(
-            (adresse: FormAdresse) => ({
-              ...adresse,
-              adresseTypologies: adresse.adresseTypologies?.map(
-                (typologie: FormAdresseTypologie) => {
-                  const typedTypologie = typologie as FormAdresseTypologie & {
-                    date: string;
-                  };
-                  return {
-                    ...typologie,
-                    year:
-                      typedTypologie.year ??
-                      getYearFromDate(typedTypologie.date),
-                  };
-                }
-              ),
-            })
-          ),
+          adresses: migrateLegacyAdresseTypologies(localStorageValues.adresses),
         }
       : {
           typeBati: undefined,
@@ -71,14 +49,9 @@ export const AdressesRecovery = ({ id }: { id: number }) => {
               commune: "",
               departement: "",
               repartition: Repartition.DIFFUS,
-              adresseTypologies: [
-                {
-                  year: CURRENT_YEAR,
-                  placesAutorisees: undefined as unknown as number,
-                  logementSocial: false,
-                  qpv: false,
-                },
-              ],
+              placesAutorisees: undefined as unknown as number,
+              isLogementSocial: false,
+              isQpv: false,
             },
           ],
         };

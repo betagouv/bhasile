@@ -222,10 +222,10 @@ const INDICATEURS: Record<CartographieIndicateur, IndicateurValuesCalculation> =
       computeTypologieFieldForYear(context, year, "fvvTeh")
     ),
     "places.qpv": yearOverPreviousYear((context, year) =>
-      computeAdresseFieldForYear(context, year, "qpv")
+      computeAdresseFieldForYear(context, year, "isQpv")
     ),
     "places.logementsSociaux": yearOverPreviousYear((context, year) =>
-      computeAdresseFieldForYear(context, year, "logementSocial")
+      computeAdresseFieldForYear(context, year, "isLogementSocial")
     ),
     "finance.dotationAccordee": (context, annee, aggregation) =>
       financeValuesForYears(context, annee, aggregation, "dotationAccordee"),

@@ -96,6 +96,7 @@ const invalidTestCases: TestStructureScenario[] = [
 
 for (const { name, formData, failingStep } of invalidTestCases) {
   test(name, async ({ page }) => {
+    test.setTimeout(180000); // Rejoue tout le flux avant l'étape en échec, uploads S3 compris
     const id = await beforeFlow(formData, page);
 
     try {
