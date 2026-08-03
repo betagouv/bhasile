@@ -21,9 +21,16 @@ describe("transfo-huda-cada.resolve db integration", () => {
   const createdTransformationIds: number[] = [];
   const createdDnaIds: number[] = [];
 
-  const createStructure = async (type: StructureType | null) => {
+  const createStructure = async (
+    type: StructureType | null,
+    { fermetureDate }: { fermetureDate?: Date } = {}
+  ) => {
     const structure = await prisma.structure.create({
-      data: { codeBhasile: `${CODE_BHASILE_PREFIX}${randomUUID()}`, type },
+      data: {
+        codeBhasile: `${CODE_BHASILE_PREFIX}${randomUUID()}`,
+        type,
+        fermetureDate,
+      },
     });
     return structure;
   };
@@ -131,6 +138,42 @@ describe("transfo-huda-cada.resolve db integration", () => {
       expect(resolution.ok).toBe(false);
       expect(resolution.ok === false && resolution.failure.reason).toContain(
         "type non renseigné"
+      );
+    });
+
+    it("rejette un HUDA fermé désigné par son code Bhasile", async () => {
+      const structure = await createStructure(StructureType.HUDA, {
+        fermetureDate: new Date("2026-03-01T00:00:00.000Z"),
+      });
+
+      const resolution = await resolveHuda(
+        prisma,
+        structure.codeBhasile,
+        "",
+        now
+      );
+
+      expect(resolution.ok).toBe(false);
+      expect(resolution.ok === false && resolution.failure.reason).toContain(
+        "est fermé depuis le 01/03/2026"
+      );
+    });
+
+    it("rejette un HUDA fermé rattaché via ses codes DNA", async () => {
+      const structure = await createStructure(StructureType.HUDA, {
+        fermetureDate: new Date("2026-03-01T00:00:00.000Z"),
+      });
+      const version = await createVersion(
+        structure.id,
+        new Date("2026-01-01T00:00:00.000Z")
+      );
+      const dna = await createDnaOnVersion(version.id);
+
+      const resolution = await resolveHuda(prisma, "", dna.code, now);
+
+      expect(resolution.ok).toBe(false);
+      expect(resolution.ok === false && resolution.failure.reason).toContain(
+        "est fermé depuis le 01/03/2026"
       );
     });
 

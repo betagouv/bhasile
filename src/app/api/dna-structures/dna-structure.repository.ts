@@ -15,7 +15,12 @@ export const findStructuresByCurrentDnaCodes = async (
   codes: string[],
   now: Date
 ): Promise<
-  { id: number; codeBhasile: string; type: StructureType | null }[]
+  {
+    id: number;
+    codeBhasile: string;
+    type: StructureType | null;
+    fermetureDate: Date | null;
+  }[]
 > => {
   const structures = await prisma.structure.findMany({
     where: {
@@ -30,6 +35,7 @@ export const findStructuresByCurrentDnaCodes = async (
       id: true,
       codeBhasile: true,
       type: true,
+      fermetureDate: true,
       structureVersions: {
         ...currentVersionArgs(now),
         select: {
@@ -47,7 +53,12 @@ export const findStructuresByCurrentDnaCodes = async (
       ({ structureVersions }) =>
         (structureVersions[0]?.dnaStructures.length ?? 0) > 0
     )
-    .map(({ id, codeBhasile, type }) => ({ id, codeBhasile, type }));
+    .map(({ id, codeBhasile, type, fermetureDate }) => ({
+      id,
+      codeBhasile,
+      type,
+      fermetureDate,
+    }));
 };
 
 const buildDnaStructureWhere = (

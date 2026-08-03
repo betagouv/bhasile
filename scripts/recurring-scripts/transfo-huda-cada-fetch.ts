@@ -22,6 +22,7 @@ import {
   getValueByLabel,
 } from "../utils/demarches-numeriques.util";
 import {
+  describeClosure,
   describeType,
   findExistingHudaCadaTransformation,
   hasExpectedType,
@@ -114,10 +115,14 @@ const buildCadaBrique = async (
 
   const cada = await prisma.structure.findUnique({
     where: { codeBhasile },
-    select: { id: true, codeBhasile: true, type: true },
+    select: { id: true, codeBhasile: true, type: true, fermetureDate: true },
   });
   if (!cada) {
     return { ok: false, reason: `CADA cible : ${codeBhasile} inconnu en base` };
+  }
+  const closure = describeClosure(cada);
+  if (closure) {
+    return { ok: false, reason: `CADA cible : ${closure}` };
   }
   if (!hasExpectedType(cada, StructureType.CADA)) {
     return {
@@ -175,6 +180,8 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     select: { id: true },
   });
   if (existing) {
+    /* Le marquage est hors de la transaction de création : on le rejoue tant qu'il n'a pas pris. */
+    await markIdentificationPrefilled(existing.id);
     return;
   }
 

@@ -1,6 +1,9 @@
 import { findStructuresByCurrentDnaCodes } from "@/app/api/dna-structures/dna-structure.repository";
 import { getNow } from "@/app/utils/now.util";
-import { PrismaClient } from "@/generated/prisma/client";
+import {
+  PrismaClient,
+  StructureType as DbStructureType,
+} from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
 
@@ -18,7 +21,8 @@ const HUDA_CADA_TRANSFORMATION_TYPES: TransformationType[] = [
 export type StructureCandidate = {
   id: number;
   codeBhasile: string;
-  type: string | null;
+  type: DbStructureType | null;
+  fermetureDate: Date | null;
 };
 
 export const hasExpectedType = (
@@ -28,6 +32,14 @@ export const hasExpectedType = (
 
 export const describeType = (structure: StructureCandidate): string =>
   structure.type ?? "type non renseigné";
+
+/* On retire les structures fermées */
+export const describeClosure = (
+  structure: StructureCandidate
+): string | null =>
+  structure.fermetureDate
+    ? `${structure.codeBhasile} est fermé depuis le ${structure.fermetureDate.toLocaleDateString("fr-FR")}`
+    : null;
 
 export type ResolvedHuda = {
   structureId: number;
@@ -46,7 +58,19 @@ const structureSelect = {
   id: true,
   codeBhasile: true,
   type: true,
+  fermetureDate: true,
 } as const;
+
+const checkHuda = (structure: StructureCandidate): string | null => {
+  const closure = describeClosure(structure);
+  if (closure) {
+    return closure;
+  }
+  if (!hasExpectedType(structure, StructureType.HUDA)) {
+    return `${structure.codeBhasile} n'est pas un HUDA (${describeType(structure)})`;
+  }
+  return null;
+};
 
 /* Le code Bhasile manque sur une bonne partie des dossiers soumis, alors que les codes DNA résolvent bien. On tente donc le code Bhasile, puis fallback sur DNA */
 export const resolveHuda = async (
@@ -63,19 +87,15 @@ export const resolveHuda = async (
       select: structureSelect,
     });
     if (structure) {
-      return hasExpectedType(structure, StructureType.HUDA)
-        ? {
+      const failureReason = checkHuda(structure);
+      return failureReason
+        ? { ok: false, failure: { reason: failureReason } }
+        : {
             ok: true,
             huda: {
               structureId: structure.id,
               codeBhasile: structure.codeBhasile,
               via: "code-bhasile",
-            },
-          }
-        : {
-            ok: false,
-            failure: {
-              reason: `${structure.codeBhasile} n'est pas un HUDA (${describeType(structure)})`,
             },
           };
     }
@@ -114,11 +134,12 @@ export const resolveHuda = async (
   }
 
   const [structure] = structures;
-  if (!hasExpectedType(structure, StructureType.HUDA)) {
+  const failureReason = checkHuda(structure);
+  if (failureReason) {
     return {
       ok: false,
       failure: {
-        reason: `${structure.codeBhasile}, rattaché via ${codes.join(", ")}, n'est pas un HUDA (${describeType(structure)})`,
+        reason: `rattaché via ${codes.join(", ")} : ${failureReason}`,
       },
     };
   }
