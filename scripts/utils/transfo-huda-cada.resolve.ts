@@ -5,12 +5,16 @@ import {
   StructureType as DbStructureType,
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
-import { TransformationType } from "@/types/transformation.type";
-
 import {
-  normalizeBhasileCode,
-  normalizeDnaCodes,
-} from "./transfo-huda-cada.util";
+  StructureVersionTransformationType,
+  TransformationType,
+} from "@/types/transformation.type";
+
+import { normalizeBhasileCode, parseDnaCodes } from "./transfo-huda-cada.util";
+
+type StructureWithDnaCodes = Awaited<
+  ReturnType<typeof findStructuresByCurrentDnaCodes>
+>[number];
 
 const HUDA_CADA_TRANSFORMATION_TYPES: TransformationType[] = [
   TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
@@ -34,7 +38,6 @@ export const hasExpectedType = (
 export const describeType = (structure: StructureCandidate): string =>
   structure.type ?? "type non renseigné";
 
-/* On retire les structures fermées */
 export const describeClosure = (
   structure: StructureCandidate
 ): string | null =>
@@ -42,7 +45,7 @@ export const describeClosure = (
     ? `${structure.codeBhasile} est fermé depuis le ${structure.fermetureDate.toLocaleDateString("fr-FR")}`
     : null;
 
-export type ResolvedHuda = {
+export type ResolvedStructure = {
   structureId: number;
   codeBhasile: string;
   operateurId: number | null;
@@ -53,8 +56,8 @@ export type ResolutionFailure = {
   reason: string;
 };
 
-export type HudaResolution =
-  { ok: true; huda: ResolvedHuda } | { ok: false; failure: ResolutionFailure };
+export type Resolution<TValue> =
+  { ok: true; value: TValue } | { ok: false; failure: ResolutionFailure };
 
 const structureSelect = {
   id: true,
@@ -64,24 +67,153 @@ const structureSelect = {
   operateurId: true,
 } as const;
 
-const checkHuda = (structure: StructureCandidate): string | null => {
+const checkStructure = (
+  structure: StructureCandidate,
+  expectedType: StructureType
+): string | null => {
   const closure = describeClosure(structure);
   if (closure) {
     return closure;
   }
-  if (!hasExpectedType(structure, StructureType.HUDA)) {
-    return `${structure.codeBhasile} n'est pas un HUDA (${describeType(structure)})`;
+  if (!hasExpectedType(structure, expectedType)) {
+    return `${structure.codeBhasile} n'est pas un ${expectedType} (${describeType(structure)})`;
   }
   return null;
 };
 
-/* Le code Bhasile manque sur une bonne partie des dossiers soumis, alors que les codes DNA résolvent bien. On tente donc le code Bhasile, puis fallback sur DNA */
-export const resolveHuda = async (
+const resolveStructuresByDnaCodes = async (
+  rawValues: string[],
+  departement: string | null,
+  now: Date
+): Promise<Resolution<StructureWithDnaCodes[]>> => {
+  const { codes, padded, invalid } = parseDnaCodes(rawValues, departement);
+  const blocking = [...invalid];
+
+  if (codes.length === 0 && padded.size === 0) {
+    return blocking.length > 0
+      ? { ok: false, failure: { reason: describeInvalidCodes(blocking) } }
+      : { ok: true, value: [] };
+  }
+
+  const structures = await findStructuresByCurrentDnaCodes(
+    [...codes, ...padded.values()],
+    now
+  );
+  const matched = new Set(structures.flatMap(({ dnaCodes }) => dnaCodes));
+
+  blocking.push(...codes.filter((code) => !matched.has(code)));
+  blocking.push(
+    ...[...padded]
+      .filter(([, candidate]) => !matched.has(candidate))
+      .map(([code]) => code)
+  );
+
+  if (blocking.length > 0) {
+    return { ok: false, failure: { reason: describeInvalidCodes(blocking) } };
+  }
+
+  return { ok: true, value: structures };
+};
+
+const describeInvalidCodes = (codes: string[]): string =>
+  `codes DNA non exploitables : ${[...new Set(codes)].join(", ")}`;
+
+export type HudaEnvelopeInput = {
+  rawBhasileCodes: string[];
+  rawDnaCodes: string[];
+  departement: string | null;
+};
+
+/* Aucune source ne prime : les codes Bhasile et les codes DNA s'additionnent */
+export const resolveHudas = async (
   prisma: PrismaClient,
-  rawBhasileCode: string,
-  rawDnaCodes: string,
+  { rawBhasileCodes, rawDnaCodes, departement }: HudaEnvelopeInput,
   now: Date = getNow()
-): Promise<HudaResolution> => {
+): Promise<Resolution<ResolvedStructure[]>> => {
+  const resolved = new Map<number, ResolvedStructure>();
+
+  const codesBhasile = [
+    ...new Set(
+      rawBhasileCodes
+        .map((raw) => normalizeBhasileCode(raw))
+        .filter((code) => code !== null)
+    ),
+  ];
+
+  for (const codeBhasile of codesBhasile) {
+    const structure = await prisma.structure.findUnique({
+      where: { codeBhasile },
+      select: structureSelect,
+    });
+    if (!structure) {
+      return {
+        ok: false,
+        failure: { reason: `code Bhasile ${codeBhasile} inconnu en base` },
+      };
+    }
+    const failureReason = checkStructure(structure, StructureType.HUDA);
+    if (failureReason) {
+      return { ok: false, failure: { reason: failureReason } };
+    }
+    resolved.set(structure.id, {
+      structureId: structure.id,
+      codeBhasile: structure.codeBhasile,
+      operateurId: structure.operateurId,
+      via: "code-bhasile",
+    });
+  }
+
+  const parDna = await resolveStructuresByDnaCodes(
+    rawDnaCodes,
+    departement,
+    now
+  );
+  if (!parDna.ok) {
+    return parDna;
+  }
+
+  for (const structure of parDna.value) {
+    const failureReason = checkStructure(structure, StructureType.HUDA);
+    if (failureReason) {
+      return {
+        ok: false,
+        failure: {
+          reason: `rattaché via ${structure.dnaCodes.join(", ")} : ${failureReason}`,
+        },
+      };
+    }
+    if (!resolved.has(structure.id)) {
+      resolved.set(structure.id, {
+        structureId: structure.id,
+        codeBhasile: structure.codeBhasile,
+        operateurId: structure.operateurId,
+        via: "codes-dna",
+      });
+    }
+  }
+
+  if (resolved.size === 0) {
+    return {
+      ok: false,
+      failure: { reason: "ni code Bhasile ni code DNA exploitables" },
+    };
+  }
+
+  return { ok: true, value: [...resolved.values()] };
+};
+
+export type CadaCibleInput = {
+  rawBhasileCode: string;
+  rawDnaCodes: string[];
+  departement: string | null;
+};
+
+/* Une extension n'a qu'une structure d'accueil. */
+export const resolveCadaCible = async (
+  prisma: PrismaClient,
+  { rawBhasileCode, rawDnaCodes, departement }: CadaCibleInput,
+  now: Date = getNow()
+): Promise<Resolution<ResolvedStructure>> => {
   const codeBhasile = normalizeBhasileCode(rawBhasileCode);
 
   if (codeBhasile) {
@@ -89,68 +221,65 @@ export const resolveHuda = async (
       where: { codeBhasile },
       select: structureSelect,
     });
-    if (structure) {
-      const failureReason = checkHuda(structure);
-      return failureReason
-        ? { ok: false, failure: { reason: failureReason } }
-        : {
-            ok: true,
-            huda: {
-              structureId: structure.id,
-              codeBhasile: structure.codeBhasile,
-              operateurId: structure.operateurId,
-              via: "code-bhasile",
-            },
-          };
+    if (!structure) {
+      return {
+        ok: false,
+        failure: { reason: `${codeBhasile} inconnu en base` },
+      };
     }
-  }
-
-  const { codes } = normalizeDnaCodes(rawDnaCodes);
-  if (codes.length === 0) {
+    const failureReason = checkStructure(structure, StructureType.CADA);
+    if (failureReason) {
+      return { ok: false, failure: { reason: failureReason } };
+    }
     return {
-      ok: false,
-      failure: {
-        reason: codeBhasile
-          ? `code Bhasile ${codeBhasile} inconnu en base, et aucun code DNA exploitable`
-          : `ni code Bhasile ni code DNA exploitables`,
+      ok: true,
+      value: {
+        structureId: structure.id,
+        codeBhasile: structure.codeBhasile,
+        operateurId: structure.operateurId,
+        via: "code-bhasile",
       },
     };
   }
 
-  const structures = await findStructuresByCurrentDnaCodes(codes, now);
-
+  const parDna = await resolveStructuresByDnaCodes(
+    rawDnaCodes,
+    departement,
+    now
+  );
+  if (!parDna.ok) {
+    return parDna;
+  }
+  const structures = parDna.value;
   if (structures.length === 0) {
     return {
       ok: false,
-      failure: {
-        reason: `aucun code DNA connu en base parmi ${codes.join(", ")}`,
-      },
+      failure: { reason: "code Bhasile absent ou illisible, aucun code DNA" },
     };
   }
-
   if (structures.length > 1) {
     return {
       ok: false,
       failure: {
-        reason: `les codes DNA ${codes.join(", ")} pointent vers ${structures.length} structures différentes (${structures.map((structure) => structure.codeBhasile).join(", ")})`,
+        reason: `les codes DNA pointent vers ${structures.length} structures (${structures.map((structure) => structure.codeBhasile).join(", ")})`,
       },
     };
   }
 
   const [structure] = structures;
-  const failureReason = checkHuda(structure);
+  const failureReason = checkStructure(structure, StructureType.CADA);
   if (failureReason) {
     return {
       ok: false,
       failure: {
-        reason: `rattaché via ${codes.join(", ")} : ${failureReason}`,
+        reason: `rattaché via ${structure.dnaCodes.join(", ")} : ${failureReason}`,
       },
     };
   }
 
   return {
     ok: true,
-    huda: {
+    value: {
       structureId: structure.id,
       codeBhasile: structure.codeBhasile,
       operateurId: structure.operateurId,
@@ -159,24 +288,53 @@ export const resolveHuda = async (
   };
 };
 
-/* Une transfo HUDA>CADA déjà ouverte sur cette structure prime, qu'elle vienne d'un agent ou d'un autre dossier Démarches Numériques : on ne veut pas en superposer une seconde. */
-export const findExistingHudaCadaTransformation = async (
-  prisma: PrismaClient,
-  structureId: number
-): Promise<{
+export type ExistingHudaCadaTransformation = {
   id: number;
-  type: TransformationType;
   numeroDossier: string | null;
-} | null> => {
-  const transformation = await prisma.transformation.findFirst({
+  fermetureStructureIds: number[];
+};
+
+/* Un code Bhasile ne peut porter qu'une transfo HUDA>CADA à la fois */
+export const findHudaCadaTransformations = async (
+  prisma: PrismaClient,
+  structureIds: number[]
+): Promise<ExistingHudaCadaTransformation[]> => {
+  const transformations = await prisma.transformation.findMany({
     where: {
       type: { in: HUDA_CADA_TRANSFORMATION_TYPES },
       structureVersionTransformations: {
-        some: { structureVersion: { structureId } },
+        some: { structureVersion: { structureId: { in: structureIds } } },
       },
     },
-    select: { id: true, type: true, numeroDossier: true },
+    select: {
+      id: true,
+      numeroDossier: true,
+      structureVersionTransformations: {
+        where: { type: StructureVersionTransformationType.FERMETURE },
+        select: { structureVersion: { select: { structureId: true } } },
+      },
+    },
   });
 
-  return transformation;
+  return transformations.map(
+    ({ id, numeroDossier, structureVersionTransformations }) => ({
+      id,
+      numeroDossier,
+      fermetureStructureIds: structureVersionTransformations
+        .map(({ structureVersion }) => structureVersion?.structureId)
+        .filter(
+          (structureId) => structureId !== null && structureId !== undefined
+        ),
+    })
+  );
 };
+
+/* On ne touche jamais à une transfo qu'un agent a commencée, on lui rattache juste le numéro de dossier s'il porte exactement la même enveloppe. */
+export const matchesEnvelope = (
+  transformation: ExistingHudaCadaTransformation,
+  structureIds: number[]
+): boolean =>
+  transformation.fermetureStructureIds.length === structureIds.length &&
+  structureIds.every((structureId) =>
+    transformation.fermetureStructureIds.includes(structureId)
+  );
