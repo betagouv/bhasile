@@ -243,7 +243,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
         now
       );
 
-      expect(reasonOf(resolution)).toContain("codes DNA inconnus en base");
+      expect(reasonOf(resolution)).toContain(`inconnus en base : ${dna.code}`);
     });
 
     it("rejette le dossier entier quand un code est illisible", async () => {
@@ -262,7 +262,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
         now
       );
 
-      expect(reasonOf(resolution)).toContain("H351 illisible");
+      expect(reasonOf(resolution)).toContain("illisibles : H351");
     });
 
     it("rattrape un zéro manquant quand le code padé existe et colle au département", async () => {
@@ -287,7 +287,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
       ).toEqual([structure.id]);
     });
 
-    it("rejette un code hors département en suggérant la transposition", async () => {
+    it("rejette un code hors du département du dossier", async () => {
       const { dna } = await createHudaWithDna(
         "20",
         new Date("2026-01-01T00:00:00.000Z")
@@ -299,9 +299,8 @@ describe("transfo-huda-cada.resolve db integration", () => {
         now
       );
 
-      expect(reasonOf(resolution)).toContain("hors département 02");
       expect(reasonOf(resolution)).toContain(
-        `${dna.code[0]}02${dna.code.slice(3)} ?`
+        `hors département 02 : ${dna.code}`
       );
     });
   });

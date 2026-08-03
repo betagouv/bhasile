@@ -20,7 +20,7 @@ const DNA_CODE_LIKE = /^[A-Z]\d+$/;
 const collapseSpacedCodes = (text: string): string =>
   text.replace(/(^|[^A-Z0-9])([A-Z])\s+(?=\d)/g, "$1$2");
 
-export type DnaCodesParseResult = {
+type DnaCodesParseResult = {
   codes: string[];
   unparsed: string[];
 };
@@ -49,15 +49,14 @@ export const parseDepartement = (raw: string): string | null => {
   return numero && /^(\d{2,3}|2[AB])$/.test(numero) ? numero : null;
 };
 
-export const getDnaCodeDepartement = (code: string): string => code.slice(1, 3);
-
+/* Un code DNA encode le département sur deux chiffres : l'outre-mer est comparé sur « 97 ». */
 export const isDnaCodeInDepartement = (
   code: string,
   departement: string | null
 ): boolean =>
   departement === null ||
-  !/^\d{2}$/.test(departement) ||
-  getDnaCodeDepartement(code) === departement;
+  !/^\d+$/.test(departement) ||
+  code.slice(1, 3) === departement.slice(0, 2);
 
 /* Un zéro manquant après la lettre : « H209 » se lit « H0209 ». */
 export const padDnaCode = (code: string): string | null =>
@@ -67,7 +66,8 @@ export type DnaCodesParse = {
   codes: string[];
   /* Candidats à confirmer contre le référentiel : code brut → code padé */
   padded: Map<string, string>;
-  invalid: string[];
+  illisibles: string[];
+  horsDepartement: string[];
 };
 
 /* Un code jeté en silence, c'est une structure absente de la transformation. */
@@ -80,26 +80,28 @@ export const parseDnaCodes = (
   const unparsed = [...new Set(parsed.flatMap(({ unparsed }) => unparsed))];
 
   const codes: string[] = [];
-  const invalid: string[] = [];
+  const illisibles: string[] = [];
+  const horsDepartement: string[] = [];
   for (const code of parsedCodes) {
-    (isDnaCodeInDepartement(code, departement) ? codes : invalid).push(code);
+    (isDnaCodeInDepartement(code, departement) ? codes : horsDepartement).push(
+      code
+    );
   }
 
   const padded = new Map<string, string>();
   for (const code of unparsed) {
     const candidate = padDnaCode(code);
-    if (
-      candidate &&
-      !codes.includes(candidate) &&
-      isDnaCodeInDepartement(candidate, departement)
-    ) {
+    if (!candidate || !isDnaCodeInDepartement(candidate, departement)) {
+      illisibles.push(code);
+      continue;
+    }
+    /* Le code correct figure déjà dans la saisie : candidat redondant, pas code perdu. */
+    if (!codes.includes(candidate)) {
       padded.set(code, candidate);
-    } else {
-      invalid.push(code);
     }
   }
 
-  return { codes, padded, invalid };
+  return { codes, padded, illisibles, horsDepartement };
 };
 
 const FRENCH_MONTHS = [

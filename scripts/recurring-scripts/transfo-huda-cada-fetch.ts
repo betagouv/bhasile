@@ -162,17 +162,25 @@ const buildCadaBrique = async (
   if (
     type === TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
   ) {
+    /* « Même opérateur » : le nouveau CADA reprend celui des HUDA fermés, plus fiable
+     * qu'un rapprochement sur le SIRET. Des opérateurs divergents contredisent le cas de figure. */
+    const operateurIds = [...new Set(hudas.map((huda) => huda.operateurId))];
+    if (operateurIds.length > 1) {
+      return {
+        ok: false,
+        reason: `les HUDA fermés relèvent de ${operateurIds.length} opérateurs différents`,
+      };
+    }
+
     const { structureTypologies, placesAutorisees } = buildCapaciteFields(
       resolveNewCadaCapacite(dossier),
       effectiveDate
     );
-    /* « Même opérateur » : le nouveau CADA reprend l'opérateur des HUDA fermés,
-     * plus fiable qu'un rapprochement sur le SIRET du dossier. */
     return {
       ok: true,
       brique: {
         type: StructureVersionTransformationType.CREATION,
-        operateurId: hudas[0]?.operateurId ?? undefined,
+        operateurId: operateurIds[0] ?? undefined,
         structureType: StructureType.CADA,
         structureTypologies,
         structureVersion: {
@@ -263,8 +271,6 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     select: { id: true },
   });
   if (existing) {
-    /* Le marquage est hors de la transaction de création : on le rejoue tant qu'il n'a pas pris. */
-    await markStepsPrefilled(existing.id);
     return;
   }
 

@@ -15,16 +15,17 @@
 ## Identité du dossier
 
 - `Transformation.numeroDossier` = numéro DN, unique. Pas d'enum `source` : rempli ⇒ Démarches Numériques, nul ⇒ agent.
-- Dossier déjà importé -> on rejoue seulement le marquage des étapes.
+- Dossier déjà importé -> ignoré. Le marquage des étapes n'a lieu qu'à la création.
 - Transfo déjà saisie dans Bhasile -> on rattache le `numeroDossier` **si** elle est seule, sans numéro, et porte exactement la même enveloppe. Aucun champ n'est écrasé.
 
 ## Enveloppe HUDA
 
 - **Union sans priorité** : codes Bhasile et codes DNA s'additionnent, l'ensemble des structures est le périmètre à fermer. Une brique `FERMETURE` par structure.
 - Libellés balayés par motif (`HUDA 2`, apostrophe droite ou typographique), pas par égalité.
-- **Tout ou rien** : un seul code illisible, inconnu ou hors département fait skipper le dossier entier.
-- Padding `H209` -> `H0209` retenu si le département du dossier colle **et** que le code padé est rattaché à une version courante.
+- **Tout ou rien** : un seul code illisible, inconnu ou hors département fait skipper le dossier entier. Le message distingue les trois causes.
+- Padding `H209` -> `H0209` retenu si le département du dossier colle **et** que le code padé est rattaché à une version courante. Candidat ignoré sans blocage si le code correct figure déjà dans la saisie.
 - Transposition (`H2012` pour `H0212`) jamais corrigée, jamais suggérée : code jeté.
+- Contrôle de département sur les deux chiffres qui suivent la lettre ; outre-mer comparé sur `97`, Corse (`2A` / `2B`) non contrôlée.
 - Chaque structure doit être de type `HUDA` (type nul refusé) et non fermée.
 - Un code Bhasile ne porte qu'une transfo HUDA->CADA en parallèle : une seule structure déjà prise bloque le dossier.
 
@@ -56,7 +57,7 @@
 - Convention de l'extension : début = date d'effet, fin = fin de la convention en cours du CADA. L'agent corrige.
 - Adresses, contacts, antennes : héritées du CADA et des HUDA par le service, toutes conservées. L'agent arbitre celles qui restent.
 - Code DNA : lu pour résoudre, **jamais écrit**. Le CADA garde le sien.
-- Opérateur du nouveau CADA : celui du premier HUDA de l'enveloppe.
+- Opérateur du nouveau CADA : celui des HUDA fermés. Des opérateurs divergents dans l'enveloppe contredisent le cas de figure « même opérateur » -> skip.
 
 ## Étapes marquées `PRE_REMPLI`
 

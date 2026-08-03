@@ -30,17 +30,15 @@ export type StructureCandidate = {
   operateurId: number | null;
 };
 
-export const hasExpectedType = (
+const hasExpectedType = (
   structure: StructureCandidate,
   expectedType: StructureType
 ): boolean => structure.type === expectedType;
 
-export const describeType = (structure: StructureCandidate): string =>
+const describeType = (structure: StructureCandidate): string =>
   structure.type ?? "type non renseigné";
 
-export const describeClosure = (
-  structure: StructureCandidate
-): string | null =>
+const describeClosure = (structure: StructureCandidate): string | null =>
   structure.fermetureDate
     ? `${structure.codeBhasile} est fermé depuis le ${structure.fermetureDate.toLocaleDateString("fr-FR")}`
     : null;
@@ -52,7 +50,7 @@ export type ResolvedStructure = {
   via: "code-bhasile" | "codes-dna"; // Comment le rattachement a été obtenu
 };
 
-export type ResolutionFailure = {
+type ResolutionFailure = {
   reason: string;
 };
 
@@ -86,39 +84,63 @@ const resolveStructuresByDnaCodes = async (
   departement: string | null,
   now: Date
 ): Promise<Resolution<StructureWithDnaCodes[]>> => {
-  const { codes, padded, invalid } = parseDnaCodes(rawValues, departement);
-  const blocking = [...invalid];
-
-  if (codes.length === 0 && padded.size === 0) {
-    return blocking.length > 0
-      ? { ok: false, failure: { reason: describeInvalidCodes(blocking) } }
-      : { ok: true, value: [] };
-  }
-
-  const structures = await findStructuresByCurrentDnaCodes(
-    [...codes, ...padded.values()],
-    now
+  const { codes, padded, illisibles, horsDepartement } = parseDnaCodes(
+    rawValues,
+    departement
   );
+
+  const structures =
+    codes.length > 0 || padded.size > 0
+      ? await findStructuresByCurrentDnaCodes(
+          [...codes, ...padded.values()],
+          now
+        )
+      : [];
   const matched = new Set(structures.flatMap(({ dnaCodes }) => dnaCodes));
 
-  blocking.push(...codes.filter((code) => !matched.has(code)));
-  blocking.push(
+  const inconnus = [
+    ...codes.filter((code) => !matched.has(code)),
     ...[...padded]
       .filter(([, candidate]) => !matched.has(candidate))
-      .map(([code]) => code)
-  );
+      .map(([code]) => code),
+  ];
 
-  if (blocking.length > 0) {
-    return { ok: false, failure: { reason: describeInvalidCodes(blocking) } };
-  }
-
-  return { ok: true, value: structures };
+  const reason = describeUnusableCodes({
+    illisibles,
+    horsDepartement,
+    inconnus,
+    departement,
+  });
+  return reason
+    ? { ok: false, failure: { reason } }
+    : { ok: true, value: structures };
 };
 
-const describeInvalidCodes = (codes: string[]): string =>
-  `codes DNA non exploitables : ${[...new Set(codes)].join(", ")}`;
+const describeUnusableCodes = ({
+  illisibles,
+  horsDepartement,
+  inconnus,
+  departement,
+}: {
+  illisibles: string[];
+  horsDepartement: string[];
+  inconnus: string[];
+  departement: string | null;
+}): string | null => {
+  const details = [
+    illisibles.length > 0 ? `illisibles : ${illisibles.join(", ")}` : null,
+    horsDepartement.length > 0
+      ? `hors département ${departement} : ${horsDepartement.join(", ")}`
+      : null,
+    inconnus.length > 0 ? `inconnus en base : ${inconnus.join(", ")}` : null,
+  ].filter((detail) => detail !== null);
 
-export type HudaEnvelopeInput = {
+  return details.length > 0
+    ? `codes DNA non exploitables — ${details.join(" ; ")}`
+    : null;
+};
+
+type HudaEnvelopeInput = {
   rawBhasileCodes: string[];
   rawDnaCodes: string[];
   departement: string | null;
@@ -202,7 +224,7 @@ export const resolveHudas = async (
   return { ok: true, value: [...resolved.values()] };
 };
 
-export type CadaCibleInput = {
+type CadaCibleInput = {
   rawBhasileCode: string;
   rawDnaCodes: string[];
   departement: string | null;

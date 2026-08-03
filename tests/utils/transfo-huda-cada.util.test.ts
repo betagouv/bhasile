@@ -203,6 +203,11 @@ describe("transfo huda cada util", () => {
       expect(isDnaCodeInDepartement("H2012", "02")).toBe(false);
     });
 
+    it("compare l'outre-mer sur les deux premiers chiffres", () => {
+      expect(isDnaCodeInDepartement("H9741", "974")).toBe(true);
+      expect(isDnaCodeInDepartement("H0209", "974")).toBe(false);
+    });
+
     it("laisse passer quand le département est inconnu ou corse", () => {
       expect(isDnaCodeInDepartement("H0209", null)).toBe(true);
       expect(isDnaCodeInDepartement("H2012", "2A")).toBe(true);
@@ -218,7 +223,8 @@ describe("transfo huda cada util", () => {
         ["H208", "H0208"],
         ["H209", "H0209"],
       ]);
-      expect(result.invalid).toEqual(["H2012"]);
+      expect(result.horsDepartement).toEqual(["H2012"]);
+      expect(result.illisibles).toEqual([]);
     });
 
     it("agrège plusieurs champs et dédoublonne", () => {
@@ -228,11 +234,19 @@ describe("transfo huda cada util", () => {
       ]);
     });
 
+    it("ignore un candidat dont le code padé est déjà saisi correctement", () => {
+      const result = parseDnaCodes(["H0209 H209"], "02");
+
+      expect(result.codes).toEqual(["H0209"]);
+      expect(result.padded.size).toBe(0);
+      expect(result.illisibles).toEqual([]);
+    });
+
     it("ne pade pas un code dont le département ne colle pas", () => {
       const result = parseDnaCodes(["H209"], "35");
 
       expect(result.padded.size).toBe(0);
-      expect(result.invalid).toEqual(["H209"]);
+      expect(result.illisibles).toEqual(["H209"]);
     });
   });
 
