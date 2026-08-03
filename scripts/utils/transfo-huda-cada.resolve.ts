@@ -1,4 +1,5 @@
-import { currentVersionWhere } from "@/app/api/structure-versions/structure-version.db.type";
+import { findStructuresByCurrentDnaCodes } from "@/app/api/dna-structures/dna-structure.repository";
+import { getNow } from "@/app/utils/now.util";
 import { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
@@ -47,74 +48,12 @@ const structureSelect = {
   type: true,
 } as const;
 
-/* Un code DNA peut avoir été rattaché à plusieurs structures au fil du temps : seule la version courante fait foi. */
-const findStructuresByDnaCodes = async (
-  prisma: PrismaClient,
-  codes: string[],
-  now: Date
-): Promise<StructureCandidate[]> => {
-  const dnaStructures = await prisma.dnaStructure.findMany({
-    where: {
-      dna: { code: { in: codes } },
-      structureVersion: {
-        ...currentVersionWhere(now),
-        structureId: { not: null },
-      },
-    },
-    select: {
-      dna: { select: { code: true } },
-      structureVersion: {
-        select: {
-          id: true,
-          effectiveDate: true,
-          structure: { select: structureSelect },
-        },
-      },
-    },
-  });
-
-  const latestByCode = new Map<
-    string,
-    { effectiveDate: number; versionId: number; structure: StructureCandidate }
-  >();
-
-  for (const dnaStructure of dnaStructures) {
-    const structureVersion = dnaStructure.structureVersion;
-    if (!structureVersion?.structure) {
-      continue;
-    }
-    const candidate = {
-      effectiveDate: structureVersion.effectiveDate?.getTime() ?? 0,
-      versionId: structureVersion.id,
-      structure: structureVersion.structure,
-    };
-    const current = latestByCode.get(dnaStructure.dna.code);
-    if (
-      !current ||
-      candidate.effectiveDate > current.effectiveDate ||
-      (candidate.effectiveDate === current.effectiveDate &&
-        candidate.versionId > current.versionId)
-    ) {
-      latestByCode.set(dnaStructure.dna.code, candidate);
-    }
-  }
-
-  return [
-    ...new Map(
-      [...latestByCode.values()].map(({ structure }) => [
-        structure.id,
-        structure,
-      ])
-    ).values(),
-  ];
-};
-
 /* Le code Bhasile manque sur une bonne partie des dossiers soumis, alors que les codes DNA résolvent bien. On tente donc le code Bhasile, puis fallback sur DNA */
 export const resolveHuda = async (
   prisma: PrismaClient,
   rawBhasileCode: string,
   rawDnaCodes: string,
-  now: Date = new Date()
+  now: Date = getNow()
 ): Promise<HudaResolution> => {
   const codeBhasile = normalizeBhasileCode(rawBhasileCode);
 
@@ -154,7 +93,7 @@ export const resolveHuda = async (
     };
   }
 
-  const structures = await findStructuresByDnaCodes(prisma, codes, now);
+  const structures = await findStructuresByCurrentDnaCodes(codes, now);
 
   if (structures.length === 0) {
     return {

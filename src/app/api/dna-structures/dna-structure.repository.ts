@@ -1,9 +1,54 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, StructureType } from "@/generated/prisma/client";
+import prisma from "@/lib/prisma";
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { upsertDna } from "../dna-codes/dna-codes.repository";
+import {
+  currentVersionArgs,
+  currentVersionWhere,
+} from "../structure-versions/structure-version.db.type";
+
+/* Un code DNA appartient à la structure dont la version courante le porte */
+export const findStructuresByCurrentDnaCodes = async (
+  codes: string[],
+  now: Date
+): Promise<
+  { id: number; codeBhasile: string; type: StructureType | null }[]
+> => {
+  const structures = await prisma.structure.findMany({
+    where: {
+      structureVersions: {
+        some: {
+          ...currentVersionWhere(now),
+          dnaStructures: { some: { dna: { code: { in: codes } } } },
+        },
+      },
+    },
+    select: {
+      id: true,
+      codeBhasile: true,
+      type: true,
+      structureVersions: {
+        ...currentVersionArgs(now),
+        select: {
+          dnaStructures: {
+            where: { dna: { code: { in: codes } } },
+            select: { id: true },
+          },
+        },
+      },
+    },
+  });
+
+  return structures
+    .filter(
+      ({ structureVersions }) =>
+        (structureVersions[0]?.dnaStructures.length ?? 0) > 0
+    )
+    .map(({ id, codeBhasile, type }) => ({ id, codeBhasile, type }));
+};
 
 const buildDnaStructureWhere = (
   dnaStructureId: number | undefined,
@@ -65,11 +110,7 @@ export const createOrUpdateDnaStructures = async (
       continue;
     }
     await tx.dnaStructure.upsert({
-      where: buildDnaStructureWhere(
-        dnaStructure.id,
-        entityId,
-        upsertedDna.id
-      ),
+      where: buildDnaStructureWhere(dnaStructure.id, entityId, upsertedDna.id),
       update: {
         dnaId: upsertedDna.id,
         description: dnaStructure.description,

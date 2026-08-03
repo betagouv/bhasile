@@ -154,7 +154,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
       });
     });
 
-    it("ignore un rattachement DNA porté par une version périmée", async () => {
+    it("ignore un rattachement porté par une version que la version courante ne reprend pas", async () => {
       const ancienHuda = await createStructure(StructureType.HUDA);
       const nouveauHuda = await createStructure(StructureType.HUDA);
 
@@ -163,6 +163,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
         new Date("2024-01-01T00:00:00.000Z")
       );
       const dna = await createDnaOnVersion(ancienneVersion.id);
+      await createVersion(ancienHuda.id, new Date("2026-01-01T00:00:00.000Z"));
 
       const nouvelleVersion = await createVersion(
         nouveauHuda.id,
