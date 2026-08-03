@@ -9,5 +9,13 @@ export enum StepStatus {
   VALIDE = "VALIDE",
 }
 
+const NOT_STARTED_STEP_STATUSES: StepStatus[] = [
+  StepStatus.NON_COMMENCE,
+  StepStatus.PRE_REMPLI,
+];
+
+export const isStepNotStarted = (status: StepStatus): boolean =>
+  NOT_STARTED_STEP_STATUSES.includes(status);
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyZodSchema = z.ZodType<any, any>;

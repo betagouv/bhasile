@@ -1,3 +1,4 @@
+import { TRANSFORMATION_START_YEAR } from "@/constants";
 import { TransformationType } from "@/types/transformation.type";
 
 /* Le dernier segment d'un code Bhasile est numérique : on change les O en 0 */
@@ -80,6 +81,9 @@ export const parseFrenchDate = (raw: string): Date | null => {
 
   return date;
 };
+
+export const isEffectiveDateInScope = (date: Date): boolean =>
+  date.getUTCFullYear() >= TRANSFORMATION_START_YEAR;
 
 /* Deux libellés coexistent pour chaque branche : on matche sur le préfixe */
 export const parseTransformationType = (

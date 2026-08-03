@@ -36,7 +36,6 @@ import {
   findAll,
   findOne,
   resetSelection,
-  TransformationOrigin,
   updateOne,
 } from "./transformation.repository";
 import {
@@ -149,7 +148,7 @@ const prepareStructureVersionTransformations = async (
 
 export const createTransformation = async (
   transformation: TransformationApiCreate,
-  origin?: TransformationOrigin
+  numeroDossier?: string
 ): Promise<number> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
@@ -159,7 +158,7 @@ export const createTransformation = async (
 
   return createOne(
     { ...transformation, structureVersionTransformations },
-    origin
+    numeroDossier
   );
 };
 

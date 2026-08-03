@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isEffectiveDateInScope,
   normalizeBhasileCode,
   normalizeDnaCodes,
   parseFrenchDate,
@@ -158,6 +159,23 @@ describe("transfo huda cada util", () => {
     it("rejette une chaîne vide ou un mois inconnu", () => {
       expect(parseFrenchDate("")).toBeNull();
       expect(parseFrenchDate("01 juilet 2026")).toBeNull();
+    });
+  });
+
+  describe("isEffectiveDateInScope", () => {
+    it("accepte une date à partir de 2026", () => {
+      expect(isEffectiveDateInScope(new Date("2026-01-01T12:00:00Z"))).toBe(
+        true
+      );
+      expect(isEffectiveDateInScope(new Date("2027-06-15T12:00:00Z"))).toBe(
+        true
+      );
+    });
+
+    it("rejette une date antérieure à 2026", () => {
+      expect(isEffectiveDateInScope(new Date("2025-12-31T12:00:00Z"))).toBe(
+        false
+      );
     });
   });
 

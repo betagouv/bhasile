@@ -14,7 +14,7 @@ import {
   DashboardTransformationRow,
   DashboardTransformationStatus,
 } from "@/types/dashboard.type";
-import { StepStatus } from "@/types/form.type";
+import { isStepNotStarted } from "@/types/form.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 export const getTransformationStatus = (
@@ -25,7 +25,7 @@ export const getTransformationStatus = (
       (structureVersionTransformation) =>
         structureVersionTransformation.form?.formSteps ?? []
     )
-    .some((formStep) => formStep.status !== StepStatus.NON_COMMENCE);
+    .some((formStep) => !isStepNotStarted(formStep.status));
 
   return hasStartedStep ? "A_FINALISER" : "A_INITIALISER";
 };

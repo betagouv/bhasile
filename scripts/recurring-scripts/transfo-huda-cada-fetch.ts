@@ -4,24 +4,31 @@
 import "dotenv/config";
 
 import { createTransformation } from "@/app/api/transformations/transformation.service";
+import { TRANSFORMATION_START_YEAR } from "@/constants";
 import { createPrismaClient } from "@/prisma-client";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
+import { StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
 import {
+  DNColumn,
   DNDossierNode,
   DNDossierState,
   fetchAllDossiers,
+  getValueByLabel,
 } from "../utils/demarches-numeriques.util";
 import {
-  findAgentTransformation,
+  describeType,
+  findExistingHudaCadaTransformation,
+  hasExpectedType,
   resolveHuda,
 } from "../utils/transfo-huda-cada.resolve";
 import {
+  isEffectiveDateInScope,
   normalizeBhasileCode,
   parseFrenchDate,
   parseTransformationType,
@@ -43,11 +50,10 @@ const CADA_BHASILE_LABEL = "Code Bhasile du CADA";
 const DATE_PREVISIONNELLE_LABEL = "Date prévisionnelle de la transformation";
 const DATE_EFFECTIVE_LABEL = "Date effective de la transformation";
 
-type Champ = { label: string; stringValue: string };
-type HudaCadaDossierNode = DNDossierNode & { champs: Champ[] };
+type HudaCadaDossierNode = DNDossierNode & { champs: DNColumn[] };
 
 const champValue = (dossier: HudaCadaDossierNode, label: string): string =>
-  dossier.champs.find((champ) => champ.label === label)?.stringValue || "";
+  getValueByLabel(dossier.champs, label);
 
 const fetchDossiers = async (): Promise<HudaCadaDossierNode[]> => {
   const dossiers: HudaCadaDossierNode[] = [];
@@ -90,6 +96,7 @@ const buildCadaBrique = async (
       ok: true,
       brique: {
         type: StructureVersionTransformationType.CREATION,
+        structureType: StructureType.CADA,
         structureVersion: { effectiveDate: effectiveDateIso },
       },
     };
@@ -107,10 +114,16 @@ const buildCadaBrique = async (
 
   const cada = await prisma.structure.findUnique({
     where: { codeBhasile },
-    select: { id: true },
+    select: { id: true, codeBhasile: true, type: true },
   });
   if (!cada) {
     return { ok: false, reason: `CADA cible : ${codeBhasile} inconnu en base` };
+  }
+  if (!hasExpectedType(cada, StructureType.CADA)) {
+    return {
+      ok: false,
+      reason: `CADA cible : ${codeBhasile} n'est pas un CADA (${describeType(cada)})`,
+    };
   }
 
   return {
@@ -144,16 +157,16 @@ const markIdentificationPrefilled = async (
   return count;
 };
 
-type Skipped = { numero: number; reason: string };
+type DossierReport = { numero: number; reason: string };
 
 const imported: string[] = [];
-const skipped: Skipped[] = [];
+const skipped: DossierReport[] = [];
+const failed: DossierReport[] = [];
 const inferred: string[] = [];
 
-const dossiers = await fetchDossiers();
-console.log(`📝 ${dossiers.length} dossiers soumis récupérés`);
-
-for (const dossier of dossiers) {
+/* Un dossier hors cadre ou en erreur ne doit jamais empêcher les suivants d'être importés :
+ * on collecte tout et on rend compte à la fin. */
+const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
   const skip = (reason: string) =>
     skipped.push({ numero: dossier.number, reason });
 
@@ -162,7 +175,7 @@ for (const dossier of dossiers) {
     select: { id: true },
   });
   if (existing) {
-    continue;
+    return;
   }
 
   const type = parseTransformationType(champValue(dossier, TYPE_LABEL));
@@ -170,13 +183,19 @@ for (const dossier of dossiers) {
     skip(
       `type de transformation non reconnu : "${champValue(dossier, TYPE_LABEL).slice(0, 40)}"`
     );
-    continue;
+    return;
   }
 
   const effectiveDate = resolveEffectiveDate(dossier);
   if (!effectiveDate) {
     skip("aucune date de transformation exploitable");
-    continue;
+    return;
+  }
+  if (!isEffectiveDateInScope(effectiveDate)) {
+    skip(
+      `date de transformation ${effectiveDate.toLocaleDateString("fr-FR")} antérieure à ${TRANSFORMATION_START_YEAR}`
+    );
+    return;
   }
 
   const resolution = await resolveHuda(
@@ -186,55 +205,67 @@ for (const dossier of dossiers) {
   );
   if (!resolution.ok) {
     skip(`HUDA non rattaché — ${resolution.failure.reason}`);
-    continue;
+    return;
   }
   const { huda } = resolution;
-  if (huda.via === "codes-dna") {
-    inferred.push(`#${dossier.number} → ${huda.codeBhasile}`);
-  }
 
-  const agentTransformation = await findAgentTransformation(
+  const existingTransformation = await findExistingHudaCadaTransformation(
     prisma,
     huda.structureId
   );
-  if (agentTransformation) {
+  if (existingTransformation) {
     skip(
-      `transfo #${agentTransformation.id} déjà initiée par un agent sur ${huda.codeBhasile}`
+      `transfo #${existingTransformation.id} déjà ouverte sur ${huda.codeBhasile}${
+        existingTransformation.numeroDossier
+          ? ` (dossier #${existingTransformation.numeroDossier})`
+          : ""
+      }`
     );
-    continue;
+    return;
   }
 
   const cadaBrique = await buildCadaBrique(dossier, type, effectiveDate);
   if (!cadaBrique.ok) {
     skip(cadaBrique.reason);
-    continue;
+    return;
   }
 
-  try {
-    const id = await createTransformation(
-      {
-        type,
-        structureVersionTransformations: [
-          {
-            type: StructureVersionTransformationType.FERMETURE,
-            structureVersion: {
-              structureId: huda.structureId,
-              effectiveDate: effectiveDate.toISOString(),
-            },
+  const id = await createTransformation(
+    {
+      type,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: huda.structureId,
+            effectiveDate: effectiveDate.toISOString(),
           },
-          cadaBrique.brique,
-        ],
-      },
-      { source: "DEMARCHES_NUMERIQUES", numeroDossier: String(dossier.number) }
-    );
-    const steps = await markIdentificationPrefilled(id);
-    imported.push(
-      `#${dossier.number} -> transfo #${id} (${huda.codeBhasile}, ${steps} étape(s) pré-remplie(s))`
-    );
+        },
+        cadaBrique.brique,
+      ],
+    },
+    String(dossier.number)
+  );
+  const steps = await markIdentificationPrefilled(id);
+  imported.push(
+    `#${dossier.number} -> transfo #${id} (${huda.codeBhasile}, ${steps} étape(s) pré-remplie(s))`
+  );
+  if (huda.via === "codes-dna") {
+    inferred.push(`#${dossier.number} → ${huda.codeBhasile}`);
+  }
+};
+
+const dossiers = await fetchDossiers();
+console.log(`📝 ${dossiers.length} dossiers soumis récupérés`);
+
+for (const dossier of dossiers) {
+  try {
+    await importDossier(dossier);
   } catch (error) {
-    skip(
-      `création refusée — ${error instanceof Error ? error.message : String(error)}`
-    );
+    failed.push({
+      numero: dossier.number,
+      reason: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -249,8 +280,15 @@ if (inferred.length) {
 }
 
 if (skipped.length) {
-  console.log(`⚠️ ${skipped.length} dossier(s) non importé(s) :`);
+  console.log(`⚠️ ${skipped.length} dossier(s) hors cadre, non importé(s) :`);
   skipped.forEach(({ numero, reason }) =>
+    console.log(`   #${numero} — ${reason}`)
+  );
+}
+
+if (failed.length) {
+  console.log(`❌ ${failed.length} dossier(s) en erreur :`);
+  failed.forEach(({ numero, reason }) =>
     console.log(`   #${numero} — ${reason}`)
   );
 }

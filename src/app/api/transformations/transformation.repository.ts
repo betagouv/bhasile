@@ -12,10 +12,7 @@ import {
   TransformationSelectionApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
-import {
-  StructureVersionTransformationType,
-  TransformationSource,
-} from "@/types/transformation.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { TRANSFORMATION_FORM_SLUG } from "../forms/form.constants";
@@ -43,21 +40,15 @@ export const findAll = async () => {
 };
 
 // Hors schéma Zod : la provenance est décidée par le serveur, jamais par l'appelant de l'API.
-export type TransformationOrigin = {
-  source: TransformationSource;
-  numeroDossier?: string;
-};
-
 export const createOne = async (
   input: TransformationApiCreate,
-  origin?: TransformationOrigin
+  numeroDossier?: string
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
     const transformation = await tx.transformation.create({
       data: {
         type: input.type,
-        source: origin?.source,
-        numeroDossier: origin?.numeroDossier,
+        numeroDossier,
       },
     });
 
