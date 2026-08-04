@@ -20,7 +20,7 @@ export type AnomalieContexte = {
 export type StructureContexte = {
   type: StructureType | null;
   departementAdministratif: string | null;
-  estIdf: boolean;
+  tarifJournalierCible: number | null; // reporting.tarif_journalier_cible, selon type et zonage IDF
   creationDate: Date | null;
   date303: Date | null;
   placesAutorisees: number | null;

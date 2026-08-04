@@ -20,17 +20,6 @@ model Anomalie {
   @@schema("public")
 }
 
-// Projection en lecture du registre TS (src/lib/anomalies), régénérée par le seeder.
-// Source de vérité : le registre TS. Aucune FK volontairement, pour ne pas contraindre l'ordre seeder/recalcul.
-model AnomalieDefinition {
-  code        AnomalieCode      @id
-  label       String
-  categorie   AnomalieCategorie
-  isDisplayed Boolean
-
-  @@schema("public")
-}
-
 enum AnomalieCategorie {
   CALENDRIER
   PLACES

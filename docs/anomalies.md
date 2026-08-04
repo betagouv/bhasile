@@ -28,13 +28,15 @@ Clé naturelle : `[structureId, code, year, targetId]`.
 
 Une anomalie qui disparaît est supprimée : le commentaire est perdu, c'est assumé. Une justification n'est pas invalidée automatiquement si la donnée change sans faire disparaître l'anomalie — `justifiedAt` est affiché pour que l'agent le repère.
 
-`AnomalieDefinition` est une **projection en lecture** du registre TS, régénérée par le seeder, sans clé étrangère. Elle existe pour que le reporting dispose des libellés et catégories en SQL.
+Il n'existe **aucune table de définitions** : les libellés et catégories vivent uniquement en TS. La vue de reporting n'expose donc que le `code`, à charge de Metabase d'en faire la lecture.
 
 ## Registre
 
 `src/lib/anomalies/anomalie.definition.ts` — un `Record<AnomalieCode, AnomalieDefinition>` exhaustif : `label`, `categorie`, `cible`, `champsCibles` (surlignage front), `isDisplayed`.
 
-Les 33 règles sont **toutes calculées et persistées**. `isDisplayed` ne gouverne que l'affichage front : exposer une règle supplémentaire aux agents est un changement de booléen.
+Les 34 règles sont **toutes calculées et persistées**. `isDisplayed` ne gouverne que l'affichage front : exposer une règle supplémentaire aux agents est un changement de booléen.
+
+Une anomalie est rattachée à un exercice **dès que la donnée sous-jacente l'est**. Les agrégats `BOOL_OR` / `MIN` / `MAX` des vues `004*` ont donc tous été désagrégés par année, à deux exceptions près, notées en commentaire dans le code : les indicateurs LGBT / FVV-TEH (portés par la version courante, pas par un millésime) et les activités (le contexte ne contient que le dernier millésime par code DNA).
 
 ## Moteur
 
