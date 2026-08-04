@@ -9,28 +9,22 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/structures\/[^/]+$/,
+    pattern: /^\/api\/structures\/\d+$/,
     routes: {
       GET: "either",
       PUT: "either",
     },
   },
   {
-    pattern: /^\/api\/structures\/[^/]+\/actualisation$/,
+    pattern: /^\/api\/structures\/\d+\/actualisation$/,
     routes: {
       PUT: "proconnect",
     },
   },
   {
-    pattern: /^\/api\/structures\/[^/]+\/adresses$/,
+    pattern: /^\/api\/structures\/\d+\/adresses$/,
     routes: {
       HEAD: "password",
-    },
-  },
-  {
-    pattern: /^\/api\/structures\/dna\/[^/]+$/,
-    routes: {
-      GET: "password",
     },
   },
   {
@@ -41,7 +35,7 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/cpoms\/[^/]+$/,
+    pattern: /^\/api\/cpoms\/\d+$/,
     routes: {
       GET: "proconnect",
       PUT: "proconnect",
@@ -79,7 +73,7 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/operateurs\/[^/]+$/,
+    pattern: /^\/api\/operateurs\/\d+$/,
     routes: {
       GET: "proconnect",
       PUT: "proconnect",
@@ -89,7 +83,6 @@ export const protectedApiRoutes: ApiRoute[] = [
     pattern: /^\/api\/structures\/stats$/,
     routes: {
       GET: "proconnect",
-      POST: "proconnect",
     },
   },
   {
@@ -126,12 +119,11 @@ export const protectedApiRoutes: ApiRoute[] = [
   {
     pattern: /^\/api\/transformations$/,
     routes: {
-      GET: "proconnect",
       POST: "proconnect",
     },
   },
   {
-    pattern: /^\/api\/transformations\/[^/]+$/,
+    pattern: /^\/api\/transformations\/\d+$/,
     routes: {
       GET: "proconnect",
       PUT: "proconnect",
@@ -139,20 +131,28 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/transformations\/[^/]+\/selection$/,
+    pattern: /^\/api\/transformations\/\d+\/selection$/,
     routes: {
       PUT: "proconnect",
     },
   },
 ];
 
-export const proConnectProtectedPages = [
-  "/",
-  "/structures",
-  "/operateurs",
-  "/statistiques",
-];
-
 export const passwordProtectedPages = ["/ajout-structure", "/ajout-adresses"];
 
 export const noProtectionPage = "/mot-de-passe";
+
+/** Le proxy est fail-closed : toute page absente de cette liste exige une
+ *  session ProConnect. Y ajouter une entrée rend la page publique. */
+export const publicPages = [
+  "/accessibilite",
+  "/cgu",
+  "/connexion",
+  // Déconnexion OIDC en deux temps : /deconnexion/proconnect s'exécute après la
+  // suppression de la session, la protéger empêcherait la fin de session ProConnect.
+  "/deconnexion",
+  "/mentions-legales",
+  "/politique-confidentialite",
+  "/usage",
+  noProtectionPage,
+];
