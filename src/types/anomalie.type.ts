@@ -54,6 +54,7 @@ export const AnomalieCible = [
   "ACTE_ADMINISTRATIF",
   "ADRESSE",
   "CPOM",
+  "DNA",
 ] as const;
 
 export type AnomalieCible = (typeof AnomalieCible)[number];

@@ -122,7 +122,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
   DEPARTEMENT_INCOHERENT_CODE_DNA: {
     label: "Le département de la structure est incohérent avec son code DNA",
     categorie: "CARACTERISTIQUES",
-    cible: "STRUCTURE",
+    cible: "DNA",
     champsCibles: ["departementAdministratif"],
     isDisplayed: false,
   },

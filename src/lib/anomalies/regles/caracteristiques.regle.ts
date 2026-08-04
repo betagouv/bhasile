@@ -19,11 +19,12 @@ export const REGLES_CARACTERISTIQUES = [
         return [];
       }
 
-      return dnas.some(
-        (dna) => dna.code.slice(1, 1 + departement.length) !== departement
-      )
-        ? [surStructure]
-        : [];
+      return dnas
+        .filter((dna) => dna.code.slice(1, 1 + departement.length) !== departement)
+        .map((dna) => ({
+          year: ANOMALIE_YEAR_HORS_EXERCICE,
+          targetId: dna.id,
+        }));
     },
   }),
 

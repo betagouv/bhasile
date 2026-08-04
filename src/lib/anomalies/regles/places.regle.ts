@@ -36,30 +36,20 @@ export const REGLES_PLACES = [
       exercicesEnDepassement(typologies, anneeCourante, "pmr"),
   }),
 
-  // Non désagrégées par exercice : les indicateurs LGBT et FVV/TEH sont portés par la
-  // version courante de la structure, pas par un millésime.
+  // L'indicateur vient de la version active de la structure, les places du millésime :
+  // la comparaison se fait exercice par exercice.
   defineRegle({
     code: "INCOHERENCE_LGBT_PLACES",
     requiert: ["structure", "typologies"],
     evalue: ({ structure, typologies }, { anneeCourante }) =>
-      indicateurIncoherent(
-        structure.lgbt,
-        maxPlaces(typologiesEchues(typologies, anneeCourante), "lgbt")
-      )
-        ? [surStructure]
-        : [],
+      exercicesIncoherents(typologies, anneeCourante, "lgbt", structure.lgbt),
   }),
 
   defineRegle({
     code: "INCOHERENCE_FVVTEH_PLACES",
     requiert: ["structure", "typologies"],
     evalue: ({ structure, typologies }, { anneeCourante }) =>
-      indicateurIncoherent(
-        structure.fvvTeh,
-        maxPlaces(typologiesEchues(typologies, anneeCourante), "fvvTeh")
-      )
-        ? [surStructure]
-        : [],
+      exercicesIncoherents(typologies, anneeCourante, "fvvTeh", structure.fvvTeh),
   }),
 
   defineRegle({
@@ -102,14 +92,18 @@ const exercicesEnDepassement = (
       targetId: ANOMALIE_TARGET_STRUCTURE,
     }));
 
-const maxPlaces = (
+const exercicesIncoherents = (
   typologies: TypologieContexte[],
-  champ: ChampPlaces
-): number =>
-  typologies.reduce(
-    (max, typologie) => Math.max(max, typologie[champ] ?? 0),
-    0
-  );
+  anneeCourante: number,
+  champ: ChampPlaces,
+  indicateur: boolean | null
+) =>
+  typologiesEchues(typologies, anneeCourante)
+    .filter((typologie) => indicateurIncoherent(indicateur, typologie[champ] ?? 0))
+    .map((typologie) => ({
+      year: typologie.year,
+      targetId: ANOMALIE_TARGET_STRUCTURE,
+    }));
 
 const indicateurIncoherent = (
   indicateur: boolean | null,

@@ -80,22 +80,38 @@ describe("PLACES_ADRESSES_ECART_STRUCTURE", () => {
 });
 
 describe("INCOHERENCE_LGBT_PLACES", () => {
-  it("signale un indicateur positif sans aucune place LGBT", () => {
+  it("signale l'exercice où l'indicateur est positif sans aucune place LGBT", () => {
     const detections = detectionsDe("INCOHERENCE_LGBT_PLACES", {
       structure: structureContexte({ lgbt: true }),
-      typologies: [typologieContexte({ lgbt: 0 })],
+      typologies: [typologieContexte({ year: 2024, lgbt: 0 })],
     });
 
-    expect(detections).toEqual([{ year: 0, targetId: 0 }]);
+    expect(detections).toEqual([{ year: 2024, targetId: 0 }]);
   });
 
-  it("signale un indicateur négatif avec des places LGBT", () => {
+  it("signale l'exercice où l'indicateur est négatif avec des places LGBT", () => {
     const detections = detectionsDe("INCOHERENCE_LGBT_PLACES", {
       structure: structureContexte({ lgbt: false }),
-      typologies: [typologieContexte({ lgbt: 5 })],
+      typologies: [typologieContexte({ year: 2024, lgbt: 5 })],
     });
 
-    expect(detections).toEqual([{ year: 0, targetId: 0 }]);
+    expect(detections).toEqual([{ year: 2024, targetId: 0 }]);
+  });
+
+  it("ne signale que les exercices incohérents avec l'indicateur de la version active", () => {
+    const detections = detectionsDe("INCOHERENCE_LGBT_PLACES", {
+      structure: structureContexte({ lgbt: true }),
+      typologies: [
+        typologieContexte({ year: 2023, lgbt: 0 }),
+        typologieContexte({ year: 2024, lgbt: 5 }),
+        typologieContexte({ year: 2025, lgbt: 0 }),
+      ],
+    });
+
+    expect(detections).toEqual([
+      { year: 2023, targetId: 0 },
+      { year: 2025, targetId: 0 },
+    ]);
   });
 
   it("ne signale rien quand l'indicateur n'est pas renseigné", () => {

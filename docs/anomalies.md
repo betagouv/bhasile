@@ -36,7 +36,7 @@ Il n'existe **aucune table de définitions** : les libellés et catégories vive
 
 Les 34 règles sont **toutes calculées et persistées**. `isDisplayed` ne gouverne que l'affichage front : exposer une règle supplémentaire aux agents est un changement de booléen.
 
-Une anomalie est rattachée à un exercice **dès que la donnée sous-jacente l'est**. Les agrégats `BOOL_OR` / `MIN` / `MAX` des vues `004*` ont donc tous été désagrégés par année, à deux exceptions près, notées en commentaire dans le code : les indicateurs LGBT / FVV-TEH (portés par la version courante, pas par un millésime) et les activités (le contexte ne contient que le dernier millésime par code DNA).
+Une anomalie est rattachée à un exercice **dès que la donnée sous-jacente l'est**. Les agrégats `BOOL_OR` / `MIN` / `MAX` des vues `004*` ont donc tous été désagrégés par année. Seules les deux règles activité restent globales, le contexte ne contenant que le dernier millésime par code DNA.
 
 ## Moteur
 
@@ -57,8 +57,21 @@ computeAnomalies(
 
 ⚠️ La suppression doit être **restreinte à `codesEvalues`**. Une règle non évaluée faute de données est indiscernable d'une règle évaluée sans anomalie : un `deleteMany` sur toute la structure détruirait des anomalies légitimes et les justifications associées.
 
-1. `upsert` de chaque détection sur la clé naturelle (préserve `commentaire` et `isJustified`)
+`reconcilierAnomalies` ([anomalie.repository.ts](../src/app/api/anomalies/anomalie.repository.ts)), en une transaction :
+
+1. `createMany` + `skipDuplicates` des détections — les lignes existantes ne sont pas touchées, `commentaire` et `isJustified` survivent
 2. `deleteMany` des anomalies dont le `code` est dans `codesEvalues` et qui ne sont pas redétectées
+
+Couvert par `tests/api/anomalies/anomalie.repository.test.ts` (`yarn test:db`).
+
+## Entrées
+
+| Quoi                      | Où                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------- |
+| Recalcul d'une structure  | `recalculerAnomalies(structureId)`                                                          |
+| Recalcul complet          | `yarn script recompute-anomalies`                                                           |
+| Horloge                   | `getNow()` — `anneeCourante` en découle, les règles ne lisent jamais l'heure                |
+| Tarifs journaliers cibles | `TARIF_JOURNALIER_CIBLE` (JSON). Absent ⇒ `COUT_JOURNALIER_GT_TARIF_CIBLE` ne déclenche pas |
 
 ## Ajouter une règle
 
