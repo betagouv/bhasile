@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isDnaCodeInDepartement,
   isEffectiveDateInScope,
   normalizeBhasileCode,
   normalizeDnaCodes,
+  padDnaCode,
+  parseDepartement,
+  parseDnaCodes,
   parseFrenchDate,
   parseTransformationType,
 } from "../../scripts/utils/transfo-huda-cada.util";
@@ -35,8 +39,12 @@ describe("transfo huda cada util", () => {
       expect(normalizeBhasileCode("CPOM")).toBeNull();
       expect(normalizeBhasileCode("sous CPOM ")).toBeNull();
       expect(normalizeBhasileCode("HUDA multi-site")).toBeNull();
-      expect(normalizeBhasileCode("en cours de saisie dans Bhasile")).toBeNull();
-      expect(normalizeBhasileCode("établissement sous CPOM régional")).toBeNull();
+      expect(
+        normalizeBhasileCode("en cours de saisie dans Bhasile")
+      ).toBeNull();
+      expect(
+        normalizeBhasileCode("établissement sous CPOM régional")
+      ).toBeNull();
     });
 
     it("rejette un code DNA saisi à la place du code Bhasile", () => {
@@ -159,6 +167,86 @@ describe("transfo huda cada util", () => {
     it("rejette une chaîne vide ou un mois inconnu", () => {
       expect(parseFrenchDate("")).toBeNull();
       expect(parseFrenchDate("01 juilet 2026")).toBeNull();
+    });
+  });
+
+  describe("parseDepartement", () => {
+    it("extrait le numéro du libellé Démarches Numériques", () => {
+      expect(parseDepartement("02 - Aisne")).toBe("02");
+      expect(parseDepartement("974 - La Réunion")).toBe("974");
+    });
+
+    it("accepte la Corse", () => {
+      expect(parseDepartement("2A - Corse-du-Sud")).toBe("2A");
+    });
+
+    it("rejette une valeur inexploitable", () => {
+      expect(parseDepartement("")).toBeNull();
+      expect(parseDepartement("Aisne")).toBeNull();
+    });
+  });
+
+  describe("padDnaCode", () => {
+    it("insère le zéro manquant après la lettre", () => {
+      expect(padDnaCode("H209")).toBe("H0209");
+    });
+
+    it("laisse intact un code déjà complet ou trop court", () => {
+      expect(padDnaCode("H0209")).toBeNull();
+      expect(padDnaCode("H20")).toBeNull();
+    });
+  });
+
+  describe("isDnaCodeInDepartement", () => {
+    it("compare les deux chiffres qui suivent la lettre", () => {
+      expect(isDnaCodeInDepartement("H0209", "02")).toBe(true);
+      expect(isDnaCodeInDepartement("H2012", "02")).toBe(false);
+    });
+
+    it("compare l'outre-mer sur les deux premiers chiffres", () => {
+      expect(isDnaCodeInDepartement("H9741", "974")).toBe(true);
+      expect(isDnaCodeInDepartement("H0209", "974")).toBe(false);
+    });
+
+    it("laisse passer quand le département est inconnu ou corse", () => {
+      expect(isDnaCodeInDepartement("H0209", null)).toBe(true);
+      expect(isDnaCodeInDepartement("H2012", "2A")).toBe(true);
+    });
+  });
+
+  describe("parseDnaCodes", () => {
+    it("sépare les codes valides, les candidats au padding et les rejets", () => {
+      const result = parseDnaCodes(["H0203 H208 H209 H0211 H2012"], "02");
+
+      expect(result.codes).toEqual(["H0203", "H0211"]);
+      expect([...result.padded]).toEqual([
+        ["H208", "H0208"],
+        ["H209", "H0209"],
+      ]);
+      expect(result.outsideDepartement).toEqual(["H2012"]);
+      expect(result.unreadable).toEqual([]);
+    });
+
+    it("agrège plusieurs champs et dédoublonne", () => {
+      expect(parseDnaCodes(["H8305 et H 8308", "H8305"], "83").codes).toEqual([
+        "H8305",
+        "H8308",
+      ]);
+    });
+
+    it("ignore un candidat dont le code padé est déjà saisi correctement", () => {
+      const result = parseDnaCodes(["H0209 H209"], "02");
+
+      expect(result.codes).toEqual(["H0209"]);
+      expect(result.padded.size).toBe(0);
+      expect(result.unreadable).toEqual([]);
+    });
+
+    it("ne pade pas un code dont le département ne colle pas", () => {
+      const result = parseDnaCodes(["H209"], "35");
+
+      expect(result.padded.size).toBe(0);
+      expect(result.unreadable).toEqual(["H209"]);
     });
   });
 
