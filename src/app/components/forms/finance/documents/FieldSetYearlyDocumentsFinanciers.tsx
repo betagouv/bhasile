@@ -4,7 +4,9 @@ import { Control, useFormContext } from "react-hook-form";
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
+import { FormKind } from "@/types/global";
 
+import { DocumentsFinanciersCheckboxIsInCpom } from "./DocumentsFinanciersCheckboxIsInCpom";
 import { DocumentsFinanciersCommentaire } from "./DocumentsFinanciersCommentaire";
 import { DocumentsFinanciersList } from "./DocumentsFinanciersList";
 import { YearlyFileUpload } from "./YearlyFileUpload";
@@ -15,6 +17,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
   isAutorisee,
   control,
   hasAccordion,
+  formKind,
 }: Props): ReactElement | null => {
   const { watch, formState } = useFormContext();
 
@@ -65,6 +68,10 @@ export const FieldSetYearlyDocumentsFinanciers = ({
         </p>
       )}
 
+      {formKind === FormKind.AJOUT && (
+        <DocumentsFinanciersCheckboxIsInCpom year={year} index={index} />
+      )}
+
       <div className="grid grid-cols-2 gap-16 mb-10">
         <DocumentsFinanciersList isAutorisee={isAutorisee} year={year} />
         <YearlyFileUpload
@@ -89,4 +96,5 @@ type Props = {
   isAutorisee: boolean;
   control: Control<DocumentsFinanciersFlexibleFormValues>;
   hasAccordion?: boolean;
+  formKind?: FormKind;
 };
