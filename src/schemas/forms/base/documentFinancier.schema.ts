@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 import {
-  isDocumentRequiredForYear,
+  isDocumentStillRequired,
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import { getCpomCoveredDocumentsFinanciers } from "@/app/utils/documentFinancier.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   nullishFrenchDateToISO,
@@ -14,6 +15,7 @@ import {
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
 import { fileApiSchema } from "@/schemas/api/file.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { DocumentFinancierCategory } from "@/types/document-financier.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -56,15 +58,18 @@ export const DocumentsFinanciersFlexibleSchema =
     }
   );
 
-export const DocumentsFinanciersStrictSchema = DocumentsFinanciersSchema.extend(
-  {
+export const getDocumentsFinanciersStrictSchema = (
+  structure: StructureApiRead
+) => {
+  const coveredDocumentsFinanciers = getCpomCoveredDocumentsFinanciers(structure);
+
+  return DocumentsFinanciersSchema.extend({
     type: z.preprocess(
       (val) => (val === "" ? undefined : val),
       z.enum(StructureType)
     ),
-  }
-)
-  .refine(
+  })
+    .refine(
     (data) => {
       if (data.creationDate && data.date303) {
         return data.creationDate <= data.date303;
@@ -93,9 +98,10 @@ export const DocumentsFinanciersStrictSchema = DocumentsFinanciersSchema.extend(
       years.forEach((year) => {
         if (year >= referenceYear) {
           documents.forEach((document) => {
-            const documentIsRequired = isDocumentRequiredForYear(
+            const documentIsRequired = isDocumentStillRequired(
               document,
-              year
+              year,
+              coveredDocumentsFinanciers
             );
             if (documentIsRequired) {
               const requiredDocument = data.documentsFinanciers?.find(
@@ -116,6 +122,7 @@ export const DocumentsFinanciersStrictSchema = DocumentsFinanciersSchema.extend(
       });
     })
   );
+};
 
 export type DocumentFinancierFlexibleFormValues = z.infer<
   typeof DocumentFinancierSchema

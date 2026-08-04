@@ -3,6 +3,7 @@ import { ReactElement } from "react";
 
 import { DownloadItem } from "@/app/components/common/DownloadItem";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import { getCpomInheritedDocumentsFinanciers } from "@/app/utils/documentFinancier.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -22,12 +23,7 @@ export const DocumentsFinanciers = (): ReactElement => {
   const yearsToDisplay = years.filter((year) => year >= (startYear ?? 0));
 
   const inheritedDocumentsFinanciers =
-    structure.cpomStructures
-      ?.flatMap((cpomStructure) => cpomStructure.cpom?.documentsFinanciers ?? [])
-      .filter(
-        (documentFinancier) =>
-          documentFinancier.structureType === structure.type
-      ) ?? [];
+    getCpomInheritedDocumentsFinanciers(structure);
 
   return (
     <>

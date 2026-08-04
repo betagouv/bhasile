@@ -2,6 +2,7 @@ import { ReactElement, useEffect, useRef } from "react";
 import { Control, useFormContext } from "react-hook-form";
 
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
+import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { FormKind } from "@/types/global";
@@ -17,6 +18,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
   isAutorisee,
   control,
   hasAccordion,
+  coveredDocumentsFinanciers,
   formKind,
 }: Props): ReactElement | null => {
   const { watch, formState } = useFormContext();
@@ -73,7 +75,11 @@ export const FieldSetYearlyDocumentsFinanciers = ({
       )}
 
       <div className="grid grid-cols-2 gap-16 mb-10">
-        <DocumentsFinanciersList isAutorisee={isAutorisee} year={year} />
+        <DocumentsFinanciersList
+          isAutorisee={isAutorisee}
+          year={year}
+          coveredDocumentsFinanciers={coveredDocumentsFinanciers}
+        />
         <YearlyFileUpload
           year={year}
           isAutorisee={isAutorisee}
@@ -95,6 +101,7 @@ type Props = {
   startYear: number;
   isAutorisee: boolean;
   control: Control<DocumentsFinanciersFlexibleFormValues>;
+  coveredDocumentsFinanciers?: DocumentFinancierApiType[];
   hasAccordion?: boolean;
   formKind?: FormKind;
 };

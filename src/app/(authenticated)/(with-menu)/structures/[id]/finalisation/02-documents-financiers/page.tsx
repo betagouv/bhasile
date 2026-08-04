@@ -14,7 +14,7 @@ import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util
 import {
   DocumentsFinanciersFlexibleFormValues,
   DocumentsFinanciersFlexibleSchema,
-  DocumentsFinanciersStrictSchema,
+  getDocumentsFinanciersStrictSchema,
 } from "@/schemas/forms/base/documentFinancier.schema";
 import { StepStatus } from "@/types/form.type";
 
@@ -31,6 +31,8 @@ export default function FinalisationDocumentsFinanciers() {
   );
 
   const defaultValues = getDefaultValues({ structure });
+
+  const strictSchema = getDocumentsFinanciersStrictSchema(structure);
 
   const { handleValidation, handleAutoSave } = useAgentFormHandling({
     currentStep,
@@ -58,7 +60,7 @@ export default function FinalisationDocumentsFinanciers() {
     <div>
       <Tabs currentStep={currentStep} />
       <FormWrapper
-        schema={DocumentsFinanciersStrictSchema}
+        schema={strictSchema}
         defaultValues={defaultValues}
         submitButtonText="Je valide la saisie de cette page"
         availableFooterButtons={[FooterButtonType.SUBMIT]}

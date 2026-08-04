@@ -60,7 +60,7 @@ model DocumentFinancier {
   year          Int
   name          String?
   isMissing     Boolean?
-  granularity   DocumentFinancierGranularity @default(STRUCTURE)
+  granularity   DocumentFinancierGranularity @default(STRUCTURE) // TODO: décommissionner le champ (plus lu ni écrit) une fois les contrôles qualité de la phase d'initialisation terminés
   fileUploads   FileUpload[]
 
   createdAt DateTime @default(now())

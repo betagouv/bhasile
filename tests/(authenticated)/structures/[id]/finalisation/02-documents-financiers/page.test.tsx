@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsFinanciersPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/02-documents-financiers/page";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationDocumentsFinanciersValidStructure } from "../../../../../test-utils/structure.factory";
@@ -77,6 +78,41 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
 
     // THEN
     expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it("valide sans document propre quand le CPOM porte ceux du type de la structure", async () => {
+    // GIVEN
+    const base = createFinalisationDocumentsFinanciersValidStructure(79);
+    const structure = {
+      ...base,
+      documentsFinanciers: [],
+      cpomStructures: [
+        {
+          cpom: {
+            documentsFinanciers: base.documentsFinanciers.map(
+              (documentFinancier) => ({
+                ...documentFinancier,
+                structureType: base.type,
+              })
+            ),
+          },
+        },
+      ] as unknown as StructureApiRead["cpomStructures"],
+    };
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(
+      structure,
+      <FinalisationDocumentsFinanciersPage />
+    );
+
+    // WHEN
+    await clickButtonByName("Je valide la saisie de cette page");
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+    // Sans dispense, chaque document requis et non fourni afficherait « À importer »
+    expect(screen.queryAllByText("À importer")).toHaveLength(0);
   });
 
   it("sauvegarde automatiquement et ne conserve que les documents financiers prêts à être téléversés", async () => {
