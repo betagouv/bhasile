@@ -17,13 +17,25 @@ import {
   StructureParentActe,
 } from "@/types/acte-administratif.type";
 
+export const getActeDisplayCategory = (
+  acteAdministratif: ActeAdministratifApiType
+): ActeAdministratifCategory =>
+  acteAdministratif.category in ACTE_ADMINISTRATIF_CATEGORY_LABELS
+    ? acteAdministratif.category
+    : "AUTRE";
+
+export const hasDownloadableFile = (
+  acteAdministratif: ActeAdministratifApiType
+): boolean => Boolean(acteAdministratif.fileUploads?.[0]?.key);
+
 export const getActesCategoriesToDisplay = (
   actesAdministratifs: ActeAdministratifApiType[] | undefined
 ): ActeAdministratifCategory[] => {
   const presentCategories = new Set(
     (actesAdministratifs ?? [])
       .filter((acteAdministratif) => !acteAdministratif.parentId)
-      .map((acteAdministratif) => acteAdministratif.category)
+      .filter(hasDownloadableFile)
+      .map(getActeDisplayCategory)
   );
   return (
     Object.keys(
@@ -61,8 +73,7 @@ export const getCurrentStructureParentActe = (
   referenceDate: Date
 ): ResolvedAvenantParent | undefined => {
   let mostRecent:
-    | { id: number; startDate: Date; effectiveEndDate: Date }
-    | undefined;
+    { id: number; startDate: Date; effectiveEndDate: Date } | undefined;
 
   for (const candidate of structureActes ?? []) {
     if (candidate.category !== category) {

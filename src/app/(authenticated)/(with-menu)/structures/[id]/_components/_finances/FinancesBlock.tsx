@@ -33,7 +33,7 @@ export const FinancesBlock = (): ReactElement => {
 
   return (
     <Block
-      title="Finances"
+      title="Finance"
       iconClass="fr-icon-money-euro-box-line"
       onEdit={() => {
         router.push(`/structures/${structure.id}/modification/finances`);

@@ -209,7 +209,12 @@ describe("getActesCategoriesToDisplay", () => {
   const acte = (
     category: ActeAdministratifCategory,
     parentId?: number
-  ): ActeAdministratifApiType => ({ category, parentId });
+  ): ActeAdministratifApiType =>
+    ({
+      category,
+      parentId,
+      fileUploads: [{ key: "un-fichier" }],
+    }) as unknown as ActeAdministratifApiType;
 
   it("inclut une catégorie transférée absente de la config structure", () => {
     expect(
@@ -251,6 +256,24 @@ describe("getActesCategoriesToDisplay", () => {
   it("retourne une liste vide sans acte", () => {
     expect(getActesCategoriesToDisplay([])).toEqual([]);
     expect(getActesCategoriesToDisplay(undefined)).toEqual([]);
+  });
+
+  it("omet une catégorie dont aucun acte ne porte de document", () => {
+    expect(
+      getActesCategoriesToDisplay([
+        { category: "CONVENTION" } as ActeAdministratifApiType,
+      ])
+    ).toEqual([]);
+  });
+
+  it("rattache aux autres documents un acte dont la catégorie manque", () => {
+    expect(
+      getActesCategoriesToDisplay([
+        {
+          fileUploads: [{ key: "un-fichier" }],
+        } as unknown as ActeAdministratifApiType,
+      ])
+    ).toEqual(["AUTRE"]);
   });
 });
 

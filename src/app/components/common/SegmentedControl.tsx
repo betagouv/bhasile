@@ -15,21 +15,27 @@ export const SegmentedControl = ({
         {children}
       </legend>
       <div className="fr-segmented__elements m-0">
-        {options.map(({ id, isChecked, label, value, icon }) => (
-          <div className="fr-segmented__element" key={id}>
-            <input
-              defaultChecked={isChecked}
-              id={id}
-              name={name}
-              type="radio"
-              value={value}
-              onChange={(event) => onChange?.(event.target.value)}
-            />
-            <label className={`fr-label ${icon} justify-center`} htmlFor={id}>
-              {label}
-            </label>
-          </div>
-        ))}
+        {options.map(({ id, isChecked, label, value, icon }) => {
+          const inputId = `${name}-${id}`;
+          return (
+            <div className="fr-segmented__element" key={id}>
+              <input
+                defaultChecked={isChecked}
+                id={inputId}
+                name={name}
+                type="radio"
+                value={value}
+                onChange={(event) => onChange?.(event.target.value)}
+              />
+              <label
+                className={`fr-label ${icon} justify-center`}
+                htmlFor={inputId}
+              >
+                {label}
+              </label>
+            </div>
+          );
+        })}
       </div>
     </fieldset>
   );

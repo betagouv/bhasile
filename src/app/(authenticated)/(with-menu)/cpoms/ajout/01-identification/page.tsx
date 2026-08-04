@@ -48,7 +48,7 @@ export default function CpomAjoutIdentification() {
       >
         <PreviousPageLink />
         <FieldSetGeneral />
-        <FieldSetActesAdministratifs structureTypes={[]} />
+        <FieldSetActesAdministratifs />
         <FieldSetStructures />
       </FormWrapper>
     </>

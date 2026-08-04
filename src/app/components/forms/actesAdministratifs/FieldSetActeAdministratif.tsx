@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { useActeAdministratifRadios } from "@/app/hooks/useActeAdministratifRadios";
+import { cn } from "@/app/utils/classname.util";
 import {
   AdditionalFieldsType,
   AvenantAlternative,
@@ -20,6 +21,7 @@ export default function FieldSetActeAdministratif({
   category,
   categoryShortName,
   title,
+  isTitleHidden = false,
   notice,
   isOptional,
   canAddFile,
@@ -108,7 +110,12 @@ export default function FieldSetActeAdministratif({
 
   return (
     <fieldset className="flex flex-col gap-6 w-full">
-      <legend className="flex items-center gap-4 text-xl font-bold mb-4 text-title-blue-france">
+      <legend
+        className={cn(
+          "flex items-center gap-4 text-xl font-bold mb-4 text-title-blue-france",
+          isTitleHidden && "sr-only"
+        )}
+      >
         {legend} {isOptional && "(optionnel)"}
         {canAddFile && (
           <Button
@@ -182,6 +189,7 @@ type FieldSetActeAdministratifProps = {
   category: ActeAdministratifCategory;
   categoryShortName: string;
   title: string;
+  isTitleHidden?: boolean;
   notice?: string | React.ReactElement;
   isOptional?: boolean;
   canAddFile?: boolean;

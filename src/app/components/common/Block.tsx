@@ -11,6 +11,7 @@ import { StructureApiRead } from "@/schemas/api/structure.schema";
 export const Block = ({
   title,
   iconClass,
+  titleAside,
   disclaimer,
   onEdit,
   multipleEdit,
@@ -22,10 +23,13 @@ export const Block = ({
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
-      <div className="flex justify-between items-start">
-        <div className="flex">
-          <span className={`text-title-blue-france mr-3 ${iconClass}`} />
-          <h3 className="text-title-blue-france fr-h6 mb-12">{title}</h3>
+      <div className="flex justify-between items-start mb-12">
+        <div className="flex items-center gap-4">
+          <div className="flex">
+            <span className={`text-title-blue-france mr-3 ${iconClass}`} />
+            <h3 className="text-title-blue-france fr-h6 mb-0">{title}</h3>
+          </div>
+          {titleAside}
         </div>
         {disclaimer}
         <Can I="update" this={subject(entityType, entity)}>
@@ -73,6 +77,7 @@ export const Block = ({
 type Props = PropsWithChildren<{
   title: string;
   iconClass: string;
+  titleAside?: ReactElement;
   disclaimer?: ReactElement;
   onEdit?: () => void;
   multipleEdit?: {

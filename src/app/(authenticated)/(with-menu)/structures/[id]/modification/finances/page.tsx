@@ -50,7 +50,7 @@ export default function ModificationFinanceForm() {
   return (
     <>
       <ModificationTitle
-        step="Finances"
+        step="Finance"
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper

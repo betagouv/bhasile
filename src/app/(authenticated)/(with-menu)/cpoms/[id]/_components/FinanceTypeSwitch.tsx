@@ -19,7 +19,6 @@ export const FinanceTypeSwitch = ({
         value: type,
       }))}
       onChange={handleChange}
-      className="mb-6"
     />
   );
 };

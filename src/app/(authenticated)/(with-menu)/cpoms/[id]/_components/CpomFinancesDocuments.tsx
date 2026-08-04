@@ -16,9 +16,9 @@ export const CpomFinancesDocuments = ({
 
   return (
     <div>
-      <h3 className="text-title-blue-france text-lg mb-4">
-        Documents financiers
-      </h3>
+      <h4 className="text-title-blue-france text-lg mb-4">
+        Documents financiers ({structureType})
+      </h4>
       {documentsFinanciersOfType.length === 0 ? (
         <p className="text-disabled-grey mb-0">Aucun document importé</p>
       ) : (

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import { CpomDocumentsFinanciers } from "@/app/components/forms/cpom/CpomDocumentsFinanciers";
 import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
@@ -44,7 +43,21 @@ export default function CpomModificationFinance() {
   return (
     <>
       <ModificationTitle
-        step="Finances"
+        step="Finance"
+        titleAside={
+          structureTypes.length > 1 ? (
+            <SegmentedControl
+              name="cpomFinancesType"
+              options={structureTypes.map((structureType) => ({
+                id: structureType,
+                label: structureType,
+                value: structureType,
+                isChecked: currentType === structureType,
+              }))}
+              onChange={(value) => setCurrentType(value as StructureType)}
+            />
+          ) : undefined
+        }
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
@@ -59,35 +72,28 @@ export default function CpomModificationFinance() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france) gap-10"
       >
-        {structureTypes.length > 1 && (
-          <CustomNotice
-            severity="info"
-            description="Nous avons détecté dans la composition de votre CPOM différents types de structures. Veuillez remplir les informations pour chacun d’eux via le sélecteur ci-dessous, en prenant en compte toutes les structures du type correspondant."
+        <div>
+          <h2
+            className="text-title-blue-france text-lg mb-6 font-bold"
+            id={`gestionBudgetaire-${currentType}`}
+          >
+            Gestion budgétaire ({currentType})
+          </h2>
+          <p className="mb-8 max-w-3xl">
+            Veuillez renseigner l’historique des données budgétaires{" "}
+            <strong>
+              à l’échelle du CPOM en prenant en compte toutes les structures
+              d’un même type.
+            </strong>{" "}
+            Aussi, le tableau des affectations reflète uniquement des flux
+            annuels. Les montants saisis ne doivent en aucun cas être une
+            estimation du stock.
+          </p>
+          <CpomTable
+            type={currentType}
+            ariaLabelledBy={`gestionBudgetaire-${currentType}`}
           />
-        )}
-
-        {structureTypes.length > 1 && (
-          <SegmentedControl
-            name="cpomFinancesType"
-            className="mb-2"
-            options={structureTypes.map((structureType) => ({
-              id: structureType,
-              label: structureType,
-              value: structureType,
-              isChecked: currentType === structureType,
-            }))}
-            onChange={(value) => setCurrentType(value as StructureType)}
-          />
-        )}
-
-        <p className="mb-0 max-w-3xl">
-          Veuillez renseigner l’historique des données budgétaires{" "}
-          <strong>à l’échelle de l’ensemble du CPOM</strong>. Aussi, le tableau
-          des affectations reflète uniquement des flux annuels. Les montants
-          saisis ne doivent en aucun cas être une estimation du stock.
-        </p>
-
-        <CpomTable type={currentType} showTitle />
+        </div>
         <hr />
         <div>
           <h2 className="text-title-blue-france text-xl mb-6">
