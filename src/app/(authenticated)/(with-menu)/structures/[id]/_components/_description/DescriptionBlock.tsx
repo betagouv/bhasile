@@ -83,6 +83,7 @@ export const DescriptionBlock = (): ReactElement => {
           label: tab.label,
         }))}
         onTabChange={(tabId) => setSelectedTabId(tabId)}
+        className="-mx-6.5 -mb-8.5"
       >
         {selectedTabId === "general" && <General />}
         {selectedTabId === "sites" && <AntennesAndContacts />}

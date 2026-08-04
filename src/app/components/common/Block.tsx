@@ -22,7 +22,7 @@ export const Block = ({
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
 
   return (
-    <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
+    <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid overflow-hidden">
       <div className="flex justify-between items-start mb-12">
         <div className="flex items-center gap-4">
           <div className="flex">
