@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import * as XLSX from "xlsx";
@@ -56,6 +58,19 @@ describe("useSpreadsheetParse", () => {
     ]);
   });
 
+  it("force la répartition à DIFFUS même si le tableur porte une colonne Type de bâti", async () => {
+    const file = buildSpreadsheetFile(HEADERS_MIXTE, [
+      ["1 rue de la Paix", "35000", "Rennes", 12, "Oui", "Non", "COLLECTIF"],
+    ]);
+
+    const { result } = renderHook(() => useSpreadsheetParse());
+    const adresses = await result.current.parseAdressesDiffuses(file);
+
+    expect(adresses.map((adresse) => adresse.repartition)).toEqual([
+      Repartition.DIFFUS,
+    ]);
+  });
+
   it("ignore les lignes vides intercalées entre deux adresses", async () => {
     const file = buildSpreadsheetFile(HEADERS_DIFFUS, [
       ["1 rue de la Paix", "35000", "Rennes", 12, "Oui", "Non"],
@@ -84,6 +99,27 @@ describe("useSpreadsheetParse", () => {
     await expect(
       result.current.parseAdressesDiffuses(file)
     ).rejects.toThrowError("Valeur invalide (Places autorisées : ligne 5)");
+  });
+
+  it("rejette un tableur ne contenant aucune adresse plutôt que de vider la liste", async () => {
+    const file = buildSpreadsheetFile(HEADERS_DIFFUS, []);
+
+    const { result } = renderHook(() => useSpreadsheetParse());
+
+    await expect(
+      result.current.parseAdressesDiffuses(file)
+    ).rejects.toThrowError("Aucune adresse n'a été trouvée dans le tableur");
+  });
+
+  it("rejette le modèle de tableur distribué tant qu'il n'a pas été rempli", async () => {
+    const contents = await readFile("public/adresses-diffus.xlsx");
+    const file = new File([new Uint8Array(contents)], "adresses-diffus.xlsx");
+
+    const { result } = renderHook(() => useSpreadsheetParse());
+
+    await expect(
+      result.current.parseAdressesDiffuses(file)
+    ).rejects.toThrowError("Valeur invalide (Code postal : ligne 3)");
   });
 });
 

@@ -2,6 +2,7 @@ import {
   parseSheetData,
   ParseSheetDataError,
   readSheet,
+  Row,
   Schema,
 } from "read-excel-file/browser";
 
@@ -27,15 +28,14 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
     );
 
     if (parsed.errors) {
-      throw new Error(
-        buildErrorMessage(
-          parsed.errors,
-          filledRows.map(({ spreadsheetRowNumber }) => spreadsheetRowNumber)
-        )
-      );
+      throw new Error(buildErrorMessage(parsed.errors, filledRows));
     }
 
-    return parsed.objects.map(toFormAdresse);
+    if (parsed.objects.length === 0) {
+      throw new Error("Aucune adresse n'a été trouvée dans le tableur");
+    }
+
+    return parsed.objects.map(buildFormAdresse);
   };
 
   const parseAdressesDiffuses = (file: File): ParseSpreadsheetResult => {
@@ -51,7 +51,7 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
 
 const FIRST_ADRESSE_ROW_NUMBER = 3;
 
-const toFormAdresse = (row: ImportedAdresseRow): FormAdresse => ({
+const buildFormAdresse = (row: ImportedAdresseRow): FormAdresse => ({
   adresse: row.adresse,
   codePostal: row.codePostal,
   commune: row.ville,
@@ -65,16 +65,33 @@ const toFormAdresse = (row: ImportedAdresseRow): FormAdresse => ({
 
 const buildErrorMessage = (
   errors: ParseSheetDataError[],
-  spreadsheetRowNumbers: number[]
+  filledRows: FilledRow[]
 ): string =>
   errors
-    .map(
-      (error) =>
-        `Valeur invalide (${error.column} : ligne ${spreadsheetRowNumbers[error.row - 1]})`
-    )
+    .map((error) => {
+      const rowNumber = filledRows[error.row - 1]?.spreadsheetRowNumber;
+
+      return `Valeur invalide (${error.column} : ligne ${rowNumber ?? "inconnue"})`;
+    })
     .join(", ");
 
-const getSchema = (isMixte: boolean): Schema<ImportedAdresseRow> => ({
+const getSchema = (isMixte: boolean): Schema<ImportedAdresseRow> => {
+  if (!isMixte) {
+    return ADRESSE_COLUMNS;
+  }
+
+  return {
+    ...ADRESSE_COLUMNS,
+    repartition: {
+      column: "Type de bâti",
+      type: String,
+      oneOf: [Repartition.DIFFUS, Repartition.COLLECTIF],
+      required: true,
+    },
+  };
+};
+
+const ADRESSE_COLUMNS: Schema<ImportedAdresseRow> = {
   adresse: {
     column: "Adresse",
     type: String,
@@ -114,13 +131,12 @@ const getSchema = (isMixte: boolean): Schema<ImportedAdresseRow> => ({
     oneOf: ["Oui", "oui", "OUI", "Non", "non", "NON"],
     required: true,
   },
-  repartition: {
-    column: "Type de bâti",
-    type: String,
-    oneOf: [Repartition.DIFFUS, Repartition.COLLECTIF],
-    required: isMixte,
-  },
-});
+};
+
+type FilledRow = {
+  cells: Row;
+  spreadsheetRowNumber: number;
+};
 
 type ImportedAdresseRow = {
   adresse: string;
