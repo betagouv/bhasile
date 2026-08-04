@@ -24,6 +24,7 @@ export const createFakeActeAdministratif = (): Omit<
     date: faker.date.past(),
     name: faker.lorem.word(),
     category: faker.helpers.enumValue(ActeAdministratifCategory),
+    structureType: null,
     startDate: faker.date.past(),
     endDate: faker.date.future(),
     isMissing: false,

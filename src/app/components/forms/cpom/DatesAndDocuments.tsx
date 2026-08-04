@@ -26,7 +26,9 @@ export const DatesAndDocuments = () => {
   // We use a key to run the useEffect every time the dates change
   const actesDatesKey =
     actesAdministratifs
-      ?.filter((a) => a?.category === "CONVENTION")
+      ?.filter(
+        (acteAdministratif) => acteAdministratif?.category === "CONVENTION_CPOM"
+      )
       .map(
         (acteAdministratif) =>
           `${acteAdministratif?.startDate ?? ""}-${acteAdministratif?.endDate ?? ""}`
@@ -35,7 +37,7 @@ export const DatesAndDocuments = () => {
 
   useEffect(() => {
     const conventionActes = actesAdministratifs.filter(
-      (acteAdministratif) => acteAdministratif?.category === "CONVENTION"
+      (acteAdministratif) => acteAdministratif?.category === "CONVENTION_CPOM"
     );
 
     const dateEnd = conventionActes.reduce((accumulator, current) => {
@@ -85,7 +87,7 @@ export const DatesAndDocuments = () => {
           type="hidden"
         />
         <FieldSetActeAdministratif
-          category="CONVENTION"
+          category="CONVENTION_CPOM"
           categoryShortName="CPOM"
           title="Contrat CPOM"
           canAddFile={false}

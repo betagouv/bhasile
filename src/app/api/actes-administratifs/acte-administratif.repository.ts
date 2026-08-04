@@ -139,6 +139,7 @@ const createOrUpdateActeAdministratif = async (
   const scalarData = {
     ...entityId,
     category: acteAdministratif.category,
+    structureType: acteAdministratif.structureType,
     date: acteAdministratif.date,
     startDate: acteAdministratif.startDate,
     endDate: acteAdministratif.endDate,

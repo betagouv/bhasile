@@ -20,6 +20,7 @@ export const createFakeDocumentFinancier = (): Omit<
     year: faker.number.int({ min: 2021, max: 2025 }),
     name: faker.lorem.word(),
     category: faker.helpers.enumValue(DocumentFinancierCategory),
+    structureType: null,
     granularity: faker.helpers.enumValue(DocumentFinancierGranularity),
     fileUploads: [createFakeFileUpload()],
     isMissing: false,

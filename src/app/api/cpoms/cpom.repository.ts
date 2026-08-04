@@ -8,6 +8,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
+import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import {
   CpomDbDetails,
   CpomDbList,
@@ -73,6 +74,10 @@ export const createOrUpdateCpom = async (
     await createOrUpdateBudgets(tx, cpom.budgets, { cpomId });
 
     await createOrUpdateActesAdministratifs(tx, cpom.actesAdministratifs, {
+      cpomId,
+    });
+
+    await createOrUpdateDocumentsFinanciers(tx, cpom.documentsFinanciers, {
       cpomId,
     });
 

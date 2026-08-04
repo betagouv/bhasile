@@ -17,6 +17,11 @@ export const cpomListInclude = {
       fileUploads: true,
     },
   },
+  documentsFinanciers: {
+    include: {
+      fileUploads: true,
+    },
+  },
 } satisfies Prisma.CpomInclude;
 
 export const cpomDetailsInclude = {
@@ -52,6 +57,11 @@ export const cpomDetailsInclude = {
     },
   },
   actesAdministratifs: {
+    include: {
+      fileUploads: true,
+    },
+  },
+  documentsFinanciers: {
     include: {
       fileUploads: true,
     },

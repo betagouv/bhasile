@@ -180,7 +180,7 @@ export const createFakeCpoms = async (
           ? {
               actesAdministratifs: {
                 create: {
-                  category: ActeAdministratifCategory.CONVENTION,
+                  category: ActeAdministratifCategory.CONVENTION_CPOM,
                   startDate: dateStart,
                   endDate: dateEnd,
                   fileUploads: {

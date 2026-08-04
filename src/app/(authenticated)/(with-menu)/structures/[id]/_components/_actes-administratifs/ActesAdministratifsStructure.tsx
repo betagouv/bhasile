@@ -10,7 +10,10 @@ export const ActesAdministratifsStructure = (): ReactElement => {
 
   const cpomActesAdministratifs = structure.cpomStructures
     ?.flatMap((cpomStructure) => cpomStructure.cpom?.actesAdministratifs)
-    .filter((acte): acte is ActeAdministratifApiType => !!acte);
+    .filter(
+      (acte): acte is ActeAdministratifApiType =>
+        !!acte && (!acte.structureType || acte.structureType === structure.type)
+    );
 
   return (
     <ActesAdministratifsBlock
