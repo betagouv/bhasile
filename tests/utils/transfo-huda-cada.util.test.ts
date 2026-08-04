@@ -223,8 +223,8 @@ describe("transfo huda cada util", () => {
         ["H208", "H0208"],
         ["H209", "H0209"],
       ]);
-      expect(result.horsDepartement).toEqual(["H2012"]);
-      expect(result.illisibles).toEqual([]);
+      expect(result.outsideDepartement).toEqual(["H2012"]);
+      expect(result.unreadable).toEqual([]);
     });
 
     it("agrège plusieurs champs et dédoublonne", () => {
@@ -239,14 +239,14 @@ describe("transfo huda cada util", () => {
 
       expect(result.codes).toEqual(["H0209"]);
       expect(result.padded.size).toBe(0);
-      expect(result.illisibles).toEqual([]);
+      expect(result.unreadable).toEqual([]);
     });
 
     it("ne pade pas un code dont le département ne colle pas", () => {
       const result = parseDnaCodes(["H209"], "35");
 
       expect(result.padded.size).toBe(0);
-      expect(result.illisibles).toEqual(["H209"]);
+      expect(result.unreadable).toEqual(["H209"]);
     });
   });
 

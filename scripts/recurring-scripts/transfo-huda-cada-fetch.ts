@@ -3,8 +3,9 @@
 
 import "dotenv/config";
 
-import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
+import { getActeAdministratifPeriods } from "@/app/api/actes-administratifs/acte-administratif.util";
 import { createTransformation } from "@/app/api/transformations/transformation.service";
+import { isCurrentlyInEffect } from "@/app/utils/date.util";
 import { TRANSFORMATION_START_YEAR } from "@/constants";
 import { createPrismaClient } from "@/prisma-client";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
@@ -25,9 +26,9 @@ import {
 import {
   findHudaCadaTransformations,
   matchesEnvelope,
-  resolveCadaCible,
   ResolvedStructure,
   resolveHudas,
+  resolveTargetCada,
 } from "../utils/transfo-huda-cada.resolve";
 import {
   isEffectiveDateInScope,
@@ -105,13 +106,13 @@ const parsePositiveInt = (raw: string): number | null => {
 };
 
 /* Le premier libellé renseigné l'emporte. */
-const resolveNewCadaCapacite = (
+const resolveNewCadaCapacity = (
   dossier: HudaCadaDossierNode
 ): number | null => {
   for (const label of CADA_NOUVEAU_CAPACITE_LABELS) {
-    const capacite = parsePositiveInt(champValue(dossier, label));
-    if (capacite !== null) {
-      return capacite;
+    const capacity = parsePositiveInt(champValue(dossier, label));
+    if (capacity !== null) {
+      return capacity;
     }
   }
   return null;
@@ -119,16 +120,18 @@ const resolveNewCadaCapacite = (
 
 /* Le formulaire écrit la capacité aux deux endroits et relit `structureVersion` :
  * pré-remplir l'un sans l'autre donne soit un champ vide, soit une typologie manquante. */
-const buildCapaciteFields = (capacite: number | null, effectiveDate: Date) => ({
-  structureTypologies: capacite
-    ? [{ year: effectiveDate.getUTCFullYear(), placesAutorisees: capacite }]
+const buildCapacityFields = (capacity: number | null, effectiveDate: Date) => ({
+  structureTypologies: capacity
+    ? [{ year: effectiveDate.getUTCFullYear(), placesAutorisees: capacity }]
     : undefined,
-  placesAutorisees: capacite ?? undefined,
+  placesAutorisees: capacity ?? undefined,
 });
 
-/* La nouvelle convention couvre le temps restant de celle du CADA étendu. */
+/* La nouvelle convention couvre le temps restant de celle en vigueur à la date
+ * d'effet — pas aujourd'hui, et pas la plus récente si elle est expirée. */
 const findConventionEndDate = async (
-  structureId: number
+  structureId: number,
+  effectiveDate: Date
 ): Promise<Date | null> => {
   const actesAdministratifs = await prisma.acteAdministratif.findMany({
     where: { structureId },
@@ -140,11 +143,13 @@ const findConventionEndDate = async (
       endDate: true,
     },
   });
-  const [, endDate] = getDatesOfCurrentActeAdministratif(
+  const period = getActeAdministratifPeriods(
     actesAdministratifs,
     "CONVENTION"
+  ).find(([startDate, endDate]) =>
+    isCurrentlyInEffect(startDate, endDate, effectiveDate)
   );
-  return endDate;
+  return period?.[1] ?? null;
 };
 
 const buildCadaBrique = async (
@@ -172,8 +177,8 @@ const buildCadaBrique = async (
       };
     }
 
-    const { structureTypologies, placesAutorisees } = buildCapaciteFields(
-      resolveNewCadaCapacite(dossier),
+    const { structureTypologies, placesAutorisees } = buildCapacityFields(
+      resolveNewCadaCapacity(dossier),
       effectiveDate
     );
     return {
@@ -191,21 +196,22 @@ const buildCadaBrique = async (
     };
   }
 
-  const cible = await resolveCadaCible(prisma, {
+  const targetCada = await resolveTargetCada(prisma, {
     rawBhasileCode: champValue(dossier, CADA_BHASILE_LABEL),
     rawDnaCodes: [champValue(dossier, CADA_DNA_LABEL)],
     departement,
   });
-  if (!cible.ok) {
-    return { ok: false, reason: `CADA cible : ${cible.failure.reason}` };
+  if (!targetCada.ok) {
+    return { ok: false, reason: `CADA cible : ${targetCada.failure.reason}` };
   }
 
-  const { structureTypologies, placesAutorisees } = buildCapaciteFields(
+  const { structureTypologies, placesAutorisees } = buildCapacityFields(
     parsePositiveInt(champValue(dossier, CADA_ETENDU_CAPACITE_LABEL)),
     effectiveDate
   );
   const conventionEndDate = await findConventionEndDate(
-    cible.value.structureId
+    targetCada.value.structureId,
+    effectiveDate
   );
 
   return {
@@ -223,7 +229,7 @@ const buildCadaBrique = async (
           ]
         : undefined,
       structureVersion: {
-        structureId: cible.value.structureId,
+        structureId: targetCada.value.structureId,
         effectiveDate: effectiveDateIso,
         placesAutorisees,
       },
@@ -367,9 +373,9 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     String(dossier.number)
   );
   const steps = await markStepsPrefilled(id);
-  const codesBhasile = hudas.map((huda) => huda.codeBhasile).join(", ");
+  const bhasileCodes = hudas.map((huda) => huda.codeBhasile).join(", ");
   imported.push(
-    `#${dossier.number} -> transfo #${id} (${codesBhasile}, ${steps} étape(s) pré-remplie(s))`
+    `#${dossier.number} -> transfo #${id} (${bhasileCodes}, ${steps} étape(s) pré-remplie(s))`
   );
   const viaDna = hudas.filter((huda) => huda.via === "codes-dna");
   if (viaDna.length > 0) {

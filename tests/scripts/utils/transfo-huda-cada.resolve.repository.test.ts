@@ -10,8 +10,8 @@ import {
 import {
   findHudaCadaTransformations,
   matchesEnvelope,
-  resolveCadaCible,
   resolveHudas,
+  resolveTargetCada,
 } from "../../../scripts/utils/transfo-huda-cada.resolve";
 
 const CODE_BHASILE_PREFIX = "BHA-ZZZ-";
@@ -179,9 +179,27 @@ describe("transfo-huda-cada.resolve db integration", () => {
       expect(reasonOf(resolution)).toContain("est fermé depuis le 01/03/2026");
     });
 
+    it("rejette un code Bhasile illisible au lieu de l'ignorer", async () => {
+      const structure = await createStructure(StructureType.HUDA);
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [structure.codeBhasile, "BHA-ZZ-1"],
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(reasonOf(resolution)).toContain(
+        "codes Bhasile illisibles : BHA-ZZ-1"
+      );
+    });
+
     it("additionne les structures désignées par code Bhasile et par codes DNA", async () => {
       const parCode = await createStructure(StructureType.HUDA);
-      const { structure: parDna, dna } = await createHudaWithDna(
+      const { structure: byDnaCodes, dna } = await createHudaWithDna(
         "35",
         new Date("2026-01-01T00:00:00.000Z")
       );
@@ -199,7 +217,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
       expect(resolution.ok).toBe(true);
       expect(
         resolution.ok && resolution.value.map(({ structureId }) => structureId)
-      ).toEqual([parCode.id, parDna.id]);
+      ).toEqual([parCode.id, byDnaCodes.id]);
     });
 
     it("ferme les deux HUDA quand les codes DNA pointent vers deux structures", async () => {
@@ -303,11 +321,11 @@ describe("transfo-huda-cada.resolve db integration", () => {
     });
   });
 
-  describe("resolveCadaCible", () => {
-    it("résout la cible par son code Bhasile", async () => {
+  describe("resolveTargetCada", () => {
+    it("résout le CADA cible par son code Bhasile", async () => {
       const cada = await createStructure(StructureType.CADA);
 
-      const resolution = await resolveCadaCible(
+      const resolution = await resolveTargetCada(
         prisma,
         {
           rawBhasileCode: cada.codeBhasile,
@@ -329,7 +347,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
       const dna = await createDna("35");
       await linkDnaToVersion(version.id, dna.id);
 
-      const resolution = await resolveCadaCible(
+      const resolution = await resolveTargetCada(
         prisma,
         { rawBhasileCode: "", rawDnaCodes: [dna.code], departement: "35" },
         now
@@ -338,7 +356,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
       expect(resolution.ok && resolution.value.structureId).toBe(cada.id);
     });
 
-    it("rejette une cible qui résout vers plusieurs structures", async () => {
+    it("rejette un CADA cible qui résout vers plusieurs structures", async () => {
       const premier = await createStructure(StructureType.CADA);
       const second = await createStructure(StructureType.CADA);
       const dates = new Date("2026-01-01T00:00:00.000Z");
@@ -353,7 +371,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
         secondDna.id
       );
 
-      const resolution = await resolveCadaCible(
+      const resolution = await resolveTargetCada(
         prisma,
         {
           rawBhasileCode: "",

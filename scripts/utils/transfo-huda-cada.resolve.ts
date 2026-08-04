@@ -84,7 +84,7 @@ const resolveStructuresByDnaCodes = async (
   departement: string | null,
   now: Date
 ): Promise<Resolution<StructureWithDnaCodes[]>> => {
-  const { codes, padded, illisibles, horsDepartement } = parseDnaCodes(
+  const { codes, padded, unreadable, outsideDepartement } = parseDnaCodes(
     rawValues,
     departement
   );
@@ -98,7 +98,7 @@ const resolveStructuresByDnaCodes = async (
       : [];
   const matched = new Set(structures.flatMap(({ dnaCodes }) => dnaCodes));
 
-  const inconnus = [
+  const unknownCodes = [
     ...codes.filter((code) => !matched.has(code)),
     ...[...padded]
       .filter(([, candidate]) => !matched.has(candidate))
@@ -106,9 +106,9 @@ const resolveStructuresByDnaCodes = async (
   ];
 
   const reason = describeUnusableCodes({
-    illisibles,
-    horsDepartement,
-    inconnus,
+    unreadable,
+    outsideDepartement,
+    unknownCodes,
     departement,
   });
   return reason
@@ -117,22 +117,24 @@ const resolveStructuresByDnaCodes = async (
 };
 
 const describeUnusableCodes = ({
-  illisibles,
-  horsDepartement,
-  inconnus,
+  unreadable,
+  outsideDepartement,
+  unknownCodes,
   departement,
 }: {
-  illisibles: string[];
-  horsDepartement: string[];
-  inconnus: string[];
+  unreadable: string[];
+  outsideDepartement: string[];
+  unknownCodes: string[];
   departement: string | null;
 }): string | null => {
   const details = [
-    illisibles.length > 0 ? `illisibles : ${illisibles.join(", ")}` : null,
-    horsDepartement.length > 0
-      ? `hors département ${departement} : ${horsDepartement.join(", ")}`
+    unreadable.length > 0 ? `illisibles : ${unreadable.join(", ")}` : null,
+    outsideDepartement.length > 0
+      ? `hors département ${departement} : ${outsideDepartement.join(", ")}`
       : null,
-    inconnus.length > 0 ? `inconnus en base : ${inconnus.join(", ")}` : null,
+    unknownCodes.length > 0
+      ? `inconnus en base : ${unknownCodes.join(", ")}`
+      : null,
   ].filter((detail) => detail !== null);
 
   return details.length > 0
@@ -154,7 +156,19 @@ export const resolveHudas = async (
 ): Promise<Resolution<ResolvedStructure[]>> => {
   const resolved = new Map<number, ResolvedStructure>();
 
-  const codesBhasile = [
+  const unreadableBhasileCodes = rawBhasileCodes.filter(
+    (raw) => raw.trim() !== "" && normalizeBhasileCode(raw) === null
+  );
+  if (unreadableBhasileCodes.length > 0) {
+    return {
+      ok: false,
+      failure: {
+        reason: `codes Bhasile illisibles : ${unreadableBhasileCodes.join(", ")}`,
+      },
+    };
+  }
+
+  const bhasileCodes = [
     ...new Set(
       rawBhasileCodes
         .map((raw) => normalizeBhasileCode(raw))
@@ -162,7 +176,7 @@ export const resolveHudas = async (
     ),
   ];
 
-  for (const codeBhasile of codesBhasile) {
+  for (const codeBhasile of bhasileCodes) {
     const structure = await prisma.structure.findUnique({
       where: { codeBhasile },
       select: structureSelect,
@@ -185,16 +199,16 @@ export const resolveHudas = async (
     });
   }
 
-  const parDna = await resolveStructuresByDnaCodes(
+  const byDnaCodes = await resolveStructuresByDnaCodes(
     rawDnaCodes,
     departement,
     now
   );
-  if (!parDna.ok) {
-    return parDna;
+  if (!byDnaCodes.ok) {
+    return byDnaCodes;
   }
 
-  for (const structure of parDna.value) {
+  for (const structure of byDnaCodes.value) {
     const failureReason = checkStructure(structure, StructureType.HUDA);
     if (failureReason) {
       return {
@@ -224,16 +238,16 @@ export const resolveHudas = async (
   return { ok: true, value: [...resolved.values()] };
 };
 
-type CadaCibleInput = {
+type TargetCadaInput = {
   rawBhasileCode: string;
   rawDnaCodes: string[];
   departement: string | null;
 };
 
 /* Une extension n'a qu'une structure d'accueil. */
-export const resolveCadaCible = async (
+export const resolveTargetCada = async (
   prisma: PrismaClient,
-  { rawBhasileCode, rawDnaCodes, departement }: CadaCibleInput,
+  { rawBhasileCode, rawDnaCodes, departement }: TargetCadaInput,
   now: Date = getNow()
 ): Promise<Resolution<ResolvedStructure>> => {
   const codeBhasile = normalizeBhasileCode(rawBhasileCode);
@@ -264,15 +278,15 @@ export const resolveCadaCible = async (
     };
   }
 
-  const parDna = await resolveStructuresByDnaCodes(
+  const byDnaCodes = await resolveStructuresByDnaCodes(
     rawDnaCodes,
     departement,
     now
   );
-  if (!parDna.ok) {
-    return parDna;
+  if (!byDnaCodes.ok) {
+    return byDnaCodes;
   }
-  const structures = parDna.value;
+  const structures = byDnaCodes.value;
   if (structures.length === 0) {
     return {
       ok: false,

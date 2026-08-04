@@ -66,8 +66,8 @@ export type DnaCodesParse = {
   codes: string[];
   /* Candidats à confirmer contre le référentiel : code brut → code padé */
   padded: Map<string, string>;
-  illisibles: string[];
-  horsDepartement: string[];
+  unreadable: string[];
+  outsideDepartement: string[];
 };
 
 /* Un code jeté en silence, c'est une structure absente de la transformation. */
@@ -80,19 +80,20 @@ export const parseDnaCodes = (
   const unparsed = [...new Set(parsed.flatMap(({ unparsed }) => unparsed))];
 
   const codes: string[] = [];
-  const illisibles: string[] = [];
-  const horsDepartement: string[] = [];
+  const unreadable: string[] = [];
+  const outsideDepartement: string[] = [];
   for (const code of parsedCodes) {
-    (isDnaCodeInDepartement(code, departement) ? codes : horsDepartement).push(
-      code
-    );
+    (isDnaCodeInDepartement(code, departement)
+      ? codes
+      : outsideDepartement
+    ).push(code);
   }
 
   const padded = new Map<string, string>();
   for (const code of unparsed) {
     const candidate = padDnaCode(code);
     if (!candidate || !isDnaCodeInDepartement(candidate, departement)) {
-      illisibles.push(code);
+      unreadable.push(code);
       continue;
     }
     /* Le code correct figure déjà dans la saisie : candidat redondant, pas code perdu. */
@@ -101,7 +102,7 @@ export const parseDnaCodes = (
     }
   }
 
-  return { codes, padded, illisibles, horsDepartement };
+  return { codes, padded, unreadable, outsideDepartement };
 };
 
 const FRENCH_MONTHS = [
