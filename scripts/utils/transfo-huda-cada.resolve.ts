@@ -10,7 +10,7 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-import { normalizeBhasileCode, parseDnaCodes } from "./transfo-huda-cada.util";
+import { normalizeBhasileCodes, parseDnaCodes } from "./transfo-huda-cada.util";
 
 type StructureWithDnaCodes = Awaited<
   ReturnType<typeof findStructuresByCurrentDnaCodes>
@@ -157,11 +157,7 @@ export const resolveHudas = async (
   const resolved = new Map<number, ResolvedStructure>();
 
   const bhasileCodes = [
-    ...new Set(
-      rawBhasileCodes
-        .map((raw) => normalizeBhasileCode(raw))
-        .filter((code) => code !== null)
-    ),
+    ...new Set(rawBhasileCodes.flatMap((raw) => normalizeBhasileCodes(raw))),
   ];
 
   const structuresByCode = new Map(
@@ -245,7 +241,8 @@ export const resolveTargetCada = async (
   { rawBhasileCode, rawDnaCodes, departement }: TargetCadaInput,
   now: Date = getNow()
 ): Promise<Resolution<ResolvedStructure>> => {
-  const codeBhasile = normalizeBhasileCode(rawBhasileCode);
+  /* Une extension n'a qu'une structure d'accueil : le premier code fait foi */
+  const [codeBhasile] = normalizeBhasileCodes(rawBhasileCode);
 
   if (codeBhasile) {
     const structure = await prisma.structure.findUnique({
