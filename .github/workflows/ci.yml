@@ -51,7 +51,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -64,6 +64,10 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: Apply migrations
         run: npx prisma migrate deploy
+      - name: Seed reference data
+        env:
+          SMALL_SEED: "1"
+        run: npx prisma db seed
       - name: Build test env file
         run: |
           cp .env.example .env.test
