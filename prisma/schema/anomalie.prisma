@@ -1,24 +1,87 @@
 model Anomalie {
-    id           Int                 @id @default(autoincrement())
-    structure    Structure?          @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    structureId  Int?
-    definition   AnomalieDefinition? @relation(fields: [definitionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    definitionId Int?
-    commentaire  String?
-    year         Int?
-    isJustified  Boolean?
-    createdAt    DateTime            @default(now())
-    updatedAt    DateTime            @default(now()) @updatedAt
+  id          Int          @id @default(autoincrement())
+  structure   Structure    @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId Int
+  code        AnomalieCode
+  year        Int          @default(0) // 0 = anomalie non rattachée à un exercice
+  targetId    Int          @default(0) // 0 = portée par la structure ; sinon l'entité désignée par la cible du code
 
-    @@schema("public")
+  isJustified   Boolean? // null = jamais examinée, true = justifiée, false = rouverte
+  commentaire   String?
+  justifiedBy   User?     @relation(fields: [justifiedById], references: [id])
+  justifiedById Int?
+  justifiedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([structureId, code, year, targetId])
+  @@index([code])
+  @@schema("public")
 }
 
+// Projection en lecture du registre TS (src/lib/anomalies), régénérée par le seeder.
+// Source de vérité : le registre TS. Aucune FK volontairement, pour ne pas contraindre l'ordre seeder/recalcul.
 model AnomalieDefinition {
-    id          Int        @id @default(autoincrement())
-    label       String
-    fieldName   String
-    divsToColor String[]
-    anomalies   Anomalie[]
+  code        AnomalieCode      @id
+  label       String
+  categorie   AnomalieCategorie
+  isDisplayed Boolean
 
-    @@schema("public")
+  @@schema("public")
+}
+
+enum AnomalieCategorie {
+  CALENDRIER
+  PLACES
+  CARACTERISTIQUES
+  FINANCE
+  DOCUMENTS
+  ACTIVITE
+
+  @@schema("public")
+}
+
+enum AnomalieCode {
+  AUTORISATION_DUREE_NOT_15Y
+  CONVENTION_AUTORISEE_DUREE_NOT_5Y
+  CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y
+  CONVENTION_HORS_PERIODE_AUTORISATION
+  CONVENTION_MANQUANTE_OU_EXPIREE
+  CONVENTION_DATES_DIFFERENTES_ACTES
+  AUTORISATION_DATES_DIFFERENTES_ACTES
+  EVALUATION_HORS_DELAI
+
+  PLACES_LABELLISEES_GT_AUTORISEES
+  PLACES_SPECIALISEES_GT_AUTORISEES
+  PLACES_PMR_GT_AUTORISEES
+  INCOHERENCE_LGBT_PLACES
+  INCOHERENCE_FVVTEH_PLACES
+  PLACES_ADRESSES_ECART_STRUCTURE
+
+  DEPARTEMENT_INCOHERENT_CODE_DNA
+  MULTI_DNA
+  CPOM_MONO_STRUCTURE
+
+  TAUX_ENCADREMENT_GT_SEUIL
+  TAUX_ENCADREMENT_LT_2
+  COUT_JOURNALIER_GT_TARIF_CIBLE
+  COUT_JOURNALIER_LT_15
+  RESULTAT_NET_EQ_0
+  AFFECTATION_DETAIL_MANQUANT
+  AFFECTATION_DETAIL_ECART
+  REPRISE_PLUS_AFFECTATION_ECART
+  REPRISE_ETAT_SIGNE_INVERSE
+  SUBVENTIONNEE_DEFICIT_AVEC_EXCEDENT
+  SUBVENTIONNEE_EXCEDENT_AVEC_REPRISE_ETAT
+  SUBVENTIONNEE_EXCEDENT_ECART
+
+  DOCUMENT_CONVENTION_MANQUANT
+  DOCUMENT_AUTORISATION_MANQUANT
+  DOCUMENT_CPOM_MANQUANT
+
+  ACTIVITE_PLACES_INDISPONIBLES_GT_3PCT
+  ACTIVITE_PRESENCES_INDUES_GT_7PCT
+
+  @@schema("public")
 }
