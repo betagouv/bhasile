@@ -5,7 +5,9 @@ import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
+import { FormKind } from "@/types/global";
 
+import { DocumentsFinanciersCheckboxIsInCpom } from "./DocumentsFinanciersCheckboxIsInCpom";
 import { DocumentsFinanciersCommentaire } from "./DocumentsFinanciersCommentaire";
 import { DocumentsFinanciersList } from "./DocumentsFinanciersList";
 import { YearlyFileUpload } from "./YearlyFileUpload";
@@ -17,6 +19,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
   control,
   hasAccordion,
   coveredDocumentsFinanciers,
+  formKind,
 }: Props): ReactElement | null => {
   const { watch, formState } = useFormContext();
 
@@ -67,6 +70,10 @@ export const FieldSetYearlyDocumentsFinanciers = ({
         </p>
       )}
 
+      {formKind === FormKind.AJOUT && (
+        <DocumentsFinanciersCheckboxIsInCpom year={year} index={index} />
+      )}
+
       <div className="grid grid-cols-2 gap-16 mb-10">
         <DocumentsFinanciersList
           isAutorisee={isAutorisee}
@@ -96,4 +103,5 @@ type Props = {
   control: Control<DocumentsFinanciersFlexibleFormValues>;
   coveredDocumentsFinanciers?: DocumentFinancierApiType[];
   hasAccordion?: boolean;
+  formKind?: FormKind;
 };

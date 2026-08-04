@@ -17,7 +17,7 @@ import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { ActesAdministratifsFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
-import { getActesAdministratifsSchema } from "@/schemas/forms/base/getActesAdministratifsSchema";
+import { getActesAdministratifsSchema } from "@/schemas/forms/base/acteAdministratif/getActesAdministratifsSchema";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 

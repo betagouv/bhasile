@@ -5,11 +5,16 @@ import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { getCpomCoveredDocumentsFinanciers } from "@/app/utils/documentFinancier.util";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
+import { FormKind } from "@/types/global";
 
 import { DocumentsFinanciersAccordion } from "./DocumentsFinanciersAccordion";
 import { FieldSetYearlyDocumentsFinanciers } from "./FieldSetYearlyDocumentsFinanciers";
 
-export const DocumentsFinanciers = ({ hasAccordion, className }: Props) => {
+export const DocumentsFinanciers = ({
+  hasAccordion,
+  className,
+  formKind,
+}: Props) => {
   const { structure } = useStructureContext();
   const { control } = useFormContext<DocumentsFinanciersFlexibleFormValues>();
   const isAutorisee = structure?.isAutorisee ?? false;
@@ -47,6 +52,7 @@ export const DocumentsFinanciers = ({ hasAccordion, className }: Props) => {
             control={control}
             hasAccordion={hasAccordion}
             coveredDocumentsFinanciers={coveredDocumentsFinanciers}
+            formKind={formKind}
           />
         </DocumentsFinanciersAccordion>
       ))}
@@ -57,4 +63,5 @@ export const DocumentsFinanciers = ({ hasAccordion, className }: Props) => {
 type Props = {
   hasAccordion?: boolean;
   className?: string;
+  formKind?: FormKind;
 };

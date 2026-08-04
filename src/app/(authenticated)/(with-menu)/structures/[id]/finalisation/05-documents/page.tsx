@@ -19,7 +19,7 @@ import {
   ActesAdministratifsAutoSaveFormValues,
   actesAdministratifsAutoSaveSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
-import { getActesAdministratifsSchema } from "@/schemas/forms/base/getActesAdministratifsSchema";
+import { getActesAdministratifsSchema } from "@/schemas/forms/base/acteAdministratif/getActesAdministratifsSchema";
 import { StepStatus } from "@/types/form.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
