@@ -32,7 +32,7 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   mapTypologieYears,
-  resolveStructuresWithTypologieForYear,
+  structuresActiveInPeriod,
 } from "../statistiques.util";
 
 const getRepartitionFromRepartitions = (
@@ -411,24 +411,30 @@ export const computeStructuresStatistiques = (
 export type StructuresYearIndicatorField =
   "totalStructures" | "structuresAvecCpom";
 
-/** Computes a single byYear field for one year, for the cartographie one-indicator requests. */
+/* Computes a single byYear field for one year, for the cartographie one-indicator requests. */
 export const computeStructuresIndicatorForYear = (
   context: StatistiquesCpomYearContext,
   year: number,
   field: StructuresYearIndicatorField
 ): number | null => {
-  const resolved = resolveStructuresWithTypologieForYear(context, year);
-  if (!resolved) {
+  if (!context.activeStructureIdsByPeriod.year.has(String(year))) {
     return null;
   }
 
+  const structuresForYear = structuresActiveInPeriod(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    "year",
+    String(year)
+  );
+
   if (field === "totalStructures") {
-    return resolved.structures.length;
+    return structuresForYear.length;
   }
 
   return countStructuresAvecCpomForYear(
     context.cpomLinks,
-    new Set(resolved.structures.map((structure) => structure.id)),
+    new Set(structuresForYear.map((structure) => structure.id)),
     year
   );
 };

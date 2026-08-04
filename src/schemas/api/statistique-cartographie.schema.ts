@@ -37,6 +37,15 @@ export type CartographieIndicateur = z.infer<
 export const DEFAULT_CARTOGRAPHIE_INDICATEUR: CartographieIndicateur =
   "structures.total";
 
+/** Indicateurs sans dimension temporelle : snapshot à date (pas de sélecteur d'année). */
+export const SNAPSHOT_CARTOGRAPHIE_INDICATEURS = [
+  "places.qpv",
+  "places.logementsSociaux",
+] as const satisfies readonly CartographieIndicateur[];
+
+export const isSnapshotCartographieIndicateur = (indicateur: string): boolean =>
+  (SNAPSHOT_CARTOGRAPHIE_INDICATEURS as readonly string[]).includes(indicateur);
+
 const CARTOGRAPHIE_GRANULARITES = [
   "region",
   "departement",

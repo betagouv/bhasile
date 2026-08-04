@@ -41,16 +41,6 @@ export const TypesPlacesStatsTable = (): ReactElement => {
           subLabel: "(spécialisées)",
           value: statistiques.places.byYear.map((yearItem) => yearItem.fvvTeh),
         },
-        {
-          label: "Places en QPV",
-          value: statistiques.places.byYear.map((yearItem) => yearItem.qpv),
-        },
-        {
-          label: "Places en logements sociaux",
-          value: statistiques.places.byYear.map(
-            (yearItem) => yearItem.logementsSociaux
-          ),
-        },
       ],
     },
   ];

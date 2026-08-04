@@ -1,6 +1,18 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { Prisma } from "@/generated/prisma/client";
 
+/** Une version liée à une transformation non finalisée n'est jamais "effective". */
+export const finalizedVersionWhere: Prisma.StructureVersionWhereInput = {
+  OR: [
+    { structureVersionTransformationId: null },
+    {
+      structureVersionTransformation: {
+        transformation: { form: { status: true } },
+      },
+    },
+  ],
+};
+
 export const currentVersionWhere = (
   now: Date
 ): Prisma.StructureVersionWhereInput => ({
@@ -11,16 +23,7 @@ export const currentVersionWhere = (
         { effectiveDate: { lt: startOfNextUtcDay(now) } },
       ],
     },
-    {
-      OR: [
-        { structureVersionTransformationId: null },
-        {
-          structureVersionTransformation: {
-            transformation: { form: { status: true } },
-          },
-        },
-      ],
-    },
+    finalizedVersionWhere,
   ],
 });
 
@@ -36,6 +39,19 @@ export const currentVersionArgs = (now: Date) =>
     Prisma.StructureVersionFindManyArgs,
     "where" | "orderBy" | "take"
   >;
+
+/** Seul champ de la transfo consommé par isVersionValid. */
+export const transformationStatusSelect = {
+  transformation: { select: { form: { select: { status: true } } } },
+} satisfies Prisma.StructureVersionTransformationSelect;
+
+/** Champs exigés par ResolvableVersion à étendre selon les besoins de l'appelant. */
+export const resolvableVersionSelect = {
+  id: true,
+  effectiveDate: true,
+  structureVersionTransformationId: true,
+  structureVersionTransformation: { select: transformationStatusSelect },
+} satisfies Prisma.StructureVersionSelect;
 
 export const structureVersionDetailsInclude = {
   contacts: true,

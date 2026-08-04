@@ -87,6 +87,7 @@ const buildContext = (
     indicateurs: [],
     activites: [],
     rmus: [],
+    resolveDnaStructureIds: () => [],
   };
 };
 
