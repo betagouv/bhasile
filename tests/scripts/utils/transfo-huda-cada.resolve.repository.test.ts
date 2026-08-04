@@ -14,12 +14,25 @@ import {
   resolveHuda,
 } from "../../../scripts/utils/transfo-huda-cada.resolve";
 
-const CODE_BHASILE_PREFIX = "BHA-HC-TEST-";
+const CODE_BHASILE_PREFIX = "BHA-ZZZ-";
 
 describe("transfo-huda-cada.resolve db integration", () => {
   const now = new Date("2026-07-01T00:00:00.000Z");
   const createdTransformationIds: number[] = [];
   const createdDnaIds: number[] = [];
+
+  const pickFreeCodeBhasile = async () => {
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const code = `${CODE_BHASILE_PREFIX}${String(
+        Math.floor(Math.random() * 1000)
+      ).padStart(3, "0")}`;
+      if (await prisma.structure.findUnique({ where: { codeBhasile: code } })) {
+        continue;
+      }
+      return code;
+    }
+    throw new Error("Impossible de générer un code Bhasile libre");
+  };
 
   const createStructure = async (
     type: StructureType | null,
@@ -27,7 +40,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
   ) => {
     const structure = await prisma.structure.create({
       data: {
-        codeBhasile: `${CODE_BHASILE_PREFIX}${randomUUID()}`,
+        codeBhasile: await pickFreeCodeBhasile(),
         type,
         fermetureDate,
       },
