@@ -39,13 +39,16 @@ export const findAll = async () => {
   });
 };
 
+// Hors schéma Zod : la provenance est décidée par le serveur, jamais par l'appelant de l'API.
 export const createOne = async (
-  input: TransformationApiCreate
+  input: TransformationApiCreate,
+  numeroDossier?: string
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
     const transformation = await tx.transformation.create({
       data: {
         type: input.type,
+        numeroDossier,
       },
     });
 

@@ -147,7 +147,8 @@ const prepareStructureVersionTransformations = async (
 };
 
 export const createTransformation = async (
-  transformation: TransformationApiCreate
+  transformation: TransformationApiCreate,
+  numeroDossier?: string
 ): Promise<number> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
@@ -155,7 +156,10 @@ export const createTransformation = async (
       transformation.structureVersionTransformations
     );
 
-  return createOne({ ...transformation, structureVersionTransformations });
+  return createOne(
+    { ...transformation, structureVersionTransformations },
+    numeroDossier
+  );
 };
 
 export const resetTransformationSelection = async (

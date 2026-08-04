@@ -98,6 +98,19 @@ describe("getTransformationStatus", () => {
 
     expect(getTransformationStatus(transformation)).toBe("A_FINALISER");
   });
+
+  it("renvoie A_INITIALISER quand les seules étapes renseignées sont PRE_REMPLI", () => {
+    const transformation = makeTransformation({
+      svts: [
+        makeSvt({
+          type: StructureVersionTransformationType.FERMETURE,
+          formStepStatuses: [StepStatus.PRE_REMPLI, StepStatus.NON_COMMENCE],
+        }),
+      ],
+    });
+
+    expect(getTransformationStatus(transformation)).toBe("A_INITIALISER");
+  });
 });
 
 describe("buildTransformationSummary", () => {
