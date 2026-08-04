@@ -345,5 +345,20 @@ export const deleteStructure = async (codeBhasile: string): Promise<void> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
-  await prisma.structure.delete({ where: { codeBhasile } });
+
+  const structure = await prisma.structure.findUnique({
+    where: { codeBhasile },
+    select: { id: true },
+  });
+
+  if (!structure) {
+    return;
+  }
+
+  // CpomStructure and Note reference Structure with onDelete: Restrict
+  await prisma.$transaction([
+    prisma.cpomStructure.deleteMany({ where: { structureId: structure.id } }),
+    prisma.note.deleteMany({ where: { structureId: structure.id } }),
+    prisma.structure.delete({ where: { id: structure.id } }),
+  ]);
 };
