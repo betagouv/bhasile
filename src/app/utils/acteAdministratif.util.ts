@@ -63,9 +63,11 @@ export const getCpomCoveredActeCategories = (
     getCpomInheritedActes(structure)
       .typeScoped.filter(
         (acteAdministratif) =>
-          !acteAdministratif.parentId && hasDownloadableFile(acteAdministratif)
+          !acteAdministratif.parentId &&
+          hasDownloadableFile(acteAdministratif) &&
+          Boolean(acteAdministratif.category)
       )
-      .map(getActeDisplayCategory)
+      .map((acteAdministratif) => acteAdministratif.category)
   );
 
 export const relaxCoveredCategories = (

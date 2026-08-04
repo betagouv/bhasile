@@ -372,6 +372,14 @@ describe("getCpomCoveredActeCategories", () => {
     expect(covered.size).toBe(0);
   });
 
+  it("ignore un acte sans catégorie plutôt que de le verser dans « Autres documents »", () => {
+    const covered = getCpomCoveredActeCategories(
+      structureWithCpomActes([cpomActe({ category: undefined })])
+    );
+
+    expect(covered.size).toBe(0);
+  });
+
   it("ignore un avenant", () => {
     const covered = getCpomCoveredActeCategories(
       structureWithCpomActes([cpomActe({ parentId: 42 })])

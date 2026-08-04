@@ -20,7 +20,7 @@ import {
   ActesAdministratifsAutoSaveFormValues,
   actesAdministratifsAutoSaveSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
-import { getActesAdministratifsSchema } from "@/schemas/forms/base/getActesAdministratifsSchema";
+import { getActesAdministratifsSchema } from "@/schemas/forms/base/acteAdministratif/getActesAdministratifsSchema";
 
 import { ActualisationTabs } from "../_components/ActualisationTabs";
 
