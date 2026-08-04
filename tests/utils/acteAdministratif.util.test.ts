@@ -4,6 +4,7 @@ import {
   getActesAdministratifsDefaultValues,
   getActesCategoriesToDisplay,
   getCategoryGroup,
+  getCpomCoveredActeCategories,
   getCurrentStructureParentActe,
   resolveAvenantParentIds,
 } from "@/app/utils/acteAdministratif.util";
@@ -13,10 +14,12 @@ import {
   CategoryDisplayRules,
 } from "@/config/acte-administratif.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import {
   ActeAdministratifCategory,
   StructureParentActe,
 } from "@/types/acte-administratif.type";
+import { StructureType } from "@/types/structure.type";
 
 const REFERENCE_DATE = new Date("2025-06-01T12:00:00.000Z");
 
@@ -303,5 +306,99 @@ describe("getActesAdministratifsDefaultValues with avenant blocks", () => {
     expect(defaults).toHaveLength(1);
     expect(defaults[0].category).toBe("ARRETE_EXTENSION");
     expect(defaults[0].parentId).toBeUndefined();
+  });
+});
+
+describe("getCpomCoveredActeCategories", () => {
+  const cpomActe = (
+    overrides: Partial<ActeAdministratifApiType> = {}
+  ): ActeAdministratifApiType =>
+    ({
+      id: 1,
+      category: "ARRETE_AUTORISATION",
+      structureType: StructureType.CADA,
+      parentId: null,
+      fileUploads: [{ key: "un-fichier" }],
+      ...overrides,
+    }) as unknown as ActeAdministratifApiType;
+
+  const structureWithCpomActes = (
+    ...actesParCpom: ActeAdministratifApiType[][]
+  ): StructureApiRead =>
+    ({
+      type: StructureType.CADA,
+      cpomStructures: actesParCpom.map((actesAdministratifs) => ({
+        cpom: { actesAdministratifs },
+      })),
+    }) as unknown as StructureApiRead;
+
+  it("ne couvre rien quand la structure n'appartient à aucun CPOM", () => {
+    const structure = { type: StructureType.CADA } as StructureApiRead;
+
+    expect(getCpomCoveredActeCategories(structure).size).toBe(0);
+  });
+
+  it("couvre une catégorie portée par le CPOM pour le type de la structure", () => {
+    const covered = getCpomCoveredActeCategories(
+      structureWithCpomActes([cpomActe()])
+    );
+
+    expect(covered.has("ARRETE_AUTORISATION")).toBe(true);
+  });
+
+  it("ignore un acte scopé sur un autre type de structure", () => {
+    const covered = getCpomCoveredActeCategories(
+      structureWithCpomActes([cpomActe({ structureType: StructureType.CPH })])
+    );
+
+    expect(covered.size).toBe(0);
+  });
+
+  it("ignore un acte porté au niveau du CPOM et non rattaché à un type", () => {
+    const covered = getCpomCoveredActeCategories(
+      structureWithCpomActes([
+        cpomActe({ category: "CONVENTION_CPOM", structureType: null }),
+      ])
+    );
+
+    expect(covered.size).toBe(0);
+  });
+
+  it("ignore un acte sans document", () => {
+    const covered = getCpomCoveredActeCategories(
+      structureWithCpomActes([cpomActe({ fileUploads: [] })])
+    );
+
+    expect(covered.size).toBe(0);
+  });
+
+  it("ignore un acte sans catégorie plutôt que de le verser dans « Autres documents »", () => {
+    const covered = getCpomCoveredActeCategories(
+      structureWithCpomActes([cpomActe({ category: undefined })])
+    );
+
+    expect(covered.size).toBe(0);
+  });
+
+  it("ignore un avenant", () => {
+    const covered = getCpomCoveredActeCategories(
+      structureWithCpomActes([cpomActe({ parentId: 42 })])
+    );
+
+    expect(covered.size).toBe(0);
+  });
+
+  it("agrège les catégories de tous les CPOM de rattachement", () => {
+    const covered = getCpomCoveredActeCategories(
+      structureWithCpomActes(
+        [cpomActe({ category: "ARRETE_AUTORISATION" })],
+        [cpomActe({ id: 2, category: "ARRETE_TARIFICATION" })]
+      )
+    );
+
+    expect([...covered].sort()).toEqual([
+      "ARRETE_AUTORISATION",
+      "ARRETE_TARIFICATION",
+    ]);
   });
 });

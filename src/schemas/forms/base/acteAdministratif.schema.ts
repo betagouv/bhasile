@@ -108,37 +108,48 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     }
   );
 
-const acteAdministratifAutoriseesSchema = acteAdministratifSchema.refine(
-  (data) => {
-    const isNotAvenant = !data.parentId && !data.parentUuid;
-    if (
-      (data.category === "ARRETE_AUTORISATION" ||
-        data.category === "ARRETE_TARIFICATION") &&
-      isNotAvenant
-    ) {
-      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+const getActeAdministratifAutoriseesSchema = (
+  coveredCategories: Set<ActeAdministratifCategory>
+) =>
+  acteAdministratifSchema.refine(
+    (data) => {
+      const isNotAvenant = !data.parentId && !data.parentUuid;
+      if (
+        (data.category === "ARRETE_AUTORISATION" ||
+          data.category === "ARRETE_TARIFICATION") &&
+        isNotAvenant &&
+        !coveredCategories.has(data.category)
+      ) {
+        return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+      }
+      return true;
+    },
+    {
+      error: "Ces documents sont obligatoires.",
+      path: ["fileUploads"],
     }
-    return true;
-  },
-  {
-    error: "Ces documents sont obligatoires.",
-    path: ["fileUploads"],
-  }
-);
+  );
 
-const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
-  (data) => {
-    const isNotAvenant = !data.parentId && !data.parentUuid;
-    if (data.category === "CONVENTION" && isNotAvenant) {
-      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+const getActeAdministratifSubventionneesSchema = (
+  coveredCategories: Set<ActeAdministratifCategory>
+) =>
+  acteAdministratifSchema.refine(
+    (data) => {
+      const isNotAvenant = !data.parentId && !data.parentUuid;
+      if (
+        data.category === "CONVENTION" &&
+        isNotAvenant &&
+        !coveredCategories.has(data.category)
+      ) {
+        return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+      }
+      return true;
+    },
+    {
+      error: "Ces documents sont obligatoires.",
+      path: ["fileUploads"],
     }
-    return true;
-  },
-  {
-    error: "Ces documents sont obligatoires.",
-    path: ["fileUploads"],
-  }
-);
+  );
 
 export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   (data) => {
@@ -175,6 +186,12 @@ export const filterActesWithKey =
         )
       : val;
 
+const getRequiredCategories = (
+  categories: ActeAdministratifCategory[],
+  coveredCategories: Set<ActeAdministratifCategory>
+): ActeAdministratifCategory[] =>
+  categories.filter((category) => !coveredCategories.has(category));
+
 const hasMandatoryNonAvenant = (
   actesAdministratifs: ActeAdministratifFormValues[] | undefined,
   category: ActeAdministratifCategory
@@ -186,34 +203,70 @@ const hasMandatoryNonAvenant = (
       !acteAdministratif.parentUuid
   );
 
-export const actesAdministratifsAutoriseesSchema = z
-  .object({
-    actesAdministratifs: z.preprocess(
-      filterActesWithKey(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION"]),
-      z.array(acteAdministratifAutoriseesSchema).optional()
-    ),
-  })
-  .refine(
-    (data) => hasMandatoryNonAvenant(data.actesAdministratifs, "ARRETE_TARIFICATION"),
-    {
-      message: "Un arrêté de tarification est obligatoire.",
-      path: ["actesAdministratifs"],
-    }
-  );
-export const actesAdministratifsSubventionneesSchema = z
-  .object({
-    actesAdministratifs: z.preprocess(
-      filterActesWithKey(["CONVENTION"]),
-      z.array(acteAdministratifSubventionneesSchema).optional()
-    ),
-  })
-  .refine(
-    (data) => hasMandatoryNonAvenant(data.actesAdministratifs, "CONVENTION"),
-    {
-      message: "Une convention est obligatoire.",
-      path: ["actesAdministratifs"],
-    }
-  );
+const isMandatoryCategorySatisfied = (
+  actesAdministratifs: ActeAdministratifFormValues[] | undefined,
+  category: ActeAdministratifCategory,
+  coveredCategories: Set<ActeAdministratifCategory>
+): boolean =>
+  coveredCategories.has(category) ||
+  hasMandatoryNonAvenant(actesAdministratifs, category);
+
+export const getActesAdministratifsAutoriseesSchema = (
+  coveredCategories: Set<ActeAdministratifCategory>
+) =>
+  z
+    .object({
+      actesAdministratifs: z.preprocess(
+        filterActesWithKey(
+          getRequiredCategories(
+            ["ARRETE_AUTORISATION", "ARRETE_TARIFICATION"],
+            coveredCategories
+          )
+        ),
+        z
+          .array(getActeAdministratifAutoriseesSchema(coveredCategories))
+          .optional()
+      ),
+    })
+    .refine(
+      (data) =>
+        isMandatoryCategorySatisfied(
+          data.actesAdministratifs,
+          "ARRETE_TARIFICATION",
+          coveredCategories
+        ),
+      {
+        message: "Un arrêté de tarification est obligatoire.",
+        path: ["actesAdministratifs"],
+      }
+    );
+
+export const getActesAdministratifsSubventionneesSchema = (
+  coveredCategories: Set<ActeAdministratifCategory>
+) =>
+  z
+    .object({
+      actesAdministratifs: z.preprocess(
+        filterActesWithKey(
+          getRequiredCategories(["CONVENTION"], coveredCategories)
+        ),
+        z
+          .array(getActeAdministratifSubventionneesSchema(coveredCategories))
+          .optional()
+      ),
+    })
+    .refine(
+      (data) =>
+        isMandatoryCategorySatisfied(
+          data.actesAdministratifs,
+          "CONVENTION",
+          coveredCategories
+        ),
+      {
+        message: "Une convention est obligatoire.",
+        path: ["actesAdministratifs"],
+      }
+    );
 
 export const actesAdministratifsTransformationSchema = z.object({
   actesAdministratifs: z.preprocess(
@@ -248,8 +301,7 @@ export type ActeAdministratifFormValues = z.infer<
 >;
 
 export type ActesAdministratifsFormValues = z.infer<
-  | typeof actesAdministratifsAutoriseesSchema
-  | typeof actesAdministratifsSubventionneesSchema
+  ReturnType<typeof getActesAdministratifsAutoriseesSchema>
 >;
 
 export type ActesAdministratifsAutoSaveFormValues = z.infer<
