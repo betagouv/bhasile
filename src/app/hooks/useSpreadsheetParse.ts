@@ -1,6 +1,8 @@
-import readXlsxFile, {
+import {
+  parseSheetData,
+  ParseSheetDataError,
+  readSheet,
   Schema,
-  SchemaParseCellValueError,
 } from "read-excel-file/browser";
 
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
@@ -9,54 +11,70 @@ import { Repartition } from "@/types/adresse.type";
 export const useSpreadsheetParse = (): UseExcelParseResult => {
   const parseSpreadsheet = async (
     file: File,
-    repartitionColumnIndex: number,
     isMixte: boolean
-  ): ParseXlsxResult => {
-    const adresses: FormAdresse[] = [];
-    const schema = getSchema(isMixte);
-    const { rows, errors } = await readXlsxFile(file, { schema });
-    const filteredErrors = errors.filter(
-      (error) => (error as unknown as SchemaParseCellValueError).row !== 2
-    ) as unknown as SchemaParseCellValueError[];
-    if (filteredErrors.length > 0) {
-      const errorMessage = filteredErrors
-        .map(
-          (error) => `Valeur invalide (${error.column} : ligne ${error.row})`
+  ): ParseSpreadsheetResult => {
+    const [headerRow, , ...rowsBelowExample] = await readSheet(file);
+    const filledRows = rowsBelowExample
+      .map((cells, index) => ({
+        cells,
+        spreadsheetRowNumber: index + FIRST_ADRESSE_ROW_NUMBER,
+      }))
+      .filter(({ cells }) => cells.some((cell) => cell !== null));
+
+    const parsed = parseSheetData<ImportedAdresseRow>(
+      [headerRow, ...filledRows.map(({ cells }) => cells)],
+      getSchema(isMixte)
+    );
+
+    if (parsed.errors) {
+      throw new Error(
+        buildErrorMessage(
+          parsed.errors,
+          filledRows.map(({ spreadsheetRowNumber }) => spreadsheetRowNumber)
         )
-        .join(", ");
-      throw new Error(errorMessage);
+      );
     }
-    rows.shift();
-    rows.forEach((row) => {
-      const adresse = {
-        adresse: row.adresse,
-        codePostal: row.codePostal,
-        commune: row.ville,
-        adresseComplete: `${row.adresse} ${row.codePostal} ${row.ville}`,
-        departement: String(row.codePostal).substring(0, 2),
-        repartition:
-          repartitionColumnIndex === -1 ? Repartition.DIFFUS : row.repartition,
-        placesAutorisees: row.placesAutorisees,
-        isQpv: row.qpv?.toLowerCase() === "oui",
-        isLogementSocial: row.logementSocial?.toLowerCase() === "oui",
-      } as unknown as FormAdresse;
-      adresses.push(adresse);
-    });
-    return adresses;
+
+    return parsed.objects.map(toFormAdresse);
   };
 
-  const parseAdressesDiffuses = async (file: File): ParseXlsxResult => {
-    return parseSpreadsheet(file, -1, false);
+  const parseAdressesDiffuses = (file: File): ParseSpreadsheetResult => {
+    return parseSpreadsheet(file, false);
   };
 
-  const parseAdressesMixtes = (file: File): ParseXlsxResult => {
-    return parseSpreadsheet(file, 6, true);
+  const parseAdressesMixtes = (file: File): ParseSpreadsheetResult => {
+    return parseSpreadsheet(file, true);
   };
 
   return { parseAdressesDiffuses, parseAdressesMixtes };
 };
 
-const getSchema = (isMixte: boolean): Schema => ({
+const FIRST_ADRESSE_ROW_NUMBER = 3;
+
+const toFormAdresse = (row: ImportedAdresseRow): FormAdresse => ({
+  adresse: row.adresse,
+  codePostal: row.codePostal,
+  commune: row.ville,
+  adresseComplete: `${row.adresse} ${row.codePostal} ${row.ville}`,
+  departement: row.codePostal.substring(0, 2),
+  repartition: row.repartition ?? Repartition.DIFFUS,
+  placesAutorisees: row.placesAutorisees,
+  isQpv: row.qpv.toLowerCase() === "oui",
+  isLogementSocial: row.logementSocial.toLowerCase() === "oui",
+});
+
+const buildErrorMessage = (
+  errors: ParseSheetDataError[],
+  spreadsheetRowNumbers: number[]
+): string =>
+  errors
+    .map(
+      (error) =>
+        `Valeur invalide (${error.column} : ligne ${spreadsheetRowNumbers[error.row - 1]})`
+    )
+    .join(", ");
+
+const getSchema = (isMixte: boolean): Schema<ImportedAdresseRow> => ({
   adresse: {
     column: "Adresse",
     type: String,
@@ -104,9 +122,19 @@ const getSchema = (isMixte: boolean): Schema => ({
   },
 });
 
-type ParseXlsxResult = Promise<FormAdresse[]>;
+type ImportedAdresseRow = {
+  adresse: string;
+  codePostal: string;
+  ville: string;
+  placesAutorisees: number;
+  logementSocial: string;
+  qpv: string;
+  repartition?: Repartition;
+};
+
+type ParseSpreadsheetResult = Promise<FormAdresse[]>;
 
 type UseExcelParseResult = {
-  parseAdressesDiffuses: (file: File) => ParseXlsxResult;
-  parseAdressesMixtes: (file: File) => ParseXlsxResult;
+  parseAdressesDiffuses: (file: File) => ParseSpreadsheetResult;
+  parseAdressesMixtes: (file: File) => ParseSpreadsheetResult;
 };
