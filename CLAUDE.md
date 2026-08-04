@@ -21,7 +21,7 @@ yarn test                     # Tests unitaires/intégration (hors DB)
 yarn test:db                  # Tests repository (nécessite .env.test)
 yarn lint                     # ESLint + Stylelint
 yarn check:ts                 # Vérification TypeScript sans build
-yarn pre-push                 # lint + check:ts + test + sql:format:check (lancé par Husky)
+yarn pre-push                 # lint + check:ts + sql:format:check (lancé par Husky ; les tests tournent en CI)
 
 # Base de données
 yarn prisma:migrate            # Crée et applique les migrations + génère le client
