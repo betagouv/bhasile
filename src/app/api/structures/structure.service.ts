@@ -236,9 +236,10 @@ export const getResolvedStructure = async (
     dbStructure.structureVersions,
     now
   );
-  return displayVersion
-    ? mergeStructureWithVersion(dbStructure, displayVersion)
-    : (dbStructure as ResolvedStructureDetails);
+  if (!displayVersion) {
+    throw new Error(`Aucune version affichable pour la structure ${id}`);
+  }
+  return mergeStructureWithVersion(dbStructure, displayVersion);
 };
 
 export const getFullStructure = async (

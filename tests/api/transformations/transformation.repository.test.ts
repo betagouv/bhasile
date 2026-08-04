@@ -29,11 +29,18 @@ describe("transformation.repository db integration", () => {
   const createdTransformationIds: number[] = [];
   const createdOperateurIds: number[] = [];
 
-  const createStructure = async () => {
+  const createStructure = async (versionData: Record<string, unknown> = {}) => {
     const structure = await prisma.structure.create({
       data: {
         codeBhasile: `BHA-TF-TEST-${Date.now()}-${Math.random()}`,
+        structureVersions: {
+          create: {
+            effectiveDate: new Date("2020-01-01T12:00:00.000Z"),
+            ...versionData,
+          },
+        },
       },
+      include: { structureVersions: true },
     });
     createdStructureIds.push(structure.id);
     return structure;
@@ -45,6 +52,12 @@ describe("transformation.repository db integration", () => {
     });
     createdOperateurIds.push(operateur.id);
     return operateur;
+  };
+
+  const createDna = async (code: string) => {
+    const dna = await createReferentialDna(code);
+    createdOperateurIds.push(dna.operateurId);
+    return dna;
   };
 
   const createFileUpload = async (prefix: string) => {
@@ -153,14 +166,14 @@ describe("transformation.repository db integration", () => {
         where: { id: { in: createdStructureIds } },
       });
     }
+    await prisma.dna.deleteMany({
+      where: { code: { startsWith: "DNA-TF-TEST-" } },
+    });
     if (createdOperateurIds.length > 0) {
       await prisma.operateur.deleteMany({
         where: { id: { in: createdOperateurIds } },
       });
     }
-    await prisma.dna.deleteMany({
-      where: { code: { startsWith: "DNA-TF-TEST-" } },
-    });
     await prisma.fileUpload.deleteMany({
       where: { key: { startsWith: "FILE-TF-TEST-" } },
     });
@@ -536,16 +549,14 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformationId,
       structureVersionId,
     } = await createBareTransformation();
-    const oldDna = await createReferentialDna(
-      `DNA-TF-TEST-OLD-${randomUUID()}`
-    );
+    const oldDna = await createDna(`DNA-TF-TEST-OLD-${randomUUID()}`);
     await prisma.dnaStructure.create({
       data: {
         structureVersionId,
         dnaId: oldDna.id,
       },
     });
-    const newCode = `DNA-TF-TEST-${randomUUID()}`;
+    const { code: newCode } = await createDna(`DNA-TF-TEST-${randomUUID()}`);
     await updateOne({
       id: transformationId,
       structureVersionTransformations: [
@@ -963,9 +974,10 @@ describe("transformation.repository db integration", () => {
 
   const seedRichStructure = async () => {
     const structure = await createStructure();
+    const structureVersionId = structure.structureVersions[0].id;
     const contact = await prisma.contact.create({
       data: {
-        structureId: structure.id,
+        structureVersionId,
         prenom: "Nicolas",
         nom: "Leboeuf",
         telephone: "0652464214",
@@ -976,7 +988,7 @@ describe("transformation.repository db integration", () => {
     });
     const antenne = await prisma.antenne.create({
       data: {
-        structureId: structure.id,
+        structureVersionId,
         name: "Avranches Nord",
         adresse: "2 rue B",
         codePostal: "50300",
@@ -986,7 +998,7 @@ describe("transformation.repository db integration", () => {
     });
     await prisma.adresse.create({
       data: {
-        structureId: structure.id,
+        structureVersionId,
         adresse: "3 rue C",
         codePostal: "50300",
         commune: "Avranches",
@@ -996,13 +1008,13 @@ describe("transformation.repository db integration", () => {
         isLogementSocial: false,
       },
     });
-    const dna = await createReferentialDna(`DNA-TF-TEST-${randomUUID()}`);
+    const dna = await createDna(`DNA-TF-TEST-${randomUUID()}`);
     await prisma.dnaStructure.create({
-      data: { structureId: structure.id, dnaId: dna.id },
+      data: { structureVersionId, dnaId: dna.id },
     });
     const structureFiness = await prisma.structureFiness.create({
       data: {
-        structure: { connect: { id: structure.id } },
+        structureVersion: { connect: { id: structureVersionId } },
         finess: {
           create: { code: `FIN-TF-TEST-${randomUUID()}` },
         },
@@ -1078,9 +1090,14 @@ describe("transformation.repository db integration", () => {
     const finessCount = await prisma.finess.count({ where: { id: finessId } });
     expect(finessCount).toBe(1);
 
-    // La structure source n'est pas modifiée.
+    // La version de base de la structure source n'est pas modifiée.
     const sourceContacts = await prisma.contact.findMany({
-      where: { structureVersion: { structureId: structure.id } },
+      where: {
+        structureVersion: {
+          structureId: structure.id,
+          structureVersionTransformationId: null,
+        },
+      },
     });
     expect(sourceContacts).toHaveLength(1);
     expect(sourceContacts[0].id).toBe(contactId);
@@ -1984,15 +2001,11 @@ describe("transformation.repository db integration", () => {
     effectiveDate: string,
     versionData: Record<string, unknown> = {}
   ) => {
-    const structure = await createStructure();
-    const version = await prisma.structureVersion.create({
-      data: {
-        structureId: structure.id,
-        effectiveDate: new Date(effectiveDate),
-        ...versionData,
-      },
+    const structure = await createStructure({
+      effectiveDate: new Date(effectiveDate),
+      ...versionData,
     });
-    return { structure, version };
+    return { structure, version: structure.structureVersions[0] };
   };
 
   const createExtensionTransfo = async (
