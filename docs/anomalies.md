@@ -28,7 +28,22 @@ Clé naturelle : `[structureId, code, year, targetId]`.
 
 Une anomalie qui disparaît est supprimée : le commentaire est perdu, c'est assumé. Une justification n'est pas invalidée automatiquement si la donnée change sans faire disparaître l'anomalie — `justifiedAt` est affiché pour que l'agent le repère.
 
-Il n'existe **aucune table de définitions** : les libellés et catégories vivent uniquement en TS. La vue de reporting n'expose donc que le `code`, à charge de Metabase d'en faire la lecture.
+Il n'existe **aucune table de définitions** : les libellés et catégories vivent uniquement en TS. Les vues de reporting n'exposent donc que le `code`, à charge de Metabase d'en faire la lecture.
+
+## Vues de reporting
+
+Les six vues thématiques `004a`–`004f` sont supprimées : elles portaient une seconde implémentation des règles.
+
+| Vue                                   | Rôle                                                                                |
+| ------------------------------------- | ----------------------------------------------------------------------------------- |
+| `reporting.structures_anomalies`      | Nouvelle surface, une ligne par anomalie, avec `year` et `target_id`                |
+| `reporting.structures_global_quality` | Compatibilité : pivot sur `Anomalie`, colonnes `has_issue_*` historiques inchangées |
+
+La seconde est conservée telle quelle parce que `fill-monthly-reporting.ts` alimente `monthly_structures_global_quality_count`, table d'historique dont les colonnes portent ces noms. Elle ré-agrège les anomalies au niveau structure — ce que faisaient les `BOOL_OR` — donc les comptages mensuels restent comparables à l'historique déjà stocké.
+
+La correspondance colonne ↔ codes vit dans `src/lib/anomalies/anomalie.reporting.ts`, avec un test de garde qui échoue si un code est ajouté sans être reporté dans la vue.
+
+⚠️ La vue est vide tant que `recompute-anomalies` n'a pas tourné. Après un déploiement, le lancer **avant** le reporting mensuel du 1er, sinon des zéros sont écrits dans l'historique.
 
 ## Registre
 
