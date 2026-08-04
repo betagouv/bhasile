@@ -22,7 +22,9 @@
 
 - **Union sans priorité** : codes Bhasile et codes DNA s'additionnent, l'ensemble des structures est le périmètre à fermer. Une brique `FERMETURE` par structure.
 - Libellés balayés par motif (`HUDA 2`, apostrophe droite ou typographique), pas par égalité.
-- **Tout ou rien** : un seul code illisible, inconnu ou hors département fait skipper le dossier entier. Le message distingue les trois causes.
+- **Tout ou rien sur les codes DNA** : après tentatives de rattrapage (séparateurs, lettre isolée recollée, majuscules, padding du zéro), un seul code encore illisible, inconnu en base ou hors département fait skipper le dossier entier. Le message distingue les trois causes.
+- **Le code Bhasile ne bloque que s'il est lisible** : le champ sert de texte libre (`Multi DNA`, `sous CPOM`, `en cours de saisie dans Bhasile`, voire un code DNA). Une valeur qui ne se lit pas comme un code est ignorée sans bloquer, les codes DNA prennent le relais et désignent leurs structures détentrices à date. En revanche un code bien formé mais inconnu en base, fermé ou non-HUDA skippe le dossier, comme un code DNA.
+- Corollaire assumé : une faute de frappe qui rend le code illisible passe inaperçue ; une faute qui produit un autre code valide rattache la mauvaise structure sans signal.
 - Padding `H209` -> `H0209` retenu si le département du dossier colle **et** que le code padé est rattaché à une version courante. Candidat ignoré sans blocage si le code correct figure déjà dans la saisie.
 - Transposition (`H2012` pour `H0212`) jamais corrigée, jamais suggérée : code jeté.
 - Contrôle de département sur les deux chiffres qui suivent la lettre ; outre-mer comparé sur `97`, Corse (`2A` / `2B`) non contrôlée.
@@ -54,7 +56,7 @@
 
 ## Autres pré-remplissages
 
-- Convention de l'extension : début = date d'effet, fin = fin de la convention en cours du CADA. L'agent corrige.
+- Convention de l'extension : début = date d'effet, fin = fin de la convention du CADA **en vigueur à la date d'effet**. Aucune convention à cette date -> rien de pré-rempli, plutôt qu'une date déjà expirée. L'agent corrige.
 - Adresses, contacts, antennes : héritées du CADA et des HUDA par le service, toutes conservées. L'agent arbitre celles qui restent.
 - Code DNA : lu pour résoudre, **jamais écrit**. Le CADA garde le sien.
 - Opérateur du nouveau CADA : celui des HUDA fermés. Des opérateurs divergents dans l'enveloppe contredisent le cas de figure « même opérateur » -> skip.

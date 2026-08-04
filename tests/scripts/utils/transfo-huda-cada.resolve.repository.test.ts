@@ -179,22 +179,30 @@ describe("transfo-huda-cada.resolve db integration", () => {
       expect(reasonOf(resolution)).toContain("est fermé depuis le 01/03/2026");
     });
 
-    it("rejette un code Bhasile illisible au lieu de l'ignorer", async () => {
-      const structure = await createStructure(StructureType.HUDA);
+    it("ignore une non-valeur saisie dans le champ code Bhasile", async () => {
+      const { structure, dna } = await createHudaWithDna(
+        "35",
+        new Date("2026-01-01T00:00:00.000Z")
+      );
 
       const resolution = await resolveHudas(
         prisma,
         {
-          rawBhasileCodes: [structure.codeBhasile, "BHA-ZZ-1"],
-          rawDnaCodes: [],
+          rawBhasileCodes: ["Multi DNA"],
+          rawDnaCodes: [dna.code],
           departement: "35",
         },
         now
       );
 
-      expect(reasonOf(resolution)).toContain(
-        "codes Bhasile illisibles : BHA-ZZ-1"
-      );
+      expect(resolution.ok && resolution.value).toEqual([
+        {
+          structureId: structure.id,
+          codeBhasile: structure.codeBhasile,
+          operateurId: null,
+          via: "codes-dna",
+        },
+      ]);
     });
 
     it("additionne les structures désignées par code Bhasile et par codes DNA", async () => {

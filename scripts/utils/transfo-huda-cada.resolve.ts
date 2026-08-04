@@ -156,18 +156,6 @@ export const resolveHudas = async (
 ): Promise<Resolution<ResolvedStructure[]>> => {
   const resolved = new Map<number, ResolvedStructure>();
 
-  const unreadableBhasileCodes = rawBhasileCodes.filter(
-    (raw) => raw.trim() !== "" && normalizeBhasileCode(raw) === null
-  );
-  if (unreadableBhasileCodes.length > 0) {
-    return {
-      ok: false,
-      failure: {
-        reason: `codes Bhasile illisibles : ${unreadableBhasileCodes.join(", ")}`,
-      },
-    };
-  }
-
   const bhasileCodes = [
     ...new Set(
       rawBhasileCodes
@@ -176,11 +164,18 @@ export const resolveHudas = async (
     ),
   ];
 
+  const structuresByCode = new Map(
+    (bhasileCodes.length > 0
+      ? await prisma.structure.findMany({
+          where: { codeBhasile: { in: bhasileCodes } },
+          select: structureSelect,
+        })
+      : []
+    ).map((structure) => [structure.codeBhasile, structure])
+  );
+
   for (const codeBhasile of bhasileCodes) {
-    const structure = await prisma.structure.findUnique({
-      where: { codeBhasile },
-      select: structureSelect,
-    });
+    const structure = structuresByCode.get(codeBhasile);
     if (!structure) {
       return {
         ok: false,
