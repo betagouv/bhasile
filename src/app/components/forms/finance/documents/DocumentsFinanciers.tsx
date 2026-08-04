@@ -11,8 +11,8 @@ import { FieldSetYearlyDocumentsFinanciers } from "./FieldSetYearlyDocumentsFina
 
 export const DocumentsFinanciers = ({
   hasAccordion,
-  formKind,
   className,
+  formKind,
 }: Props) => {
   const { structure } = useStructureContext();
   const { control } = useFormContext<DocumentsFinanciersFlexibleFormValues>();
@@ -58,6 +58,6 @@ export const DocumentsFinanciers = ({
 
 type Props = {
   hasAccordion?: boolean;
-  formKind?: FormKind;
   className?: string;
+  formKind?: FormKind;
 };

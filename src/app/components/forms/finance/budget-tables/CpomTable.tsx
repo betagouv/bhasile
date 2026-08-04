@@ -43,7 +43,7 @@ export const CpomTable = ({ type, showTitle }: Props) => {
     <div>
       {showTitle && (
         <h2 className="text-title-blue-france text-lg mb-8 text-left font-bold">
-          {type}
+          Gestion budgétaire ({type})
         </h2>
       )}
       <Table

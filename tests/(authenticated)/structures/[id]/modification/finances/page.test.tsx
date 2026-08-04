@@ -57,7 +57,9 @@ describe("ModificationFinances page integration", () => {
     expect(body.indicateursFinanciers.every((item) => item.year >= 2021)).toBe(
       true
     );
-    expect(body.documentsFinanciers).toEqual([]);
+    expect(body.documentsFinanciers).toHaveLength(
+      structure.documentsFinanciers.length
+    );
     expect(body.structureMillesimes).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

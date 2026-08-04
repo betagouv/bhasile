@@ -9,13 +9,13 @@ import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-ta
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { getBudgetTableLines } from "@/app/components/forms/finance/budget-tables/getBudgetTableLines";
-import { cn } from "@/app/utils/classname.util";
 import { getCpomStructureTypes } from "@/app/utils/cpom.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { StructureType } from "@/types/structure.type";
 
 import { useCpomContext } from "../_context/CpomClientContext";
+import { CpomFinancesDocuments } from "./CpomFinancesDocuments";
 import { FinanceTypeSwitch } from "./FinanceTypeSwitch";
 
 export const FinancesBlock = () => {
@@ -46,21 +46,6 @@ export const FinancesBlock = () => {
       entity={cpom}
       entityType="Cpom"
     >
-      <p
-        className={cn(
-          "max-w-4xl",
-          cpomStructureTypes.length > 1 ? "mb-2" : "mb-6"
-        )}
-      >
-        Dans cette vue, l’ensemble des montants correspond à la gestion
-        budgétaire{" "}
-        <strong>
-          à l’échelle du CPOM en prenant en compte toutes les structures d’un
-          même type.
-        </strong>{" "}
-        Aussi, le tableau des affectations reflète uniquement des flux annuels.
-        Les chiffres ne sont en aucun cas une estimation du stock.
-      </p>
       {cpomStructureTypes.length > 1 && (
         <FinanceTypeSwitch
           cpomStructureTypes={cpomStructureTypes}
@@ -68,11 +53,28 @@ export const FinancesBlock = () => {
           handleChange={(value) => setCurrentType(value as StructureType)}
         />
       )}
+      <h4
+        className="text-title-blue-france text-lg pr-6"
+        id="gestionBudgetaire"
+      >
+        Gestion budgétaire
+      </h4>
+      <p className="max-w-4xl mb-6">
+        Dans cette vue, l’ensemble des montants correspond à la gestion
+        budgétaire{" "}
+        <strong>
+          à l’échelle du CPOM en prenant en compte toutes les structures d’un
+          même type (ici {currentType}).
+        </strong>{" "}
+        Aussi, le tableau des affectations reflète uniquement des flux annuels.
+        Les chiffres ne sont en aucun cas une estimation du stock.
+      </p>
+
       <Table
         ariaLabelledBy="gestionBudgetaire"
         headings={getBudgetTableHeading({ years })}
         enableBorders
-        className="[&_thead_tr_th]:text-sm!"
+        className="[&_thead_tr_th]:text-sm! mb-12"
         stickFirstColumn
       >
         <BudgetTableLines
@@ -90,6 +92,11 @@ export const FinancesBlock = () => {
           type={currentType}
         />
       </Table>
+      <hr className="mb-10" />
+      <CpomFinancesDocuments
+        documentsFinanciers={cpom.documentsFinanciers ?? []}
+        structureType={currentType}
+      />
     </Block>
   );
 };

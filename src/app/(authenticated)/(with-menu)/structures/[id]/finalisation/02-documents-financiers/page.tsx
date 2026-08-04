@@ -17,7 +17,6 @@ import {
   DocumentsFinanciersStrictSchema,
 } from "@/schemas/forms/base/documentFinancier.schema";
 import { StepStatus } from "@/types/form.type";
-import { FormKind } from "@/types/global";
 
 import { Tabs } from "../_components/Tabs";
 
@@ -83,10 +82,7 @@ export default function FinalisationDocumentsFinanciers() {
           description="Veuillez vérifier les documents financiers fournis par l’opérateur concernant les cinq dernières années."
         />
         <Date303 />
-        <DocumentsFinanciers
-          className="mb-6"
-          formKind={FormKind.FINALISATION}
-        />
+        <DocumentsFinanciers className="mb-6" />
       </FormWrapper>
     </div>
   );

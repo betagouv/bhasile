@@ -32,7 +32,6 @@ export const createOrUpdateDocumentsFinanciers = async (
       structureType: documentFinancier.structureType,
       year: documentFinancier.year,
       name: documentFinancier.name,
-      granularity: documentFinancier.granularity,
       fileUploads: {
         connect: (documentFinancier.fileUploads ?? []).map((fileUpload) => ({
           key: fileUpload.key,

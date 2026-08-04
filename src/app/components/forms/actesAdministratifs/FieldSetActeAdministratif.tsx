@@ -12,6 +12,7 @@ import {
 } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { StructureType } from "@/types/structure.type";
 
 import { ActeAdministratif } from "./ActeAdministratif";
 
@@ -29,6 +30,7 @@ export default function FieldSetActeAdministratif({
   documentLabel,
   alternativeCategories,
   avenantAlternative,
+  structureScope,
 }: FieldSetActeAdministratifProps) {
   const { control, watch } = useFormContext();
   const { append, remove } = useFieldArray({
@@ -51,6 +53,7 @@ export default function FieldSetActeAdministratif({
     additionalFieldsType,
     alternativeCategories,
     avenantAlternative,
+    structureScope,
   });
 
   const pendingScrollUuid = useRef<string | null>(null);
@@ -65,7 +68,13 @@ export default function FieldSetActeAdministratif({
   const handleAddNewField = () => {
     const uuid = uuidv4();
     pendingScrollUuid.current = uuid;
-    append({ uuid, category });
+    append({
+      uuid,
+      category,
+      ...(structureScope !== undefined
+        ? { structureType: structureScope }
+        : {}),
+    });
   };
 
   const handleDeleteField = (index: number, shouldConfirm = true) => {
@@ -183,4 +192,5 @@ type FieldSetActeAdministratifProps = {
   documentLabel: string;
   alternativeCategories?: ActeAdministratifCategory[];
   avenantAlternative?: AvenantAlternative;
+  structureScope?: StructureType | null;
 };

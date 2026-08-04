@@ -17,7 +17,6 @@ import {
   DocumentsFinanciersFlexibleSchema,
   DocumentsFinanciersStrictSchema,
 } from "@/schemas/forms/base/documentFinancier.schema";
-import { FormKind } from "@/types/global";
 
 import { ActualisationTabs } from "../_components/ActualisationTabs";
 
@@ -72,10 +71,7 @@ export default function ActualisationDocumentsFinanciers() {
           schema={DocumentsFinanciersFlexibleSchema}
           onSave={onAutoSave}
         />
-        <DocumentsFinanciers
-          className="mb-6"
-          formKind={FormKind.ACTUALISATION}
-        />
+        <DocumentsFinanciers className="mb-6" />
       </FormWrapper>
     </div>
   );

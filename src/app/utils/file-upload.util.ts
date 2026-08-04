@@ -8,9 +8,7 @@ export const filterDocumentsFinanciersForApi = (
 ): DocumentFinancierApiType[] =>
   (documentsFinanciers?.filter(
     (documentFinancier) =>
-      documentFinancier.fileUploads?.[0]?.key &&
-      documentFinancier.category &&
-      documentFinancier.granularity
+      documentFinancier.fileUploads?.[0]?.key && documentFinancier.category
   ) ?? []) as DocumentFinancierApiType[];
 
 export const getCategoryLabel = (

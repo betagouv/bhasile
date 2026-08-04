@@ -10,7 +10,10 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
-import { getCpomDefaultValues } from "@/app/utils/cpom.util";
+import {
+  getCpomDefaultValues,
+  getCpomStructureTypes,
+} from "@/app/utils/cpom.util";
 import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
@@ -24,6 +27,7 @@ export default function CpomAjoutIdentification() {
   });
 
   const defaultValues = getCpomDefaultValues(cpom);
+  const structureTypes = getCpomStructureTypes(cpom);
 
   return (
     <>
@@ -44,7 +48,7 @@ export default function CpomAjoutIdentification() {
         <PreviousPageLink previousRoute="" />
 
         <FieldSetGeneral />
-        <FieldSetActesAdministratifs />
+        <FieldSetActesAdministratifs structureTypes={structureTypes} />
         <FieldSetStructures />
       </FormWrapper>
     </>

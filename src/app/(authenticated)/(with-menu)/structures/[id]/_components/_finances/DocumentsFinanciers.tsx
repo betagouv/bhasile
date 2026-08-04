@@ -3,7 +3,6 @@ import { ReactElement } from "react";
 
 import { DownloadItem } from "@/app/components/common/DownloadItem";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
-import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -22,11 +21,13 @@ export const DocumentsFinanciers = (): ReactElement => {
 
   const yearsToDisplay = years.filter((year) => year >= (startYear ?? 0));
 
-  const getDocumentsFinanciersToDisplay = (budget: BudgetApiType) => {
-    return documentsFinanciers?.filter(
-      (documentFinancier) => documentFinancier.year === budget.year
-    );
-  };
+  const inheritedDocumentsFinanciers =
+    structure.cpomStructures
+      ?.flatMap((cpomStructure) => cpomStructure.cpom?.documentsFinanciers ?? [])
+      .filter(
+        (documentFinancier) =>
+          documentFinancier.structureType === structure.type
+      ) ?? [];
 
   return (
     <>
@@ -35,22 +36,40 @@ export const DocumentsFinanciers = (): ReactElement => {
         const structureMillesime = structureMillesimes?.find(
           (structureMillesime) => structureMillesime.year === year
         );
-        return budget ? (
-          <Accordion label={budget.year} key={budget.id}>
+        const ownDocuments =
+          documentsFinanciers?.filter(
+            (documentFinancier) => documentFinancier.year === year
+          ) ?? [];
+        const inheritedDocuments = inheritedDocumentsFinanciers.filter(
+          (documentFinancier) => documentFinancier.year === year
+        );
+
+        if (
+          !budget &&
+          ownDocuments.length === 0 &&
+          inheritedDocuments.length === 0
+        ) {
+          return null;
+        }
+
+        return (
+          <Accordion label={year} key={year}>
             <div className="grid grid-cols-3 gap-4">
-              {getDocumentsFinanciersToDisplay(budget)?.length === 0 ? (
+              {ownDocuments.length === 0 && inheritedDocuments.length === 0 ? (
                 <span>Aucun document importé</span>
               ) : (
-                getDocumentsFinanciersToDisplay(budget)?.map(
-                  (documentFinancier) => (
+                <>
+                  {ownDocuments.map((documentFinancier) => (
                     <div key={documentFinancier.id} className="pb-5">
-                      <DownloadItem
-                        item={documentFinancier}
-                        displayGranularity={true}
-                      />
+                      <DownloadItem item={documentFinancier} />
                     </div>
-                  )
-                )
+                  ))}
+                  {inheritedDocuments.map((documentFinancier) => (
+                    <div key={`cpom-${documentFinancier.id}`} className="pb-5">
+                      <DownloadItem item={documentFinancier} cpomInherited />
+                    </div>
+                  ))}
+                </>
               )}
             </div>
             {structureMillesime?.operateurComment ? (
@@ -61,7 +80,7 @@ export const DocumentsFinanciers = (): ReactElement => {
               </p>
             ) : null}
           </Accordion>
-        ) : null;
+        );
       })}
     </>
   );

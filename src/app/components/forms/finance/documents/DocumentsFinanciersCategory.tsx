@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { DocumentsFinanciersItem } from "./DocumentsFinanciersItem";
 import {
@@ -14,6 +15,8 @@ import {
 export const DocumentsFinanciersCategory = ({
   documentType,
   year,
+  structureType,
+  hideRequirement = false,
 }: Props): ReactElement => {
   const { watch } = useFormContext();
 
@@ -25,11 +28,13 @@ export const DocumentsFinanciersCategory = ({
     documentsFinanciers?.filter(
       (documentFinancier) =>
         documentFinancier.category === documentType.value &&
-        documentFinancier.year === year
+        documentFinancier.year === year &&
+        (!structureType || documentFinancier.structureType === structureType)
     ) || [];
 
   const isFilled = documentsFinanciersOfCategory.length > 0;
-  const isRequiredThisYear = isDocumentRequiredForYear(documentType, year);
+  const isRequiredThisYear =
+    !hideRequirement && isDocumentRequiredForYear(documentType, year);
 
   return (
     <Accordion
@@ -89,4 +94,6 @@ export const DocumentsFinanciersCategory = ({
 type Props = {
   documentType: StructureDocument;
   year: number;
+  structureType?: StructureType;
+  hideRequirement?: boolean;
 };

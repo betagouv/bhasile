@@ -1,8 +1,5 @@
 import { CURRENT_YEAR, DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
-import {
-  DocumentFinancierCategory,
-  DocumentFinancierGranularity,
-} from "@/types/document-financier.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 const baseYearIndex = CURRENT_YEAR - DOCUMENTS_FINANCIERS_OPEN_YEAR;
 
@@ -95,30 +92,10 @@ export const isDocumentRequiredForYear = (
   year: number
 ): boolean => document.required && year <= CURRENT_YEAR - document.yearIndex;
 
-export const granularities: DocumentGranularity[] = [
-  {
-    label: "Structure",
-    value: "STRUCTURE",
-  },
-  {
-    label: "CPOM",
-    value: "CPOM",
-  },
-  {
-    label: "Structure et CPOM",
-    value: "STRUCTURE_ET_CPOM",
-  },
-];
-
 export type StructureDocument = {
   label: string;
   subLabel?: string;
   value: DocumentFinancierCategory;
   yearIndex: number;
   required: boolean;
-};
-
-type DocumentGranularity = {
-  label: string;
-  value: DocumentFinancierGranularity[number];
 };
