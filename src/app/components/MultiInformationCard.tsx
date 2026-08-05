@@ -3,6 +3,8 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Fragment, ReactElement, ReactNode, useState } from "react";
 
+import { cn } from "@/app/utils/classname.util";
+
 export const MultiInformationCard = ({
   informations,
   detailLabel,
@@ -12,7 +14,7 @@ export const MultiInformationCard = ({
   return (
     <div className="px-6 py-3 rounded-xl bg-alt-blue-france flex-col h-full flex justify-center items-center relative">
       {detailLabel && (
-        <div className="flex justify-end w-full absolute top-1 right-1">
+        <div className="flex justify-end w-full absolute top-1 right-1 z-10">
           <Button
             onClick={() => setShowDetails(!showDetails)}
             iconId={
@@ -24,8 +26,13 @@ export const MultiInformationCard = ({
           />
         </div>
       )}
-      {!showDetails &&
-        informations.map(
+      <div
+        className={cn(
+          "flex flex-col justify-center items-center w-full",
+          showDetails && "invisible"
+        )}
+      >
+        {informations.map(
           ({ primaryInformation, secondaryInformation }, index) => (
             <Fragment key={index}>
               <div
@@ -42,8 +49,9 @@ export const MultiInformationCard = ({
             </Fragment>
           )
         )}
+      </div>
       {showDetails && (
-        <div className="text-center text-sm w-full break-words whitespace-normal">
+        <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm break-words overflow-y-auto">
           {detailLabel}
         </div>
       )}
