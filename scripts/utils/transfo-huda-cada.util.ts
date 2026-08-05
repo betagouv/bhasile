@@ -3,7 +3,7 @@ import { TransformationType } from "@/types/transformation.type";
 
 const BHASILE_CODE_PATTERN = /BHA[\s-]*([A-Z]{3})[\s-]*([0-9O]{3})(?![0-9O])/g;
 
-/* Un champ peut en désigner plusieurs. Le dernier segment est numérique : on change les O en 0 */
+/* Un champ peut désigner plusieurs codes. Le dernier segment est numérique : on change les O en 0 */
 export const normalizeBhasileCodes = (raw: string): string[] => [
   ...new Set(
     [...raw.toUpperCase().matchAll(BHASILE_CODE_PATTERN)].map(
@@ -149,8 +149,7 @@ export const isEffectiveDateInScope = (date: Date): boolean =>
 const FUSION_PATTERN = /fusion/i;
 
 /* Une variante du libellé « création » couvre aussi l'absorption d'un CADA existant.
- * Le dossier ne dit pas lequel absorber : on créerait un CADA neuf en laissant
- * l'ancien ouvert. */
+ * Le dossier ne dit pas lequel absorber : on créerait un CADA neuf en laissant l'ancien ouvert. */
 export const isAmbiguousFusion = (raw: string): boolean =>
   FUSION_PATTERN.test(raw);
 

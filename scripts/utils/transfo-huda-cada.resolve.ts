@@ -241,8 +241,7 @@ export const resolveTargetCada = async (
   { rawBhasileCode, rawDnaCodes, departement }: TargetCadaInput,
   now: Date = getNow()
 ): Promise<Resolution<ResolvedStructure>> => {
-  /* Une extension n'a qu'une structure d'accueil : le premier code fait foi */
-  const [codeBhasile] = normalizeBhasileCodes(rawBhasileCode);
+  const [codeBhasile] = normalizeBhasileCodes(rawBhasileCode); // Une extension n'a qu'une structure d'accueil : le premier code fait foi
 
   if (codeBhasile) {
     const structure = await prisma.structure.findUnique({
