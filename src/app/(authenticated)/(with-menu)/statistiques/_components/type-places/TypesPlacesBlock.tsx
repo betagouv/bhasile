@@ -7,6 +7,7 @@ import { formatPerMille } from "@/app/utils/number.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
+import { AnnualDataNote } from "../AnnualDataNote";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";
 
 export const TypesPlacesBlock = (): ReactElement => {
@@ -50,10 +51,7 @@ export const TypesPlacesBlock = (): ReactElement => {
         />
       </div>
       <TypesPlacesStatsTable />
-      <div className="italic text-sm pt-3">
-        Les chiffres correspondent au 31 décembre de chaque année, et à la
-        dernière mise à jour pour l’année en cours.
-      </div>
+      <AnnualDataNote />
     </div>
   );
 };
