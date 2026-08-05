@@ -4,6 +4,7 @@ import "chartist/dist/index.css";
 
 import { useId, useMemo } from "react";
 
+import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
 import { useBarLineChart } from "@/app/hooks/useBarLineChart";
 
 type ChartData = {
@@ -20,9 +21,10 @@ type ChartColors = {
 type Props = {
   data: ChartData;
   colors: ChartColors;
+  axisYLabel?: string;
 };
 
-export const StackedBarLineChart = ({ data, colors }: Props) => {
+export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
   const id = useId();
   const chartClass = `stacked-bar-line-${id.replace(/:/g, "-")}`;
 
@@ -73,29 +75,32 @@ export const StackedBarLineChart = ({ data, colors }: Props) => {
   });
 
   return (
-    <div className={chartClass} style={{ position: "relative", height: 340 }}>
-      <div
-        ref={barChartRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-        }}
-      />
-      <div
-        ref={lineChartRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 10,
-          pointerEvents: "none",
-        }}
-      />
+    <div className={chartClass}>
+      <ChartAxisLabels startLabel={axisYLabel} />
+      <div style={{ position: "relative", height: 340 }}>
+        <div
+          ref={barChartRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        />
+        <div
+          ref={lineChartRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 10,
+            pointerEvents: "none",
+          }}
+        />
+      </div>
     </div>
   );
 };

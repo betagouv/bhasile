@@ -84,7 +84,12 @@ export const RMUChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <BarChart data={chartData} options={options} colors={colors} />
+          <BarChart
+            data={chartData}
+            options={options}
+            colors={colors}
+            axisYLabel="Nb RMU"
+          />
         </div>
         <div>
           <TimePeriodSelector

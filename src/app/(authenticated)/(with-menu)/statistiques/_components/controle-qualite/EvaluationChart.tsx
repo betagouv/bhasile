@@ -86,8 +86,8 @@ export const EvaluationChart = (): ReactElement => {
           <DoubleYAxisBarLineChart
             data={chartData}
             colors={colors}
-            leftAxisLabel="note"
-            rightAxisLabel="structures"
+            leftAxisLabel="Note"
+            rightAxisLabel="Nb structures"
           />
         </div>
         <div>

@@ -119,6 +119,7 @@ export const ActiviteHistoriqueChart = (): ReactElement => {
       <div className="flex">
         <div className="flex-4">
           <LineChart
+            axisYLabel="% des places DNA"
             data={{
               labels: selectedMonths.map(formatForCharts),
               series: [

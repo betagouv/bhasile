@@ -70,7 +70,11 @@ export const BalanceChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarLineChart data={getChartData()} colors={colors} />
+          <StackedBarLineChart
+            data={getChartData()}
+            colors={colors}
+            axisYLabel="Montant (€)"
+          />
         </div>
         <div>
           <div className="flex items-center pb-6">
