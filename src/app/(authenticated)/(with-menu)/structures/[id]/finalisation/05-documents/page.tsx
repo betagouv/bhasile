@@ -14,7 +14,7 @@ import {
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
 import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   ActesAdministratifsAutoSaveFormValues,

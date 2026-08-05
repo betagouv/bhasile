@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 
 import { SeeFileButton } from "@/app/components/common/SeeFileButton";
 import { formatDate } from "@/app/utils/date.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { ControleType } from "@/types/controle.type";
 
 export const ControleTable = (): ReactElement => {

@@ -15,7 +15,7 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import {
   FinalisationIdentificationAutoSaveFormValues,
   finalisationIdentificationAutoSaveSchema,

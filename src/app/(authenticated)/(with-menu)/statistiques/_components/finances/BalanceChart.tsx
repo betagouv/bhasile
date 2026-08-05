@@ -2,7 +2,7 @@ import { ReactElement, useMemo } from "react";
 
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
-import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 
 export const BalanceChart = (): ReactElement => {

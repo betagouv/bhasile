@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { average } from "@/app/utils/math.util";
-import { useStatistiquesCartographieContext } from "@/contexts/StatistiquesCartographieClientContext";
+import { useStatistiquesCartographieContext } from "@/contexts/StatistiquesCartographieContext";
 
 import { cleanZoneCode } from "./cartographie.util";
 

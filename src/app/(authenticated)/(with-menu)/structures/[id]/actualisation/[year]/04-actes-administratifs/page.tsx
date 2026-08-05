@@ -14,7 +14,7 @@ import {
 } from "@/app/utils/acteAdministratif.util";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import { getActualisationActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   ActesAdministratifsAutoSaveFormValues,

@@ -16,7 +16,7 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import {
   ModificationDescriptionFormValues,
   modificationDescriptionSchema,

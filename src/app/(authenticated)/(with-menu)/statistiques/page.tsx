@@ -69,7 +69,7 @@ export default async function StatistiquesPage({
   });
 
   return (
-    <StatistiquesProvider statistiques={statistiques}>
+    <StatistiquesProvider entity={statistiques}>
       <div className="flex flex-col h-full">
         <StatistiquesHeader />
         <StatistiquesContent />

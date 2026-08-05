@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { vi } from "vitest";
 
 import { FetchStateProvider } from "@/contexts/FetchStateContext";
-import { StructureClientProvider } from "@/contexts/StructureClientContext";
+import { StructureProvider } from "@/contexts/StructureContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
@@ -28,9 +28,7 @@ export const renderWithStructurePageProviders = (
 ) =>
   render(
     <FetchStateProvider>
-      <StructureClientProvider structure={structure}>
-        {page}
-      </StructureClientProvider>
+      <StructureProvider entity={structure}>{page}</StructureProvider>
     </FetchStateProvider>
   );
 

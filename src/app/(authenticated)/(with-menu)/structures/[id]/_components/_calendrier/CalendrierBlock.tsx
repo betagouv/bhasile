@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { getCurrentCpomStructureDates } from "@/app/utils/structure.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 import { DateBars } from "./DateBars";
 

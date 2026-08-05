@@ -12,7 +12,7 @@ import {
   getYearFromDate,
 } from "@/app/utils/date.util";
 import { capitalizeFirstLetter } from "@/app/utils/string.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
 import { StructureType } from "@/types/structure.type";
 

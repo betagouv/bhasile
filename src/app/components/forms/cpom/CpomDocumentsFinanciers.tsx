@@ -7,7 +7,7 @@ import { YearlyFileUpload } from "@/app/components/forms/finance/documents/Yearl
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { useCpomContext } from "@/contexts/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { StructureType } from "@/types/structure.type";
 

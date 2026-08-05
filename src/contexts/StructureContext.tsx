@@ -1,22 +1,16 @@
-import { ReactNode } from "react";
+"use client";
 
-import { StructureClientProvider } from "@/contexts/StructureClientContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
-export type StructureContextType = {
-  structure: StructureApiRead;
-};
+import { createMutableEntityContext } from "./createEntityContext";
 
-export function StructureProvider({
-  children,
-  structure,
-}: {
-  children: ReactNode;
-  structure: StructureApiRead | null;
-}) {
-  return (
-    <StructureClientProvider structure={structure}>
-      {children}
-    </StructureClientProvider>
-  );
-}
+const { Provider, useValue } =
+  createMutableEntityContext<StructureApiRead>("Structure");
+
+export const StructureProvider = Provider;
+
+export const useStructureContext = () => {
+  const { entity, setEntity } = useValue();
+
+  return { structure: entity, setStructure: setEntity };
+};

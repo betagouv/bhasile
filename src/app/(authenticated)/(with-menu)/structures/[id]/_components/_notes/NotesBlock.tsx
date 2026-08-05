@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 export const NotesBlock = (): ReactElement | null => {
   const { structure } = useStructureContext();

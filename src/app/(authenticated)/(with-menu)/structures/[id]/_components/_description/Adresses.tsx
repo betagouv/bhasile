@@ -6,7 +6,7 @@ import { Badge } from "@/app/components/common/Badge";
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { formatCityName } from "@/app/utils/adresse.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { RepartitionLabel } from "@/types/adresse.type";
 
 export const Adresses = (): ReactElement => {

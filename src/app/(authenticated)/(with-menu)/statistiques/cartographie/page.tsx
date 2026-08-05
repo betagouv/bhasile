@@ -106,7 +106,7 @@ export default async function CartographiePage({
   });
 
   return (
-    <StatistiquesCartographieProvider statistiques={statistiques}>
+    <StatistiquesCartographieProvider entity={statistiques}>
       <div className="flex flex-col h-full">
         <StatistiquesHeader />
         <StatistiquesCartographie />

@@ -6,7 +6,7 @@ import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 import { CustomNotice } from "../../common/CustomNotice";
 import { getIndicateurFinancierTableHeading } from "./budget-tables/getIndicateurFinancierTableHeading";

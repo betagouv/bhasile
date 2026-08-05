@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { PropsWithChildren, ReactNode, useEffect } from "react";
 
 import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 export const ModificationGuard = ({
   children,

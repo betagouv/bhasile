@@ -10,7 +10,7 @@ import FormWrapper, {
 import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import {
   structureTypologiesAutoSaveSchema,

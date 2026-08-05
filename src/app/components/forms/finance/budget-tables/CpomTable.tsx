@@ -4,7 +4,7 @@ import { Table } from "@/app/components/common/Table";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { parseFrenchNumber } from "@/app/utils/number.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { useCpomContext } from "@/contexts/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { StructureType } from "@/types/structure.type";
 

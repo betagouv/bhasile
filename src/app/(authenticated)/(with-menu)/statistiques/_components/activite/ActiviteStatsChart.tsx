@@ -9,7 +9,7 @@ import {
   getLastMonths,
   getYearFromDate,
 } from "@/app/utils/date.util";
-import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { ActiviteByMonthStat } from "@/schemas/api/statistique.schema";
 
 import {

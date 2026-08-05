@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 export const AntennesAndContacts = (): ReactElement => {
   const { structure } = useStructureContext();

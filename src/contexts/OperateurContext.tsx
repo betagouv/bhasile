@@ -1,22 +1,16 @@
-import { ReactNode } from "react";
+"use client";
 
-import { OperateurClientProvider } from "@/contexts/OperateurClientContext";
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 
-export type OperateurContextType = {
-  operateur: OperateurApiRead;
-};
+import { createMutableEntityContext } from "./createEntityContext";
 
-export function OperateurProvider({
-  children,
-  operateur,
-}: {
-  children: ReactNode;
-  operateur: OperateurApiRead | null;
-}) {
-  return (
-    <OperateurClientProvider operateur={operateur}>
-      {children}
-    </OperateurClientProvider>
-  );
-}
+const { Provider, useValue } =
+  createMutableEntityContext<OperateurApiRead>("Operateur");
+
+export const OperateurProvider = Provider;
+
+export const useOperateurContext = () => {
+  const { entity, setEntity } = useValue();
+
+  return { operateur: entity, setOperateur: setEntity };
+};

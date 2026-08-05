@@ -5,7 +5,7 @@ import { Fragment, ReactElement, useState } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
-import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { FinanceTypeSelector } from "./FinanceTypeSelector";

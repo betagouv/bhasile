@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
 import { formatNumber } from "@/app/utils/number.util";
-import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";

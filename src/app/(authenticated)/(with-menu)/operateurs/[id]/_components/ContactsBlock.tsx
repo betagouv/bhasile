@@ -2,7 +2,7 @@ import { useRouter } from "next/navigation";
 import { Fragment, ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import { useOperateurContext } from "@/contexts/OperateurClientContext";
+import { useOperateurContext } from "@/contexts/OperateurContext";
 
 export const ContactsBlock = (): ReactElement => {
   const router = useRouter();

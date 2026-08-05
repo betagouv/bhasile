@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { InformationCard } from "@/app/components/InformationCard";
 import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
 import { formatCurrency, formatNumber } from "@/app/utils/number.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 export const BudgetExecutoire = ({ year }: Props): ReactElement => {
   const { structure } = useStructureContext();

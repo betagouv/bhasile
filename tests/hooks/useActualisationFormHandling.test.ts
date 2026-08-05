@@ -33,7 +33,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 vi.mock(
-  "@/contexts/StructureClientContext",
+  "@/contexts/StructureContext",
   () => ({
     useStructureContext: () => ({
       structure: { id: 1, forms: [actualisationForm] },

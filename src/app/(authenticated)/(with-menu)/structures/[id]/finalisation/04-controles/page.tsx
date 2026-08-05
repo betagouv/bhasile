@@ -12,7 +12,7 @@ import { transformFormControlesToApiControles } from "@/app/utils/controle.util"
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { transformFormEvaluationsToApiEvaluations } from "@/app/utils/evaluation.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import {
   FinalisationQualiteAutoSaveFormValues,
   finalisationQualiteAutoSaveSchema,

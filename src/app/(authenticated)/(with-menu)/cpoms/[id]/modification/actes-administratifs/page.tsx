@@ -15,7 +15,7 @@ import {
   getCpomActesScopes,
   getCpomDefaultValues,
 } from "@/app/utils/cpom.util";
-import { useCpomContext } from "@/contexts/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { actesAdministratifsCpomSchema } from "@/schemas/forms/base/cpom.schema";
 
 import { ActesScopeSwitch } from "../../_components/ActesScopeSwitch";

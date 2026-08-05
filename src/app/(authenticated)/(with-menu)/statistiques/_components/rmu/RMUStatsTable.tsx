@@ -9,7 +9,7 @@ import {
 } from "@/app/components/common/TimePeriodSelector";
 import { formatDate } from "@/app/utils/date.util";
 import { formatNumber } from "@/app/utils/number.util";
-import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import {
   RmuPeriodStat,
   StatistiqueApiRead,

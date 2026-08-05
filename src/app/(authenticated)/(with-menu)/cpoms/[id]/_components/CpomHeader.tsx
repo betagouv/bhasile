@@ -10,7 +10,7 @@ import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { formatCpomName } from "@/app/utils/cpom.util";
 import { getYearFromDate } from "@/app/utils/date.util";
-import { useCpomContext } from "@/contexts/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomContext";
 
 export const CpomHeader = (): ReactElement | null => {
   const { cpom } = useCpomContext();

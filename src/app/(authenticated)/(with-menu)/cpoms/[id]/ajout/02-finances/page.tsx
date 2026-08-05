@@ -13,7 +13,7 @@ import FormWrapper, {
 import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { useCpomContext } from "@/contexts/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { financesCpomSchema } from "@/schemas/forms/base/cpom.schema";
 
 const confirmationModal = createModal({

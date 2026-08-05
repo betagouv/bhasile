@@ -4,7 +4,7 @@ import { ReactElement, useState } from "react";
 import { Block } from "@/app/components/common/Block";
 import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 import { BudgetExecutoire } from "./BudgetExecutoire";
 import { CpomStaticTable } from "./CpomStaticTable";

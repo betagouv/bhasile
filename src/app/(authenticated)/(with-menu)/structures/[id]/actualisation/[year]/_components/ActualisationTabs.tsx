@@ -5,7 +5,7 @@ import {
   ACTUALISATION_STEPS,
   getActualisationFormStepStatus,
 } from "@/app/utils/actualisationForm.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 const titles: Record<string, ReactNode> = {
   "01-places": <>Places</>,

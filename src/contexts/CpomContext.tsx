@@ -1,18 +1,15 @@
-import { ReactNode } from "react";
+"use client";
 
-import { CpomClientProvider } from "@/contexts/CpomClientContext";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 
-export type CpomContextType = {
-  cpom: CpomApiRead;
-};
+import { createMutableEntityContext } from "./createEntityContext";
 
-export function CpomProvider({
-  children,
-  cpom,
-}: {
-  children: ReactNode;
-  cpom: CpomApiRead | null;
-}) {
-  return <CpomClientProvider cpom={cpom}>{children}</CpomClientProvider>;
-}
+const { Provider, useValue } = createMutableEntityContext<CpomApiRead>("Cpom");
+
+export const CpomProvider = Provider;
+
+export const useCpomContext = () => {
+  const { entity, setEntity } = useValue();
+
+  return { cpom: entity, setCpom: setEntity };
+};

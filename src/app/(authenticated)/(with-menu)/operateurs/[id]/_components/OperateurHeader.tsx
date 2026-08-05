@@ -7,7 +7,7 @@ import { ReactElement } from "react";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
-import { useOperateurContext } from "@/contexts/OperateurClientContext";
+import { useOperateurContext } from "@/contexts/OperateurContext";
 
 export const OperateurHeader = (): ReactElement | null => {
   const { operateur } = useOperateurContext();

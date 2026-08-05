@@ -3,7 +3,7 @@
 import { ReactElement } from "react";
 
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
-import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
 import { BalanceChart } from "./BalanceChart";

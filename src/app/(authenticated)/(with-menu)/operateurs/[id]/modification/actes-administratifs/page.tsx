@@ -11,7 +11,7 @@ import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
 import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
 import { operateurActesAdministratifsCategoryToDisplay } from "@/config/operateur.config";
-import { useOperateurContext } from "@/contexts/OperateurClientContext";
+import { useOperateurContext } from "@/contexts/OperateurContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   ActesAdministratifsFormValues,

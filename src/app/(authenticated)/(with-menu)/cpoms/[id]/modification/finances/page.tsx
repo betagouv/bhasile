@@ -15,7 +15,7 @@ import {
   getCpomDefaultValues,
   getCpomStructureTypes,
 } from "@/app/utils/cpom.util";
-import { useCpomContext } from "@/contexts/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { financesAndDocumentsCpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 

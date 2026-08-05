@@ -15,7 +15,7 @@ import { transformFormControlesToApiControles } from "@/app/utils/controle.util"
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { transformFormEvaluationsToApiEvaluations } from "@/app/utils/evaluation.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import {
   ModificationQualiteFormValues,
   modificationQualiteSchema,

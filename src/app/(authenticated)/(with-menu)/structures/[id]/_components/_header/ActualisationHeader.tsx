@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 import { StructureCallToActionHeader } from "./StructureCallToActionHeader";
 

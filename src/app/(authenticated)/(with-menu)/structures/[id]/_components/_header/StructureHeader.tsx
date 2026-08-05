@@ -9,7 +9,7 @@ import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { hasOpenActualisation } from "@/app/utils/actualisationForm.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ActualisationHeader } from "./ActualisationHeader";
 import { FinalisationHeader } from "./FinalisationHeader";

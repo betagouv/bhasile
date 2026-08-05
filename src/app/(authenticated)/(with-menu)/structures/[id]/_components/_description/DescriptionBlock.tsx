@@ -4,7 +4,7 @@ import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 import { Adresses } from "./Adresses";
 import { AntennesAndContacts } from "./AntennesAndContacts";

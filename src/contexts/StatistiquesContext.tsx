@@ -1,24 +1,16 @@
 "use client";
 
-import { ReactNode } from "react";
-
-import { StatistiquesClientProvider } from "@/contexts/StatistiquesClientContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
-export type StatistiquesContextType = {
-  statistiques: StatistiqueApiRead;
-};
+import { createEntityContext } from "./createEntityContext";
 
-export function StatistiquesProvider({
-  children,
-  statistiques,
-}: {
-  children: ReactNode;
-  statistiques: StatistiqueApiRead | null;
-}) {
-  return (
-    <StatistiquesClientProvider statistiques={statistiques}>
-      {children}
-    </StatistiquesClientProvider>
-  );
-}
+const { Provider, useValue } =
+  createEntityContext<StatistiqueApiRead>("Statistiques");
+
+export const StatistiquesProvider = Provider;
+
+export const useStatistiquesContext = () => {
+  const { entity } = useValue();
+
+  return { statistiques: entity };
+};

@@ -3,7 +3,7 @@ import { Fragment, ReactElement } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { formatNumber } from "@/app/utils/number.util";
-import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 export const TypesPlacesStatsTable = (): ReactElement => {

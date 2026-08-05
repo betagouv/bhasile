@@ -9,7 +9,7 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { formatNumber } from "@/app/utils/number.util";
-import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import {
   ControleQualitePeriodStat,
   StatistiqueApiRead,

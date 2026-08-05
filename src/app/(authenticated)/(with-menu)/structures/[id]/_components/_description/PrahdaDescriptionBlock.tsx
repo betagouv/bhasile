@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { formatDate } from "@/app/utils/date.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { PublicType } from "@/types/structure.type";
 
 export const PrahdaDescriptionBlock = (): ReactElement => {

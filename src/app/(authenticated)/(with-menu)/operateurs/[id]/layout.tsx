@@ -37,12 +37,8 @@ export default async function OperateurLayout({
   const { id } = await params;
   const operateur = await getOperateur(id);
 
-  if (!operateur) {
-    notFound();
-  }
-
   return (
-    <OperateurProvider operateur={operateur}>
+    <OperateurProvider entity={operateur}>
       <div className="flex flex-col h-full gap-3 pb-4">
         <OperateurHeader />
         <div className="flex flex-col gap-3 max-w-7xl mx-auto px-3">

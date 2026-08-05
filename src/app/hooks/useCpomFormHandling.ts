@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 
-import { useCpomContext } from "@/contexts/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 
 import { useCpom } from "./useCpom";

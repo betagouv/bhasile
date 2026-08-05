@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { useStatistiquesCartographieContext } from "@/contexts/StatistiquesCartographieClientContext";
+import { useStatistiquesCartographieContext } from "@/contexts/StatistiquesCartographieContext";
 import { ZoneDataInfo } from "@/types/map.type";
 
 import { zonesToRichRecord } from "./cartographie.util";

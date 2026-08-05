@@ -10,7 +10,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
-import { useStructureContext } from "@/contexts/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 import {
   BudgetsAutoSaveFormValues,
   budgetsAutoSaveSchema,

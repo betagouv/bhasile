@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 
-import { useStatistiquesCartographieContext } from "@/contexts/StatistiquesCartographieClientContext";
+import { useStatistiquesCartographieContext } from "@/contexts/StatistiquesCartographieContext";
 import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.schema";
 import { ZoneDataInfo } from "@/types/map.type";
 
