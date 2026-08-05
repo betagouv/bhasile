@@ -1,9 +1,6 @@
-import {
-  createMinimalStructure,
-  createMinimalStructureVersion,
-} from "@/app/api/structures/structure.repository";
 import { StructureType } from "@/types/structure.type";
 
+import { prisma } from "../../e2e/seed/prisma";
 import { parseAddress } from "./shared-utils";
 import { TestStructureData } from "./test-data/types";
 
@@ -48,3 +45,68 @@ export async function seedStructureForSelection(
 
   return id;
 }
+
+const createMinimalStructure = async (
+  dnaCodes: { code: string }[],
+  structure: {
+    codeBhasile: string;
+    type: StructureType;
+    operateurId: number;
+    departementAdministratif?: string;
+    nom: string;
+    adresseAdministrative: string;
+    codePostalAdministratif: string;
+    communeAdministrative: string;
+  }
+): Promise<{ id: number }> => {
+  const dnaStructures = {
+    create: dnaCodes.map(({ code }) => ({
+      dna: {
+        connectOrCreate: {
+          where: { code },
+          create: { code },
+        },
+      },
+    })),
+  };
+
+  return await prisma.structure.upsert({
+    where: { codeBhasile: structure.codeBhasile },
+    update: { ...structure, dnaStructures },
+    create: { ...structure, dnaStructures },
+    select: { id: true },
+  });
+};
+
+const createMinimalStructureVersion = async (
+  structureId: number,
+  version: {
+    departementAdministratif?: string;
+    communeAdministrative?: string;
+    codePostalAdministratif?: string;
+    adresseAdministrative?: string;
+    nom?: string;
+    effectiveDate?: Date;
+  }
+): Promise<void> => {
+  await prisma.structureVersion.deleteMany({
+    where: { structureId, structureVersionTransformationId: null },
+  });
+
+  const createdVersion = await prisma.structureVersion.create({
+    data: {
+      structureId,
+      effectiveDate: version.effectiveDate ?? new Date("2020-01-01"),
+      departementAdministratif: version.departementAdministratif,
+      communeAdministrative: version.communeAdministrative,
+      codePostalAdministratif: version.codePostalAdministratif,
+      adresseAdministrative: version.adresseAdministrative,
+      nom: version.nom,
+    },
+  });
+
+  await prisma.dnaStructure.updateMany({
+    where: { structureId, structureVersionId: null },
+    data: { structureVersionId: createdVersion.id },
+  });
+};
