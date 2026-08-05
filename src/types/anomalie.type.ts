@@ -37,19 +37,19 @@ export const AnomalieCode = [
 
 export type AnomalieCode = (typeof AnomalieCode)[number];
 
-export const AnomalieCategorie = [
-  "CALENDRIER",
+export const AnomalieCategory = [
+  "CALENDAR",
   "PLACES",
-  "CARACTERISTIQUES",
+  "CHARACTERISTICS",
   "FINANCE",
   "DOCUMENTS",
   "ACTIVITE",
 ] as const;
 
-export type AnomalieCategorie = (typeof AnomalieCategorie)[number];
+export type AnomalieCategory = (typeof AnomalieCategory)[number];
 
 // Table pointée par targetId. STRUCTURE => targetId reste à 0.
-export const AnomalieCible = [
+export const AnomalieTarget = [
   "STRUCTURE",
   "ACTE_ADMINISTRATIF",
   "ADRESSE",
@@ -57,7 +57,7 @@ export const AnomalieCible = [
   "DNA",
 ] as const;
 
-export type AnomalieCible = (typeof AnomalieCible)[number];
+export type AnomalieTarget = (typeof AnomalieTarget)[number];
 
-export const ANOMALIE_YEAR_HORS_EXERCICE = 0;
+export const ANOMALIE_NO_YEAR = 0;
 export const ANOMALIE_TARGET_STRUCTURE = 0;

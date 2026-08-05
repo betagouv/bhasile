@@ -1,39 +1,39 @@
-import type { AnomalieContexte } from "@/lib/anomalies/anomalie.contexte";
+import type { AnomalieContext } from "@/lib/anomalies/anomalie.context";
 import type {
-  AnomalieDetectee,
   AnomalieOptions,
-} from "@/lib/anomalies/anomalie.regle";
-import { REGLES_ANOMALIES } from "@/lib/anomalies/regles";
+  DetectedAnomalie,
+} from "@/lib/anomalies/anomalie.rule";
+import { ANOMALIE_RULES } from "@/lib/anomalies/rules";
 import type { AnomalieCode } from "@/types/anomalie.type";
 
 export const computeAnomalies = (
-  contexte: AnomalieContexte,
+  context: AnomalieContext,
   options: AnomalieOptions
-): ResultatCalculAnomalies => {
-  const detectees: AnomalieDetectee[] = [];
-  const codesEvalues: AnomalieCode[] = [];
+): AnomalieComputeResult => {
+  const detected: DetectedAnomalie[] = [];
+  const evaluatedCodes: AnomalieCode[] = [];
 
-  for (const regle of REGLES_ANOMALIES) {
-    if (!regle.requiert.every((tranche) => contexte[tranche] !== undefined)) {
+  for (const rule of ANOMALIE_RULES) {
+    if (!rule.requires.every((slice) => context[slice] !== undefined)) {
       continue;
     }
 
-    codesEvalues.push(regle.code);
-    for (const detection of regle.evalue(
-      contexte as Required<AnomalieContexte>,
+    evaluatedCodes.push(rule.code);
+    for (const detection of rule.evaluates(
+      context as Required<AnomalieContext>,
       options
     )) {
-      detectees.push({ code: regle.code, ...detection });
+      detected.push({ code: rule.code, ...detection });
     }
   }
 
-  return { detectees, codesEvalues };
+  return { detected, evaluatedCodes };
 };
 
-// `codesEvalues` est indispensable à la réconciliation : sans lui, une règle non évaluée
+// `evaluatedCodes` est indispensable à la réconciliation : sans lui, une règle non évaluée
 // faute de données est indiscernable d'une règle évaluée sans anomalie, et la suppression
 // détruirait des anomalies légitimes ainsi que leurs justifications.
-export type ResultatCalculAnomalies = {
-  detectees: AnomalieDetectee[];
-  codesEvalues: AnomalieCode[];
+export type AnomalieComputeResult = {
+  detected: DetectedAnomalie[];
+  evaluatedCodes: AnomalieCode[];
 };

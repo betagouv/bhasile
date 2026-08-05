@@ -3,21 +3,21 @@ import type { IndicateurFinancierType } from "@/types/indicateur-financier.type"
 import type { StructureType } from "@/types/structure.type";
 
 // Chaque tranche est optionnelle : une règle n'est évaluée que si toutes celles qu'elle
-// déclare dans `requiert` sont présentes. Absent != vide.
-export type AnomalieContexte = {
-  structure?: StructureContexte;
-  typologies?: TypologieContexte[];
-  actes?: ActeContexte[];
-  adresses?: AdresseContexte[];
-  budgets?: BudgetContexte[];
-  indicateurs?: IndicateurContexte[];
-  evaluations?: EvaluationContexte[];
-  dnas?: DnaContexte[];
-  cpoms?: CpomContexte[];
-  activites?: ActiviteContexte[];
+// déclare dans `requires` sont présentes. Absent != vide.
+export type AnomalieContext = {
+  structure?: StructureContext;
+  typologies?: TypologieContext[];
+  actes?: ActeContext[];
+  adresses?: AdresseContext[];
+  budgets?: BudgetContext[];
+  indicateurs?: IndicateurContext[];
+  evaluations?: EvaluationContext[];
+  dnas?: DnaContext[];
+  cpoms?: CpomContext[];
+  activites?: ActiviteContext[];
 };
 
-export type StructureContexte = {
+export type StructureContext = {
   type: StructureType | null;
   departementAdministratif: string | null;
   tarifJournalierCible: number | null; // reporting.tarif_journalier_cible, selon type et zonage IDF
@@ -32,7 +32,7 @@ export type StructureContexte = {
   finPeriodeAutorisation: Date | null;
 };
 
-export type TypologieContexte = {
+export type TypologieContext = {
   year: number;
   placesAutorisees: number | null;
   pmr: number | null;
@@ -40,7 +40,7 @@ export type TypologieContexte = {
   fvvTeh: number | null;
 };
 
-export type ActeContexte = {
+export type ActeContext = {
   id: number;
   category: ActeAdministratifCategory;
   startDate: Date | null;
@@ -51,12 +51,12 @@ export type ActeContexte = {
   hasFile: boolean;
 };
 
-export type AdresseContexte = {
+export type AdresseContext = {
   id: number;
   placesAutorisees: number | null;
 };
 
-export type BudgetContexte = {
+export type BudgetContext = {
   year: number;
   isMissing: boolean | null;
   totalProduits: number | null;
@@ -75,7 +75,7 @@ export type BudgetContexte = {
   autre: number | null;
 };
 
-export type IndicateurContexte = {
+export type IndicateurContext = {
   year: number;
   type: IndicateurFinancierType;
   isMissing: boolean | null;
@@ -83,22 +83,22 @@ export type IndicateurContexte = {
   coutJournalier: number | null;
 };
 
-export type EvaluationContexte = {
+export type EvaluationContext = {
   date: Date | null;
 };
 
-export type DnaContexte = {
+export type DnaContext = {
   id: number;
   code: string;
 };
 
-export type CpomContexte = {
+export type CpomContext = {
   id: number;
   structuresCount: number;
   hasConventionDocument: boolean;
 };
 
-export type ActiviteContexte = {
+export type ActiviteContext = {
   dnaCode: string;
   placesAutorisees: number | null;
   placesIndisponibles: number | null;

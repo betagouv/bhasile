@@ -12,7 +12,7 @@
 --   guarded by tests/lib/anomalies/anomalie.reporting.test.ts.
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_global_quality" AS
 WITH
-  codes_par_structure AS (
+  codes_by_structure AS (
     SELECT
       a."structureId" AS "id",
       ARRAY_AGG(DISTINCT a."code"::text) AS "codes"
@@ -21,7 +21,7 @@ WITH
     GROUP BY
       a."structureId"
   ),
-  places_par_structure AS (
+  places_by_structure AS (
     SELECT
       st."structureId" AS "id",
       MAX(st."lgbt") AS "lgbt_places",
@@ -37,7 +37,7 @@ WITH
     GROUP BY
       st."structureId"
   ),
-  indicateurs AS (
+  indicators AS (
     SELECT
       sc."id" AS "id",
       sc."code_bhasile" AS "code_bhasile",
@@ -54,13 +54,13 @@ WITH
 :"SCHEMA"."structures_core" sc
       INNER JOIN public."Form" f ON f."structureId" = sc."id"
       INNER JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
-      LEFT JOIN codes_par_structure cps ON cps."id" = sc."id"
-      LEFT JOIN places_par_structure pl ON pl."id" = sc."id"
+      LEFT JOIN codes_by_structure cps ON cps."id" = sc."id"
+      LEFT JOIN places_by_structure pl ON pl."id" = sc."id"
     WHERE
       fd."slug" = 'finalisation-v1'
       AND f."status" = TRUE
   ),
-  colonnes AS (
+  columns AS (
     SELECT
       i."id",
       i."code_bhasile",
@@ -109,7 +109,7 @@ WITH
       ('ACTIVITE_PLACES_INDISPONIBLES_GT_3PCT' = ANY (i."codes")) AS "has_issue_places_indisponibles_gt_3pct",
       ('ACTIVITE_PRESENCES_INDUES_GT_7PCT' = ANY (i."codes")) AS "has_issue_presences_indues_gt_7pct"
     FROM
-      indicateurs i
+      indicators i
   )
 SELECT
   c.*,
@@ -117,4 +117,4 @@ SELECT
     c."has_issue_authorisation_period_not_15y"::int + c."has_issue_authorized_convention_not_5y"::int + c."has_issue_authorized_convention_outside_authorisation_period"::int + c."has_issue_authorized_convention_missing_or_expired"::int + c."has_issue_convention_dates_differ_from_actes_administratifs"::int + c."has_issue_authorisation_dates_differ_from_actes_administratifs"::int + c."has_issue_evaluation_not_done_in_time"::int + c."has_issue_subsidized_convention_gt_3y"::int + c."has_issue_specific_places_gt_places_autorisees"::int + c."has_issue_incoherence_lgbt_places"::int + c."has_issue_incoherence_fvvteh_places"::int + c."has_issue_places_structure_vs_address_diff_gt_10pct"::int + c."has_issue_dept_code"::int + c."has_issue_multi_dna"::int + c."has_issue_cpom_mono_structure"::int + c."has_issue_taux_encadrement_max_gt_threshold"::int + c."has_issue_taux_encadrement_min_lt_2"::int + c."has_issue_cout_journalier_max_gt_tarif_cible"::int + c."has_issue_cout_journalier_min_lt_15"::int + c."has_issue_resultat_net_eq_0"::int + c."has_issue_authorized_affectations_breakdown_missing"::int + c."has_issue_authorized_affectations_breakdown_mismatch"::int + c."has_issue_authorized_reprise_plus_affectations_mismatch"::int + c."has_issue_authorized_reprise_wrong_sign"::int + c."has_issue_subsidized_deficit_nonzero_boxes"::int + c."has_issue_subsidized_excedent_reprise_etat_nonzero"::int + c."has_issue_subsidized_excedent_rules"::int + c."has_issue_missing_convention_document"::int + c."has_issue_missing_autorisation_document"::int + c."has_issue_missing_cpom_document"::int + c."has_issue_places_indisponibles_gt_3pct"::int + c."has_issue_presences_indues_gt_7pct"::int
   ) AS "issues_count"
 FROM
-  colonnes c;
+  columns c;

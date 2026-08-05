@@ -1,19 +1,19 @@
 import type {
-  ActeContexte,
-  ActiviteContexte,
-  BudgetContexte,
-  CpomContexte,
-  IndicateurContexte,
-  StructureContexte,
-  TypologieContexte,
-} from "@/lib/anomalies/anomalie.contexte";
+  ActeContext,
+  ActiviteContext,
+  BudgetContext,
+  CpomContext,
+  IndicateurContext,
+  StructureContext,
+  TypologieContext,
+} from "@/lib/anomalies/anomalie.context";
 import { StructureType } from "@/types/structure.type";
 
-export const ANNEE_COURANTE_TEST = 2026;
+export const TEST_CURRENT_YEAR = 2026;
 
-export const structureContexte = (
-  overrides: Partial<StructureContexte> = {}
-): StructureContexte => ({
+export const structureContext = (
+  overrides: Partial<StructureContext> = {}
+): StructureContext => ({
   type: StructureType.CADA,
   departementAdministratif: "75",
   tarifJournalierCible: null,
@@ -29,9 +29,9 @@ export const structureContexte = (
   ...overrides,
 });
 
-export const acteContexte = (
-  overrides: Partial<ActeContexte> = {}
-): ActeContexte => ({
+export const acteContext = (
+  overrides: Partial<ActeContext> = {}
+): ActeContext => ({
   id: 1,
   category: "CONVENTION",
   startDate: new Date("2020-01-01"),
@@ -43,9 +43,9 @@ export const acteContexte = (
   ...overrides,
 });
 
-export const typologieContexte = (
-  overrides: Partial<TypologieContexte> = {}
-): TypologieContexte => ({
+export const typologieContext = (
+  overrides: Partial<TypologieContext> = {}
+): TypologieContext => ({
   year: 2024,
   placesAutorisees: 100,
   pmr: 0,
@@ -54,9 +54,9 @@ export const typologieContexte = (
   ...overrides,
 });
 
-export const budgetContexte = (
-  overrides: Partial<BudgetContexte> = {}
-): BudgetContexte => ({
+export const budgetContext = (
+  overrides: Partial<BudgetContext> = {}
+): BudgetContext => ({
   year: 2024,
   isMissing: null,
   totalProduits: 1_000,
@@ -76,9 +76,9 @@ export const budgetContexte = (
   ...overrides,
 });
 
-export const indicateurContexte = (
-  overrides: Partial<IndicateurContexte> = {}
-): IndicateurContexte => ({
+export const indicateurContext = (
+  overrides: Partial<IndicateurContext> = {}
+): IndicateurContext => ({
   year: 2024,
   type: "REALISE",
   isMissing: null,
@@ -87,18 +87,18 @@ export const indicateurContexte = (
   ...overrides,
 });
 
-export const cpomContexte = (
-  overrides: Partial<CpomContexte> = {}
-): CpomContexte => ({
+export const cpomContext = (
+  overrides: Partial<CpomContext> = {}
+): CpomContext => ({
   id: 1,
   structuresCount: 3,
   hasConventionDocument: true,
   ...overrides,
 });
 
-export const activiteContexte = (
-  overrides: Partial<ActiviteContexte> = {}
-): ActiviteContexte => ({
+export const activiteContext = (
+  overrides: Partial<ActiviteContext> = {}
+): ActiviteContext => ({
   dnaCode: "C7500001",
   placesAutorisees: 100,
   placesIndisponibles: 0,

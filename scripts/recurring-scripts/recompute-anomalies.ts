@@ -3,7 +3,7 @@
 
 import "dotenv/config";
 
-import { recalculerToutesLesAnomalies } from "@/app/api/anomalies/anomalie.service";
+import { recomputeAllAnomalies } from "@/app/api/anomalies/anomalie.service";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
@@ -12,7 +12,7 @@ const run = async () => {
   try {
     console.log("🔎 Recalcul des anomalies");
 
-    const count = await recalculerToutesLesAnomalies();
+    const count = await recomputeAllAnomalies();
 
     console.log(`Anomalies recalculées pour ${count} structures`);
   } catch (error) {

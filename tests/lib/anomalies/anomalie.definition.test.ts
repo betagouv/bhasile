@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  AnomalieCategorie as PrismaAnomalieCategorie,
+  AnomalieCategory as PrismaAnomalieCategory,
   AnomalieCode as PrismaAnomalieCode,
 } from "@/generated/prisma/enums";
 import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
-import { AnomalieCategorie, AnomalieCode } from "@/types/anomalie.type";
+import { AnomalieCategory, AnomalieCode } from "@/types/anomalie.type";
 
 describe("registre des anomalies", () => {
   it("expose exactement les mêmes codes que l'enum Prisma", () => {
@@ -15,8 +15,8 @@ describe("registre des anomalies", () => {
   });
 
   it("expose exactement les mêmes catégories que l'enum Prisma", () => {
-    expect([...AnomalieCategorie].sort()).toEqual(
-      Object.values(PrismaAnomalieCategorie).sort()
+    expect([...AnomalieCategory].sort()).toEqual(
+      Object.values(PrismaAnomalieCategory).sort()
     );
   });
 

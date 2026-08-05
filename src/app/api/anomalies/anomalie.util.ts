@@ -2,21 +2,21 @@ import { z } from "zod";
 
 import type { StructureAnomalieDb } from "@/app/api/anomalies/anomalie.db.type";
 import type {
-  AnomalieContexte,
-  StructureContexte,
-} from "@/lib/anomalies/anomalie.contexte";
+  AnomalieContext,
+  StructureContext,
+} from "@/lib/anomalies/anomalie.context";
 import { StructureType } from "@/types/structure.type";
 
 const CODE_REGION_IDF = "FR-IDF";
 
-export const buildAnomalieContexte = (
+export const buildAnomalieContext = (
   dbStructure: StructureAnomalieDb
-): AnomalieContexte => {
+): AnomalieContext => {
   const version = dbStructure.structureVersions.at(0);
   const dnas = (version?.dnaStructures ?? []).map(({ dna }) => dna);
 
   return {
-    structure: buildStructureContexte(dbStructure),
+    structure: buildStructureContext(dbStructure),
     typologies: dbStructure.structureTypologies.map((typologie) => ({
       year: typologie.year,
       placesAutorisees: typologie.placesAutorisees,
@@ -78,7 +78,7 @@ export const buildAnomalieContexte = (
 // Absent => la règle COUT_JOURNALIER_GT_TARIF_CIBLE ne déclenche pas.
 export const tarifJournalierCible = (
   type: StructureType | null,
-  estIdf: boolean
+  isIdf: boolean
 ): number | null => {
   if (type === null) {
     return null;
@@ -86,21 +86,21 @@ export const tarifJournalierCible = (
 
   const tarif = TARIFS_JOURNALIERS_CIBLES[type];
 
-  return tarif === undefined ? null : estIdf ? tarif.idf : tarif.horsIdf;
+  return tarif === undefined ? null : isIdf ? tarif.idf : tarif.horsIdf;
 };
 
-const buildStructureContexte = (
+const buildStructureContext = (
   dbStructure: StructureAnomalieDb
-): StructureContexte => {
+): StructureContext => {
   const version = dbStructure.structureVersions.at(0);
   const type = dbStructure.type as StructureType | null;
-  const estIdf =
+  const isIdf =
     dbStructure.departement?.regionAdministrative?.code === CODE_REGION_IDF;
 
   return {
     type,
     departementAdministratif: dbStructure.departementAdministratif,
-    tarifJournalierCible: tarifJournalierCible(type, estIdf),
+    tarifJournalierCible: tarifJournalierCible(type, isIdf),
     creationDate: dbStructure.creationDate,
     date303: dbStructure.date303,
     placesAutorisees: version?.placesAutorisees ?? null,
@@ -123,13 +123,13 @@ type TarifsJournaliersCibles = Partial<
 >;
 
 const parseTarifs = (): TarifsJournaliersCibles => {
-  const brut = process.env.TARIF_JOURNALIER_CIBLE;
-  if (brut === undefined || brut === "") {
+  const raw = process.env.TARIF_JOURNALIER_CIBLE;
+  if (raw === undefined || raw === "") {
     return {};
   }
 
   try {
-    return tarifsSchema.parse(JSON.parse(brut));
+    return tarifsSchema.parse(JSON.parse(raw));
   } catch {
     console.error("TARIF_JOURNALIER_CIBLE illisible, tarifs ignorés");
     return {};

@@ -1,14 +1,14 @@
-import { ANNEE_COURANTE_TEST } from "tests/test-utils/factories/anomalie-contexte.factory";
+import { TEST_CURRENT_YEAR } from "tests/test-utils/factories/anomalie-context.factory";
 
 import { computeAnomalies } from "@/lib/anomalies/anomalie.compute";
-import type { AnomalieContexte } from "@/lib/anomalies/anomalie.contexte";
+import type { AnomalieContext } from "@/lib/anomalies/anomalie.context";
 import type { AnomalieCode } from "@/types/anomalie.type";
 
-export const detectionsDe = (
+export const detectionsOf = (
   code: AnomalieCode,
-  contexte: AnomalieContexte,
-  anneeCourante: number = ANNEE_COURANTE_TEST
+  context: AnomalieContext,
+  currentYear: number = TEST_CURRENT_YEAR
 ): { year: number; targetId: number }[] =>
-  computeAnomalies(contexte, { anneeCourante })
-    .detectees.filter((detectee) => detectee.code === code)
+  computeAnomalies(context, { currentYear })
+    .detected.filter((detectee) => detectee.code === code)
     .map(({ year, targetId }) => ({ year, targetId }));

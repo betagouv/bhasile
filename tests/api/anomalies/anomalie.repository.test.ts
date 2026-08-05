@@ -4,11 +4,11 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
 import {
   findAnomaliesByStructureId,
-  reconcilierAnomalies,
+  reconcileAnomalies,
 } from "@/app/api/anomalies/anomalie.repository";
 import prisma from "@/lib/prisma";
 
-describe("anomalie.repository reconcilierAnomalies db integration", () => {
+describe("anomalie.repository reconcileAnomalies db integration", () => {
   const createdStructureIds: number[] = [];
   let structureId: number;
 
@@ -41,7 +41,7 @@ describe("anomalie.repository reconcilierAnomalies db integration", () => {
   });
 
   it("crée les anomalies détectées", async () => {
-    await reconcilierAnomalies(
+    await reconcileAnomalies(
       structureId,
       [detectee("RESULTAT_NET_EQ_0", 2024)],
       ["RESULTAT_NET_EQ_0"]
@@ -57,7 +57,7 @@ describe("anomalie.repository reconcilierAnomalies db integration", () => {
   });
 
   it("conserve le commentaire et la justification d'une anomalie toujours détectée", async () => {
-    await reconcilierAnomalies(
+    await reconcileAnomalies(
       structureId,
       [detectee("RESULTAT_NET_EQ_0", 2024)],
       ["RESULTAT_NET_EQ_0"]
@@ -67,7 +67,7 @@ describe("anomalie.repository reconcilierAnomalies db integration", () => {
       data: { isJustified: true, commentaire: "dérogation" },
     });
 
-    await reconcilierAnomalies(
+    await reconcileAnomalies(
       structureId,
       [detectee("RESULTAT_NET_EQ_0", 2024)],
       ["RESULTAT_NET_EQ_0"]
@@ -83,25 +83,25 @@ describe("anomalie.repository reconcilierAnomalies db integration", () => {
   });
 
   it("supprime une anomalie évaluée qui n'est plus détectée", async () => {
-    await reconcilierAnomalies(
+    await reconcileAnomalies(
       structureId,
       [detectee("RESULTAT_NET_EQ_0", 2024)],
       ["RESULTAT_NET_EQ_0"]
     );
 
-    await reconcilierAnomalies(structureId, [], ["RESULTAT_NET_EQ_0"]);
+    await reconcileAnomalies(structureId, [], ["RESULTAT_NET_EQ_0"]);
 
     expect(await findAnomaliesByStructureId(structureId)).toHaveLength(0);
   });
 
   it("préserve une anomalie dont la règle n'a pas été évaluée", async () => {
-    await reconcilierAnomalies(
+    await reconcileAnomalies(
       structureId,
       [detectee("MULTI_DNA")],
       ["MULTI_DNA"]
     );
 
-    await reconcilierAnomalies(structureId, [], ["RESULTAT_NET_EQ_0"]);
+    await reconcileAnomalies(structureId, [], ["RESULTAT_NET_EQ_0"]);
 
     const anomalies = await findAnomaliesByStructureId(structureId);
 
@@ -110,7 +110,7 @@ describe("anomalie.repository reconcilierAnomalies db integration", () => {
   });
 
   it("distingue deux exercices de la même règle", async () => {
-    await reconcilierAnomalies(
+    await reconcileAnomalies(
       structureId,
       [
         detectee("RESULTAT_NET_EQ_0", 2023),
@@ -119,7 +119,7 @@ describe("anomalie.repository reconcilierAnomalies db integration", () => {
       ["RESULTAT_NET_EQ_0"]
     );
 
-    await reconcilierAnomalies(
+    await reconcileAnomalies(
       structureId,
       [detectee("RESULTAT_NET_EQ_0", 2024)],
       ["RESULTAT_NET_EQ_0"]

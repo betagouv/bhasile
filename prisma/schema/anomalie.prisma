@@ -20,10 +20,10 @@ model Anomalie {
   @@schema("public")
 }
 
-enum AnomalieCategorie {
-  CALENDRIER
+enum AnomalieCategory {
+  CALENDAR
   PLACES
-  CARACTERISTIQUES
+  CHARACTERISTICS
   FINANCE
   DOCUMENTS
   ACTIVITE

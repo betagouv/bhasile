@@ -2,11 +2,11 @@ import {
   type StructureAnomalieDb,
   structureAnomalieInclude,
 } from "@/app/api/anomalies/anomalie.db.type";
-import type { AnomalieDetectee } from "@/lib/anomalies/anomalie.regle";
+import type { DetectedAnomalie } from "@/lib/anomalies/anomalie.rule";
 import prisma from "@/lib/prisma";
 import type { AnomalieCode } from "@/types/anomalie.type";
 
-export const findStructurePourAnomalies = (
+export const findStructureForAnomalies = (
   structureId: number,
   now: Date
 ): Promise<StructureAnomalieDb | null> =>
@@ -32,21 +32,21 @@ export const findAnomaliesByStructureId = (structureId: number) =>
 
 // La suppression est restreinte aux codes réellement évalués : une règle ignorée faute de
 // données ne doit jamais faire disparaître ses anomalies ni les justifications associées.
-export const reconcilierAnomalies = (
+export const reconcileAnomalies = (
   structureId: number,
-  detectees: AnomalieDetectee[],
-  codesEvalues: AnomalieCode[]
+  detected: DetectedAnomalie[],
+  evaluatedCodes: AnomalieCode[]
 ): Promise<unknown> =>
   prisma.$transaction([
     prisma.anomalie.createMany({
-      data: detectees.map((detectee) => ({ structureId, ...detectee })),
+      data: detected.map((detectee) => ({ structureId, ...detectee })),
       skipDuplicates: true,
     }),
     prisma.anomalie.deleteMany({
       where: {
         structureId,
-        code: { in: codesEvalues },
-        NOT: detectees.map(({ code, year, targetId }) => ({
+        code: { in: evaluatedCodes },
+        NOT: detected.map(({ code, year, targetId }) => ({
           code,
           year,
           targetId,

@@ -1,10 +1,10 @@
 # Anomalies
 
-Détection des incohérences de données d'une structure. Remplace les vues `reporting.structures_*_quality`.
+Détection des incohérences de données d'une structure pour restitution à l'utilisateur. L'utilisateur peut décider de les corriger en base ou d'indiquer qu'elles sont "normales" et donc de les ignorer.
 
 ## Principe
 
-Une seule implémentation des règles, en TypeScript, dans `src/lib/anomalies/`. Elle est **pure et isomorphe** : pas d'accès base, pas d'horloge, pas de modèle Prisma en entrée. Trois consommateurs :
+Une seule implémentation des règles, en TypeScript, dans `src/lib/anomalies/` avec trois consommateurs :
 
 | Consommateur               | Appel                                    | Fraîcheur                   |
 | -------------------------- | ---------------------------------------- | --------------------------- |
@@ -12,85 +12,80 @@ Une seule implémentation des règles, en TypeScript, dans `src/lib/anomalies/`.
 | Formulaire                 | calcul sur les valeurs `react-hook-form` | temps réel                  |
 | Tableau de bord / Metabase | lecture de la table `Anomalie`           | recalcul complet périodique |
 
-La table sert d'index pour les requêtes transverses et porte les annotations humaines. Elle n'est jamais la source de vérité des règles.
+La table sert d'index et porte les annotations utilisateur. Elle n'est jamais la source de vérité des règles.
 
 ## Modèle
 
-Clé naturelle : `[structureId, code, year, targetId]`.
+Clé primaire : `[structureId, code, year, targetId]`.
 
-| Colonne                         | Sémantique                                                                                                                                            |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `code`                          | Identifie la règle. Enum Prisma, dupliqué en TS dans `src/types/anomalie.type.ts` (test de garde : `tests/lib/anomalies/anomalie.definition.test.ts`) |
-| `year`                          | **Exercice** concerné. `0` = anomalie non rattachée à un exercice. Jamais utilisé pour discriminer autre chose                                        |
-| `targetId`                      | Ligne fautive. `0` = anomalie portée par la structure. La table pointée est donnée par `cible` dans le registre, jamais stockée en base               |
-| `isJustified`                   | `null` jamais examinée, `true` justifiée, `false` rouverte                                                                                            |
-| `justifiedById` / `justifiedAt` | Traçabilité, nécessaire à la réouverture                                                                                                              |
+| Colonne                         | Sémantique                                                                                                                                   |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`                          | Identifie la règle. Enum Prisma, dupliqué en TS dans `src/types/anomalie.type.ts` (test : `tests/lib/anomalies/anomalie.definition.test.ts`) |
+| `year`                          | **Exercice** concerné. `0` = anomalie non rattachée à un exercice mais directement à la structure.                                           |
+| `targetId`                      | Ligne fautive. `0` = anomalie portée par la structure. La table pointée est donnée par `target` dans le registre, jamais stockée en base     |
+| `isJustified`                   | `null` jamais examinée, `true` justifiée, `false` rouverte                                                                                   |
+| `justifiedById` / `justifiedAt` | Traçabilité, nécessaire à la réouverture                                                                                                     |
 
-Une anomalie qui disparaît est supprimée : le commentaire est perdu, c'est assumé. Une justification n'est pas invalidée automatiquement si la donnée change sans faire disparaître l'anomalie — `justifiedAt` est affiché pour que l'agent le repère.
+Une anomalie qui disparaît est supprimée et son commentaire est perdu.
 
-Il n'existe **aucune table de définitions** : les libellés et catégories vivent uniquement en TS. Les vues de reporting n'exposent donc que le `code`, à charge de Metabase d'en faire la lecture.
+TODO later : il n'existe **aucune table de définition** : les libellés et catégories vivent uniquement en TS. Les vues de reporting n'exposent donc que le `code`, à charge de Metabase d'en faire la lecture.
 
-## Vues de reporting
+## Vues de reporting (pour Metabase)
 
-Les six vues thématiques `004a`–`004f` sont supprimées : elles portaient une seconde implémentation des règles.
+Les anciennes vues thématiques `004a`–`004f` sont supprimées.
 
 | Vue                                   | Rôle                                                                                |
 | ------------------------------------- | ----------------------------------------------------------------------------------- |
 | `reporting.structures_anomalies`      | Nouvelle surface, une ligne par anomalie, avec `year` et `target_id`                |
 | `reporting.structures_global_quality` | Compatibilité : pivot sur `Anomalie`, colonnes `has_issue_*` historiques inchangées |
 
-La seconde est conservée telle quelle parce que `fill-monthly-reporting.ts` alimente `monthly_structures_global_quality_count`, table d'historique dont les colonnes portent ces noms. Elle ré-agrège les anomalies au niveau structure — ce que faisaient les `BOOL_OR` — donc les comptages mensuels restent comparables à l'historique déjà stocké.
+La seconde est conservée telle quelle parce que `fill-monthly-reporting.ts` alimente `monthly_structures_global_quality_count`, table d'historique dont les colonnes portent ces noms. Elle ré-agrège les anomalies au niveau structure plutôt que par année (ce que faisaient les `BOOL_OR`) donc les comptages mensuels restent comparables à l'historique déjà stocké.
 
-La correspondance colonne ↔ codes vit dans `src/lib/anomalies/anomalie.reporting.ts`, avec un test de garde qui échoue si un code est ajouté sans être reporté dans la vue.
+La correspondance colonne x codes vit dans `src/lib/anomalies/anomalie.reporting.ts`, avec un test qui échoue si un code est ajouté sans être reporté dans la vue.
 
-⚠️ La vue est vide tant que `recompute-anomalies` n'a pas tourné. Après un déploiement, le lancer **avant** le reporting mensuel du 1er, sinon des zéros sont écrits dans l'historique.
+TODO : ⚠️ La vue est vide tant que `recompute-anomalies` n'a pas tourné. Après un déploiement, le lancer **avant** le reporting mensuel du 1er, sinon des zéros sont écrits dans l'historique.
 
-## Registre
-
-`src/lib/anomalies/anomalie.definition.ts` — un `Record<AnomalieCode, AnomalieDefinition>` exhaustif : `label`, `categorie`, `cible`, `champsCibles` (surlignage front), `isDisplayed`.
+## Exhaustivité
 
 Les 34 règles sont **toutes calculées et persistées**. `isDisplayed` ne gouverne que l'affichage front : exposer une règle supplémentaire aux agents est un changement de booléen.
 
-Une anomalie est rattachée à un exercice **dès que la donnée sous-jacente l'est**. Les agrégats `BOOL_OR` / `MIN` / `MAX` des vues `004*` ont donc tous été désagrégés par année. Seules les deux règles activité restent globales, le contexte ne contenant que le dernier millésime par code DNA.
-
 ## Moteur
 
-`computeAnomalies(contexte, { anneeCourante })` → `{ detectees, codesEvalues }`.
+`computeAnomalies(contexte, { currentYear })` -> `{ detected, evaluatedCodes }`.
 
-Toutes les tranches de `AnomalieContexte` sont optionnelles. Une règle déclare celles dont elle a besoin dans `requiert` et n'est évaluée que si elles sont **toutes** présentes — ce qui permet au formulaire de n'en fournir qu'une partie. Dans `evalue`, elles sont typées non-optionnelles.
+Toutes les tranches de `AnomalieContext` sont optionnelles. Une règle déclare celles dont elle a besoin dans `requires` et n'est évaluée que si elles sont **toutes** présentes, ce qui permet au formulaire de n'en fournir qu'une partie. Dans `evaluates`, elles sont typées non-optionnelles.
 
 Le formulaire construit son contexte en écrasant la seule tranche en cours d'édition :
 
 ```ts
 computeAnomalies(
-  { ...contexteServeur, typologies: watch("typologies") },
-  { anneeCourante }
+  { ...serverContext, typologies: watch("typologies") },
+  { currentYear }
 );
 ```
 
 ## Réconciliation
 
-⚠️ La suppression doit être **restreinte à `codesEvalues`**. Une règle non évaluée faute de données est indiscernable d'une règle évaluée sans anomalie : un `deleteMany` sur toute la structure détruirait des anomalies légitimes et les justifications associées.
+⚠️ La suppression est **restreinte à `evaluatedCodes`**.
 
-`reconcilierAnomalies` ([anomalie.repository.ts](../src/app/api/anomalies/anomalie.repository.ts)), en une transaction :
+`reconcileAnomalies` ([anomalie.repository.ts](../src/app/api/anomalies/anomalie.repository.ts)), en une transaction :
 
-1. `createMany` + `skipDuplicates` des détections — les lignes existantes ne sont pas touchées, `commentaire` et `isJustified` survivent
-2. `deleteMany` des anomalies dont le `code` est dans `codesEvalues` et qui ne sont pas redétectées
-
-Couvert par `tests/api/anomalies/anomalie.repository.test.ts` (`yarn test:db`).
+1. `createMany` + `skipDuplicates` des détections : les lignes existantes ne sont pas touchées, `commentaire` et `isJustified` survivent
+2. `deleteMany` des anomalies dont le `code` est dans `evaluatedCodes` et qui ne sont pas redétectées
 
 ## Entrées
 
-| Quoi                      | Où                                                                                          |
-| ------------------------- | ------------------------------------------------------------------------------------------- |
-| Recalcul d'une structure  | `recalculerAnomalies(structureId)`                                                          |
-| Recalcul complet          | `yarn script recompute-anomalies`                                                           |
-| Horloge                   | `getNow()` — `anneeCourante` en découle, les règles ne lisent jamais l'heure                |
-| Tarifs journaliers cibles | `TARIF_JOURNALIER_CIBLE` (JSON). Absent ⇒ `COUT_JOURNALIER_GT_TARIF_CIBLE` ne déclenche pas |
+| Quoi                      | Où                                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------- |
+| Recalcul d'une structure  | `recomputeAnomalies(structureId)`                                                            |
+| Recalcul complet          | `yarn script recompute-anomalies`                                                            |
+| Date                      | `getNow()` -> `currentYear` en découle, les règles ne lisent jamais l'heure                  |
+| Tarifs journaliers cibles | `TARIF_JOURNALIER_CIBLE` (JSON). Absent -> `COUT_JOURNALIER_GT_TARIF_CIBLE` ne déclenche pas |
 
-## Ajouter une règle
+## Pour ajouter une règle
 
 1. Ajouter le code dans l'enum Prisma `AnomalieCode` **et** dans `src/types/anomalie.type.ts` (une migration)
 2. Ajouter l'entrée dans `ANOMALIE_DEFINITIONS`
-3. Implémenter la règle dans `src/lib/anomalies/regles/<categorie>.regle.ts` avec `defineRegle`
-4. Tests unitaires : la règle est pure, aucune base nécessaire
+3. Implémenter la règle dans `src/lib/anomalies/rules/<category>.rule.ts` avec `defineRule`
+4. Ajouter la règle aux vues reporting si besoin
+5. Implémenter les tests unitaires

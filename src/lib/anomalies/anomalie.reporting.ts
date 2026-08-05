@@ -3,7 +3,7 @@ import type { AnomalieCode } from "@/types/anomalie.type";
 // Correspondance entre les colonnes historiques de reporting.structures_global_quality et
 // les codes du registre. La vue 004z est écrite à partir de cette table ; le test de garde
 // interdit qu'un code soit ajouté sans être reporté dans la vue.
-export const COLONNES_REPORTING_QUALITE: Record<string, AnomalieCode[]> = {
+export const REPORTING_QUALITY_COLUMNS: Record<string, AnomalieCode[]> = {
   has_issue_authorisation_period_not_15y: ["AUTORISATION_DUREE_NOT_15Y"],
   has_issue_authorized_convention_not_5y: ["CONVENTION_AUTORISEE_DUREE_NOT_5Y"],
   has_issue_authorized_convention_outside_authorisation_period: [
