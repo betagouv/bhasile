@@ -9,11 +9,9 @@ import {
 } from "@/app/components/common/TimePeriodSelector";
 import { formatDate } from "@/app/utils/date.util";
 import { formatPercentage } from "@/app/utils/number.util";
+import { filterDisplayedPeriods } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import {
-  RmuPeriodStat,
-  StatistiqueApiRead,
-} from "@/schemas/api/statistique.schema";
+import { RmuPeriodStat } from "@/schemas/api/statistique.schema";
 
 const rmuLines: RMULine[] = [
   {
@@ -35,7 +33,9 @@ export const RMUStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
-  const RMUPeriods = statistiques?.rmu?.[timePeriod] ?? [];
+  const RMUPeriods = filterDisplayedPeriods(
+    statistiques?.rmu?.[timePeriod] ?? []
+  );
 
   const renderPeriodHeader = (period: RmuPeriodStat) => {
     const periodDate = new Date(period.date);
@@ -52,12 +52,12 @@ export const RMUStatsTable = (): ReactElement => {
     return periodDate.getFullYear();
   };
 
-  const getHeadings = (statistiques: StatistiqueApiRead) => {
+  const getHeadings = (periods: RmuPeriodStat[]) => {
     return [
       <th scope="col" key="heading-label">
         {" "}
       </th>,
-      ...(statistiques?.rmu?.[timePeriod] ?? []).map((period, index) => (
+      ...periods.map((period, index) => (
         <th
           scope="col"
           key={`${period.date}-${index}`}
@@ -97,7 +97,7 @@ export const RMUStatsTable = (): ReactElement => {
         />
       </div>
       <Table
-        headings={getHeadings(statistiques)}
+        headings={getHeadings(RMUPeriods)}
         ariaLabelledBy="rmu-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders

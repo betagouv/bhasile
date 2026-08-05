@@ -3,22 +3,23 @@ import { Fragment, ReactElement } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { formatNumber } from "@/app/utils/number.util";
+import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
+import { PlacesByYearStat } from "@/schemas/api/statistique.schema";
 
 export const TypesPlacesStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
+  const placeYears = filterDisplayedYears(statistiques.places.byYear);
+
   const topLevelStats: StructureStat[] = [
     {
       label: "Places autorisées",
-      value: statistiques.places.byYear.map((yearItem) =>
-        formatNumber(yearItem.totalPlaces)
-      ),
+      value: placeYears.map((yearItem) => formatNumber(yearItem.totalPlaces)),
     },
     {
       label: "Taux d'équipement",
-      value: statistiques.places.byYear.map((yearItem) =>
+      value: placeYears.map((yearItem) =>
         formatNumber(Number(yearItem.tauxEquipement) * 1000)
       ),
     },
@@ -30,17 +31,17 @@ export const TypesPlacesStatsTable = (): ReactElement => {
       rows: [
         {
           label: "Places PMR",
-          value: statistiques.places.byYear.map((yearItem) => yearItem.pmr),
+          value: placeYears.map((yearItem) => yearItem.pmr),
         },
         {
           label: "Places LGBT",
           subLabel: "(labellisées)",
-          value: statistiques.places.byYear.map((yearItem) => yearItem.lgbt),
+          value: placeYears.map((yearItem) => yearItem.lgbt),
         },
         {
           label: "Places FVV/TEH",
           subLabel: "(spécialisées)",
-          value: statistiques.places.byYear.map((yearItem) => yearItem.fvvTeh),
+          value: placeYears.map((yearItem) => yearItem.fvvTeh),
         },
       ],
     },
@@ -55,7 +56,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
         Tableau de données
       </h4>
       <Table
-        headings={getHeadings(statistiques)}
+        headings={getHeadings(placeYears)}
         ariaLabelledBy="type-places-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
@@ -85,7 +86,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
             <tr>
               <td
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
-                colSpan={statistiques.places.byYear.length + 1}
+                colSpan={placeYears.length + 1}
               >
                 <span className="sticky left-4 inline-block h-8 leading-8">
                   {section.title}
@@ -118,9 +119,9 @@ export const TypesPlacesStatsTable = (): ReactElement => {
   );
 };
 
-const getHeadings = (statistiques: StatistiqueApiRead) => {
+const getHeadings = (placeYears: PlacesByYearStat[]) => {
   const dates =
-    statistiques.places.byYear.map((yearItem) => {
+    placeYears.map((yearItem) => {
       return (
         <th scope="col" key={yearItem.year}>
           {yearItem.year}

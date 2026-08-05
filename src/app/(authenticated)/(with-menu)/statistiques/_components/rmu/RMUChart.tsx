@@ -7,31 +7,18 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { formatDate, getYearRange } from "@/app/utils/date.util";
+import { formatDate } from "@/app/utils/date.util";
+import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-
-const MAX_DISPLAYED_TIME_PERIODS = 10;
 
 export const RMUChart = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const rmuPeriodData = statistiques.rmu?.[timePeriod] || [];
-
-    const { years } = getYearRange();
-    const filteredRmuPeriodData = rmuPeriodData.filter((periodStat) => {
-      const itemYear = new Date(periodStat.date).getFullYear();
-      return years.includes(itemYear);
-    });
-
-    const sortedRmuPeriodData = [...filteredRmuPeriodData]
-      .sort(
-        (firstRmuPeriod, secondRmuPeriod) =>
-          new Date(firstRmuPeriod.date).getTime() -
-          new Date(secondRmuPeriod.date).getTime()
-      )
-      .slice(-MAX_DISPLAYED_TIME_PERIODS);
+    const sortedRmuPeriodData = getLastDisplayedPeriods(
+      statistiques.rmu?.[timePeriod] || []
+    );
 
     const labels = sortedRmuPeriodData.map((periodStat) => {
       const date = new Date(periodStat.date);

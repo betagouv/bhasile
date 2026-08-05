@@ -5,8 +5,9 @@ import { Fragment, ReactElement, useState } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
+import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
+import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
 
 import { FinanceTypeSelector } from "./FinanceTypeSelector";
 
@@ -23,7 +24,9 @@ const formatAmountCell = (value?: number | null): ReactElement | string =>
 export const FinancesStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
-  const financeYears = statistiques?.finance?.byYear ?? [];
+  const financeYears = filterDisplayedYears(
+    statistiques?.finance?.byYear ?? []
+  );
 
   const [visualization, setVisualization] = useState<
     "total" | "autorisees" | "subventionnees"
@@ -138,7 +141,7 @@ export const FinancesStatsTable = (): ReactElement => {
         />
       </div>
       <Table
-        headings={getHeadings(statistiques)}
+        headings={getHeadings(financeYears)}
         ariaLabelledBy="finances-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
@@ -199,9 +202,7 @@ export const FinancesStatsTable = (): ReactElement => {
   );
 };
 
-const getHeadings = (statistiques: StatistiqueApiRead) => {
-  const financeYears = statistiques?.finance?.byYear ?? [];
-
+const getHeadings = (financeYears: FinanceByYearStat[]) => {
   const dates = financeYears.map((yearItem) => (
     <th scope="col" key={yearItem.year} className="text-center font-bold">
       {yearItem.year}

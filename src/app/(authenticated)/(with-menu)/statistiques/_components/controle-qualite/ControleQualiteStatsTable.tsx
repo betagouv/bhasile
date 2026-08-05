@@ -9,11 +9,9 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { formatPercentage } from "@/app/utils/number.util";
+import { filterDisplayedPeriods } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import {
-  ControleQualitePeriodStat,
-  StatistiqueApiRead,
-} from "@/schemas/api/statistique.schema";
+import { ControleQualitePeriodStat } from "@/schemas/api/statistique.schema";
 
 const sectionsConfig: ControleQualiteSectionConfig[] = [
   {
@@ -84,8 +82,9 @@ export const ControleQualiteStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
-  const controleQualitePeriods =
-    statistiques?.controleQualite?.[timePeriod] ?? [];
+  const controleQualitePeriods = filterDisplayedPeriods(
+    statistiques?.controleQualite?.[timePeriod] ?? []
+  );
 
   const renderPeriodHeader = (period: ControleQualitePeriodStat) => {
     const periodDate = new Date(period.date);
@@ -102,22 +101,20 @@ export const ControleQualiteStatsTable = (): ReactElement => {
     return periodDate.getFullYear();
   };
 
-  const getHeadings = (statistiques: StatistiqueApiRead) => {
+  const getHeadings = (periods: ControleQualitePeriodStat[]) => {
     return [
       <th scope="col" key="heading-label">
         {" "}
       </th>,
-      ...(statistiques?.controleQualite?.[timePeriod] ?? []).map(
-        (period, index) => (
-          <th
-            scope="col"
-            key={`${period.date}-${index}`}
-            className="text-center font-bold"
-          >
-            {renderPeriodHeader(period)}
-          </th>
-        )
-      ),
+      ...periods.map((period, index) => (
+        <th
+          scope="col"
+          key={`${period.date}-${index}`}
+          className="text-center font-bold"
+        >
+          {renderPeriodHeader(period)}
+        </th>
+      )),
     ];
   };
 
@@ -158,7 +155,7 @@ export const ControleQualiteStatsTable = (): ReactElement => {
         />
       </div>
       <Table
-        headings={getHeadings(statistiques)}
+        headings={getHeadings(controleQualitePeriods)}
         ariaLabelledBy="controle-qualite-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
