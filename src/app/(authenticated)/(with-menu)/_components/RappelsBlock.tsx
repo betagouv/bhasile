@@ -5,7 +5,7 @@ import {
   parseRappelEchelle,
   resolveRappelGroupBy,
 } from "@/app/utils/rappel.util";
-import { getFirstParam } from "@/app/utils/searchParams.util";
+import { getFirstParam, SearchParams } from "@/app/utils/searchParams.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
@@ -68,8 +68,6 @@ export const RappelsBlock = async ({
     </Block>
   );
 };
-
-type SearchParams = { [key: string]: string | string[] | undefined };
 
 type Props = {
   filters: Filters;

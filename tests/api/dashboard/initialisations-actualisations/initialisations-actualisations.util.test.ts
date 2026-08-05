@@ -7,14 +7,12 @@ import {
   getInitialisationStatus,
   getMostUrgentActionUrl,
   isOpen,
-  paginateDashboardRows,
 } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.util";
 import {
   FINALISATION_FORM_SLUG,
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
-import { DashboardStructureRow } from "@/types/dashboard.type";
 import { StepStatus } from "@/types/form.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
@@ -306,40 +304,3 @@ describe("buildDashboardRows", () => {
   });
 });
 
-const makeRow = (id: number): DashboardStructureRow => ({
-  id,
-  codeBhasile: `BHA-${id}`,
-  type: null,
-  operateurName: null,
-  communeAdministrative: null,
-  departementAdministratif: null,
-  initialisationStatus: "A_INITIALISER",
-  actualisationStatus: "A_DEBUTER",
-  actionUrl: null,
-});
-
-describe("paginateDashboardRows", () => {
-  const rows = Array.from({ length: 13 }, (_, index) => makeRow(index + 1));
-
-  it("renvoie le total et la première page (12 lignes)", () => {
-    const result = paginateDashboardRows(rows, 0);
-
-    expect(result.total).toBe(13);
-    expect(result.rows).toHaveLength(12);
-  });
-
-  it("renvoie la page suivante", () => {
-    const result = paginateDashboardRows(rows, 1);
-
-    expect(result.total).toBe(13);
-    expect(result.rows).toHaveLength(1);
-    expect(result.rows[0].id).toBe(13);
-  });
-
-  it("clampe une page hors borne à la dernière page (jamais vide)", () => {
-    const result = paginateDashboardRows(rows, 99);
-
-    expect(result.rows).toHaveLength(1);
-    expect(result.rows[0].id).toBe(13);
-  });
-});

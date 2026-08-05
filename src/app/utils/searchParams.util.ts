@@ -1,3 +1,5 @@
+export type SearchParams = { [key: string]: string | string[] | undefined };
+
 export const getFirstParam = (
   value: string | string[] | undefined
 ): string | null => {

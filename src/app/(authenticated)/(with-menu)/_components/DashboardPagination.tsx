@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement, useTransition } from "react";
 
 import { SimplePagination } from "@/app/components/common/SimplePagination";
+import { getSafePage } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 
 export const DashboardPagination = ({
@@ -15,9 +16,8 @@ export const DashboardPagination = ({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const lastPage = Math.max(0, Math.ceil(total / MIDDLE_PAGE_SIZE) - 1);
   const rawPage = Number(searchParams.get(pageParam)) || 0;
-  const currentPage = Math.min(Math.max(0, rawPage), lastPage);
+  const currentPage = getSafePage(rawPage, total, MIDDLE_PAGE_SIZE);
 
   const setCurrentPage = (page: number): void => {
     startTransition(() => {

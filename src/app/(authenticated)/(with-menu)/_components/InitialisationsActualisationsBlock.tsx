@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 
 import { getInitialisationsActualisations } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.service";
 import { formatDate } from "@/app/utils/date.util";
+import { getFirstParam, SearchParams } from "@/app/utils/searchParams.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
@@ -15,8 +16,9 @@ import { InitialisationActualisationRow } from "./InitialisationActualisationRow
 export const InitialisationsActualisationsBlock = async ({
   filters,
   user,
-  page,
+  searchParams,
 }: Props): Promise<ReactElement> => {
+  const page = Number(getFirstParam(searchParams.actualisationsPage)) || 0;
   const data = await getInitialisationsActualisations(filters, user, page);
 
   const rows = data.rows;
@@ -71,5 +73,5 @@ export const InitialisationsActualisationsBlock = async ({
 type Props = {
   filters: Filters;
   user: SessionUser | undefined;
-  page: number;
+  searchParams: SearchParams;
 };

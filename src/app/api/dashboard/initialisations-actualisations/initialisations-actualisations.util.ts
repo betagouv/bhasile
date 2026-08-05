@@ -4,8 +4,7 @@ import {
   ActualisationStatusForm,
   findActualisationForm,
 } from "@/app/utils/actualisationForm.util";
-import { paginateRows, sortRows } from "@/app/utils/list.util";
-import { MIDDLE_PAGE_SIZE } from "@/constants";
+import { sortRows } from "@/app/utils/list.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
@@ -174,14 +173,3 @@ export const buildDashboardRows = (
   );
 };
 
-export const paginateDashboardRows = (
-  rows: DashboardStructureRow[],
-  page: number
-): { total: number; rows: DashboardStructureRow[] } => {
-  const total = rows.length;
-  const lastPage = Math.max(0, Math.ceil(total / MIDDLE_PAGE_SIZE) - 1);
-  return {
-    total,
-    rows: paginateRows(rows, Math.min(page, lastPage), MIDDLE_PAGE_SIZE),
-  };
-};
