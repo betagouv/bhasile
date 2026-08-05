@@ -73,7 +73,7 @@ export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
     });
 
     return [
-      <th scope="col" key="heading-label" className="min-w-[240px]">
+      <th scope="col" key="heading-label">
         {" "}
       </th>,
       ...dates,
@@ -118,7 +118,7 @@ export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
     >
       {activiteTypes.map((activiteType) => (
         <tr key={activiteType.label}>
-          <td className="text-left! py-3! min-w-[240px]">
+          <td className="text-left! py-3!">
             <strong>{activiteType.label}</strong>
             <br />
             {activiteType.subLabel}
@@ -126,7 +126,7 @@ export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
           {activiteType.activites?.map((activite, index) => (
             <td
               key={`${activiteType.label}-${index}`}
-              className="min-w-[132px] whitespace-nowrap"
+              className="whitespace-nowrap"
             >
               <span className="inline-flex items-center gap-6">
                 <span>

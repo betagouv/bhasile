@@ -234,7 +234,7 @@ const getHeadings = (statistiques: StatistiqueApiRead) => {
   ));
 
   return [
-    <th scope="col" key="heading-label" className="min-w-[240px]">
+    <th scope="col" key="heading-label">
       {" "}
     </th>,
     ...dates,

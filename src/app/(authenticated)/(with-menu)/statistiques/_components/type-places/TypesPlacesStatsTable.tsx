@@ -62,14 +62,14 @@ export const TypesPlacesStatsTable = (): ReactElement => {
       >
         {topLevelStats.map((structureStat) => (
           <tr key={structureStat.label}>
-            <td className="text-left! py-3! min-w-[240px]">
+            <td className="text-left! py-3!">
               <strong>{structureStat.label}</strong>
               <br />
             </td>
             {structureStat.value?.map((structureStatItem, index) => (
               <td
                 key={`${structureStat.label}-${index}`}
-                className="min-w-[132px] whitespace-nowrap"
+                className="whitespace-nowrap"
               >
                 <span className="inline-flex items-center gap-6">
                   <span>{structureStatItem?.toString()}</span>
@@ -92,7 +92,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
             </tr>
             {section.rows.map((structureStat) => (
               <tr key={structureStat.label}>
-                <td className="text-left! py-3! min-w-[240px]">
+                <td className="text-left! py-3!">
                   <strong>{structureStat.label}</strong>
                   <br />
                   <span className="text-xs">{structureStat.subLabel}</span>
@@ -100,7 +100,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
                 {structureStat.value?.map((structureStatItem, index) => (
                   <td
                     key={`${structureStat.label}-${index}`}
-                    className="min-w-[132px] whitespace-nowrap"
+                    className="whitespace-nowrap"
                   >
                     <span className="inline-flex items-center gap-6">
                       <NumberDisplay value={structureStatItem} />
@@ -127,7 +127,7 @@ const getHeadings = (statistiques: StatistiqueApiRead) => {
     }) ?? [];
 
   return [
-    <th scope="col" key="heading-label" className="min-w-[240px]">
+    <th scope="col" key="heading-label">
       {" "}
     </th>,
     ...dates,
