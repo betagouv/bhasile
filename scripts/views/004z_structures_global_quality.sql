@@ -1,15 +1,6 @@
 -- Objective: global data quality indicators per structure
--- One row per structure, one boolean column per legacy indicator
+-- One row per structure, one boolean column per indicator
 --
--- Notes:
--- - No business logic here: the rules live in TypeScript (src/lib/anomalies) and are
---   materialized in public."Anomalie" by the recompute-anomalies script.
--- - Column names are the historical ones, kept so that fill-monthly-reporting.ts, the
---   monthly_structures_global_quality_count table and Metabase keep working.
--- - Anomalies are stored per fiscal year: this view aggregates them back to the structure
---   level, which is what the previous BOOL_OR did, so monthly counts stay comparable.
--- - The code to column mapping is mirrored in src/lib/anomalies/anomalie.reporting.ts and
---   guarded by tests/lib/anomalies/anomalie.reporting.test.ts.
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_global_quality" AS
 WITH
   codes_by_structure AS (

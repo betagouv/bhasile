@@ -14,8 +14,7 @@ const onStructure = {
   targetId: ANOMALIE_TARGET_STRUCTURE,
 };
 
-// Les activités du contexte sont le dernier millésime connu par code DNA : pas de
-// désagrégation par exercice possible ici.
+// Les activités du contexte sont le dernier millésime connu par code DNA
 export const ACTIVITE_RULES = [
   defineRule({
     code: "ACTIVITE_PLACES_INDISPONIBLES_GT_3PCT",

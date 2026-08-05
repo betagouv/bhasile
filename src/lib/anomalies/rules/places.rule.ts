@@ -36,8 +36,8 @@ export const PLACES_RULES = [
       yearsOverLimit(typologies, currentYear, "pmr"),
   }),
 
-  // L'indicateur vient de la version active de la structure, les places du millésime :
-  // la comparaison se fait exercice par exercice.
+  // L'indicateur vient de la version active de la structure et les places du millésime : la comparaison se fait exercice par exercice.
+  // TODO : vérifier que cet indicateur est pertinent sans historique
   defineRule({
     code: "INCOHERENCE_LGBT_PLACES",
     requires: ["structure", "typologies"],

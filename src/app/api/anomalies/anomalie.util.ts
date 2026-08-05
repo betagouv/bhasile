@@ -73,9 +73,6 @@ export const buildAnomalieContext = (
   };
 };
 
-// Le tarif cible vivait dans reporting.tarif_journalier_cible : passé en variable
-// d'environnement pour que le calcul ne dépende pas du schéma de reporting.
-// Absent => la règle COUT_JOURNALIER_GT_TARIF_CIBLE ne déclenche pas.
 export const tarifJournalierCible = (
   type: StructureType | null,
   isIdf: boolean

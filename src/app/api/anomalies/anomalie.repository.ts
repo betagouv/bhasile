@@ -30,8 +30,7 @@ export const findAnomaliesByStructureId = (structureId: number) =>
     include: { justifiedBy: { select: { id: true, name: true, email: true } } },
   });
 
-// La suppression est restreinte aux codes réellement évalués : une règle ignorée faute de
-// données ne doit jamais faire disparaître ses anomalies ni les justifications associées.
+// La suppression est restreinte aux codes réellement évalués
 export const reconcileAnomalies = (
   structureId: number,
   detected: DetectedAnomalie[],

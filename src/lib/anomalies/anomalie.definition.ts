@@ -4,8 +4,7 @@ import type {
   AnomalieTarget,
 } from "@/types/anomalie.type";
 
-// Source de vérité du registre. `isDisplayed` gouverne l'affichage front ; les règles à
-// false sont calculées et persistées quand même, pour le reporting.
+// SSoT. `isDisplayed` pour affichage front
 export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
   AUTORISATION_DUREE_NOT_15Y: {
     label:

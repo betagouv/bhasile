@@ -2,8 +2,7 @@ import type { ActeAdministratifCategory } from "@/types/acte-administratif.type"
 import type { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import type { StructureType } from "@/types/structure.type";
 
-// Chaque tranche est optionnelle : une règle n'est évaluée que si toutes celles qu'elle
-// déclare dans `requires` sont présentes. Absent != vide.
+// Chaque tranche est optionnelle : une règle n'est évaluée que si toutes celles qu'elle déclare dans `requires` sont présentes. Absent != vide.
 export type AnomalieContext = {
   structure?: StructureContext;
   typologies?: TypologieContext[];

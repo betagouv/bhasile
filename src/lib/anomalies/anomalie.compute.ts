@@ -30,9 +30,7 @@ export const computeAnomalies = (
   return { detected, evaluatedCodes };
 };
 
-// `evaluatedCodes` est indispensable à la réconciliation : sans lui, une règle non évaluée
-// faute de données est indiscernable d'une règle évaluée sans anomalie, et la suppression
-// détruirait des anomalies légitimes ainsi que leurs justifications.
+// evaluatedCodes est indispensable pour ne cibler que les anomalies réellement évaluées
 export type AnomalieComputeResult = {
   detected: DetectedAnomalie[];
   evaluatedCodes: AnomalieCode[];

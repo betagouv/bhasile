@@ -25,8 +25,8 @@ export const recomputeAnomalies = async (
   await reconcileAnomalies(structureId, detected, evaluatedCodes);
 };
 
-// La fiche structure recalcule à la lecture : une péremption de quelques heures sur la
-// table n'affecte que le tableau de bord, jamais ce que l'agent a sous les yeux.
+// La fiche structure recalcule à la lecture
+// TODO : tester impact sur durée de chargement de la fiche structure
 export const recomputeAllAnomalies = async (): Promise<number> => {
   const structureIds = await findAllStructureIds();
 

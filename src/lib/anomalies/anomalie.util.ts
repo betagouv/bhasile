@@ -54,8 +54,7 @@ export const pastTypologies = (
 ): TypologieContext[] =>
   typologies.filter((typologie) => typologie.year <= currentYear);
 
-// Reprise de la fenêtre des vues 004c : de l'année d'ouverture (date 303 à défaut création)
-// à l'exercice précédent, l'exercice courant n'étant pas clos.
+// Fde l'année d'ouverture (date 303 à défaut création) à l'exercice précédent, l'exercice courant n'étant pas clos.
 const isInWindow = (
   year: number,
   structure: StructureContext,
@@ -111,7 +110,7 @@ export const getResultatNet = (budget: BudgetContext): number | null =>
     ? null
     : (budget.totalProduits ?? 0) - (budget.totalCharges ?? 0);
 
-// NULL si aucune ligne du détail n'est renseignée, à l'image du NULLIF de la vue 004c.
+// Null si aucune ligne du détail n'est renseignée
 export const sumAffectationsDetail = (budget: BudgetContext): number | null => {
   const sum =
     (budget.reserveInvestissement ?? 0) +
