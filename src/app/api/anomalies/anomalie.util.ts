@@ -55,7 +55,7 @@ export const buildAnomalieContext = (
       structuresCount: cpom._count.structures,
       hasConventionDocument: cpom.actesAdministratifs.some(
         (acte) =>
-          acte.category === "CONVENTION" &&
+          acte.category === "CONVENTION_CPOM" &&
           acte.parentId === null &&
           acte.isMissing !== true &&
           acte._count.fileUploads > 0
