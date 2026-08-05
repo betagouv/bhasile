@@ -252,66 +252,44 @@ const updateStructure = async (
 };
 
 // Only used in e2e tests
-export const createMinimalStructure = async (
-  dnaCodes: { code: string }[],
-  structure: {
-    codeBhasile: string;
-    type: StructureType;
-    operateurId: number;
-    departementAdministratif?: string;
-    nom: string;
-    adresseAdministrative: string;
-    codePostalAdministratif: string;
-    communeAdministrative: string;
-  }
-): Promise<Structure> => {
+export const createMinimalStructure = async (structure: {
+  codeBhasile: string;
+  type: StructureType;
+  operateurId: number;
+  departementAdministratif?: string;
+}): Promise<Structure> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
 
-  const upsertedStructure = await prisma.structure.upsert({
-    where: { codeBhasile: structure.codeBhasile },
-    update: {
-      ...structure,
-      dnaStructures: {
-        create: dnaCodes.map(({ code }) => ({
-          dna: {
-            connectOrCreate: {
-              where: { code },
-              create: { code },
-            },
-          },
-        })),
-      },
-    },
-    create: {
-      ...structure,
-      dnaStructures: {
-        create: dnaCodes.map(({ code }) => ({
-          dna: {
-            connectOrCreate: {
-              where: { code },
-              create: { code },
-            },
-          },
-        })),
-      },
-    },
-  });
+  // Les scalaires versionnés et les liens DNA sont portés par StructureVersion :
+  // voir createMinimalStructureVersion.
+  const structureData = {
+    codeBhasile: structure.codeBhasile,
+    type: structure.type,
+    operateurId: structure.operateurId,
+    departementAdministratif: structure.departementAdministratif,
+  };
 
-  return upsertedStructure;
+  return prisma.structure.upsert({
+    where: { codeBhasile: structure.codeBhasile },
+    update: structureData,
+    create: structureData,
+  });
 };
 
 // Only used in e2e tests
 export const createMinimalStructureVersion = async (
   structureId: number,
   version: {
-    departementAdministratif?: string;
+    operateurId: number;
+    departementAdministratif: string;
     communeAdministrative?: string;
     codePostalAdministratif?: string;
     adresseAdministrative?: string;
     nom?: string;
     effectiveDate?: Date;
+    dnaCodes?: { code: string }[];
   }
 ): Promise<void> => {
   if (process.env.NODE_ENV === "production") {
@@ -322,7 +300,7 @@ export const createMinimalStructureVersion = async (
     where: { structureId, structureVersionTransformationId: null },
   });
 
-  const createdVersion = await prisma.structureVersion.create({
+  await prisma.structureVersion.create({
     data: {
       structureId,
       effectiveDate: version.effectiveDate ?? new Date("2020-01-01"),
@@ -331,12 +309,27 @@ export const createMinimalStructureVersion = async (
       codePostalAdministratif: version.codePostalAdministratif,
       adresseAdministrative: version.adresseAdministrative,
       nom: version.nom,
+      dnaStructures: {
+        create: (version.dnaCodes ?? []).map(({ code }) => ({
+          dna: {
+            connectOrCreate: {
+              where: { code },
+              create: {
+                code,
+                type: StructureType.CADA,
+                nom: `DNA ${code}`,
+                nomOfii: `DNA ${code}`,
+                directionTerritoriale: "DT",
+                operateur: { connect: { id: version.operateurId } },
+                departement: {
+                  connect: { numero: version.departementAdministratif },
+                },
+              },
+            },
+          },
+        })),
+      },
     },
-  });
-
-  await prisma.dnaStructure.updateMany({
-    where: { structureId, structureVersionId: null },
-    data: { structureVersionId: createdVersion.id },
   });
 };
 

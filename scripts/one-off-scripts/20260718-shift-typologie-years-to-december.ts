@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 // One-off — PHASE 2/2 du décalage des années de typologies.
 // Décale year = yearOrigin - 1 (1er janvier N → 31 décembre N-1).
 //
@@ -31,7 +33,9 @@ async function main() {
     );
   }
 
-  console.log("🚀 Décalage des années StructureTypologie (1er janv → 31 déc)...");
+  console.log(
+    "🚀 Décalage des années StructureTypologie (1er janv → 31 déc)..."
+  );
 
   const [, shifted] = await prisma.$transaction([
     prisma.$executeRaw`UPDATE "StructureTypologie" SET "year" = "year" - ${COLLISION_SAFE_OFFSET} WHERE "yearOrigin" IS NOT NULL`,

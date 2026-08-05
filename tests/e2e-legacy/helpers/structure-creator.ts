@@ -24,19 +24,16 @@ export async function seedStructureForSelection(
 
   const type = testData.type ?? StructureType.CADA;
 
-  const { id } = await createMinimalStructure(testData.dnas ?? [], {
+  const { id } = await createMinimalStructure({
     codeBhasile: testData.codeBhasile,
     type,
     operateurId: testData.operateur?.id ?? 1,
     departementAdministratif: testData.departementAdministratif,
-    nom: testData.nom ?? "",
-    adresseAdministrative: testData.adresseAdministrative?.complete ?? "",
-    codePostalAdministratif: adminAddress.postalCode,
-    communeAdministrative: adminAddress.city,
   });
 
   await createMinimalStructureVersion(id, {
-    departementAdministratif: testData.departementAdministratif,
+    operateurId: testData.operateur?.id ?? 1,
+    departementAdministratif: testData.departementAdministratif ?? "01",
     communeAdministrative: adminAddress.city,
     codePostalAdministratif: adminAddress.postalCode,
     adresseAdministrative: testData.adresseAdministrative?.complete ?? "",
@@ -44,6 +41,7 @@ export async function seedStructureForSelection(
     effectiveDate: testData.creationDate
       ? new Date(testData.creationDate)
       : undefined,
+    dnaCodes: testData.dnas ?? [],
   });
 
   return id;
