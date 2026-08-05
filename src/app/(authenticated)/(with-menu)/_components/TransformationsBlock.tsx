@@ -1,8 +1,7 @@
 import { ReactElement } from "react";
 
 import { getDashboardTransformations } from "@/app/api/dashboard/transformations/transformations.service";
-import { getFirstParam, SearchParams } from "@/app/utils/searchParams.util";
-import { MIDDLE_PAGE_SIZE } from "@/constants";
+import { getPageParam, SearchParams } from "@/app/utils/searchParams.util";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
@@ -17,7 +16,7 @@ export const TransformationsBlock = async ({
   user,
   searchParams,
 }: Props): Promise<ReactElement> => {
-  const page = Number(getFirstParam(searchParams.transformationsPage)) || 0;
+  const page = getPageParam(searchParams, "transformationsPage");
   const { total, rows } = await getDashboardTransformations(
     filters,
     user,
@@ -44,11 +43,7 @@ export const TransformationsBlock = async ({
         </p>
       )}
 
-      {total > MIDDLE_PAGE_SIZE && (
-        <div className="flex justify-center mt-4">
-          <DashboardPagination total={total} pageParam="transformationsPage" />
-        </div>
-      )}
+      <DashboardPagination total={total} pageParam="transformationsPage" />
     </Block>
   );
 };

@@ -1,6 +1,7 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
-import { paginateRows, sortRows } from "@/app/utils/list.util";
+import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
+import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
@@ -59,11 +60,15 @@ export const getCpoms = async ({
     (cpom) => ({ value: cpom.id, kind: "number" }),
     direction ?? "asc"
   );
-  const pageCpoms = paginateRows(sorted, page ?? 0);
+  const { total, rows } = paginateWithTotal(
+    sorted,
+    page ?? 0,
+    DEFAULT_PAGE_SIZE
+  );
 
   return {
-    cpoms: pageCpoms.map(getFullCpom),
-    totalCpoms: filtered.length,
+    cpoms: rows.map(getFullCpom),
+    totalCpoms: total,
   };
 };
 

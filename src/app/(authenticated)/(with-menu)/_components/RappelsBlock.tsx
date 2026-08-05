@@ -5,8 +5,11 @@ import {
   parseRappelEchelle,
   resolveRappelGroupBy,
 } from "@/app/utils/rappel.util";
-import { getFirstParam, SearchParams } from "@/app/utils/searchParams.util";
-import { MIDDLE_PAGE_SIZE } from "@/constants";
+import {
+  getFirstParam,
+  getPageParam,
+  SearchParams,
+} from "@/app/utils/searchParams.util";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
@@ -29,7 +32,7 @@ export const RappelsBlock = async ({
     echelle,
     getFirstParam(searchParams.rappelsGroupe)
   );
-  const page = Number(getFirstParam(searchParams.rappelsPage)) || 0;
+  const page = getPageParam(searchParams, "rappelsPage");
 
   const { rappelCount, totalNodes, nodes } = await getDashboardRappels(
     filters,
@@ -60,11 +63,7 @@ export const RappelsBlock = async ({
         )}
       </div>
 
-      {totalNodes > MIDDLE_PAGE_SIZE && (
-        <div className="flex justify-center mt-4">
-          <DashboardPagination total={totalNodes} pageParam="rappelsPage" />
-        </div>
-      )}
+      <DashboardPagination total={totalNodes} pageParam="rappelsPage" />
     </Block>
   );
 };

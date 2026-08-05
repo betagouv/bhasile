@@ -1,12 +1,13 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
-import { paginateRows } from "@/app/utils/list.util";
+import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import {
   getMostRecentMillesime,
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
+import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Structure } from "@/generated/prisma/client";
 import {
   StructureAgentUpdateApiType,
@@ -178,7 +179,7 @@ export const getFullStructures = async (
 
   const pageRows = props.selection
     ? sorted
-    : paginateRows(sorted, props.page ?? 0);
+    : paginateWithTotal(sorted, props.page ?? 0, DEFAULT_PAGE_SIZE).rows;
 
   const dbStructures = await findStructuresByIds(
     pageRows.map((row) => row.id),

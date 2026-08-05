@@ -216,10 +216,16 @@ describe("buildDashboardRows", () => {
     const structure = makeStructure();
 
     expect(
-      buildDashboardRows([structure], { ...baseOptions, departementList: ["76"] })
+      buildDashboardRows([structure], {
+        ...baseOptions,
+        departementList: ["76"],
+      })
     ).toHaveLength(0);
     expect(
-      buildDashboardRows([structure], { ...baseOptions, departementList: ["75"] })
+      buildDashboardRows([structure], {
+        ...baseOptions,
+        departementList: ["75"],
+      })
     ).toHaveLength(1);
   });
 
@@ -283,7 +289,9 @@ describe("buildDashboardRows", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].initialisationStatus).toBe("FINALISEE");
     expect(rows[0].actualisationStatus).toBe("A_DEBUTER");
-    expect(rows[0].actionUrl).toBe("/structures/1/actualisation/2026/01-places");
+    expect(rows[0].actionUrl).toBe(
+      "/structures/1/actualisation/2026/01-places"
+    );
   });
 
   it("trie les lignes par codeBhasile croissant", () => {
@@ -303,4 +311,3 @@ describe("buildDashboardRows", () => {
     ]);
   });
 });
-

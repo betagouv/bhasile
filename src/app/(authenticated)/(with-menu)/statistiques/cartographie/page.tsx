@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 
+import { SearchParams } from "@/app/utils/searchParams.util";
 import { DEFAULT_CARTOGRAPHIE_ANNEE } from "@/constants";
 import {
   CartographieApiRead,
@@ -64,7 +65,7 @@ async function getStatistiquesCartographie({
 export default async function CartographiePage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const awaitedSearchParams = await searchParams;
 

@@ -4,13 +4,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement, useTransition } from "react";
 
 import { SimplePagination } from "@/app/components/common/SimplePagination";
+import { cn } from "@/app/utils/classname.util";
 import { getSafePage } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 
 export const DashboardPagination = ({
   total,
   pageParam,
-}: Props): ReactElement => {
+}: Props): ReactElement | null => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -27,8 +28,17 @@ export const DashboardPagination = ({
     });
   };
 
+  if (total <= MIDDLE_PAGE_SIZE) {
+    return null;
+  }
+
   return (
-    <div className={isPending ? "pointer-events-none opacity-50" : ""}>
+    <div
+      className={cn(
+        "flex justify-center mt-4",
+        isPending && "pointer-events-none opacity-50"
+      )}
+    >
       <SimplePagination
         totalElements={total}
         currentPage={currentPage}

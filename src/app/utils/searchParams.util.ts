@@ -9,6 +9,9 @@ export const getFirstParam = (
   return value ?? null;
 };
 
+export const getPageParam = (searchParams: SearchParams, key: string): number =>
+  Number(getFirstParam(searchParams[key])) || 0;
+
 export const deletePaginationParams = (params: URLSearchParams): void => {
   for (const key of Array.from(params.keys())) {
     if (key === "page" || key.endsWith("Page")) {
