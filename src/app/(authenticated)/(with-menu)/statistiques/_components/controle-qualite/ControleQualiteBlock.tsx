@@ -47,10 +47,11 @@ export const ControleQualiteBlock = (): ReactElement => {
           <InformationCard
             primaryInformation={
               <>
-                dont {statistiques.controleQualite.eig.nbEigComportementViolent}{" "}
-                <span className="text-xl">
-                  ({tauxEigComportementViolent})
-                </span>
+                dont{" "}
+                {formatNumber(
+                  statistiques.controleQualite.eig.nbEigComportementViolent
+                )}{" "}
+                <span className="text-xl">({tauxEigComportementViolent})</span>
               </>
             }
             secondaryInformation="au motif de comportements violents"
