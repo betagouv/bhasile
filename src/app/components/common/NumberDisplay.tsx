@@ -1,3 +1,5 @@
+import { formatNumber } from "@/app/utils/number.util";
+
 /**
  * Displays a number as formatted French number or currency (EUR).
  * @param value - The number to display as number or currency
@@ -20,22 +22,11 @@ export const NumberDisplay = ({
     return <span className={className}>-</span>;
   }
 
-  const numericValue =
-    value === null || value === undefined ? 0 : Number(value);
-
-  const options: Intl.NumberFormatOptions = {
+  const valueToDisplay = formatNumber(value ?? 0, {
     notation: compact ? "compact" : "standard",
     maximumFractionDigits,
-  };
-
-  if (type === "currency") {
-    options.style = "currency";
-    options.currency = "EUR";
-  }
-
-  const valueToDisplay = new Intl.NumberFormat("fr-FR", options).format(
-    numericValue
-  );
+    ...(type === "currency" ? { style: "currency", currency: "EUR" } : {}),
+  });
 
   return <span className={className}>{valueToDisplay}</span>;
 };
