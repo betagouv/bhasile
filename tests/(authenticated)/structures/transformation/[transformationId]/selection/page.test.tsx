@@ -23,7 +23,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock(
-  "@/contexts/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
     useTransformationContext: () => mockUseTransformationContext(),
   })

@@ -1,7 +1,7 @@
 import { useParams, usePathname } from "next/navigation";
 
 import { VERIFICATION_STEP_NAME } from "@/config/transformation.config";
-import { useTransformationContext } from "@/contexts/TransformationClientContext";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import {

@@ -14,7 +14,7 @@ import {
 } from "@/app/utils/transformation.util";
 import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { useFetchState } from "@/contexts/FetchStateContext";
-import { useTransformationContext } from "@/contexts/TransformationClientContext";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   TransformationFormType,

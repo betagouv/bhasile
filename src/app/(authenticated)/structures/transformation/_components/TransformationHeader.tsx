@@ -9,7 +9,7 @@ import { useTransformationNavigateWithSave } from "@/app/hooks/useTransformation
 import { useTransformations } from "@/app/hooks/useTransformations";
 import { getTransformationTitle } from "@/app/utils/transformation.util";
 import { useFetchState } from "@/contexts/FetchStateContext";
-import { useOptionalTransformationContext } from "@/contexts/TransformationClientContext";
+import { useOptionalTransformationContext } from "@/contexts/TransformationContext";
 import { FetchState } from "@/types/fetch-state.type";
 import { TransformationFormType } from "@/types/transformation.type";
 
@@ -25,7 +25,7 @@ import { ErrorModal, errorModal } from "./ErrorModal";
 import { QuitterModal, quitterModal } from "./QuitterModal";
 
 export const TransformationHeader = () => {
-  const { transformation, saveCurrentForm, isSaverRegistered } =
+  const { transformation, saveCurrentForm } =
     useOptionalTransformationContext();
   const { deleteTransformation } = useTransformations();
   const { navigateWithSave } = useTransformationNavigateWithSave();
@@ -45,7 +45,7 @@ export const TransformationHeader = () => {
   );
 
   const handleSaveProgress = async () => {
-    if (!transformation) {
+    if (!saveCurrentForm) {
       return;
     }
     try {
@@ -62,7 +62,7 @@ export const TransformationHeader = () => {
   };
 
   const handleSaveAndQuit = async () => {
-    if (!transformation) {
+    if (!saveCurrentForm) {
       return;
     }
     try {
@@ -123,7 +123,7 @@ export const TransformationHeader = () => {
                 >
                   Annuler la démarche
                 </Button>
-                {isSaverRegistered && (
+                {saveCurrentForm && (
                   <Button
                     priority="secondary"
                     iconId="fr-icon-save-line"
@@ -141,7 +141,7 @@ export const TransformationHeader = () => {
               iconId="fr-icon-close-line"
               iconPosition="left"
               onClick={() => {
-                if (transformation && isSaverRegistered) {
+                if (transformation && saveCurrentForm) {
                   quitterModal.open();
                 } else {
                   router.push("/structures");

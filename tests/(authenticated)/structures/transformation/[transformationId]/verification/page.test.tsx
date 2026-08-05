@@ -42,7 +42,7 @@ vi.mock("@codegouvfr/react-dsfr/Modal/useIsModalOpen", () => ({
 }));
 
 vi.mock(
-  "@/contexts/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
     useTransformationContext: () => mockUseTransformationContext(),
   })

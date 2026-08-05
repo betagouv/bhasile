@@ -39,10 +39,6 @@ export default async function TransformationLayout({
   const { transformationId } = await params;
   const transformation = await getTransformation(transformationId);
 
-  if (!transformation) {
-    notFound();
-  }
-
   return (
     <TransformationProvider transformation={transformation}>
       <main className="w-full max-w-screen flex" id="content">

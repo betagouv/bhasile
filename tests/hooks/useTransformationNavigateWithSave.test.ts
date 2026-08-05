@@ -7,9 +7,8 @@ import { FetchState } from "@/types/fetch-state.type";
 const mockRouterPush = vi.fn();
 const mockSaveCurrentForm = vi.fn();
 const mockGetFetchState = vi.fn<() => FetchState>();
-const mockUseOptionalTransformationContext = vi.fn<
-  () => { saveCurrentForm: () => Promise<boolean>; isSaverRegistered: boolean }
->();
+const mockUseOptionalTransformationContext =
+  vi.fn<() => Partial<{ saveCurrentForm: () => Promise<boolean> }>>();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
@@ -17,7 +16,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock(
-  "@/contexts/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
     useOptionalTransformationContext: () =>
       mockUseOptionalTransformationContext(),
@@ -36,15 +35,13 @@ describe("useTransformationNavigateWithSave", () => {
     mockGetFetchState.mockReturnValue(FetchState.IDLE);
     mockUseOptionalTransformationContext.mockReturnValue({
       saveCurrentForm: mockSaveCurrentForm,
-      isSaverRegistered: true,
     });
   });
 
-  it("navigue sans sauver quand aucun formulaire n'est monté", async () => {
-    mockUseOptionalTransformationContext.mockReturnValue({
-      saveCurrentForm: mockSaveCurrentForm,
-      isSaverRegistered: false,
-    });
+  // Hors provider et « provider sans formulaire monté » sont désormais le même état :
+  // saveCurrentForm absent.
+  it("navigue sans sauver quand aucun formulaire n'est enregistrable", async () => {
+    mockUseOptionalTransformationContext.mockReturnValue({});
 
     const { result } = renderHook(() => useTransformationNavigateWithSave());
     await result.current.navigateWithSave(TARGET_ROUTE);

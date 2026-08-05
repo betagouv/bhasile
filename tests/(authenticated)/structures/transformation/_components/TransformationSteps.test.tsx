@@ -21,7 +21,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock(
-  "@/contexts/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
     useOptionalTransformationContext: () =>
       mockUseOptionalTransformationContext(),
@@ -43,7 +43,9 @@ describe("TransformationSteps", () => {
 
   it("n'affiche rien quand il n'y a pas de transformation", () => {
     // WHEN
-    const { container } = render(<TransformationSteps transformation={null} />);
+    const { container } = render(
+      <TransformationSteps transformation={undefined} />
+    );
 
     // THEN
     expect(container).toBeEmptyDOMElement();

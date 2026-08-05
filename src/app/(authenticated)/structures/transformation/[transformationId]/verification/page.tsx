@@ -14,7 +14,7 @@ import {
   sortStructureVersionTransformationsByType,
 } from "@/app/utils/transformation.util";
 import { useFetchState } from "@/contexts/FetchStateContext";
-import { useTransformationContext } from "@/contexts/TransformationClientContext";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import {

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 
-import { useOptionalTransformationContext } from "@/contexts/TransformationClientContext";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 import { AnyZodSchema } from "@/types/form.type";
 
 export const TransformationFormController = <TSchema extends AnyZodSchema>({
@@ -18,7 +18,7 @@ export const TransformationFormController = <TSchema extends AnyZodSchema>({
     formState: { isDirty },
   } = useFormContext<z.infer<TSchema>>();
   const { registerSaver, shouldShowIncompleteSteps } =
-    useOptionalTransformationContext();
+    useTransformationContext();
 
   const onSaveRef = useRef(onSave);
   useEffect(() => {

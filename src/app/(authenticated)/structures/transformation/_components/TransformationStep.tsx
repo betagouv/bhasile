@@ -8,7 +8,7 @@ import {
   getStructureVersionTransformationLabel,
   Step,
 } from "@/app/utils/transformation.util";
-import { useOptionalTransformationContext } from "@/contexts/TransformationClientContext";
+import { useOptionalTransformationContext } from "@/contexts/TransformationContext";
 import { StepStatus } from "@/types/form.type";
 
 export const TransformationStep = ({ step }: Props) => {

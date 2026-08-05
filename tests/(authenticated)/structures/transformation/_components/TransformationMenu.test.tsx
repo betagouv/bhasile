@@ -13,7 +13,7 @@ import {
 const mockUsePathname = vi.fn<() => string>();
 const mockRouterPush = vi.fn();
 const mockUseOptionalTransformationContext =
-  vi.fn<() => { transformation: TransformationApiRead | null }>();
+  vi.fn<() => Partial<{ transformation: TransformationApiRead }>>();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
@@ -23,7 +23,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("next-auth/react");
 
 vi.mock(
-  "@/contexts/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
     useOptionalTransformationContext: () =>
       mockUseOptionalTransformationContext(),
@@ -37,9 +37,8 @@ vi.mock("@/contexts/FetchStateContext", () => ({
 describe("TransformationMenu", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseOptionalTransformationContext.mockReturnValue({
-      transformation: null,
-    });
+    // Hors provider — c'est ce que voit /structures/transformation/type
+    mockUseOptionalTransformationContext.mockReturnValue({});
   });
 
   describe("when there is no transformationId", () => {

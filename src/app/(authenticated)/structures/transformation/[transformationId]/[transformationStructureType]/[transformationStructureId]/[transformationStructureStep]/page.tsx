@@ -3,7 +3,7 @@
 import { notFound, useParams } from "next/navigation";
 
 import { TransformationStructureHeader } from "@/app/components/transformations/TransformationStructureHeader";
-import { useTransformationContext } from "@/contexts/TransformationClientContext";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
