@@ -6,6 +6,7 @@ import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
 import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
+import { withCompactAxisY } from "@/app/utils/chart.util";
 
 export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
   const barChartRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,7 @@ export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
       barChart = new Chartist.BarChart(
         barChartRef.current,
         barData,
-        barOptions
+        withCompactAxisY(barOptions)
       );
 
       barChart.on("draw", function (ctx) {

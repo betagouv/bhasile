@@ -43,10 +43,7 @@ export const DotationChart = ({
 
   const options = {
     seriesBarDistance: 10,
-    axisY: {
-      offset: 70,
-      labelInterpolationFnc: (value: number) => value.toLocaleString(),
-    },
+    axisY: { offset: 50 },
     axisX: { showGrid: false },
   };
 

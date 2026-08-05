@@ -6,6 +6,7 @@ import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
 import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
+import { withCompactAxisY } from "@/app/utils/chart.util";
 
 const defaultColors = [
   "var(--yellow-moutarde-850-200)",
@@ -27,7 +28,11 @@ export default function BarChart({
   useEffect(() => {
     let chart = null;
     if (chartRef.current) {
-      chart = new Chartist.BarChart(chartRef.current, data, options);
+      chart = new Chartist.BarChart(
+        chartRef.current,
+        data,
+        withCompactAxisY(options)
+      );
       const extraSpace = 10;
 
       chart.on("draw", function (ctx) {

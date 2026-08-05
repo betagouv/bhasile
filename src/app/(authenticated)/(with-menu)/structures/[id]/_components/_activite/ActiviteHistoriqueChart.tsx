@@ -11,6 +11,7 @@ import {
   getLastMonths,
   getYearFromDate,
 } from "@/app/utils/date.util";
+import { formatCompactNumber } from "@/app/utils/number.util";
 import { capitalizeFirstLetter } from "@/app/utils/string.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
@@ -140,9 +141,8 @@ export const ActiviteHistoriqueChart = (): ReactElement => {
               },
               axisY: {
                 offset: 50,
-                labelInterpolationFnc: (value) => {
-                  return value + " %";
-                },
+                labelInterpolationFnc: (value) =>
+                  `${formatCompactNumber(value as number)} %`,
               },
             }}
           />

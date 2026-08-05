@@ -46,7 +46,7 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
       stackBars: false,
       fullWidth: false,
       axisX: { showGrid: false },
-      axisY: { offset: 70 },
+      axisY: { offset: 50 },
       seriesBarDistance: 0,
     }),
     [syncOptions]
@@ -59,7 +59,7 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
       lineSmooth: false,
       showGridBackground: false,
       axisX: { showGrid: false, showLabel: false },
-      axisY: { offset: 70, showGrid: false, showLabel: false },
+      axisY: { offset: 50, showGrid: false, showLabel: false },
     }),
     [syncOptions]
   );

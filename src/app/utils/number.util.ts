@@ -25,6 +25,25 @@ export const formatBytes = (value: number | null | undefined): string =>
   prettyBytes(value ?? 0, { locale: "fr" });
 
 /**
+ * Formats a number in compact French notation, for chart axis labels
+ * @param value - The number to format
+ * @returns Compact number string (e.g., "250 k", "1,5 M")
+ */
+export const formatCompactNumber = (
+  value: number | string | null | undefined
+): string => {
+  if (value === null || value === undefined || isNaN(Number(value))) {
+    return "0";
+  }
+
+  return new Intl.NumberFormat("fr-FR", {
+    notation: "compact",
+    compactDisplay: "short",
+    maximumFractionDigits: 1,
+  }).format(Number(value));
+};
+
+/**
  * Formats a number as French currency (EUR)
  * @param value - The number to format
  * @returns Formatted currency string (e.g., "1 234,56 €")

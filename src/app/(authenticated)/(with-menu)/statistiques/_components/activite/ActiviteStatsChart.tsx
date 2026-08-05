@@ -9,6 +9,7 @@ import {
   getLastMonths,
   getYearFromDate,
 } from "@/app/utils/date.util";
+import { formatCompactNumber } from "@/app/utils/number.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { ActiviteByMonthStat } from "@/schemas/api/statistique.schema";
 
@@ -94,9 +95,8 @@ export const ActiviteStatsChart = (): ReactElement => {
               },
               axisY: {
                 offset: 50,
-                labelInterpolationFnc: (value) => {
-                  return value + " %";
-                },
+                labelInterpolationFnc: (value) =>
+                  `${formatCompactNumber(value as number)} %`,
               },
             }}
           />

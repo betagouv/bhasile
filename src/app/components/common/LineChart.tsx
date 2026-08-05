@@ -6,6 +6,7 @@ import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
 import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
+import { withCompactAxisY } from "@/app/utils/chart.util";
 
 export default function LineChart({
   data,
@@ -20,10 +21,11 @@ export default function LineChart({
   useEffect(() => {
     let chart = null;
     if (chartRef.current) {
-      chart = new Chartist.LineChart(chartRef.current, data, {
-        ...options,
-        lineSmooth: false,
-      });
+      chart = new Chartist.LineChart(
+        chartRef.current,
+        data,
+        withCompactAxisY({ ...options, lineSmooth: false })
+      );
     }
     return () => {
       if (chart) {
