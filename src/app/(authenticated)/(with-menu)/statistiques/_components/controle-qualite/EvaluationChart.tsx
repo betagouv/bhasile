@@ -6,6 +6,7 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { EVALUATION_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const EvaluationChart = (): ReactElement => {
@@ -14,7 +15,8 @@ export const EvaluationChart = (): ReactElement => {
 
   const chartData = useMemo(() => {
     const sortedEvaluationPeriodData = getLastDisplayedPeriods(
-      statistiques.controleQualite[timePeriod] || []
+      statistiques.controleQualite[timePeriod] || [],
+      EVALUATION_START_YEAR
     );
 
     const labels = sortedEvaluationPeriodData.map((item) => {

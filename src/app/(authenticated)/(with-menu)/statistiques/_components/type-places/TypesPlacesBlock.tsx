@@ -3,7 +3,7 @@
 import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
-import { formatNumber } from "@/app/utils/number.util";
+import { formatPerMille } from "@/app/utils/number.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
@@ -31,7 +31,9 @@ export const TypesPlacesBlock = (): ReactElement => {
         </div>
         <div>
           <InformationCard
-            primaryInformation={`${formatNumber(Number(statistiques.places.tauxEquipement) * 1000)} ‰`}
+            primaryInformation={formatPerMille(
+              statistiques.places.tauxEquipement
+            )}
             secondaryInformation="taux d'équipement"
             tertiaryInformation="nombre de places divisé par le nombre d'habitants"
           />

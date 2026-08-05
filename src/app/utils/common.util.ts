@@ -1,3 +1,5 @@
+import { formatPercentage } from "./number.util";
+
 export const sortKeysByValue = (
   object: Record<string, number>
 ): Record<string, number> => {
@@ -16,12 +18,11 @@ export const getPercentage = (
   partialValue: number,
   totalValue: number
 ): string => {
-  const percentage = (partialValue / totalValue) * 100;
-  if (percentage < 1) {
-    return "< 1%";
-  } else {
-    return `${Math.floor(percentage)}%`;
+  const rate = totalValue > 0 ? partialValue / totalValue : 0;
+  if (rate > 0 && rate < 0.01) {
+    return "< 1 %";
   }
+  return formatPercentage(rate, { maximumFractionDigits: 0 });
 };
 
 export const computeAverage = (array: (number | null)[]): number => {

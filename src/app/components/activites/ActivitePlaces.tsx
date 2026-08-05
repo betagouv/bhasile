@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
+
 import { NumberDisplay } from "../common/NumberDisplay";
 
 const pieChartOptions = {

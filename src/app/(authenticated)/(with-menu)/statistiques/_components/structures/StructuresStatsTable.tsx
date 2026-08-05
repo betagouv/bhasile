@@ -1,5 +1,6 @@
 import { Fragment, ReactElement } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
@@ -91,7 +92,7 @@ export const StructuresStatsTable = (): ReactElement => {
                 className="whitespace-nowrap"
               >
                 <span className="inline-flex items-center gap-6">
-                  <span>{structureStatItem?.toString()}</span>
+                  <NumberDisplay value={structureStatItem} />
                 </span>
               </td>
             ))}
@@ -121,7 +122,7 @@ export const StructuresStatsTable = (): ReactElement => {
                     className="whitespace-nowrap"
                   >
                     <span className="inline-flex items-center gap-6">
-                      <span>{structureStatItem?.toString()}</span>
+                      <NumberDisplay value={structureStatItem} />
                     </span>
                   </td>
                 ))}

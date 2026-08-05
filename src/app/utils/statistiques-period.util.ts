@@ -4,22 +4,27 @@ import { getYearFromDate } from "./date.util";
 
 const MAX_DISPLAYED_TIME_PERIODS = 10;
 
-const isDisplayedYear = (year: number): boolean =>
-  year >= START_YEAR && year <= CURRENT_YEAR;
+const isDisplayedYear = (year: number, fromYear: number): boolean =>
+  year >= fromYear && year <= CURRENT_YEAR;
 
 export const filterDisplayedPeriods = <T extends { date: string | Date }>(
-  periods: T[]
+  periods: T[],
+  fromYear: number = START_YEAR
 ): T[] =>
-  periods.filter((period) => isDisplayedYear(getYearFromDate(period.date)));
+  periods.filter((period) =>
+    isDisplayedYear(getYearFromDate(period.date), fromYear)
+  );
 
 export const filterDisplayedYears = <T extends { year: number }>(
-  items: T[]
-): T[] => items.filter((item) => isDisplayedYear(item.year));
+  items: T[],
+  fromYear: number = START_YEAR
+): T[] => items.filter((item) => isDisplayedYear(item.year, fromYear));
 
 export const getLastDisplayedPeriods = <T extends { date: string | Date }>(
-  periods: T[]
+  periods: T[],
+  fromYear: number = START_YEAR
 ): T[] =>
-  filterDisplayedPeriods(periods)
+  filterDisplayedPeriods(periods, fromYear)
     .sort(
       (firstPeriod, secondPeriod) =>
         new Date(firstPeriod.date).getTime() -

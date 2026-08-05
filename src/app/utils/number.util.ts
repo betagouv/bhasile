@@ -82,6 +82,23 @@ export const formatPercentage = (
 };
 
 /**
+ * Formats a ratio (0-1) as a French per-mille value
+ * @param value - The ratio to format
+ * @returns Formatted per-mille string (e.g., "1,48 ‰")
+ */
+export const formatPerMille = (
+  value: number | string | null | undefined
+): string => {
+  if (value === null || value === undefined || isNaN(Number(value))) {
+    return "0\u202f‰";
+  }
+
+  return `${formatNumber(Number(value) * 1000, {
+    maximumFractionDigits: 2,
+  })}\u202f‰`;
+};
+
+/**
  * Parses a French-formatted number string back to a number
  * Handles both "1 234,56" and "1234.56" formats
  * @param value - The formatted string to parse

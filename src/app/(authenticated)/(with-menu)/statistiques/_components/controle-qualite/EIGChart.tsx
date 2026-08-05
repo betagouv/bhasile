@@ -7,6 +7,7 @@ import {
 } from "@/app/components/common/TimePeriodSelector";
 import { formatDate } from "@/app/utils/date.util";
 import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { EIG_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const EIGChart = (): ReactElement => {
@@ -15,7 +16,8 @@ export const EIGChart = (): ReactElement => {
 
   const chartData = useMemo(() => {
     const sortedEigPeriodData = getLastDisplayedPeriods(
-      statistiques.controleQualite[timePeriod] || []
+      statistiques.controleQualite[timePeriod] || [],
+      EIG_START_YEAR
     );
 
     const labels = sortedEigPeriodData.map((periodStat) => {

@@ -1,8 +1,8 @@
-import { Fragment, ReactElement } from "react";
+import { Fragment, ReactElement, ReactNode } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
-import { formatNumber } from "@/app/utils/number.util";
+import { formatPerMille } from "@/app/utils/number.util";
 import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { PlacesByYearStat } from "@/schemas/api/statistique.schema";
@@ -15,12 +15,14 @@ export const TypesPlacesStatsTable = (): ReactElement => {
   const topLevelStats: StructureStat[] = [
     {
       label: "Places autorisées",
-      value: placeYears.map((yearItem) => formatNumber(yearItem.totalPlaces)),
+      value: placeYears.map((yearItem) => (
+        <NumberDisplay key={yearItem.year} value={yearItem.totalPlaces} />
+      )),
     },
     {
       label: "Taux d'équipement",
       value: placeYears.map((yearItem) =>
-        formatNumber(Number(yearItem.tauxEquipement) * 1000)
+        formatPerMille(yearItem.tauxEquipement)
       ),
     },
   ];
@@ -75,7 +77,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
                 className="whitespace-nowrap"
               >
                 <span className="inline-flex items-center gap-6">
-                  <span>{structureStatItem?.toString()}</span>
+                  <span>{structureStatItem}</span>
                 </span>
               </td>
             ))}
@@ -139,5 +141,5 @@ const getHeadings = (placeYears: PlacesByYearStat[]) => {
 
 type StructureStat = {
   label: string;
-  value?: (string | number | null)[];
+  value?: ReactNode[];
 };

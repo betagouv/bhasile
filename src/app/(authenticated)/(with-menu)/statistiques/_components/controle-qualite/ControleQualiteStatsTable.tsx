@@ -8,24 +8,29 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
+import { getYearFromDate } from "@/app/utils/date.util";
 import { formatPercentage } from "@/app/utils/number.util";
 import { filterDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { EIG_START_YEAR, EVALUATION_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { ControleQualitePeriodStat } from "@/schemas/api/statistique.schema";
 
 const sectionsConfig: ControleQualiteSectionConfig[] = [
   {
     title: "EIG",
+    startYear: EIG_START_YEAR,
     rows: [
       {
         label: "Structures ne déclarant aucun EIG",
         key: "nbStructuresSansDeclarationEig",
         format: (value, periodItem) => (
           <span>
-            {Number(value)}{" "}
-            <span className="text-disabled-grey pl-2">
-              {formatPercentage(periodItem.partStructuresSansDeclarationEig)}
-            </span>
+            <NumberDisplay value={Number(value)} />{" "}
+            {periodItem.partStructuresSansDeclarationEig !== null && (
+              <span className="text-disabled-grey pl-2">
+                {formatPercentage(periodItem.partStructuresSansDeclarationEig)}
+              </span>
+            )}
           </span>
         ),
       },
@@ -48,6 +53,7 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
   },
   {
     title: "Évaluations",
+    startYear: EVALUATION_START_YEAR,
     rows: [
       {
         label: "Structures évaluées",
@@ -83,7 +89,8 @@ export const ControleQualiteStatsTable = (): ReactElement => {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const controleQualitePeriods = filterDisplayedPeriods(
-    statistiques?.controleQualite?.[timePeriod] ?? []
+    statistiques?.controleQualite?.[timePeriod] ?? [],
+    Math.min(...sectionsConfig.map((section) => section.startYear))
   );
 
   const renderPeriodHeader = (period: ControleQualitePeriodStat) => {
@@ -122,9 +129,12 @@ export const ControleQualiteStatsTable = (): ReactElement => {
     title: section.title,
     rows: section.rows.map((row) => {
       const values = controleQualitePeriods.map((periodItem) => {
-        const rawValue = periodItem
-          ? periodItem[row.key as keyof ControleQualitePeriodStat]
-          : null;
+        const isBeforeCollection =
+          getYearFromDate(periodItem.date) < section.startYear;
+        const rawValue =
+          periodItem && !isBeforeCollection
+            ? periodItem[row.key as keyof ControleQualitePeriodStat]
+            : null;
 
         return row.format && rawValue !== null && rawValue !== undefined
           ? row.format(rawValue, periodItem)
@@ -209,5 +219,6 @@ type ControleQualiteRowConfig = {
 
 type ControleQualiteSectionConfig = {
   title: string;
+  startYear: number;
   rows: ControleQualiteRowConfig[];
 };

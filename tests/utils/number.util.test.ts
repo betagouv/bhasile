@@ -5,6 +5,7 @@ import {
   formatCompactNumber,
   formatCurrency,
   formatNumber,
+  formatPerMille,
   parseFrenchNumber,
 } from "@/app/utils/number.util";
 
@@ -87,6 +88,19 @@ describe("number util", () => {
       expect(formatCompactNumber(null)).toBe("0");
       expect(formatCompactNumber(undefined)).toBe("0");
       expect(formatCompactNumber(NaN)).toBe("0");
+    });
+  });
+
+  describe("formatPerMille", () => {
+    it("convertit un ratio en pour mille", () => {
+      expect(formatPerMille(0.00148)).toBe("1,48\u202f\u2030");
+      expect(formatPerMille(0.01)).toBe("10\u202f\u2030");
+    });
+
+    it("gère les valeurs null, undefined et NaN", () => {
+      expect(formatPerMille(null)).toBe("0\u202f\u2030");
+      expect(formatPerMille(undefined)).toBe("0\u202f\u2030");
+      expect(formatPerMille(NaN)).toBe("0\u202f\u2030");
     });
   });
 

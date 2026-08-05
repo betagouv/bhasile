@@ -42,7 +42,11 @@ export const MultiInformationCard = ({
             </Fragment>
           )
         )}
-      {showDetails && <div className="text-center text-sm">{detailLabel}</div>}
+      {showDetails && (
+        <div className="text-center text-sm w-full break-words whitespace-normal">
+          {detailLabel}
+        </div>
+      )}
     </div>
   );
 };
