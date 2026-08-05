@@ -12,7 +12,9 @@ export const TypesPlacesStatsTable = (): ReactElement => {
   const topLevelStats: StructureStat[] = [
     {
       label: "Places autorisées",
-      value: statistiques.places.byYear.map((yearItem) => yearItem.totalPlaces),
+      value: statistiques.places.byYear.map((yearItem) =>
+        formatNumber(yearItem.totalPlaces)
+      ),
     },
     {
       label: "Taux d'équipement",
