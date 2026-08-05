@@ -4,13 +4,32 @@ Détection des incohérences de données d'une structure pour restitution à l'u
 
 ## Principe
 
-Une seule implémentation des règles, en TypeScript, dans `src/lib/anomalies/` avec trois consommateurs :
+Une seule implémentation des règles, en TypeScript, dans `src/lib/anomalies/`.
 
-| Consommateur               | Appel                                    | Fraîcheur                   |
-| -------------------------- | ---------------------------------------- | --------------------------- |
-| Fiche structure            | calcul à la lecture                      | toujours à jour             |
-| Formulaire                 | calcul sur les valeurs `react-hook-form` | temps réel                  |
-| Tableau de bord / Metabase | lecture de la table `Anomalie`           | recalcul complet périodique |
+Elle sert deux usages :
+
+- **calculer à la volée** pour afficher l'état vrai à l'instant t
+- **persister** dans la table `Anomalie` pour pouvoir requêter à travers toutes les structures.
+
+### Qui lit les anomalies
+
+| Consommateur               | Source                                   | Fraîcheur                    | État        |
+| -------------------------- | ---------------------------------------- | ---------------------------- | ----------- |
+| Tableau de bord / Metabase | table `Anomalie`                         | dernier recalcul persisté    | fait        |
+| Fiche structure            | calcul à la lecture                      | toujours à jour              | **à faire** |
+| Formulaire                 | calcul sur les valeurs `react-hook-form` | temps réel, avant sauvegarde | **à faire** |
+
+Les deux derniers ne passent pas par la table : ils appellent `computeAnomalies` directement, donc aucune péremption possible. La table ne les sert que pour récupérer `commentaire` et `isJustified`.
+
+### Qui écrit dans la table
+
+| Déclencheur                 | Comment                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| Écriture sur une structure  | Automatique, après le commit : `updateOneAndRecomputeAnomalies` dans `structure.service` |
+| Une structure, à la demande | `recomputeAnomalies(structureId)`                                                        |
+| Toutes les structures       | `yarn script recompute-anomalies`                                                        |
+
+Les écritures hors routes `structures` (CPOM, fichiers, import OFII) ne déclenchent rien : elles n'impactent que des règles non affichées, et le recalcul complet les rattrape.
 
 La table sert d'index et porte les annotations utilisateur. Elle n'est jamais la source de vérité des règles.
 
@@ -72,15 +91,6 @@ computeAnomalies(
 
 1. `createMany` + `skipDuplicates` des détections : les lignes existantes ne sont pas touchées, `commentaire` et `isJustified` survivent
 2. `deleteMany` des anomalies dont le `code` est dans `evaluatedCodes` et qui ne sont pas redétectées
-
-## Entrées
-
-| Quoi                      | Où                                                                                           |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| Recalcul d'une structure  | `recomputeAnomalies(structureId)`                                                            |
-| Recalcul complet          | `yarn script recompute-anomalies`                                                            |
-| Date                      | `getNow()` -> `currentYear` en découle, les règles ne lisent jamais l'heure                  |
-| Tarifs journaliers cibles | `TARIF_JOURNALIER_CIBLE` (JSON). Absent -> `COUT_JOURNALIER_GT_TARIF_CIBLE` ne déclenche pas |
 
 ## Pour ajouter une règle
 

@@ -25,6 +25,20 @@ export const recomputeAnomalies = async (
   await reconcileAnomalies(structureId, detected, evaluatedCodes);
 };
 
+// Appelé après le commit d'une écriture : un échec de recalcul ne fait pas perdre les modifications.
+export const recomputeAnomaliesSafely = async (
+  structureId: number
+): Promise<void> => {
+  try {
+    await recomputeAnomalies(structureId);
+  } catch (error) {
+    console.error(
+      `Recalcul des anomalies échoué pour la structure ${structureId}`,
+      error
+    );
+  }
+};
+
 // La fiche structure recalcule à la lecture
 // TODO : tester impact sur durée de chargement de la fiche structure
 export const recomputeAllAnomalies = async (): Promise<number> => {

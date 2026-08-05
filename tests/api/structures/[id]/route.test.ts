@@ -22,6 +22,10 @@ vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
 }));
 
+vi.mock("@/app/api/anomalies/anomalie.service", () => ({
+  recomputeAnomaliesSafely: vi.fn(),
+}));
+
 vi.mock("@/lib/casl/abilities", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
   canUpdateDepartement: (...args: unknown[]) =>
@@ -42,7 +46,9 @@ vi.mock("@/app/api/activites/activite.util", () => ({
 
 vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("@/app/api/structures/structure.util")>();
+    await importOriginal<
+      typeof import("@/app/api/structures/structure.util")
+    >();
   return {
     getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
       mockGetAdresseAdministrativeCoordinates(...args),
@@ -78,9 +84,7 @@ vi.mock("@/app/api/finesses/finess.util", () => ({
 }));
 
 vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
-  ...(await importOriginal<
-    typeof import("@/app/api/adresses/adresse.util")
-  >()),
+  ...(await importOriginal<typeof import("@/app/api/adresses/adresse.util")>()),
   getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
