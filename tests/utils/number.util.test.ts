@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatBytes,
+  formatCompactNumber,
   formatCurrency,
   formatNumber,
   parseFrenchNumber,
@@ -57,6 +58,35 @@ describe("number util", () => {
       expect(formatNumber(12.345, { maximumFractionDigits: 1 })).toBe("12,3");
       expect(formatNumber(12.345, { maximumFractionDigits: 3 })).toBe("12,345");
       expect(formatNumber(12.345, { maximumFractionDigits: 0 })).toBe("12");
+    });
+  });
+
+  describe("formatCompactNumber", () => {
+    it("laisse les valeurs inférieures au millier telles quelles", () => {
+      expect(formatCompactNumber(0)).toBe("0");
+      expect(formatCompactNumber(250)).toBe("250");
+      expect(formatCompactNumber(999)).toBe("999");
+    });
+
+    it("abrège les milliers en k", () => {
+      expect(formatCompactNumber(1000)).toBe("1\u00a0k");
+      expect(formatCompactNumber(12500)).toBe("12,5\u00a0k");
+      expect(formatCompactNumber(750000)).toBe("750\u00a0k");
+    });
+
+    it("abrège les millions en M", () => {
+      expect(formatCompactNumber(1000000)).toBe("1\u00a0M");
+      expect(formatCompactNumber(1500000)).toBe("1,5\u00a0M");
+    });
+
+    it("gère les nombres négatifs", () => {
+      expect(formatCompactNumber(-1500000)).toBe("-1,5\u00a0M");
+    });
+
+    it("gère les valeurs null, undefined et NaN", () => {
+      expect(formatCompactNumber(null)).toBe("0");
+      expect(formatCompactNumber(undefined)).toBe("0");
+      expect(formatCompactNumber(NaN)).toBe("0");
     });
   });
 
