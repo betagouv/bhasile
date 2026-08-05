@@ -235,13 +235,13 @@ type TargetCadaInput = {
   departement: string | null;
 };
 
-/* Une extension n'a qu'une structure d'accueil. */
+/* Une extension n'a qu'une structure d'accueil : le premier code fait foi. */
 export const resolveTargetCada = async (
   prisma: PrismaClient,
   { rawBhasileCode, rawDnaCodes, departement }: TargetCadaInput,
   now: Date = getNow()
 ): Promise<Resolution<ResolvedStructure>> => {
-  const [codeBhasile] = normalizeBhasileCodes(rawBhasileCode); // Une extension n'a qu'une structure d'accueil : le premier code fait foi
+  const [codeBhasile] = normalizeBhasileCodes(rawBhasileCode);
 
   if (codeBhasile) {
     const structure = await prisma.structure.findUnique({
