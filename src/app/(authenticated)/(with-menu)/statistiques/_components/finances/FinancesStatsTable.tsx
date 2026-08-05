@@ -10,6 +10,16 @@ import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { FinanceTypeSelector } from "./FinanceTypeSelector";
 
+const formatNumberCell = (value?: number | null): ReactElement | string =>
+  value !== null && value !== undefined ? <NumberDisplay value={value} /> : "•";
+
+const formatAmountCell = (value?: number | null): ReactElement | string =>
+  value !== null && value !== undefined ? (
+    <NumberDisplay value={value} type="currency" maximumFractionDigits={0} />
+  ) : (
+    "•"
+  );
+
 export const FinancesStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
@@ -26,22 +36,12 @@ export const FinancesStatsTable = (): ReactElement => {
         {
           label: "Nombre d’ETP",
           key: "totalETP",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} />
-            ) : (
-              "•"
-            ),
+          format: formatNumberCell,
         },
         {
           label: "Taux d’encadrement moyen",
           key: "tauxEncadrement",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} />
-            ) : (
-              "•"
-            ),
+          format: formatNumberCell,
         },
         {
           label: "Coût journalier moyen",
@@ -61,22 +61,12 @@ export const FinancesStatsTable = (): ReactElement => {
         {
           label: "Dotation demandée",
           key: "dotationDemandee",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
         },
         {
           label: "Dotation accordée",
           key: "dotationAccordee",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
         },
       ],
     },
@@ -87,34 +77,19 @@ export const FinancesStatsTable = (): ReactElement => {
           label: "Total des produits retenu",
           subLabel: "dont dotation État",
           key: "totalProduits",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
         },
         {
           label: "Total charges retenu",
           subLabel: "par les autorités tarifaires",
           key: "totalCharges",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
         },
         {
           label: "Résultat net retenu",
           subLabel: "par les autorités tarifaires",
           key: "resultatNet",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
           isBadge: true,
         },
       ],

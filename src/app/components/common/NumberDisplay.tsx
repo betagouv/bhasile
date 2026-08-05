@@ -5,6 +5,7 @@
  * @param showZero - If false, displays "-" for zero/null/undefined values
  * @param className - Optional CSS class for the span
  * @param compact - Optional boolean to display in k or M (ex : 10000 => 10k)
+ * @param maximumFractionDigits - Optional maximum number of decimals (ex : 0 => 1 815 873 €)
  */
 
 export const NumberDisplay = ({
@@ -13,6 +14,7 @@ export const NumberDisplay = ({
   showZero = true,
   className,
   compact = false,
+  maximumFractionDigits,
 }: Props) => {
   if (!showZero && (value === 0 || value === null || value === undefined)) {
     return <span className={className}>-</span>;
@@ -23,6 +25,7 @@ export const NumberDisplay = ({
 
   const options: Intl.NumberFormatOptions = {
     notation: compact ? "compact" : "standard",
+    maximumFractionDigits,
   };
 
   if (type === "currency") {
@@ -43,4 +46,5 @@ type Props = {
   className?: string;
   showZero?: boolean;
   compact?: boolean;
+  maximumFractionDigits?: number;
 };
