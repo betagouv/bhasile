@@ -1,6 +1,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { ReactElement, useCallback } from "react";
 
+import { getSafePage } from "@/app/utils/list.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 
 export const Pagination = ({
@@ -10,7 +11,11 @@ export const Pagination = ({
   const router = useRouter();
 
   const searchParams = useSearchParams();
-  const currentPage: number = Number(searchParams.get("page")) || 0;
+  const currentPage: number = getSafePage(
+    Number(searchParams.get("page")) || 0,
+    totalElements,
+    pageSize
+  );
 
   const setCurrentPage = useCallback(
     (page: number) => {

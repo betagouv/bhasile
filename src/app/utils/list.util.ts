@@ -74,6 +74,9 @@ export const getSafePage = (
   total: number,
   pageSize: number
 ): number => {
+  if (!Number.isFinite(page)) {
+    return 0;
+  }
   const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
   return Math.min(Math.max(0, page), lastPage);
 };

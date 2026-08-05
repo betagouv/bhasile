@@ -163,6 +163,11 @@ describe("getSafePage", () => {
   it("dépend de la taille de page fournie", () => {
     expect(getSafePage(2, 30, 20)).toBe(1);
   });
+
+  it("ramène une page non numérique à la première page", () => {
+    expect(getSafePage(Number("abc"), 30, 12)).toBe(0);
+    expect(getSafePage(Infinity, 30, 12)).toBe(0);
+  });
 });
 
 describe("paginateWithTotal", () => {
