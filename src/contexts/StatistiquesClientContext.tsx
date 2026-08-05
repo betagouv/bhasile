@@ -2,9 +2,8 @@
 
 import { createContext, ReactNode, useContext } from "react";
 
+import { StatistiquesContextType } from "@/contexts/StatistiquesContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
-
-import { StatistiquesContextType } from "./StatistiquesContext";
 
 type StatistiquesContextInternalType = {
   statistiques: StatistiqueApiRead | null;

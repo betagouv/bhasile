@@ -6,8 +6,7 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { formatDate, getYearRange } from "@/app/utils/date.util";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
 
 const MAX_DISPLAYED_TIME_PERIODS = 10;
 

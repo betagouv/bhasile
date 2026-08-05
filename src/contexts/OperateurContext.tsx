@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
 
+import { OperateurClientProvider } from "@/contexts/OperateurClientContext";
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
-
-import { OperateurClientProvider } from "./OperateurClientContext";
 
 export type OperateurContextType = {
   operateur: OperateurApiRead;

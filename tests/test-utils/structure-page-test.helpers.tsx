@@ -3,8 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { ReactElement } from "react";
 import { vi } from "vitest";
 
-import { StructureClientProvider } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
-import { FetchStateProvider } from "@/app/context/FetchStateContext";
+import { FetchStateProvider } from "@/contexts/FetchStateContext";
+import { StructureClientProvider } from "@/contexts/StructureClientContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 

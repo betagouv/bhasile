@@ -10,9 +10,8 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
 import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
+import { useOperateurContext } from "@/contexts/OperateurClientContext";
 import { operateurUpdateSchema } from "@/schemas/forms/base/operateur.schema";
-
-import { useOperateurContext } from "../../_context/OperateurClientContext";
 
 export default function OperateurModificationContacts() {
   const { operateur } = useOperateurContext();

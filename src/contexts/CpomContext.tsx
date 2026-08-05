@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
 
+import { CpomClientProvider } from "@/contexts/CpomClientContext";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
-
-import { CpomClientProvider } from "./CpomClientContext";
 
 export type CpomContextType = {
   cpom: CpomApiRead;

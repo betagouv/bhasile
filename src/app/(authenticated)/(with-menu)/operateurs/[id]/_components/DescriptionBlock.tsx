@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
+import { useOperateurContext } from "@/contexts/OperateurClientContext";
 
 import { OperateurLogo } from "../../OperateurLogo";
-import { useOperateurContext } from "../_context/OperateurClientContext";
 
 export const DescriptionBlock = () => {
   const router = useRouter();

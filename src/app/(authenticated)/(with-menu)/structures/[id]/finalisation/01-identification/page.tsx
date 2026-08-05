@@ -15,6 +15,7 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 import {
   FinalisationIdentificationAutoSaveFormValues,
   finalisationIdentificationAutoSaveSchema,
@@ -23,7 +24,6 @@ import {
 import { StepStatus } from "@/types/form.type";
 import { FormKind } from "@/types/global";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { Tabs } from "../_components/Tabs";
 
 export default function FinalisationIdentification(): ReactElement {

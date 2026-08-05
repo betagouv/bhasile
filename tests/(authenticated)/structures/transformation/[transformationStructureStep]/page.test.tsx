@@ -22,7 +22,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  "@/contexts/TransformationClientContext",
   () => ({
     useTransformationContext: () => mockUseTransformationContext(),
   })

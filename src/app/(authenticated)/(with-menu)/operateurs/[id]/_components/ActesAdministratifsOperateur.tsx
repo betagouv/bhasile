@@ -1,8 +1,7 @@
 import { ReactElement } from "react";
 
 import { ActesAdministratifsBlock } from "@/app/components/blocks/actesAdministratifs/ActesAdministratifsBlock";
-
-import { useOperateurContext } from "../_context/OperateurClientContext";
+import { useOperateurContext } from "@/contexts/OperateurClientContext";
 
 export const ActesAdministratifsOperateur = (): ReactElement => {
   const { operateur } = useOperateurContext();

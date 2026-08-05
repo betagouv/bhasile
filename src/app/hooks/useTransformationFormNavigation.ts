@@ -1,9 +1,9 @@
 import { useParams, usePathname } from "next/navigation";
 
 import { VERIFICATION_STEP_NAME } from "@/config/transformation.config";
+import { useTransformationContext } from "@/contexts/TransformationClientContext";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
-import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import {
   getTransformationFormNavigation,
   getTransformationSteps,

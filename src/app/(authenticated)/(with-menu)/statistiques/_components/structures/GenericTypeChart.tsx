@@ -6,9 +6,8 @@ import { ReactElement, useState } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
 import { BatiStat, TypeStructureStat } from "@/schemas/api/statistique.schema";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
 export const GenericTypeChart = ({
   title,

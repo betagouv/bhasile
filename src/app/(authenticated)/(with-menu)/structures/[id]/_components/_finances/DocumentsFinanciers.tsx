@@ -4,8 +4,7 @@ import { ReactElement } from "react";
 import { DownloadItem } from "@/app/components/common/DownloadItem";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { getCpomInheritedDocumentsFinanciers } from "@/app/utils/documentFinancier.util";
-
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 
 export const DocumentsFinanciers = (): ReactElement => {
   const { structure } = useStructureContext();

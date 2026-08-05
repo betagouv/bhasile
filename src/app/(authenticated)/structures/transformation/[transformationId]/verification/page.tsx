@@ -7,13 +7,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
 import { useTransformations } from "@/app/hooks/useTransformations";
 import {
   getTransformationOriginRoute,
   sortStructureVersionTransformationsByType,
 } from "@/app/utils/transformation.util";
+import { useFetchState } from "@/contexts/FetchStateContext";
+import { useTransformationContext } from "@/contexts/TransformationClientContext";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import {
@@ -21,7 +22,6 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-import { useTransformationContext } from "../_context/TransformationClientContext";
 import { StructureVersionTransformationGroup } from "./_components/StructureVersionTransformationGroup";
 
 const confirmationModal = createModal({

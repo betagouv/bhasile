@@ -2,9 +2,8 @@
 
 import { createContext, ReactNode, useContext, useState } from "react";
 
+import { OperateurContextType } from "@/contexts/OperateurContext";
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
-
-import { OperateurContextType } from "./OperateurContext";
 
 type OperateurContextInternalType = {
   operateur: OperateurApiRead | null;

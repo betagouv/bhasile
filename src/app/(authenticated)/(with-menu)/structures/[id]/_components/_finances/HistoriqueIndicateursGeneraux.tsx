@@ -4,8 +4,8 @@ import { getIndicateurFinancierTableLines } from "@/app/components/forms/finance
 import { IndicateurFinancierTableLines } from "@/app/components/forms/finance/budget-tables/IndicateurFinancierTableLines";
 import { getYearRange } from "@/app/utils/date.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { getIndicateurFinancierStaticTableHeading } from "./getIndicateurFinancierStaticTableHeading";
 
 export const HistoriqueIndicateursGeneraux = () => {

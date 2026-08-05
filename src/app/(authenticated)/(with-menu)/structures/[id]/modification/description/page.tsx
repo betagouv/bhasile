@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
@@ -17,6 +16,7 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 import {
   ModificationDescriptionFormValues,
   modificationDescriptionSchema,

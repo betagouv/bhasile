@@ -2,9 +2,8 @@
 
 import { createContext, ReactNode, useContext } from "react";
 
+import { StatistiquesCartographieContextType } from "@/contexts/StatistiquesCartographieContext";
 import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.schema";
-
-import { StatistiquesCartographieContextType } from "./StatistiquesCartographieContext";
 
 type StatistiquesCartographieContextInternalType = {
   statistiques: CartographieApiRead | null;

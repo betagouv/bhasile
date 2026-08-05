@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 
 export const Codes = (): ReactElement => {
   const { structure } = useStructureContext();

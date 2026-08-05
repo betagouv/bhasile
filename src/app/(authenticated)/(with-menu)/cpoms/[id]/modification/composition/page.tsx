@@ -10,10 +10,9 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
+import { useCpomContext } from "@/contexts/CpomClientContext";
 import { compositionCpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FormKind } from "@/types/global";
-
-import { useCpomContext } from "../../_context/CpomClientContext";
 
 export default function CpomModificationComposition() {
   const { cpom } = useCpomContext();

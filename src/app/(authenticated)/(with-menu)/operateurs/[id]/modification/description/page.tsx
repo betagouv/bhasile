@@ -12,9 +12,8 @@ import { FieldSetDirectionGenerale } from "@/app/components/forms/operateur/Fiel
 import { FieldSetSiegeSocial } from "@/app/components/forms/operateur/FieldSetSiegeSocial";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
 import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
+import { useOperateurContext } from "@/contexts/OperateurClientContext";
 import { operateurUpdateSchema } from "@/schemas/forms/base/operateur.schema";
-
-import { useOperateurContext } from "../../_context/OperateurClientContext";
 
 export default function OperateurModificationDescription() {
   const { operateur } = useOperateurContext();

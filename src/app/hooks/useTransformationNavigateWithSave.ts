@@ -1,9 +1,8 @@
 import { useRouter } from "next/navigation";
 
-import { useFetchState } from "@/app/context/FetchStateContext";
+import { useFetchState } from "@/contexts/FetchStateContext";
+import { useOptionalTransformationContext } from "@/contexts/TransformationClientContext";
 import { FetchState } from "@/types/fetch-state.type";
-
-import { useOptionalTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 
 export const useTransformationNavigateWithSave = () => {
   const router = useRouter();

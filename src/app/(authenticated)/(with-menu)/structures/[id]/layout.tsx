@@ -2,10 +2,10 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { getActualisationYear } from "@/app/api/structures/actualisation.util";
+import { StructureProvider } from "@/contexts/StructureContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructureHeader } from "./_components/_header/StructureHeader";
-import { StructureProvider } from "./_context/StructureContext";
 
 async function getStructure(id: string): Promise<StructureApiRead> {
   try {

@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
 import { DEFAULT_CARTOGRAPHIE_ANNEE } from "@/constants";
+import { StatistiquesCartographieProvider } from "@/contexts/StatistiquesCartographieContext";
 import {
   CartographieApiRead,
   DEFAULT_CARTOGRAPHIE_GRANULARITE,
@@ -9,7 +10,6 @@ import {
 
 import { StatistiquesCartographie } from "../_components/StatistiquesCartographie";
 import { StatistiquesHeader } from "../_components/StatistiquesHeader";
-import { StatistiquesCartographieProvider } from "../_context/StatistiquesCartographieContext";
 
 type GetStatistiquesCartographieArgs = {
   departements?: string;

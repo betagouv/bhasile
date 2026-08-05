@@ -9,12 +9,11 @@ import {
 } from "@/app/components/common/TimePeriodSelector";
 import { formatDate } from "@/app/utils/date.util";
 import { formatNumber } from "@/app/utils/number.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
 import {
   RmuPeriodStat,
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
 const rmuLines: RMULine[] = [
   {

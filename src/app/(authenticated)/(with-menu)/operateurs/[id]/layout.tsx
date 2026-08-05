@@ -2,10 +2,10 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
+import { OperateurProvider } from "@/contexts/OperateurContext";
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 
 import { OperateurHeader } from "./_components/OperateurHeader";
-import { OperateurProvider } from "./_context/OperateurContext";
 
 async function getOperateur(id: string): Promise<OperateurApiRead> {
   try {

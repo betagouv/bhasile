@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
 
+import { StructureClientProvider } from "@/contexts/StructureClientContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
-
-import { StructureClientProvider } from "./StructureClientContext";
 
 export type StructureContextType = {
   structure: StructureApiRead;

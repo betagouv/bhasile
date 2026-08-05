@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { PropsWithChildren, ReactNode, useEffect } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 
 export const ModificationGuard = ({
   children,

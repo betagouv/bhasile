@@ -2,8 +2,7 @@ import { ReactNode } from "react";
 
 import { FormStepTab } from "@/app/components/forms/stepper/FormStepTab";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
-
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 
 export const Tab = ({ title, route, current, type }: Props) => {
   const { structure } = useStructureContext();

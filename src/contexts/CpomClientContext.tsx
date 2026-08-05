@@ -2,9 +2,8 @@
 
 import { createContext, ReactNode, useContext, useState } from "react";
 
+import { CpomContextType } from "@/contexts/CpomContext";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
-
-import { CpomContextType } from "./CpomContext";
 
 type CpomContextInternalType = {
   cpom: CpomApiRead | null;

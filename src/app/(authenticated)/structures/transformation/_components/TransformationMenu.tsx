@@ -4,8 +4,8 @@ import { usePathname } from "next/navigation";
 
 import { Logo } from "@/app/components/Logo";
 import { MenuFooter } from "@/app/components/MenuFooter";
+import { useOptionalTransformationContext } from "@/contexts/TransformationClientContext";
 
-import { useOptionalTransformationContext } from "../[transformationId]/_context/TransformationClientContext";
 import { TransformationMenuItem } from "./TransformationMenuItem";
 import { TransformationSteps } from "./TransformationSteps";
 

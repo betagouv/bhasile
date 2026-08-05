@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { CpomProvider } from "@/contexts/CpomContext";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 
 import { CpomHeader } from "./_components/CpomHeader";
-import { CpomProvider } from "./_context/CpomContext";
 
 async function getCpom(id: string): Promise<CpomApiRead> {
   try {

@@ -10,6 +10,7 @@ import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 import {
   NotesAutoSaveFormValues,
   notesAutoSaveSchema,
@@ -18,7 +19,6 @@ import {
 import { StepStatus } from "@/types/form.type";
 import { FormKind } from "@/types/global";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { Tabs } from "../_components/Tabs";
 
 export default function FinalisationNotes() {

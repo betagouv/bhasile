@@ -10,7 +10,7 @@ const mockRegisterSaver = vi.fn();
 const mockUseOptionalTransformationContext = vi.fn();
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  "@/contexts/TransformationClientContext",
   () => ({
     useOptionalTransformationContext: () =>
       mockUseOptionalTransformationContext(),

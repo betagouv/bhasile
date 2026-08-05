@@ -8,8 +8,7 @@ import { Table } from "@/app/components/common/Table";
 import { InformationCard } from "@/app/components/InformationCard";
 import { formatDate } from "@/app/utils/date.util";
 import { pluralize } from "@/app/utils/string.util";
-
-import { useCpomContext } from "../_context/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomClientContext";
 
 export const CompositionBlock = () => {
   const { cpom } = useCpomContext();

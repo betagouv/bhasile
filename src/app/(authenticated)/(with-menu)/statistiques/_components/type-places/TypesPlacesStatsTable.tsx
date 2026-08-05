@@ -3,9 +3,8 @@ import { Fragment, ReactElement } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { formatNumber } from "@/app/utils/number.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
 export const TypesPlacesStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();

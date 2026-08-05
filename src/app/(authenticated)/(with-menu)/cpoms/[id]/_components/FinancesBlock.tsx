@@ -12,9 +12,9 @@ import { getBudgetTableLines } from "@/app/components/forms/finance/budget-table
 import { getCpomStructureTypes } from "@/app/utils/cpom.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { useCpomContext } from "@/contexts/CpomClientContext";
 import { StructureType } from "@/types/structure.type";
 
-import { useCpomContext } from "../_context/CpomClientContext";
 import { CpomFinancesDocuments } from "./CpomFinancesDocuments";
 import { FinanceTypeSwitch } from "./FinanceTypeSwitch";
 

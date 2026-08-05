@@ -9,6 +9,7 @@ import {
   getLastMonths,
   getYearFromDate,
 } from "@/app/utils/date.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
 import { ActiviteByMonthStat } from "@/schemas/api/statistique.schema";
 
 import {
@@ -16,7 +17,6 @@ import {
   typesActivite,
 } from "../../../structures/[id]/_components/_activite/activite.constants";
 import { ActiviteTypes } from "../../../structures/[id]/_components/_activite/ActiviteTypes";
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
 export const ActiviteStatsChart = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();

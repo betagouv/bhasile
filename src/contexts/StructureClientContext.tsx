@@ -2,9 +2,8 @@
 
 import { createContext, ReactNode, useContext, useState } from "react";
 
+import { StructureContextType } from "@/contexts/StructureContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
-
-import { StructureContextType } from "./StructureContext";
 
 type StructureContextInternalType = {
   structure: StructureApiRead | null;

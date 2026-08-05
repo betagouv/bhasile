@@ -2,7 +2,6 @@
 
 import { ReactElement } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { AutoSave } from "@/app/components/forms/AutoSave";
 import { BudgetTables } from "@/app/components/forms/finance/BudgetTables";
 import { IndicateursFinanciers } from "@/app/components/forms/finance/IndicateursFinanciers";
@@ -13,6 +12,7 @@ import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 import {
   BudgetsAutoSaveFormValues,
   budgetsAutoSaveSchema,

@@ -4,12 +4,12 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useOptionalTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformationNavigateWithSave } from "@/app/hooks/useTransformationNavigateWithSave";
 import { useTransformations } from "@/app/hooks/useTransformations";
 import { getTransformationTitle } from "@/app/utils/transformation.util";
+import { useFetchState } from "@/contexts/FetchStateContext";
+import { useOptionalTransformationContext } from "@/contexts/TransformationClientContext";
 import { FetchState } from "@/types/fetch-state.type";
 import { TransformationFormType } from "@/types/transformation.type";
 

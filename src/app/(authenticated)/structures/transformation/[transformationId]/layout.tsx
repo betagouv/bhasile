@@ -1,11 +1,11 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { TransformationProvider } from "@/contexts/TransformationContext";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 
 import { TransformationHeader } from "../_components/TransformationHeader";
 import { TransformationMenu } from "../_components/TransformationMenu";
-import { TransformationProvider } from "./_context/TransformationContext";
 
 async function getTransformation(id: string): Promise<TransformationApiRead> {
   try {

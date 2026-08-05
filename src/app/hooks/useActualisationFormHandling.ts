@@ -1,10 +1,10 @@
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
+import { useStructureContext } from "@/contexts/StructureClientContext";
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
-import { useStructureContext } from "../(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { getActualisationFormSlug } from "../api/forms/form.constants";
 import { getActualisationNextRoute } from "../utils/actualisationForm.util";
 import { useSaveMutation } from "./useSaveMutation";

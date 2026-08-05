@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/ActesAdministratifs";
 import { AutoSave } from "@/app/components/forms/AutoSave";
 import FormWrapper, {
@@ -15,6 +14,7 @@ import {
 } from "@/app/utils/acteAdministratif.util";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import { getActualisationActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   ActesAdministratifsAutoSaveFormValues,

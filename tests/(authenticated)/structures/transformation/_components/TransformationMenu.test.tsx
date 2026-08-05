@@ -23,14 +23,14 @@ vi.mock("next/navigation", () => ({
 vi.mock("next-auth/react");
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  "@/contexts/TransformationClientContext",
   () => ({
     useOptionalTransformationContext: () =>
       mockUseOptionalTransformationContext(),
   })
 );
 
-vi.mock("@/app/context/FetchStateContext", () => ({
+vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
 }));
 

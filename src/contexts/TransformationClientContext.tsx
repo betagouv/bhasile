@@ -9,9 +9,8 @@ import {
   useState,
 } from "react";
 
+import { TransformationContextType } from "@/contexts/TransformationContext";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
-
-import { TransformationContextType } from "./TransformationContext";
 
 type SaveCurrentFormFn = () => Promise<boolean>;
 

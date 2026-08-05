@@ -10,8 +10,8 @@ import { getTransformationMarkers } from "@/app/components/transformation-marker
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
 import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
 import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
 

@@ -1,13 +1,13 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { useTransformationContext } from "@/contexts/TransformationClientContext";
 import {
   StructureVersionTransformationApiUpdateClient,
   TransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
 import { AnyZodSchema, StepStatus } from "@/types/form.type";
 
-import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { setStructureVersionTransformationFormStepStatus } from "../utils/transformation.util";
 import { useSaveMutation } from "./useSaveMutation";
 import { useTransformationFormNavigation } from "./useTransformationFormNavigation";

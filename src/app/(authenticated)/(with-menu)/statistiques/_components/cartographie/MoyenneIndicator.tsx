@@ -4,8 +4,8 @@ import { ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { average } from "@/app/utils/math.util";
+import { useStatistiquesCartographieContext } from "@/contexts/StatistiquesCartographieClientContext";
 
-import { useStatistiquesCartographieContext } from "../../_context/StatistiquesCartographieClientContext";
 import { cleanZoneCode } from "./cartographie.util";
 
 export const MoyenneIndicator = ({ selectedRegion }: Props): ReactElement => {

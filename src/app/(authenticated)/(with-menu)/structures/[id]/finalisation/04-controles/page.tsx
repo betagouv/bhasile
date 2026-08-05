@@ -12,6 +12,7 @@ import { transformFormControlesToApiControles } from "@/app/utils/controle.util"
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { transformFormEvaluationsToApiEvaluations } from "@/app/utils/evaluation.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { useStructureContext } from "@/contexts/StructureClientContext";
 import {
   FinalisationQualiteAutoSaveFormValues,
   finalisationQualiteAutoSaveSchema,
@@ -19,7 +20,6 @@ import {
 } from "@/schemas/forms/finalisation/finalisationQualite.schema";
 import { StepStatus } from "@/types/form.type";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { Tabs } from "../_components/Tabs";
 
 export default function ModificationControleForm() {

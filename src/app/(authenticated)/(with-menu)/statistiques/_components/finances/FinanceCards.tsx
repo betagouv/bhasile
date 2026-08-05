@@ -2,8 +2,7 @@ import { ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { MultiInformationCard } from "@/app/components/MultiInformationCard";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
+import { useStatistiquesContext } from "@/contexts/StatistiquesClientContext";
 
 export const FinanceCards = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();

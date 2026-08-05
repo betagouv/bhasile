@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
 
+import { StatistiquesCartographieClientProvider } from "@/contexts/StatistiquesCartographieClientContext";
 import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.schema";
-
-import { StatistiquesCartographieClientProvider } from "./StatistiquesCartographieClientContext";
 
 export type StatistiquesCartographieContextType = {
   statistiques: CartographieApiRead;

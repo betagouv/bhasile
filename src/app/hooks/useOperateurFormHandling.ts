@@ -1,8 +1,8 @@
 import { useRouter } from "next/navigation";
 
+import { useOperateurContext } from "@/contexts/OperateurClientContext";
 import { OperateurUpdateFormValues } from "@/schemas/forms/base/operateur.schema";
 
-import { useOperateurContext } from "../(authenticated)/(with-menu)/operateurs/[id]/_context/OperateurClientContext";
 import { useOperateur } from "./useOperateur";
 import { useSaveMutation } from "./useSaveMutation";
 

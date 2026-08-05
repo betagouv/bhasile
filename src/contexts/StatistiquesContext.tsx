@@ -2,9 +2,8 @@
 
 import { ReactNode } from "react";
 
+import { StatistiquesClientProvider } from "@/contexts/StatistiquesClientContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
-
-import { StatistiquesClientProvider } from "./StatistiquesClientContext";
 
 export type StatistiquesContextType = {
   statistiques: StatistiqueApiRead;
