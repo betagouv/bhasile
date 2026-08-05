@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -43,10 +44,12 @@ describe("useSpreadsheetParse", () => {
     ]);
   });
 
-  it("conserve le type de bâti d'un tableur mixte", async () => {
+  it("conserve le type de bâti d'un tableur mixte quelle que soit sa casse", async () => {
     const file = buildSpreadsheetFile(HEADERS_MIXTE, [
-      ["1 rue de la Paix", "35000", "Rennes", 12, "Oui", "Non", "COLLECTIF"],
-      ["2 avenue Foch", "75008", "Paris", 4, "Non", "Oui", "DIFFUS"],
+      ["1 rue de la Paix", "35000", "Rennes", 12, "Oui", "Non", "Collectif"],
+      ["2 avenue Foch", "75008", "Paris", 4, "Non", "Oui", "Diffus"],
+      ["3 rue Neuve", "44000", "Nantes", 8, "Oui", "Oui", "COLLECTIF"],
+      ["4 rue Verte", "69001", "Lyon", 6, "Non", "Non", "diffus"],
     ]);
 
     const { result } = renderHook(() => useSpreadsheetParse());
@@ -55,7 +58,33 @@ describe("useSpreadsheetParse", () => {
     expect(adresses.map((adresse) => adresse.repartition)).toEqual([
       Repartition.COLLECTIF,
       Repartition.DIFFUS,
+      Repartition.COLLECTIF,
+      Repartition.DIFFUS,
     ]);
+  });
+
+  it("rejette un type de bâti hors des valeurs attendues", async () => {
+    const file = buildSpreadsheetFile(HEADERS_MIXTE, [
+      ["1 rue de la Paix", "35000", "Rennes", 12, "Oui", "Non", "Bâtiment A"],
+    ]);
+
+    const { result } = renderHook(() => useSpreadsheetParse());
+
+    await expect(result.current.parseAdressesMixtes(file)).rejects.toThrowError(
+      "Valeur invalide (Type de bâti : ligne 3)"
+    );
+  });
+
+  it("rejette un tableur mixte dépourvu de colonne Type de bâti", async () => {
+    const file = buildSpreadsheetFile(HEADERS_DIFFUS, [
+      ["1 rue de la Paix", "35000", "Rennes", 12, "Oui", "Non"],
+    ]);
+
+    const { result } = renderHook(() => useSpreadsheetParse());
+
+    await expect(result.current.parseAdressesMixtes(file)).rejects.toThrowError(
+      "Valeur invalide (Type de bâti : ligne 3)"
+    );
   });
 
   it("force la répartition à DIFFUS même si le tableur porte une colonne Type de bâti", async () => {
@@ -101,6 +130,28 @@ describe("useSpreadsheetParse", () => {
     ).rejects.toThrowError("Valeur invalide (Places autorisées : ligne 5)");
   });
 
+  it("importe la première adresse d'un tableur dont la ligne d'exemple a été supprimée", async () => {
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      HEADERS_DIFFUS,
+      ["1 rue de la Paix", "35000", "Rennes", 12, "Oui", "Non"],
+      ["2 avenue Foch", "75008", "Paris", 4, "Non", "Oui"],
+    ]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Feuille1");
+    const file = new File(
+      [XLSX.write(workbook, { type: "array", bookType: "xlsx" })],
+      "adresses.xlsx"
+    );
+
+    const { result } = renderHook(() => useSpreadsheetParse());
+    const adresses = await result.current.parseAdressesDiffuses(file);
+
+    expect(adresses.map((adresse) => adresse.adresse)).toEqual([
+      "1 rue de la Paix",
+      "2 avenue Foch",
+    ]);
+  });
+
   it("rejette un tableur ne contenant aucune adresse plutôt que de vider la liste", async () => {
     const file = buildSpreadsheetFile(HEADERS_DIFFUS, []);
 
@@ -112,7 +163,9 @@ describe("useSpreadsheetParse", () => {
   });
 
   it("rejette le modèle de tableur distribué tant qu'il n'a pas été rempli", async () => {
-    const contents = await readFile("public/adresses-diffus.xlsx");
+    const contents = await readFile(
+      join(import.meta.dirname, "../../public/adresses-diffus.xlsx")
+    );
     const file = new File([new Uint8Array(contents)], "adresses-diffus.xlsx");
 
     const { result } = renderHook(() => useSpreadsheetParse());
