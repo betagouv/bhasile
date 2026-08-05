@@ -13,6 +13,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test?schema=public
+
 jobs:
   checks:
     name: Lint, types, tests, SQL format
@@ -43,8 +46,6 @@ jobs:
     name: Repository tests (Postgres 17)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test?schema=public
     services:
       postgres:
         image: postgres:17
