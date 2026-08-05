@@ -37,6 +37,12 @@ export const transformationInclude = {
           structure: {
             include: {
               operateur: { select: { id: true, name: true } },
+              forms: {
+                select: {
+                  status: true,
+                  formDefinition: { select: { slug: true } },
+                },
+              },
               antennes: true,
               actesAdministratifs: {
                 where: {

@@ -118,6 +118,15 @@ export type BuildDashboardTransformationRowsOptions = {
   typeList: string[];
 };
 
+const hasNonFinalisedStructure = (
+  transformation: TransformationApiRead
+): boolean =>
+  transformation.structureVersionTransformations.some(
+    (structureVersionTransformation) =>
+      structureVersionTransformation.structureVersion?.structure
+        ?.isFinalised === false
+  );
+
 export const buildDashboardTransformationRows = (
   transformations: TransformationApiRead[],
   options: BuildDashboardTransformationRowsOptions
@@ -125,6 +134,10 @@ export const buildDashboardTransformationRows = (
   const rows: DashboardTransformationRow[] = [];
 
   for (const transformation of transformations) {
+    if (hasNonFinalisedStructure(transformation)) {
+      continue;
+    }
+
     const referenceStructureVersionTransformation =
       getReferenceStructureVersionTransformation(transformation);
     const departement = getStructureVersionTransformationDepartement(
