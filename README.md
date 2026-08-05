@@ -1,5 +1,7 @@
 # Bhasile (ex-Place d'asile)
 
+[![CI](https://github.com/betagouv/bhasile/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/betagouv/bhasile/actions/workflows/ci.yml?query=branch%3Adev)
+
 Piloter le parc de logements pour demandeurs d’asile
 
 ## ✨ Installation
