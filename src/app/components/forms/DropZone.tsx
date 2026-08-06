@@ -109,9 +109,7 @@ export const DropZone = ({ className, onChange, children }: Props) => {
           <p className="mb-0">
             <span>{getShortDisplayedName(fileData?.originalName)}</span>
             <span className="text-disabled-grey text-xs block">
-              {fileData?.fileSize
-                ? formatBytes(fileData?.fileSize)
-                : ""}
+              {formatBytes(fileData?.fileSize)}
             </span>
           </p>
 

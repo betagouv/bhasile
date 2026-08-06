@@ -48,6 +48,9 @@ et les listes à puces fonctionnent.
 Déposer le fichier dans `public/`, puis le référencer par son chemin depuis la racine du site.
 Si le nom contient des espaces, entourer le lien de chevrons : `[Libellé](</Mon fichier.pdf>)`.
 
+Tout ce qui est déposé dans `public/` est téléchargeable par n'importe qui, sans connexion, et
+part dans l'image déployée : n'y mettre que des documents publiables et de poids raisonnable.
+
 Un lien qui ne correspond à aucun fichier fait **échouer la CI** : une pull request ne peut pas
 introduire de lien mort. Un chemin qui sort de `public/` est refusé lui aussi — il ne serait
 pas servi en ligne.

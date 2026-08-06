@@ -74,7 +74,9 @@ export const readBlocks = (): Block[] => {
 
   const blocks = readdirSync(directory)
     .filter((fileName) => BLOCK_FILE_PATTERN.test(fileName))
-    .sort()
+    .sort((fileName, otherFileName) =>
+      fileName.localeCompare(otherFileName, "fr", { numeric: true })
+    )
     .map((fileName) =>
       parseBlock(
         readFileSync(path.join(directory, fileName), "utf8"),
@@ -252,6 +254,17 @@ const buildFilesTab = (
     throw new Error(
       `Onglet « ${group.title} » : deux sous-titres identiques (« ${duplicateId} »). Renommez l'un des deux ###.`
     );
+  }
+
+  for (const section of sections) {
+    const duplicateHref = findDuplicateId(
+      section.links.map((link) => link.href)
+    );
+    if (duplicateHref) {
+      throw new Error(
+        `Onglet « ${group.title} » : le lien « ${duplicateHref} » est listé deux fois dans la même section. Supprimez le doublon.`
+      );
+    }
   }
 
   return { id: tabId, title: group.title, sections };

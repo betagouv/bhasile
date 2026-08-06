@@ -3,7 +3,7 @@ import { ReactElement, Suspense } from "react";
 import {
   readBlocks,
   readSuggestions,
-} from "@/app/utils/ressources.server.util";
+} from "@/utils-server/ressources.server.util";
 
 import { ResourcesBlockList } from "./_components/ResourcesBlockList";
 import { ResourcesContent } from "./_components/ResourcesContent";
