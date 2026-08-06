@@ -1,7 +1,6 @@
 model Dna {
   id                           Int                         @id @default(autoincrement())
   code                         String                      @unique
-  description                  String? // TODO: remove after backfill code-link descriptions
   activeInOfiiFileSince        DateTime? // date d'entrée dans le document Ofii
   inactiveInOfiiFileSince      DateTime? // date de sortie du document Ofii
   dnaStructures                DnaStructure[]
@@ -9,14 +8,14 @@ model Dna {
   evenementsIndesirablesGraves EvenementIndesirableGrave[]
 
   // All fields below are directly coming from OFII file and not used after DNA is linked to a structure
-  departement              Departement?   @relation(fields: [departementAdministratif], references: [numero])
-  departementAdministratif String? // TODO: remove nullable after first filling is complete
-  operateur                Operateur?     @relation(fields: [operateurId], references: [id])
-  operateurId              Int? // TODO: remove nullable after first filling is complete
-  type                     StructureType? // TODO: remove nullable after first filling is complete
-  nom                      String? // TODO: remove nullable after first filling is complete
-  nomOfii                  String? // TODO: remove nullable after first filling is complete
-  directionTerritoriale    String? // TODO: remove nullable after first filling is complete
+  departement              Departement   @relation(fields: [departementAdministratif], references: [numero])
+  departementAdministratif String
+  operateur                Operateur     @relation(fields: [operateurId], references: [id])
+  operateurId              Int
+  type                     StructureType
+  nom                      String
+  nomOfii                  String
+  directionTerritoriale    String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -28,28 +27,21 @@ model DnaStructure {
   id                 Int               @id @default(autoincrement())
   dnaId              Int
   dna                Dna               @relation(fields: [dnaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId        Int? // TODO: remove after backfill of structure version
-  structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill of structure version
   structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureVersionId Int? // TODO: rendre obligatoire après backfill de structure version
+  structureVersionId Int?
   description        String?
-  startDate          DateTime? // TODO: remove after backfill of structure version - remplacé par effectiveDate de la version
-  endDate            DateTime? // TODO: remove after backfill of structure version
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([structureId, dnaId])
   @@unique([structureVersionId, dnaId])
   @@schema("public")
 }
 
 model Antenne {
   id                 Int               @id @default(autoincrement())
-  structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill of structure version
-  structureId        Int? // TODO: remove after backfill of structure version
   structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureVersionId Int? // TODO: rendre obligatoire après backfill de structure version
+  structureVersionId Int?
   name               String?
   adresse            String?
   codePostal         String?
@@ -63,13 +55,8 @@ model Antenne {
 
 model Finess {
   id                 Int               @id @default(autoincrement())
-  code               String?           @unique //TODO Rendre obligatoire après le backfill
-  description        String? // TODO: remove after backfill code-link descriptions
+  code               String           @unique
   structureFinesses  StructureFiness[]
-  structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill structure finess
-  structureId        Int? // TODO: remove after backfill structure finess
-  structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill structure finess
-  structureVersionId Int? // TODO: remove after backfill structure finess
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
 
@@ -80,16 +67,13 @@ model StructureFiness {
   id                 Int               @id @default(autoincrement())
   finessId           Int
   finess             Finess            @relation(fields: [finessId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId        Int? // TODO: remove after backfill of structure version
-  structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill of structure version
   structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureVersionId Int? // TODO: rendre obligatoire après backfill de structure version
+  structureVersionId Int?
   description        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([structureId, finessId])
   @@unique([structureVersionId, finessId])
   @@schema("public")
 }

@@ -1,59 +1,55 @@
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
 
+import { SearchParams } from "@/app/utils/searchParams.util";
+import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
-import { StatistiquesProvider } from "./_context/StatistiquesContext";
+import { StatistiquesHeader } from "./_components/StatistiquesHeader";
 
 type GetStatistiquesArgs = {
   departements?: string;
   operateurs?: string;
-  type?: string;
+  types?: string;
 };
 
 async function getStatistiques({
   departements,
   operateurs,
-  type,
+  types,
 }: GetStatistiquesArgs): Promise<StatistiqueApiRead> {
-  try {
-    const baseUrl = process.env.NEXT_URL || "";
-    const params = new URLSearchParams();
-    if (departements) {
-      params.append("departements", departements);
-    }
-    if (operateurs) {
-      params.append("operateurs", operateurs);
-    }
-    if (type) {
-      params.append("types", type);
-    }
-
-    const result = await fetch(
-      `${baseUrl}/api/statistiques?${params.toString()}`,
-      {
-        cache: "no-store",
-        // Requête côté serveur donc il faut appeler les headers manuellement
-        headers: await headers(),
-      }
-    );
-    if (!result.ok) {
-      throw new Error(
-        `Impossible de récupérer les statistiques : ${result.status}`
-      );
-    }
-    return await result.json();
-  } catch (error) {
-    console.error(error);
-    notFound();
+  const baseUrl = process.env.NEXT_URL || "";
+  const params = new URLSearchParams();
+  if (departements) {
+    params.append("departements", departements);
   }
+  if (operateurs) {
+    params.append("operateurs", operateurs);
+  }
+  if (types) {
+    params.append("types", types);
+  }
+
+  const result = await fetch(
+    `${baseUrl}/api/statistiques?${params.toString()}`,
+    {
+      cache: "no-store",
+      // Requête côté serveur donc il faut appeler les headers manuellement
+      headers: await headers(),
+    }
+  );
+  if (!result.ok) {
+    throw new Error(
+      `Impossible de récupérer les statistiques : ${result.status}`
+    );
+  }
+  return await result.json();
 }
 
 export default async function StatistiquesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const awaitedSearchParams = await searchParams;
 
@@ -65,20 +61,21 @@ export default async function StatistiquesPage({
     typeof awaitedSearchParams.operateurs === "string"
       ? awaitedSearchParams.operateurs
       : undefined;
-  const type =
-    typeof awaitedSearchParams.type === "string"
-      ? awaitedSearchParams.type
+  const types =
+    typeof awaitedSearchParams.types === "string"
+      ? awaitedSearchParams.types
       : undefined;
 
   const statistiques = await getStatistiques({
     departements,
     operateurs,
-    type,
+    types,
   });
 
   return (
-    <StatistiquesProvider statistiques={statistiques}>
+    <StatistiquesProvider entity={statistiques}>
       <div className="flex flex-col h-full">
+        <StatistiquesHeader />
         <StatistiquesContent />
       </div>
     </StatistiquesProvider>

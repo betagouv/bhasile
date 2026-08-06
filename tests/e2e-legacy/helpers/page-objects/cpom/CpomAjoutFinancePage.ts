@@ -48,6 +48,10 @@ const STRUCTURE_TYPES: StructureType[] = [
   StructureType.PRAHDA,
 ];
 
+const FINANCES_TYPE_SWITCH_NAME = "cpomFinancesType";
+
+const BUDGET_HEADING_ID_PREFIX = "gestionBudgetaire-";
+
 export class CpomAjoutFinancePage extends BasePage {
   private waitHelper: WaitHelper;
   private formHelper: FormHelper;
@@ -71,6 +75,7 @@ export class CpomAjoutFinancePage extends BasePage {
       if (typePosition === undefined) {
         continue;
       }
+      await this.selectStructureType(type);
       for (const [yearKey, fields] of Object.entries(yearlyData)) {
         const year = Number(yearKey);
         if (year < START_YEAR || year > CURRENT_YEAR) {
@@ -131,17 +136,54 @@ export class CpomAjoutFinancePage extends BasePage {
     if (requestedTypes.length === 1) {
       return { [requestedTypes[0]]: 0 };
     }
-    const headings = await this.page.locator("h2").allTextContents();
-    const visibleTypes = headings
-      .map((text) => text.trim())
-      .filter((text): text is StructureType =>
-        STRUCTURE_TYPES.includes(text as StructureType)
-      );
+    const orderedTypes = await this.getOrderedStructureTypes();
     const positions: Partial<Record<StructureType, number>> = {};
-    visibleTypes.forEach((type, index) => {
-      positions[type] = index;
+    orderedTypes.forEach((structureType, index) => {
+      positions[structureType] = index;
     });
     return positions;
+  }
+
+  /**
+   * The `budgets` field array is ordered by structure type, so an input index is
+   * `typePosition * yearSpan + yearIndex`. The ajout page renders every table at
+   * once (one heading per type), while the modification page renders a single
+   * table behind a type switch — both expose the same type order.
+   */
+  private async getOrderedStructureTypes(): Promise<StructureType[]> {
+    const typeSwitchInputs = this.page.locator(
+      `input[name="${FINANCES_TYPE_SWITCH_NAME}"]`
+    );
+    const values =
+      (await typeSwitchInputs.count()) > 0
+        ? await typeSwitchInputs.evaluateAll((inputs) =>
+            inputs.map((input) => (input as HTMLInputElement).value)
+          )
+        : (
+            await this.page
+              .locator(`h2[id^="${BUDGET_HEADING_ID_PREFIX}"]`)
+              .evaluateAll((headings) => headings.map((heading) => heading.id))
+          ).map((headingId) =>
+            headingId.replace(BUDGET_HEADING_ID_PREFIX, "")
+          );
+
+    return values.filter((value): value is StructureType =>
+      STRUCTURE_TYPES.includes(value as StructureType)
+    );
+  }
+
+  private async selectStructureType(
+    structureType: StructureType
+  ): Promise<void> {
+    const typeInput = this.page.locator(
+      `input[name="${FINANCES_TYPE_SWITCH_NAME}"][value="${structureType}"]`
+    );
+    if ((await typeInput.count()) === 0 || (await typeInput.isChecked())) {
+      return;
+    }
+    const typeInputId = await typeInput.getAttribute("id");
+    await this.page.locator(`label[for="${typeInputId}"]`).click();
+    await this.waitHelper.waitForUIUpdate(1);
   }
 
   async verifyFinanceTable(financeData: TestCpomFinanceData): Promise<void> {

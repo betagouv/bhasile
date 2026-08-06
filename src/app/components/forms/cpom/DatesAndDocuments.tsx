@@ -3,18 +3,23 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { CPOM_ACTE_SCOPE, CpomActeScope } from "@/app/utils/cpom.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { AdditionalFieldsType } from "@/config/acte-administratif.config";
+import { getCpomActesAdministratifsCategoryToDisplay } from "@/config/cpom-acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
+import { ActesAdministratifs } from "../actesAdministratifs/ActesAdministratifs";
 import FieldSetActeAdministratif from "../actesAdministratifs/FieldSetActeAdministratif";
 import InputWithValidation from "../InputWithValidation";
 import { MaxSizeNotice } from "../MaxSizeNotice";
 
 dayjs.extend(customParseFormat);
 
-export const DatesAndDocuments = () => {
+export const DatesAndDocuments = ({
+  currentScope = CPOM_ACTE_SCOPE,
+}: Props) => {
   const { watch, control, setValue, formState } = useFormContext();
 
   const errorMessages = getErrorMessages(formState, "actesAdministratifs");
@@ -26,7 +31,9 @@ export const DatesAndDocuments = () => {
   // We use a key to run the useEffect every time the dates change
   const actesDatesKey =
     actesAdministratifs
-      ?.filter((a) => a?.category === "CONVENTION")
+      ?.filter(
+        (acteAdministratif) => acteAdministratif?.category === "CONVENTION_CPOM"
+      )
       .map(
         (acteAdministratif) =>
           `${acteAdministratif?.startDate ?? ""}-${acteAdministratif?.endDate ?? ""}`
@@ -35,7 +42,7 @@ export const DatesAndDocuments = () => {
 
   useEffect(() => {
     const conventionActes = actesAdministratifs.filter(
-      (acteAdministratif) => acteAdministratif?.category === "CONVENTION"
+      (acteAdministratif) => acteAdministratif?.category === "CONVENTION_CPOM"
     );
 
     const dateEnd = conventionActes.reduce((accumulator, current) => {
@@ -84,32 +91,46 @@ export const DatesAndDocuments = () => {
           label=""
           type="hidden"
         />
-        <FieldSetActeAdministratif
-          category="CONVENTION"
-          categoryShortName="CPOM"
-          title="Contrat CPOM"
-          canAddFile={false}
-          canAddAvenant={true}
-          avenantCanExtendDateEnd={true}
-          isOptional={false}
-          additionalFieldsType={AdditionalFieldsType.DATE_START_END}
-          documentLabel="Document"
-          addFileButtonLabel="Ajouter un CPOM"
-          notice={<MaxSizeNotice className="mb-0" />}
-        />
       </div>
-      <FieldSetActeAdministratif
-        category="AUTRE"
-        categoryShortName="autre"
-        title="Autres documents"
-        canAddFile={true}
-        canAddAvenant={false}
-        isOptional={true}
-        additionalFieldsType={AdditionalFieldsType.NAME}
-        documentLabel="Document"
-        addFileButtonLabel="Ajouter un document"
-        notice={<MaxSizeNotice className="mb-0" />}
-      />
+      {currentScope === CPOM_ACTE_SCOPE ? (
+        <>
+          <FieldSetActeAdministratif
+            category="CONVENTION_CPOM"
+            categoryShortName="CPOM"
+            title="Conventions CPOM"
+            isTitleHidden
+            canAddFile={false}
+            canAddAvenant={true}
+            avenantCanExtendDateEnd={true}
+            isOptional={false}
+            additionalFieldsType={AdditionalFieldsType.DATE_START_END}
+            documentLabel="Document"
+            addFileButtonLabel="Ajouter un CPOM"
+            notice={<MaxSizeNotice className="mb-0" />}
+            structureScope={null}
+          />
+          <FieldSetActeAdministratif
+            category="AUTRE"
+            categoryShortName="autre"
+            title="Autres documents"
+            canAddFile={true}
+            canAddAvenant={false}
+            isOptional={true}
+            additionalFieldsType={AdditionalFieldsType.NAME}
+            documentLabel="Document"
+            addFileButtonLabel="Ajouter un document"
+            notice={<MaxSizeNotice className="mb-0" />}
+            structureScope={null}
+          />
+        </>
+      ) : (
+        <ActesAdministratifs
+          categoryDisplayRules={getCpomActesAdministratifsCategoryToDisplay(
+            currentScope
+          )}
+          structureScope={currentScope}
+        />
+      )}
       {errorMessages?.length > 0 && (
         <p className="text-default-error m-0 p-0" data-form-error>
           {errorMessages?.length ? errorMessages[0] : ""}
@@ -117,4 +138,8 @@ export const DatesAndDocuments = () => {
       )}
     </>
   );
+};
+
+type Props = {
+  currentScope?: CpomActeScope;
 };

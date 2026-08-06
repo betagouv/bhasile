@@ -7,8 +7,8 @@ import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
 import { getNow } from "@/app/utils/now.util";
 import { getLastVisitInMonths } from "@/app/utils/structure.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { ControleAccordion } from "./ControleAccordion";
 import { ControleTable } from "./ControleTable";
 import { EIGTable } from "./EIGTable";

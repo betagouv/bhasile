@@ -1,8 +1,8 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
-import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
+import { finalizedVersionWhere } from "../structure-versions/structure-version.db.type";
 import type {
   StatistiqueDbActivite,
   StatistiqueDbAdresse,
@@ -23,18 +23,6 @@ import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 
 /** Année plancher des EIG remontés dans les stats (borne haute = année courante). */
 const EIG_STATS_MIN_YEAR = 2015;
-
-/** Une version liée à une transformation non finalisée n'est jamais "effective". */
-const FINALIZED_VERSION_WHERE: Prisma.StructureVersionWhereInput = {
-  OR: [
-    { structureVersionTransformationId: null },
-    {
-      structureVersionTransformation: {
-        transformation: { form: { status: true } },
-      },
-    },
-  ],
-};
 
 /** Filiales directes des opérateurs donnés (résolution du filtre `operateurs`, cf. statistique.service). */
 export const findOperateurFiliales = async (
@@ -64,8 +52,15 @@ export const findPerimeterStructures = async (
         : {}),
       structureVersions: {
         some: {
-          ...FINALIZED_VERSION_WHERE,
-          effectiveDate: { lt: startOfNextUtcDay(reference) },
+          AND: [
+            finalizedVersionWhere,
+            {
+              OR: [
+                { effectiveDate: null },
+                { effectiveDate: { lt: startOfNextUtcDay(reference) } },
+              ],
+            },
+          ],
         },
       },
     },
@@ -137,8 +132,8 @@ export const findStructureAdresses = async (
       structureVersion: { select: { structureId: true } },
       repartition: true,
       placesAutorisees: true,
-      qpv: true,
-      logementSocial: true,
+      isQpv: true,
+      isLogementSocial: true,
     },
   });
 
@@ -148,8 +143,8 @@ export const findStructureAdresses = async (
     structureVersionId: row.structureVersionId!,
     repartition: row.repartition,
     placesAutorisees: row.placesAutorisees,
-    qpv: row.qpv,
-    logementSocial: row.logementSocial,
+    isQpv: row.isQpv,
+    isLogementSocial: row.isLogementSocial,
   }));
 };
 
@@ -186,7 +181,7 @@ export const findStructureVersionTimeline = async (
   return prisma.structureVersion.findMany({
     where: {
       structureId: { in: structureIds },
-      ...FINALIZED_VERSION_WHERE,
+      ...finalizedVersionWhere,
     },
     select: {
       id: true,

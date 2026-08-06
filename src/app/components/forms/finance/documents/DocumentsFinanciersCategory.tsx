@@ -3,17 +3,22 @@ import { ReactElement } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
+import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { DocumentsFinanciersItem } from "./DocumentsFinanciersItem";
 import {
-  isDocumentRequiredForYear,
+  isDocumentStillRequired,
   StructureDocument,
 } from "./documentsStructures";
 
 export const DocumentsFinanciersCategory = ({
   documentType,
   year,
+  structureType,
+  hideRequirement = false,
+  coveredDocumentsFinanciers,
 }: Props): ReactElement => {
   const { watch } = useFormContext();
 
@@ -25,11 +30,14 @@ export const DocumentsFinanciersCategory = ({
     documentsFinanciers?.filter(
       (documentFinancier) =>
         documentFinancier.category === documentType.value &&
-        documentFinancier.year === year
+        documentFinancier.year === year &&
+        (!structureType || documentFinancier.structureType === structureType)
     ) || [];
 
   const isFilled = documentsFinanciersOfCategory.length > 0;
-  const isRequiredThisYear = isDocumentRequiredForYear(documentType, year);
+  const isRequiredThisYear =
+    !hideRequirement &&
+    isDocumentStillRequired(documentType, year, coveredDocumentsFinanciers);
 
   return (
     <Accordion
@@ -89,4 +97,7 @@ export const DocumentsFinanciersCategory = ({
 type Props = {
   documentType: StructureDocument;
   year: number;
+  structureType?: StructureType;
+  hideRequirement?: boolean;
+  coveredDocumentsFinanciers?: DocumentFinancierApiType[];
 };

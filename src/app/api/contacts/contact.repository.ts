@@ -15,13 +15,8 @@ export const createOrUpdateContacts = async (
     return;
   }
 
-  let where:
-    | { structureId: number }
-    | { structureVersionId: number }
-    | { operateurId: number };
-  if (entityId.structureId !== undefined) {
-    where = { structureId: entityId.structureId };
-  } else if (entityId.structureVersionId !== undefined) {
+  let where: { structureVersionId: number } | { operateurId: number };
+  if (entityId.structureVersionId !== undefined) {
     where = { structureVersionId: entityId.structureVersionId };
   } else if (entityId.operateurId !== undefined) {
     where = { operateurId: entityId.operateurId };
@@ -37,7 +32,7 @@ export const createOrUpdateContacts = async (
 
   await tx.contact.createMany({
     data: contacts.map((contact) => ({
-      ...entityId,
+      ...where,
       prenom: contact.prenom ?? "",
       nom: contact.nom ?? "",
       telephone: contact.telephone ?? "",

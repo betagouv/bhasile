@@ -1,7 +1,9 @@
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
+import { buildRequiredDocumentsFinanciers } from "./documents-financiers";
 import { TestStructureScenario } from "./types";
+import { mirrorVersionedPlaces } from "./typologies";
 
 export const cada1: TestStructureScenario = {
   name: "CADA 1 - Multi dna, collectif, same address, all docs, old eval, controls, every actes administratifs",
@@ -57,177 +59,17 @@ export const cada1: TestStructureScenario = {
     typeBati: Repartition.COLLECTIF,
     sameAddress: true,
     adresses: [],
-    structureTypologies: [
+    structureTypologies: mirrorVersionedPlaces([
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 48, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 45, pmr: 4, lgbt: 8, fvvTeh: 7 },
       { placesAutorisees: 43, pmr: 4, lgbt: 8, fvvTeh: 7 },
-    ],
+    ]),
     documentsFinanciers: {
       allAddedViaAjout: true,
-      fileUploads: [
-        {
-          year: "2026",
-          category: "Budget prévisionnel demandé",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2026",
-          category: "Budget prévisionnel retenu (ou exécutoire)",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2025",
-          category: "Budget prévisionnel demandé",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2025",
-          category: "Budget prévisionnel retenu (ou exécutoire)",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2024",
-          category: "Budget prévisionnel demandé",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2024",
-          category: "Budget prévisionnel retenu (ou exécutoire)",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2024",
-          category: "Compte administratif soumis",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2024",
-          category: "Rapport d'activité",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Budget prévisionnel demandé",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Budget prévisionnel retenu (ou exécutoire)",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Compte administratif soumis",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Rapport d'activité",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2023",
-          category: "Compte administratif retenu",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2022",
-          category: "Budget prévisionnel demandé",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2022",
-          category: "Budget prévisionnel retenu (ou exécutoire)",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2022",
-          category: "Compte administratif soumis",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2022",
-          category: "Rapport d'activité",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2022",
-          category: "Compte administratif retenu",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2021",
-          category: "Budget prévisionnel demandé",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2021",
-          category: "Budget prévisionnel retenu (ou exécutoire)",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2021",
-          category: "Compte administratif soumis",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2021",
-          category: "Rapport d'activité",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-        {
-          year: "2021",
-          category: "Compte administratif retenu",
-          fileName: "sample.csv",
-          filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
-        },
-      ],
+      fileUploads: buildRequiredDocumentsFinanciers({
+        structureType: StructureType.CADA,
+      }),
     },
     finances: {
       2026: {
@@ -366,12 +208,12 @@ export const cada1: TestStructureScenario = {
     public: "Famille",
     contacts: [{ email: "modif-cada1@example.com" }],
     notes: "Notes modification CADA 1 - suivi renforcé.",
-    structureTypologies: [
+    structureTypologies: mirrorVersionedPlaces([
       { placesAutorisees: 52, pmr: 6, lgbt: 12, fvvTeh: 9 },
       { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 8 },
       { placesAutorisees: 47, pmr: 5, lgbt: 9, fvvTeh: 8 },
       { placesAutorisees: 45, pmr: 5, lgbt: 9, fvvTeh: 7 },
-    ],
+    ]),
     finances: {
       2026: {
         ETP: "9",

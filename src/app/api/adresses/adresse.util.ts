@@ -1,6 +1,4 @@
-import { Adresse, AdresseTypologie } from "@/generated/prisma/client";
-
-import { StructureDbDetails } from "../structures/structure.db.type";
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 
 export const buildAdresseAdministrativeComplete = (parts: {
   adresseAdministrative?: string | null;
@@ -17,25 +15,20 @@ export const buildAdresseAdministrativeComplete = (parts: {
     .filter(Boolean)
     .join(" ");
 
-export const getAdressesApiRead = (adresses?: StructureDbDetails["adresses"]) =>
+export const getAdressesApiRead = (
+  adresses?: StructureVersionDbDetails["adresses"]
+) =>
   adresses?.map((adresse) => ({
     id: adresse.id,
     adresse: adresse.adresse ?? "",
     codePostal: adresse.codePostal ?? "",
     commune: adresse.commune ?? "",
     repartition: adresse.repartition ?? undefined,
-    adresseTypologies: adresse.adresseTypologies,
+    placesAutorisees: adresse.placesAutorisees ?? undefined,
+    isQpv: adresse.isQpv,
+    isLogementSocial: adresse.isLogementSocial,
     adresseComplete: [adresse.adresse, adresse.codePostal, adresse.commune]
       .filter(Boolean)
       .join(" ")
       .trim(),
   }));
-
-export type AdresseWithTypologies = Adresse & {
-  adresseTypologies: AdresseTypologie[];
-};
-
-export type AdresseInput = Omit<AdresseWithTypologies, "id"> & {
-  createdAt?: Date;
-  updatedAt?: Date;
-};

@@ -1,15 +1,23 @@
 import Button from "@codegouvfr/react-dsfr/Button";
+import { ReactElement } from "react";
 
-export const ModificationTitle = ({ step, handleCancel }: Props) => {
+export const ModificationTitle = ({
+  step,
+  titleAside,
+  handleCancel,
+}: Props) => {
   return (
     <div className="flex justify-between items-center mx-6 mt-3">
-      <h1 className="text-xl font-bold mb-0 text-title-blue-france flex items-center gap-2">
-        <span
-          className="fr-icon-edit-line fr-icon--md before:h-5 before:w-5 mb-1"
-          aria-hidden="true"
-        />
-        <span className="italic font-normal"> Modification</span> - {step}
-      </h1>
+      <div className="flex items-center gap-4">
+        <h1 className="text-xl font-bold mb-0 text-title-blue-france flex items-center gap-2">
+          <span
+            className="fr-icon-edit-line fr-icon--md before:h-5 before:w-5 mb-1"
+            aria-hidden="true"
+          />
+          <span className="italic font-normal"> Modification</span> - {step}
+        </h1>
+        {titleAside}
+      </div>
       <Button
         onClick={handleCancel}
         aria-label="Fermer la modification"
@@ -26,5 +34,6 @@ export const ModificationTitle = ({ step, handleCancel }: Props) => {
 
 type Props = {
   step: string;
+  titleAside?: ReactElement;
   handleCancel: () => void;
 };

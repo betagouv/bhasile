@@ -2,6 +2,7 @@
 
 import { useMapLabels } from "@/app/hooks/useMapLabels";
 
+import { useCartographieRichZoneData } from "./useCartographieRichZoneData";
 import { ZoneIndicator } from "./ZoneIndicator";
 
 const OFFSETS: Record<string, { offsetX: number; offsetY: number }> = {
@@ -12,7 +13,11 @@ const OFFSETS: Record<string, { offsetX: number; offsetY: number }> = {
 };
 
 export const IdfMap = ({ zoneData }: Props) => {
-  const { containerRef, mapRef, labels } = useMapLabels({ zoneData });
+  const richZoneData = useCartographieRichZoneData();
+
+  const { containerRef, mapRef, labels } = useMapLabels({
+    zoneData: richZoneData,
+  });
 
   return (
     <div ref={containerRef} className="relative w-48 h-48">
@@ -60,6 +65,8 @@ export const IdfMap = ({ zoneData }: Props) => {
             value={label.value}
             x={label.x + offset.offsetX}
             y={label.y + offset.offsetY}
+            delta={label.delta}
+            direction={label.direction}
           />
         );
       })}

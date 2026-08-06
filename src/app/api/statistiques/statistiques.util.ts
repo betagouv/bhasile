@@ -12,7 +12,9 @@ import {
 import { StructureType } from "@/generated/prisma/client";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
+import { pickVersionBefore } from "../structure-versions/structure-version.util";
 import type {
+  DnaStructureIdsResolver,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
@@ -131,6 +133,8 @@ const isStructureActiveInPeriod = (
   return true;
 };
 
+const toDayKey = (date: Date): string => date.toISOString().slice(0, 10);
+
 export const toMonthKey = (date: Date): string =>
   date.toISOString().slice(0, 7);
 
@@ -213,44 +217,121 @@ export const filterByTwelveMonthWindow = <Item>(
   });
 };
 
+type StructureVersionTimelineIndex = Map<
+  number,
+  StatistiqueDbStructureVersionTimeline[]
+>;
+
+const indexTimelineByStructureId = (
+  timeline: StatistiqueDbStructureVersionTimeline[]
+): StructureVersionTimelineIndex => {
+  const timelineByStructureId: StructureVersionTimelineIndex = new Map();
+
+  for (const version of timeline) {
+    if (version.structureId === null) {
+      continue;
+    }
+    const versions = timelineByStructureId.get(version.structureId) ?? [];
+    versions.push(version);
+    timelineByStructureId.set(version.structureId, versions);
+  }
+
+  return timelineByStructureId;
+};
+
+const pickEffectiveVersionFromIndex = (
+  timelineByStructureId: StructureVersionTimelineIndex,
+  structureId: number,
+  date: Date
+): StatistiqueDbStructureVersionTimeline | null =>
+  pickVersionBefore(
+    timelineByStructureId.get(structureId) ?? [],
+    startOfNextUtcDay(date).getTime()
+  );
+
+/* Version effective d'une structure à date : version la plus récente dont la date d'effet est inf à `date`, sinon version socle. */
 export const getEffectiveStructureVersionAtDate = (
   structureId: number,
   date: Date,
   timeline: StatistiqueDbStructureVersionTimeline[]
-): StatistiqueDbStructureVersionTimeline | null => {
-  const cutoff = startOfNextUtcDay(date);
-  let effectiveVersion: StatistiqueDbStructureVersionTimeline | null = null;
+): StatistiqueDbStructureVersionTimeline | null =>
+  pickVersionBefore(
+    timeline.filter((version) => version.structureId === structureId),
+    startOfNextUtcDay(date).getTime()
+  );
 
-  for (const version of timeline) {
-    if (version.structureId !== structureId) {
+/**
+ * Résolveur `dnaCode → structures` pré-indexé et mémoïsé par `(dnaCode, date)`.
+ * Construit une fois par requête : la cartographie découpe le contexte par zone
+ * mais réutilise ce même résolveur (recopié par le slice), d'où un cache partagé
+ * qui évite de re-résoudre chaque évènement pour chaque zone.
+ */
+export const buildDnaStructureIdsResolver = (
+  dnaLinks: StatistiqueDbDnaLink[],
+  timeline: StatistiqueDbStructureVersionTimeline[]
+): DnaStructureIdsResolver => {
+  const linksByCode = new Map<
+    string,
+    (StatistiqueDbDnaLink & { structureId: number })[]
+  >();
+  for (const link of dnaLinks) {
+    if (link.structureId === null) {
       continue;
     }
-    if (version.effectiveDate == null || version.effectiveDate >= cutoff) {
-      continue;
-    }
-    if (effectiveVersion == null || effectiveVersion.effectiveDate == null) {
-      effectiveVersion = version;
-      continue;
-    }
-    if (
-      version.effectiveDate > effectiveVersion.effectiveDate ||
-      (version.effectiveDate.getTime() ===
-        effectiveVersion.effectiveDate.getTime() &&
-        version.id > effectiveVersion.id)
-    ) {
-      effectiveVersion = version;
-    }
+    const links = linksByCode.get(link.dna.code) ?? [];
+    links.push({ ...link, structureId: link.structureId });
+    linksByCode.set(link.dna.code, links);
   }
 
-  return effectiveVersion;
+  const timelineByStructureId = indexTimelineByStructureId(timeline);
+
+  // Clé au jour UTC : la résolution ne dépend que de `startOfNextUtcDay(date)`.
+  const cache = new Map<string, number[]>();
+
+  return (dnaCode, date) => {
+    const key = `${dnaCode}|${toDayKey(date)}`;
+    const cached = cache.get(key);
+    if (cached) {
+      return cached;
+    }
+    const structureIds = new Set<number>();
+    for (const link of linksByCode.get(dnaCode) ?? []) {
+      const effectiveVersion = pickEffectiveVersionFromIndex(
+        timelineByStructureId,
+        link.structureId,
+        date
+      );
+      if (effectiveVersion?.id === link.structureVersionId) {
+        structureIds.add(link.structureId);
+      }
+    }
+    const result = [...structureIds];
+    cache.set(key, result);
+    return result;
+  };
+};
+
+export const resolveDnaEventStructureIds = (
+  resolveDnaStructureIds: DnaStructureIdsResolver,
+  dnaCode: string,
+  date: Date,
+  activeStructureIds?: Set<number>
+): number[] => {
+  const structureIds = resolveDnaStructureIds(dnaCode, date);
+  // Copie défensive : le résolveur renvoie le tableau du cache par référence.
+  return activeStructureIds
+    ? structureIds.filter((id) => activeStructureIds.has(id))
+    : [...structureIds];
 };
 
 export const applyVersionedPlacesToTypologies = (
   typologies: StatistiqueDbTypologie[],
   timeline: StatistiqueDbStructureVersionTimeline[],
   now: Date
-): StatistiqueDbTypologie[] =>
-  typologies.map((typologie) => {
+): StatistiqueDbTypologie[] => {
+  const timelineByStructureId = indexTimelineByStructureId(timeline);
+
+  return typologies.map((typologie) => {
     if (
       typologie.structureId === null ||
       typologie.year < PLACES_VERSIONED_FROM_YEAR
@@ -259,23 +340,24 @@ export const applyVersionedPlacesToTypologies = (
     }
     const asOfDate = endOfYearUtc(typologie.year);
     const cappedDate = asOfDate < now ? asOfDate : now;
-    const effectiveVersion = getEffectiveStructureVersionAtDate(
+    const effectiveVersion = pickEffectiveVersionFromIndex(
+      timelineByStructureId,
       typologie.structureId,
-      cappedDate,
-      timeline
+      cappedDate
     );
     return {
       ...typologie,
       placesAutorisees: effectiveVersion?.placesAutorisees ?? null,
     };
   });
+};
 
 /**
  * Ne garde que les lignes (adresses, typologies, …) rattachées à la
  * StructureVersion effective de leur structure à `date` (plafonnée à `now`
  * pour ne jamais anticiper une version pas encore effective). Généralise le
- * pivot déjà utilisé pour les liens DNA (`lookupStructureIdsForDnaAtDate`) à
- * n'importe quelle donnée rattachée à une `structureVersionId`.
+ * pivot déjà utilisé pour les liens DNA à n'importe quelle donnée rattachée à
+ * une `structureVersionId`.
  */
 export const filterByEffectiveVersionAtDate = <
   Row extends { structureId: number; structureVersionId: number | null },
@@ -287,13 +369,14 @@ export const filterByEffectiveVersionAtDate = <
   now: Date = getNow()
 ): Row[] => {
   const cappedDate = date < now ? date : now;
+  const timelineByStructureId = indexTimelineByStructureId(timeline);
   const effectiveVersionIdByStructureId = new Map<number, number>();
 
   for (const structureId of structureIds) {
-    const effectiveVersion = getEffectiveStructureVersionAtDate(
+    const effectiveVersion = pickEffectiveVersionFromIndex(
+      timelineByStructureId,
       structureId,
-      cappedDate,
-      timeline
+      cappedDate
     );
     if (effectiveVersion?.id != null) {
       effectiveVersionIdByStructureId.set(structureId, effectiveVersion.id);
@@ -305,37 +388,6 @@ export const filterByEffectiveVersionAtDate = <
       effectiveVersionIdByStructureId.get(row.structureId) ===
       row.structureVersionId
   );
-};
-
-export const lookupStructureIdsForDnaAtDate = (
-  dnaCode: string,
-  date: Date,
-  dnaLinks: StatistiqueDbDnaLink[],
-  timeline: StatistiqueDbStructureVersionTimeline[],
-  activeStructureIds?: Set<number>
-): number[] => {
-  const structureIds = new Set<number>();
-
-  for (const link of dnaLinks) {
-    if (link.dna.code !== dnaCode || link.structureId === null) {
-      continue;
-    }
-    const structureId = link.structureId;
-    const effectiveVersion = getEffectiveStructureVersionAtDate(
-      structureId,
-      date,
-      timeline
-    );
-    if (effectiveVersion?.id !== link.structureVersionId) {
-      continue;
-    }
-    if (activeStructureIds && !activeStructureIds.has(structureId)) {
-      continue;
-    }
-    structureIds.add(structureId);
-  }
-
-  return [...structureIds];
 };
 
 /** Structures ouvertes à un instant (jour UTC de référence). */

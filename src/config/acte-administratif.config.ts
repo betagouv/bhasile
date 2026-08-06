@@ -49,6 +49,7 @@ export const ACTE_ADMINISTRATIF_CATEGORY_LABELS: Record<
   ARRETE_CONTRACTION: "Arrêtés de contraction",
   ARRETE_FUSION: "Arrêtés de fusion",
   CONVENTION: "Conventions",
+  CONVENTION_CPOM: "Conventions CPOM",
   STATUTS: "Statuts",
   FRAIS_DE_SIEGE: "Frais de siège",
   RAPPORT_ACTIVITE_OPERATEUR: "Rapport d'activité",

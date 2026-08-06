@@ -89,6 +89,15 @@ vi.mock("@/app/api/user-action/user-action.service", () => ({
     mockCreateStructureEvent(...args),
 }));
 
+const buildCurrentVersion = (version: Record<string, unknown> = {}) => ({
+  id: 10,
+  effectiveDate: new Date("2021-01-01"),
+  structureVersionTransformationId: null,
+  structureVersionTransformation: null,
+  dnaStructures: [],
+  ...version,
+});
+
 describe("GET /api/structures/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -103,14 +112,16 @@ describe("GET /api/structures/[id]", () => {
       filiale: null,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
-      adresses: [],
       cpomStructures: [],
       creationDate: new Date("2020-01-01"),
       date303: null,
-      dnaStructures: [],
-      latitude: 48.86,
-      longitude: 2.34,
-      structureVersions: [],
+      structureVersions: [
+        buildCurrentVersion({
+          adresses: [],
+          latitude: 48.86,
+          longitude: 2.34,
+        }),
+      ],
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);
@@ -183,13 +194,7 @@ describe("GET /api/structures/[id]", () => {
     // GIVEN : le millésime le plus récent (2024) a des places LGBT mais pas FVV/TEH,
     // un millésime antérieur (2023) avait des places FVV/TEH -> ne doit pas fuiter.
     // Les typologies sont dé-versionnées : elles vivent sur la Structure.
-    const currentVersion = {
-      id: 20,
-      effectiveDate: new Date("2021-01-01"),
-      structureVersionTransformationId: null,
-      structureVersionTransformation: null,
-      dnaStructures: [],
-    };
+    const currentVersion = buildCurrentVersion({ id: 20 });
     const dbStructure = {
       id: 2,
       name: "Test",
@@ -227,11 +232,9 @@ describe("GET /api/structures/[id]", () => {
     const dbStructure = {
       id: 1,
       type: "CADA",
-      adresses: [{ id: 42 }],
       cpomStructures: [],
       creationDate: new Date("2020-01-01"),
-      dnaStructures: [],
-      structureVersions: [],
+      structureVersions: [buildCurrentVersion({ adresses: [{ id: 42 }] })],
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);
@@ -396,7 +399,7 @@ describe("PUT /api/structures/[id]", () => {
     );
   });
 
-  it("convertit les booléens qpv/logementSocial de l'adresse en nombres via le transform du schéma", async () => {
+  it("transmet les particularités booléennes de l'adresse au service", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindStructureDepartement.mockResolvedValueOnce({
@@ -416,14 +419,9 @@ describe("PUT /api/structures/[id]", () => {
             codePostal: "75011",
             commune: "Paris",
             repartition: "DIFFUS",
-            adresseTypologies: [
-              {
-                year: 2024,
-                placesAutorisees: 10,
-                qpv: true,
-                logementSocial: false,
-              },
-            ],
+            placesAutorisees: 10,
+            isQpv: true,
+            isLogementSocial: false,
           },
         ],
       }),
@@ -434,20 +432,14 @@ describe("PUT /api/structures/[id]", () => {
       params: Promise.resolve({ id: "4" }),
     });
 
-    // THEN — the route's zod parse converts the booleans:
-    // qpv true → placesAutorisees (10), logementSocial false → 0
     expect(response.status).toBe(200);
     expect(mockUpdateOne).toHaveBeenCalledWith(
       expect.objectContaining({
         adresses: [
           expect.objectContaining({
-            adresseTypologies: [
-              expect.objectContaining({
-                placesAutorisees: 10,
-                qpv: 10,
-                logementSocial: 0,
-              }),
-            ],
+            placesAutorisees: 10,
+            isQpv: true,
+            isLogementSocial: false,
           }),
         ],
       }),

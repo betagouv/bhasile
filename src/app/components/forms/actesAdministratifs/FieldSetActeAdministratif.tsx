@@ -6,12 +6,14 @@ import { v4 as uuidv4 } from "uuid";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { useActeAdministratifRadios } from "@/app/hooks/useActeAdministratifRadios";
+import { cn } from "@/app/utils/classname.util";
 import {
   AdditionalFieldsType,
   AvenantAlternative,
 } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { StructureType } from "@/types/structure.type";
 
 import { ActeAdministratif } from "./ActeAdministratif";
 
@@ -19,6 +21,7 @@ export default function FieldSetActeAdministratif({
   category,
   categoryShortName,
   title,
+  isTitleHidden = false,
   notice,
   isOptional,
   canAddFile,
@@ -29,6 +32,7 @@ export default function FieldSetActeAdministratif({
   documentLabel,
   alternativeCategories,
   avenantAlternative,
+  structureScope,
 }: FieldSetActeAdministratifProps) {
   const { control, watch } = useFormContext();
   const { append, remove } = useFieldArray({
@@ -51,6 +55,7 @@ export default function FieldSetActeAdministratif({
     additionalFieldsType,
     alternativeCategories,
     avenantAlternative,
+    structureScope,
   });
 
   const pendingScrollUuid = useRef<string | null>(null);
@@ -65,7 +70,13 @@ export default function FieldSetActeAdministratif({
   const handleAddNewField = () => {
     const uuid = uuidv4();
     pendingScrollUuid.current = uuid;
-    append({ uuid, category });
+    append({
+      uuid,
+      category,
+      ...(structureScope !== undefined
+        ? { structureType: structureScope }
+        : {}),
+    });
   };
 
   const handleDeleteField = (index: number, shouldConfirm = true) => {
@@ -99,7 +110,12 @@ export default function FieldSetActeAdministratif({
 
   return (
     <fieldset className="flex flex-col gap-6 w-full">
-      <legend className="flex items-center gap-4 text-xl font-bold mb-4 text-title-blue-france">
+      <legend
+        className={cn(
+          "flex items-center gap-4 text-xl font-bold mb-4 text-title-blue-france",
+          isTitleHidden && "sr-only"
+        )}
+      >
         {legend} {isOptional && "(optionnel)"}
         {canAddFile && (
           <Button
@@ -173,6 +189,7 @@ type FieldSetActeAdministratifProps = {
   category: ActeAdministratifCategory;
   categoryShortName: string;
   title: string;
+  isTitleHidden?: boolean;
   notice?: string | React.ReactElement;
   isOptional?: boolean;
   canAddFile?: boolean;
@@ -183,4 +200,5 @@ type FieldSetActeAdministratifProps = {
   documentLabel: string;
   alternativeCategories?: ActeAdministratifCategory[];
   avenantAlternative?: AvenantAlternative;
+  structureScope?: StructureType | null;
 };

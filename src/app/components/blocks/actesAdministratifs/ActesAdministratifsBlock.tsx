@@ -10,7 +10,7 @@ import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { ActesAdministratifsCategory } from "./ActesAdministratifsCategory";
 
-const CPOM_CATEGORY: ActeAdministratifCategory = "CONVENTION";
+const CPOM_CATEGORY: ActeAdministratifCategory = "CONVENTION_CPOM";
 
 export const ActesAdministratifsBlock = ({
   structure,

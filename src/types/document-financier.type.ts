@@ -14,12 +14,3 @@ export const DocumentFinancierCategory = [
 
 export type DocumentFinancierCategory =
   (typeof DocumentFinancierCategory)[number];
-
-export const DocumentFinancierGranularity = [
-  "STRUCTURE",
-  "CPOM",
-  "STRUCTURE_ET_CPOM",
-] as const;
-
-export type DocumentFinancierGranularity =
-  (typeof DocumentFinancierGranularity)[number];

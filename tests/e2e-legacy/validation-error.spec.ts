@@ -1,8 +1,7 @@
 import { test } from "@playwright/test";
 
-import { deleteStructure } from "@/app/api/structures/structure.repository";
-
 import { beforeFlow } from "./helpers/before-flow";
+import { deleteStructure } from "./helpers/cleanup";
 import { completeStructureFlow } from "./helpers/complete-structure-flow";
 import { cada1 } from "./helpers/test-data/cada-1";
 import { TestStructureDataBuilder } from "./helpers/test-data/test-data-builder";
@@ -96,6 +95,7 @@ const invalidTestCases: TestStructureScenario[] = [
 
 for (const { name, formData, failingStep } of invalidTestCases) {
   test(name, async ({ page }) => {
+    test.setTimeout(180000); // Rejoue tout le flux avant l'étape en échec, uploads S3 compris
     const id = await beforeFlow(formData, page);
 
     try {

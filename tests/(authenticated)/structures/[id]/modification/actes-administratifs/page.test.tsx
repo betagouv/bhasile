@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationActesAdministratifsPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/actes-administratifs/page";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";
@@ -73,5 +74,49 @@ describe("ModificationActesAdministratifs page integration", () => {
     expect(body.id).toBe(77);
     expect(body.actesAdministratifs).toEqual(structure.actesAdministratifs);
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
+  });
+
+  it("valide sans acte propre quand le CPOM porte déjà les arrêtés du type de la structure", async () => {
+    // GIVEN
+    const base = createStructure({ id: 78 });
+    const structure = {
+      ...base,
+      actesAdministratifs: [],
+      cpomStructures: [
+        {
+          cpom: {
+            actesAdministratifs: [
+              {
+                id: 10,
+                category: "ARRETE_AUTORISATION" as const,
+                structureType: base.type,
+                parentId: null,
+                fileUploads: [{ id: 10, key: "arrete-autorisation-cpom" }],
+              },
+              {
+                id: 11,
+                category: "ARRETE_TARIFICATION" as const,
+                structureType: base.type,
+                parentId: null,
+                fileUploads: [{ id: 11, key: "arrete-tarification-cpom" }],
+              },
+            ],
+          },
+        },
+      ] as unknown as StructureApiRead["cpomStructures"],
+    };
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(
+      structure,
+      <ModificationActesAdministratifsPage />
+    );
+
+    // WHEN
+    await clickButtonByName("Valider");
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+    expect(mockRouterPush).toHaveBeenCalledWith("/structures/78");
   });
 });

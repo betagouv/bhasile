@@ -1,6 +1,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { ReactElement, useCallback } from "react";
 
+import { getSafePage } from "@/app/utils/list.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 
 export const Pagination = ({
@@ -10,7 +11,11 @@ export const Pagination = ({
   const router = useRouter();
 
   const searchParams = useSearchParams();
-  const currentPage: number = Number(searchParams.get("page")) || 0;
+  const currentPage: number = getSafePage(
+    Number(searchParams.get("page")),
+    totalElements,
+    pageSize
+  );
 
   const setCurrentPage = useCallback(
     (page: number) => {
@@ -44,7 +49,7 @@ export const Pagination = ({
           <a
             className="fr-pagination__link fr-pagination__link--prev fr-pagination__link--lg-label"
             href={currentPage - 1 < 0 ? undefined : ""}
-            aria-disabled={currentPage - 1 >= 0}
+            aria-disabled={currentPage - 1 < 0}
             role="link"
             onClick={(e) => {
               e.preventDefault();
@@ -71,7 +76,7 @@ export const Pagination = ({
             className="fr-pagination__link fr-pagination__link--next fr-pagination__link--lg-label"
             role="link"
             href={currentPage + 1 >= totalPages ? undefined : ""}
-            aria-disabled={currentPage + 1 < totalPages}
+            aria-disabled={currentPage + 1 >= totalPages}
             onClick={(e) => {
               e.preventDefault();
               if (currentPage + 1 < totalPages) {
@@ -87,7 +92,7 @@ export const Pagination = ({
             className="fr-pagination__link fr-pagination__link--last"
             role="link"
             href={currentPage + 1 >= totalPages ? undefined : ""}
-            aria-disabled={currentPage + 1 < totalPages}
+            aria-disabled={currentPage + 1 >= totalPages}
             onClick={(e) => {
               e.preventDefault();
               setCurrentPage(totalPages - 1);

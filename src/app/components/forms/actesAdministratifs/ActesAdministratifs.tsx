@@ -2,8 +2,12 @@ import FieldSetActeAdministratif from "@/app/components/forms/actesAdministratif
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { CategoryDisplayRules } from "@/config/acte-administratif.config";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { StructureType } from "@/types/structure.type";
 
-export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {
+export const ActesAdministratifs = ({
+  categoryDisplayRules,
+  structureScope,
+}: Props) => {
   const filteredCategories = Object.entries(categoryDisplayRules).filter(
     ([, rules]) => rules.shouldShow
   );
@@ -32,6 +36,7 @@ export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {
             }
             alternativeCategories={rules.alternativeCategories}
             avenantAlternative={rules.avenantAlternative}
+            structureScope={structureScope}
           />
           {index < filteredCategories.length - 1 && <hr />}
         </div>
@@ -42,4 +47,5 @@ export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {
 
 type Props = {
   categoryDisplayRules: CategoryDisplayRules;
+  structureScope?: StructureType | null;
 };

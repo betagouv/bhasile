@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: migrate legacy Structure.notes into Note rows
 // Usage: yarn one-off 20260410-migrate-structure-notes-to-note
 

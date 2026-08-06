@@ -1,7 +1,7 @@
-import { StructureDbDetails } from "../structures/structure.db.type";
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 
 export const getStructureFinessesApiRead = (
-  structureFinesses?: StructureDbDetails["structureFinesses"]
+  structureFinesses?: StructureVersionDbDetails["structureFinesses"]
 ) =>
   structureFinesses?.map((structureFiness) => ({
     id: structureFiness.id,

@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { CpomProvider } from "@/contexts/CpomContext";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 
 import { CpomHeader } from "./_components/CpomHeader";
-import { CpomProvider } from "./_context/CpomContext";
 
 async function getCpom(id: string): Promise<CpomApiRead> {
   try {
@@ -36,12 +36,8 @@ export default async function CpomLayout({
   const { id } = await params;
   const cpom = await getCpom(id);
 
-  if (!cpom) {
-    notFound();
-  }
-
   return (
-    <CpomProvider cpom={cpom}>
+    <CpomProvider entity={cpom}>
       <div className="flex flex-col h-full gap-3 pb-4">
         <CpomHeader />
         <div className="flex flex-col gap-3 w-full max-w-7xl mx-auto px-3">

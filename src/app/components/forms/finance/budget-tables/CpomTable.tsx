@@ -1,10 +1,10 @@
 import { useFormContext } from "react-hook-form";
 
-import { useCpomContext } from "@/app/(authenticated)/(with-menu)/cpoms/[id]/_context/CpomClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { parseFrenchNumber } from "@/app/utils/number.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { StructureType } from "@/types/structure.type";
 
@@ -13,7 +13,7 @@ import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 import { getBudgetTableLines } from "./getBudgetTableLines";
 
-export const CpomTable = ({ type, showTitle }: Props) => {
+export const CpomTable = ({ type, ariaLabelledBy }: Props) => {
   const { watch } = useFormContext();
   const budgets = watch("budgets") as BudgetApiType[];
 
@@ -41,13 +41,8 @@ export const CpomTable = ({ type, showTitle }: Props) => {
 
   return (
     <div>
-      {showTitle && (
-        <h2 className="text-title-blue-france text-lg mb-8 text-left font-bold">
-          {type}
-        </h2>
-      )}
       <Table
-        ariaLabelledBy="gestionBudgetaire"
+        ariaLabelledBy={ariaLabelledBy}
         headings={getBudgetTableHeading({ years: yearsInCpom })}
         enableBorders
         stickFirstColumn
@@ -74,5 +69,5 @@ export const CpomTable = ({ type, showTitle }: Props) => {
 
 type Props = {
   type: StructureType;
-  showTitle: boolean;
+  ariaLabelledBy: string;
 };

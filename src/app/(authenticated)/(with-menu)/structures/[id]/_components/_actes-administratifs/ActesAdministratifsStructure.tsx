@@ -1,23 +1,23 @@
 import { ReactElement } from "react";
 
 import { ActesAdministratifsBlock } from "@/app/components/blocks/actesAdministratifs/ActesAdministratifsBlock";
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
-
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { getCpomInheritedActes } from "@/app/utils/acteAdministratif.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 export const ActesAdministratifsStructure = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const cpomActesAdministratifs = structure.cpomStructures
-    ?.flatMap((cpomStructure) => cpomStructure.cpom?.actesAdministratifs)
-    .filter((acte): acte is ActeAdministratifApiType => !!acte);
+  const { cpomLevel, typeScoped } = getCpomInheritedActes(structure);
 
   return (
     <ActesAdministratifsBlock
       structure={structure}
-      actesAdministratifs={structure.actesAdministratifs}
+      actesAdministratifs={[
+        ...(structure.actesAdministratifs ?? []),
+        ...typeScoped,
+      ]}
       editRoute={`/structures/${structure.id}/modification/actes-administratifs`}
-      cpomActesAdministratifs={cpomActesAdministratifs}
+      cpomActesAdministratifs={cpomLevel}
     />
   );
 };

@@ -9,10 +9,16 @@ import FormWrapper, {
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
-import { getCpomDefaultValues } from "@/app/utils/cpom.util";
+import {
+  CPOM_ACTE_SCOPE,
+  CpomActeScope,
+  getCpomActesScopes,
+  getCpomDefaultValues,
+} from "@/app/utils/cpom.util";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { actesAdministratifsCpomSchema } from "@/schemas/forms/base/cpom.schema";
 
-import { useCpomContext } from "../../_context/CpomClientContext";
+import { ActesScopeSwitch } from "../../_components/ActesScopeSwitch";
 
 export default function CpomModificationActesAdministratifs() {
   const { cpom } = useCpomContext();
@@ -22,13 +28,25 @@ export default function CpomModificationActesAdministratifs() {
     nextRoute: `/cpoms/${cpom.id}`,
   });
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
+  const [currentScope, setCurrentScope] =
+    useState<CpomActeScope>(CPOM_ACTE_SCOPE);
 
   const defaultValues = getCpomDefaultValues(cpom);
+  const scopes = getCpomActesScopes(cpom);
 
   return (
     <>
       <ModificationTitle
         step="Actes administratifs"
+        titleAside={
+          scopes.length > 1 ? (
+            <ActesScopeSwitch
+              scopes={scopes}
+              currentScope={currentScope}
+              handleChange={setCurrentScope}
+            />
+          ) : undefined
+        }
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
@@ -43,7 +61,7 @@ export default function CpomModificationActesAdministratifs() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <FieldSetActesAdministratifs />
+        <FieldSetActesAdministratifs currentScope={currentScope} />
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/cpoms/${cpom.id}`}

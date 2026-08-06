@@ -3,9 +3,8 @@ import { Fragment, ReactElement } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { formatNumber } from "@/app/utils/number.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
 export const TypesPlacesStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
@@ -40,16 +39,6 @@ export const TypesPlacesStatsTable = (): ReactElement => {
           label: "Places FVV/TEH",
           subLabel: "(spécialisées)",
           value: statistiques.places.byYear.map((yearItem) => yearItem.fvvTeh),
-        },
-        {
-          label: "Places en QPV",
-          value: statistiques.places.byYear.map((yearItem) => yearItem.qpv),
-        },
-        {
-          label: "Places en logements sociaux",
-          value: statistiques.places.byYear.map(
-            (yearItem) => yearItem.logementsSociaux
-          ),
         },
       ],
     },

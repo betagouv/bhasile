@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
 
-import { AppAbilityProvider } from "@/app/context/AbilityContext";
+import { AppAbilityProvider } from "@/contexts/AbilityProvider";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructuresTable } from "../../../src/app/(authenticated)/(with-menu)/structures/_components/StructuresTable";

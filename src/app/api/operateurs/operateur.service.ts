@@ -1,5 +1,5 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
-import { paginateRows, sortRows } from "@/app/utils/list.util";
+import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Operateur } from "@/generated/prisma/client";
@@ -62,9 +62,11 @@ export const getOperateurs = async ({
     "desc"
   );
 
+  const { total, rows } = paginateWithTotal(sorted, page, MIDDLE_PAGE_SIZE);
+
   return {
-    operateurs: paginateRows(sorted, page ?? 0, MIDDLE_PAGE_SIZE),
-    totalOperateurs: filtered.length,
+    operateurs: rows,
+    totalOperateurs: total,
   };
 };
 

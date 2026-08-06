@@ -49,7 +49,7 @@ describe("cpom.repository db integration", () => {
         budgets: { create: { year: 2024 } },
         actesAdministratifs: {
           create: {
-            category: "CONVENTION",
+            category: "CONVENTION_CPOM",
             startDate: conventionStart,
             endDate: conventionEnd,
           },
@@ -87,6 +87,6 @@ describe("cpom.repository db integration", () => {
     expect(cpom?.departements[0]?.departement.id).toBe(departementId);
     expect(cpom?.structures[0]?.structureId).toBe(structureId);
     expect(cpom?.budgets[0]?.year).toBe(2024);
-    expect(cpom?.actesAdministratifs[0]?.category).toBe("CONVENTION");
+    expect(cpom?.actesAdministratifs[0]?.category).toBe("CONVENTION_CPOM");
   });
 });

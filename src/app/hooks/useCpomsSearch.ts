@@ -1,11 +1,10 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { useFetchState } from "@/contexts/FetchStateContext";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { CpomColumn } from "@/types/ListColumn";
-
-import { useFetchState } from "../context/FetchStateContext";
 
 export const useCpomsSearch = () => {
   const [cpoms, setCpoms] = useState<CpomApiRead[] | undefined>(undefined);

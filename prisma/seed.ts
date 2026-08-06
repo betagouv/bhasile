@@ -342,7 +342,14 @@ async function seed(): Promise<void> {
 
   const numberOfUnusedDnas = 50;
 
-  const dnaList = createDnaList(totalDnasNeeded + numberOfUnusedDnas);
+  const [allOperateurs, allDepartements] = await Promise.all([
+    prisma.operateur.findMany({ select: { id: true } }),
+    prisma.departement.findMany({ select: { numero: true } }),
+  ]);
+  const dnaList = createDnaList(totalDnasNeeded + numberOfUnusedDnas, {
+    operateurIds: allOperateurs.map((operateur) => operateur.id),
+    departementNumeros: allDepartements.map((departement) => departement.numero),
+  });
   await prisma.dna.createMany({ data: dnaList });
   console.log(`✅ ${dnaList.length} codes DNA créés`);
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off — PHASE 1/2 du décalage des années de typologies.
 // Fige l'année d'origine (convention « 1er janvier ») dans la colonne TEMP
 // yearOrigin. Snapshot immuable qui rend le décalage (phase 2) idempotent : la

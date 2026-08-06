@@ -1,10 +1,19 @@
 "use client";
 
-import { useMapLabels } from "@/app/hooks/useMapLabels";
+import { useMemo } from "react";
 
+import { useMapLabels } from "@/app/hooks/useMapLabels";
+import { ZoneDataInfo } from "@/types/map.type";
+
+import { richRecordToValueRecord } from "./cartographie.util";
 import { ZoneIndicator } from "./ZoneIndicator";
 
 export const RegionDetailsMap = ({ regionCode, zoneData }: Props) => {
+  const valueRecord = useMemo(
+    () => richRecordToValueRecord(zoneData),
+    [zoneData]
+  );
+
   const { containerRef, mapRef, labels } = useMapLabels({
     zoneData,
     dependencyTrigger: regionCode,
@@ -23,7 +32,7 @@ export const RegionDetailsMap = ({ regionCode, zoneData }: Props) => {
       <map-chart-reg
         key={regionCode}
         ref={mapRef}
-        data={JSON.stringify(zoneData)}
+        data={JSON.stringify(valueRecord)}
         region={regionCode}
         name={`Moyenne ${regionCode}`}
         className="w-full h-full max-w-[80%] max-h-[80%] [&>div]:w-full [&>div]:h-full [&>div]:flex [&>div]:items-center [&>div]:justify-center [&_svg]:max-w-full [&_svg]:max-h-full"
@@ -35,6 +44,8 @@ export const RegionDetailsMap = ({ regionCode, zoneData }: Props) => {
           value={label.value}
           x={label.x}
           y={label.y}
+          delta={label.delta}
+          direction={label.direction}
         />
       ))}
     </div>
@@ -43,5 +54,5 @@ export const RegionDetailsMap = ({ regionCode, zoneData }: Props) => {
 
 type Props = {
   regionCode: string;
-  zoneData: Record<string, number>;
+  zoneData: Record<string, ZoneDataInfo>;
 };

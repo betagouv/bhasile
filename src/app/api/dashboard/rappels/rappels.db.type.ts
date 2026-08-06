@@ -1,4 +1,5 @@
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
+import { resolvableVersionSelect } from "@/app/api/structure-versions/structure-version.db.type";
 import { Prisma } from "@/generated/prisma/client";
 
 const acteDatesSelect = {
@@ -15,17 +16,7 @@ export const rappelStructureSelect = {
   type: true,
   departementAdministratif: true,
   structureVersions: {
-    select: {
-      id: true,
-      effectiveDate: true,
-      communeAdministrative: true,
-      structureVersionTransformationId: true,
-      structureVersionTransformation: {
-        select: {
-          transformation: { select: { form: { select: { status: true } } } },
-        },
-      },
-    },
+    select: { ...resolvableVersionSelect, communeAdministrative: true },
   },
   operateur: { select: { id: true, name: true } },
   forms: {

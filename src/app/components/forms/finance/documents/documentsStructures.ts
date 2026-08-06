@@ -1,8 +1,7 @@
+import { isDocumentCoveredByCpom } from "@/app/utils/documentFinancier.util";
 import { CURRENT_YEAR, DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
-import {
-  DocumentFinancierCategory,
-  DocumentFinancierGranularity,
-} from "@/types/document-financier.type";
+import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 const baseYearIndex = CURRENT_YEAR - DOCUMENTS_FINANCIERS_OPEN_YEAR;
 
@@ -90,25 +89,14 @@ export const structureSubventionneesDocuments: StructureDocument[] = [
   },
 ];
 
-export const isDocumentRequiredForYear = (
+export const isDocumentStillRequired = (
   document: StructureDocument,
-  year: number
-): boolean => document.required && year <= CURRENT_YEAR - document.yearIndex;
-
-export const granularities: DocumentGranularity[] = [
-  {
-    label: "Structure",
-    value: "STRUCTURE",
-  },
-  {
-    label: "CPOM",
-    value: "CPOM",
-  },
-  {
-    label: "Structure et CPOM",
-    value: "STRUCTURE_ET_CPOM",
-  },
-];
+  year: number,
+  coveredDocumentsFinanciers: DocumentFinancierApiType[] = []
+): boolean =>
+  document.required &&
+  year <= CURRENT_YEAR - document.yearIndex &&
+  !isDocumentCoveredByCpom(coveredDocumentsFinanciers, document.value, year);
 
 export type StructureDocument = {
   label: string;
@@ -116,9 +104,4 @@ export type StructureDocument = {
   value: DocumentFinancierCategory;
   yearIndex: number;
   required: boolean;
-};
-
-type DocumentGranularity = {
-  label: string;
-  value: DocumentFinancierGranularity[number];
 };

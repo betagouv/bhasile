@@ -12,7 +12,7 @@ type SiblingStub = {
 };
 
 type VersionStub = {
-  effectiveDate: Date;
+  effectiveDate: Date | null;
   structureVersionTransformationId?: number | null;
   structureVersionTransformation: {
     id: number;
@@ -88,12 +88,12 @@ const finalizedTransformation = (
 };
 
 describe("buildStructureHistory — jalon création", () => {
-  it("synthétise la création depuis creationDate pour une structure legacy (sans transformation)", () => {
+  it("synthétise la création depuis creationDate pour une structure sur son socle (sans transformation)", () => {
     const structure = makeStructure({
       creationDate: new Date("2014-10-09T00:00:00.000Z"),
       structureVersions: [
         {
-          effectiveDate: new Date("2026-05-21T00:00:00.000Z"),
+          effectiveDate: null,
           structureVersionTransformationId: null,
           structureVersionTransformation: null,
         },
@@ -111,13 +111,13 @@ describe("buildStructureHistory — jalon création", () => {
     ]);
   });
 
-  it("retombe sur l'effectiveDate de la version baseline quand creationDate et date303 sont absents", () => {
+  it("n'affiche pas de création quand creationDate et date303 sont absents (le socle n'en porte pas)", () => {
     const structure = makeStructure({
       creationDate: null,
       date303: null,
       structureVersions: [
         {
-          effectiveDate: new Date("2015-03-10T00:00:00.000Z"),
+          effectiveDate: null,
           structureVersionTransformationId: null,
           structureVersionTransformation: null,
         },
@@ -126,13 +126,7 @@ describe("buildStructureHistory — jalon création", () => {
 
     const history = buildStructureHistory(structure, []);
 
-    expect(history).toEqual([
-      {
-        kind: "CREATION",
-        date: "2015-03-10T00:00:00.000Z",
-        sources: [],
-      },
-    ]);
+    expect(history).toEqual([]);
   });
 
   it("utilise l'effectiveDate de la transformation CREATION pour une structure moderne ex-nihilo", () => {

@@ -89,7 +89,7 @@ describe("FermetureDescriptionForm (intégration jusqu'au fetch)", () => {
       fermetureTransformation({
         id: 12,
         structureId: 104,
-        structure: { codeBhasile: "BHA-NOR-023" },
+        structure: { codeBhasile: "BHA-NOR-023", isFinalised: true },
       })
     );
 

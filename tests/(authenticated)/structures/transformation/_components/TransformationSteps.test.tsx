@@ -21,14 +21,14 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
     useOptionalTransformationContext: () =>
       mockUseOptionalTransformationContext(),
   })
 );
 
-vi.mock("@/app/context/FetchStateContext", () => ({
+vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
 }));
 
@@ -43,7 +43,9 @@ describe("TransformationSteps", () => {
 
   it("n'affiche rien quand il n'y a pas de transformation", () => {
     // WHEN
-    const { container } = render(<TransformationSteps transformation={null} />);
+    const { container } = render(
+      <TransformationSteps transformation={undefined} />
+    );
 
     // THEN
     expect(container).toBeEmptyDOMElement();
@@ -55,17 +57,17 @@ describe("TransformationSteps", () => {
       {
         id: 1,
         type: StructureVersionTransformationType.FERMETURE,
-        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001", isFinalised: true } },
       },
       {
         id: 2,
         type: StructureVersionTransformationType.EXTENSION,
-        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
       },
       {
         id: 3,
         type: StructureVersionTransformationType.CREATION,
-        structureVersion: { structureId: 1003, structure: { codeBhasile: "1003" } },
+        structureVersion: { structureId: 1003, structure: { codeBhasile: "1003", isFinalised: true } },
       },
     ] });
 
@@ -84,22 +86,22 @@ describe("TransformationSteps", () => {
       {
         id: 1,
         type: StructureVersionTransformationType.CREATION,
-        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001", isFinalised: true } },
       },
       {
         id: 2,
         type: StructureVersionTransformationType.EXTENSION,
-        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
       },
       {
         id: 3,
         type: StructureVersionTransformationType.FERMETURE,
-        structureVersion: { structureId: 1003, structure: { codeBhasile: "1003" } },
+        structureVersion: { structureId: 1003, structure: { codeBhasile: "1003", isFinalised: true } },
       },
       {
         id: 4,
         type: StructureVersionTransformationType.CONTRACTION,
-        structureVersion: { structureId: 1004, structure: { codeBhasile: "1004" } },
+        structureVersion: { structureId: 1004, structure: { codeBhasile: "1004", isFinalised: true } },
       },
     ] });
 
@@ -124,7 +126,7 @@ describe("TransformationSteps", () => {
       {
         id: 7,
         type: StructureVersionTransformationType.EXTENSION,
-        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
       },
     ] });
 
@@ -149,7 +151,7 @@ describe("TransformationSteps", () => {
       {
         id: 9,
         type: StructureVersionTransformationType.FERMETURE,
-        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001", isFinalised: true } },
       },
     ] });
 
@@ -171,7 +173,7 @@ describe("TransformationSteps", () => {
       {
         id: 7,
         type: StructureVersionTransformationType.EXTENSION,
-        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
       },
     ] });
 
@@ -194,7 +196,7 @@ describe("TransformationSteps", () => {
       {
         id: 7,
         type: StructureVersionTransformationType.EXTENSION,
-        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
       },
     ] });
 
@@ -234,7 +236,7 @@ describe("TransformationSteps", () => {
           type: type,
           structureVersion: {
             structureId: 1002,
-            structure: { codeBhasile: "1002" },
+            structure: { codeBhasile: "1002", isFinalised: true },
           },
         },
       ] });
@@ -262,7 +264,7 @@ describe("TransformationSteps", () => {
           type: StructureVersionTransformationType.EXTENSION,
           structureVersion: {
             structureId: 1002,
-            structure: { codeBhasile: "1002" },
+            structure: { codeBhasile: "1002", isFinalised: true },
           },
         },
       ],
@@ -284,7 +286,7 @@ describe("TransformationSteps", () => {
           type: StructureVersionTransformationType.EXTENSION,
           structureVersion: {
             structureId: 1002,
-            structure: { codeBhasile: "1002" },
+            structure: { codeBhasile: "1002", isFinalised: true },
           },
         },
       ],
@@ -309,7 +311,7 @@ describe("TransformationSteps", () => {
           type: StructureVersionTransformationType.EXTENSION,
           structureVersion: {
             structureId: 1002,
-            structure: { codeBhasile: "1002" },
+            structure: { codeBhasile: "1002", isFinalised: true },
           },
           form: createTransformationForm({
             validatedSlugs: ["01-identification"],

@@ -239,12 +239,22 @@ export const fillOfiiStructureFromRows = async (
         row.operateur,
         operateurMapping
       );
-      if (row.operateur && !operateurResolved) {
+      if (!row.operateur) {
+        issues.push("opérateur manquant");
+      } else if (!operateurResolved) {
         issues.push(`opérateur invalide : ${row.operateur}`);
-      } else if (operateurResolved && !operateurMap.has(operateurResolved)) {
+      } else if (!operateurMap.has(operateurResolved)) {
         issues.push(
           `opérateur inconnu en base (mapping/fallback) : ${operateurResolved}`
         );
+      }
+
+      if (!row.nom) {
+        issues.push("nom OFII manquant");
+      }
+
+      if (!row.directionTerritoriale) {
+        issues.push("direction territoriale manquante");
       }
 
       if (issues.length > 0) {
@@ -287,6 +297,19 @@ export const fillOfiiStructureFromRows = async (
 
         const operateurId = operateurMap.get(row.operateur);
 
+        // Garanti par la validation ci-dessus ; garde défensif pour respecter le NOT NULL en base.
+        if (
+          depNumero == null ||
+          operateurId == null ||
+          !row.type ||
+          !row.nom ||
+          !row.directionTerritoriale
+        ) {
+          throw new Error(
+            `Ligne OFII ${row.dnaCode} incomplète après validation (dep/opérateur/type/nom/direction territoriale)`
+          );
+        }
+
         const cleanName = getCleanName(row, depNumero, row.operateur);
 
         const dna = await tx.dna.upsert({
@@ -296,20 +319,20 @@ export const fillOfiiStructureFromRows = async (
             activeInOfiiFileSince: date,
             inactiveInOfiiFileSince: null,
             departementAdministratif: depNumero,
-            directionTerritoriale: row.directionTerritoriale ?? undefined,
+            directionTerritoriale: row.directionTerritoriale,
             nom: cleanName,
-            nomOfii: row.nom ?? undefined,
+            nomOfii: row.nom,
             operateurId,
-            type: row.type ? (row.type as StructureType) : undefined,
+            type: row.type as StructureType,
           },
           update: {
             inactiveInOfiiFileSince: null,
             departementAdministratif: depNumero,
-            directionTerritoriale: row.directionTerritoriale ?? undefined,
+            directionTerritoriale: row.directionTerritoriale,
             nom: cleanName,
-            nomOfii: row.nom ?? undefined,
+            nomOfii: row.nom,
             operateurId,
-            type: row.type ? (row.type as StructureType) : undefined,
+            type: row.type as StructureType,
           },
           select: {
             id: true,

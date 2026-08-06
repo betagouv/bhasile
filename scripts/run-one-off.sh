@@ -5,6 +5,9 @@
 set -euo pipefail
 export HUSKY=0
 
+# Un container one-off peut tourner pendant un déploiement : il laisse le pool web tranquille.
+export DATABASE_POOL_MAX=${DATABASE_POOL_MAX:-3}
+
 SCRIPT_KIND=${SCRIPT_KIND:-one-off}
 SCRIPTS_BASE_DIR="scripts/${SCRIPT_KIND}-scripts"
 

@@ -23,6 +23,13 @@ export const TIMEOUTS = {
   VALIDATION_CHECK: 2000,
   /** Timeout for waiting for a file to be uploaded */
   FILE_UPLOAD: 15000,
+  /**
+   * Marge au-delà du debounce de l'autosave agent (500 ms dans AutoSave.tsx).
+   * Sa réponse remonte le FormWrapper : toute saisie faite pendant ce
+   * round-trip est écrasée, il faut donc le laisser retomber avant de saisir
+   * la suite.
+   */
+  AUTOSAVE_DEBOUNCE: 800,
 } as const;
 
 export const URLS = {

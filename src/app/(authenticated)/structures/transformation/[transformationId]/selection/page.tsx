@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformations } from "@/app/hooks/useTransformations";
 import {
@@ -14,13 +13,14 @@ import {
   getTransformationTitle,
 } from "@/app/utils/transformation.util";
 import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
+import { useFetchState } from "@/contexts/FetchStateContext";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   TransformationFormType,
   TransformationType,
 } from "@/types/transformation.type";
 
-import { useTransformationContext } from "../_context/TransformationClientContext";
 import {
   ReinitialiserSelectionModal,
   reinitialiserSelectionModal,

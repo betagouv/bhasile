@@ -45,7 +45,7 @@ export class AdressesPage extends BasePage {
         true
       );
       await this.formHelper.fillInput(
-        'input[name="adresses.0.adresseTypologies.0.placesAutorisees"]',
+        'input[name="adresses.0.placesAutorisees"]',
         data.structureTypologies[0].placesAutorisees.toString()
       );
     } else if (data.adresses) {
@@ -65,7 +65,7 @@ export class AdressesPage extends BasePage {
         await this.waitHelper.waitForUIUpdate();
 
         await this.formHelper.fillInput(
-          `input[name="adresses.${i}.adresseTypologies.0.placesAutorisees"]`,
+          `input[name="adresses.${i}.placesAutorisees"]`,
           adresse.placesAutorisees.toString()
         );
 
