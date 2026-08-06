@@ -6,9 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ReactElement, useEffect, useState } from "react";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
-import { normalizeWords } from "@/app/utils/string.util";
-
-const DEBOUNCE_TIME = 300;
+import { SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
 
 export const ResourcesSearch = ({ suggestions }: Props): ReactElement => {
   const router = useRouter();
@@ -17,21 +15,26 @@ export const ResourcesSearch = ({ suggestions }: Props): ReactElement => {
     searchParams.get("search") ?? ""
   );
 
-  const updateSearchParam = useDebounceCallback((): void => {
+  const applySearch = (term: string): void => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
 
-    if ((params.get("search") ?? "") === searchTerm) {
+    if ((params.get("search") ?? "") === term) {
       return;
     }
 
-    if (searchTerm.length > 0) {
-      params.set("search", searchTerm);
+    if (term.length > 0) {
+      params.set("search", term);
     } else {
       params.delete("search");
     }
 
     router.replace(`?${params.toString()}`, { scroll: false });
-  }, DEBOUNCE_TIME);
+  };
+
+  const updateSearchParam = useDebounceCallback(
+    () => applySearch(searchTerm),
+    SEARCH_PARAM_DEBOUNCE_MS
+  );
 
   useEffect(() => {
     updateSearchParam();
@@ -39,15 +42,17 @@ export const ResourcesSearch = ({ suggestions }: Props): ReactElement => {
 
   return (
     <div className="bg-alt-grey mt-20 mb-10">
-      <h1 className="max-w-lg mx-auto text-5xl text-title-blue-france text-center leading-14 mb-8">
+      <h2 className="max-w-lg mx-auto text-5xl text-title-blue-france text-center leading-14 mb-8">
         Sur quel sujet peut‑on vous aider&nbsp;?
-      </h1>
+      </h2>
 
       <div className="max-w-2xl mx-auto">
         <SearchBar
           big
           label="Rechercher"
           className="mb-8"
+          allowEmptySearch
+          onButtonClick={applySearch}
           renderInput={({ className, id, type, placeholder }) => (
             <input
               className={className}
@@ -66,10 +71,6 @@ export const ResourcesSearch = ({ suggestions }: Props): ReactElement => {
               <Tag
                 key={suggestion}
                 small
-                pressed={
-                  normalizeWords(suggestion) ===
-                  normalizeWords(searchTerm)
-                }
                 nativeButtonProps={{
                   onClick: () => setSearchTerm(suggestion),
                 }}

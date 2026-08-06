@@ -116,6 +116,19 @@ describe("ResourcesContent", () => {
     ).toBeInTheDocument();
   });
 
+  it("garde le bouton Rechercher visible pendant la saisie", async () => {
+    // GIVEN
+    renderWithSearch("");
+
+    // WHEN
+    await userEvent.type(screen.getByRole("searchbox"), "cpom");
+
+    // THEN
+    expect(
+      screen.getByRole("button", { name: "Rechercher" })
+    ).toBeInTheDocument();
+  });
+
   it("remplit la recherche quand on clique sur une suggestion", async () => {
     // GIVEN
     renderWithSearch("");
