@@ -35,12 +35,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
     useTransformationContext: () => mockUseTransformationContext(),
     useOptionalTransformationContext: () => ({
       saveCurrentForm: mockSaveCurrentForm,
-      isSaverRegistered: true,
     }),
   })
 );
@@ -51,7 +50,7 @@ vi.mock("@/app/hooks/useTransformations", () => ({
   }),
 }));
 
-vi.mock("@/app/context/FetchStateContext", () => ({
+vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({
     getFetchState: () => FetchState.IDLE,
     setFetchState: vi.fn(),

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -12,6 +11,7 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import {
   TypeBatiAndAdressesFormValues,

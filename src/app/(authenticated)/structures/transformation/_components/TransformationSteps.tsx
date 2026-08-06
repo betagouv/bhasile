@@ -20,5 +20,5 @@ export const TransformationSteps = ({ transformation }: Props) => {
 };
 
 type Props = {
-  transformation: TransformationApiRead | null;
+  transformation: TransformationApiRead | undefined;
 };

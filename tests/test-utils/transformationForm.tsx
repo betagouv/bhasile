@@ -2,17 +2,17 @@ import { render } from "@testing-library/react";
 import { ReactNode, useEffect } from "react";
 import { vi } from "vitest";
 
+import { FetchStateProvider } from "@/contexts/FetchStateContext";
 import {
-  TransformationClientProvider,
-  useOptionalTransformationContext,
-} from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
-import { FetchStateProvider } from "@/app/context/FetchStateContext";
+  TransformationProvider,
+  useTransformationContext,
+} from "@/contexts/TransformationContext";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 
 import { toJsonResponse } from "./http.mock";
 
 const ShowIncompleteStepsSetter = () => {
-  const { setShouldShowIncompleteSteps } = useOptionalTransformationContext();
+  const { setShouldShowIncompleteSteps } = useTransformationContext();
   useEffect(() => {
     setShouldShowIncompleteSteps(true);
   }, [setShouldShowIncompleteSteps]);
@@ -26,10 +26,10 @@ export const renderTransformationForm = (
 ) =>
   render(
     <FetchStateProvider>
-      <TransformationClientProvider transformation={transformation}>
+      <TransformationProvider transformation={transformation}>
         {showIncompleteSteps && <ShowIncompleteStepsSetter />}
         {form}
-      </TransformationClientProvider>
+      </TransformationProvider>
     </FetchStateProvider>
   );
 

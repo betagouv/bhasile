@@ -4,9 +4,9 @@ import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
 import { formatNumber } from "@/app/utils/number.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";
 
 export const TypesPlacesBlock = (): ReactElement => {

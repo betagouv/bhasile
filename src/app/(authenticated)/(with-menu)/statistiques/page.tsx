@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
 
+import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
 import { StatistiquesHeader } from "./_components/StatistiquesHeader";
-import { StatistiquesProvider } from "./_context/StatistiquesContext";
 
 type GetStatistiquesArgs = {
   departements?: string;
@@ -69,7 +69,7 @@ export default async function StatistiquesPage({
   });
 
   return (
-    <StatistiquesProvider statistiques={statistiques}>
+    <StatistiquesProvider entity={statistiques}>
       <div className="flex flex-col h-full">
         <StatistiquesHeader />
         <StatistiquesContent />

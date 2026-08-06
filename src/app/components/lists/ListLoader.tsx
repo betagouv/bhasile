@@ -1,6 +1,6 @@
 import { PropsWithChildren, ReactElement } from "react";
 
-import { useFetchState } from "@/app/context/FetchStateContext";
+import { useFetchState } from "@/contexts/FetchStateContext";
 import { FetchState } from "@/types/fetch-state.type";
 
 import Loader from "../ui/Loader";

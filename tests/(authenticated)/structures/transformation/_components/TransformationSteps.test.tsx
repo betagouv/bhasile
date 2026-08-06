@@ -21,14 +21,14 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
     useOptionalTransformationContext: () =>
       mockUseOptionalTransformationContext(),
   })
 );
 
-vi.mock("@/app/context/FetchStateContext", () => ({
+vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
 }));
 
@@ -43,7 +43,9 @@ describe("TransformationSteps", () => {
 
   it("n'affiche rien quand il n'y a pas de transformation", () => {
     // WHEN
-    const { container } = render(<TransformationSteps transformation={null} />);
+    const { container } = render(
+      <TransformationSteps transformation={undefined} />
+    );
 
     // THEN
     expect(container).toBeEmptyDOMElement();

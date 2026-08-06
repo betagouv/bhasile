@@ -14,7 +14,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams(),
 }));
 
-vi.mock("@/app/context/FetchStateContext", () => ({
+vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({
     setFetchState: vi.fn(),
     getFetchState: vi.fn(() => "idle"),
