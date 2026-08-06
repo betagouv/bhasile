@@ -417,6 +417,23 @@ describe("transfo-huda-cada.resolve db integration", () => {
 
       expect(reasonOf(resolution)).toContain("pointent vers 2 structures");
     });
+
+    it("rejette un dossier qui prévoit plusieurs CADA d'accueil", async () => {
+      const premier = await createStructure(StructureType.CADA);
+      const second = await createStructure(StructureType.CADA);
+
+      const resolution = await resolveTargetCada(
+        prisma,
+        {
+          rawBhasileCode: `${premier.codeBhasile} et ${second.codeBhasile}`,
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(reasonOf(resolution)).toContain("2 CADA d'accueil");
+    });
   });
 
   describe("findHudaCadaTransformations", () => {
