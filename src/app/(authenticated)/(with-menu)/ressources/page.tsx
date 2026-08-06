@@ -1,11 +1,16 @@
-import { ReactElement } from "react";
+import { ReactElement, Suspense } from "react";
 
-import { readBlocks } from "@/utils-server/ressources.server.util";
+import {
+  readBlocks,
+  readSuggestions,
+} from "@/utils-server/ressources.server.util";
 
-import { ResourceBlock } from "./_components/ResourceBlock";
+import { ResourcesBlockList } from "./_components/ResourcesBlockList";
+import { ResourcesContent } from "./_components/ResourcesContent";
 
 export default function Ressources(): ReactElement {
   const blocks = readBlocks();
+  const suggestions = readSuggestions();
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -14,11 +19,10 @@ export default function Ressources(): ReactElement {
           Modèles et ressources
         </h2>
       </div>
-      <div className="flex flex-col gap-3 max-w-7xl w-full mx-auto p-6">
-        {blocks.map((block) => (
-          <ResourceBlock key={block.id} block={block} />
-        ))}
-      </div>
+
+      <Suspense fallback={<ResourcesBlockList blocks={blocks} />}>
+        <ResourcesContent blocks={blocks} suggestions={suggestions} />
+      </Suspense>
     </div>
   );
 }

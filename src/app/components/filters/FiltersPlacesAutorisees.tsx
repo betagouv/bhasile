@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
 import { useStructureStats } from "@/app/hooks/useStructureStats";
-
-const DEBOUNCE_TIME = 300;
+import { SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
 
 export const FiltersPlacesAutorisees = () => {
   const router = useRouter();
@@ -46,7 +45,7 @@ export const FiltersPlacesAutorisees = () => {
       params.delete("places");
     }
     router.replace(`?${params.toString()}`);
-  }, DEBOUNCE_TIME);
+  }, SEARCH_PARAM_DEBOUNCE_MS);
 
   useEffect(() => {
     handlePlacesAutoriseesUpdate();
