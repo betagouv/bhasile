@@ -16,6 +16,7 @@ import {
   acteAdministratifCpomSchema,
   filterActesWithKey,
 } from "./acteAdministratif.schema";
+import { DocumentFinancierSchema } from "./documentFinancier.schema";
 import { operateurSchema } from "./operateur.schema";
 
 const budgetCpomSchema = z.object({
@@ -84,10 +85,18 @@ export const financesCpomSchema = z.object({
 
 export const actesAdministratifsCpomSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey(["CONVENTION"]),
+    filterActesWithKey(["CONVENTION_CPOM"]),
     z.array(acteAdministratifCpomSchema).optional()
   ),
 });
+
+export const documentsFinanciersCpomSchema = z.object({
+  documentsFinanciers: z.array(DocumentFinancierSchema).optional(),
+});
+
+export const financesAndDocumentsCpomSchema = financesCpomSchema.and(
+  documentsFinanciersCpomSchema
+);
 
 export const compositionCpomSchema = z.object({
   structures: z.array(cpomStructureSchema),
@@ -96,6 +105,7 @@ export const compositionCpomSchema = z.object({
 export const cpomSchema = descriptionCpomSchema
   .and(financesCpomSchema)
   .and(actesAdministratifsCpomSchema)
+  .and(documentsFinanciersCpomSchema)
   .and(compositionCpomSchema)
   .refine(
     (data) => {
@@ -142,7 +152,7 @@ export const cpomSchema = descriptionCpomSchema
         (acteAdministratif) =>
           !acteAdministratif.parentId &&
           !acteAdministratif.parentUuid &&
-          acteAdministratif.category === "CONVENTION"
+          acteAdministratif.category === "CONVENTION_CPOM"
       );
       if (!convention) {
         return true;

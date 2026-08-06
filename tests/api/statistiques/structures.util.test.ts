@@ -54,8 +54,8 @@ const testAdresse = (
   structureVersionId,
   repartition,
   placesAutorisees,
-  qpv: 0,
-  logementSocial: 0,
+  isQpv: false,
+  isLogementSocial: false,
 });
 
 const cpomLink = (

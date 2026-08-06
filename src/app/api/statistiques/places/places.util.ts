@@ -1,4 +1,3 @@
-import { endOfYearUtc } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
 import { roundStatsRate } from "@/app/utils/statistiques-format.util";
@@ -13,7 +12,7 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologieValues,
-  StatistiquesAdresseYearContext,
+  StatistiquesAdresseSnapshotContext,
   StatistiquesContext,
   StatistiquesTypologieYearContext,
 } from "../statistiques.db.type";
@@ -43,8 +42,7 @@ type TauxEquipement = {
   tauxEquipement: number | null;
 };
 
-type PlacesIndicators = PlacesSpeciales &
-  PlacesSpecialesAdresse &
+type PlacesTypologieIndicators = PlacesSpeciales &
   TauxEquipement & {
     totalPlaces: number;
   };
@@ -77,8 +75,9 @@ const sumAdressePlacesSpeciales = (
   let logementsSociaux = 0;
 
   for (const adresse of adressesInScope) {
-    qpv += adresse.qpv ?? 0;
-    logementsSociaux += adresse.logementSocial ?? 0;
+    const places = adresse.placesAutorisees ?? 0;
+    qpv += adresse.isQpv ? places : 0;
+    logementsSociaux += adresse.isLogementSocial ? places : 0;
   }
 
   return { qpv, logementsSociaux };
@@ -112,27 +111,16 @@ const computeTauxEquipementAgrege = (
   };
 };
 
-const computePlacesIndicators = (
+const computePlacesTypologieIndicators = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>,
-  adresses: StatistiqueDbAdresse[],
-  departements: StatistiqueDbDepartement[],
-  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[],
-  referenceDate: Date,
-  now: Date
-): PlacesIndicators => {
+  departements: StatistiqueDbDepartement[]
+): PlacesTypologieIndicators => {
   const structuresWithTypologie = filterStructuresWithTypologie(
     structures,
     typologieMap
   );
   const totalPlaces = computeTotalPlaces(structuresWithTypologie, typologieMap);
-  const adressesInScope = filterByEffectiveVersionAtDate(
-    adresses,
-    structuresWithTypologie.map((structure) => structure.id),
-    referenceDate,
-    structureVersionTimeline,
-    now
-  );
 
   return {
     totalPlaces,
@@ -141,8 +129,24 @@ const computePlacesIndicators = (
       structuresWithTypologie,
       typologieMap
     ),
-    ...sumAdressePlacesSpeciales(adressesInScope),
   };
+};
+
+// QPV / logement social :  snapshot à date (version courante)
+const computeAdressePlacesSpecialesSnapshot = (
+  structures: StatistiqueDbStructure[],
+  adresses: StatistiqueDbAdresse[],
+  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[],
+  now: Date
+): PlacesSpecialesAdresse => {
+  const adressesInScope = filterByEffectiveVersionAtDate(
+    adresses,
+    structures.map((structure) => structure.id),
+    now,
+    structureVersionTimeline,
+    now
+  );
+  return sumAdressePlacesSpeciales(adressesInScope);
 };
 
 export const computePlacesStatistiques = (
@@ -161,13 +165,11 @@ export const computePlacesStatistiques = (
   const now = getNow();
 
   return {
-    ...computePlacesIndicators(
+    ...computePlacesTypologieIndicators(structures, typologieMap, departements),
+    ...computeAdressePlacesSpecialesSnapshot(
       structures,
-      typologieMap,
       adresses,
-      departements,
       structureVersionTimeline,
-      now,
       now
     ),
     byYear: mapTypologieYears<PlacesByYearStat>(
@@ -175,14 +177,10 @@ export const computePlacesStatistiques = (
       activeStructureIdsByPeriod,
       typologies,
       (year, structuresForYear) =>
-        computePlacesIndicators(
+        computePlacesTypologieIndicators(
           structuresForYear,
           getTypologieMapForExactYear(typologies, year),
-          adresses,
-          departements,
-          structureVersionTimeline,
-          endOfYearUtc(year),
-          now
+          departements
         )
     ),
   };
@@ -210,25 +208,14 @@ export const computeTypologieFieldForYear = (
   );
 };
 
-type PlacesAdresseField = "qpv" | "logementSocial";
-
-/** Computes a single adresse field (qpv/logementSocial) for one year, for cartographie one-indicator requests. */
-export const computeAdresseFieldForYear = (
-  context: StatistiquesAdresseYearContext,
-  year: number,
-  field: PlacesAdresseField
-): number | null => {
-  const resolved = resolveStructuresWithTypologieForYear(context, year);
-  if (!resolved) {
-    return null;
-  }
-
-  const adressesInScope = filterByEffectiveVersionAtDate(
+/** Snapshot QPV / logement social à date (version courante), pour la cartographie. */
+export const computeAdresseSnapshot = (
+  context: StatistiquesAdresseSnapshotContext,
+  field: keyof PlacesSpecialesAdresse
+): number =>
+  computeAdressePlacesSpecialesSnapshot(
+    context.structures,
     context.adresses,
-    resolved.structures.map((structure) => structure.id),
-    endOfYearUtc(year),
-    context.structureVersionTimeline
-  );
-
-  return sumValues(adressesInScope.map((adresse) => adresse[field])) ?? 0;
-};
+    context.structureVersionTimeline,
+    getNow()
+  )[field];

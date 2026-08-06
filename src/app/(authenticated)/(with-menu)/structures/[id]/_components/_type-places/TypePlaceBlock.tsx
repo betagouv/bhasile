@@ -6,8 +6,8 @@ import { ReactElement } from "react";
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
 import { getMostRecentMillesime } from "@/app/utils/structure.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { TypePlaceCharts } from "./TypePlaceCharts";
 import { TypePlaceHistory } from "./TypePlaceHistory";
 

@@ -1,3 +1,5 @@
+export type SearchParams = { [key: string]: string | string[] | undefined };
+
 export const getFirstParam = (
   value: string | string[] | undefined
 ): string | null => {
@@ -6,6 +8,9 @@ export const getFirstParam = (
   }
   return value ?? null;
 };
+
+export const getPageParam = (searchParams: SearchParams, key: string): number =>
+  Number(getFirstParam(searchParams[key])) || 0;
 
 export const deletePaginationParams = (params: URLSearchParams): void => {
   for (const key of Array.from(params.keys())) {

@@ -19,6 +19,7 @@ type SvtInput = {
   structureType?: StructureType | null;
   operateur?: { id: number; name: string };
   structureOperateur?: { id: number; name: string };
+  structureIsFinalised?: boolean;
   departement?: string;
   formStepStatuses?: StepStatus[];
 };
@@ -30,12 +31,19 @@ const makeSvt = (input: SvtInput): StructureVersionTransformationApiRead =>
     structureType: input.structureType ?? null,
     operateur: input.operateur,
     structureVersion:
-      input.departement || input.structureOperateur
+      input.departement ||
+      input.structureOperateur ||
+      input.structureIsFinalised !== undefined
         ? {
             departementAdministratif: input.departement,
-            structure: input.structureOperateur
-              ? { operateur: input.structureOperateur }
-              : undefined,
+            structure:
+              input.structureOperateur ||
+              input.structureIsFinalised !== undefined
+                ? {
+                    operateur: input.structureOperateur,
+                    isFinalised: input.structureIsFinalised ?? true,
+                  }
+                : undefined,
           }
         : undefined,
     form: input.formStepStatuses
@@ -97,6 +105,19 @@ describe("getTransformationStatus", () => {
     });
 
     expect(getTransformationStatus(transformation)).toBe("A_FINALISER");
+  });
+
+  it("renvoie A_INITIALISER quand les seules étapes renseignées sont PRE_REMPLI", () => {
+    const transformation = makeTransformation({
+      svts: [
+        makeSvt({
+          type: StructureVersionTransformationType.FERMETURE,
+          formStepStatuses: [StepStatus.PRE_REMPLI, StepStatus.NON_COMMENCE],
+        }),
+      ],
+    });
+
+    expect(getTransformationStatus(transformation)).toBe("A_INITIALISER");
   });
 });
 
@@ -371,5 +392,87 @@ describe("buildDashboardTransformationRows", () => {
       ["A_INITIALISER", "Adoma", 4],
       ["A_INITIALISER", "Coallia", 1],
     ]);
+  });
+});
+
+describe("buildDashboardTransformationRows — structures non finalisées", () => {
+  const transformationOnStructure = (
+    id: number,
+    structureIsFinalised: boolean
+  ) =>
+    makeTransformation({
+      id,
+      svts: [
+        makeSvt({
+          type: StructureVersionTransformationType.FERMETURE,
+          departement: "50",
+          structureIsFinalised,
+        }),
+      ],
+    });
+
+  it("conserve une transformation dont la structure est finalisée", () => {
+    const rows = buildDashboardTransformationRows(
+      [transformationOnStructure(1, true)],
+      noFilters
+    );
+
+    expect(rows).toHaveLength(1);
+  });
+
+  it("masque une transformation dont la structure n'est pas finalisée", () => {
+    const rows = buildDashboardTransformationRows(
+      [transformationOnStructure(1, false)],
+      noFilters
+    );
+
+    expect(rows).toHaveLength(0);
+  });
+
+  it("masque dès qu'une seule des structures de la transformation n'est pas finalisée", () => {
+    const transformation = makeTransformation({
+      svts: [
+        makeSvt({
+          id: 1,
+          type: StructureVersionTransformationType.CONTRACTION,
+          departement: "50",
+          structureIsFinalised: true,
+        }),
+        makeSvt({
+          id: 2,
+          type: StructureVersionTransformationType.EXTENSION,
+          departement: "50",
+          structureIsFinalised: false,
+        }),
+      ],
+    });
+
+    expect(
+      buildDashboardTransformationRows([transformation], noFilters)
+    ).toHaveLength(0);
+  });
+
+  it("conserve une transformation de création pure, sans structure rattachée", () => {
+    const transformation = makeTransformation({
+      svts: [
+        makeSvt({
+          type: StructureVersionTransformationType.CREATION,
+          departement: "50",
+        }),
+      ],
+    });
+
+    expect(
+      buildDashboardTransformationRows([transformation], noFilters)
+    ).toHaveLength(1);
+  });
+
+  it("exclut du total les transformations masquées", () => {
+    const rows = buildDashboardTransformationRows(
+      [transformationOnStructure(1, false), transformationOnStructure(2, true)],
+      noFilters
+    );
+
+    expect(rows.map((row) => row.transformationId)).toEqual([2]);
   });
 });

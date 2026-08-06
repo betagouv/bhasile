@@ -44,7 +44,7 @@ const buildCompleteStructureVersionTransformation = (
     departementAdministratif: "Manche",
     effectiveDate: "2026-08-25T12:00:00.000Z",
     structure: {
-      codeBhasile: "BHA-NOR-025",
+      codeBhasile: "BHA-NOR-025", isFinalised: true,
       operateur: { id: 10, name: "Groupe SOS" },
     },
     placesAutorisees: 47,
@@ -147,7 +147,7 @@ describe("StructureVersionTransformationItem", () => {
       operateur: undefined,
       structureVersion: {
         ...buildCompleteStructureVersionTransformation().structureVersion,
-        structure: { codeBhasile: "BHA-NOR-025", operateur: undefined },
+        structure: { codeBhasile: "BHA-NOR-025", isFinalised: true, operateur: undefined },
       },
     });
 
@@ -168,7 +168,7 @@ describe("StructureVersionTransformationItem", () => {
       operateur: { id: 99, name: "Opérateur fallback" },
       structureVersion: {
         ...buildCompleteStructureVersionTransformation().structureVersion,
-        structure: { codeBhasile: "BHA-NOR-025", operateur: undefined },
+        structure: { codeBhasile: "BHA-NOR-025", isFinalised: true, operateur: undefined },
       },
     });
 
@@ -243,7 +243,7 @@ describe("StructureVersionTransformationItem", () => {
       structureVersion: {
         ...buildCompleteStructureVersionTransformation().structureVersion,
         structure: {
-          codeBhasile: "BHA-NOR-025",
+          codeBhasile: "BHA-NOR-025", isFinalised: true,
           operateur: { id: 10, name: "Groupe SOS" },
           placesAutorisees: 47,
         },
@@ -269,7 +269,7 @@ describe("StructureVersionTransformationItem", () => {
       structureVersion: {
         ...buildCompleteStructureVersionTransformation().structureVersion,
         structure: {
-          codeBhasile: "BHA-NOR-025",
+          codeBhasile: "BHA-NOR-025", isFinalised: true,
           operateur: { id: 10, name: "Groupe SOS" },
           placesAutorisees: 1,
         },
@@ -294,7 +294,7 @@ describe("StructureVersionTransformationItem", () => {
       structureVersion: {
         ...buildCompleteStructureVersionTransformation().structureVersion,
         structure: {
-          codeBhasile: "BHA-NOR-025",
+          codeBhasile: "BHA-NOR-025", isFinalised: true,
           operateur: { id: 10, name: "Groupe SOS" },
           placesAutorisees: 0,
         },

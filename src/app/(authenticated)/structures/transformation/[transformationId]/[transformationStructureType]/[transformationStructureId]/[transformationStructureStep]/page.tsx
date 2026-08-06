@@ -2,8 +2,8 @@
 
 import { notFound, useParams } from "next/navigation";
 
-import { useTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { TransformationStructureHeader } from "@/app/components/transformations/TransformationStructureHeader";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,

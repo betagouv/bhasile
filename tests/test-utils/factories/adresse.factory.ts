@@ -1,14 +1,13 @@
-import {
-  AdresseApiType,
-  AdresseTypologieApiType,
-} from "@/schemas/api/adresse.schema";
+import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 
 export const createAdresse = ({
   id,
   adresse,
   commune,
-  typologies,
+  placesAutorisees,
+  isQpv,
+  isLogementSocial,
   repartition,
 }: CreateLogementsArgs): AdresseApiType => {
   return {
@@ -17,7 +16,9 @@ export const createAdresse = ({
     codePostal: "75001",
     commune: commune ?? "Paris",
     repartition: repartition ?? Repartition.DIFFUS,
-    adresseTypologies: typologies ?? [],
+    placesAutorisees,
+    isQpv: isQpv ?? false,
+    isLogementSocial: isLogementSocial ?? false,
   };
 };
 
@@ -25,6 +26,8 @@ type CreateLogementsArgs = {
   id?: number;
   adresse?: string;
   commune?: string;
-  typologies?: AdresseTypologieApiType[];
+  placesAutorisees?: number;
+  isQpv?: boolean;
+  isLogementSocial?: boolean;
   repartition?: Repartition;
 };

@@ -8,8 +8,6 @@ import { FileUploadWithLink, useFileUpload } from "@/app/hooks/useFileUpload";
 import { getShortDisplayedName } from "@/app/utils/file-upload.util";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
-import { granularities } from "./documentsStructures";
-
 export const DocumentsFinanciersItem = ({
   documentFinancier,
 }: Props): ReactElement => {
@@ -72,14 +70,6 @@ export const DocumentsFinanciersItem = ({
   return (
     <div className="flex items-center gap-2 text-xs text-mention-grey">
       <span className="fr-icon-file-text-fill text-title-blue-france fr-icon--sm" />
-      <span className="text-default-grey">
-        {
-          granularities.find(
-            (granularity) => granularity.value === documentFinancier.granularity
-          )?.label
-        }
-      </span>
-      {" - "}
       <span>
         {documentFinancier.name ||
           getShortDisplayedName(fileData?.originalName)}

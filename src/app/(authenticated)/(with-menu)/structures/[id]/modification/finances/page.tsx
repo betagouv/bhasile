@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { BudgetTables } from "@/app/components/forms/finance/BudgetTables";
 import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/DocumentsFinanciers";
 import { IndicateursFinanciers } from "@/app/components/forms/finance/IndicateursFinanciers";
@@ -13,6 +12,7 @@ import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";
 import { anyModificationFinanceFormValues } from "@/schemas/forms/modification/modificationFinance.schema";
 import { FormKind } from "@/types/global";
@@ -50,7 +50,7 @@ export default function ModificationFinanceForm() {
   return (
     <>
       <ModificationTitle
-        step="Finances"
+        step="Finance"
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
@@ -65,11 +65,7 @@ export default function ModificationFinanceForm() {
         onSubmit={onSubmit}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <DocumentsFinanciers
-          className="mb-6"
-          hasAccordion
-          formKind={FormKind.MODIFICATION}
-        />
+        <DocumentsFinanciers className="mb-6" hasAccordion />
         <IndicateursFinanciers />
         <hr />
 

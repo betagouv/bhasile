@@ -9,6 +9,7 @@ export type DNColumn = {
   stringValue: string;
 };
 
+// L'API renvoie `Dossier.number` en Int, pas en String.
 export type DNDossierNode = {
   number: number;
 };

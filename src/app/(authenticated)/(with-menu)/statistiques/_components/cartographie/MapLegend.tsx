@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
+
 export const MapLegend = ({ zoneData }: Props) => {
   const { min, max } = useMemo(() => {
     const values = Object.values(zoneData);
@@ -17,8 +19,8 @@ export const MapLegend = ({ zoneData }: Props) => {
       <span className="uppercase font-bold">Légende</span>
       <div className="w-full h-4 bg-linear-to-r from-[#DBDAFF] to-[#00005F]" />
       <div className="flex justify-between w-full px-0.5 mt-0.5">
-        <span>{min}</span>
-        <span>{max}</span>
+        <NumberDisplay value={min} compact />
+        <NumberDisplay value={max} compact />
       </div>
     </div>
   );

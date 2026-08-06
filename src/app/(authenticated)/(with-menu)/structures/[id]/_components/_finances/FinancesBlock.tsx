@@ -4,8 +4,8 @@ import { ReactElement, useState } from "react";
 import { Block } from "@/app/components/common/Block";
 import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { BudgetExecutoire } from "./BudgetExecutoire";
 import { CpomStaticTable } from "./CpomStaticTable";
 import { DocumentsFinanciers } from "./DocumentsFinanciers";
@@ -33,7 +33,7 @@ export const FinancesBlock = (): ReactElement => {
 
   return (
     <Block
-      title="Finances"
+      title="Finance"
       iconClass="fr-icon-money-euro-box-line"
       onEdit={() => {
         router.push(`/structures/${structure.id}/modification/finances`);

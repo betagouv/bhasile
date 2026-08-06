@@ -7,7 +7,5 @@ export const createDefaultDnaStructures = (): DnaStructureApiType[] => [
     dna: {
       code: "C0001",
     },
-    startDate: undefined,
-    endDate: undefined,
   },
 ];

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 
 import { cn } from "@/app/utils/classname.util";
-import { StepStatus } from "@/types/form.type";
+import { isStepNotStarted, StepStatus } from "@/types/form.type";
 
 export const FormStepTab = ({
   title,
@@ -44,7 +44,7 @@ export const FormStepTab = ({
         À VÉRIFIER
       </Tag>
     )}
-    {status === StepStatus.NON_COMMENCE && (
+    {isStepNotStarted(status) && (
       <Tag
         className="!bg-[var(--color-background-contrast-warning)]  !text-[var(--color-text-default-warning)] font-bold"
         iconId="fr-icon-eye-line"

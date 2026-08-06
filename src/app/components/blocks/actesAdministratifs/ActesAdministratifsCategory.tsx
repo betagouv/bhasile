@@ -1,5 +1,9 @@
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 
+import {
+  getActeDisplayCategory,
+  hasDownloadableFile,
+} from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
@@ -10,6 +14,7 @@ type Props = {
   category: ActeAdministratifCategory;
   actesAdministratifs: ActeAdministratifApiType[];
   isCpom?: boolean;
+  showCpomBadge?: boolean;
 };
 
 export const ActesAdministratifsCategory = ({
@@ -17,11 +22,17 @@ export const ActesAdministratifsCategory = ({
   category,
   actesAdministratifs,
   isCpom = false,
+  showCpomBadge = true,
 }: Props) => {
+  const parentActesWithDocument = actesAdministratifs
+    .filter((acteAdministratif) => !acteAdministratif.parentId)
+    .filter(hasDownloadableFile);
+
   const actesAdministratifsOfCategory = isCpom
-    ? actesAdministratifs.filter((acte) => !acte.parentId)
-    : actesAdministratifs.filter(
-        (acte) => acte.category === category && !acte.parentId
+    ? parentActesWithDocument
+    : parentActesWithDocument.filter(
+        (acteAdministratif) =>
+          getActeDisplayCategory(acteAdministratif) === category
       );
 
   if (!actesAdministratifsOfCategory.length) {
@@ -36,6 +47,7 @@ export const ActesAdministratifsCategory = ({
             key={acteAdministratif.id}
             acteAdministratif={acteAdministratif}
             allActesAdministratifs={actesAdministratifs}
+            showCpomBadge={showCpomBadge}
           />
         ))}
       </div>

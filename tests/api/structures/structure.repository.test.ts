@@ -19,9 +19,12 @@ import { ControleType } from "@/types/controle.type";
 import { StepStatus } from "@/types/form.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
+import { createReferentialDna } from "../../test-utils/referential-dna";
+
 describe("structure.repository db integration", () => {
   const createdStructureIds: number[] = [];
   const createdOperateurIds: number[] = [];
+  const createdDnaIds: number[] = [];
 
   const createStructure = async (type?: StructureType) => {
     const structure = await prisma.structure.create({
@@ -35,6 +38,13 @@ describe("structure.repository db integration", () => {
     });
     createdStructureIds.push(structure.id);
     return structure;
+  };
+
+  const createDna = async (code: string) => {
+    const dna = await createReferentialDna(code);
+    createdDnaIds.push(dna.id);
+    createdOperateurIds.push(dna.operateurId);
+    return dna;
   };
 
   const createFileUpload = async (prefix: string) => {
@@ -69,7 +79,7 @@ describe("structure.repository db integration", () => {
       orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
       include: {
         contacts: true,
-        adresses: { include: { adresseTypologies: true } },
+        adresses: true,
         antennes: true,
         structureFinesses: { include: { finess: true } },
         dnaStructures: { include: { dna: true } },
@@ -82,6 +92,16 @@ describe("structure.repository db integration", () => {
         where: {
           id: {
             in: createdStructureIds,
+          },
+        },
+      });
+    }
+
+    if (createdDnaIds.length > 0) {
+      await prisma.dna.deleteMany({
+        where: {
+          id: {
+            in: createdDnaIds,
           },
         },
       });
@@ -562,16 +582,16 @@ describe("structure.repository db integration", () => {
       codePostal: "31000",
       commune: "Toulouse",
       repartition: Repartition.DIFFUS,
-      adresseTypologies: [
-        { year: 2026, placesAutorisees: 11, qpv: 2, logementSocial: 3 },
-      ],
+      placesAutorisees: 11,
+      isQpv: true,
+      isLogementSocial: true,
     };
     await updateOne({
       id: structure.id,
       adresses: [newAdresse],
     });
 
-    // THEN: old address is removed and new one created with typology
+    // THEN: old address is removed and new one created
     const version = await fetchCurrentVersion(structure.id);
     expect(version.adresses).toHaveLength(1);
     expect(version.adresses[0].id).not.toBe(oldAdresseId);
@@ -580,11 +600,10 @@ describe("structure.repository db integration", () => {
       codePostal: newAdresse.codePostal,
       commune: newAdresse.commune,
       repartition: "DIFFUS",
+      placesAutorisees: 11,
+      isQpv: true,
+      isLogementSocial: true,
     });
-    expect(version.adresses[0].adresseTypologies).toHaveLength(1);
-    expect(version.adresses[0].adresseTypologies[0]).toMatchObject(
-      newAdresse.adresseTypologies[0]
-    );
   });
 
   it("remplace la liste des antennes sur la version courante", async () => {
@@ -614,14 +633,14 @@ describe("structure.repository db integration", () => {
   it("remplace la liste des dnaStructures sur la version courante", async () => {
     // GIVEN: a rolling version with one dna link
     const structure = await createStructure();
-    const oldCode = `DNA-OLD-${Date.now()}-${randomUUID()}`;
+    const { code: oldCode } = await createDna(`DNA-OLD-${randomUUID()}`);
     await updateOne({
       id: structure.id,
       dnaStructures: [{ dna: { code: oldCode } }],
     });
 
     // WHEN: a different dna code is provided
-    const newCode = `DNA-NEW-${Date.now()}-${randomUUID()}`;
+    const { code: newCode } = await createDna(`DNA-NEW-${randomUUID()}`);
     await updateOne({
       id: structure.id,
       dnaStructures: [{ description: "New DNA", dna: { code: newCode } }],
@@ -637,7 +656,7 @@ describe("structure.repository db integration", () => {
   it("fusionne les codes DNA en doublon en un seul lien au lieu de planter", async () => {
     // GIVEN: an empty structure
     const structure = await createStructure();
-    const duplicatedCode = `DNA-DUP-${Date.now()}-${randomUUID()}`;
+    const { code: duplicatedCode } = await createDna(`DNA-DUP-${randomUUID()}`);
 
     // WHEN: the same DNA code is sent twice in one update (e.g. an autosaved draft)
     await updateOne({
@@ -1182,7 +1201,7 @@ describe("structure.repository db integration", () => {
       // GIVEN: a structure (type = invariant Structure scalar) edited via the rolling write
       const structure = await createStructure(StructureType.HUDA);
       const nom = `Liste-Nom-${randomUUID()}`;
-      const dnaCode = `DNA-LST-${randomUUID()}`;
+      const { code: dnaCode } = await createDna(`DNA-LST-${randomUUID()}`);
       await updateOne({
         id: structure.id,
         nom,
@@ -1192,9 +1211,9 @@ describe("structure.repository db integration", () => {
             codePostal: "75001",
             commune: "Paris",
             repartition: Repartition.DIFFUS,
-            adresseTypologies: [
-              { year: 2026, placesAutorisees: 42, qpv: 0, logementSocial: 0 },
-            ],
+            placesAutorisees: 42,
+            isQpv: false,
+            isLogementSocial: false,
           },
         ],
         structureTypologies: [{ year: 2025, placesAutorisees: 42 }],

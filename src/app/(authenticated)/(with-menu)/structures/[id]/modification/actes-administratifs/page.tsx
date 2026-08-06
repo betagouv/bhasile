@@ -9,26 +9,21 @@ import FormWrapper, {
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
+import {
+  getCpomCoveredActeCategories,
+  relaxCoveredCategories,
+} from "@/app/utils/acteAdministratif.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
-import {
-  actesAdministratifsAutoriseesSchema,
-  ActesAdministratifsFormValues,
-  actesAdministratifsSubventionneesSchema,
-} from "@/schemas/forms/base/acteAdministratif.schema";
-
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { ActesAdministratifsFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
+import { getActesAdministratifsSchema } from "@/schemas/forms/base/acteAdministratif/getActesAdministratifsSchema";
 
 export default function ModificationQualiteForm() {
   const { structure } = useStructureContext();
 
-  let schema;
-  if (structure.isAutorisee) {
-    schema = actesAdministratifsAutoriseesSchema;
-  } else {
-    schema = actesAdministratifsSubventionneesSchema;
-  }
+  const schema = getActesAdministratifsSchema(structure);
 
   const { handleSubmit } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
@@ -58,8 +53,10 @@ export default function ModificationQualiteForm() {
     ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)
     ?.join(",");
 
-  const categoriesRules =
-    getStructureActesAdministratifsCategoryToDisplay(structure);
+  const categoriesRules = relaxCoveredCategories(
+    getStructureActesAdministratifsCategoryToDisplay(structure),
+    getCpomCoveredActeCategories(structure)
+  );
 
   return (
     <>

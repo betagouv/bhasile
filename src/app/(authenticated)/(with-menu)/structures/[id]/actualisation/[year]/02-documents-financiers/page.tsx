@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation";
 import { z } from "zod";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { AutoSave } from "@/app/components/forms/AutoSave";
 import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/DocumentsFinanciers";
 import FormWrapper, {
@@ -12,12 +11,12 @@ import FormWrapper, {
 import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 import {
   DocumentsFinanciersFlexibleFormValues,
   DocumentsFinanciersFlexibleSchema,
-  DocumentsFinanciersStrictSchema,
+  getDocumentsFinanciersStrictSchema,
 } from "@/schemas/forms/base/documentFinancier.schema";
-import { FormKind } from "@/types/global";
 
 import { ActualisationTabs } from "../_components/ActualisationTabs";
 
@@ -28,6 +27,8 @@ export default function ActualisationDocumentsFinanciers() {
   const year = Number(useParams().year);
 
   const defaultValues = getActualisationDefaultValues({ structure });
+
+  const strictSchema = getDocumentsFinanciersStrictSchema(structure);
 
   const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
     year,
@@ -41,13 +42,13 @@ export default function ActualisationDocumentsFinanciers() {
           data.documentsFinanciers
         ),
       },
-      DocumentsFinanciersStrictSchema,
+      strictSchema,
       data
     );
   };
 
   const onSubmit = async (
-    data: z.infer<typeof DocumentsFinanciersStrictSchema>
+    data: z.infer<ReturnType<typeof getDocumentsFinanciersStrictSchema>>
   ) => {
     await handleValidateStep({
       documentsFinanciers: filterDocumentsFinanciersForApi(
@@ -60,7 +61,7 @@ export default function ActualisationDocumentsFinanciers() {
     <div>
       <ActualisationTabs currentStep={currentStep} year={year} />
       <FormWrapper
-        schema={DocumentsFinanciersStrictSchema}
+        schema={strictSchema}
         defaultValues={defaultValues}
         submitButtonText="Valider"
         availableFooterButtons={[FooterButtonType.SUBMIT]}
@@ -72,10 +73,7 @@ export default function ActualisationDocumentsFinanciers() {
           schema={DocumentsFinanciersFlexibleSchema}
           onSave={onAutoSave}
         />
-        <DocumentsFinanciers
-          className="mb-6"
-          formKind={FormKind.ACTUALISATION}
-        />
+        <DocumentsFinanciers className="mb-6" />
       </FormWrapper>
     </div>
   );

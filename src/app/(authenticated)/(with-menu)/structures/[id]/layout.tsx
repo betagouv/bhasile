@@ -2,10 +2,10 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { getActualisationYear } from "@/app/api/structures/actualisation.util";
+import { StructureProvider } from "@/contexts/StructureContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructureHeader } from "./_components/_header/StructureHeader";
-import { StructureProvider } from "./_context/StructureContext";
 
 async function getStructure(id: string): Promise<StructureApiRead> {
   try {
@@ -38,15 +38,10 @@ export default async function StructureLayout({
 }) {
   const { id } = await params;
   const structure = await getStructure(id);
-
-  if (!structure) {
-    notFound();
-  }
-
   const actualisationYear = getActualisationYear();
 
   return (
-    <StructureProvider structure={structure}>
+    <StructureProvider entity={structure}>
       <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
         <StructureHeader actualisationYear={actualisationYear} />
         <div className="flex flex-col gap-3 max-w-7xl mx-auto px-3">

@@ -37,11 +37,9 @@ export const getPlacesByCommunes = (
     );
 
     if (!existingCommune) {
-      placesByCommune[adresse.commune ?? ""] =
-        adresse.adresseTypologies?.[0]?.placesAutorisees || 0;
+      placesByCommune[adresse.commune ?? ""] = adresse.placesAutorisees || 0;
     } else {
-      placesByCommune[adresse.commune ?? ""] +=
-        adresse.adresseTypologies?.[0]?.placesAutorisees || 0;
+      placesByCommune[adresse.commune ?? ""] += adresse.placesAutorisees || 0;
     }
   }
 

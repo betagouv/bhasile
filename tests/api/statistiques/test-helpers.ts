@@ -9,6 +9,7 @@ import type {
 } from "@/app/api/statistiques/statistiques.db.type";
 import {
   buildActivityIndex,
+  buildDnaStructureIdsResolver,
   buildStatistiquesActivityContext,
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
@@ -41,15 +42,15 @@ export const testTypologie = (
 export const testAdresse = (
   id: number,
   structureId: number,
-  qpv: number
+  placesAutorisees: number
 ): StatistiqueDbAdresse => ({
   id,
   structureId,
   structureVersionId: structureId,
   repartition: Repartition.COLLECTIF,
-  placesAutorisees: 0,
-  qpv,
-  logementSocial: 0,
+  placesAutorisees,
+  isQpv: true,
+  isLogementSocial: false,
 });
 
 type BuildTestStructureVersionTimelineEntry = {
@@ -202,6 +203,11 @@ export const buildTestStatistiquesContext = (
       }
     );
 
+  const dnaLinks = partial.dnaLinks ?? [];
+  const structureVersionTimeline =
+    partial.structureVersionTimeline ??
+    buildTestStructureVersionTimeline(allStructureIds);
+
   return {
     structures,
     allStructures,
@@ -213,10 +219,12 @@ export const buildTestStatistiquesContext = (
     adresses: partial.adresses,
     departements: partial.departements,
     cpomLinks: partial.cpomLinks ?? [],
-    dnaLinks: partial.dnaLinks ?? [],
-    structureVersionTimeline:
-      partial.structureVersionTimeline ??
-      buildTestStructureVersionTimeline(allStructureIds),
+    dnaLinks,
+    structureVersionTimeline,
+    resolveDnaStructureIds: buildDnaStructureIdsResolver(
+      dnaLinks,
+      structureVersionTimeline
+    ),
     budgets: partial.budgets ?? [],
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],

@@ -23,7 +23,6 @@ import {
 } from "@/types/transformation.type";
 
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
-import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getYearFromDate } from "./date.util";
 import { areAllFormStepsValidated } from "./formStep.util";
 import {
@@ -433,7 +432,7 @@ export const getTransformationDefaultValues = <T>({
   return {
     ...structureVersion,
     type: structureVersionTransformation.structureType,
-    adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
+    adresses: structureVersion?.adresses,
     operateur: structureVersionTransformation.operateur,
     structureTypologies: [
       buildTransformationTypologie(structureVersionTransformation),

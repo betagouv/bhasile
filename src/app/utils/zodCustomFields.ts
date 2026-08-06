@@ -73,6 +73,9 @@ export const zSafePositiveInteger = () =>
 export const zSafeStrictlyPositiveInteger = () =>
   z.preprocess(numberPreprocess, z.number().int().positive());
 
+export const zSafeStrictlyPositiveIntegerNullish = () =>
+  z.preprocess(numberPreprocess, z.number().int().positive().nullish());
+
 export const zSafePositiveIntegerNullish = () =>
   z.preprocess(numberPreprocess, z.number().int().min(0).nullish());
 

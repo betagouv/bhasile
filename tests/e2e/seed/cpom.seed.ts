@@ -55,7 +55,7 @@ export const createCpomForTest = async (
         ? {
             create: [
               {
-                category: "CONVENTION",
+                category: "CONVENTION_CPOM",
                 startDate: new Date(
                   `${input.acteConvention.startDate}T12:00:00.000Z`
                 ),

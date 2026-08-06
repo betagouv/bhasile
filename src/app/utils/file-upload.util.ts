@@ -8,9 +8,7 @@ export const filterDocumentsFinanciersForApi = (
 ): DocumentFinancierApiType[] =>
   (documentsFinanciers?.filter(
     (documentFinancier) =>
-      documentFinancier.fileUploads?.[0]?.key &&
-      documentFinancier.category &&
-      documentFinancier.granularity
+      documentFinancier.fileUploads?.[0]?.key && documentFinancier.category
   ) ?? []) as DocumentFinancierApiType[];
 
 export const getCategoryLabel = (
@@ -42,6 +40,7 @@ export const getCategoryLabel = (
     ARRETE_EXTENSION: "Arrêté d'extension",
     ARRETE_CONTRACTION: "Arrêté actant la contraction",
     CONVENTION: "Convention",
+    CONVENTION_CPOM: "Convention CPOM",
     ARRETE_TARIFICATION: "Arrêté de tarification",
     FRAIS_DE_SIEGE: "Frais de siège",
     STATUTS: "Statuts",

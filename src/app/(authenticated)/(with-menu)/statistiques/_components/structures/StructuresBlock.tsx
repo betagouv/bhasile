@@ -4,8 +4,8 @@ import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
 import { InformationCardBridge } from "@/app/components/InformationCardBridge";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { StructuresStatsTable } from "./StructuresStatsTable";
 import { TypesBatis } from "./TypesBatis";
 import { TypesStructures } from "./TypesStructures";

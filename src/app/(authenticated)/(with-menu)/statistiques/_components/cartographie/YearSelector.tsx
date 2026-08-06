@@ -1,14 +1,38 @@
-import Select from "@codegouvfr/react-dsfr/Select";
-import { ReactElement, useState } from "react";
+"use client";
 
-const options = [
-  { label: "2026", value: "2026" },
-  { label: "2025", value: "2025" },
-  { label: "2024", value: "2024" },
-];
+import Select from "@codegouvfr/react-dsfr/Select";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactElement, useMemo } from "react";
+
+import { getYearRange } from "@/app/utils/date.util";
+import { DEFAULT_CARTOGRAPHIE_ANNEE, START_YEAR } from "@/constants";
 
 export const YearSelector = (): ReactElement => {
-  const [annee, setAnnee] = useState("2026");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const options = useMemo(
+    () =>
+      getYearRange({
+        startYear: START_YEAR,
+        endYear: DEFAULT_CARTOGRAPHIE_ANNEE,
+      }).years.map((year) => ({
+        label: year.toString(),
+        value: year.toString(),
+      })),
+    []
+  );
+
+  const currentYear =
+    searchParams.get("annee") ?? String(DEFAULT_CARTOGRAPHIE_ANNEE);
+
+  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedYear = event.target.value;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("annee", selectedYear);
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <Select
@@ -17,8 +41,8 @@ export const YearSelector = (): ReactElement => {
       nativeSelectProps={{
         name: "annee",
         id: "annee",
-        value: annee,
-        onChange: (event) => setAnnee(event.target.value),
+        value: currentYear,
+        onChange: handleYearChange,
       }}
     >
       {options.map((option) => (

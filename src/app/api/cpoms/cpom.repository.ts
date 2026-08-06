@@ -8,6 +8,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
+import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import {
   CpomDbDetails,
   CpomDbList,
@@ -76,6 +77,10 @@ export const createOrUpdateCpom = async (
       cpomId,
     });
 
+    await createOrUpdateDocumentsFinanciers(tx, cpom.documentsFinanciers, {
+      cpomId,
+    });
+
     return cpomId;
   });
 
@@ -141,12 +146,4 @@ const createOrUpdateCpomStructures = async (
       dateEnd: structure.dateEnd,
     })),
   });
-};
-
-export const deleteCpom = async (id: number): Promise<void> => {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("deleteCpom is only used in e2e tests");
-  }
-  await prisma.cpomMillesime.deleteMany({ where: { cpomId: id } });
-  await prisma.cpom.delete({ where: { id } });
 };

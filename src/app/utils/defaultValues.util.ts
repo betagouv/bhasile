@@ -12,7 +12,6 @@ import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
 import { StructureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
-import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getBudgetsDefaultValues } from "./budget.util";
 import { getControlesDefaultValues } from "./controle.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
@@ -27,7 +26,7 @@ export const getDefaultValues = ({
 }): Partial<StructureDefaultValues> => {
   const structureCreationYear = getRealCreationYear(structure);
 
-  const adresses = transformApiAdressesToFormAdresses(structure.adresses);
+  const adresses = structure.adresses as FormAdresse[] | undefined;
   const budgets = getBudgetsDefaultValues(
     structure?.budgets || [],
     structureCreationYear

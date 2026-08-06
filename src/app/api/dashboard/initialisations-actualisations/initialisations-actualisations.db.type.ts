@@ -1,5 +1,10 @@
 import { Prisma } from "@/generated/prisma/client";
 
+import {
+  resolvableVersionSelect,
+  transformationStatusSelect,
+} from "../../structure-versions/structure-version.db.type";
+
 export const dashboardStructureSelect = {
   id: true,
   codeBhasile: true,
@@ -19,16 +24,11 @@ export const dashboardStructureSelect = {
   },
   structureVersions: {
     select: {
-      id: true,
-      effectiveDate: true,
+      ...resolvableVersionSelect,
       communeAdministrative: true,
       departementAdministratif: true,
-      structureVersionTransformationId: true,
       structureVersionTransformation: {
-        select: {
-          type: true,
-          transformation: { select: { form: { select: { status: true } } } },
-        },
+        select: { type: true, ...transformationStatusSelect },
       },
     },
   },

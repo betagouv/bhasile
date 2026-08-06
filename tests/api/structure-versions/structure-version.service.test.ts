@@ -9,7 +9,7 @@ import {
   dbStructureVersionToApiRead,
 } from "@/app/api/structure-versions/structure-version.service";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
-import type { StructureDbDetails } from "@/app/api/structures/structure.db.type";
+import type { ResolvedStructureDetails } from "@/app/api/structures/structure.db.type";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType } from "@/types/structure.type";
 
@@ -137,7 +137,7 @@ describe("resolveCurrentVersion", () => {
   });
 });
 
-const buildStructure = (): StructureDbDetails =>
+const buildStructure = (): ResolvedStructureDetails =>
   ({
     type: "CADA",
     public: "TOUT_PUBLIC",
@@ -190,18 +190,8 @@ const buildStructure = (): StructureDbDetails =>
         commune: "Avranches",
         repartition: "COLLECTIF",
         placesAutorisees: 10,
-        qpv: 0,
-        logementSocial: 0,
-        adresseTypologies: [
-          {
-            id: 99,
-            adresseId: 9,
-            placesAutorisees: 10,
-            year: 2024,
-            qpv: 0,
-            logementSocial: 0,
-          },
-        ],
+        isQpv: false,
+        isLogementSocial: false,
       },
     ],
     structureFinesses: [
@@ -238,7 +228,7 @@ const buildStructure = (): StructureDbDetails =>
         dna: { id: 50, code: "DNA-1", description: null },
       },
     ],
-  }) as unknown as StructureDbDetails;
+  }) as unknown as ResolvedStructureDetails;
 
 describe("copyStructureVersion", () => {
   it("copie les scalaires et convertit les clés d'enum Prisma vers les valeurs d'enum de l'app", () => {
@@ -270,11 +260,10 @@ describe("copyStructureVersion", () => {
     });
 
     expect(result.adresses?.[0]).not.toHaveProperty("id");
-    expect(result.adresses?.[0]?.adresseTypologies?.[0]).toEqual({
+    expect(result.adresses?.[0]).toMatchObject({
       placesAutorisees: 10,
-      year: 2024,
-      qpv: 0,
-      logementSocial: 0,
+      isQpv: false,
+      isLogementSocial: false,
     });
 
     expect(result.structureFinesses).toEqual([
@@ -336,9 +325,8 @@ const buildStructureVersion = (
       commune: "Avranches",
       repartition,
       placesAutorisees: 10,
-      qpv: 0,
-      logementSocial: 0,
-      adresseTypologies: [],
+      isQpv: false,
+      isLogementSocial: false,
     })),
   }) as unknown as StructureVersionDbTransformation;
 

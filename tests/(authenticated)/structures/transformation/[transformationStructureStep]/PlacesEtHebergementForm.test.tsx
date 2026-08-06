@@ -58,14 +58,9 @@ const buildStructureVersion = () =>
         codePostal: "75011",
         commune: "Paris",
         repartition: Repartition.COLLECTIF,
-        adresseTypologies: [
-          {
-            year: CURRENT_YEAR,
-            placesAutorisees: 10,
-            qpv: false,
-            logementSocial: false,
-          },
-        ],
+        placesAutorisees: 10,
+        isQpv: false,
+        isLogementSocial: false,
       },
     ],
     structureTypologies: [

@@ -1,8 +1,8 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useState } from "react";
 
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
+import { useFetchState } from "@/contexts/FetchStateContext";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import {
