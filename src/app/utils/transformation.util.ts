@@ -45,8 +45,15 @@ export const getTransformationTitle = (
   return "Transformer une structure";
 };
 
+export type DepartementBearingStructureVersionTransformation = {
+  structureVersion?: {
+    departementAdministratif?: string | null;
+    structure?: { departementAdministratif?: string | null } | null;
+  } | null;
+};
+
 export const getStructureVersionTransformationDepartement = (
-  structureVersionTransformation?: StructureVersionTransformationApiRead
+  structureVersionTransformation?: DepartementBearingStructureVersionTransformation
 ): string | undefined =>
   structureVersionTransformation?.structureVersion?.departementAdministratif ??
   structureVersionTransformation?.structureVersion?.structure

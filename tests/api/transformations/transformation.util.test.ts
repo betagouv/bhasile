@@ -332,6 +332,19 @@ describe("checkCanUpdateDepartements", () => {
     ).toThrow(ApiDomainError);
   });
 
+  it("retient le département de la version plutôt que celui de la structure", () => {
+    expect(() =>
+      checkCanUpdateDepartements(agentParis, [
+        {
+          structureVersion: {
+            departementAdministratif: "75",
+            structure: { departementAdministratif: "92" },
+          },
+        },
+      ])
+    ).not.toThrow();
+  });
+
   it("laisse un agent démarrer une création dont le département est encore inconnu", () => {
     expect(() => checkCanUpdateDepartements(agentParis, [{}])).not.toThrow();
   });

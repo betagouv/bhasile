@@ -1,5 +1,9 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import { isEffectiveDateValid } from "@/app/utils/transformation.util";
+import {
+  DepartementBearingStructureVersionTransformation,
+  getStructureVersionTransformationDepartement,
+  isEffectiveDateValid,
+} from "@/app/utils/transformation.util";
 import {
   PrefillField,
   TRANSFORMATION_TYPE_SPECS,
@@ -47,27 +51,16 @@ export const checkUniqueDepartement = (
   }
 };
 
-type DepartementBearing = {
-  structureVersion?: {
-    departementAdministratif?: string | null;
-    structure?: { departementAdministratif?: string | null } | null;
-  } | null;
-};
-
 const collectDepartements = (
-  structureVersionTransformations: DepartementBearing[]
+  structureVersionTransformations: DepartementBearingStructureVersionTransformation[]
 ): string[] =>
   structureVersionTransformations
-    .flatMap((structureVersionTransformation) => [
-      structureVersionTransformation.structureVersion?.departementAdministratif,
-      structureVersionTransformation.structureVersion?.structure
-        ?.departementAdministratif,
-    ])
+    .map(getStructureVersionTransformationDepartement)
     .filter((departement): departement is string => Boolean(departement));
 
 export const checkCanUpdateDepartements = (
   user: SessionUser | undefined,
-  structureVersionTransformations: DepartementBearing[]
+  structureVersionTransformations: DepartementBearingStructureVersionTransformation[]
 ): void => {
   if (!user) {
     return;
