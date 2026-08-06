@@ -1,6 +1,7 @@
 import { ReactElement } from "react";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
+
 import { HistoryTimeline } from "./_historique/HistoryTimeline";
 
 export const Historique = (): ReactElement => {

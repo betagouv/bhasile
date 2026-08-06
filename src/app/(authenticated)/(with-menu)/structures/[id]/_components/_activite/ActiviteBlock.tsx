@@ -4,9 +4,9 @@ import { ReactElement } from "react";
 import { ActiviteMotifsIndisponibilite } from "@/app/components/activites/ActiviteMotifsIndisponibilite";
 import { ActivitePlaces } from "@/app/components/activites/ActivitePlaces";
 import { formatDate } from "@/app/utils/date.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureType } from "@/types/structure.type";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteHistorique } from "./ActiviteHistorique";
 
 export const ActiviteBlock = (): ReactElement => {

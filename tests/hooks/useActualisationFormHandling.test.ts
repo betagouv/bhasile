@@ -33,7 +33,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 vi.mock(
-  "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext",
+  "@/contexts/StructureContext",
   () => ({
     useStructureContext: () => ({
       structure: { id: 1, forms: [actualisationForm] },
@@ -46,7 +46,7 @@ vi.mock("@/app/hooks/useStructures", () => ({
     updateActualisation: (...args: unknown[]) => mockUpdateActualisation(...args),
   }),
 }));
-vi.mock("@/app/context/FetchStateContext", () => ({
+vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ setFetchState: mockSetFetchState }),
 }));
 

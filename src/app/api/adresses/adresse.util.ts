@@ -1,4 +1,4 @@
-import { StructureDbDetails } from "../structures/structure.db.type";
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 
 export const buildAdresseAdministrativeComplete = (parts: {
   adresseAdministrative?: string | null;
@@ -15,7 +15,9 @@ export const buildAdresseAdministrativeComplete = (parts: {
     .filter(Boolean)
     .join(" ");
 
-export const getAdressesApiRead = (adresses?: StructureDbDetails["adresses"]) =>
+export const getAdressesApiRead = (
+  adresses?: StructureVersionDbDetails["adresses"]
+) =>
   adresses?.map((adresse) => ({
     id: adresse.id,
     adresse: adresse.adresse ?? "",

@@ -13,6 +13,7 @@ import {
   resolveHudas,
   resolveTargetCada,
 } from "../../../scripts/utils/transfo-huda-cada.resolve";
+import { createReferentialDna } from "../../test-utils/referential-dna";
 
 const CODE_BHASILE_PREFIX = "BHA-ZZZ-";
 
@@ -20,6 +21,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
   const now = new Date("2026-07-01T00:00:00.000Z");
   const createdTransformationIds: number[] = [];
   const createdDnaIds: number[] = [];
+  const createdOperateurIds: number[] = [];
 
   const pickFreeCodeBhasile = async () => {
     for (let attempt = 0; attempt < 50; attempt++) {
@@ -57,8 +59,9 @@ describe("transfo-huda-cada.resolve db integration", () => {
       if (await prisma.dna.findUnique({ where: { code } })) {
         continue;
       }
-      const dna = await prisma.dna.create({ data: { code } });
+      const dna = await createReferentialDna(code);
       createdDnaIds.push(dna.id);
+      createdOperateurIds.push(dna.operateurId);
       return dna;
     }
     throw new Error("Impossible de générer un code DNA libre");
@@ -97,6 +100,9 @@ describe("transfo-huda-cada.resolve db integration", () => {
     await prisma.dna.deleteMany({ where: { id: { in: createdDnaIds } } });
     await prisma.structure.deleteMany({
       where: { codeBhasile: { startsWith: CODE_BHASILE_PREFIX } },
+    });
+    await prisma.operateur.deleteMany({
+      where: { id: { in: createdOperateurIds } },
     });
   });
 

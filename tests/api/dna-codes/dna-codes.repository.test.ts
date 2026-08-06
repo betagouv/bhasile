@@ -10,6 +10,8 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
+import { createReferentialDna } from "../../test-utils/referential-dna";
+
 describe("dna-codes.repository findAll db integration", () => {
   const createdStructureIds: number[] = [];
   const createdTransformationIds: number[] = [];
@@ -26,9 +28,9 @@ describe("dna-codes.repository findAll db integration", () => {
     structureVersionId: number,
     suffix: string
   ) => {
-    const dna = await prisma.dna.create({
-      data: { code: `DNA-DC-TEST-${suffix}-${randomUUID()}` },
-    });
+    const dna = await createReferentialDna(
+      `DNA-DC-TEST-${suffix}-${randomUUID()}`
+    );
     await prisma.dnaStructure.create({
       data: { structureVersionId, dnaId: dna.id },
     });
@@ -78,9 +80,9 @@ describe("dna-codes.repository findAll db integration", () => {
 
     const codeInTransfo = await createDnaOnVersion(versionInTransfoId, "IN");
 
-    const freeDna = await prisma.dna.create({
-      data: { code: `DNA-DC-TEST-FREE-${randomUUID()}` },
-    });
+    const freeDna = await createReferentialDna(
+      `DNA-DC-TEST-FREE-${randomUUID()}`
+    );
 
     const outsideStructure = await createStructure();
     const outsideVersion = await prisma.structureVersion.create({

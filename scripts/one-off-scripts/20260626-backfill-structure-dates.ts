@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off : backfill creationDate / date303 sur Structure depuis la dernière StructureVersion.
 // Ces 2 champs sont immuables et vivent désormais uniquement sur Structure (plus versionnés).
 // Les structures créées après le backfill 20260521 ont un scalaire null → on le remplit depuis la version.

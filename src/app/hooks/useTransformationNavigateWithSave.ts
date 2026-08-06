@@ -1,18 +1,16 @@
 import { useRouter } from "next/navigation";
 
-import { useFetchState } from "@/app/context/FetchStateContext";
+import { useFetchState } from "@/contexts/FetchStateContext";
+import { useOptionalTransformationContext } from "@/contexts/TransformationContext";
 import { FetchState } from "@/types/fetch-state.type";
-
-import { useOptionalTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 
 export const useTransformationNavigateWithSave = () => {
   const router = useRouter();
-  const { saveCurrentForm, isSaverRegistered } =
-    useOptionalTransformationContext();
+  const { saveCurrentForm } = useOptionalTransformationContext();
   const { getFetchState } = useFetchState();
 
   const navigateWithSave = async (targetRoute: string) => {
-    if (!isSaverRegistered) {
+    if (!saveCurrentForm) {
       router.push(targetRoute);
       return;
     }

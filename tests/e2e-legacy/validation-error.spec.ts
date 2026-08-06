@@ -1,8 +1,7 @@
 import { test } from "@playwright/test";
 
-import { deleteStructure } from "@/app/api/structures/structure.repository";
-
 import { beforeFlow } from "./helpers/before-flow";
+import { deleteStructure } from "./helpers/cleanup";
 import { completeStructureFlow } from "./helpers/complete-structure-flow";
 import { cada1 } from "./helpers/test-data/cada-1";
 import { TestStructureDataBuilder } from "./helpers/test-data/test-data-builder";

@@ -53,6 +53,7 @@ src/
     components/              # Composants réutilisables
     hooks/                   # Hooks React (logique + appels réseau)
     utils/                   # Utilitaires transverses
+  contexts/                  # Contextes React partagés (un fichier par contexte)
   schemas/                   # Schémas Zod partagés (API + forms) + types inférrés
   types/                     # Types de l'application non inférrés des schemas
   lib/
@@ -60,6 +61,14 @@ src/
     next-auth/               # Config NextAuth
 tests/                       # Même arborescence que src/
 ```
+
+### Emplacement du code partagé
+
+`src/app/` ne contient que du routage : pages, layouts et `api/`. Tout code partagé vit à la racine de `src/` — c'est déjà le cas de `lib/`, `schemas/`, `types/` et `contexts/`.
+
+Migration en cours : `components/`, `hooks/` et `utils/` sont encore sous `src/app/` et remonteront un dossier à la fois. Ne pas prendre leur emplacement actuel comme modèle pour du nouveau code partagé.
+
+Un contexte vit dans `src/contexts/` si son provider est monté par une route ou par `Providers.tsx`. Il reste colocalisé avec son composant si c'est ce composant qui le fournit (par ex. `MapContext`).
 
 ## Patterns et conventions
 

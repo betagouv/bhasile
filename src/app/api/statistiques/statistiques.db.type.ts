@@ -73,11 +73,10 @@ export type StatistiqueDbEig = Prisma.EvenementIndesirableGraveGetPayload<{
 export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
   select: {
     id: true;
-    structureId: true;
     structureVersionId: true;
     dna: { select: { code: true } };
   };
-}>;
+}> & { structureId: number };
 
 /** Timeline des `StructureVersion` d'une structure */
 export type StatistiqueDbStructureVersionTimeline = {

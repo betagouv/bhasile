@@ -1,3 +1,4 @@
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { Dna, Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { EntityId } from "@/types/Entity.type";
@@ -12,14 +13,11 @@ export const findAll = async ({
   operateurId?: number;
   transformationId?: number;
 } = {}): Promise<{ code: string }[]> => {
-  const { structureId, structureVersionId } = entityId;
+  const { structureVersionId } = entityId;
 
   const ownershipFilters: Prisma.DnaWhereInput[] = [
     { dnaStructures: { none: {} } },
   ];
-  if (structureId) {
-    ownershipFilters.push({ dnaStructures: { some: { structureId } } });
-  }
   if (structureVersionId) {
     ownershipFilters.push({
       dnaStructures: { some: { structureVersionId } },
@@ -38,10 +36,7 @@ export const findAll = async ({
   }
   const structureFilter: Prisma.DnaWhereInput = { OR: ownershipFilters };
 
-  const operateurFilter =
-    operateurId !== undefined
-      ? { OR: [{ operateurId }, { operateurId: null }] }
-      : null;
+  const operateurFilter = operateurId !== undefined ? { operateurId } : null;
 
   return prisma.dna.findMany({
     where: operateurFilter
@@ -52,7 +47,8 @@ export const findAll = async ({
   });
 };
 
-export const upsertDna = async (
+// Un DNA n'existe que via l'import du référentiel OFII : on résout le code existant, on n'en crée jamais.
+export const resolveDnaByCode = async (
   tx: PrismaTransaction,
   dna: { code?: string | null } | undefined | null
 ): Promise<Dna | null> => {
@@ -61,9 +57,13 @@ export const upsertDna = async (
     return null;
   }
 
-  return tx.dna.upsert({
+  const existing = await tx.dna.findUnique({
     where: { code: normalizedCode },
-    update: {},
-    create: { code: normalizedCode },
   });
+  if (!existing) {
+    throw new ApiDomainError(
+      `Code DNA inconnu du référentiel : ${normalizedCode}. Un DNA ne peut être créé que par l'import du référentiel OFII.`
+    );
+  }
+  return existing;
 };

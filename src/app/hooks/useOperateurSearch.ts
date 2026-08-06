@@ -1,11 +1,10 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { useFetchState } from "@/contexts/FetchStateContext";
 import { FileUploadApiType } from "@/schemas/api/file.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { StructureType } from "@/types/structure.type";
-
-import { useFetchState } from "../context/FetchStateContext";
 
 export const useOperateurSearch = () => {
   const [operateurs, setOperateurs] = useState<

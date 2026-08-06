@@ -5,9 +5,10 @@ import "@/app/utils/zodConfig";
 import { SessionProvider } from "next-auth/react";
 import { PropsWithChildren, ReactElement, Suspense } from "react";
 
+import { AppAbilityProvider } from "@/contexts/AbilityProvider";
+import { FetchStateProvider } from "@/contexts/FetchStateContext";
+
 import { Tracking } from "./components/Tracking";
-import { AppAbilityProvider } from "./context/AbilityContext";
-import { FetchStateProvider } from "./context/FetchStateContext";
 
 export const Providers = ({ children }: PropsWithChildren): ReactElement => {
   return (
