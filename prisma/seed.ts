@@ -53,6 +53,10 @@ import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();
 
+// Graine fixe : les tests repository tournent en CI sur ce jeu de données.
+// Surcharger via FAKER_SEED pour rejouer un échec observé avec une autre graine.
+faker.seed(Number(process.env.FAKER_SEED) || 20260804);
+
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
 
