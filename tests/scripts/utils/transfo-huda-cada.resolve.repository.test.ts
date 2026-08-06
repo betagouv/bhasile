@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { afterAll, describe, expect, it } from "vitest";
 
 import prisma from "@/lib/prisma";
@@ -10,9 +8,12 @@ import {
 } from "@/types/transformation.type";
 
 import {
-  findExistingHudaCadaTransformation,
-  resolveHuda,
+  findHudaCadaTransformations,
+  matchesEnvelope,
+  resolveHudas,
+  resolveTargetCada,
 } from "../../../scripts/utils/transfo-huda-cada.resolve";
+import { createReferentialDna } from "../../test-utils/referential-dna";
 
 const CODE_BHASILE_PREFIX = "BHA-ZZZ-";
 
@@ -20,6 +21,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
   const now = new Date("2026-07-01T00:00:00.000Z");
   const createdTransformationIds: number[] = [];
   const createdDnaIds: number[] = [];
+  const createdOperateurIds: number[] = [];
 
   const pickFreeCodeBhasile = async () => {
     for (let attempt = 0; attempt < 50; attempt++) {
@@ -37,34 +39,29 @@ describe("transfo-huda-cada.resolve db integration", () => {
   const createStructure = async (
     type: StructureType | null,
     { fermetureDate }: { fermetureDate?: Date } = {}
-  ) => {
-    const structure = await prisma.structure.create({
+  ) =>
+    prisma.structure.create({
       data: {
         codeBhasile: await pickFreeCodeBhasile(),
         type,
         fermetureDate,
       },
     });
-    return structure;
-  };
 
-  const createVersion = async (structureId: number, effectiveDate: Date) => {
-    return prisma.structureVersion.create({
-      data: { structureId, effectiveDate },
-    });
-  };
+  const createVersion = async (structureId: number, effectiveDate: Date) =>
+    prisma.structureVersion.create({ data: { structureId, effectiveDate } });
 
-  /* Le format DNA attendu par le parseur est contraint ([A-Z]\d{4}), et la base peut déjà contenir le code tiré */
-  const createDna = async () => {
+  /* Le parseur n'accepte que [A-Z]\d{4}, et la base peut déjà contenir le code tiré */
+  const createDna = async (departement: string) => {
     for (let attempt = 0; attempt < 20; attempt++) {
-      const code = `${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${String(
-        Math.floor(Math.random() * 10000)
-      ).padStart(4, "0")}`;
+      const serie = String(Math.floor(Math.random() * 100)).padStart(2, "0");
+      const code = `${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${departement}${serie}`;
       if (await prisma.dna.findUnique({ where: { code } })) {
         continue;
       }
-      const dna = await prisma.dna.create({ data: { code } });
+      const dna = await createReferentialDna(code);
       createdDnaIds.push(dna.id);
+      createdOperateurIds.push(dna.operateurId);
       return dna;
     }
     throw new Error("Impossible de générer un code DNA libre");
@@ -77,10 +74,15 @@ describe("transfo-huda-cada.resolve db integration", () => {
     await prisma.dnaStructure.create({ data: { structureVersionId, dnaId } });
   };
 
-  const createDnaOnVersion = async (structureVersionId: number) => {
-    const dna = await createDna();
-    await linkDnaToVersion(structureVersionId, dna.id);
-    return dna;
+  const createHudaWithDna = async (
+    departement: string,
+    effectiveDate: Date
+  ) => {
+    const structure = await createStructure(StructureType.HUDA);
+    const version = await createVersion(structure.id, effectiveDate);
+    const dna = await createDna(departement);
+    await linkDnaToVersion(version.id, dna.id);
+    return { structure, dna };
   };
 
   afterAll(async () => {
@@ -99,186 +101,307 @@ describe("transfo-huda-cada.resolve db integration", () => {
     await prisma.structure.deleteMany({
       where: { codeBhasile: { startsWith: CODE_BHASILE_PREFIX } },
     });
+    await prisma.operateur.deleteMany({
+      where: { id: { in: createdOperateurIds } },
+    });
   });
 
-  describe("resolveHuda", () => {
-    it("rattache le HUDA par son code Bhasile", async () => {
+  const reasonOf = (resolution: { ok: boolean } & Record<string, unknown>) =>
+    resolution.ok === false
+      ? (resolution.failure as { reason: string }).reason
+      : "";
+
+  describe("resolveHudas", () => {
+    it("rattache un HUDA par son code Bhasile", async () => {
       const structure = await createStructure(StructureType.HUDA);
 
-      const resolution = await resolveHuda(
+      const resolution = await resolveHudas(
         prisma,
-        structure.codeBhasile,
-        "",
+        {
+          rawBhasileCodes: [structure.codeBhasile],
+          rawDnaCodes: [],
+          departement: "35",
+        },
         now
       );
 
-      expect(resolution).toEqual({
-        ok: true,
-        huda: {
+      expect(resolution.ok && resolution.value).toEqual([
+        {
           structureId: structure.id,
           codeBhasile: structure.codeBhasile,
+          operateurId: null,
           via: "code-bhasile",
         },
-      });
+      ]);
     });
 
-    it("rejette une structure dont le type n'est pas HUDA", async () => {
+    it("rejette une structure qui n'est pas un HUDA", async () => {
       const structure = await createStructure(StructureType.CADA);
 
-      const resolution = await resolveHuda(
+      const resolution = await resolveHudas(
         prisma,
-        structure.codeBhasile,
-        "",
+        {
+          rawBhasileCodes: [structure.codeBhasile],
+          rawDnaCodes: [],
+          departement: "35",
+        },
         now
       );
 
-      expect(resolution.ok).toBe(false);
-      expect(resolution.ok === false && resolution.failure.reason).toContain(
-        "n'est pas un HUDA"
-      );
+      expect(reasonOf(resolution)).toContain("n'est pas un HUDA");
     });
 
     it("rejette une structure dont le type n'est pas renseigné", async () => {
       const structure = await createStructure(null);
 
-      const resolution = await resolveHuda(
+      const resolution = await resolveHudas(
         prisma,
-        structure.codeBhasile,
-        "",
+        {
+          rawBhasileCodes: [structure.codeBhasile],
+          rawDnaCodes: [],
+          departement: "35",
+        },
         now
       );
 
-      expect(resolution.ok).toBe(false);
-      expect(resolution.ok === false && resolution.failure.reason).toContain(
-        "type non renseigné"
-      );
+      expect(reasonOf(resolution)).toContain("type non renseigné");
     });
 
-    it("rejette un HUDA fermé désigné par son code Bhasile", async () => {
+    it("rejette un HUDA fermé", async () => {
       const structure = await createStructure(StructureType.HUDA, {
         fermetureDate: new Date("2026-03-01T00:00:00.000Z"),
       });
 
-      const resolution = await resolveHuda(
+      const resolution = await resolveHudas(
         prisma,
-        structure.codeBhasile,
-        "",
+        {
+          rawBhasileCodes: [structure.codeBhasile],
+          rawDnaCodes: [],
+          departement: "35",
+        },
         now
       );
 
-      expect(resolution.ok).toBe(false);
-      expect(resolution.ok === false && resolution.failure.reason).toContain(
-        "est fermé depuis le 01/03/2026"
-      );
+      expect(reasonOf(resolution)).toContain("est fermé depuis le 01/03/2026");
     });
 
-    it("rejette un HUDA fermé rattaché via ses codes DNA", async () => {
-      const structure = await createStructure(StructureType.HUDA, {
-        fermetureDate: new Date("2026-03-01T00:00:00.000Z"),
-      });
-      const version = await createVersion(
-        structure.id,
+    it("ignore une non-valeur saisie dans le champ code Bhasile", async () => {
+      const { structure, dna } = await createHudaWithDna(
+        "35",
         new Date("2026-01-01T00:00:00.000Z")
       );
-      const dna = await createDnaOnVersion(version.id);
 
-      const resolution = await resolveHuda(prisma, "", dna.code, now);
-
-      expect(resolution.ok).toBe(false);
-      expect(resolution.ok === false && resolution.failure.reason).toContain(
-        "est fermé depuis le 01/03/2026"
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: ["Multi DNA"],
+          rawDnaCodes: [dna.code],
+          departement: "35",
+        },
+        now
       );
-    });
 
-    it("rattache le HUDA par ses codes DNA quand le code Bhasile est illisible", async () => {
-      const structure = await createStructure(StructureType.HUDA);
-      const version = await createVersion(
-        structure.id,
-        new Date("2026-01-01T00:00:00.000Z")
-      );
-      const dna = await createDnaOnVersion(version.id);
-
-      const resolution = await resolveHuda(prisma, "Multi DNA", dna.code, now);
-
-      expect(resolution).toEqual({
-        ok: true,
-        huda: {
+      expect(resolution.ok && resolution.value).toEqual([
+        {
           structureId: structure.id,
           codeBhasile: structure.codeBhasile,
+          operateurId: null,
           via: "codes-dna",
         },
-      });
+      ]);
+    });
+
+    it("additionne les structures désignées par code Bhasile et par codes DNA", async () => {
+      const parCode = await createStructure(StructureType.HUDA);
+      const { structure: byDnaCodes, dna } = await createHudaWithDna(
+        "35",
+        new Date("2026-01-01T00:00:00.000Z")
+      );
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [parCode.codeBhasile],
+          rawDnaCodes: [dna.code],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(resolution.ok).toBe(true);
+      expect(
+        resolution.ok && resolution.value.map(({ structureId }) => structureId)
+      ).toEqual([parCode.id, byDnaCodes.id]);
+    });
+
+    it("ferme les deux HUDA quand les codes DNA pointent vers deux structures", async () => {
+      const premier = await createHudaWithDna(
+        "83",
+        new Date("2026-01-01T00:00:00.000Z")
+      );
+      const second = await createHudaWithDna(
+        "83",
+        new Date("2026-01-01T00:00:00.000Z")
+      );
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [],
+          rawDnaCodes: [`${premier.dna.code} et ${second.dna.code}`],
+          departement: "83",
+        },
+        now
+      );
+
+      expect(resolution.ok).toBe(true);
+      expect(
+        resolution.ok && resolution.value.map(({ codeBhasile }) => codeBhasile)
+      ).toHaveLength(2);
     });
 
     it("ignore un rattachement porté par une version que la version courante ne reprend pas", async () => {
-      const ancienHuda = await createStructure(StructureType.HUDA);
-      const nouveauHuda = await createStructure(StructureType.HUDA);
-
-      const ancienneVersion = await createVersion(
-        ancienHuda.id,
+      const { structure: ancien, dna } = await createHudaWithDna(
+        "35",
         new Date("2024-01-01T00:00:00.000Z")
       );
-      const dna = await createDnaOnVersion(ancienneVersion.id);
-      await createVersion(ancienHuda.id, new Date("2026-01-01T00:00:00.000Z"));
+      await createVersion(ancien.id, new Date("2026-01-01T00:00:00.000Z"));
 
-      const nouvelleVersion = await createVersion(
-        nouveauHuda.id,
-        new Date("2026-01-01T00:00:00.000Z")
-      );
-      await linkDnaToVersion(nouvelleVersion.id, dna.id);
-
-      const resolution = await resolveHuda(prisma, "", dna.code, now);
-
-      expect(resolution.ok && resolution.huda.structureId).toBe(nouveauHuda.id);
-    });
-
-    it("ignore une version qui n'a pas encore pris effet", async () => {
-      const huda = await createStructure(StructureType.HUDA);
-      const versionFuture = await createVersion(
-        huda.id,
-        new Date("2027-01-01T00:00:00.000Z")
-      );
-      const dna = await createDnaOnVersion(versionFuture.id);
-
-      const resolution = await resolveHuda(prisma, "", dna.code, now);
-
-      expect(resolution.ok).toBe(false);
-      expect(resolution.ok === false && resolution.failure.reason).toContain(
-        "aucun code DNA connu en base"
-      );
-    });
-
-    it("rejette des codes DNA qui pointent vers plusieurs structures", async () => {
-      const premierHuda = await createStructure(StructureType.HUDA);
-      const secondHuda = await createStructure(StructureType.HUDA);
-      const premiereVersion = await createVersion(
-        premierHuda.id,
-        new Date("2026-01-01T00:00:00.000Z")
-      );
-      const secondeVersion = await createVersion(
-        secondHuda.id,
-        new Date("2026-01-01T00:00:00.000Z")
-      );
-      const premierDna = await createDnaOnVersion(premiereVersion.id);
-      const secondDna = await createDnaOnVersion(secondeVersion.id);
-
-      const resolution = await resolveHuda(
+      const resolution = await resolveHudas(
         prisma,
-        "",
-        `${premierDna.code} ${secondDna.code}`,
+        { rawBhasileCodes: [], rawDnaCodes: [dna.code], departement: "35" },
         now
       );
 
-      expect(resolution.ok).toBe(false);
-      expect(resolution.ok === false && resolution.failure.reason).toContain(
-        "2 structures différentes"
+      expect(reasonOf(resolution)).toContain(`inconnus en base : ${dna.code}`);
+    });
+
+    it("rejette le dossier entier quand un code est illisible", async () => {
+      const { dna } = await createHudaWithDna(
+        "35",
+        new Date("2026-01-01T00:00:00.000Z")
+      );
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [],
+          rawDnaCodes: [`${dna.code} H351`],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(reasonOf(resolution)).toContain("illisibles : H351");
+    });
+
+    it("rattrape un zéro manquant quand le code padé existe et colle au département", async () => {
+      const { structure, dna } = await createHudaWithDna(
+        "09",
+        new Date("2026-01-01T00:00:00.000Z")
+      );
+      const codeSansZero = `${dna.code[0]}${dna.code.slice(2)}`;
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [],
+          rawDnaCodes: [codeSansZero],
+          departement: "09",
+        },
+        now
+      );
+
+      expect(
+        resolution.ok && resolution.value.map(({ structureId }) => structureId)
+      ).toEqual([structure.id]);
+    });
+
+    it("rejette un code hors du département du dossier", async () => {
+      const { dna } = await createHudaWithDna(
+        "20",
+        new Date("2026-01-01T00:00:00.000Z")
+      );
+
+      const resolution = await resolveHudas(
+        prisma,
+        { rawBhasileCodes: [], rawDnaCodes: [dna.code], departement: "02" },
+        now
+      );
+
+      expect(reasonOf(resolution)).toContain(
+        `hors département 02 : ${dna.code}`
       );
     });
   });
 
-  describe("findExistingHudaCadaTransformation", () => {
+  describe("resolveTargetCada", () => {
+    it("résout le CADA cible par son code Bhasile", async () => {
+      const cada = await createStructure(StructureType.CADA);
+
+      const resolution = await resolveTargetCada(
+        prisma,
+        {
+          rawBhasileCode: cada.codeBhasile,
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(resolution.ok && resolution.value.structureId).toBe(cada.id);
+    });
+
+    it("retombe sur les codes DNA quand le code Bhasile est absent", async () => {
+      const cada = await createStructure(StructureType.CADA);
+      const version = await createVersion(
+        cada.id,
+        new Date("2026-01-01T00:00:00.000Z")
+      );
+      const dna = await createDna("35");
+      await linkDnaToVersion(version.id, dna.id);
+
+      const resolution = await resolveTargetCada(
+        prisma,
+        { rawBhasileCode: "", rawDnaCodes: [dna.code], departement: "35" },
+        now
+      );
+
+      expect(resolution.ok && resolution.value.structureId).toBe(cada.id);
+    });
+
+    it("rejette un CADA cible qui résout vers plusieurs structures", async () => {
+      const premier = await createStructure(StructureType.CADA);
+      const second = await createStructure(StructureType.CADA);
+      const dates = new Date("2026-01-01T00:00:00.000Z");
+      const premierDna = await createDna("35");
+      const secondDna = await createDna("35");
+      await linkDnaToVersion(
+        (await createVersion(premier.id, dates)).id,
+        premierDna.id
+      );
+      await linkDnaToVersion(
+        (await createVersion(second.id, dates)).id,
+        secondDna.id
+      );
+
+      const resolution = await resolveTargetCada(
+        prisma,
+        {
+          rawBhasileCode: "",
+          rawDnaCodes: [`${premierDna.code} ${secondDna.code}`],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(reasonOf(resolution)).toContain("pointent vers 2 structures");
+    });
+  });
+
+  describe("findHudaCadaTransformations", () => {
     const createTransformation = async (
-      structureId: number,
+      structureIds: number[],
       numeroDossier?: string
     ) => {
       const transformation = await prisma.transformation.create({
@@ -286,10 +409,10 @@ describe("transfo-huda-cada.resolve db integration", () => {
           type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
           numeroDossier,
           structureVersionTransformations: {
-            create: {
+            create: structureIds.map((structureId) => ({
               type: StructureVersionTransformationType.FERMETURE,
               structureVersion: { create: { structureId } },
-            },
+            })),
           },
         },
       });
@@ -297,39 +420,48 @@ describe("transfo-huda-cada.resolve db integration", () => {
       return transformation;
     };
 
-    it("remonte une transformation initiée par un agent", async () => {
+    it("remonte une transformation initiée par un agent, avec son enveloppe", async () => {
       const huda = await createStructure(StructureType.HUDA);
-      const transformation = await createTransformation(huda.id);
+      const transformation = await createTransformation([huda.id]);
 
-      const existing = await findExistingHudaCadaTransformation(
-        prisma,
-        huda.id
-      );
+      const [existing] = await findHudaCadaTransformations(prisma, [huda.id]);
 
-      expect(existing?.id).toBe(transformation.id);
+      expect(existing.id).toBe(transformation.id);
+      expect(existing.numeroDossier).toBeNull();
+      expect(existing.fermetureStructureIds).toEqual([huda.id]);
     });
 
-    it("remonte aussi une transformation issue d'un autre dossier Démarches Numériques", async () => {
+    it("ne remonte rien quand aucune transformation ne porte sur les structures", async () => {
       const huda = await createStructure(StructureType.HUDA);
-      const transformation = await createTransformation(
-        huda.id,
-        `HC-TEST-${randomUUID()}`
-      );
 
-      const existing = await findExistingHudaCadaTransformation(
-        prisma,
-        huda.id
-      );
-
-      expect(existing?.id).toBe(transformation.id);
+      expect(await findHudaCadaTransformations(prisma, [huda.id])).toEqual([]);
     });
 
-    it("ne remonte rien quand aucune transformation ne porte sur la structure", async () => {
-      const huda = await createStructure(StructureType.HUDA);
+    it("remonte la transformation dès qu'un seul HUDA de l'enveloppe est déjà pris", async () => {
+      const premier = await createStructure(StructureType.HUDA);
+      const second = await createStructure(StructureType.HUDA);
+      await createTransformation([premier.id]);
 
-      expect(
-        await findExistingHudaCadaTransformation(prisma, huda.id)
-      ).toBeNull();
+      const existing = await findHudaCadaTransformations(prisma, [
+        premier.id,
+        second.id,
+      ]);
+
+      expect(existing).toHaveLength(1);
+      expect(matchesEnvelope(existing[0], [premier.id, second.id])).toBe(false);
+    });
+
+    it("reconnaît une enveloppe identique quel que soit l'ordre", async () => {
+      const premier = await createStructure(StructureType.HUDA);
+      const second = await createStructure(StructureType.HUDA);
+      await createTransformation([premier.id, second.id]);
+
+      const [existing] = await findHudaCadaTransformations(prisma, [
+        premier.id,
+        second.id,
+      ]);
+
+      expect(matchesEnvelope(existing, [second.id, premier.id])).toBe(true);
     });
   });
 });

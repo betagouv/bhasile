@@ -19,7 +19,8 @@ export const getDepartementFromCodePostal = (codePostal: string) =>
     ? (codePostal?.trim().slice(0, 3) ?? "")
     : (codePostal?.trim().slice(0, 2) ?? "")) || "";
 
-// TODO: supprimer avec AdresseTypologie.
+// TODO: Adaptateur localStorage : les navigateurs peuvent encore contenir l'ancien
+// format `adresseTypologies`. Supprimer à la fin de phase d'initialisation
 export const migrateLegacyAdresseTypologies = (
   adresses?: LegacyFormAdresse[]
 ): FormAdresse[] | undefined =>
@@ -147,7 +148,6 @@ export const isAdresseEmpty = (adresse: FormAdresse): boolean =>
   !adresse.isLogementSocial &&
   !adresse.isQpv;
 
-// TODO: supprimer avec AdresseTypologie.
 type LegacyFormAdresse = FormAdresse & {
   adresseTypologies?: {
     placesAutorisees?: number | null;

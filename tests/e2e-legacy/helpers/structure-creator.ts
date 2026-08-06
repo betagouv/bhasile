@@ -21,19 +21,16 @@ export async function seedStructureForSelection(
 
   const type = testData.type ?? StructureType.CADA;
 
-  const { id } = await createMinimalStructure(testData.dnas ?? [], {
+  const { id } = await createMinimalStructure({
     codeBhasile: testData.codeBhasile,
     type,
     operateurId: testData.operateur?.id ?? 1,
     departementAdministratif: testData.departementAdministratif,
-    nom: testData.nom ?? "",
-    adresseAdministrative: testData.adresseAdministrative?.complete ?? "",
-    codePostalAdministratif: adminAddress.postalCode,
-    communeAdministrative: adminAddress.city,
   });
 
   await createMinimalStructureVersion(id, {
-    departementAdministratif: testData.departementAdministratif,
+    operateurId: testData.operateur?.id ?? 1,
+    departementAdministratif: testData.departementAdministratif ?? "01",
     communeAdministrative: adminAddress.city,
     codePostalAdministratif: adminAddress.postalCode,
     adresseAdministrative: testData.adresseAdministrative?.complete ?? "",
@@ -41,39 +38,24 @@ export async function seedStructureForSelection(
     effectiveDate: testData.creationDate
       ? new Date(testData.creationDate)
       : undefined,
+    dnaCodes: testData.dnas ?? [],
   });
 
   return id;
 }
 
-const createMinimalStructure = async (
-  dnaCodes: { code: string }[],
-  structure: {
-    codeBhasile: string;
-    type: StructureType;
-    operateurId: number;
-    departementAdministratif?: string;
-    nom: string;
-    adresseAdministrative: string;
-    codePostalAdministratif: string;
-    communeAdministrative: string;
-  }
-): Promise<{ id: number }> => {
-  const dnaStructures = {
-    create: dnaCodes.map(({ code }) => ({
-      dna: {
-        connectOrCreate: {
-          where: { code },
-          create: { code },
-        },
-      },
-    })),
-  };
-
+const createMinimalStructure = async (structure: {
+  codeBhasile: string;
+  type: StructureType;
+  operateurId: number;
+  departementAdministratif?: string;
+}): Promise<{ id: number }> => {
+  // Les scalaires versionnés et les liens DNA sont portés par StructureVersion :
+  // voir createMinimalStructureVersion.
   return await prisma.structure.upsert({
     where: { codeBhasile: structure.codeBhasile },
-    update: { ...structure, dnaStructures },
-    create: { ...structure, dnaStructures },
+    update: structure,
+    create: structure,
     select: { id: true },
   });
 };
@@ -81,19 +63,21 @@ const createMinimalStructure = async (
 const createMinimalStructureVersion = async (
   structureId: number,
   version: {
-    departementAdministratif?: string;
+    operateurId: number;
+    departementAdministratif: string;
     communeAdministrative?: string;
     codePostalAdministratif?: string;
     adresseAdministrative?: string;
     nom?: string;
     effectiveDate?: Date;
+    dnaCodes?: { code: string }[];
   }
 ): Promise<void> => {
   await prisma.structureVersion.deleteMany({
     where: { structureId, structureVersionTransformationId: null },
   });
 
-  const createdVersion = await prisma.structureVersion.create({
+  await prisma.structureVersion.create({
     data: {
       structureId,
       effectiveDate: version.effectiveDate ?? new Date("2020-01-01"),
@@ -102,11 +86,26 @@ const createMinimalStructureVersion = async (
       codePostalAdministratif: version.codePostalAdministratif,
       adresseAdministrative: version.adresseAdministrative,
       nom: version.nom,
+      dnaStructures: {
+        create: (version.dnaCodes ?? []).map(({ code }) => ({
+          dna: {
+            connectOrCreate: {
+              where: { code },
+              create: {
+                code,
+                type: StructureType.CADA,
+                nom: `DNA ${code}`,
+                nomOfii: `DNA ${code}`,
+                directionTerritoriale: "DT",
+                operateur: { connect: { id: version.operateurId } },
+                departement: {
+                  connect: { numero: version.departementAdministratif },
+                },
+              },
+            },
+          },
+        })),
+      },
     },
-  });
-
-  await prisma.dnaStructure.updateMany({
-    where: { structureId, structureVersionId: null },
-    data: { structureVersionId: createdVersion.id },
   });
 };

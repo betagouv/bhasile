@@ -61,8 +61,6 @@ describe("ModificationDescription page integration", () => {
         id: number;
         description: string;
         dna: { code: string };
-        startDate: string | null;
-        endDate: string | null;
       }>;
       structureFinesses: unknown[];
       type: string;
@@ -86,8 +84,6 @@ describe("ModificationDescription page integration", () => {
           dna: expect.objectContaining({
             code: "C0001",
           }),
-          startDate: null,
-          endDate: null,
         }),
       ])
     );

@@ -9,7 +9,7 @@ import {
   dbStructureVersionToApiRead,
 } from "@/app/api/structure-versions/structure-version.service";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
-import type { StructureDbDetails } from "@/app/api/structures/structure.db.type";
+import type { ResolvedStructureDetails } from "@/app/api/structures/structure.db.type";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType } from "@/types/structure.type";
 
@@ -137,7 +137,7 @@ describe("resolveCurrentVersion", () => {
   });
 });
 
-const buildStructure = (): StructureDbDetails =>
+const buildStructure = (): ResolvedStructureDetails =>
   ({
     type: "CADA",
     public: "TOUT_PUBLIC",
@@ -228,7 +228,7 @@ const buildStructure = (): StructureDbDetails =>
         dna: { id: 50, code: "DNA-1", description: null },
       },
     ],
-  }) as unknown as StructureDbDetails;
+  }) as unknown as ResolvedStructureDetails;
 
 describe("copyStructureVersion", () => {
   it("copie les scalaires et convertit les clés d'enum Prisma vers les valeurs d'enum de l'app", () => {

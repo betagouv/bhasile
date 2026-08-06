@@ -1,7 +1,7 @@
-import { StructureDbDetails } from "../structures/structure.db.type";
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 
 export const getAntennesApiRead = (
-  antennes?: StructureDbDetails["antennes"]
+  antennes?: StructureVersionDbDetails["antennes"]
 ) =>
   antennes?.map((antenne) => ({
     id: antenne.id,

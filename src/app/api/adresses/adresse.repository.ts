@@ -63,7 +63,7 @@ export const checkAdressesExistence = async (
   structureId: number
 ): Promise<boolean> => {
   const adresses = await prisma.adresse.findMany({
-    where: { structureId: structureId },
+    where: { structureVersion: { structureId } },
   });
   return adresses.length > 0;
 };

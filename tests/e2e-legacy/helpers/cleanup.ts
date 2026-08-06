@@ -9,8 +9,5 @@ export const deleteStructure = async (codeBhasile: string): Promise<void> => {
 };
 
 export const deleteCpom = async (id: number): Promise<void> => {
-  await prisma.$transaction([
-    prisma.cpomMillesime.deleteMany({ where: { cpomId: id } }),
-    prisma.cpom.deleteMany({ where: { id } }),
-  ]);
+  await prisma.cpom.deleteMany({ where: { id } });
 };

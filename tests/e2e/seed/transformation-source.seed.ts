@@ -66,11 +66,11 @@ const seedContacts = async (structureVersionId: number): Promise<void> => {
   });
 };
 
-const seedAntennes = async (structureId: number): Promise<void> => {
+const seedAntennes = async (structureVersionId: number): Promise<void> => {
   await prisma.antenne.createMany({
     data: [
       {
-        structureId,
+        structureVersionId,
         name: "Antenne A",
         adresse: "10 rue de l'Antenne A",
         codePostal: "75002",
@@ -78,7 +78,7 @@ const seedAntennes = async (structureId: number): Promise<void> => {
         departement: "75",
       },
       {
-        structureId,
+        structureVersionId,
         name: "Antenne B",
         adresse: "20 rue de l'Antenne B",
         codePostal: "75003",
@@ -119,7 +119,7 @@ export const createTransformationSource = async (
 
   await seedValidStructureTypologies(structure.id);
   await seedContacts(structure.structureVersionId);
-  await seedAntennes(structure.id);
+  await seedAntennes(structure.structureVersionId);
   await seedAdresses(structure.structureVersionId);
   await seedFinalisationForm(structure.id);
 
@@ -132,6 +132,20 @@ export const createTransformationSource = async (
 
 export const seedKnownDnaCodes = async (count: number): Promise<string[]> => {
   const codes = Array.from({ length: count }, () => uniqueDnaCode());
-  await prisma.dna.createMany({ data: codes.map((code) => ({ code })) });
+  const [departement, operateur] = await Promise.all([
+    prisma.departement.findFirstOrThrow(),
+    prisma.operateur.findFirstOrThrow(),
+  ]);
+  await prisma.dna.createMany({
+    data: codes.map((code) => ({
+      code,
+      type: StructureType.CADA,
+      nom: `DNA ${code}`,
+      nomOfii: `DNA ${code}`,
+      directionTerritoriale: "DT",
+      operateurId: operateur.id,
+      departementAdministratif: departement.numero,
+    })),
+  });
   return codes;
 };
