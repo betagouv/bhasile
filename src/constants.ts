@@ -30,6 +30,10 @@ export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 export const START_YEAR = 2021;
 export const TRANSFORMATION_START_YEAR = 2026;
 
+// Premières années de collecte, côté contrôle qualité
+export const EIG_START_YEAR = 2025;
+export const EVALUATION_START_YEAR = 2023;
+
 export const CURRENT_YEAR = getNow().getFullYear();
 
 export const DEFAULT_CARTOGRAPHIE_ANNEE = CURRENT_YEAR - 1;

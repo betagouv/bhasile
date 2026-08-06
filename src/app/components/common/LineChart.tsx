@@ -5,7 +5,15 @@ import "chartist/dist/index.css";
 import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
-export default function LineChart({ data, options, height = 350 }: Props) {
+import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
+import { withCompactAxisY } from "@/app/utils/chart.util";
+
+export default function LineChart({
+  data,
+  options,
+  height = 350,
+  axisYLabel,
+}: Props) {
   const chartRef = useRef(null);
   const id = useId();
   const chartClass = `linechart-${id.replace(/:/g, "-")}`;
@@ -13,10 +21,11 @@ export default function LineChart({ data, options, height = 350 }: Props) {
   useEffect(() => {
     let chart = null;
     if (chartRef.current) {
-      chart = new Chartist.LineChart(chartRef.current, data, {
-        ...options,
-        lineSmooth: false,
-      });
+      chart = new Chartist.LineChart(
+        chartRef.current,
+        data,
+        withCompactAxisY({ ...options, lineSmooth: false })
+      );
     }
     return () => {
       if (chart) {
@@ -27,6 +36,7 @@ export default function LineChart({ data, options, height = 350 }: Props) {
 
   return (
     <div className={`w-full ${chartClass}`}>
+      <ChartAxisLabels startLabel={axisYLabel} />
       <div ref={chartRef} style={{ height }} />
       <style>
         {`
@@ -56,4 +66,5 @@ type Props = {
   data: Chartist.LineChartData;
   options: Chartist.LineChartOptions;
   height?: number;
+  axisYLabel?: string;
 };

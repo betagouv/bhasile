@@ -1,6 +1,8 @@
 import * as Chartist from "chartist";
 import { useEffect, useRef } from "react";
 
+import { withCompactAxisY } from "@/app/utils/chart.util";
+
 export const useBarLineChart = ({
   labels,
   barsSeries,
@@ -24,12 +26,12 @@ export const useBarLineChart = ({
       barChart = new Chartist.BarChart(
         barChartRef.current,
         barData,
-        barOptions
+        withCompactAxisY(barOptions)
       );
       lineChart = new Chartist.LineChart(
         lineChartRef.current,
         lineData,
-        lineOptions
+        withCompactAxisY(lineOptions)
       );
 
       let barX0 = 0;
