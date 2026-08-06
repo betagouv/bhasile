@@ -45,6 +45,7 @@ import {
 } from "./transformation.repository";
 import {
   applyPrefill,
+  checkCanUpdateDepartements,
   checkEffectiveDatesAreValid,
   checkNoDuplicateStructureIds,
   checkUniqueDepartement,
@@ -144,7 +145,8 @@ export const getOngoingTransformationsForUser = async (
 
 const prepareStructureVersionTransformations = async (
   type: TransformationType,
-  structureVersionTransformations: StructureVersionTransformationApiCreate[]
+  structureVersionTransformations: StructureVersionTransformationApiCreate[],
+  user: SessionUser | undefined
 ): Promise<StructureVersionTransformationApiCreate[]> => {
   checkNoDuplicateStructureIds(structureVersionTransformations);
   checkEffectiveDatesAreValid(structureVersionTransformations);
@@ -156,18 +158,21 @@ const prepareStructureVersionTransformations = async (
   );
 
   checkUniqueDepartement(structureVersionTransformationsWithSource);
+  checkCanUpdateDepartements(user, structureVersionTransformationsWithSource);
 
   return applyPrefill(type, structureVersionTransformationsWithSource);
 };
 
 export const createTransformation = async (
   transformation: TransformationApiCreate,
-  numeroDossier?: string
+  numeroDossier?: string,
+  user?: SessionUser
 ): Promise<number> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
       transformation.type,
-      transformation.structureVersionTransformations
+      transformation.structureVersionTransformations,
+      user
     );
 
   return createOne(
@@ -177,12 +182,14 @@ export const createTransformation = async (
 };
 
 export const resetTransformationSelection = async (
-  input: TransformationSelectionApiUpdate
+  input: TransformationSelectionApiUpdate,
+  user: SessionUser
 ): Promise<number> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
       input.type,
-      input.structureVersionTransformations
+      input.structureVersionTransformations,
+      user
     );
 
   return resetSelection({ ...input, structureVersionTransformations });
@@ -208,10 +215,13 @@ const enrichStructureVersionTransformationFromSource = async (
     structureType: structure.type
       ? StructureType[structure.type as keyof typeof StructureType]
       : undefined,
-    structureVersion: copyStructureVersion(
-      structure,
-      structureVersionTransformation.structureVersion
-    ),
+    structureVersion: {
+      ...copyStructureVersion(
+        structure,
+        structureVersionTransformation.structureVersion
+      ),
+      departementAdministratif: structure.departementAdministratif ?? undefined,
+    },
   };
 };
 

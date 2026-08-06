@@ -5,11 +5,13 @@ import {
   TRANSFORMATION_TYPE_SPECS,
 } from "@/config/transformation.config";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
+import { canUpdateDepartement, defineAbilityFor } from "@/lib/casl/abilities";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import {
   StructureVersionTransformationApiCreate,
   StructureVersionTransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
+import { SessionUser } from "@/types/global";
 import { TransformationType } from "@/types/transformation.type";
 
 export const checkNoDuplicateStructureIds = (
@@ -37,10 +39,56 @@ export const checkUniqueDepartement = (
         structureVersionTransformation.structureVersion
           ?.departementAdministratif
     )
-    .filter((departement): departement is string => departement != null);
+    .filter((departement): departement is string => Boolean(departement));
   if (new Set(departements).size > 1) {
     throw new ApiDomainError(
       "Toutes les structures d'une transformation doivent appartenir au même département."
+    );
+  }
+};
+
+type DepartementBearing = {
+  structureVersion?: {
+    departementAdministratif?: string | null;
+    structure?: { departementAdministratif?: string | null } | null;
+  } | null;
+};
+
+const collectDepartements = (
+  structureVersionTransformations: DepartementBearing[]
+): string[] =>
+  structureVersionTransformations
+    .flatMap((structureVersionTransformation) => [
+      structureVersionTransformation.structureVersion?.departementAdministratif,
+      structureVersionTransformation.structureVersion?.structure
+        ?.departementAdministratif,
+    ])
+    .filter((departement): departement is string => Boolean(departement));
+
+export const checkCanUpdateDepartements = (
+  user: SessionUser | undefined,
+  structureVersionTransformations: DepartementBearing[]
+): void => {
+  if (!user) {
+    return;
+  }
+
+  const departements = collectDepartements(structureVersionTransformations);
+
+  if (departements.length === 0) {
+    if (!defineAbilityFor(user).can("update", "Structure")) {
+      throw new ApiDomainError("Droits insuffisants", 403);
+    }
+    return;
+  }
+
+  const refusedDepartement = departements.find(
+    (departement) => !canUpdateDepartement(user, departement)
+  );
+  if (refusedDepartement) {
+    throw new ApiDomainError(
+      `Le département ${refusedDepartement} n'est pas dans votre périmètre.`,
+      403
     );
   }
 };
