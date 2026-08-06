@@ -84,7 +84,7 @@ export type StructureVersionTransformationApiRead =
     structureVersion?: StructureVersionApiRead & {
       structure?: {
         codeBhasile: string;
-        isFinalised?: boolean;
+        isFinalised: boolean;
         operateur?: { id: number; name: string };
         nom?: string | null;
         adresseAdministrative?: string | null;
