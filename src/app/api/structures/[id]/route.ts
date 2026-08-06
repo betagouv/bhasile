@@ -18,13 +18,7 @@ import {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    const doBypass =
-      process.env.NODE_ENV !== "production" &&
-      (process.env.DEV_AUTH_BYPASS ||
-        request.headers.get("x-dev-auth-bypass") === "1");
-
-    const isAuthenticated = !!session?.user || doBypass;
+    const isAuthenticated = !!session?.user;
 
     const id = request.nextUrl.pathname.split("/").pop();
     const structure = isAuthenticated

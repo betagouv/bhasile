@@ -125,8 +125,7 @@ Les routes `/ajout-structure` et `/ajout-adresses` sont protégées par mot de p
 Pour définir un ou plusieurs mots de passe, il suffit d'ajouter la variable `OPERATEUR_PASSWORDS` dans le fichier `.env`. Les mots de passe devront être séparées par des virgules.
 `PAGE_PASSWORD` est une variable d'environnement legacy et sera bientôt supprimée.
 
-En mode développement, il est possible aussi de bypasser ces accès privés grace à la variable d'environnement `DEV_AUTH_BYPASS=1`
-Les pages sont ensuite accessibles via :
+Les pages sont accessibles via :
 
 - http://localhost:3000/ajout-structure/123abc pour créer une structure (ici `123abc`)
 - http://localhost:3000/structures pour accéder au tableau de bord
