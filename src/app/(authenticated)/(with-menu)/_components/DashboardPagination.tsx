@@ -17,8 +17,11 @@ export const DashboardPagination = ({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const rawPage = Number(searchParams.get(pageParam)) || 0;
-  const currentPage = getSafePage(rawPage, total, MIDDLE_PAGE_SIZE);
+  const currentPage = getSafePage(
+    Number(searchParams.get(pageParam)),
+    total,
+    MIDDLE_PAGE_SIZE
+  );
 
   const setCurrentPage = (page: number): void => {
     startTransition(() => {

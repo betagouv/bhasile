@@ -62,11 +62,7 @@ export const getOperateurs = async ({
     "desc"
   );
 
-  const { total, rows } = paginateWithTotal(
-    sorted,
-    page ?? 0,
-    MIDDLE_PAGE_SIZE
-  );
+  const { total, rows } = paginateWithTotal(sorted, page, MIDDLE_PAGE_SIZE);
 
   return {
     operateurs: rows,

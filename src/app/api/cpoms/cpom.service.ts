@@ -60,11 +60,7 @@ export const getCpoms = async ({
     (cpom) => ({ value: cpom.id, kind: "number" }),
     direction ?? "asc"
   );
-  const { total, rows } = paginateWithTotal(
-    sorted,
-    page ?? 0,
-    DEFAULT_PAGE_SIZE
-  );
+  const { total, rows } = paginateWithTotal(sorted, page, DEFAULT_PAGE_SIZE);
 
   return {
     cpoms: rows.map(getFullCpom),
