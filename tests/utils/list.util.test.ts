@@ -168,6 +168,14 @@ describe("getSafePage", () => {
     expect(getSafePage(Number("abc"), 30, 12)).toBe(0);
     expect(getSafePage(Infinity, 30, 12)).toBe(0);
   });
+
+  it("ramène une page non entière à la première page", () => {
+    expect(getSafePage(1.5, 30, 12)).toBe(0);
+  });
+
+  it("ramène une page absente à la première page", () => {
+    expect(getSafePage(null, 30, 12)).toBe(0);
+  });
 });
 
 describe("paginateWithTotal", () => {

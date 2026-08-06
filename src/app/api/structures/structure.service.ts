@@ -177,9 +177,9 @@ export const getFullStructures = async (
     return { structures, totalStructures: sorted.length };
   }
 
-  const pageRows = props.selection
-    ? sorted
-    : paginateWithTotal(sorted, props.page ?? 0, DEFAULT_PAGE_SIZE).rows;
+  const { total: totalStructures, rows: pageRows } = props.selection
+    ? { total: sorted.length, rows: sorted }
+    : paginateWithTotal(sorted, props.page, DEFAULT_PAGE_SIZE);
 
   const dbStructures = await findStructuresByIds(
     pageRows.map((row) => row.id),
@@ -217,7 +217,7 @@ export const getFullStructures = async (
       (structure): structure is StructureApiRead => structure !== undefined
     );
 
-  return { structures, totalStructures: sorted.length };
+  return { structures, totalStructures };
 };
 
 export const getResolvedStructure = async (

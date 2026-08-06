@@ -70,11 +70,11 @@ export const paginateRows = <T>(
 };
 
 export const getSafePage = (
-  page: number,
+  page: number | null,
   total: number,
   pageSize: number
 ): number => {
-  if (!Number.isFinite(page)) {
+  if (page === null || !Number.isInteger(page)) {
     return 0;
   }
   const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
@@ -83,7 +83,7 @@ export const getSafePage = (
 
 export const paginateWithTotal = <T>(
   rows: T[],
-  page: number,
+  page: number | null,
   pageSize: number
 ): { total: number; rows: T[] } => {
   const total = rows.length;

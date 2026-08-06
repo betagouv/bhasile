@@ -12,7 +12,7 @@ export const Pagination = ({
 
   const searchParams = useSearchParams();
   const currentPage: number = getSafePage(
-    Number(searchParams.get("page")) || 0,
+    Number(searchParams.get("page")),
     totalElements,
     pageSize
   );
