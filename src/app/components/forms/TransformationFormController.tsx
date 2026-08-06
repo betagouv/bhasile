@@ -21,13 +21,15 @@ export const TransformationFormController = <TSchema extends AnyZodSchema>({
     useTransformationContext();
 
   const onSaveRef = useRef(onSave);
+  const schemaRef = useRef(schema);
   useEffect(() => {
     onSaveRef.current = onSave;
+    schemaRef.current = schema;
   });
 
   useEffect(() => {
     const saveCurrentForm = async () => {
-      const result = schema.safeParse(getValues());
+      const result = schemaRef.current.safeParse(getValues());
       if (!result.success) {
         console.error(
           "TransformationFormController: données invalides",
@@ -42,7 +44,7 @@ export const TransformationFormController = <TSchema extends AnyZodSchema>({
     registerSaver(saveCurrentForm);
 
     return () => registerSaver(null);
-  }, [registerSaver, schema, getValues, trigger]);
+  }, [registerSaver, getValues, trigger]);
 
   useEffect(() => {
     if (!isDirty) {

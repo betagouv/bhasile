@@ -3,19 +3,21 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 
 export const createEntityContext = <TEntity,>(name: string) => {
-  const { EntityContext, useValue, useOptionalValue } =
+  const { EntityContext, useValue } =
     buildEntityContext<EntityContextValue<TEntity>>(name);
 
   const Provider = ({ children, entity }: ProviderProps<TEntity>) => (
     <EntityContext value={{ entity }}>{children}</EntityContext>
   );
+  Provider.displayName = `${name}Provider`;
 
-  return { Provider, useValue, useOptionalValue };
+  return { Provider, useValue };
 };
 
-//TODO: À supprimer quand on aura passé toutes les entités en RSC
+//TODO: L'entité est copiée dans un state client pour que les mutations du formulaire
+// se répercutent sans refetch. À supprimer quand on aura passé toutes les entités en RSC.
 export const createMutableEntityContext = <TEntity,>(name: string) => {
-  const { EntityContext, useValue, useOptionalValue } =
+  const { EntityContext, useValue } =
     buildEntityContext<MutableEntityContextValue<TEntity>>(name);
 
   const Provider = ({
@@ -28,18 +30,17 @@ export const createMutableEntityContext = <TEntity,>(name: string) => {
       <EntityContext value={{ entity, setEntity }}>{children}</EntityContext>
     );
   };
+  Provider.displayName = `${name}Provider`;
 
-  return { Provider, useValue, useOptionalValue };
+  return { Provider, useValue };
 };
 
 const buildEntityContext = <TValue,>(name: string) => {
   const EntityContext = createContext<TValue | undefined>(undefined);
   EntityContext.displayName = `${name}Context`;
 
-  const useOptionalValue = (): TValue | undefined => useContext(EntityContext);
-
   const useValue = (): TValue => {
-    const value = useOptionalValue();
+    const value = useContext(EntityContext);
 
     if (!value) {
       throw new Error(
@@ -50,7 +51,7 @@ const buildEntityContext = <TValue,>(name: string) => {
     return value;
   };
 
-  return { EntityContext, useValue, useOptionalValue };
+  return { EntityContext, useValue };
 };
 
 type EntityContextValue<TEntity> = {

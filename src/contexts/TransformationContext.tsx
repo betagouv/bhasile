@@ -26,6 +26,8 @@ export const TransformationProvider = ({
   const [saveCurrentForm, setSaveCurrentForm] = useState<SaveCurrentFormFn>();
 
   const registerSaver = useCallback((saver: SaveCurrentFormFn | null) => {
+    // La forme updater est obligatoire : passer directement `saver` ferait
+    // exécuter la fonction par React au lieu de la stocker.
     setSaveCurrentForm(() => saver ?? undefined);
   }, []);
 
