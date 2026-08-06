@@ -1,4 +1,4 @@
-// Pré-remplir les transformations HUDA > CADA depuis l'API de Démarches Numériques
+// Pré-remplir les transformations HUDA > CADA depuis l'API de Démarche Numérique
 // Usage: yarn script transfo-huda-cada-fetch
 
 import "dotenv/config";

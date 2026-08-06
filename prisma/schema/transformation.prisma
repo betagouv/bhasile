@@ -1,7 +1,7 @@
 model Transformation {
   id                              Int                              @id @default(autoincrement())
   type                            TransformationType
-  numeroDossier                   String?                          @unique // Dossier Démarches Numériques d'origine, absent quand la transfo vient d'un agent
+  numeroDossier                   String?                          @unique // Dossier Démarche Numérique d'origine, absent quand la transfo vient d'un agent
   form                            Form? // Pour le lien au bouton "Finaliser"
   createdAt                       DateTime                         @default(now())
   updatedAt                       DateTime                         @updatedAt
