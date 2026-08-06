@@ -4,8 +4,8 @@ import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { Adresses } from "./Adresses";
 import { AntennesAndContacts } from "./AntennesAndContacts";
 import { Codes } from "./Codes";
@@ -83,6 +83,7 @@ export const DescriptionBlock = (): ReactElement => {
           label: tab.label,
         }))}
         onTabChange={(tabId) => setSelectedTabId(tabId)}
+        className="-mx-6.5 -mb-8.5"
       >
         {selectedTabId === "general" && <General />}
         {selectedTabId === "sites" && <AntennesAndContacts />}

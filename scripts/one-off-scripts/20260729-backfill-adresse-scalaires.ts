@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off : bascule des scalaires d'adresse depuis AdresseTypologie.
 // Adresse devient la source de vérité (places, QPV, logement social) ; AdresseTypologie
 // n'est plus écrite par l'app et sera supprimée dans une PR suivante.

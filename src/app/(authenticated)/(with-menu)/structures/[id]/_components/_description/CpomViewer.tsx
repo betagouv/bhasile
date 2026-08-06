@@ -4,8 +4,7 @@ import Link from "next/link";
 import { ReactElement, useState } from "react";
 
 import { getCurrentCpomStructure } from "@/app/utils/structure.util";
-
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 export const CpomViewer = (): ReactElement => {
   const [showCpom, setShowCpom] = useState(false);

@@ -3,8 +3,8 @@ import { ReactElement } from "react";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { CpomViewer } from "./CpomViewer";
 
 export const General = (): ReactElement => {

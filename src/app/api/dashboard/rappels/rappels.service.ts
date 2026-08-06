@@ -1,5 +1,5 @@
 import { findAllCpoms } from "@/app/api/cpoms/cpom.repository";
-import { paginateRows } from "@/app/utils/list.util";
+import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { groupRappels } from "@/app/utils/rappel.util";
 import { parseCommaList } from "@/app/utils/string.util";
@@ -45,18 +45,20 @@ export const getDashboardRappels = async (
   });
 
   const nodes = groupRappels(rappels, options.echelle, options.groupBy);
-  const totalNodes = nodes.length;
   const rappelCount = nodes.reduce(
     (total, node) => total + node.importantCount + node.urgentCount,
     0
   );
 
-  const lastPage = Math.max(0, Math.ceil(totalNodes / MIDDLE_PAGE_SIZE) - 1);
-  const currentPage = Math.min(Math.max(0, options.page), lastPage);
+  const { total: totalNodes, rows: pagedNodes } = paginateWithTotal(
+    nodes,
+    options.page,
+    MIDDLE_PAGE_SIZE
+  );
 
   return {
     rappelCount,
     totalNodes,
-    nodes: paginateRows(nodes, currentPage, MIDDLE_PAGE_SIZE),
+    nodes: pagedNodes,
   };
 };

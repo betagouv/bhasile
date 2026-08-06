@@ -5,8 +5,8 @@ import { ReactElement } from "react";
 import { InformationCard } from "@/app/components/InformationCard";
 import { InformationCardBridge } from "@/app/components/InformationCardBridge";
 import { formatNumber } from "@/app/utils/number.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { ControleQualiteStatsTable } from "./ControleQualiteStatsTable";
 import { EIGChart } from "./EIGChart";
 import { EvaluationChart } from "./EvaluationChart";

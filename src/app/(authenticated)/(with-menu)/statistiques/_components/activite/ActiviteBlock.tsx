@@ -4,8 +4,8 @@ import { ActiviteHistoriqueTable } from "@/app/components/activites/ActiviteHist
 import { ActiviteMotifsIndisponibilite } from "@/app/components/activites/ActiviteMotifsIndisponibilite";
 import { ActivitePlaces } from "@/app/components/activites/ActivitePlaces";
 import { formatDate } from "@/app/utils/date.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { ActiviteStatsChart } from "./ActiviteStatsChart";
 
 export const ActiviteBlock = () => {

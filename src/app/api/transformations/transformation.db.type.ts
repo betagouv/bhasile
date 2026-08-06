@@ -1,6 +1,7 @@
 import { AVENANT_PARENT_CATEGORIES } from "@/config/transformation.config";
 import { Prisma } from "@/generated/prisma/client";
 
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
 
 export const transformationInclude = {
@@ -37,7 +38,13 @@ export const transformationInclude = {
           structure: {
             include: {
               operateur: { select: { id: true, name: true } },
-              antennes: true,
+              forms: {
+                where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
+                select: {
+                  status: true,
+                  formDefinition: { select: { slug: true } },
+                },
+              },
               actesAdministratifs: {
                 where: {
                   parentId: null,

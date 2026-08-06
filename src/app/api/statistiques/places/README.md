@@ -1,6 +1,6 @@
 # `places`
 
-> `AdresseTypologie` en cours de dépréciation : QPV et logements sociaux lus directement sur `Adresse`.
+> Places, QPV et logements sociaux sont lus directement sur `Adresse` (scalaires `placesAutorisees`, `isQpv`, `isLogementSocial`).
 
 ## Vue globale
 

@@ -1,8 +1,8 @@
 import { useRouter } from "next/navigation";
 
+import { useCpomContext } from "@/contexts/CpomContext";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 
-import { useCpomContext } from "../(authenticated)/(with-menu)/cpoms/[id]/_context/CpomClientContext";
 import { useCpom } from "./useCpom";
 import { useSaveMutation } from "./useSaveMutation";
 

@@ -3,7 +3,9 @@
 
 import "dotenv/config";
 
+import { getActeAdministratifPeriods } from "@/app/api/actes-administratifs/acte-administratif.util";
 import { createTransformation } from "@/app/api/transformations/transformation.service";
+import { isCurrentlyInEffect } from "@/app/utils/date.util";
 import { TRANSFORMATION_START_YEAR } from "@/constants";
 import { createPrismaClient } from "@/prisma-client";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
@@ -22,15 +24,15 @@ import {
   getValueByLabel,
 } from "../utils/demarches-numeriques.util";
 import {
-  describeClosure,
-  describeType,
-  findExistingHudaCadaTransformation,
-  hasExpectedType,
-  resolveHuda,
+  findHudaCadaTransformations,
+  matchesEnvelope,
+  ResolvedStructure,
+  resolveHudas,
+  resolveTargetCada,
 } from "../utils/transfo-huda-cada.resolve";
 import {
   isEffectiveDateInScope,
-  normalizeBhasileCode,
+  parseDepartement,
   parseFrenchDate,
   parseTransformationType,
 } from "../utils/transfo-huda-cada.util";
@@ -45,16 +47,34 @@ const STATES_TO_IMPORT: DNDossierState[] = ["accepte", "en_instruction"];
 const WINDOW_TO_FETCH_DAYS: number | null = null;
 
 const TYPE_LABEL = "Quelle type de transformation HUDA-CADA est prévue ?";
-const HUDA_BHASILE_LABEL = "Code Bhasile de l'HUDA";
-const HUDA_DNA_LABEL = "Code(s) DNA de l'HUDA";
 const CADA_BHASILE_LABEL = "Code Bhasile du CADA";
+const CADA_DNA_LABEL = "Code OFII du CADA";
+const DEPARTEMENT_LABEL = "Département";
 const DATE_PREVISIONNELLE_LABEL = "Date prévisionnelle de la transformation";
 const DATE_EFFECTIVE_LABEL = "Date effective de la transformation";
+const CADA_ETENDU_CAPACITE_LABEL =
+  "Nouvelle capacité de l'établissement étendu";
+const HUDA_BHASILE_PATTERN = /^Code Bhasile de l['’]HUDA/i;
+const HUDA_DNA_PATTERN = /^Code\(s\) DNA (de l['’])?HUDA/i;
+
+/* La section « nouveau CADA » ne comporte pas de capacité propre bien remplie :
+ * on retombe sur le nombre de places transformées, renseigné dans la majorité
+ * des dossiers. */
+const CADA_NOUVEAU_CAPACITE_LABELS = [
+  "Nombre de places de l'établissement transformé",
+  "Capacité du nouveau CADA créé dans le cadre de la transformation",
+];
 
 type HudaCadaDossierNode = DNDossierNode & { champs: DNColumn[] };
 
 const champValue = (dossier: HudaCadaDossierNode, label: string): string =>
   getValueByLabel(dossier.champs, label);
+
+const champValues = (dossier: HudaCadaDossierNode, pattern: RegExp): string[] =>
+  dossier.champs
+    .filter((champ) => pattern.test(champ.label))
+    .map((champ) => champ.stringValue?.trim() || "")
+    .filter(Boolean);
 
 const fetchDossiers = async (): Promise<HudaCadaDossierNode[]> => {
   const dossiers: HudaCadaDossierNode[] = [];
@@ -80,10 +100,64 @@ const resolveEffectiveDate = (dossier: HudaCadaDossierNode): Date | null =>
   parseFrenchDate(champValue(dossier, DATE_EFFECTIVE_LABEL)) ??
   parseFrenchDate(champValue(dossier, DATE_PREVISIONNELLE_LABEL));
 
+const parsePositiveInt = (raw: string): number | null => {
+  const value = Number.parseInt(raw.trim(), 10);
+  return Number.isFinite(value) && value > 0 ? value : null;
+};
+
+/* Le premier libellé renseigné l'emporte. */
+const resolveNewCadaCapacity = (
+  dossier: HudaCadaDossierNode
+): number | null => {
+  for (const label of CADA_NOUVEAU_CAPACITE_LABELS) {
+    const capacity = parsePositiveInt(champValue(dossier, label));
+    if (capacity !== null) {
+      return capacity;
+    }
+  }
+  return null;
+};
+
+/* Le formulaire écrit la capacité aux deux endroits et relit `structureVersion` :
+ * pré-remplir l'un sans l'autre donne soit un champ vide, soit une typologie manquante. */
+const buildCapacityFields = (capacity: number | null, effectiveDate: Date) => ({
+  structureTypologies: capacity
+    ? [{ year: effectiveDate.getUTCFullYear(), placesAutorisees: capacity }]
+    : undefined,
+  placesAutorisees: capacity ?? undefined,
+});
+
+/* La nouvelle convention couvre le temps restant de celle en vigueur à la date
+ * d'effet — pas aujourd'hui, et pas la plus récente si elle est expirée. */
+const findConventionEndDate = async (
+  structureId: number,
+  effectiveDate: Date
+): Promise<Date | null> => {
+  const actesAdministratifs = await prisma.acteAdministratif.findMany({
+    where: { structureId },
+    select: {
+      id: true,
+      category: true,
+      parentId: true,
+      startDate: true,
+      endDate: true,
+    },
+  });
+  const period = getActeAdministratifPeriods(
+    actesAdministratifs,
+    "CONVENTION"
+  ).find(([startDate, endDate]) =>
+    isCurrentlyInEffect(startDate, endDate, effectiveDate)
+  );
+  return period?.[1] ?? null;
+};
+
 const buildCadaBrique = async (
   dossier: HudaCadaDossierNode,
   type: TransformationType,
-  effectiveDate: Date
+  effectiveDate: Date,
+  hudas: ResolvedStructure[],
+  departement: string | null
 ): Promise<
   | { ok: true; brique: StructureVersionTransformationApiCreate }
   | { ok: false; reason: string }
@@ -93,68 +167,90 @@ const buildCadaBrique = async (
   if (
     type === TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
   ) {
+    /* « Même opérateur » : le nouveau CADA reprend celui des HUDA fermés, plus fiable
+     * qu'un rapprochement sur le SIRET. Des opérateurs divergents contredisent le cas de figure. */
+    const operateurIds = [...new Set(hudas.map((huda) => huda.operateurId))];
+    if (operateurIds.length > 1) {
+      return {
+        ok: false,
+        reason: `les HUDA fermés relèvent de ${operateurIds.length} opérateurs différents`,
+      };
+    }
+
+    const { structureTypologies, placesAutorisees } = buildCapacityFields(
+      resolveNewCadaCapacity(dossier),
+      effectiveDate
+    );
     return {
       ok: true,
       brique: {
         type: StructureVersionTransformationType.CREATION,
+        operateurId: operateurIds[0] ?? undefined,
         structureType: StructureType.CADA,
-        structureVersion: { effectiveDate: effectiveDateIso },
+        structureTypologies,
+        structureVersion: {
+          effectiveDate: effectiveDateIso,
+          placesAutorisees,
+        },
       },
     };
   }
 
-  const codeBhasile = normalizeBhasileCode(
-    champValue(dossier, CADA_BHASILE_LABEL)
-  );
-  if (!codeBhasile) {
-    return {
-      ok: false,
-      reason: "CADA cible : code Bhasile absent ou illisible",
-    };
+  const targetCada = await resolveTargetCada(prisma, {
+    rawBhasileCode: champValue(dossier, CADA_BHASILE_LABEL),
+    rawDnaCodes: [champValue(dossier, CADA_DNA_LABEL)],
+    departement,
+  });
+  if (!targetCada.ok) {
+    return { ok: false, reason: `CADA cible : ${targetCada.failure.reason}` };
   }
 
-  const cada = await prisma.structure.findUnique({
-    where: { codeBhasile },
-    select: { id: true, codeBhasile: true, type: true, fermetureDate: true },
-  });
-  if (!cada) {
-    return { ok: false, reason: `CADA cible : ${codeBhasile} inconnu en base` };
-  }
-  const closure = describeClosure(cada);
-  if (closure) {
-    return { ok: false, reason: `CADA cible : ${closure}` };
-  }
-  if (!hasExpectedType(cada, StructureType.CADA)) {
-    return {
-      ok: false,
-      reason: `CADA cible : ${codeBhasile} n'est pas un CADA (${describeType(cada)})`,
-    };
-  }
+  const { structureTypologies, placesAutorisees } = buildCapacityFields(
+    parsePositiveInt(champValue(dossier, CADA_ETENDU_CAPACITE_LABEL)),
+    effectiveDate
+  );
+  const conventionEndDate = await findConventionEndDate(
+    targetCada.value.structureId,
+    effectiveDate
+  );
 
   return {
     ok: true,
     brique: {
       type: StructureVersionTransformationType.EXTENSION,
+      structureTypologies,
+      actesAdministratifs: conventionEndDate
+        ? [
+            {
+              category: "CONVENTION",
+              startDate: effectiveDateIso,
+              endDate: conventionEndDate.toISOString(),
+            },
+          ]
+        : undefined,
       structureVersion: {
-        structureId: cada.id,
+        structureId: targetCada.value.structureId,
         effectiveDate: effectiveDateIso,
+        placesAutorisees,
       },
     },
   };
 };
 
-/* Seule cette étape est alimentée par le script (structure et date d'effet).
- * TODO: intégrer reste des champs
- */
-const IDENTIFICATION_STEP_SLUG = "01-identification";
+/* Étapes alimentées par le script :
+ * - identification (toutes briques) : structure, date d'effet, opérateur ;
+ * - places-hébergement : capacité (recopiée depuis Bhasile pour l'extension,
+ *   issue du dossier DN pour la création). La brique fermeture n'a pas cette
+ *   étape, l'updateMany ne la touche donc pas. */
+const PREFILLED_STEP_SLUGS = ["01-identification", "02-places-hebergement"];
 
-const markIdentificationPrefilled = async (
+const markStepsPrefilled = async (
   transformationId: number
 ): Promise<number> => {
   const { count } = await prisma.formStep.updateMany({
     where: {
       status: StepStatus.NON_COMMENCE,
-      stepDefinition: { slug: IDENTIFICATION_STEP_SLUG },
+      stepDefinition: { slug: { in: PREFILLED_STEP_SLUGS } },
       form: { structureVersionTransformation: { transformationId } },
     },
     data: { status: StepStatus.PRE_REMPLI },
@@ -165,6 +261,7 @@ const markIdentificationPrefilled = async (
 type DossierReport = { numero: number; reason: string };
 
 const imported: string[] = [];
+const linked: string[] = [];
 const skipped: DossierReport[] = [];
 const failed: DossierReport[] = [];
 const inferred: string[] = [];
@@ -180,8 +277,6 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     select: { id: true },
   });
   if (existing) {
-    /* Le marquage est hors de la transaction de création : on le rejoue tant qu'il n'a pas pris. */
-    await markIdentificationPrefilled(existing.id);
     return;
   }
 
@@ -205,33 +300,57 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     return;
   }
 
-  const resolution = await resolveHuda(
-    prisma,
-    champValue(dossier, HUDA_BHASILE_LABEL),
-    champValue(dossier, HUDA_DNA_LABEL)
-  );
+  const departement = parseDepartement(champValue(dossier, DEPARTEMENT_LABEL));
+
+  const resolution = await resolveHudas(prisma, {
+    rawBhasileCodes: champValues(dossier, HUDA_BHASILE_PATTERN),
+    rawDnaCodes: champValues(dossier, HUDA_DNA_PATTERN),
+    departement,
+  });
   if (!resolution.ok) {
     skip(`HUDA non rattaché — ${resolution.failure.reason}`);
     return;
   }
-  const { huda } = resolution;
+  const hudas = resolution.value;
 
-  const existingTransformation = await findExistingHudaCadaTransformation(
+  const structureIds = hudas.map((huda) => huda.structureId);
+  const existingTransformations = await findHudaCadaTransformations(
     prisma,
-    huda.structureId
+    structureIds
   );
-  if (existingTransformation) {
+
+  if (existingTransformations.length > 0) {
+    /* Une transfo saisie dans Bhasile avant le dépôt du dossier : on lui rattache le
+     * numéro pour l'idempotence, sans jamais écraser ce qui a été commencé. */
+    const [existing] = existingTransformations;
+    if (
+      existingTransformations.length === 1 &&
+      existing.numeroDossier === null &&
+      matchesEnvelope(existing, structureIds)
+    ) {
+      await prisma.transformation.update({
+        where: { id: existing.id },
+        data: { numeroDossier: String(dossier.number) },
+      });
+      linked.push(`#${dossier.number} → transfo #${existing.id}`);
+      return;
+    }
+
     skip(
-      `transfo #${existingTransformation.id} déjà ouverte sur ${huda.codeBhasile}${
-        existingTransformation.numeroDossier
-          ? ` (dossier #${existingTransformation.numeroDossier})`
-          : ""
-      }`
+      `transfo(s) ${existingTransformations.map(({ id }) => `#${id}`).join(", ")} déjà ouverte(s) sur ${hudas
+        .map((huda) => huda.codeBhasile)
+        .join(", ")}`
     );
     return;
   }
 
-  const cadaBrique = await buildCadaBrique(dossier, type, effectiveDate);
+  const cadaBrique = await buildCadaBrique(
+    dossier,
+    type,
+    effectiveDate,
+    hudas,
+    departement
+  );
   if (!cadaBrique.ok) {
     skip(cadaBrique.reason);
     return;
@@ -241,24 +360,28 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     {
       type,
       structureVersionTransformations: [
-        {
+        ...hudas.map((huda) => ({
           type: StructureVersionTransformationType.FERMETURE,
           structureVersion: {
             structureId: huda.structureId,
             effectiveDate: effectiveDate.toISOString(),
           },
-        },
+        })),
         cadaBrique.brique,
       ],
     },
     String(dossier.number)
   );
-  const steps = await markIdentificationPrefilled(id);
+  const steps = await markStepsPrefilled(id);
+  const bhasileCodes = hudas.map((huda) => huda.codeBhasile).join(", ");
   imported.push(
-    `#${dossier.number} -> transfo #${id} (${huda.codeBhasile}, ${steps} étape(s) pré-remplie(s))`
+    `#${dossier.number} -> transfo #${id} (${bhasileCodes}, ${steps} étape(s) pré-remplie(s))`
   );
-  if (huda.via === "codes-dna") {
-    inferred.push(`#${dossier.number} → ${huda.codeBhasile}`);
+  const viaDna = hudas.filter((huda) => huda.via === "codes-dna");
+  if (viaDna.length > 0) {
+    inferred.push(
+      `#${dossier.number} → ${viaDna.map((huda) => huda.codeBhasile).join(", ")}`
+    );
   }
 };
 
@@ -278,6 +401,13 @@ for (const dossier of dossiers) {
 
 console.log(`✅ ${imported.length} transformation(s) créée(s)`);
 imported.forEach((line) => console.log(`   ${line}`));
+
+if (linked.length) {
+  console.log(
+    `📎 ${linked.length} dossier(s) rattaché(s) à une transformation déjà saisie dans Bhasile`
+  );
+  linked.forEach((line) => console.log(`   ${line}`));
+}
 
 if (inferred.length) {
   console.log(

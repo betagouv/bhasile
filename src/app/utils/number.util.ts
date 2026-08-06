@@ -1,3 +1,5 @@
+import prettyBytes from "pretty-bytes";
+
 /**
  * Formats a number for display in French locale (without currency symbol)
  * @param value - The number to format
@@ -12,6 +14,15 @@ export const formatNumber = (
   }
   return new Intl.NumberFormat("fr-FR", options).format(value);
 };
+
+/**
+ * Formats a file size for display in French locale
+ * @param value - The size in bytes
+ * @returns Formatted size string (e.g., "11,8 kB") — the locale drives the
+ * decimal separator only, prettyBytes always emits SI units in English
+ */
+export const formatBytes = (value: number | null | undefined): string =>
+  prettyBytes(value ?? 0, { locale: "fr" });
 
 /**
  * Formats a number as French currency (EUR)

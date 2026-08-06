@@ -20,6 +20,8 @@ export const DEFAULT_PAGE_SIZE = 20;
 export const MIDDLE_PAGE_SIZE = 12;
 export const SHORT_PAGE_SIZE = 6;
 
+export const SEARCH_PARAM_DEBOUNCE_MS = 300;
+
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 

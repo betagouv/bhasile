@@ -2,8 +2,7 @@ import { ReactElement } from "react";
 
 import { ActesAdministratifsBlock } from "@/app/components/blocks/actesAdministratifs/ActesAdministratifsBlock";
 import { getCpomInheritedActes } from "@/app/utils/acteAdministratif.util";
-
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 export const ActesAdministratifsStructure = (): ReactElement => {
   const { structure } = useStructureContext();

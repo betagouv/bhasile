@@ -1,11 +1,11 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import prettyBytes from "pretty-bytes";
 import { ReactElement, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { DeleteButton } from "@/app/components/common/DeleteButton";
 import { FileUploadWithLink, useFileUpload } from "@/app/hooks/useFileUpload";
 import { getShortDisplayedName } from "@/app/utils/file-upload.util";
+import { formatBytes } from "@/app/utils/number.util";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
 export const DocumentsFinanciersItem = ({
@@ -74,13 +74,7 @@ export const DocumentsFinanciersItem = ({
         {documentFinancier.name ||
           getShortDisplayedName(fileData?.originalName)}
       </span>
-      <span>
-        (
-        {fileData?.fileSize
-          ? prettyBytes(fileData?.fileSize, { locale: "fr" })
-          : ""}
-        )
-      </span>
+      <span>({formatBytes(fileData?.fileSize)})</span>
       <Button
         iconId="fr-icon-eye-line"
         priority="tertiary no outline"

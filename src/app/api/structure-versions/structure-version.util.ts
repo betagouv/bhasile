@@ -124,6 +124,20 @@ export const resolveCurrentVersion = <TVersion extends ResolvableVersion>(
   now: Date
 ): TVersion | undefined => getValidVersions(versions, now)[0];
 
+// Afficher la version courante ou pour une structure dont la création est dans le futur la première version valide à venir.
+export const resolveDisplayVersion = <TVersion extends ResolvableVersion>(
+  versions: TVersion[],
+  now: Date
+): TVersion | undefined =>
+  resolveCurrentVersion(versions, now) ??
+  versions
+    .filter(isVersionValid)
+    .sort(
+      (first, second) =>
+        (first.effectiveDate?.getTime() ?? 0) -
+        (second.effectiveDate?.getTime() ?? 0)
+    )[0];
+
 export const resolvePredecessor = <TVersion extends ResolvableVersion>(
   versions: TVersion[],
   effectiveDate: Date

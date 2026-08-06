@@ -1,5 +1,4 @@
 "use client";
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { AutoSave } from "@/app/components/forms/AutoSave";
 import { Date303 } from "@/app/components/forms/finance/documents/Date303";
 import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/DocumentsFinanciers";
@@ -11,6 +10,7 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 import {
   DocumentsFinanciersFlexibleFormValues,
   DocumentsFinanciersFlexibleSchema,

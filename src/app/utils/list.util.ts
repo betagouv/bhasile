@@ -68,3 +68,27 @@ export const paginateRows = <T>(
   const safePage = Math.max(0, page);
   return rows.slice(safePage * pageSize, safePage * pageSize + pageSize);
 };
+
+export const getSafePage = (
+  page: number | null,
+  total: number,
+  pageSize: number
+): number => {
+  if (page === null || !Number.isInteger(page)) {
+    return 0;
+  }
+  const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+  return Math.min(Math.max(0, page), lastPage);
+};
+
+export const paginateWithTotal = <T>(
+  rows: T[],
+  page: number | null,
+  pageSize: number
+): { total: number; rows: T[] } => {
+  const total = rows.length;
+  return {
+    total,
+    rows: paginateRows(rows, getSafePage(page, total, pageSize), pageSize),
+  };
+};
