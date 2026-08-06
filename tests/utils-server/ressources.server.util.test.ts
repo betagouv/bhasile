@@ -2,18 +2,18 @@ import { rmSync, writeFileSync } from "fs";
 import path from "path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import {
-  measurePublicFile,
-  parseBlock,
-  readBlocks,
-  readSuggestions,
-} from "@/app/utils/ressources.server.util";
 import { filterBlocks } from "@/app/utils/ressources.util";
 import {
   FaqBlock,
   FilesBlock,
   MeasureFile,
 } from "@/types/ressources.type";
+import {
+  measurePublicFile,
+  parseBlock,
+  readBlocks,
+  readSuggestions,
+} from "@/utils-server/ressources.server.util";
 
 const measureFileStub: MeasureFile = (href) => ({
   extension: href.split(".").pop()?.toUpperCase() ?? "",
