@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import { readBlocks } from "@/app/utils/ressources.server.util";
+import { readBlocks } from "@/utils-server/ressources.server.util";
 
 import { ResourceBlock } from "./_components/ResourceBlock";
 

@@ -67,7 +67,9 @@ export const readBlocks = (): Block[] => {
 
   const blocks = readdirSync(directory)
     .filter((fileName) => BLOCK_FILE_PATTERN.test(fileName))
-    .sort()
+    .sort((fileName, otherFileName) =>
+      fileName.localeCompare(otherFileName, "fr", { numeric: true })
+    )
     .map((fileName) =>
       parseBlock(
         readFileSync(path.join(directory, fileName), "utf8"),

@@ -1,17 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { rmSync, writeFileSync } from "fs";
+import path from "path";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import {
-  measurePublicFile,
-  parseBlock,
-  readBlocks,
-  readSuggestions,
-} from "@/app/utils/ressources.server.util";
 import { filterBlocks } from "@/app/utils/ressources.util";
 import {
   FaqBlock,
   FilesBlock,
   MeasureFile,
 } from "@/types/ressources.type";
+import {
+  measurePublicFile,
+  parseBlock,
+  readBlocks,
+  readSuggestions,
+} from "@/utils-server/ressources.server.util";
 
 const measureFileStub: MeasureFile = (href) => ({
   extension: href.split(".").pop()?.toUpperCase() ?? "",
@@ -54,6 +56,43 @@ describe("ressources server util", () => {
         href: "/arrete.odt",
         file: { extension: "ODT", bytes: 1024 },
       });
+    });
+
+    it("recompose le libellé d’un lien qui contient du balisage inline", () => {
+      // GIVEN
+      const source = `${FILES_FRONTMATTER}
+## Actes administratifs
+
+- [Arrêté **type** 2024](/modeles/arrete.odt)
+`;
+
+      // WHEN
+      const block = parseBlock(source, "modeles", measureFileStub) as FilesBlock;
+
+      // THEN
+      expect(block.tabs[0].sections[0].links[0]).toMatchObject({
+        label: "Arrêté type 2024",
+        href: "/modeles/arrete.odt",
+        file: { extension: "ODT", bytes: 1024 },
+      });
+    });
+
+    it("extrait chacun des liens écrits sur une même ligne", () => {
+      // GIVEN
+      const source = `${FILES_FRONTMATTER}
+## Actes administratifs
+
+- [Arrêté](/arrete.odt) puis [Convention](/convention.pdf)
+`;
+
+      // WHEN
+      const block = parseBlock(source, "modeles", measureFileStub) as FilesBlock;
+
+      // THEN
+      expect(block.tabs[0].sections[0].links).toMatchObject([
+        { label: "Arrêté", href: "/arrete.odt" },
+        { label: "Convention", href: "/convention.pdf" },
+      ]);
     });
 
     it("crée une section titrée par ### et conserve l’ordre d’écriture", () => {
@@ -398,15 +437,18 @@ Seconde réponse.
   });
 
   describe("measurePublicFile", () => {
+    const FIXTURE_NAME = "test-fixture mesure fichier.pdf";
+    const fixturePath = path.join(process.cwd(), "public", FIXTURE_NAME);
+
+    beforeAll(() => writeFileSync(fixturePath, "x".repeat(2048)));
+    afterAll(() => rmSync(fixturePath, { force: true }));
+
     it("mesure un fichier de public/ dont le nom contient des espaces encodées", () => {
       // WHEN
-      const file = measurePublicFile(
-        "/11-FAQ%20Transformation%20HUDA%20en%20CADA_FV.pdf"
-      );
+      const file = measurePublicFile(`/${encodeURIComponent(FIXTURE_NAME)}`);
 
       // THEN
-      expect(file.extension).toBe("PDF");
-      expect(file.bytes).toBeGreaterThan(0);
+      expect(file).toEqual({ extension: "PDF", bytes: 2048 });
     });
 
     it("rejette un chemin qui sort du dossier public", () => {
