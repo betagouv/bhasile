@@ -135,6 +135,26 @@ describe("transfo-huda-cada.resolve db integration", () => {
       ]);
     });
 
+    it("rattache les deux HUDA quand un même champ contient deux codes Bhasile", async () => {
+      const premier = await createStructure(StructureType.HUDA);
+      const second = await createStructure(StructureType.HUDA);
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [`${premier.codeBhasile} et ${second.codeBhasile}`],
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(resolution.ok).toBe(true);
+      expect(
+        resolution.ok && resolution.value.map(({ structureId }) => structureId)
+      ).toEqual([premier.id, second.id]);
+    });
+
     it("rejette une structure qui n'est pas un HUDA", async () => {
       const structure = await createStructure(StructureType.CADA);
 
@@ -396,6 +416,23 @@ describe("transfo-huda-cada.resolve db integration", () => {
       );
 
       expect(reasonOf(resolution)).toContain("pointent vers 2 structures");
+    });
+
+    it("rejette un dossier qui prévoit plusieurs CADA d'accueil", async () => {
+      const premier = await createStructure(StructureType.CADA);
+      const second = await createStructure(StructureType.CADA);
+
+      const resolution = await resolveTargetCada(
+        prisma,
+        {
+          rawBhasileCode: `${premier.codeBhasile} et ${second.codeBhasile}`,
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(reasonOf(resolution)).toContain("2 CADA d'accueil");
     });
   });
 

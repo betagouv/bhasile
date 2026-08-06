@@ -1,7 +1,7 @@
 {
   "jobs": [
     {
-      "command": "0 10 * * 1-5 yarn cronify eig-fetch",
+      "command": "0 10 * * 1-5 yarn cronify eig-fetch; yarn cronify transfo-huda-cada-fetch",
       "size": "S"
     },
     {
