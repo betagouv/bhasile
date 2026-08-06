@@ -21,6 +21,10 @@ vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
 }));
 
+vi.mock("@/app/api/anomalies/anomalie.service", () => ({
+  recomputeAnomaliesSafely: vi.fn(),
+}));
+
 vi.mock("@/app/api/structures/structure.repository", () => ({
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),
   findAllStructures: (...args: unknown[]) => mockfindAllStructures(...args),

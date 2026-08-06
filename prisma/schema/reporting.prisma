@@ -231,6 +231,31 @@ view StructuresGlobalQuality {
   @@schema("reporting")
 }
 
+view StructuresAnomalies {
+  id           Int  @unique
+  structure_id Int
+
+  code_bhasile              String?
+  operateur                 String?
+  departement_administratif String?
+  departement               String?
+  region                    String?
+  structure_type            String?
+  dna_codes                 String?
+
+  code         String
+  year         Int
+  target_id    Int
+  is_justified Boolean?
+  commentaire  String?
+  justified_at DateTime?
+  created_at   DateTime
+  updated_at   DateTime
+
+  @@map("structures_anomalies")
+  @@schema("reporting")
+}
+
 view StructuresMissingHistory {
   id                        Int
   code_bhasile              String
