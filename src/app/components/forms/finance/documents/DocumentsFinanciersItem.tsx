@@ -84,13 +84,7 @@ export const DocumentsFinanciersItem = ({
         {documentFinancier.name ||
           getShortDisplayedName(fileData?.originalName)}
       </span>
-      <span>
-        (
-        {fileData?.fileSize
-          ? formatBytes(fileData?.fileSize)
-          : ""}
-        )
-      </span>
+      <span>({formatBytes(fileData?.fileSize)})</span>
       <Button
         iconId="fr-icon-eye-line"
         priority="tertiary no outline"

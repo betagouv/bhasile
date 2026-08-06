@@ -199,11 +199,9 @@ const Upload = ({
                   {file?.originalName}
                 </Tooltip>
               </a>
-              {file?.fileSize && (
-                <span className="text-xs text-default-grey tabular-nums">
-                  {formatBytes(file?.fileSize)}
-                </span>
-              )}
+              <span className="text-xs text-default-grey tabular-nums">
+                {formatBytes(file?.fileSize)}
+              </span>
             </span>
             <Button
               iconId="fr-icon-eye-line"

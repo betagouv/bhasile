@@ -247,6 +247,17 @@ const buildFilesTab = (
     );
   }
 
+  for (const section of sections) {
+    const duplicateHref = findDuplicateId(
+      section.links.map((link) => link.href)
+    );
+    if (duplicateHref) {
+      throw new Error(
+        `Onglet « ${group.title} » : le lien « ${duplicateHref} » est listé deux fois dans la même section. Supprimez le doublon.`
+      );
+    }
+  }
+
   return { id: tabId, title: group.title, sections };
 };
 
