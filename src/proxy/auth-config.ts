@@ -151,6 +151,7 @@ export const proConnectProtectedPages = [
   "/structures",
   "/operateurs",
   "/statistiques",
+  "/ressources",
 ];
 
 export const passwordProtectedPages = ["/ajout-structure", "/ajout-adresses"];

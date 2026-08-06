@@ -1,7 +1,7 @@
 ---
 type: fichiers
 titre: Modèles
-icone: fr-icon-file-text-line
+icone: fr-icon-article-line
 ---
 
 ## Transformation HUDA – CADA

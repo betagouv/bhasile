@@ -343,6 +343,61 @@ Une introduction orpheline.
       );
     });
 
+    it("rejette deux sous-titres identiques dans un onglet", () => {
+      // GIVEN
+      const source = `${FILES_FRONTMATTER}
+## Actes administratifs
+
+### Structures autorisées
+
+- [Arrêté](/arrete.odt)
+
+### Structures autorisées
+
+- [Convention](/convention.odt)
+`;
+
+      // WHEN / THEN
+      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
+        /deux sous-titres identiques/
+      );
+    });
+
+    it("rejette deux liens pointant vers le même fichier dans une section", () => {
+      // GIVEN
+      const source = `${FILES_FRONTMATTER}
+## Actes administratifs
+
+- [Arrêté d’autorisation](/arrete.odt)
+- [Arrêté (copie)](/arrete.odt)
+`;
+
+      // WHEN / THEN
+      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
+        /est listé deux fois dans la même section/
+      );
+    });
+
+    it("accepte le même fichier référencé dans deux sections distinctes", () => {
+      // GIVEN
+      const source = `${FILES_FRONTMATTER}
+## Actes administratifs
+
+### Structures autorisées
+
+- [Arrêté d’autorisation](/arrete.odt)
+
+### Structures subventionnées
+
+- [Arrêté d’autorisation](/arrete.odt)
+`;
+
+      // WHEN / THEN
+      expect(() =>
+        parseBlock(source, "modeles", measureFileStub)
+      ).not.toThrow();
+    });
+
     it("rejette deux questions formulées à l’identique dans un onglet", () => {
       // GIVEN
       const source = `${FAQ_FRONTMATTER}

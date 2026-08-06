@@ -145,3 +145,8 @@ hr {
 map-chart .FR-20R, .FR-2A, .FR-2B, .map_info {
   display: none !important;
 }
+
+.fr-icon-book-shelf-line::before,
+.fr-icon-book-shelf-line::after {
+  mask-image: url("/book-shelf-line.svg");
+}

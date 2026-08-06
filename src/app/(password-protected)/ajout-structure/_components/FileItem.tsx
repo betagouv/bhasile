@@ -1,7 +1,7 @@
-import prettyBytes from "pretty-bytes";
 import { ReactElement, useEffect, useState } from "react";
 
 import { useFileUpload } from "@/app/hooks/useFileUpload";
+import { formatBytes } from "@/app/utils/number.util";
 
 export const FileItem = ({ fileKey, title }: Props): ReactElement => {
   const [name, setName] = useState("");
@@ -33,7 +33,7 @@ export const FileItem = ({ fileKey, title }: Props): ReactElement => {
           <span className="flex flex-col gap-1 truncate">
             <span className="text-sm truncate">{name}</span>
             <span className="text-xs text-disabled-grey">
-              {prettyBytes(size || 0, { locale: "fr" })}
+              {formatBytes(size)}
             </span>
           </span>
         </p>

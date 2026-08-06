@@ -28,6 +28,7 @@ const FILES_BLOCK: FilesBlock = {
       title: "Actes administratifs",
       sections: [
         {
+          id: "modeles--actes--structures-autorisees",
           title: "Structures autorisées",
           links: [
             buildLink(
@@ -37,6 +38,7 @@ const FILES_BLOCK: FilesBlock = {
           ],
         },
         {
+          id: "modeles--actes--toutes-les-structures",
           title: "Toutes les structures",
           links: [
             buildLink(
@@ -52,6 +54,7 @@ const FILES_BLOCK: FilesBlock = {
       title: "Documents financiers",
       sections: [
         {
+          id: "modeles--financiers--sans-titre",
           title: null,
           links: [
             buildLink(

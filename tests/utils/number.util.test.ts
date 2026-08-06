@@ -1,12 +1,30 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  formatBytes,
   formatCurrency,
   formatNumber,
   parseFrenchNumber,
 } from "@/app/utils/number.util";
 
 describe("number util", () => {
+  describe("formatBytes", () => {
+    it("utilise la virgule décimale française", () => {
+      expect(formatBytes(11825)).toBe("11,8 kB");
+      expect(formatBytes(4792017)).toBe("4,79 MB");
+    });
+
+    it("garde les unités SI en anglais", () => {
+      expect(formatBytes(360375)).toBe("360 kB");
+    });
+
+    it("affiche 0 B pour une taille nulle comme pour une taille absente", () => {
+      expect(formatBytes(0)).toBe("0 B");
+      expect(formatBytes(null)).toBe("0 B");
+      expect(formatBytes(undefined)).toBe("0 B");
+    });
+  });
+
   describe("formatNumber", () => {
     it("formate correctement les entiers positifs", () => {
       expect(formatNumber(1234)).toBe("1\u202f234");

@@ -219,7 +219,10 @@ const buildFilesTab = (
   blockTitle: string,
   measureFile: MeasureFile
 ): FilesTab => {
+  const tabId = `${blockId}--${slugify(group.title)}`;
+
   const buildSection = (title: string | null, tokens: Token[]): Section => ({
+    id: `${tabId}--${slugify(title ?? "sans-titre")}`,
     title,
     links: extractLinks(tokens).map((link) =>
       buildLink(link, measureFile, [
@@ -235,14 +238,29 @@ const buildFilesTab = (
   const titledSections = group.subSections.map((subSection) =>
     buildSection(subSection.title, subSection.tokens)
   );
+  const sections = [rootSection, ...titledSections].filter(
+    (section) => section.links.length > 0
+  );
 
-  return {
-    id: `${blockId}--${slugify(group.title)}`,
-    title: group.title,
-    sections: [rootSection, ...titledSections].filter(
-      (section) => section.links.length > 0
-    ),
-  };
+  const duplicateId = findDuplicateId(sections.map((section) => section.id));
+  if (duplicateId) {
+    throw new Error(
+      `Onglet « ${group.title} » : deux sous-titres identiques (« ${duplicateId} »). Renommez l'un des deux ###.`
+    );
+  }
+
+  for (const section of sections) {
+    const duplicateHref = findDuplicateId(
+      section.links.map((link) => link.href)
+    );
+    if (duplicateHref) {
+      throw new Error(
+        `Onglet « ${group.title} » : le lien « ${duplicateHref} » est listé deux fois dans la même section. Supprimez le doublon.`
+      );
+    }
+  }
+
+  return { id: tabId, title: group.title, sections };
 };
 
 const buildFaqTab = (

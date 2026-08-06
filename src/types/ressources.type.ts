@@ -23,6 +23,7 @@ export type FaqTab = {
 };
 
 export type Section = {
+  id: string;
   title: string | null;
   links: Link[];
 };
