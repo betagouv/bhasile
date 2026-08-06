@@ -29,7 +29,9 @@ export class CpomModificationPage {
   }
 
   private conventionFieldset(): Locator {
-    return this.page.locator('fieldset:has(> legend:has-text("Contrat CPOM"))');
+    return this.page.locator(
+      'fieldset:has(> legend:has-text("Conventions CPOM"))'
+    );
   }
 
   private autreFieldset(): Locator {

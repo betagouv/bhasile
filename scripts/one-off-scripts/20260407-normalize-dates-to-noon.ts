@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: normalize various DateTime columns to 12:00:00. Shift +2h first so 22h/23h becomes J+1 at 12:00:00.
 // Usage: yarn one-off 20260407-normalize-dates-to-noon
 

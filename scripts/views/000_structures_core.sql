@@ -10,9 +10,7 @@ WITH
       sv."departementAdministratif",
       sv."latitude",
       sv."longitude",
-      sv."public",
-      sv."creationDate",
-      sv."date303"
+      sv."public"
     FROM
       public."StructureVersion" sv
       LEFT JOIN public."StructureVersionTransformation" svt ON svt."id" = sv."structureVersionTransformationId"
@@ -58,8 +56,8 @@ SELECT
   s."type" AS "structure_type",
   s."createdAt" AS "created_at",
   s."updatedAt" AS "updated_at",
-  svc."creationDate" AS "creation_date",
-  svc."date303" AS "date_303",
+  s."creationDate" AS "creation_date",
+  s."date303" AS "date_303",
   svc."departementAdministratif" AS "departement_administratif",
   svc."latitude" AS "latitude",
   svc."longitude" AS "longitude",

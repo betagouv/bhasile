@@ -1,6 +1,6 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 
-import { useFormContext } from "@/app/context/FormContext";
+import { useFormContext } from "@/contexts/FormContext";
 
 export const DocumentsFinanciersCheckboxIsInCpom = ({ year, index }: Props) => {
   const { register } = useFormContext();

@@ -135,8 +135,6 @@ describe("FinalisationIdentification page integration", () => {
           dna: {
             code: "C0001",
           },
-          startDate: null,
-          endDate: null,
         },
       ],
       structureFinesses: [

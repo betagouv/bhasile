@@ -11,9 +11,8 @@ import FormWrapper, {
 import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
-
-import { useCpomContext } from "../../_context/CpomClientContext";
 
 export default function CpomAjoutIdentification() {
   const { cpom } = useCpomContext();

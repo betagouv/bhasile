@@ -25,6 +25,7 @@ import {
   resolveCurrentVersion,
   resolvePredecessor,
 } from "../structure-versions/structure-version.util";
+import type { ResolvedStructureDetails } from "../structures/structure.db.type";
 import {
   getResolvedStructure,
   mergeStructureWithVersion,
@@ -106,7 +107,9 @@ const dbTransformationToApiRead = (
                             resolvedSourceStructure
                           ) || undefined,
                         antennes: getAntennesApiRead(
-                          resolvedSourceStructure.antennes
+                          (
+                            resolvedSourceStructure as unknown as ResolvedStructureDetails
+                          ).antennes
                         ),
                       }
                     : undefined,

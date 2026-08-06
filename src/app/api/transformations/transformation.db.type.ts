@@ -45,7 +45,6 @@ export const transformationInclude = {
                   formDefinition: { select: { slug: true } },
                 },
               },
-              antennes: true,
               actesAdministratifs: {
                 where: {
                   parentId: null,

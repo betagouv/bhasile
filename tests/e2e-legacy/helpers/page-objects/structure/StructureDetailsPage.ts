@@ -45,7 +45,7 @@ export class StructureDetailsPage extends BasePage {
   }
 
   async openFinanceEdit() {
-    await this.openBlockEdit("Finances");
+    await this.openBlockEdit("Finance");
   }
 
   async openControleEdit() {
@@ -110,7 +110,7 @@ export class StructureDetailsPage extends BasePage {
 
   private getBlockByTitle(title: string): Locator {
     const heading = this.page.getByRole("heading", { name: title, level: 3 });
-    return heading.locator("..").locator("..").locator("..");
+    return heading.locator("xpath=ancestor::section[1]");
   }
 
   private async expectDescriptionData(
@@ -301,7 +301,7 @@ export class StructureDetailsPage extends BasePage {
   private async expectDocumentsFinanciers(
     documentsFinanciers: TestStructureData["documentsFinanciers"]
   ) {
-    const financesBlock = this.getBlockByTitle("Finances");
+    const financesBlock = this.getBlockByTitle("Finance");
     const documentsByYear = documentsFinanciers.fileUploads.reduce(
       (acc, file) => {
         const year = Number(file.year);

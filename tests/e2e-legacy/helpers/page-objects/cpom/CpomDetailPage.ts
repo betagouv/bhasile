@@ -97,7 +97,8 @@ export class CpomDetailPage extends BasePage {
         if ((await typeInput.count()) === 0) {
           continue;
         }
-        await this.page.locator(`label[for="${type}"]`).first().click();
+        const typeInputId = await typeInput.getAttribute("id");
+        await this.page.locator(`label[for="${typeInputId}"]`).first().click();
         await expect(typeInput).toBeChecked();
       }
 

@@ -14,6 +14,7 @@ import {
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
 import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   ActesAdministratifsAutoSaveFormValues,
@@ -22,7 +23,6 @@ import {
 import { getActesAdministratifsSchema } from "@/schemas/forms/base/acteAdministratif/getActesAdministratifsSchema";
 import { StepStatus } from "@/types/form.type";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { Tabs } from "../_components/Tabs";
 
 export default function FinalisationQualite() {

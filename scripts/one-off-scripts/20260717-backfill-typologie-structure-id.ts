@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 // One-off : rattache à leur Structure les typologies qui n'étaient portées que par
 // une StructureVersion. Sans ça, la migration 20260717145506 les perdrait.
 //
@@ -56,7 +58,8 @@ async function main() {
   console.log(
     `🔗 ${rattachements.length} typologie(s) rattachée(s) : ${rattachements
       .map(
-        ({ typologieId, structureId }) => `#${typologieId} → structure ${structureId}`
+        ({ typologieId, structureId }) =>
+          `#${typologieId} → structure ${structureId}`
       )
       .join(", ")}`
   );

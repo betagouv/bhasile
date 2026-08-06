@@ -1,9 +1,7 @@
 import { test } from "@playwright/test";
 
-import { deleteCpom } from "@/app/api/cpoms/cpom.repository";
-import { deleteStructure } from "@/app/api/structures/structure.repository";
-
 import { beforeFlow } from "./helpers/before-flow";
+import { deleteCpom, deleteStructure } from "./helpers/cleanup";
 import { URLS } from "./helpers/constants";
 import { CpomAjoutFinancePage } from "./helpers/page-objects/cpom/CpomAjoutFinancePage";
 import { CpomAjoutIdentificationPage } from "./helpers/page-objects/cpom/CpomAjoutIdentificationPage";

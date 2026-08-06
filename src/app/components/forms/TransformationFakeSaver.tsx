@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-import { useOptionalTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 
 export const TransformationFakeSaver = () => {
-  const { registerSaver } = useOptionalTransformationContext();
+  const { registerSaver } = useTransformationContext();
 
   useEffect(() => {
     registerSaver(async () => true);

@@ -1,7 +1,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
 
-import { useFetchState } from "@/app/context/FetchStateContext";
+import { useFetchState } from "@/contexts/FetchStateContext";
 import { FetchState } from "@/types/fetch-state.type";
 
 export const AutoSaveStatus = ({

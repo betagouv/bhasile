@@ -11,13 +11,12 @@ import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
 import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
 import { operateurActesAdministratifsCategoryToDisplay } from "@/config/operateur.config";
+import { useOperateurContext } from "@/contexts/OperateurContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   ActesAdministratifsFormValues,
   actesAdministratifsOperateurSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
-
-import { useOperateurContext } from "../../_context/OperateurClientContext";
 
 export default function OperateurModificationActesAdministratifs() {
   const { operateur } = useOperateurContext();

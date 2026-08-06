@@ -8,6 +8,5 @@ export const getContactsApiRead = (contacts: Contact[]) => {
     telephone: contact.telephone || "",
     email: contact.email || "",
     role: contact.role || "",
-    structureId: contact.structureId || undefined,
   }));
 };

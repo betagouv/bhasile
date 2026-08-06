@@ -1,13 +1,13 @@
 import { ReactElement } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { useCpomContext } from "@/app/(authenticated)/(with-menu)/cpoms/[id]/_context/CpomClientContext";
 import { DocumentsFinanciersAccordion } from "@/app/components/forms/finance/documents/DocumentsFinanciersAccordion";
 import { DocumentsFinanciersList } from "@/app/components/forms/finance/documents/DocumentsFinanciersList";
 import { YearlyFileUpload } from "@/app/components/forms/finance/documents/YearlyFileUpload";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { StructureType } from "@/types/structure.type";
 

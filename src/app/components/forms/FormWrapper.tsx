@@ -16,10 +16,10 @@ import {
 } from "react-hook-form";
 import { z } from "zod";
 
-import { FormProvider } from "@/app/context/FormContext";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { cn } from "@/app/utils/classname.util";
 import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
+import { FormProvider } from "@/contexts/FormContext";
 import { AnyZodSchema } from "@/types/form.type";
 import { DeepPartial } from "@/types/global";
 

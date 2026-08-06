@@ -15,10 +15,9 @@ import {
   getCpomDefaultValues,
   getCpomStructureTypes,
 } from "@/app/utils/cpom.util";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { financesAndDocumentsCpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { StructureType } from "@/types/structure.type";
-
-import { useCpomContext } from "../../_context/CpomClientContext";
 
 export default function CpomModificationFinance() {
   const { cpom } = useCpomContext();
