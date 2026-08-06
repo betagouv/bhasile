@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   compareSortValues,
+  getSafePage,
   paginateRows,
+  paginateWithTotal,
   sortRows,
 } from "@/app/utils/list.util";
-import { DEFAULT_PAGE_SIZE } from "@/constants";
+import { DEFAULT_PAGE_SIZE, MIDDLE_PAGE_SIZE } from "@/constants";
 
 describe("compareSortValues", () => {
   it("trie le texte avec la collation française", () => {
@@ -134,5 +136,75 @@ describe("paginateRows", () => {
     const secondPage = paginateRows(rows, 1, 5);
     expect(secondPage[0]).toBe(5);
     expect(secondPage).toHaveLength(5);
+  });
+});
+
+describe("getSafePage", () => {
+  it("conserve une page dans les bornes", () => {
+    expect(getSafePage(1, 30, 12)).toBe(1);
+  });
+
+  it("ramène une page négative à zéro", () => {
+    expect(getSafePage(-5, 30, 12)).toBe(0);
+  });
+
+  it("clampe une page au-delà de la dernière", () => {
+    expect(getSafePage(99, 30, 12)).toBe(2);
+  });
+
+  it("renvoie zéro quand il n'y a aucune ligne", () => {
+    expect(getSafePage(3, 0, 12)).toBe(0);
+  });
+
+  it("renvoie zéro quand tout tient sur une page", () => {
+    expect(getSafePage(2, 12, 12)).toBe(0);
+  });
+
+  it("dépend de la taille de page fournie", () => {
+    expect(getSafePage(2, 30, 20)).toBe(1);
+  });
+
+  it("ramène une page non numérique à la première page", () => {
+    expect(getSafePage(Number("abc"), 30, 12)).toBe(0);
+    expect(getSafePage(Infinity, 30, 12)).toBe(0);
+  });
+
+  it("ramène une page non entière à la première page", () => {
+    expect(getSafePage(1.5, 30, 12)).toBe(0);
+  });
+
+  it("ramène une page absente à la première page", () => {
+    expect(getSafePage(null, 30, 12)).toBe(0);
+  });
+});
+
+describe("paginateWithTotal", () => {
+  const rows = Array.from({ length: 13 }, (_, index) => index + 1);
+
+  it("renvoie le total complet et la première page", () => {
+    const result = paginateWithTotal(rows, 0, MIDDLE_PAGE_SIZE);
+
+    expect(result.total).toBe(13);
+    expect(result.rows).toHaveLength(12);
+  });
+
+  it("renvoie la page suivante", () => {
+    const result = paginateWithTotal(rows, 1, MIDDLE_PAGE_SIZE);
+
+    expect(result.total).toBe(13);
+    expect(result.rows).toEqual([13]);
+  });
+
+  it("clampe une page hors borne à la dernière page (jamais vide)", () => {
+    const result = paginateWithTotal(rows, 99, MIDDLE_PAGE_SIZE);
+
+    expect(result.rows).toEqual([13]);
+  });
+
+  it("renvoie un total nul et aucune ligne pour une liste vide", () => {
+    expect(paginateWithTotal([], 0, MIDDLE_PAGE_SIZE)).toEqual({
+      total: 0,
+      rows: [],
+    });
   });
 });
