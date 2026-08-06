@@ -4,9 +4,7 @@
 import "dotenv/config";
 
 import { recomputeAllAnomalies } from "@/app/api/anomalies/anomalie.service";
-import { createPrismaClient } from "@/prisma-client";
-
-const prisma = createPrismaClient();
+import prisma from "@/lib/prisma";
 
 const run = async () => {
   try {

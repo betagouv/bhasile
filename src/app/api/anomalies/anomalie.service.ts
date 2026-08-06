@@ -39,8 +39,6 @@ export const recomputeAnomaliesSafely = async (
   }
 };
 
-// La fiche structure recalcule à la lecture
-// TODO : tester impact sur durée de chargement de la fiche structure
 export const recomputeAllAnomalies = async (): Promise<number> => {
   const structureIds = await findAllStructureIds();
 

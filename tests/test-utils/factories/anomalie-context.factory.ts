@@ -6,7 +6,7 @@ import type {
   IndicateurContext,
   StructureContext,
   TypologieContext,
-} from "@/lib/anomalies/anomalie.context";
+} from "@/lib/anomalies/anomalie.context.type";
 import { StructureType } from "@/types/structure.type";
 
 export const TEST_CURRENT_YEAR = 2026;

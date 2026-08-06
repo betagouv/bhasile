@@ -1,4 +1,4 @@
-import type { AnomalieContext } from "@/lib/anomalies/anomalie.context";
+import type { AnomalieContext } from "@/lib/anomalies/anomalie.context.type";
 import type {
   AnomalieOptions,
   DetectedAnomalie,

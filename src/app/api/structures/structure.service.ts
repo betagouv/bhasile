@@ -94,7 +94,7 @@ export const updateStructureAgent = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
   const coordinates = await getAdresseAdministrativeCoordinates(structure);
-  return await updateOneAndRecomputeAnomalies(
+  return await updateStructureAndRecomputeAnomalies(
     {
       ...structure,
       ...coordinates,
@@ -118,7 +118,7 @@ export const updateActualisation = async (
     );
   }
 
-  return updateOneAndRecomputeAnomalies(structure, false, {
+  return updateStructureAndRecomputeAnomalies(structure, false, {
     skipActesOrphanDelete: true,
   });
 };
@@ -126,7 +126,7 @@ export const updateStructureOperateur = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
   const coordinates = await getAdresseAdministrativeCoordinates(structure);
-  return await updateOneAndRecomputeAnomalies(
+  return await updateStructureAndRecomputeAnomalies(
     {
       ...structure,
       ...coordinates,
@@ -136,7 +136,7 @@ export const updateStructureOperateur = async (
 };
 
 // Le recalcul suit le commit et n'est jamais dans la transaction d'écriture.
-const updateOneAndRecomputeAnomalies = async (
+const updateStructureAndRecomputeAnomalies = async (
   ...args: Parameters<typeof updateOne>
 ): Promise<Structure> => {
   const updated = await updateOne(...args);

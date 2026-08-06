@@ -4,7 +4,7 @@ import type { StructureAnomalieDb } from "@/app/api/anomalies/anomalie.db.type";
 import type {
   AnomalieContext,
   StructureContext,
-} from "@/lib/anomalies/anomalie.context";
+} from "@/lib/anomalies/anomalie.context.type";
 import { StructureType } from "@/types/structure.type";
 
 const CODE_REGION_IDF = "FR-IDF";
@@ -73,7 +73,7 @@ export const buildAnomalieContext = (
   };
 };
 
-export const tarifJournalierCible = (
+export const getTarifJournalierCible = (
   type: StructureType | null,
   isIdf: boolean
 ): number | null => {
@@ -97,7 +97,7 @@ const buildStructureContext = (
   return {
     type,
     departementAdministratif: dbStructure.departementAdministratif,
-    tarifJournalierCible: tarifJournalierCible(type, isIdf),
+    tarifJournalierCible: getTarifJournalierCible(type, isIdf),
     creationDate: dbStructure.creationDate,
     date303: dbStructure.date303,
     placesAutorisees: version?.placesAutorisees ?? null,

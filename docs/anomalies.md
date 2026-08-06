@@ -25,7 +25,7 @@ Les deux derniers ne passent pas par la table : ils appellent `computeAnomalies`
 
 | Déclencheur                 | Comment                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------- |
-| Écriture sur une structure  | Automatique, après le commit : `updateOneAndRecomputeAnomalies` dans `structure.service` |
+| Écriture sur une structure  | Automatique, après le commit : `updateStructureAndRecomputeAnomalies` dans `structure.service` |
 | Une structure, à la demande | `recomputeAnomalies(structureId)`                                                        |
 | Toutes les structures       | `yarn script recompute-anomalies`                                                        |
 

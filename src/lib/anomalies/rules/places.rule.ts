@@ -1,4 +1,4 @@
-import type { TypologieContext } from "@/lib/anomalies/anomalie.context";
+import type { TypologieContext } from "@/lib/anomalies/anomalie.context.type";
 import { defineRule } from "@/lib/anomalies/anomalie.rule";
 import {
   pastTypologies,

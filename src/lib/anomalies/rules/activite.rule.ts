@@ -1,4 +1,4 @@
-import type { ActiviteContext } from "@/lib/anomalies/anomalie.context";
+import type { ActiviteContext } from "@/lib/anomalies/anomalie.context.type";
 import { defineRule } from "@/lib/anomalies/anomalie.rule";
 import {
   ANOMALIE_NO_YEAR,
