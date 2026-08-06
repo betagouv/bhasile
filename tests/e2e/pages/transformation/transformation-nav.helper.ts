@@ -39,6 +39,10 @@ export const gotoVerification = async (
   await expect(
     page.getByRole("button", { name: FINALIZE_BUTTON })
   ).toBeVisible();
+  // La modale de confirmation est pilotée par le runtime DSFR, initialisé après
+  // l'hydratation : cliquer trop tôt déclenche bien le PUT mais laisse la
+  // modale fermée.
+  await page.waitForLoadState("networkidle");
 };
 
 export const finalizeTransformation = async (page: Page): Promise<void> => {

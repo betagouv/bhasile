@@ -16,7 +16,7 @@ export const fetchTransformationGraph = async (transformationId: number) => {
               antennes: true,
               structureFinesses: { include: { finess: true } },
               dnaStructures: { include: { dna: true } },
-              adresses: { include: { adresseTypologies: true } },
+              adresses: true,
             },
           },
         },

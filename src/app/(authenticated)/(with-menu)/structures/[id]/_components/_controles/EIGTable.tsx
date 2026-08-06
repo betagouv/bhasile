@@ -4,8 +4,8 @@ import { ReactElement, useState } from "react";
 import { SimplePagination } from "@/app/components/common/SimplePagination";
 import { formatDate } from "@/app/utils/date.util";
 import { SHORT_PAGE_SIZE } from "@/constants";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { DemarchesNumeriquesInfo } from "./DemarchesNumeriquesInfo";
 
 export const EIGTable = (): ReactElement => {

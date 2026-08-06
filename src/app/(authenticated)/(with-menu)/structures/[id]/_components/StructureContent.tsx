@@ -1,8 +1,8 @@
 "use client";
 
+import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureType } from "@/types/structure.type";
 
-import { useStructureContext } from "../_context/StructureClientContext";
 import { PrahdaStructure } from "./PrahdaStructure";
 import { Structure } from "./Structure";
 

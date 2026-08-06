@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/05-documents/page";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
@@ -79,9 +80,49 @@ describe("FinalisationDocuments page integration", () => {
     });
   });
 
-  it("refuse de valider l'étape documents sans convention pour une structure subventionnée", async () => {
+  it("valide l'étape sans acte propre quand le CPOM porte déjà les arrêtés du type de la structure", async () => {
     // GIVEN
     const base = createFinalisationValidStructure(78);
+    const structure = {
+      ...base,
+      actesAdministratifs: [],
+      cpomStructures: [
+        {
+          cpom: {
+            actesAdministratifs: [
+              {
+                id: 10,
+                category: "ARRETE_AUTORISATION" as const,
+                structureType: base.type,
+                parentId: null,
+                fileUploads: [{ id: 10, key: "arrete-autorisation-cpom" }],
+              },
+              {
+                id: 11,
+                category: "ARRETE_TARIFICATION" as const,
+                structureType: base.type,
+                parentId: null,
+                fileUploads: [{ id: 11, key: "arrete-tarification-cpom" }],
+              },
+            ],
+          },
+        },
+      ] as unknown as StructureApiRead["cpomStructures"],
+    };
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
+
+    // WHEN
+    await clickButtonByName("Je valide la saisie de cette page");
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+  });
+
+  it("refuse de valider l'étape documents sans convention pour une structure subventionnée", async () => {
+    // GIVEN
+    const base = createFinalisationValidStructure(80);
     const structure = {
       ...base,
       type: StructureType.HUDA,
@@ -98,6 +139,41 @@ describe("FinalisationDocuments page integration", () => {
     // THEN
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
     expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it("valide l'étape sans convention propre quand le CPOM porte celle du type de la structure", async () => {
+    // GIVEN
+    const base = createFinalisationValidStructure(81);
+    const structure = {
+      ...base,
+      type: StructureType.HUDA,
+      isAutorisee: false,
+      isSubventionnee: true,
+      actesAdministratifs: [],
+      cpomStructures: [
+        {
+          cpom: {
+            actesAdministratifs: [
+              {
+                id: 12,
+                category: "CONVENTION" as const,
+                structureType: StructureType.HUDA,
+                parentId: null,
+                fileUploads: [{ id: 12, key: "convention-cpom" }],
+              },
+            ],
+          },
+        },
+      ] as unknown as StructureApiRead["cpomStructures"],
+    };
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
+    // WHEN
+    await clickButtonByName("Je valide la saisie de cette page");
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
   });
 
   it("sauvegarde automatiquement les données des documents après le debounce", async () => {

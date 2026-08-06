@@ -32,18 +32,18 @@ export const Adresses = () => {
             {hebergement?.adresseComplete && (
               <span>{hebergement?.adresseComplete}</span>
             )}
-            {hebergement?.adresseTypologies?.[0]?.placesAutorisees && (
+            {hebergement?.placesAutorisees && (
               <span>
-                ({hebergement?.adresseTypologies?.[0]?.placesAutorisees} places)
+                ({hebergement?.placesAutorisees} places)
               </span>
             )}
             {hebergement?.repartition && (
               <span>{hebergement?.repartition}</span>
             )}
-            {hebergement?.adresseTypologies?.[0]?.qpv && (
+            {hebergement?.isQpv && (
               <Badge type="purple">QPV</Badge>
             )}
-            {hebergement?.adresseTypologies?.[0]?.logementSocial && (
+            {hebergement?.isLogementSocial && (
               <Badge type="purple">Logement social</Badge>
             )}
           </div>

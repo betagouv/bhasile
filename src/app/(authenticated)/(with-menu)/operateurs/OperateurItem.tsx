@@ -1,5 +1,4 @@
 // import Button from "@codegouvfr/react-dsfr/Button";
-import Link from "next/link";
 import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
@@ -86,10 +85,10 @@ export const OperateurItem = ({
               du parc en nombre de places
             </span>
           </div>
-          <Link
+          <span
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
             title={`Détails de l'operateur ${name}`}
-            href={`operateurs/${id}`}
+            aria-hidden="true"
           />
         </div>
       </div>

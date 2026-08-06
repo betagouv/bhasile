@@ -1,10 +1,8 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { Prisma } from "@/generated/prisma/client";
 
-export const currentVersionWhere = (
-  now: Date
-): Prisma.StructureVersionWhereInput => ({
-  effectiveDate: { lt: startOfNextUtcDay(now) },
+/** Une version liée à une transformation non finalisée n'est jamais "effective". */
+export const finalizedVersionWhere: Prisma.StructureVersionWhereInput = {
   OR: [
     { structureVersionTransformationId: null },
     {
@@ -13,27 +11,51 @@ export const currentVersionWhere = (
       },
     },
   ],
+};
+
+export const currentVersionWhere = (
+  now: Date
+): Prisma.StructureVersionWhereInput => ({
+  AND: [
+    {
+      OR: [
+        { effectiveDate: null },
+        { effectiveDate: { lt: startOfNextUtcDay(now) } },
+      ],
+    },
+    finalizedVersionWhere,
+  ],
 });
 
 export const currentVersionArgs = (now: Date) =>
   ({
     where: currentVersionWhere(now),
-    orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+    orderBy: [
+      { effectiveDate: { sort: "desc", nulls: "last" } },
+      { id: "desc" },
+    ],
     take: 1,
   }) satisfies Pick<
     Prisma.StructureVersionFindManyArgs,
     "where" | "orderBy" | "take"
   >;
 
+/** Seul champ de la transfo consommé par isVersionValid. */
+export const transformationStatusSelect = {
+  transformation: { select: { form: { select: { status: true } } } },
+} satisfies Prisma.StructureVersionTransformationSelect;
+
+/** Champs exigés par ResolvableVersion à étendre selon les besoins de l'appelant. */
+export const resolvableVersionSelect = {
+  id: true,
+  effectiveDate: true,
+  structureVersionTransformationId: true,
+  structureVersionTransformation: { select: transformationStatusSelect },
+} satisfies Prisma.StructureVersionSelect;
+
 export const structureVersionDetailsInclude = {
   contacts: true,
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   antennes: true,
   structureFinesses: {
     include: { finess: true },
@@ -88,15 +110,7 @@ export type StructureVersionDbTransformation =
         };
       };
       contacts: true;
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc";
-            };
-          };
-        };
-      };
+      adresses: true;
       structureFinesses: {
         include: {
           finess: true;

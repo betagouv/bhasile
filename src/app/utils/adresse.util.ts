@@ -1,4 +1,3 @@
-import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 
 import { isBlank } from "./common.util";
@@ -20,17 +19,25 @@ export const getDepartementFromCodePostal = (codePostal: string) =>
     ? (codePostal?.trim().slice(0, 3) ?? "")
     : (codePostal?.trim().slice(0, 2) ?? "")) || "";
 
-export const transformApiAdressesToFormAdresses = (
-  adresses?: Partial<AdresseApiType>[]
+// TODO: Adaptateur localStorage : les navigateurs peuvent encore contenir l'ancien
+// format `adresseTypologies`. Supprimer à la fin de phase d'initialisation
+export const migrateLegacyAdresseTypologies = (
+  adresses?: LegacyFormAdresse[]
 ): FormAdresse[] | undefined =>
-  adresses?.map((adresse) => ({
-    ...adresse,
-    adresseTypologies: adresse.adresseTypologies?.map((adresseTypologie) => ({
-      ...adresseTypologie,
-      qpv: !!adresseTypologie.qpv,
-      logementSocial: !!adresseTypologie.logementSocial,
-    })),
-  })) as FormAdresse[] | undefined;
+  adresses?.map(({ adresseTypologies, ...adresse }) => {
+    const legacyTypologie = adresseTypologies?.[0];
+
+    if (!legacyTypologie) {
+      return adresse;
+    }
+
+    return {
+      ...adresse,
+      placesAutorisees: legacyTypologie.placesAutorisees,
+      isQpv: !!legacyTypologie.qpv,
+      isLogementSocial: !!legacyTypologie.logementSocial,
+    };
+  });
 
 /**
  * Formate un nom de ville selon les règles de typographie françaises :
@@ -131,18 +138,22 @@ export const formatCityName = (city?: string): string | undefined | null => {
   return result;
 };
 
-export const isAdresseEmpty = (adresse: FormAdresse): boolean => {
-  const typologie = adresse.adresseTypologies?.[0];
-  return (
-    isBlank(adresse.adresseComplete) &&
-    isBlank(adresse.adresse) &&
-    isBlank(adresse.codePostal) &&
-    isBlank(adresse.commune) &&
-    isBlank(adresse.departement) &&
-    isBlank(typologie?.placesAutorisees) &&
-    !typologie?.logementSocial &&
-    !typologie?.qpv
-  );
+export const isAdresseEmpty = (adresse: FormAdresse): boolean =>
+  isBlank(adresse.adresseComplete) &&
+  isBlank(adresse.adresse) &&
+  isBlank(adresse.codePostal) &&
+  isBlank(adresse.commune) &&
+  isBlank(adresse.departement) &&
+  isBlank(adresse.placesAutorisees) &&
+  !adresse.isLogementSocial &&
+  !adresse.isQpv;
+
+type LegacyFormAdresse = FormAdresse & {
+  adresseTypologies?: {
+    placesAutorisees?: number | null;
+    qpv?: boolean;
+    logementSocial?: boolean;
+  }[];
 };
 
 type Coordinates = {

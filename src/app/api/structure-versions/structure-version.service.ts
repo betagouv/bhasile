@@ -9,12 +9,12 @@ import {
 } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
-import type { StructureDbDetails } from "../structures/structure.db.type";
+import type { ResolvedStructureDetails } from "../structures/structure.db.type";
 import { getTypeBati } from "../structures/structure.util";
 import { StructureVersionDbTransformation } from "./structure-version.db.type";
 
 const mapVersionFields = (
-  source: StructureDbDetails | StructureVersionDbTransformation
+  source: ResolvedStructureDetails | StructureVersionDbTransformation
 ): Pick<
   StructureVersionApiType,
   | "public"
@@ -76,7 +76,7 @@ export const dbStructureVersionToApiRead = (
 };
 
 export const copyStructureVersion = (
-  structure: StructureDbDetails,
+  structure: ResolvedStructureDetails,
   overrides: Partial<StructureVersionApiType> = {}
 ): StructureVersionApiType => ({
   ...mapVersionFields(structure),
@@ -113,20 +113,15 @@ export const copyStructureVersion = (
     codePostal: adresse.codePostal,
     commune: adresse.commune,
     repartition: adresse.repartition,
-    adresseTypologies: adresse.adresseTypologies.map((typologie) => ({
-      placesAutorisees: typologie.placesAutorisees,
-      year: typologie.year,
-      qpv: typologie.qpv,
-      logementSocial: typologie.logementSocial,
-    })),
+    placesAutorisees: adresse.placesAutorisees,
+    isQpv: adresse.isQpv,
+    isLogementSocial: adresse.isLogementSocial,
   })),
   dnaStructures: structure.dnaStructures.map((dnaStructure) => ({
     description: dnaStructure.description ?? undefined,
     dna: {
       code: dnaStructure.dna.code,
     },
-    startDate: dnaStructure.startDate?.toISOString() ?? undefined,
-    endDate: dnaStructure.endDate?.toISOString() ?? undefined,
   })),
   ...overrides,
 });

@@ -1,11 +1,15 @@
 import { Form, Prisma, StructureType } from "@/generated/prisma/client";
 
-import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
+import {
+  resolvableVersionSelect,
+  type StructureVersionDbDetails,
+  structureVersionDetailsInclude,
+  transformationStatusSelect,
+} from "../structure-versions/structure-version.db.type";
+import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 
 export const structureListLightVersionSelect = {
-  id: true,
-  effectiveDate: true,
-  structureVersionTransformationId: true,
+  ...resolvableVersionSelect,
   nom: true,
   departementAdministratif: true,
   communeAdministrative: true,
@@ -13,11 +17,7 @@ export const structureListLightVersionSelect = {
   latitude: true,
   longitude: true,
   structureVersionTransformation: {
-    select: {
-      type: true,
-      motif: true,
-      transformation: { select: { form: { select: { status: true } } } },
-    },
+    select: { type: true, motif: true, ...transformationStatusSelect },
   },
   placesAutorisees: true,
   adresses: { select: { repartition: true } },
@@ -52,13 +52,7 @@ export const structureListLightSelect = {
 
 export const structureListVersionInclude = {
   contacts: true,
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
+  adresses: true,
   antennes: true,
   structureFinesses: {
     include: { finess: true },
@@ -70,13 +64,6 @@ export const structureListVersionInclude = {
 } satisfies Prisma.StructureVersionInclude;
 
 export const structureListInclude = {
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
   cpomStructures: {
     include: {
       cpom: {
@@ -100,41 +87,10 @@ export const structureListInclude = {
   forms: {
     include: { formDefinition: true },
   },
-  dnaStructures: {
-    orderBy: { dna: { code: "asc" } },
-    include: { dna: true },
-  },
   actesAdministratifs: true,
 } satisfies Prisma.StructureInclude;
 
 export const structureDetailsInclude = {
-  dnaStructures: {
-    orderBy: { dna: { code: "asc" } },
-    include: {
-      dna: {
-        include: {
-          activites: {
-            orderBy: { date: "desc" },
-          },
-          evenementsIndesirablesGraves: {
-            orderBy: { evenementDate: "desc" },
-          },
-        },
-      },
-    },
-  },
-  structureFinesses: {
-    include: { finess: true },
-  },
-  adresses: {
-    include: {
-      adresseTypologies: {
-        orderBy: { year: "desc" },
-      },
-    },
-  },
-  antennes: true,
-  contacts: true,
   structureTypologies: {
     orderBy: { year: "desc" },
   },
@@ -158,17 +114,8 @@ export const structureDetailsInclude = {
                   forms: true,
                   structureVersions: {
                     select: {
-                      id: true,
-                      effectiveDate: true,
+                      ...resolvableVersionSelect,
                       communeAdministrative: true,
-                      structureVersionTransformationId: true,
-                      structureVersionTransformation: {
-                        select: {
-                          transformation: {
-                            select: { form: { select: { status: true } } },
-                          },
-                        },
-                      },
                     },
                   },
                 },
@@ -181,6 +128,9 @@ export const structureDetailsInclude = {
             include: { departement: true },
           },
           actesAdministratifs: {
+            include: { fileUploads: true },
+          },
+          documentsFinanciers: {
             include: { fileUploads: true },
           },
           budgets: {
@@ -242,6 +192,10 @@ export type StructureDbList = Prisma.StructureGetPayload<{
 export type StructureDbDetails = Prisma.StructureGetPayload<{
   include: typeof structureDetailsInclude;
 }>;
+
+// Structure enrichie des champs versionnés résolus depuis sa version courante.
+export type ResolvedStructureDetails = StructureDbDetails &
+  Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>;
 
 export type StructureDbOperateur = {
   id: number;

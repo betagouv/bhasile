@@ -44,7 +44,6 @@ export const cleanupOrphans = async (): Promise<void> => {
   for (const { id } of cpoms) {
     try {
       await prisma.userAction.deleteMany({ where: { cpomId: id } });
-      await prisma.cpomMillesime.deleteMany({ where: { cpomId: id } });
       await prisma.cpom.deleteMany({ where: { id } });
     } catch (err) {
       errors.push(

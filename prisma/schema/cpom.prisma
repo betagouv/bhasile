@@ -10,6 +10,7 @@ model Cpom {
   operateur           Operateur           @relation(fields: [operateurId], references: [id])
   operateurId         Int
   actesAdministratifs ActeAdministratif[]
+  documentsFinanciers DocumentFinancier[]
   userActions         UserAction[]
 
   createdAt DateTime @default(now())
@@ -49,32 +50,5 @@ model CpomStructure {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([cpomId, structureId])
-  @@schema("public")
-}
-
-// TODO: to delete once the migration is done
-model CpomMillesime {
-  id                                Int     @id @default(autoincrement())
-  cpomId                            Int
-  year                              Int     @default(0)
-  dotationDemandee                  Float?
-  dotationAccordee                  Float?
-  cumulResultatNet                  Float?
-  repriseEtat                       Float?
-  affectationReservesFondsDedies    Float?
-  reserveInvestissement             Float?
-  chargesNonReconductibles          Float?
-  reserveCompensationDeficits       Float?
-  reserveCompensationBFR            Float?
-  reserveCompensationAmortissements Float?
-  fondsDedies                       Float?
-  reportANouveau                    Float?
-  autre                             Float?
-  commentaire                       String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([cpomId, year])
   @@schema("public")
 }

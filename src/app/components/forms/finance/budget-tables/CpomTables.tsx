@@ -22,9 +22,13 @@ export const CpomTables = () => {
     <>
       <p className="mb-0 max-w-3xl">
         Veuillez renseigner l’historique des données budgétaires{" "}
-        <strong>à l’échelle de l’ensemble du CPOM</strong>. Aussi, le tableau
-        des affectations reflète uniquement des flux annuels. Les montants
-        saisis ne doivent en aucun cas être une estimation du stock.
+        <strong>
+          à l’échelle du CPOM en prenant en compte toutes les structures d’un
+          même type.
+        </strong>{" "}
+        Aussi, le tableau des affectations reflète uniquement des flux annuels.
+        Les montants saisis ne doivent en aucun cas être une estimation du
+        stock.
       </p>
       {structureTypes.length > 1 && (
         <CustomNotice
@@ -34,10 +38,18 @@ export const CpomTables = () => {
       )}
       {structureTypes.map((structureType, index) => (
         <Fragment key={structureType}>
-          <CpomTable
-            type={structureType}
-            showTitle={structureTypes.length > 1}
-          />
+          <div>
+            <h2
+              className="text-title-blue-france text-lg mb-8 text-left font-bold"
+              id={`gestionBudgetaire-${structureType}`}
+            >
+              Gestion budgétaire ({structureType})
+            </h2>
+            <CpomTable
+              type={structureType}
+              ariaLabelledBy={`gestionBudgetaire-${structureType}`}
+            />
+          </div>
           {index < structureTypes.length - 1 && <hr />}
         </Fragment>
       ))}

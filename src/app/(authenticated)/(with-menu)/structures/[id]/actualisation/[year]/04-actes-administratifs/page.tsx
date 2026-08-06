@@ -2,22 +2,25 @@
 
 import { useParams } from "next/navigation";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/ActesAdministratifs";
 import { AutoSave } from "@/app/components/forms/AutoSave";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
+import {
+  getCpomCoveredActeCategories,
+  relaxCoveredCategories,
+} from "@/app/utils/acteAdministratif.util";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import { getActualisationActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
-  actesAdministratifsAutoriseesSchema,
   ActesAdministratifsAutoSaveFormValues,
   actesAdministratifsAutoSaveSchema,
-  actesAdministratifsSubventionneesSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
+import { getActesAdministratifsSchema } from "@/schemas/forms/base/acteAdministratif/getActesAdministratifsSchema";
 
 import { ActualisationTabs } from "../_components/ActualisationTabs";
 
@@ -29,9 +32,7 @@ export default function ActualisationActesAdministratifs() {
 
   const defaultValues = getActualisationDefaultValues({ structure });
 
-  const strictSchema = structure.isAutorisee
-    ? actesAdministratifsAutoriseesSchema
-    : actesAdministratifsSubventionneesSchema;
+  const strictSchema = getActesAdministratifsSchema(structure);
 
   const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
     year,
@@ -59,8 +60,10 @@ export default function ActualisationActesAdministratifs() {
     });
   };
 
-  const categoriesRules =
-    getActualisationActesAdministratifsCategoryToDisplay(structure);
+  const categoriesRules = relaxCoveredCategories(
+    getActualisationActesAdministratifsCategoryToDisplay(structure),
+    getCpomCoveredActeCategories(structure)
+  );
 
   const key = structure?.actesAdministratifs
     ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)

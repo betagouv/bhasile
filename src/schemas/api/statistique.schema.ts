@@ -61,7 +61,11 @@ export type PlacesIndicatorsStat = {
   logementsSociaux: number;
 };
 
-export type PlacesByYearStat = PlacesIndicatorsStat & {
+// QPV / logement social sont en snapshot à date (pas d'historique) → hors byYear.
+export type PlacesByYearStat = Omit<
+  PlacesIndicatorsStat,
+  "qpv" | "logementsSociaux"
+> & {
   year: number;
 };
 

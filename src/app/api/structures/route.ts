@@ -16,7 +16,8 @@ import {
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
   const search = request.nextUrl.searchParams.get("search");
-  const page = request.nextUrl.searchParams.get("page") as number | null;
+  const pageParam = Number(request.nextUrl.searchParams.get("page"));
+  const page = Number.isInteger(pageParam) ? pageParam : null;
   const type = request.nextUrl.searchParams.get("type");
   const bati = request.nextUrl.searchParams.get("bati");
   const placesAutorisees = request.nextUrl.searchParams.get("places") as

@@ -1,9 +1,8 @@
 import { Fragment, ReactElement } from "react";
 
 import { Table } from "@/app/components/common/Table";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
 export const StructuresStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();

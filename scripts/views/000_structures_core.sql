@@ -10,17 +10,19 @@ WITH
       sv."departementAdministratif",
       sv."latitude",
       sv."longitude",
-      sv."public",
-      sv."creationDate",
-      sv."date303"
+      sv."public"
     FROM
       public."StructureVersion" sv
       LEFT JOIN public."StructureVersionTransformation" svt ON svt."id" = sv."structureVersionTransformationId"
       LEFT JOIN public."Form" f ON f."transformationId" = svt."transformationId"
     WHERE
       sv."structureId" IS NOT NULL
-      AND sv."effectiveDate" < (
-        (DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC') + INTERVAL '1 day') AT TIME ZONE 'UTC'
+      -- Le socle (effectiveDate NULL) est la baseline : toujours eligible
+      AND (
+        sv."effectiveDate" IS NULL
+        OR sv."effectiveDate" < (
+          (DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC') + INTERVAL '1 day') AT TIME ZONE 'UTC'
+        )
       )
       AND (
         -- Filter out structures versions linked to a non finished transformation
@@ -29,7 +31,7 @@ WITH
       )
     ORDER BY
       sv."structureId",
-      sv."effectiveDate" DESC,
+      sv."effectiveDate" DESC NULLS LAST,
       sv."id" DESC
   ),
   dna_codes_by_version AS (
@@ -54,8 +56,8 @@ SELECT
   s."type" AS "structure_type",
   s."createdAt" AS "created_at",
   s."updatedAt" AS "updated_at",
-  svc."creationDate" AS "creation_date",
-  svc."date303" AS "date_303",
+  s."creationDate" AS "creation_date",
+  s."date303" AS "date_303",
   svc."departementAdministratif" AS "departement_administratif",
   svc."latitude" AS "latitude",
   svc."longitude" AS "longitude",

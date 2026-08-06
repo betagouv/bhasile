@@ -2,10 +2,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
-import { useStructureContext } from "../(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import {
   FINALISATION_FORM_LABEL,
   FINALISATION_FORM_VERSION,

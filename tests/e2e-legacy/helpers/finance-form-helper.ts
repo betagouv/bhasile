@@ -49,12 +49,20 @@ export async function fillFinanceForm(
       }
       return [String(value)];
     });
-    for (let i = 0; i < Math.min(count, valuesToFill.length); i++) {
-      const inputName = await inputs.nth(i).getAttribute("name");
+    for (let index = 0; index < Math.min(count, valuesToFill.length); index++) {
+      const input = inputs.nth(index);
+      const inputName = await input.getAttribute("name");
       if (!inputName) {
         continue;
       }
-      await formHelper.fillInput(`input[name="${inputName}"]`, valuesToFill[i]);
+      // Le réalisé de l'année en cours est désactivé côté app (isInputDisabled).
+      if (!(await input.isEnabled().catch(() => false))) {
+        continue;
+      }
+      await formHelper.fillInput(
+        `input[name="${inputName}"]`,
+        valuesToFill[index]
+      );
     }
   }
 

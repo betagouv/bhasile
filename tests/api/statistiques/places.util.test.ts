@@ -50,16 +50,19 @@ const testAdresse = (
   id: number,
   structureId: number,
   overrides: Partial<
-    Pick<StatistiqueDbAdresse, "qpv" | "logementSocial" | "structureVersionId">
+    Pick<
+      StatistiqueDbAdresse,
+      "placesAutorisees" | "isQpv" | "isLogementSocial" | "structureVersionId"
+    >
   > = {}
 ): StatistiqueDbAdresse => ({
   id,
   structureId,
   structureVersionId: overrides.structureVersionId ?? structureId,
   repartition: Repartition.COLLECTIF,
-  placesAutorisees: 0,
-  qpv: overrides.qpv ?? 0,
-  logementSocial: overrides.logementSocial ?? 0,
+  placesAutorisees: overrides.placesAutorisees ?? 0,
+  isQpv: overrides.isQpv ?? false,
+  isLogementSocial: overrides.isLogementSocial ?? false,
 });
 
 const testDepartements = (): StatistiqueDbDepartement[] => [
@@ -157,8 +160,12 @@ describe("places - agrégés sur le périmètre ouvert à la date de référence
           testTypologie(2, 2, 2025, 50),
         ],
         adresses: [
-          testAdresse(10, 1, { qpv: 5, logementSocial: 2 }),
-          testAdresse(11, 2, { qpv: 3, logementSocial: 1 }),
+          testAdresse(10, 1, { placesAutorisees: 5, isQpv: true }),
+          testAdresse(11, 2, {
+            placesAutorisees: 3,
+            isQpv: true,
+            isLogementSocial: true,
+          }),
         ],
         departements: testDepartements().slice(0, 1),
       })
@@ -168,7 +175,7 @@ describe("places - agrégés sur le périmètre ouvert à la date de référence
     expect(result.logementsSociaux).toBe(3); // Partir un jour
   });
 
-  it("ignore les adresses rattachées à une structure sans typologie dans le périmètre", () => {
+  it("compte les adresses QPV même pour une structure sans typologie (snapshot décorrélé)", () => {
     const result = computePlacesStatistiques(
       buildTestStatistiquesContext({
         structures: [
@@ -177,15 +184,17 @@ describe("places - agrégés sur le périmètre ouvert à la date de référence
         ],
         typologies: [testTypologie(1, 1, 2025, 100)],
         adresses: [
-          testAdresse(10, 1, { qpv: 5 }),
-          testAdresse(11, 2, { qpv: 99 }),
+          testAdresse(10, 1, { placesAutorisees: 5, isQpv: true }),
+          testAdresse(11, 2, { placesAutorisees: 99, isQpv: true }),
         ],
         departements: testDepartements().slice(0, 1),
       })
     );
 
+    // Places autorisées (typologie) : seule la structure 1 compte.
     expect(result.totalPlaces).toBe(100);
-    expect(result.qpv).toBe(5);
+    // QPV (snapshot adresse) : les deux adresses, y compris la structure sans typologie.
+    expect(result.qpv).toBe(104);
   });
 });
 
@@ -330,7 +339,7 @@ describe("places - indicateurs annuels (byYear)", () => {
     );
   });
 
-  it("reporte les qpv courants des adresses sur chaque millésime annuel", () => {
+  it("expose qpv/logementsSociaux en snapshot à date, hors byYear", () => {
     const result = computePlacesStatistiques(
       buildTestStatistiquesContext({
         structures: [testStructure(1)],
@@ -338,23 +347,17 @@ describe("places - indicateurs annuels (byYear)", () => {
           testTypologie(1, 1, 2023, 80),
           testTypologie(2, 1, 2024, 100),
         ],
-        adresses: [testAdresse(10, 1, { qpv: 7 })],
+        adresses: [testAdresse(10, 1, { placesAutorisees: 7, isQpv: true })],
         departements: testDepartements().slice(0, 1),
       })
     );
 
-    const year2023 = result.byYear.find((entry) => entry.year === 2023);
-    const year2024 = result.byYear.find((entry) => entry.year === 2024);
-
-    expect(year2023?.qpv).toBe(7);
-    expect(year2024?.qpv).toBe(7);
-    expect(year2023?.totalPlaces).toBe(80);
-    expect(year2024?.totalPlaces).toBe(100);
+    expect(result.qpv).toBe(7);
+    expect(result.byYear.every((entry) => !("qpv" in entry))).toBe(true);
   });
 
-  it("reconstitue qpv/logementsSociaux par année depuis l'historique des StructureVersion, sans se figer sur l'adresse courante", () => {
-    // Structure transformée le 01/06/2023 : nouvelle StructureVersion (102) avec une
-    // nouvelle adresse. Avant cette date, la version (101) et son adresse s'appliquent.
+  it("snapshot qpv : seulement l'adresse de la version courante, pas la somme historique", () => {
+    // Structure transformée le 01/06/2023 : la version courante (102) porte l'adresse à 9.
     const structureVersionTimeline = buildTestStructureVersionTimeline([
       {
         structureId: 1,
@@ -372,28 +375,23 @@ describe("places - indicateurs annuels (byYear)", () => {
       buildTestStatistiquesContext({
         structures: [testStructure(1)],
         structureVersionTimeline,
-        typologies: [
-          testTypologie(1, 1, 2021, 100),
-          testTypologie(2, 1, 2022, 100),
-          testTypologie(3, 1, 2023, 100),
-        ],
+        typologies: [testTypologie(1, 1, 2023, 100)],
         adresses: [
-          testAdresse(10, 1, { qpv: 5, structureVersionId: 101 }),
-          testAdresse(11, 1, { qpv: 9, structureVersionId: 102 }),
+          testAdresse(10, 1, {
+            placesAutorisees: 5,
+            isQpv: true,
+            structureVersionId: 101,
+          }),
+          testAdresse(11, 1, {
+            placesAutorisees: 9,
+            isQpv: true,
+            structureVersionId: 102,
+          }),
         ],
         departements: testDepartements().slice(0, 1),
       })
     );
 
-    const year2021 = result.byYear.find((entry) => entry.year === 2021);
-    const year2022 = result.byYear.find((entry) => entry.year === 2022);
-    const year2023 = result.byYear.find((entry) => entry.year === 2023);
-
-    expect(year2021?.qpv).toBe(5);
-    expect(year2022?.qpv).toBe(5);
-    expect(year2023?.qpv).toBe(9);
-
-    // Vue globale (aujourd'hui) : uniquement la version courante, pas la somme historique (5+9).
     expect(result.qpv).toBe(9);
   });
 });

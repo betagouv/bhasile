@@ -4,14 +4,11 @@ import { ReactElement } from "react";
 
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
+import { migrateLegacyAdresseTypologies } from "@/app/utils/adresse.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
 import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
-import {
-  FormAdresse,
-  FormAdresseTypologie,
-} from "@/schemas/forms/base/adresse.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { StructureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 
@@ -66,20 +63,7 @@ export const ValidationButtonWithHook = ({
 
     updateAdresses({
       ...localAdressesValue,
-      adresses: localAdressesValue?.adresses?.map((adresse: FormAdresse) => ({
-        ...adresse,
-        adresseTypologies: adresse.adresseTypologies?.map(
-          (typologie: FormAdresseTypologie) => {
-            const typedTypologie = typologie as FormAdresseTypologie & {
-              date: string;
-            };
-            return {
-              ...typologie,
-              year: typedTypologie.year ?? getYearFromDate(typedTypologie.date),
-            };
-          }
-        ),
-      })),
+      adresses: migrateLegacyAdresseTypologies(localAdressesValue?.adresses),
     });
 
     updateTypePlaces({

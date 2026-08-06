@@ -6,12 +6,13 @@ import type {
 } from "@/app/api/statistiques/statistiques.db.type";
 import {
   applyVersionedPlacesToTypologies,
+  buildDnaStructureIdsResolver,
   filterByActiveStructureId,
   getEffectiveStructureVersionAtDate,
   lookupActiveStructureIds,
-  lookupStructureIdsForDnaAtDate,
   mapTypologieYears,
   parseStatistiquesPerimeterFilters,
+  resolveDnaEventStructureIds,
   sliceStatistiquesContext,
   structuresActiveInPeriod,
 } from "@/app/api/statistiques/statistiques.util";
@@ -235,6 +236,33 @@ describe("socle - version effective à date (résolution adresses/typologies/DNA
       )
     ).toBeNull();
   });
+
+  it("retombe sur le socle (effectiveDate null) tant qu'aucune version datée n'est effective", () => {
+    const timelineWithSocle = [
+      { id: 10, structureId: 1, effectiveDate: null, placesAutorisees: null },
+      {
+        id: 11,
+        structureId: 1,
+        effectiveDate: new Date("2028-01-01T00:00:00.000Z"),
+        placesAutorisees: null,
+      },
+    ];
+
+    expect(
+      getEffectiveStructureVersionAtDate(
+        1,
+        new Date("2025-06-15T12:00:00.000Z"),
+        timelineWithSocle
+      )
+    ).toMatchObject({ id: 10 });
+    expect(
+      getEffectiveStructureVersionAtDate(
+        1,
+        new Date("2028-06-15T12:00:00.000Z"),
+        timelineWithSocle
+      )
+    ).toMatchObject({ id: 11 });
+  });
 });
 
 describe("socle - résolution DNA à date", () => {
@@ -262,43 +290,58 @@ describe("socle - résolution DNA à date", () => {
     { structureId: 1, structureVersionId: 10, dnaCode: "DNA-OLD" },
   ]);
 
-  it("rattache un DNA via lookupStructureIdsForDnaAtDate sur la version effective", () => {
+  const resolveDnaStructureIds = buildDnaStructureIdsResolver(
+    dnaLinks,
+    timeline
+  );
+
+  it("rattache un DNA à la structure dont la version effective porte le lien", () => {
+    expect(resolveDnaStructureIds("DNA-SHARED", new Date("2024-06-01"))).toEqual(
+      [1]
+    );
+    expect(resolveDnaStructureIds("DNA-SHARED", new Date("2025-06-01"))).toEqual(
+      [2]
+    );
+    expect(resolveDnaStructureIds("DNA-OLD", new Date("2025-06-01"))).toEqual(
+      []
+    );
+  });
+
+  it("mémoïse par jour UTC sans mélanger les codes DNA", () => {
+    const matin = resolveDnaStructureIds(
+      "DNA-SHARED",
+      new Date("2025-06-01T06:00:00.000Z")
+    );
+    const soir = resolveDnaStructureIds(
+      "DNA-SHARED",
+      new Date("2025-06-01T22:00:00.000Z")
+    );
+
+    expect(soir).toBe(matin);
+    expect(resolveDnaStructureIds("DNA-OLD", new Date("2025-06-01"))).toEqual(
+      []
+    );
+  });
+
+  it("restreint la résolution au Set de structures actives fourni", () => {
     expect(
-      lookupStructureIdsForDnaAtDate(
-        "DNA-SHARED",
-        new Date("2024-06-01"),
-        dnaLinks,
-        timeline
-      )
-    ).toEqual([1]);
-    expect(
-      lookupStructureIdsForDnaAtDate(
+      resolveDnaEventStructureIds(
+        resolveDnaStructureIds,
         "DNA-SHARED",
         new Date("2025-06-01"),
-        dnaLinks,
-        timeline
-      )
-    ).toEqual([2]);
-    expect(
-      lookupStructureIdsForDnaAtDate(
-        "DNA-OLD",
-        new Date("2025-06-01"),
-        dnaLinks,
-        timeline
+        new Set([1])
       )
     ).toEqual([]);
   });
 
-  it("restreint lookupStructureIdsForDnaAtDate au Set de structures actives fourni", () => {
+  it("ne renvoie pas le tableau mémoïsé par référence", () => {
     expect(
-      lookupStructureIdsForDnaAtDate(
+      resolveDnaEventStructureIds(
+        resolveDnaStructureIds,
         "DNA-SHARED",
-        new Date("2025-06-01"),
-        dnaLinks,
-        timeline,
-        new Set([1])
+        new Date("2025-06-01")
       )
-    ).toEqual([]);
+    ).not.toBe(resolveDnaStructureIds("DNA-SHARED", new Date("2025-06-01")));
   });
 });
 

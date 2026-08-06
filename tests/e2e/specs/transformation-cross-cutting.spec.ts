@@ -106,9 +106,13 @@ test.describe("Transformations — comportements transverses", () => {
         name: /créations, transformations et fermetures de structures/i,
       })
     ).toBeVisible();
+    // Le streaming Next.js laisse transitoirement une copie masquée du bloc
+    // dans le DOM : on cible celle qui est réellement rendue à l'écran.
     await expect(
-      page.locator(`a[href="/structures/transformation/${transformationId}"]`)
-    ).toBeAttached();
+      page
+        .locator(`a[href="/structures/transformation/${transformationId}"]`)
+        .filter({ visible: true })
+    ).toBeVisible();
   });
 
   test("annuler la démarche supprime le brouillon", async ({

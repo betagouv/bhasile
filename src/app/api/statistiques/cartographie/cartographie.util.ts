@@ -15,7 +15,7 @@ import {
 import { computeControleQualiteByYear } from "../controle-qualite/controle-qualite.util";
 import { computeFinanceTotalValuesForYears } from "../finance/finance.util";
 import {
-  computeAdresseFieldForYear,
+  computeAdresseSnapshot,
   computeTypologieFieldForYear,
 } from "../places/places.util";
 import type {
@@ -141,6 +141,13 @@ const yearOverPreviousYear =
     previousValue: compute(context, annee - 1),
   });
 
+// Indicateur snapshot (sans année, donc sans évolution).
+const snapshotValue =
+  (
+    compute: (context: StatistiquesContext) => number | null
+  ): IndicateurValuesCalculation =>
+  (context) => ({ value: compute(context), previousValue: null });
+
 const financeValuesForYears = (
   context: StatistiquesContext,
   annee: number,
@@ -221,11 +228,11 @@ const INDICATEURS: Record<CartographieIndicateur, IndicateurValuesCalculation> =
     "places.fvvTeh": yearOverPreviousYear((context, year) =>
       computeTypologieFieldForYear(context, year, "fvvTeh")
     ),
-    "places.qpv": yearOverPreviousYear((context, year) =>
-      computeAdresseFieldForYear(context, year, "qpv")
+    "places.qpv": snapshotValue((context) =>
+      computeAdresseSnapshot(context, "qpv")
     ),
-    "places.logementsSociaux": yearOverPreviousYear((context, year) =>
-      computeAdresseFieldForYear(context, year, "logementSocial")
+    "places.logementsSociaux": snapshotValue((context) =>
+      computeAdresseSnapshot(context, "logementsSociaux")
     ),
     "finance.dotationAccordee": (context, annee, aggregation) =>
       financeValuesForYears(context, annee, aggregation, "dotationAccordee"),

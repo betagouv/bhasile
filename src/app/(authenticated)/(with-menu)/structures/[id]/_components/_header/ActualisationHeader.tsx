@@ -1,6 +1,7 @@
 import { ReactElement } from "react";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { useStructureContext } from "@/contexts/StructureContext";
+
 import { StructureCallToActionHeader } from "./StructureCallToActionHeader";
 
 export const ActualisationHeader = ({

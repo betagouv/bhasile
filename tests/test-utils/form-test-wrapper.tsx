@@ -5,7 +5,7 @@ import {
   useForm,
 } from "react-hook-form";
 
-import { FormProvider } from "@/app/context/FormContext";
+import { FormProvider } from "@/contexts/FormContext";
 
 type FormTestWrapperProps = {
   children: ReactNode;
