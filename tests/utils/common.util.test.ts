@@ -101,6 +101,17 @@ describe("common util", () => {
       // THEN
       expect(percentage).toBe("33\u00a0%");
     });
+    it("tronque le pourcentage plut\u00f4t que de l'arrondir", () => {
+      // GIVEN
+      const partialValue = 999;
+      const totalValue = 1000;
+
+      // WHEN
+      const percentage = getPercentage(partialValue, totalValue);
+
+      // THEN
+      expect(percentage).toBe("99\u00a0%");
+    });
   });
   describe("computeAverage", () => {
     it("retourne 0 quand on passe un tableau vide", () => {

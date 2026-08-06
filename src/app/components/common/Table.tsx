@@ -13,6 +13,9 @@ import {
 
 import { cn } from "@/app/utils/classname.util";
 
+const DEFAULT_FIRST_COLUMN_WIDTH = "15rem";
+const VALUE_COLUMN_WIDTH = "8.25rem";
+
 export const Table = ({
   children,
   title,
@@ -23,6 +26,7 @@ export const Table = ({
   enableBorders,
   hasErrors,
   stickFirstColumn,
+  firstColumnWidth = DEFAULT_FIRST_COLUMN_WIDTH,
   defaultScrollRight,
   overlay,
 }: Props) => {
@@ -89,12 +93,12 @@ export const Table = ({
           style={
             stickFirstColumn
               ? {
-                  minWidth: `max(100%, calc(15rem + ${valueColumnsCount} * 8.25rem))`,
+                  width: `max(100%, calc(${firstColumnWidth} + ${valueColumnsCount} * ${VALUE_COLUMN_WIDTH}))`,
                 }
               : undefined
           }
           className={cn(
-            "min-w-full",
+            !stickFirstColumn && "min-w-full",
             stickFirstColumn && [
               "table-fixed",
               "[&_tr>*:first-child]:sticky [&_tr>*:first-child]:left-0 [&_tr>*:first-child]:bg-white [&_tr>*:first-child]:z-20",
@@ -110,7 +114,15 @@ export const Table = ({
         >
           {stickFirstColumn && (
             <colgroup>
-              <col className="w-60" />
+              <col style={{ width: firstColumnWidth }} />
+              {Array.from({ length: valueColumnsCount }, (_, index) => (
+                <col
+                  key={index}
+                  style={{
+                    width: `calc((100% - ${firstColumnWidth}) / ${valueColumnsCount})`,
+                  }}
+                />
+              ))}
             </colgroup>
           )}
           {title && <caption>{title}</caption>}
@@ -164,6 +176,7 @@ type Props = PropsWithChildren<{
   enableBorders?: boolean;
   hasErrors?: boolean;
   stickFirstColumn?: boolean;
+  firstColumnWidth?: string;
   defaultScrollRight?: boolean;
   overlay?: ReactNode;
 }>;

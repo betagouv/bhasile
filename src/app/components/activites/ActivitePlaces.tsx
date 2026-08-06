@@ -51,7 +51,6 @@ export const ActivitePlaces = ({
           </div>
           <div>
             <strong>
-              {" "}
               <NumberDisplay value={placesDisponibles} />
             </strong>{" "}
             disponibles{" "}

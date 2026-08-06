@@ -170,6 +170,7 @@ export const ControleQualiteStatsTable = (): ReactElement => {
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
         stickFirstColumn
+        firstColumnWidth="18rem"
         defaultScrollRight
       >
         {controleQualiteStats.map((section) => (

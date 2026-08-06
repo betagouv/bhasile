@@ -2,6 +2,17 @@ import prettyBytes from "pretty-bytes";
 
 const NUMBER_LOCALE = "fr-FR";
 
+export const CURRENCY_FORMAT_OPTIONS: Intl.NumberFormatOptions = {
+  style: "currency",
+  currency: "EUR",
+};
+
+export const COMPACT_FORMAT_OPTIONS: Intl.NumberFormatOptions = {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: 1,
+};
+
 const isEmptyNumber = (value: number | string | null | undefined): boolean =>
   value === null || value === undefined || isNaN(Number(value));
 
@@ -35,12 +46,7 @@ export const formatBytes = (value: number | null | undefined): string =>
  */
 export const formatCompactNumber = (
   value: number | string | null | undefined
-): string =>
-  formatNumber(value, {
-    notation: "compact",
-    compactDisplay: "short",
-    maximumFractionDigits: 1,
-  });
+): string => formatNumber(value, COMPACT_FORMAT_OPTIONS);
 
 /**
  * Formats a number as French currency (EUR)
@@ -50,9 +56,7 @@ export const formatCompactNumber = (
 export const formatCurrency = (
   value: number | string | null | undefined
 ): string =>
-  isEmptyNumber(value)
-    ? "0 €"
-    : formatNumber(value, { style: "currency", currency: "EUR" });
+  isEmptyNumber(value) ? "0 €" : formatNumber(value, CURRENCY_FORMAT_OPTIONS);
 
 /**
  * Formats a ratio (0-1) as a French percentage

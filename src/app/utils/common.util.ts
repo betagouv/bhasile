@@ -22,7 +22,10 @@ export const getPercentage = (
   if (rate > 0 && rate < 0.01) {
     return "< 1 %";
   }
-  return formatPercentage(rate, { maximumFractionDigits: 0 });
+  return formatPercentage(rate, {
+    maximumFractionDigits: 0,
+    roundingMode: "floor",
+  });
 };
 
 export const computeAverage = (array: (number | null)[]): number => {
