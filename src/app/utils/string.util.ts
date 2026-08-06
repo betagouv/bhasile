@@ -2,7 +2,9 @@ export const normalizeAccents = (stringToNormalize: string) => {
   return stringToNormalize
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/\u0153/g, "oe")
+    .replace(/\u00e6/g, "ae");
 };
 
 export const normalizeWords = (stringToNormalize: string): string =>
