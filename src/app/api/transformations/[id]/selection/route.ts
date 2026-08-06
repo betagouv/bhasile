@@ -43,8 +43,15 @@ export async function PUT(
       );
     }
 
-    const transformationId = await resetTransformationSelection(result);
-    return NextResponse.json({ transformationId }, { status: 200 });
+    const resetTransformation = await resetTransformationSelection(result);
+    if (!resetTransformation) {
+      return NextResponse.json(
+        { error: "Transformation non trouvée" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(resetTransformation, { status: 200 });
   } catch (error) {
     return apiErrorResponse(error);
   }

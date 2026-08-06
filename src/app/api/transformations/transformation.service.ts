@@ -178,14 +178,19 @@ export const createTransformation = async (
 
 export const resetTransformationSelection = async (
   input: TransformationSelectionApiUpdate
-): Promise<number> => {
+): Promise<TransformationApiRead | null> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
       input.type,
       input.structureVersionTransformations
     );
 
-  return resetSelection({ ...input, structureVersionTransformations });
+  const transformationId = await resetSelection({
+    ...input,
+    structureVersionTransformations,
+  });
+
+  return getTransformation(transformationId);
 };
 
 const enrichStructureVersionTransformationFromSource = async (
