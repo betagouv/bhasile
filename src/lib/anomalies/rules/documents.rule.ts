@@ -1,5 +1,5 @@
-import type { ActeContext } from "@/lib/anomalies/anomalie.context.type";
 import { defineRule } from "@/lib/anomalies/anomalie.rule";
+import type { ActeContext } from "@/lib/anomalies/anomalie.type";
 import { isAutorisee } from "@/lib/anomalies/anomalie.util";
 import {
   ANOMALIE_NO_YEAR,

@@ -1,7 +1,7 @@
 import { TEST_CURRENT_YEAR } from "tests/test-utils/factories/anomalie-context.factory";
 
 import { computeAnomalies } from "@/lib/anomalies/anomalie.compute";
-import type { AnomalieContext } from "@/lib/anomalies/anomalie.context.type";
+import type { AnomalieContext } from "@/lib/anomalies/anomalie.type";
 import type { AnomalieCode } from "@/types/anomalie.type";
 
 export const detectionsOf = (

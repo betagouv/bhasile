@@ -1,5 +1,5 @@
-import type { TypologieContext } from "@/lib/anomalies/anomalie.context.type";
 import { defineRule } from "@/lib/anomalies/anomalie.rule";
+import type { TypologieContext } from "@/lib/anomalies/anomalie.type";
 import {
   pastTypologies,
   PLACES_ADRESSES_GAP_THRESHOLD_PCT,

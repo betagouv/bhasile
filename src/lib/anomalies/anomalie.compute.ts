@@ -1,8 +1,8 @@
-import type { AnomalieContext } from "@/lib/anomalies/anomalie.context.type";
 import type {
   AnomalieOptions,
   DetectedAnomalie,
 } from "@/lib/anomalies/anomalie.rule";
+import type { AnomalieContext } from "@/lib/anomalies/anomalie.type";
 import { ANOMALIE_RULES } from "@/lib/anomalies/rules";
 import type { AnomalieCode } from "@/types/anomalie.type";
 

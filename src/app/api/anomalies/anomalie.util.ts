@@ -4,7 +4,7 @@ import type { StructureAnomalieDb } from "@/app/api/anomalies/anomalie.db.type";
 import type {
   AnomalieContext,
   StructureContext,
-} from "@/lib/anomalies/anomalie.context.type";
+} from "@/lib/anomalies/anomalie.type";
 import { StructureType } from "@/types/structure.type";
 
 const CODE_REGION_IDF = "FR-IDF";
