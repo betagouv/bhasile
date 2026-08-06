@@ -34,6 +34,12 @@ describe("string util", () => {
     it("gère les caractères accentués mélangés à des caractères non accentués", () => {
       expect(normalizeAccents("Joël & Zoë")).toBe("joel & zoe");
     });
+
+    it("décompose les ligatures que la normalisation Unicode laisse intactes", () => {
+      expect(normalizeAccents("Cœur")).toBe("coeur");
+      expect(normalizeAccents("Œuvre")).toBe("oeuvre");
+      expect(normalizeAccents("Ex æquo")).toBe("ex aequo");
+    });
   });
   describe("capitalizeFirstLetter", () => {
     it("préserve une chaîne déjà capitalisée", () => {
