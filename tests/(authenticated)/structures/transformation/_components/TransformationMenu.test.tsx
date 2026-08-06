@@ -258,7 +258,7 @@ describe("TransformationMenu", () => {
               type: StructureVersionTransformationType.FERMETURE,
               structureVersion: {
                 structureId: 1001,
-                structure: { codeBhasile: "1001" },
+                structure: { codeBhasile: "1001", isFinalised: true },
               },
             },
           ],
