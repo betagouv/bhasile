@@ -28,7 +28,7 @@ export const AnomaliesControls = ({
 
   return (
     <div
-      className={`flex items-end gap-8 ${
+      className={`flex items-center gap-8 ${
         isPending ? "pointer-events-none opacity-50" : ""
       }`}
     >
@@ -38,9 +38,9 @@ export const AnomaliesControls = ({
         onClick={() =>
           updateParams({ anomaliesIgnorees: shouldShowIgnored ? "0" : "1" })
         }
-        className="flex items-center gap-2 pb-1 font-bold text-title-blue-france"
+        className="flex items-center gap-2 pb-1 text-sm font-bold text-title-blue-france"
       >
-        <span className="fr-icon-eye-line" aria-hidden="true" />
+        <span className="fr-icon-eye-line fr-icon--sm" aria-hidden="true" />
         {shouldShowIgnored ? "Masquer" : "Voir"} les anomalies ignorées
       </button>
 
