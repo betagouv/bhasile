@@ -17,7 +17,7 @@ const rmuRow = (
 
 const contextWithRmus = (rmus: StatistiqueDbRmu[]) =>
   buildTestStatistiquesContext({
-    structures: [{ id: 1, type: StructureType.CADA, departementAdministratif: "75" }],
+    structures: [{ id: 1, type: StructureType.CADA, departementAdministratif: "75", arrondissementCode: null }],
     typologies: [],
     adresses: [],
     departements: [],
@@ -145,7 +145,7 @@ describe("rmu - séries mensuelle, trimestrielle et annuelle", () => {
   it("retourne null quand le RMU est non applicable (filtre opérateur/type)", () => {
     const context = buildTestStatistiquesContext({
       structures: [
-        { id: 1, type: StructureType.CADA, departementAdministratif: "75" },
+        { id: 1, type: StructureType.CADA, departementAdministratif: "75", arrondissementCode: null },
       ],
       typologies: [],
       adresses: [],

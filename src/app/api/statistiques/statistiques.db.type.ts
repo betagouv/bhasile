@@ -5,6 +5,7 @@ export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
     id: true;
     type: true;
     departementAdministratif: true;
+    arrondissementCode: true;
   };
 }>;
 
@@ -140,6 +141,18 @@ export type StatistiqueDbDepartement = Prisma.DepartementGetPayload<{
   };
 }>;
 
+export type StatistiqueDbArrondissement = Prisma.ArrondissementGetPayload<{
+  select: {
+    code: true;
+    name: true;
+    departementNumero: true;
+    population: true;
+  };
+}>;
+
+/** Base de calcul du taux d'équipement : départements, ou arrondissements si le filtre est actif. */
+export type StatistiquePopulationScope = { population: number | null };
+
 export type StatistiqueDbBudgetAgg = {
   year: number;
   dotationDemandee: number;
@@ -208,6 +221,8 @@ export type StatistiquesContext = {
   dnaLinks: StatistiqueDbDnaLink[];
   structureVersionTimeline: StatistiqueDbStructureVersionTimeline[];
   departements: StatistiqueDbDepartement[];
+  /** Renseigné uniquement quand le filtre `arrondissements` est actif : affine le taux d'équipement. */
+  arrondissements: StatistiqueDbArrondissement[];
   budgets: StatistiqueDbBudget[];
   indicateurs: StatistiqueDbIndicateurFinancier[];
   activites: StatistiqueDbActivite[];

@@ -5,7 +5,7 @@
 ## TODO
 
 - [ ] Confirmer que la résolution région -> départements se fait bien côté client avant l'appel (le format de requête actuel repose sur cette hypothèse). Ca semble d'ailleurs discutable vu que l'on a du coup pour une région l'ensemble des départements qui sont "resommés" sur la région... Sans doute un impact sur les performances.
-- [ ] Indicateurs `rmu.*` : la donnée RMU est stockée au niveau **département** (`Rmu.departementNumero`), il n'y a pas de RMU par arrondissement. La granularité `arrondissement` ne pourra donc jamais s'appliquer à ces indicateurs, même quand le modèle `Arrondissement` existera. Prévoir de désactiver l'option côté UI quand un indicateur `rmu.*` est sélectionné.
+- [ ] Indicateurs `rmu.*` : la donnée RMU est stockée au niveau **département** (`Rmu.departementNumero`), il n'y a pas de RMU par arrondissement. La granularité `arrondissement` ne pourra donc jamais s'appliquer à ces indicateurs. Prévoir de désactiver l'option côté UI quand un indicateur `rmu.*` est sélectionné. Même logique sur `/api/statistiques` : le bloc `rmu` est déjà neutralisé dès qu'un filtre `arrondissements` est actif.
 
 ## Paramètres
 
@@ -16,7 +16,7 @@
   `granularite` — on peut restreindre à une poignée de départements et découper par région pour les regrouper, ou l'inverse). Comme partout ailleurs dans l'app (structures, `/api/statistiques`), le front résout une sélection de région en numéros de département avant l'appel réseau : pas de paramètre `regions` séparé.
 - `operateurs`, `types`, `aggregation` : identiques à `/api/statistiques`
 
-`granularite=arrondissement` retourne `501 { error: "NOT_IMPLEMENTED" }` : aucun modèle `Arrondissement` en base. Le paramètre est déjà validé côté schéma pour que le front puisse proposer l'option dans l'UI.
+`granularite=arrondissement` retourne `501 { error: "NOT_IMPLEMENTED" }`. Le modèle `Arrondissement` existe désormais en base et `Structure.arrondissementCode` est rempli, mais la construction des zones (`buildZoneDefinitions`) et le découpage du contexte (`sliceContextByZone`, indexé sur les numéros de département) restent à écrire. Le paramètre est déjà validé côté schéma pour que le front puisse proposer l'option dans l'UI.
 
 Tous les paramètres passent en query string. Une valeur invalide (`indicateur` ou `granularite` hors énum, `annee` non numérique) renvoie `400 { error: "INVALID_PARAMS" }` avec le détail des erreurs Zod.
 

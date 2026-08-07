@@ -28,10 +28,10 @@ const activiteRow = (
 
 describe("activité - agrégés et série mensuelle", () => {
   const allStructures = [
-    { id: 1, type: StructureType.CADA, departementAdministratif: "75" },
-    { id: 2, type: StructureType.CAES, departementAdministratif: "75" },
-    { id: 3, type: StructureType.CPH, departementAdministratif: "75" },
-    { id: 4, type: StructureType.CADA, departementAdministratif: "75" },
+    { id: 1, type: StructureType.CADA, departementAdministratif: "75", arrondissementCode: null },
+    { id: 2, type: StructureType.CAES, departementAdministratif: "75", arrondissementCode: null },
+    { id: 3, type: StructureType.CPH, departementAdministratif: "75", arrondissementCode: null },
+    { id: 4, type: StructureType.CADA, departementAdministratif: "75", arrondissementCode: null },
   ];
 
   const dnaLinks = buildTestDnaLinks([
@@ -235,7 +235,7 @@ describe("activité - agrégés et série mensuelle", () => {
     const closedStructure = {
       id: 5,
       type: StructureType.CADA,
-      departementAdministratif: "75",
+      departementAdministratif: "75", arrondissementCode: null,
     };
     const closedDnaLinks = buildTestDnaLinks([
       { structureId: 5, dnaCode: "DNA05" },

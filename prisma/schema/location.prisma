@@ -11,7 +11,36 @@ model Departement {
   cpoms                CpomDepartement[]
   dnas                 Dna[]
   rmus                 Rmu[]
+  arrondissements      Arrondissement[]
 
+  @@schema("public")
+}
+
+// Arrondissement départemental (découpage préfectoral), pas arrondissement municipal.
+// Référentiel figé sur le millésime COG déclaré dans prisma/data/arrondissements.csv.
+model Arrondissement {
+  code              String      @id
+  name              String
+  departement       Departement @relation(fields: [departementNumero], references: [numero])
+  departementNumero String
+  population        Int?
+  communes          Commune[]
+  structures        Structure[]
+
+  @@index([departementNumero])
+  @@schema("public")
+}
+
+model Commune {
+  codeInsee          String          @id
+  name               String
+  nameNormalized     String
+  codesPostaux       String[]
+  population         Int?
+  arrondissement     Arrondissement? @relation(fields: [arrondissementCode], references: [code])
+  arrondissementCode String?
+
+  @@index([nameNormalized])
   @@schema("public")
 }
 

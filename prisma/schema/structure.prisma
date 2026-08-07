@@ -4,6 +4,7 @@ model Structure {
   filiale                  String? // TODO: retirer après phase d'initialisation + backfill des filiales en DB
   type                     StructureType?
   departementAdministratif String? // Correspond au département de référence de la structure immuable
+  arrondissementCode       String? // Arrondissement de référence de la structure, immuable comme le département
   debutConvention          DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   finConvention            DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   creationDate             DateTime?
@@ -24,6 +25,7 @@ model Structure {
   operateurId              Int?
   forms                    Form[]
   departement              Departement?          @relation(fields: [departementAdministratif], references: [numero])
+  arrondissement           Arrondissement?       @relation(fields: [arrondissementCode], references: [code])
   userActions              UserAction[]
   userNotes                Note[]
   structureVersions        StructureVersion[]
@@ -95,6 +97,8 @@ view StructuresAggregates {
   dna_codes                   String?
   departement_administratif   String?
   departement                 String?
+  arrondissement_code         String?
+  arrondissement              String?
   region                      String?
   operateur                   String?
   structure_type              String?

@@ -18,7 +18,7 @@ const NOW = new Date("2026-01-15T00:00:00.000Z");
 const testStructure = (id: number) => ({
   id,
   type: StructureType.CADA,
-  departementAdministratif: "01",
+  departementAdministratif: "01", arrondissementCode: null,
 });
 
 const testTypologie = (structureId: number, placesAutorisees = 100) => ({

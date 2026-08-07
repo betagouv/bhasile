@@ -4,6 +4,7 @@ import {
   formatCityName,
   getDepartementFromCodePostal,
   isAdresseEmpty,
+  normalizeCommuneName,
 } from "@/app/utils/adresse.util";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
@@ -33,6 +34,24 @@ describe("adresse util", () => {
 
     it("supprime les espaces avant d'extraire le code département", () => {
       expect(getDepartementFromCodePostal("  13008  ")).toBe("13");
+    });
+  });
+
+  describe("normalizeCommuneName", () => {
+    it("supprime les accents et passe en majuscules", () => {
+      expect(normalizeCommuneName("Bourg-en-Bresse")).toBe("BOURG EN BRESSE");
+      expect(normalizeCommuneName("Génissieux")).toBe("GENISSIEUX");
+    });
+
+    it("ramène apostrophes, traits d'union et espaces multiples à un séparateur unique", () => {
+      expect(normalizeCommuneName("L'Abergement-Clémenciat")).toBe(
+        "L ABERGEMENT CLEMENCIAT"
+      );
+      expect(normalizeCommuneName("  Saint   Étienne  ")).toBe("SAINT ETIENNE");
+    });
+
+    it("rapproche les variantes de casse d'une même commune", () => {
+      expect(normalizeCommuneName("belley")).toBe(normalizeCommuneName("BELLEY"));
     });
   });
 
