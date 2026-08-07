@@ -70,8 +70,13 @@ export const getOperateurs = async ({
   };
 };
 
-export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
+export const getOperateur = async (
+  id: number
+): Promise<OperateurApiRead | null> => {
   const operateur = await findOne(id);
+  if (!operateur) {
+    return null;
+  }
 
   return recursivelySerializeForClient({
     ...operateur,
