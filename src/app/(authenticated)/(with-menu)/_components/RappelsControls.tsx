@@ -1,9 +1,9 @@
 "use client";
 
 import { Select } from "@codegouvfr/react-dsfr/Select";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ReactElement, useTransition } from "react";
+import { ReactElement } from "react";
 
+import { useDashboardParams } from "@/app/hooks/useDashboardParams";
 import {
   RAPPEL_ECHELLE_OPTIONS,
   RAPPEL_GROUP_BY_OPTIONS,
@@ -12,26 +12,13 @@ import {
 import { RappelEchelle, RappelGroupBy } from "@/types/dashboard.type";
 
 export const RappelsControls = ({ echelle, groupBy }: Props): ReactElement => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-
-  const updateParams = (updates: Record<string, string>): void => {
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      for (const [key, value] of Object.entries(updates)) {
-        params.set(key, value);
-      }
-      params.set("rappelsPage", "0");
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    });
-  };
+  const { isPending, setParams } = useDashboardParams();
 
   const handleEchelleChange = (nextEchelle: RappelEchelle): void => {
-    updateParams({
+    setParams({
       rappelsEchelle: nextEchelle,
       rappelsGroupe: resolveRappelGroupBy(nextEchelle, groupBy),
+      rappelsPage: "0",
     });
   };
 
@@ -62,7 +49,10 @@ export const RappelsControls = ({ echelle, groupBy }: Props): ReactElement => {
         nativeSelectProps={{
           value: groupBy,
           onChange: (event) =>
-            updateParams({ rappelsGroupe: event.target.value }),
+            setParams({
+              rappelsGroupe: event.target.value,
+              rappelsPage: "0",
+            }),
         }}
         className="mb-0 flex items-center gap-2 [&_select]:mt-0 [&_label]:uppercase [&_label]:whitespace-nowrap"
       >

@@ -24,6 +24,27 @@ export const findAllStructureIds = async (): Promise<number[]> => {
   return structures.map(({ id }) => id);
 };
 
+export const findAnomalieForUpdate = (id: number) =>
+  prisma.anomalie.findUnique({
+    where: { id },
+    select: {
+      structureId: true,
+      structure: { select: { departementAdministratif: true } },
+    },
+  });
+
+export const updateAnomalieJustification = (
+  id: number,
+  data: AnomalieJustificationData
+) => prisma.anomalie.update({ where: { id }, data });
+
+type AnomalieJustificationData = {
+  isJustified: boolean;
+  commentaire?: string | null;
+  justifiedById?: number;
+  justifiedAt?: Date;
+};
+
 export const findAnomaliesByStructureId = (structureId: number) =>
   prisma.anomalie.findMany({
     where: { structureId },

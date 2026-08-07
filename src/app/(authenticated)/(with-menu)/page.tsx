@@ -6,8 +6,10 @@ import { authOptions } from "@/lib/next-auth/auth";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
+import { AnomaliesBlock } from "./_components/AnomaliesBlock";
 import { BlockSkeleton } from "./_components/BlockSkeleton";
 import {
+  ANOMALIES_BLOCK_HEADER,
   INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER,
   RAPPELS_BLOCK_HEADER,
   TRANSFORMATIONS_BLOCK_HEADER,
@@ -62,6 +64,9 @@ export default async function DashboardPage({
         </Suspense>
         <Suspense fallback={<BlockSkeleton {...RAPPELS_BLOCK_HEADER} />}>
           <RappelsBlock filters={filters} user={user} searchParams={params} />
+        </Suspense>
+        <Suspense fallback={<BlockSkeleton {...ANOMALIES_BLOCK_HEADER} />}>
+          <AnomaliesBlock filters={filters} user={user} searchParams={params} />
         </Suspense>
       </div>
     </>
