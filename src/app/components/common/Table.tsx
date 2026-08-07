@@ -13,6 +13,9 @@ import {
 
 import { cn } from "@/app/utils/classname.util";
 
+const DEFAULT_FIRST_COLUMN_WIDTH = "15rem";
+const VALUE_COLUMN_WIDTH = "8.25rem";
+
 export const Table = ({
   children,
   title,
@@ -23,9 +26,12 @@ export const Table = ({
   enableBorders,
   hasErrors,
   stickFirstColumn,
+  firstColumnWidth = DEFAULT_FIRST_COLUMN_WIDTH,
   defaultScrollRight,
   overlay,
 }: Props) => {
+  const valueColumnsCount = Math.max(headings.length - 1, 1);
+
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const scrollableAreaRef = useRef<HTMLDivElement>(null);
   const renderCountRef = useRef(0);
@@ -84,20 +90,41 @@ export const Table = ({
       >
         <table
           aria-labelledby={ariaLabelledBy}
+          style={
+            stickFirstColumn
+              ? {
+                  width: `max(100%, calc(${firstColumnWidth} + ${valueColumnsCount} * ${VALUE_COLUMN_WIDTH}))`,
+                }
+              : undefined
+          }
           className={cn(
-            "min-w-full",
+            !stickFirstColumn && "min-w-full",
             stickFirstColumn && [
+              "table-fixed",
               "[&_tr>*:first-child]:sticky [&_tr>*:first-child]:left-0 [&_tr>*:first-child]:bg-white [&_tr>*:first-child]:z-20",
-              "[&_tr>*:first-child]:before:content-[''] [&_tr>*:first-child]:before:pointer-events-none [&_tr>*:first-child]:before:absolute [&_tr>*:first-child]:before:right-[-6em] [&_tr>*:first-child]:before:top-0 [&_tr>*:first-child]:before:bottom-0 [&_tr>*:first-child]:before:w-[6em]",
-              "[&_tr>*:first-child]:before:bg-linear-to-l [&_tr>*:first-child]:before:from-transparent [&_tr>*:first-child]:before:to-white",
-              "[&_tr>*:first-child]:before:opacity-100 [&_tr>*:first-child]:before:transition-opacity [&_tr>*:first-child]:before:duration-30",
-              "[&_tr>*:first-child]:after:content-[''] [&_tr>*:first-child]:after:pointer-events-none [&_tr>*:first-child]:after:absolute [&_tr>*:first-child]:after:right-0 [&_tr>*:first-child]:after:top-0 [&_tr>*:first-child]:after:bottom-0 [&_tr>*:first-child]:after:border-r [&_tr>*:first-child]:after:border-default-grey",
+              "[&_tr>*:first-child:has(+*)]:before:content-[''] [&_tr>*:first-child:has(+*)]:before:pointer-events-none [&_tr>*:first-child:has(+*)]:before:absolute [&_tr>*:first-child:has(+*)]:before:right-[-6em] [&_tr>*:first-child:has(+*)]:before:top-0 [&_tr>*:first-child:has(+*)]:before:bottom-0 [&_tr>*:first-child:has(+*)]:before:w-[6em]",
+              "[&_tr>*:first-child:has(+*)]:before:bg-linear-to-l [&_tr>*:first-child:has(+*)]:before:from-transparent [&_tr>*:first-child:has(+*)]:before:to-white",
+              "[&_tr>*:first-child:has(+*)]:before:opacity-100 [&_tr>*:first-child:has(+*)]:before:transition-opacity [&_tr>*:first-child:has(+*)]:before:duration-30",
+              "[&_tr>*:first-child:has(+*)]:after:content-[''] [&_tr>*:first-child:has(+*)]:after:pointer-events-none [&_tr>*:first-child:has(+*)]:after:absolute [&_tr>*:first-child:has(+*)]:after:right-0 [&_tr>*:first-child:has(+*)]:after:top-0 [&_tr>*:first-child:has(+*)]:after:bottom-0 [&_tr>*:first-child:has(+*)]:after:border-r [&_tr>*:first-child:has(+*)]:after:border-default-grey",
             ],
             stickFirstColumn &&
               scrollReachedEnd &&
-              "[&_tr>*:first-child]:before:opacity-0"
+              "[&_tr>*:first-child:has(+*)]:before:opacity-0"
           )}
         >
+          {stickFirstColumn && (
+            <colgroup>
+              <col style={{ width: firstColumnWidth }} />
+              {Array.from({ length: valueColumnsCount }, (_, index) => (
+                <col
+                  key={index}
+                  style={{
+                    width: `calc((100% - ${firstColumnWidth}) / ${valueColumnsCount})`,
+                  }}
+                />
+              ))}
+            </colgroup>
+          )}
           {title && <caption>{title}</caption>}
 
           <thead>
@@ -149,6 +176,7 @@ type Props = PropsWithChildren<{
   enableBorders?: boolean;
   hasErrors?: boolean;
   stickFirstColumn?: boolean;
+  firstColumnWidth?: string;
   defaultScrollRight?: boolean;
   overlay?: ReactNode;
 }>;

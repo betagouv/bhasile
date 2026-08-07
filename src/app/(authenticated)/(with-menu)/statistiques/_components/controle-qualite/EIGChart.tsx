@@ -5,31 +5,20 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { formatDate, getYearRange } from "@/app/utils/date.util";
+import { formatDate } from "@/app/utils/date.util";
+import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { EIG_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-
-const MAX_DISPLAYED_TIME_PERIODS = 10;
 
 export const EIGChart = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const eigPeriodData = statistiques.controleQualite[timePeriod] || [];
-
-    const { years } = getYearRange();
-    const filteredEigPeriodData = eigPeriodData.filter((periodStat) => {
-      const itemYear = new Date(periodStat.date).getFullYear();
-      return years.includes(itemYear);
-    });
-
-    const sortedEigPeriodData = [...filteredEigPeriodData]
-      .sort(
-        (firstEigPeriod, secondEigPeriod) =>
-          new Date(firstEigPeriod.date).getTime() -
-          new Date(secondEigPeriod.date).getTime()
-      )
-      .slice(-MAX_DISPLAYED_TIME_PERIODS);
+    const sortedEigPeriodData = getLastDisplayedPeriods(
+      statistiques.controleQualite[timePeriod] || [],
+      EIG_START_YEAR
+    );
 
     const labels = sortedEigPeriodData.map((periodStat) => {
       const date = new Date(periodStat.date);
@@ -75,7 +64,11 @@ export const EIGChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarChart data={chartData} colors={colors} axisYLabel="EIG" />
+          <StackedBarChart
+            data={chartData}
+            colors={colors}
+            axisYLabel="Nb EIG"
+          />
         </div>
         <div>
           <TimePeriodSelector

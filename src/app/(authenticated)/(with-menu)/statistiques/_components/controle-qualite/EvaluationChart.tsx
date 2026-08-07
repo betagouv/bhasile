@@ -5,33 +5,19 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { getYearRange } from "@/app/utils/date.util";
+import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { EVALUATION_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-
-const MAX_DISPLAYED_TIME_PERIODS = 10;
 
 export const EvaluationChart = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const evaluationPeriodData = statistiques.controleQualite[timePeriod] || [];
-
-    const { years } = getYearRange();
-    const filteredEvaluationPeriodData = evaluationPeriodData.filter(
-      (periodStat) => {
-        const itemYear = new Date(periodStat.date).getFullYear();
-        return years.includes(itemYear);
-      }
+    const sortedEvaluationPeriodData = getLastDisplayedPeriods(
+      statistiques.controleQualite[timePeriod] || [],
+      EVALUATION_START_YEAR
     );
-
-    const sortedEvaluationPeriodData = [...filteredEvaluationPeriodData]
-      .sort(
-        (firstEvaluationPeriod, secondEvaluationPeriod) =>
-          new Date(firstEvaluationPeriod.date).getTime() -
-          new Date(secondEvaluationPeriod.date).getTime()
-      )
-      .slice(-MAX_DISPLAYED_TIME_PERIODS);
 
     const labels = sortedEvaluationPeriodData.map((item) => {
       const date = new Date(item.date);
@@ -86,8 +72,8 @@ export const EvaluationChart = (): ReactElement => {
           <DoubleYAxisBarLineChart
             data={chartData}
             colors={colors}
-            leftAxisLabel="note"
-            rightAxisLabel="structures"
+            leftAxisLabel="Note"
+            rightAxisLabel="Nb structures"
           />
         </div>
         <div>

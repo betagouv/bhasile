@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isAmbiguousFusion,
   isDnaCodeInDepartement,
   isEffectiveDateInScope,
-  normalizeBhasileCode,
+  normalizeBhasileCodes,
   normalizeDnaCodes,
   padDnaCode,
   parseDepartement,
@@ -13,42 +14,60 @@ import {
 } from "../../scripts/utils/transfo-huda-cada.util";
 
 describe("transfo huda cada util", () => {
-  describe("normalizeBhasileCode", () => {
+  describe("normalizeBhasileCodes", () => {
     it("laisse intact un code déjà au format", () => {
-      expect(normalizeBhasileCode("BHA-GES-054")).toBe("BHA-GES-054");
+      expect(normalizeBhasileCodes("BHA-GES-054")).toEqual(["BHA-GES-054"]);
     });
 
     it("corrige un O en zéro dans le segment numérique", () => {
-      expect(normalizeBhasileCode("BHA-NAQ-O50")).toBe("BHA-NAQ-050");
+      expect(normalizeBhasileCodes("BHA-NAQ-O50")).toEqual(["BHA-NAQ-050"]);
     });
 
     it("accepte les espaces à la place des tirets", () => {
-      expect(normalizeBhasileCode("BHA IDF 034")).toBe("BHA-IDF-034");
+      expect(normalizeBhasileCodes("BHA IDF 034")).toEqual(["BHA-IDF-034"]);
     });
 
     it("extrait le code noyé dans de la prose", () => {
       expect(
-        normalizeBhasileCode(
+        normalizeBhasileCodes(
           "BHA-ARA-098 (le site H4204 compte pour 200 places parmi les 464 d'un multi-DNA)"
         )
-      ).toBe("BHA-ARA-098");
+      ).toEqual(["BHA-ARA-098"]);
+    });
+
+    it("extrait tous les codes quand le champ en contient plusieurs", () => {
+      expect(normalizeBhasileCodes("BHA-ARA-001 et BHA-ARA-002")).toEqual([
+        "BHA-ARA-001",
+        "BHA-ARA-002",
+      ]);
+    });
+
+    it("corrige le O sur chacun et dédoublonne", () => {
+      expect(
+        normalizeBhasileCodes("BHA-NAQ-O50, BHA-NAQ-050 et BHA IDF O34")
+      ).toEqual(["BHA-NAQ-050", "BHA-IDF-034"]);
     });
 
     it("rejette les non-valeurs saisies par les agents", () => {
-      expect(normalizeBhasileCode("Multi DNA")).toBeNull();
-      expect(normalizeBhasileCode("CPOM")).toBeNull();
-      expect(normalizeBhasileCode("sous CPOM ")).toBeNull();
-      expect(normalizeBhasileCode("HUDA multi-site")).toBeNull();
-      expect(
-        normalizeBhasileCode("en cours de saisie dans Bhasile")
-      ).toBeNull();
-      expect(
-        normalizeBhasileCode("établissement sous CPOM régional")
-      ).toBeNull();
+      expect(normalizeBhasileCodes("Multi DNA")).toEqual([]);
+      expect(normalizeBhasileCodes("CPOM")).toEqual([]);
+      expect(normalizeBhasileCodes("sous CPOM ")).toEqual([]);
+      expect(normalizeBhasileCodes("HUDA multi-site")).toEqual([]);
+      expect(normalizeBhasileCodes("en cours de saisie dans Bhasile")).toEqual(
+        []
+      );
+      expect(normalizeBhasileCodes("établissement sous CPOM régional")).toEqual(
+        []
+      );
     });
 
     it("rejette un code DNA saisi à la place du code Bhasile", () => {
-      expect(normalizeBhasileCode("H2902 - HUDA ADOMA - ADOMA")).toBeNull();
+      expect(normalizeBhasileCodes("H2902 - HUDA ADOMA - ADOMA")).toEqual([]);
+    });
+
+    it("ne se laisse pas piéger par l'état du regex global entre deux appels", () => {
+      expect(normalizeBhasileCodes("BHA-ARA-001")).toEqual(["BHA-ARA-001"]);
+      expect(normalizeBhasileCodes("BHA-ARA-001")).toEqual(["BHA-ARA-001"]);
     });
   });
 
@@ -138,7 +157,7 @@ describe("transfo huda cada util", () => {
   });
 
   describe("parseFrenchDate", () => {
-    it("parse une date au format de Démarches Numériques", () => {
+    it("parse une date au format de Démarche Numérique", () => {
       expect(parseFrenchDate("01 juillet 2026")?.toISOString()).toBe(
         "2026-07-01T12:00:00.000Z"
       );
@@ -171,7 +190,7 @@ describe("transfo huda cada util", () => {
   });
 
   describe("parseDepartement", () => {
-    it("extrait le numéro du libellé Démarches Numériques", () => {
+    it("extrait le numéro du libellé Démarche Numérique", () => {
       expect(parseDepartement("02 - Aisne")).toBe("02");
       expect(parseDepartement("974 - La Réunion")).toBe("974");
     });
@@ -287,9 +306,27 @@ describe("transfo huda cada util", () => {
       ).toBe("TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR");
     });
 
+    it("rejette la variante qui mêle création et fusion d'un CADA existant", () => {
+      expect(parseTransformationType(FUSION_LABEL)).toBeNull();
+      expect(isAmbiguousFusion(FUSION_LABEL)).toBe(true);
+    });
+
+    it("ne prend pas la formulation de création simple pour une fusion", () => {
+      expect(
+        isAmbiguousFusion(
+          "Création d'un nouveau CADA (transformation d'un ou plusieurs HUDA en un nouveau CADA)"
+        )
+      ).toBe(false);
+      expect(isAmbiguousFusion("Extension d'un CADA")).toBe(false);
+    });
+
     it("rejette un libellé inconnu", () => {
       expect(parseTransformationType("")).toBeNull();
       expect(parseTransformationType("Remise en concurrence")).toBeNull();
     });
   });
 });
+
+/* Libellé exact d'une ancienne révision du formulaire Démarches Numériques */
+const FUSION_LABEL =
+  "Création d'un nouveau CADA (transformation d'un ou plusieurs HUDA en un nouveau CADA OU \"fusion\" d'un CADA existant et d'un ou plusieurs HUDA représentant plus de 100 % de la capacité du CADA existant)";

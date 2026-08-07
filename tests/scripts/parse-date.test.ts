@@ -22,12 +22,12 @@ describe("parseDate util", () => {
 
     // THEN
     expect(result).toBeInstanceOf(Date);
-    expect(result.getFullYear()).toBe(2021);
-    expect(result.getMonth()).toBe(0);
-    expect(result.getDate()).toBe(1);
-    expect(result.getHours()).toBe(13);
-    expect(result.getMinutes()).toBe(0);
-    expect(result.getSeconds()).toBe(0);
+    expect(result.getUTCFullYear()).toBe(2021);
+    expect(result.getUTCMonth()).toBe(0);
+    expect(result.getUTCDate()).toBe(1);
+    expect(result.getUTCHours()).toBe(12);
+    expect(result.getUTCMinutes()).toBe(0);
+    expect(result.getUTCSeconds()).toBe(0);
   });
 
   it("interprète une chaîne de date valide au format ISO", () => {

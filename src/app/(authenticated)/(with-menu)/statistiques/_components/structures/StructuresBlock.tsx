@@ -6,6 +6,7 @@ import { InformationCard } from "@/app/components/InformationCard";
 import { InformationCardBridge } from "@/app/components/InformationCardBridge";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
+import { AnnualDataNote } from "../AnnualDataNote";
 import { StructuresStatsTable } from "./StructuresStatsTable";
 import { TypesBatis } from "./TypesBatis";
 import { TypesStructures } from "./TypesStructures";
@@ -45,10 +46,7 @@ export const StructuresBlock = (): ReactElement => {
         <TypesBatis />
       </div>
       <StructuresStatsTable />
-      <div className="italic text-sm pt-3">
-        Les chiffres correspondent au 31 décembre de chaque année, et à la
-        dernière mise à jour pour l’année en cours.
-      </div>
+      <AnnualDataNote />
     </div>
   );
 };

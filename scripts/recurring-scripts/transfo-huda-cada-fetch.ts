@@ -1,4 +1,4 @@
-// Pré-remplir les transformations HUDA > CADA depuis l'API de Démarches Numériques
+// Pré-remplir les transformations HUDA > CADA depuis l'API de Démarche Numérique
 // Usage: yarn script transfo-huda-cada-fetch
 
 import "dotenv/config";
@@ -31,6 +31,7 @@ import {
   resolveTargetCada,
 } from "../utils/transfo-huda-cada.resolve";
 import {
+  isAmbiguousFusion,
   isEffectiveDateInScope,
   parseDepartement,
   parseFrenchDate,
@@ -280,11 +281,16 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     return;
   }
 
-  const type = parseTransformationType(champValue(dossier, TYPE_LABEL));
-  if (!type) {
+  const rawType = champValue(dossier, TYPE_LABEL);
+  if (isAmbiguousFusion(rawType)) {
     skip(
-      `type de transformation non reconnu : "${champValue(dossier, TYPE_LABEL).slice(0, 40)}"`
+      "fusion d'un CADA existant : le dossier ne désigne pas le CADA à absorber"
     );
+    return;
+  }
+  const type = parseTransformationType(rawType);
+  if (!type) {
+    skip(`type de transformation non reconnu : "${rawType.slice(0, 40)}"`);
     return;
   }
 

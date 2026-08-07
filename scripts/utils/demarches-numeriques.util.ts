@@ -120,7 +120,7 @@ const fetchDossiersPage = async <TNode extends DNDossierNode>(
 
   if (!result.ok) {
     throw new Error(
-      `❌ Démarches Numériques a répondu ${result.status} ${result.statusText}`
+      `❌ Démarche Numérique a répondu ${result.status} ${result.statusText}`
     );
   }
 
@@ -146,7 +146,7 @@ export const fetchAllDossiers = async <TNode extends DNDossierNode>(
     console.log(
       "📃 Récupération de la page",
       index,
-      `des ${options.label} depuis Démarches Numériques`
+      `des ${options.label} depuis Démarche Numérique`
     );
     const response: DNResponse<TNode> = await fetchDossiersPage<TNode>(
       options,

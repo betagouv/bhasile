@@ -67,7 +67,7 @@ export const TypePlaceHistory = (): ReactElement => {
       >
         {rows.map((row) => (
           <tr key={row.label}>
-            <td className="text-left! min-w-[240px]">
+            <td className="text-left!">
               <strong>{row.label}</strong>
               {row.subLabel && (
                 <>
