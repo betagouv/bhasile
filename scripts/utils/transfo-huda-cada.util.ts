@@ -119,7 +119,7 @@ const FRENCH_MONTHS = [
   "décembre",
 ];
 
-/** Démarches Numériques renvoie les dates en français (« 01 juillet 2026 »), pas en ISO. */
+/** Démarche Numérique renvoie les dates en français (« 01 juillet 2026 »), pas en ISO. */
 export const parseFrenchDate = (raw: string): Date | null => {
   const match = raw
     .trim()

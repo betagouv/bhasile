@@ -157,7 +157,7 @@ describe("transfo huda cada util", () => {
   });
 
   describe("parseFrenchDate", () => {
-    it("parse une date au format de Démarches Numériques", () => {
+    it("parse une date au format de Démarche Numérique", () => {
       expect(parseFrenchDate("01 juillet 2026")?.toISOString()).toBe(
         "2026-07-01T12:00:00.000Z"
       );
@@ -190,7 +190,7 @@ describe("transfo huda cada util", () => {
   });
 
   describe("parseDepartement", () => {
-    it("extrait le numéro du libellé Démarches Numériques", () => {
+    it("extrait le numéro du libellé Démarche Numérique", () => {
       expect(parseDepartement("02 - Aisne")).toBe("02");
       expect(parseDepartement("974 - La Réunion")).toBe("974");
     });
