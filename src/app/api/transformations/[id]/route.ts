@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
-import { canUpdateTransformation } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { transformationApiUpdateSchema } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
@@ -12,6 +11,7 @@ import {
   getTransformation,
   updateTransformation,
 } from "../transformation.service";
+import { checkCanUpdateDepartements } from "../transformation.util";
 
 export async function GET(
   _request: NextRequest,
@@ -50,9 +50,10 @@ export async function DELETE(
         { status: 404 }
       );
     }
-    if (!canUpdateTransformation(session.user as SessionUser, transformation)) {
-      return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
-    }
+    checkCanUpdateDepartements(
+      session.user as SessionUser,
+      transformation.structureVersionTransformations
+    );
 
     await deleteTransformation(Number(id));
     return new NextResponse(null, { status: 204 });
@@ -78,9 +79,10 @@ export async function PUT(request: NextRequest) {
         { status: 404 }
       );
     }
-    if (!canUpdateTransformation(session.user as SessionUser, transformation)) {
-      return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
-    }
+    checkCanUpdateDepartements(session.user as SessionUser, [
+      ...transformation.structureVersionTransformations,
+      ...(result.structureVersionTransformations ?? []),
+    ]);
 
     const transformationId = await updateTransformation(result);
     return NextResponse.json({ transformationId }, { status: 201 });
