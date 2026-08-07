@@ -230,7 +230,10 @@ export const updateTransformation = async (
 
 export const deleteTransformation = async (id: number): Promise<void> => {
   const transformation = await findOne(id);
-  if (transformation?.form?.status === true) {
+  if (!transformation) {
+    throw new ApiDomainError("Transformation non trouvée", 404);
+  }
+  if (transformation.form?.status === true) {
     throw new ApiDomainError(
       "Impossible de supprimer une transformation finalisée"
     );

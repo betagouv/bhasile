@@ -555,25 +555,34 @@ describe("date util", () => {
     });
 
     it("sérialise un Decimal Prisma en chaîne plutôt que de descendre dans ses entrailles", () => {
-      // GIVEN — une doublure structurelle du Decimal de Prisma : instance de classe
-      // porteuse d'un toNumber, que React refuse de sérialiser vers un Client Component.
-      class DecimalDouble {
-        constructor(private readonly value: string) {}
-        toNumber() {
-          return Number(this.value);
-        }
-        toString() {
-          return this.value;
-        }
-      }
+      // GIVEN — une doublure structurelle du Decimal de Prisma : sa représentation
+      // interne (signe, exposant, chiffres) plus toNumber et toJSON.
+      const decimalDouble = {
+        s: 1,
+        e: 1,
+        d: [48, 8566],
+        toNumber: () => 48.8566,
+        toJSON: () => "48.8566",
+      };
 
       // WHEN
-      const result = recursivelySerializeForClient({
-        latitude: new DecimalDouble("48.8566"),
-      });
+      const result = recursivelySerializeForClient({ latitude: decimalDouble });
 
       // THEN
       expect(result).toEqual({ latitude: "48.8566" });
+    });
+
+    it("laisse intact un objet qui expose un toNumber sans être un Decimal", () => {
+      // GIVEN — un objet valeur quelconque : le prédicat ne doit pas l'écraser en chaîne
+      const montant = { cents: 1250, toNumber: () => 12.5 };
+
+      // WHEN
+      const result = recursivelySerializeForClient({ montant });
+
+      // THEN
+      expect(result).toEqual({
+        montant: expect.objectContaining({ cents: 1250 }),
+      });
     });
 
     it("convertit correctement les Dates au sein d'objets et de tableaux profondément imbriqués", () => {

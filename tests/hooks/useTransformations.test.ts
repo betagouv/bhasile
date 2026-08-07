@@ -9,12 +9,6 @@ import {
 
 import { toJsonResponse } from "../test-utils/http.mock";
 
-const mockRouterRefresh = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: mockRouterRefresh }),
-}));
-
 const SELECTION_INPUT = {
   type: TransformationType.FERMETURE_SANS_TRANSFERT,
   structureVersionTransformations: [
@@ -30,30 +24,17 @@ describe("useTransformations", () => {
     vi.clearAllMocks();
   });
 
-  it("rafraîchit le rendu serveur après updateTransformation", async () => {
-    // GIVEN
-    global.fetch = vi
-      .fn()
-      .mockResolvedValue(toJsonResponse(200, { transformationId: 12 }));
-
-    // WHEN
-    const { result } = renderHook(() => useTransformations());
-    await result.current.updateTransformation(12, { id: 12 });
-
-    // THEN
-    expect(mockRouterRefresh).toHaveBeenCalledTimes(1);
-  });
-
-  it("renvoie la transformation fraîche et rafraîchit après resetTransformationSelection", async () => {
-    // GIVEN
+  it("renvoie la transformation fraîche depuis la réponse du PUT de sélection", async () => {
+    // GIVEN — le PUT renvoie l'entité, il n'y a plus de relecture séparée
     const freshTransformation = {
       id: 12,
       type: TransformationType.FERMETURE_SANS_TRANSFERT,
       structureVersionTransformations: [{ id: 999 }],
     };
-    global.fetch = vi
+    const mockedFetch = vi
       .fn()
       .mockResolvedValue(toJsonResponse(200, freshTransformation));
+    global.fetch = mockedFetch;
 
     // WHEN
     const { result } = renderHook(() => useTransformations());
@@ -64,6 +45,6 @@ describe("useTransformations", () => {
 
     // THEN
     expect(transformation).toEqual(freshTransformation);
-    expect(mockRouterRefresh).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
   });
 });

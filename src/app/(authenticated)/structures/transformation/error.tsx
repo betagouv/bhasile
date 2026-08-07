@@ -22,7 +22,7 @@ export default function TransformationError({
         aria-hidden="true"
       />
       <p className="text-lg font-bold text-title-blue-france mb-0">
-        Impossible de charger cette transformation.
+        Impossible d’afficher cette page.
       </p>
       <p className="text-sm text-mention-grey mb-0">
         Une erreur est survenue lors de la récupération des données.

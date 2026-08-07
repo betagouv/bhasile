@@ -1,5 +1,3 @@
-import { useRouter } from "next/navigation";
-
 import {
   StructureVersionTransformationApiCreate,
   TransformationApiCreate,
@@ -30,8 +28,6 @@ const createOrUpdateTransformation = async (
 };
 
 export const useTransformations = () => {
-  const router = useRouter();
-
   const createTransformation = async (
     transformation: TransformationApiCreate
   ): Promise<number> => {
@@ -51,7 +47,6 @@ export const useTransformations = () => {
       "PUT",
       transformation
     );
-    router.refresh();
 
     return transformationId;
   };
@@ -70,7 +65,6 @@ export const useTransformations = () => {
     if (!response.ok) {
       throw new ApiError(await extractApiError(response), response.status);
     }
-    router.refresh();
 
     return response.json();
   };
