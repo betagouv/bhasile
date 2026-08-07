@@ -132,7 +132,6 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 
 - **ProConnect** : agents DREETS/DDETS uniquement, donne accès au dashboard
 - **Mot de passe** : opérateurs, accès limité aux formulaires `/ajout-structure` et `/ajout-adresses`
-- **Dev bypass** : `DEV_AUTH_BYPASS=1` dans `.env` pour bypasser les accès privés en local
 
 ## Documentation détaillée
 

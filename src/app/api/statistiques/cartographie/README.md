@@ -39,7 +39,7 @@ Ou en curl
 
 ```bash
 curl -G 'http://localhost:3000/api/statistiques/cartographie' \
-  -H 'x-dev-auth-bypass: 1' \
+  -H "Cookie: next-auth.session-token=$SESSION_TOKEN" \
   --data-urlencode 'granularite=region' \
   --data-urlencode 'indicateur=places.autorisees' \
   --data-urlencode 'annee=2025' \
