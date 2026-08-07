@@ -81,7 +81,6 @@ export const protectedApiRoutes: ApiRoute[] = [
   {
     pattern: /^\/api\/operateurs\/[^/]+$/,
     routes: {
-      GET: "proconnect",
       PUT: "proconnect",
     },
   },
