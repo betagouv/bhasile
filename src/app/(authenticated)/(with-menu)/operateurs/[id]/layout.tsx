@@ -1,31 +1,11 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
+import { getOperateur } from "@/app/api/operateurs/operateur.service";
+import { createOperateurEvent } from "@/app/api/user-action/user-action.service";
 import { OperateurProvider } from "@/contexts/OperateurContext";
-import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 
 import { OperateurHeader } from "./_components/OperateurHeader";
-
-async function getOperateur(id: string): Promise<OperateurApiRead> {
-  try {
-    const baseUrl = process.env.NEXT_URL || "";
-    const result = await fetch(`${baseUrl}/api/operateurs/${id}`, {
-      cache: "no-store",
-      // Requête côté serveur donc il faut appeler les headers manuellement
-      headers: await headers(),
-    });
-
-    if (!result.ok) {
-      throw new Error(`Impossible de récupérer l'opérateur : ${result.status}`);
-    }
-
-    return await result.json();
-  } catch (error) {
-    console.error(error);
-    notFound();
-  }
-}
 
 export default async function OperateurLayout({
   children,
@@ -35,7 +15,19 @@ export default async function OperateurLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const operateur = await getOperateur(id);
+  const operateurId = Number(id);
+
+  if (!Number.isInteger(operateurId)) {
+    notFound();
+  }
+
+  const operateur = await getOperateur(operateurId);
+
+  if (!operateur) {
+    notFound();
+  }
+
+  await createOperateurEvent("GET", operateur.id);
 
   return (
     <OperateurProvider entity={operateur}>
