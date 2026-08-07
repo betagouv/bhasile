@@ -31,7 +31,7 @@ vi.mock("next/navigation", () => ({
   }),
   usePathname: () =>
     "/structures/transformation/12/creation/7/description",
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
   notFound: vi.fn(),
 }));
 

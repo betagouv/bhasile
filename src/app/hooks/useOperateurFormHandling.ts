@@ -20,7 +20,10 @@ export const useOperateurFormHandling = ({
   const { mutate: saveOperateur } = useSaveMutation(
     "operateur-save",
     (data: Partial<OperateurUpdateFormValues>) =>
-      updateOperateur({ id: operateurId, ...data }, setOperateur)
+      updateOperateur({ id: operateurId, ...data }, setOperateur),
+    // shouldRefresh: false tant que cette entité passe par refreshBestEffort —
+    // à retirer avec sa migration en RSC.
+    { shouldRefresh: false }
   );
 
   const handleSubmit = async (data: Partial<OperateurUpdateFormValues>) => {

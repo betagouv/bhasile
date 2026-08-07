@@ -58,7 +58,6 @@ vi.mock("@/contexts/FetchStateContext", () => ({
   }),
 }));
 
-const setTransformation = vi.fn();
 
 // Le hook reçoit le schéma strict en paramètre : un schéma minimal suffit à tester
 // son branchement (VALIDE / COMMENCE). Il passe pour { nom: "Les Coquelicots" } et
@@ -151,7 +150,6 @@ describe("useTransformationFormHandling", () => {
     vi.clearAllMocks();
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation(),
-      setTransformation,
       saveCurrentForm: mockSaveCurrentForm,
       shouldShowIncompleteSteps: false,
     });
@@ -192,8 +190,7 @@ describe("useTransformationFormHandling", () => {
               form: buildCreationForm(["01-identification"]),
             },
           ],
-        },
-        setTransformation
+        }
       );
     });
 
@@ -223,8 +220,7 @@ describe("useTransformationFormHandling", () => {
         transformation: buildTransformation(
           buildCreationForm(["01-identification", "02-places-hebergement"])
         ),
-        setTransformation,
-        saveCurrentForm: mockSaveCurrentForm,
+          saveCurrentForm: mockSaveCurrentForm,
         shouldShowIncompleteSteps: false,
       });
       // AND — the current step is the last one (actes-administratifs)
@@ -260,8 +256,7 @@ describe("useTransformationFormHandling", () => {
               ]),
             },
           ],
-        },
-        setTransformation
+        }
       );
     });
   });

@@ -24,7 +24,8 @@ export default function TransformationSelectionPage() {
   const { createTransformation } = useTransformations();
   const { mutate: saveTransformation } = useSaveMutation(
     "transformation-save",
-    createTransformation
+    createTransformation,
+    { shouldRefresh: false }
   );
 
   const handleSubmit = async (

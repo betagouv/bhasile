@@ -1,4 +1,4 @@
-import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
 import { PublicType } from "@/types/structure.type";
@@ -61,7 +61,7 @@ export const dbStructureVersionToApiRead = (
     (version.dnaStructures?.length ?? 0) > 1 ||
     (version.structureFinesses?.length ?? 0) > 1;
 
-  return recursivelySerializeDates({
+  return recursivelySerializeForClient({
     ...version,
     ...mapVersionFields(version),
     antennes,

@@ -1,6 +1,6 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
+import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
@@ -65,7 +65,7 @@ const dbTransformationToApiRead = (
   transformation: TransformationDbDetails,
   now: Date
 ): TransformationApiRead =>
-  recursivelySerializeDates({
+  recursivelySerializeForClient({
     ...transformation,
     structureVersionTransformations:
       transformation.structureVersionTransformations.map(
@@ -178,14 +178,19 @@ export const createTransformation = async (
 
 export const resetTransformationSelection = async (
   input: TransformationSelectionApiUpdate
-): Promise<number> => {
+): Promise<TransformationApiRead | null> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
       input.type,
       input.structureVersionTransformations
     );
 
-  return resetSelection({ ...input, structureVersionTransformations });
+  const transformationId = await resetSelection({
+    ...input,
+    structureVersionTransformations,
+  });
+
+  return getTransformation(transformationId);
 };
 
 const enrichStructureVersionTransformationFromSource = async (
@@ -225,7 +230,10 @@ export const updateTransformation = async (
 
 export const deleteTransformation = async (id: number): Promise<void> => {
   const transformation = await findOne(id);
-  if (transformation?.form?.status === true) {
+  if (!transformation) {
+    throw new ApiDomainError("Transformation non trouvée", 404);
+  }
+  if (transformation.form?.status === true) {
     throw new ApiDomainError(
       "Impossible de supprimer une transformation finalisée"
     );

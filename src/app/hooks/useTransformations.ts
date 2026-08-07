@@ -7,7 +7,6 @@ import {
 import { TransformationType } from "@/types/transformation.type";
 
 import { ApiError, extractApiError } from "../utils/apiError.util";
-import { refreshBestEffort } from "../utils/refresh.util";
 
 const createOrUpdateTransformation = async (
   url: string,
@@ -41,18 +40,14 @@ export const useTransformations = () => {
 
   const updateTransformation = async (
     id: number,
-    transformation: TransformationApiUpdateClient,
-    setTransformation: (transformation: TransformationApiRead) => void
+    transformation: TransformationApiUpdateClient
   ): Promise<number> => {
     const transformationId = await createOrUpdateTransformation(
       `/api/transformations/${id}`,
       "PUT",
       transformation
     );
-    await refreshBestEffort(
-      `/api/transformations/${transformationId}`,
-      setTransformation
-    );
+
     return transformationId;
   };
 
@@ -61,8 +56,7 @@ export const useTransformations = () => {
     input: {
       type: TransformationType;
       structureVersionTransformations: StructureVersionTransformationApiCreate[];
-    },
-    setTransformation: (transformation: TransformationApiRead) => void
+    }
   ): Promise<TransformationApiRead> => {
     const response = await fetch(`/api/transformations/${id}/selection`, {
       method: "PUT",
@@ -71,13 +65,8 @@ export const useTransformations = () => {
     if (!response.ok) {
       throw new ApiError(await extractApiError(response), response.status);
     }
-    const refreshed = await fetch(`/api/transformations/${id}`);
-    if (!refreshed.ok) {
-      throw new ApiError(await extractApiError(refreshed), refreshed.status);
-    }
-    const transformation = await refreshed.json();
-    setTransformation(transformation);
-    return transformation;
+
+    return response.json();
   };
 
   const deleteTransformation = async (id: number): Promise<void> => {
