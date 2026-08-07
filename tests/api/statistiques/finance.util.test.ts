@@ -21,6 +21,7 @@ const testStructure = (
   id,
   type,
   departementAdministratif,
+  arrondissementCode: null,
 });
 
 const budgetRow = (

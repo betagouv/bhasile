@@ -12,6 +12,7 @@ import { computeRmuStatistiques } from "./rmu/rmu.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findActivites,
+  findArrondissementsWithPopulation,
   findBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
@@ -49,6 +50,7 @@ const resolveStatistiquesPerimeterFilters = async (
 
   return {
     departements: parsed.departements,
+    arrondissements: parsed.arrondissements,
     types: parsed.types,
     operateurIds:
       parsed.operateurIds.length > 0
@@ -101,6 +103,7 @@ export const buildStatistiquesContext = async (
 
   const [
     departements,
+    arrondissements,
     eigs,
     evaluations,
     budgets,
@@ -115,12 +118,24 @@ export const buildStatistiquesContext = async (
           .filter((departement): departement is string => departement !== null)
       ),
     ]),
+    resolvedFilters.arrondissements
+      ? findArrondissementsWithPopulation([
+          ...new Set(
+            allStructures
+              .map((structure) => structure.arrondissementCode)
+              .filter((code): code is string => code !== null)
+          ),
+        ])
+      : Promise.resolve([]),
     findEigs(dnaCodes),
     findEvaluations(allStructureIds),
     findBudgets(allStructureIds),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
-    resolvedFilters.operateurIds === null && filters.types === null
+    // Les RMU sont une donnée départementale : tout filtre plus fin les rend hors périmètre.
+    resolvedFilters.operateurIds === null &&
+    filters.types === null &&
+    resolvedFilters.arrondissements === null
       ? findRmus(resolvedFilters.departements)
       : Promise.resolve(null),
   ]);
@@ -157,6 +172,7 @@ export const buildStatistiquesContext = async (
     dnaLinks,
     structureVersionTimeline,
     departements,
+    arrondissements,
     budgets,
     indicateurs,
     activites,

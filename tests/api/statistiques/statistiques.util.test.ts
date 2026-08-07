@@ -51,7 +51,7 @@ const testStructure = (
 ): StatistiqueDbStructure => ({
   id,
   type,
-  departementAdministratif: "01",
+  departementAdministratif: "01", arrondissementCode: null,
 });
 
 describe("socle - ouverture / fermeture par période", () => {
@@ -349,11 +349,13 @@ describe("parseStatistiquesPerimeterFilters - résolution des filtres scalaires"
   const filters = (
     overrides: Partial<{
       departements: string | null;
+      arrondissements: string | null;
       operateurs: string | null;
       types: string | null;
     }> = {}
   ) => ({
     departements: overrides.departements ?? null,
+    arrondissements: overrides.arrondissements ?? null,
     operateurs: overrides.operateurs ?? null,
     types: overrides.types ?? null,
     aggregation: "moyenne" as const,
@@ -413,8 +415,8 @@ describe("filterByActiveStructureId", () => {
 });
 
 describe("sliceStatistiquesContext - restriction à une zone", () => {
-  const structure1 = { id: 1, type: StructureType.CADA, departementAdministratif: "01" };
-  const structure2 = { id: 2, type: StructureType.CADA, departementAdministratif: "02" };
+  const structure1 = { id: 1, type: StructureType.CADA, departementAdministratif: "01", arrondissementCode: null };
+  const structure2 = { id: 2, type: StructureType.CADA, departementAdministratif: "02", arrondissementCode: null };
 
   const { activeStructureIdsNow, activeStructureIdsByPeriod } =
     buildTestActivityIndex([1, 2], {
