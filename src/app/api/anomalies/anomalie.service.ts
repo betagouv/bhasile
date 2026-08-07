@@ -1,11 +1,16 @@
 import {
   findAllStructureIds,
+  findAnomalieForUpdate,
   findStructureForAnomalies,
   reconcileAnomalies,
+  updateAnomalieJustification,
 } from "@/app/api/anomalies/anomalie.repository";
 import { buildAnomalieContext } from "@/app/api/anomalies/anomalie.util";
+import { findUserIdByEmail } from "@/app/api/user/user.repository";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { getNow } from "@/app/utils/now.util";
 import { computeAnomalies } from "@/lib/anomalies/anomalie.compute";
+import { AnomalieApiUpdate } from "@/schemas/api/anomalie.schema";
 
 export const recomputeAnomalies = async (
   structureId: number
@@ -37,6 +42,47 @@ export const recomputeAnomaliesSafely = async (
       error
     );
   }
+};
+
+export const getAnomalieForUpdate = async (
+  id: number
+): Promise<{
+  structureId: number;
+  departementAdministratif: string | null;
+} | null> => {
+  const anomalie = await findAnomalieForUpdate(id);
+
+  if (anomalie === null) {
+    return null;
+  }
+
+  return {
+    structureId: anomalie.structureId,
+    departementAdministratif: anomalie.structure.departementAdministratif,
+  };
+};
+
+export const setAnomalieJustification = async (
+  input: AnomalieApiUpdate,
+  email: string
+): Promise<void> => {
+  if (!input.isJustified) {
+    await updateAnomalieJustification(input.id, { isJustified: false });
+    return;
+  }
+
+  const user = await findUserIdByEmail(email);
+
+  if (user === null) {
+    throw new ApiDomainError("Utilisateur introuvable", 401);
+  }
+
+  await updateAnomalieJustification(input.id, {
+    isJustified: true,
+    commentaire: input.commentaire,
+    justifiedById: user.id,
+    justifiedAt: getNow(),
+  });
 };
 
 export const recomputeAllAnomalies = async (): Promise<number> => {
