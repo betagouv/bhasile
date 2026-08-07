@@ -17,6 +17,10 @@ model FileUpload {
 
   createdAt DateTime @default(now())
 
+  @@index([acteAdministratifId])
+  @@index([documentFinancierId])
+  @@index([controleId])
+  @@index([evaluationId])
   @@schema("public")
 }
 
@@ -45,6 +49,11 @@ model ActeAdministratif {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([structureId])
+  @@index([cpomId])
+  @@index([operateurId])
+  @@index([structureVersionTransformationId])
+  @@index([parentId])
   @@schema("public")
 }
 
@@ -64,6 +73,8 @@ model DocumentFinancier {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([structureId])
+  @@index([cpomId])
   @@schema("public")
 }
 
