@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GET, PUT } from "@/app/api/transformations/[id]/route";
+import { PUT } from "@/app/api/transformations/[id]/route";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { TransformationType } from "@/types/transformation.type";
 
@@ -31,45 +31,6 @@ vi.mock("@/lib/casl/abilities", () => ({
   canUpdateTransformation: (...args: unknown[]) =>
     mockCanUpdateTransformation(...args),
 }));
-
-describe("GET /api/transformations/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("retourne 200 avec la transformation sérialisée", async () => {
-    const payload = {
-      id: 5,
-      type: TransformationType.EXTENSION_EX_NIHILO,
-      structureVersionTransformations: [],
-    };
-    mockGetTransformation.mockResolvedValueOnce(payload);
-    const request = new Request("http://localhost/api/transformations/5");
-
-    const response = await GET(request as NextRequest, {
-      params: Promise.resolve({ id: "5" }),
-    });
-
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(payload);
-    expect(mockGetTransformation).toHaveBeenCalledWith(5);
-  });
-
-  it("retourne 404 quand la transformation est introuvable", async () => {
-    mockGetTransformation.mockResolvedValueOnce(null);
-    const request = new Request("http://localhost/api/transformations/404");
-
-    const response = await GET(request as NextRequest, {
-      params: Promise.resolve({ id: "404" }),
-    });
-
-    expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({
-      error: "Transformation non trouvée",
-    });
-    expect(mockGetTransformation).toHaveBeenCalledWith(404);
-  });
-});
 
 describe("PUT /api/transformations/[id]", () => {
   const validBody = {

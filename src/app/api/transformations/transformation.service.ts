@@ -1,5 +1,5 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { recursivelySerializeForClient } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
@@ -65,7 +65,7 @@ const dbTransformationToApiRead = (
   transformation: TransformationDbDetails,
   now: Date
 ): TransformationApiRead =>
-  recursivelySerializeDates({
+  recursivelySerializeForClient({
     ...transformation,
     structureVersionTransformations:
       transformation.structureVersionTransformations.map(

@@ -10,7 +10,7 @@ import {
   getLastMonths,
   getMonthsBetween,
   getYearFromDate,
-  recursivelySerializeDates,
+  recursivelySerializeForClient,
 } from "@/app/utils/date.util";
 
 dayjs.locale("fr");
@@ -531,13 +531,13 @@ describe("date util", () => {
     });
   });
 
-  describe("recursivelySerializeDates", () => {
+  describe("recursivelySerializeForClient", () => {
     it("convertit correctement une Date au premier instant de l'année", () => {
       // GIVEN
       const date = new Date("2024-01-01T00:00:00.000Z");
 
       // WHEN
-      const result = recursivelySerializeDates(date);
+      const result = recursivelySerializeForClient(date);
 
       // THEN
       expect(result).toBe("2024-01-01T00:00:00.000Z");
@@ -548,10 +548,32 @@ describe("date util", () => {
       const date = new Date("2024-12-31T23:59:59.999Z");
 
       // WHEN
-      const result = recursivelySerializeDates(date);
+      const result = recursivelySerializeForClient(date);
 
       // THEN
       expect(result).toBe("2024-12-31T23:59:59.999Z");
+    });
+
+    it("sérialise un Decimal Prisma en chaîne plutôt que de descendre dans ses entrailles", () => {
+      // GIVEN — une doublure structurelle du Decimal de Prisma : instance de classe
+      // porteuse d'un toNumber, que React refuse de sérialiser vers un Client Component.
+      class DecimalDouble {
+        constructor(private readonly value: string) {}
+        toNumber() {
+          return Number(this.value);
+        }
+        toString() {
+          return this.value;
+        }
+      }
+
+      // WHEN
+      const result = recursivelySerializeForClient({
+        latitude: new DecimalDouble("48.8566"),
+      });
+
+      // THEN
+      expect(result).toEqual({ latitude: "48.8566" });
     });
 
     it("convertit correctement les Dates au sein d'objets et de tableaux profondément imbriqués", () => {
@@ -574,7 +596,7 @@ describe("date util", () => {
       };
 
       // WHEN
-      const result = recursivelySerializeDates(input);
+      const result = recursivelySerializeForClient(input);
 
       // THEN
       expect(result).toEqual({
@@ -600,7 +622,7 @@ describe("date util", () => {
       const input = "not a date";
 
       // WHEN
-      const result = recursivelySerializeDates(input);
+      const result = recursivelySerializeForClient(input);
 
       // THEN
       expect(result).toBe("not a date");

@@ -15,11 +15,7 @@ const TransformationContext = createContext<
 >(undefined);
 TransformationContext.displayName = "TransformationContext";
 
-export const TransformationProvider = ({
-  children,
-  transformation: initialTransformation,
-}: Props) => {
-  const [transformation, setTransformation] = useState(initialTransformation);
+export const TransformationProvider = ({ children, transformation }: Props) => {
   const [shouldShowIncompleteSteps, setShouldShowIncompleteSteps] =
     useState(false);
 
@@ -35,7 +31,6 @@ export const TransformationProvider = ({
     <TransformationContext
       value={{
         transformation,
-        setTransformation,
         registerSaver,
         saveCurrentForm,
         shouldShowIncompleteSteps,
@@ -67,7 +62,6 @@ type SaveCurrentFormFn = () => Promise<boolean>;
 
 type TransformationContextValue = {
   transformation: TransformationApiRead;
-  setTransformation: (transformation: TransformationApiRead) => void;
   registerSaver: (saver: SaveCurrentFormFn | null) => void;
   saveCurrentForm: SaveCurrentFormFn | undefined;
   shouldShowIncompleteSteps: boolean;

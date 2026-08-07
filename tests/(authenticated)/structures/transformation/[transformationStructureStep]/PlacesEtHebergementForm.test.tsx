@@ -30,7 +30,7 @@ const ORIGINAL_PLACES = 47;
 const mockUseParams = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
   useParams: () => mockUseParams(),
   usePathname: () =>
     "/structures/transformation/12/extension/7/places-et-hebergement",

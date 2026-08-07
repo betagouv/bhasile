@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
+import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
 import { useTransformations } from "@/app/hooks/useTransformations";
 import {
@@ -15,7 +16,10 @@ import {
 } from "@/app/utils/transformation.util";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { useTransformationContext } from "@/contexts/TransformationContext";
-import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureVersionTransformationApiRead,
+  TransformationApiUpdateClient,
+} from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import {
   StructureVersionTransformationType,
@@ -34,7 +38,6 @@ export default function TransformationVerificationPage() {
 
   const {
     transformation,
-    setTransformation,
     shouldShowIncompleteSteps,
     setShouldShowIncompleteSteps,
   } = useTransformationContext();
@@ -43,6 +46,11 @@ export default function TransformationVerificationPage() {
 
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
+  const { mutate: finalizeTransformation } = useSaveMutation(
+    "transformation-save",
+    (payload: TransformationApiUpdateClient) =>
+      updateTransformation(transformation.id, payload)
+  );
 
   const groups = groupStructureVersionTransformationsByType(
     transformation.structureVersionTransformations
@@ -66,19 +74,16 @@ export default function TransformationVerificationPage() {
     if (!transformation.form) {
       return;
     }
-    try {
-      await updateTransformation(
-        transformation.id,
-        {
-          id: transformation.id,
-          form: { ...transformation.form, status: true },
-        },
-        setTransformation
-      );
-      confirmationModal.open();
-    } catch (error) {
-      console.error(error);
+
+    const result = await finalizeTransformation({
+      id: transformation.id,
+      form: { ...transformation.form, status: true },
+    });
+    if (result === null) {
+      return;
     }
+
+    confirmationModal.open();
   };
 
   return (

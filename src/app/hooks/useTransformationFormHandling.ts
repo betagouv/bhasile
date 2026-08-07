@@ -17,14 +17,14 @@ import { useTransformations } from "./useTransformations";
 export const useTransformationFormHandling = () => {
   const router = useRouter();
 
-  const { transformation, setTransformation, shouldShowIncompleteSteps } =
+  const { transformation, shouldShowIncompleteSteps } =
     useTransformationContext();
   const { updateTransformation } = useTransformations();
   const { navigateWithSave } = useTransformationNavigateWithSave();
   const { mutate: saveTransformation } = useSaveMutation(
     "transformation-save",
     (id: number, payload: TransformationApiUpdateClient) =>
-      updateTransformation(id, payload, setTransformation)
+      updateTransformation(id, payload)
   );
 
   const { firstStep, currentStep, nextStep, backLink } =

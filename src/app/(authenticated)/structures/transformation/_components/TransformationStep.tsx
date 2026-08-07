@@ -40,6 +40,7 @@ export const TransformationStep = ({ step }: Props) => {
             <Link
               key={stepItem.route}
               href={stepItem.route}
+              prefetch={false}
               onNavigate={(event) => {
                 event.preventDefault();
                 navigateWithSave(stepItem.route);

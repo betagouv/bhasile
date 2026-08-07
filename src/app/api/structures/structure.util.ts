@@ -7,7 +7,7 @@ import { getCoordinates } from "@/app/utils/adresse.util";
 import {
   getYearFromDate,
   getYearRange,
-  recursivelySerializeDates,
+  recursivelySerializeForClient,
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
@@ -493,7 +493,7 @@ export const getCpomStructuresWithDates = (
     const linkedStructures =
       cpom && "structures" in cpom ? cpom.structures : undefined;
 
-    return recursivelySerializeDates({
+    return recursivelySerializeForClient({
       ...cpomStructure,
       cpom: cpom
         ? {

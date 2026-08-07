@@ -1,5 +1,5 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { recursivelySerializeForClient } from "@/app/utils/date.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import {
@@ -372,7 +372,7 @@ const dbStructureToApiRead = (
         now
       )?.structureVersionTransformationId != null;
 
-  return recursivelySerializeDates({
+  return recursivelySerializeForClient({
     ...dbStructure,
     structureTypologies,
     debutConvention,

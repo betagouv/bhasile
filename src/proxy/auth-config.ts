@@ -133,7 +133,6 @@ export const protectedApiRoutes: ApiRoute[] = [
   {
     pattern: /^\/api\/transformations\/[^/]+$/,
     routes: {
-      GET: "proconnect",
       PUT: "proconnect",
       DELETE: "proconnect",
     },

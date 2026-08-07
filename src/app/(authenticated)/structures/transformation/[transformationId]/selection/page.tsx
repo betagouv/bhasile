@@ -30,7 +30,7 @@ import { TransformationSelectionSummary } from "./_components/TransformationSele
 export default function TransformationSelectionsPage() {
   const router = useRouter();
 
-  const { transformation, setTransformation } = useTransformationContext();
+  const { transformation } = useTransformationContext();
 
   const { resetTransformationSelection } = useTransformations();
 
@@ -41,7 +41,7 @@ export default function TransformationSelectionsPage() {
     (input: {
       type: TransformationType;
       structureVersionTransformations: StructureVersionTransformationApiCreate[];
-    }) => resetTransformationSelection(transformation.id, input, setTransformation)
+    }) => resetTransformationSelection(transformation.id, input)
   );
 
   const [isEditing, setIsEditing] = useState(false);
