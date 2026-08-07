@@ -19,29 +19,20 @@ export const mirrorLegacyPlacesToBaseVersions = async (
   tx: PrismaTransaction,
   options: { structureId?: number } = {}
 ): Promise<number> => {
-  const legacyTypologies = await tx.structureTypologie.findMany({
-    where: {
-      year: PLACES_VERSIONED_FROM_YEAR - 1,
-      structureId: options.structureId ?? { not: null },
-    },
-    select: { structureId: true, placesAutorisees: true },
-  });
+  const structureFilter =
+    options.structureId === undefined
+      ? Prisma.sql`typologie."structureId" IS NOT NULL`
+      : Prisma.sql`typologie."structureId" = ${options.structureId}`;
 
-  let alignedVersions = 0;
-  for (const legacyTypologie of legacyTypologies) {
-    if (legacyTypologie.structureId === null) {
-      continue;
-    }
-    const { count } = await tx.structureVersion.updateMany({
-      where: {
-        structureId: legacyTypologie.structureId,
-        structureVersionTransformationId: null,
-      },
-      data: { placesAutorisees: legacyTypologie.placesAutorisees },
-    });
-    alignedVersions += count;
-  }
-  return alignedVersions;
+  return tx.$executeRaw`
+    UPDATE "public"."StructureVersion" AS version
+    SET "placesAutorisees" = typologie."placesAutorisees"
+    FROM "public"."StructureTypologie" AS typologie
+    WHERE version."structureId" = typologie."structureId"
+      AND version."structureVersionTransformationId" IS NULL
+      AND typologie."year" = ${PLACES_VERSIONED_FROM_YEAR - 1}
+      AND ${structureFilter}
+  `;
 };
 
 type StructureVersionParent = Pick<
