@@ -250,6 +250,28 @@ describe("places - taux d'équipement", () => {
     expect(result.tauxEquipement).toBeNull();
     expect(result.population).toBeNull();
   });
+
+  it("prend la population des arrondissements plutôt que celle des départements quand le filtre est actif", () => {
+    const result = computePlacesStatistiques(
+      buildTestStatistiquesContext({
+        structures: [testStructure(1, StructureType.CADA, "01")],
+        typologies: [testTypologie(1, 1, 2024, 100)],
+        adresses: [],
+        departements: testDepartements(),
+        arrondissements: [
+          {
+            code: "011",
+            name: "Belley",
+            departementNumero: "01",
+            population: 127_914,
+          },
+        ],
+      })
+    );
+
+    expect(result.population).toBe(127_914);
+    expect(result.tauxEquipement).toBe(0.000_782);
+  });
 });
 
 describe("places - indicateurs annuels (byYear)", () => {

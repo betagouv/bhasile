@@ -386,6 +386,17 @@ describe("parseStatistiquesPerimeterFilters - résolution des filtres scalaires"
     expect(parsed.departements).toEqual(new Set(["01", "02"]));
     expect(parsed.operateurIds).toEqual([10, 11]);
   });
+
+  it("parse les arrondissements, null quand absents", () => {
+    expect(
+      parseStatistiquesPerimeterFilters(filters()).arrondissements
+    ).toBeNull();
+
+    const parsed = parseStatistiquesPerimeterFilters(
+      filters({ arrondissements: "011,012" })
+    );
+    expect(parsed.arrondissements).toEqual(new Set(["011", "012"]));
+  });
 });
 
 describe("filterByActiveStructureId", () => {
