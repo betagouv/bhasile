@@ -4,6 +4,7 @@ import {
   capitalizeFirstLetter,
   formatPlural,
   normalizeAccents,
+  parseId,
   pluralize,
 } from "@/app/utils/string.util";
 
@@ -87,6 +88,21 @@ describe("string util", () => {
     });
     it("traite undefined comme zéro", () => {
       expect(pluralize(undefined, "Département")).toBe("Département");
+    });
+  });
+
+  describe("parseId", () => {
+    it("renvoie le nombre pour une suite de chiffres", () => {
+      expect(parseId("42")).toBe(42);
+    });
+
+    it("renvoie null pour tout ce que Number() accepterait à tort", () => {
+      expect(parseId("1e3")).toBeNull();
+      expect(parseId("+12")).toBeNull();
+      expect(parseId("12.0")).toBeNull();
+      expect(parseId(" 12 ")).toBeNull();
+      expect(parseId("abc")).toBeNull();
+      expect(parseId("")).toBeNull();
     });
   });
 });

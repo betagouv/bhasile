@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getTransformation } from "@/app/api/transformations/transformation.service";
+import { parseId } from "@/app/utils/string.util";
 import { TransformationProvider } from "@/contexts/TransformationContext";
 
 import { TransformationHeader } from "../_components/TransformationHeader";
@@ -14,9 +15,9 @@ export default async function TransformationLayout({
   params: Promise<{ transformationId: string }>;
 }) {
   const { transformationId } = await params;
-  const id = Number(transformationId);
+  const id = parseId(transformationId);
 
-  if (!Number.isInteger(id)) {
+  if (id === null) {
     notFound();
   }
 

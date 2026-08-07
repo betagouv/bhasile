@@ -1,27 +1,26 @@
 import { getServerSession } from "next-auth";
 
+import { UserActionCategory } from "@/generated/prisma/enums";
 import { authOptions } from "@/lib/next-auth/auth";
 import prisma from "@/lib/prisma";
 
-import { getActionFromMethod } from "./user-action.util";
-
 export const createUserAction = async ({
-  method,
+  action,
   structureId,
   cpomId,
   operateurId,
+  userEmail,
 }: CreateUserActionArgs): Promise<void> => {
   try {
-    const session = await getServerSession(authOptions);
-
-    const userEmail = session?.user?.email;
-    if (!userEmail) {
+    const email =
+      userEmail ?? (await getServerSession(authOptions))?.user?.email;
+    if (!email) {
       return;
     }
 
     const user = await prisma.user.findUnique({
       where: {
-        email: userEmail,
+        email,
       },
     });
 
@@ -32,8 +31,8 @@ export const createUserAction = async ({
 
     await prisma.userAction.create({
       data: {
-        userId: user!.id,
-        action: getActionFromMethod(method),
+        userId: user.id,
+        action,
         structureId,
         cpomId,
         operateurId,
@@ -48,8 +47,9 @@ export const createUserAction = async ({
 };
 
 type CreateUserActionArgs = {
-  method: string;
+  action: UserActionCategory;
   structureId?: number;
   cpomId?: number;
   operateurId?: number;
+  userEmail?: string;
 };

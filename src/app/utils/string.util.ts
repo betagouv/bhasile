@@ -36,5 +36,8 @@ export const pluralize = (count: number | undefined, noun: string): string =>
 export const formatPlural = (count: number | undefined, noun: string): string =>
   `${count ?? 0} ${pluralize(count, noun)}`;
 
+export const parseId = (value: string): number | null =>
+  /^\d+$/.test(value) ? Number(value) : null;
+
 export const parseCommaList = (value: string | null | undefined): string[] =>
   value?.split(",").filter(Boolean) ?? [];

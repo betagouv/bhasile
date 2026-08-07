@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
 import { getOperateur } from "@/app/api/operateurs/operateur.service";
-import { createOperateurEvent } from "@/app/api/user-action/user-action.service";
+import { createOperateurReadEvent } from "@/app/api/user-action/user-action.service";
+import { parseId } from "@/app/utils/string.util";
 import { OperateurProvider } from "@/contexts/OperateurContext";
 
 import { OperateurHeader } from "./_components/OperateurHeader";
@@ -15,9 +16,9 @@ export default async function OperateurLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const operateurId = Number(id);
+  const operateurId = parseId(id);
 
-  if (!Number.isInteger(operateurId)) {
+  if (operateurId === null) {
     notFound();
   }
 
@@ -27,7 +28,7 @@ export default async function OperateurLayout({
     notFound();
   }
 
-  await createOperateurEvent("GET", operateur.id);
+  await createOperateurReadEvent(operateur.id);
 
   return (
     <OperateurProvider entity={operateur}>
