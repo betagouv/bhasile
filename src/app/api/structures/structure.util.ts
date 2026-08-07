@@ -7,11 +7,11 @@ import { getCoordinates } from "@/app/utils/adresse.util";
 import {
   getYearFromDate,
   getYearRange,
-  recursivelySerializeForClient,
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
+import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
 import { getMostRecentMillesime } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";

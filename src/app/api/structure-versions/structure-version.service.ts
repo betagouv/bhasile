@@ -1,4 +1,4 @@
-import { recursivelySerializeForClient } from "@/app/utils/date.util";
+import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
 import { PublicType } from "@/types/structure.type";

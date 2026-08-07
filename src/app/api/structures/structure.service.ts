@@ -1,7 +1,7 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import { recursivelySerializeForClient } from "@/app/utils/date.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
+import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import {
   getMostRecentMillesime,
   isStructureAutorisee,

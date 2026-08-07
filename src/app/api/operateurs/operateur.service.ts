@@ -1,6 +1,6 @@
-import { recursivelySerializeForClient } from "@/app/utils/date.util";
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
+import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Operateur } from "@/generated/prisma/client";
 import {
