@@ -16,6 +16,8 @@ model Cpom {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([operateurId])
+  @@index([regionId])
   @@schema("public")
 }
 
@@ -26,6 +28,7 @@ model CpomDepartement {
   departementId Int
 
   @@id([cpomId, departementId])
+  @@index([departementId])
   @@schema("public")
 }
 
@@ -50,5 +53,6 @@ model CpomStructure {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([cpomId, structureId])
+  @@index([structureId])
   @@schema("public")
 }
