@@ -30,21 +30,6 @@ describe("fenêtre des exercices", () => {
 
     expect(detections).toEqual([]);
   });
-
-  it("ignore un budget marqué manquant", () => {
-    const detections = detectionsOf("RESULTAT_NET_EQ_0", {
-      structure: structureContext(),
-      budgets: [
-        budgetContext({
-          isMissing: true,
-          totalProduits: 500,
-          totalCharges: 500,
-        }),
-      ],
-    });
-
-    expect(detections).toEqual([]);
-  });
 });
 
 describe("RESULTAT_NET_EQ_0", () => {

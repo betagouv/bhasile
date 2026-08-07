@@ -31,20 +31,15 @@ export const buildAnomalieContext = (
         category: acte.category as NonNullable<typeof acte.category>,
         startDate: acte.startDate,
         endDate: acte.endDate,
-        isMissing: acte.isMissing,
         parentId: acte.parentId,
         cpomId: acte.cpomId,
         hasFile: acte._count.fileUploads > 0,
       })),
     adresses: version?.adresses ?? [],
-    budgets: dbStructure.budgets.map((budget) => ({
-      ...budget,
-      isMissing: budget.isMissing,
-    })),
+    budgets: dbStructure.budgets,
     indicateurs: dbStructure.indicateursFinanciers.map((indicateur) => ({
       year: indicateur.year,
       type: indicateur.type,
-      isMissing: indicateur.isMissing,
       tauxEncadrement: indicateur.tauxEncadrement,
       coutJournalier: indicateur.coutJournalier,
     })),
@@ -57,7 +52,6 @@ export const buildAnomalieContext = (
         (acte) =>
           acte.category === "CONVENTION_CPOM" &&
           acte.parentId === null &&
-          acte.isMissing !== true &&
           acte._count.fileUploads > 0
       ),
     })),

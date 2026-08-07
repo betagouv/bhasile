@@ -19,7 +19,6 @@ WITH
       public."Budget" b
     WHERE
       b."cpomId" IS NOT NULL
-      AND b."isMissing" IS NOT TRUE
       AND (
         b."dotationAccordee" IS NOT NULL
         OR b."dotationDemandee" IS NOT NULL
@@ -41,7 +40,6 @@ WITH
           AND cdm."year" = b."year"
         WHERE
           b."cpomId" IS NOT NULL
-          AND b."isMissing" IS NOT TRUE
           AND (
             b."dotationAccordee" IS NOT NULL
             OR b."dotationDemandee" IS NOT NULL
