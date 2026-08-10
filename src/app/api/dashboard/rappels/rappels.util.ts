@@ -5,7 +5,7 @@ import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-ve
 import {
   getDatesConvention,
   getDatesPeriodeAutorisation,
-  isStructureFermee,
+  isStructureClosed,
   isStructureFinalised,
 } from "@/app/api/structures/structure.util";
 import { RAPPEL_TASK_LABEL } from "@/app/utils/rappel.util";
@@ -156,7 +156,7 @@ export const buildRappels = (
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
-    if (!isStructureFinalised(structure, now) || isStructureFermee(structure, now)) {
+    if (!isStructureFinalised(structure, now) || isStructureClosed(structure, now)) {
       continue;
     }
     const departement = structure.departementAdministratif;

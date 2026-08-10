@@ -1,7 +1,7 @@
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
-  isStructureFermee,
+  isStructureClosed,
   isStructureFinalised,
 } from "@/app/api/structures/structure.util";
 import {
@@ -105,7 +105,7 @@ export const buildDashboardRows = (
       continue;
     }
 
-    if (isStructureFermee(structure, options.now)) {
+    if (isStructureClosed(structure, options.now)) {
       continue;
     }
 

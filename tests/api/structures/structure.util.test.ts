@@ -17,7 +17,7 @@ import {
   getReadableAdresses,
   getReadableNotes,
   isBornFromCreation,
-  isStructureFermee,
+  isStructureClosed,
   isStructureFinalised,
   sortStructureRows,
   StructureListComputedRow,
@@ -401,14 +401,14 @@ describe("isStructureFinalised", () => {
   });
 });
 
-describe("isStructureFermee", () => {
+describe("isStructureClosed", () => {
   it("est faux sans date de fermeture", () => {
-    expect(isStructureFermee({ fermetureDate: null }, now)).toBe(false);
+    expect(isStructureClosed({ fermetureDate: null }, now)).toBe(false);
   });
 
   it("est vrai quand la fermeture a pris effet la veille", () => {
     expect(
-      isStructureFermee(
+      isStructureClosed(
         { fermetureDate: new Date("2026-06-23T00:00:00.000Z") },
         now
       )
@@ -417,7 +417,7 @@ describe("isStructureFermee", () => {
 
   it("est vrai le jour même de la prise d'effet", () => {
     expect(
-      isStructureFermee(
+      isStructureClosed(
         { fermetureDate: new Date("2026-06-24T00:00:00.000Z") },
         now
       )
@@ -427,7 +427,7 @@ describe("isStructureFermee", () => {
   // La date stockée est celle de l'effet, pas celle de la validation.
   it("est faux quand la fermeture ne prend effet que le lendemain", () => {
     expect(
-      isStructureFermee(
+      isStructureClosed(
         { fermetureDate: new Date("2026-06-25T00:00:00.000Z") },
         now
       )

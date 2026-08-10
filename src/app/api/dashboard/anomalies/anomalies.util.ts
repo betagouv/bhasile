@@ -1,6 +1,6 @@
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
-  isStructureFermee,
+  isStructureClosed,
   isStructureFinalised,
 } from "@/app/api/structures/structure.util";
 import {
@@ -122,7 +122,7 @@ const isEligibleStructure = (
 
   if (
     !isStructureFinalised(structure, options.now) ||
-    isStructureFermee(structure, options.now)
+    isStructureClosed(structure, options.now)
   ) {
     return false;
   }

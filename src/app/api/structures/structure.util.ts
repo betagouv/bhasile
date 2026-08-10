@@ -263,7 +263,7 @@ export const isStructureFinalised = (
   isFinalisationFormValidated(structure.forms) ||
   isBornFromCreation(structure.structureVersions, now);
 
-export const isStructureFermee = (
+export const isStructureClosed = (
   structure: { fermetureDate: Date | null },
   now: Date
 ): boolean =>
