@@ -12,9 +12,7 @@ import { operateurSuggestionApiSchema } from "./operateur.schema";
 import { regionApiSchema } from "./region.schema";
 
 export const cpomDepartementApiSchema = z.object({
-  id: zId(),
   cpomId: zId(),
-  departementId: zId(),
   departement: departementApiSchema.optional(),
 });
 
