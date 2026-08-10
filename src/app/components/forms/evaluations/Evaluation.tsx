@@ -85,7 +85,7 @@ export const Evaluation = ({
                 />
               </div>
             )}
-            {type === "new" && <Notes index={index} field={field} />}
+            {type === "new" && <Notes index={index} />}
           </div>
           {type === "new" && (
             <div className="grid grid-cols-2 gap-8">

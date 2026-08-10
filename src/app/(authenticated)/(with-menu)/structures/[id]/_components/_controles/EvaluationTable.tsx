@@ -13,16 +13,16 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
         {formatDate(evaluation.date)}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.notePersonne}
+        {evaluation.notePersonne ?? <EmptyCell />}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.notePro}
+        {evaluation.notePro ?? <EmptyCell />}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.noteStructure}
+        {evaluation.noteStructure ?? <EmptyCell />}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.note}
+        {evaluation.note ?? <EmptyCell />}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
         <SeeFileButton

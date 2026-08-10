@@ -1,11 +1,9 @@
 import { ReactElement } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
-
 import InputWithValidation from "../InputWithValidation";
 
-export const Notes = ({ index, field }: Props): ReactElement => {
+export const Notes = ({ index }: Props): ReactElement => {
   const { control } = useFormContext();
 
   return (
@@ -18,7 +16,6 @@ export const Notes = ({ index, field }: Props): ReactElement => {
               name={`evaluations.${index}.notePersonne`}
               min={0}
               max={4}
-              defaultValue={field.date}
               control={control}
               label="La personne"
               className="w-full mb-0 [&>label]:italic [&>label]:text-sm"
@@ -31,7 +28,6 @@ export const Notes = ({ index, field }: Props): ReactElement => {
               name={`evaluations.${index}.notePro`}
               min={0}
               max={4}
-              defaultValue={field.date}
               control={control}
               label="Les professionnels"
               className="w-full mb-0 [&>label]:italic [&>label]:text-sm"
@@ -44,7 +40,6 @@ export const Notes = ({ index, field }: Props): ReactElement => {
               name={`evaluations.${index}.noteStructure`}
               min={0}
               max={4}
-              defaultValue={field.date}
               control={control}
               label="La structure"
               className="w-full mb-0 [&>label]:italic [&>label]:text-sm"
@@ -57,7 +52,6 @@ export const Notes = ({ index, field }: Props): ReactElement => {
               name={`evaluations.${index}.note`}
               min={0}
               max={4}
-              defaultValue={field.date}
               control={control}
               label="Moyenne"
               className="w-full mb-0 [&>label]:italic [&>label]:text-sm"
@@ -73,5 +67,4 @@ export const Notes = ({ index, field }: Props): ReactElement => {
 
 type Props = {
   index: number;
-  field: EvaluationFormValues;
 };

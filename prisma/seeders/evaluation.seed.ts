@@ -14,10 +14,10 @@ export const createFakeEvaluation = (): Omit<
 > => {
   return {
     date: faker.date.past(),
-    note: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),
-    notePro: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),
-    notePersonne: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),
-    noteStructure: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),
+    note: faker.number.float({ min: 1, max: 4, fractionDigits: 1 }),
+    notePro: faker.number.float({ min: 1, max: 4, fractionDigits: 1 }),
+    notePersonne: faker.number.float({ min: 1, max: 4, fractionDigits: 1 }),
+    noteStructure: faker.number.float({ min: 1, max: 4, fractionDigits: 1 }),
     fileUploads: [createFakeFileUpload()],
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
