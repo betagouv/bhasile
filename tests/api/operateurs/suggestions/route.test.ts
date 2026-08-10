@@ -53,4 +53,27 @@ describe("GET /api/operateurs/suggestions", () => {
     expect(await response.json()).toEqual(operateurs);
     expect(mockFindBySearchTerm).toHaveBeenCalledWith(null);
   });
+
+  it("trie les opérateurs par ordre alphabétique", async () => {
+    // GIVEN
+    mockFindBySearchTerm.mockResolvedValueOnce([
+      { id: 1, name: "France terre d'asile" },
+      { id: 2, name: "Adoma" },
+      { id: 3, name: "Émmaüs" },
+    ]);
+
+    const request = new NextRequest(
+      "http://localhost/api/operateurs/suggestions"
+    );
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(
+      (await response.json()).map(
+        (operateur: { name: string }) => operateur.name
+      )
+    ).toEqual(["Adoma", "Émmaüs", "France terre d'asile"]);
+  });
 });
