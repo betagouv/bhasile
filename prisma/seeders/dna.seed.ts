@@ -81,6 +81,6 @@ export const createDnaStructures = ({
 };
 
 type CreateDnaStructuresOptions = {
-  dnas: Dna[];
+  dnas: { id: number; code: string }[];
   perVersionCounts: { structureVersionId: number; count: number }[];
 };

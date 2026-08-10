@@ -19,20 +19,38 @@ export const mirrorLegacyPlacesToBaseVersions = async (
   tx: PrismaTransaction,
   options: { structureId?: number } = {}
 ): Promise<number> => {
-  const structureFilter =
-    options.structureId === undefined
-      ? Prisma.sql`typologie."structureId" IS NOT NULL`
-      : Prisma.sql`typologie."structureId" = ${options.structureId}`;
+  const legacyTypologies = await tx.structureTypologie.findMany({
+    where: {
+      year: PLACES_VERSIONED_FROM_YEAR - 1,
+      structureId: options.structureId ?? { not: null },
+    },
+    select: { structureId: true, placesAutorisees: true },
+  });
 
-  return tx.$executeRaw`
-    UPDATE "public"."StructureVersion" AS version
-    SET "placesAutorisees" = typologie."placesAutorisees"
-    FROM "public"."StructureTypologie" AS typologie
-    WHERE version."structureId" = typologie."structureId"
-      AND version."structureVersionTransformationId" IS NULL
-      AND typologie."year" = ${PLACES_VERSIONED_FROM_YEAR - 1}
-      AND ${structureFilter}
-  `;
+  // Une mise à jour par valeur de places plutôt qu'une par structure : sur un
+  // parc entier cela fait quelques centaines de requêtes au lieu de milliers.
+  const structureIdsByPlaces = new Map<number | null, number[]>();
+  for (const { structureId, placesAutorisees } of legacyTypologies) {
+    if (structureId === null) {
+      continue;
+    }
+    const structureIds = structureIdsByPlaces.get(placesAutorisees) ?? [];
+    structureIds.push(structureId);
+    structureIdsByPlaces.set(placesAutorisees, structureIds);
+  }
+
+  let alignedVersions = 0;
+  for (const [placesAutorisees, structureIds] of structureIdsByPlaces) {
+    const { count } = await tx.structureVersion.updateMany({
+      where: {
+        structureId: { in: structureIds },
+        structureVersionTransformationId: null,
+      },
+      data: { placesAutorisees },
+    });
+    alignedVersions += count;
+  }
+  return alignedVersions;
 };
 
 type StructureVersionParent = Pick<
