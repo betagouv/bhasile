@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import { RappelStructure } from "@/app/api/dashboard/rappels/rappels.db.type";
 import { buildRappels } from "@/app/api/dashboard/rappels/rappels.util";
+import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
+import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
@@ -47,10 +49,16 @@ const makeStructure = (
     actesAdministratifs: ReturnType<typeof parentActe>[];
     evaluations: { date: Date | null }[];
     cpomStructures: unknown[];
-    forms: { status: boolean }[];
+    forms: {
+      status: boolean;
+      formDefinition: { slug: string };
+    }[];
+    versionTransformationType: StructureVersionTransformationType | null;
   }> = {}
-): RappelStructure =>
-  ({
+): RappelStructure => {
+  const versionTransformationType = overrides.versionTransformationType ?? null;
+
+  return {
     id: overrides.id ?? 1,
     codeBhasile: "BHA-001",
     type: overrides.type ?? StructureType.CADA,
@@ -58,16 +66,27 @@ const makeStructure = (
       {
         effectiveDate: new Date("2020-01-01"),
         communeAdministrative: "Avranches",
-        structureVersionTransformationId: null,
+        structureVersionTransformationId:
+          versionTransformationType === null ? null : 7,
+        structureVersionTransformation:
+          versionTransformationType === null
+            ? null
+            : {
+                type: versionTransformationType,
+                transformation: { form: { status: true } },
+              },
       },
     ],
     departementAdministratif: overrides.departementAdministratif ?? "50",
     operateur: overrides.operateur ?? { id: 1, name: "Adoma" },
-    forms: overrides.forms ?? [{ status: true }],
+    forms: overrides.forms ?? [
+      { status: true, formDefinition: { slug: FINALISATION_FORM_SLUG } },
+    ],
     actesAdministratifs: overrides.actesAdministratifs ?? [],
     evaluations: overrides.evaluations ?? [],
     cpomStructures: overrides.cpomStructures ?? [],
-  }) as unknown as RappelStructure;
+  } as unknown as RappelStructure;
+};
 
 const makeCpom = (
   overrides: Partial<{
@@ -201,10 +220,22 @@ describe("buildRappels — scoping & CPOM", () => {
 
   it("exclut une structure non finalisée", () => {
     const structure = makeStructure({
-      forms: [{ status: false }],
+      forms: [
+        { status: false, formDefinition: { slug: FINALISATION_FORM_SLUG } },
+      ],
       actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
     });
     expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("remonte les rappels d'une structure née d'une création, sans formulaire de finalisation", () => {
+    const structure = makeStructure({
+      forms: [],
+      versionTransformationType: StructureVersionTransformationType.CREATION,
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(buildRappels([structure], [], baseOptions)).toHaveLength(1);
   });
 
   it("génère un rappel CPOM quand la convention CPOM finit dans la fenêtre", () => {
