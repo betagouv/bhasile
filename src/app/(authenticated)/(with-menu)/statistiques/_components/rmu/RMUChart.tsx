@@ -82,10 +82,13 @@ export const RMUChart = (): ReactElement => {
             timePeriod={timePeriod}
             setTimePeriod={setTimePeriod}
           />
-          <ChartLegend label="Référés mesures utiles engagés" color="#BD987A" />
+          <ChartLegend
+            label="Référés mesures utiles engagés"
+            color="var(--brown-opera-main-680)"
+          />
           <ChartLegend
             label="Référés mesures utiles exécutés"
-            color="#EAC7AD"
+            color="var(--brown-opera-850-200)"
           />
         </div>
       </div>

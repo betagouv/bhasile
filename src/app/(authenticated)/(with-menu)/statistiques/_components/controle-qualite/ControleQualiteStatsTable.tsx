@@ -15,6 +15,8 @@ import { EIG_START_YEAR, EVALUATION_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { ControleQualitePeriodStat } from "@/schemas/api/statistique.schema";
 
+import { EvaluationNote } from "./EvaluationNote";
+
 const sectionsConfig: ControleQualiteSectionConfig[] = [
   {
     title: "EIG",
@@ -63,42 +65,22 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Moyenne totale",
         key: "noteGenerale",
-        format: (value) => (
-          <>
-            <NumberDisplay value={Number(value)} />
-            <span className="text-disabled-grey">&nbsp;/4</span>
-          </>
-        ),
+        format: (value) => <EvaluationNote value={value} />,
       },
       {
         label: "Moyenne “La personne“",
         key: "notePersonne",
-        format: (value) => (
-          <>
-            <NumberDisplay value={Number(value)} />
-            <span className="text-disabled-grey">&nbsp;/4</span>
-          </>
-        ),
+        format: (value) => <EvaluationNote value={value} />,
       },
       {
         label: "Moyenne “Les professionnels“",
         key: "notePro",
-        format: (value) => (
-          <>
-            <NumberDisplay value={Number(value)} />
-            <span className="text-disabled-grey">&nbsp;/4</span>
-          </>
-        ),
+        format: (value) => <EvaluationNote value={value} />,
       },
       {
         label: "Moyenne “La structure",
         key: "noteStructure",
-        format: (value) => (
-          <>
-            <NumberDisplay value={Number(value)} />
-            <span className="text-disabled-grey">&nbsp;/4</span>
-          </>
-        ),
+        format: (value) => <EvaluationNote value={value} />,
       },
     ],
   },

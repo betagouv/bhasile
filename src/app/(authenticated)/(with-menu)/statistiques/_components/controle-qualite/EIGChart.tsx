@@ -82,7 +82,7 @@ export const EIGChart = (): ReactElement => {
           />
           <ChartLegend
             label="Nombre d’EIG au motif autre que “comportement violent“"
-            color="#73E0CF"
+            color="var(--green-menthe-850-200)"
           />
         </div>
       </div>
