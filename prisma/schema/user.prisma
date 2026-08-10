@@ -51,6 +51,7 @@ model RoleDepartement {
   roleId        Int
 
   @@id([departementId, roleId])
+  @@index([roleId])
   @@schema("public")
 }
 
