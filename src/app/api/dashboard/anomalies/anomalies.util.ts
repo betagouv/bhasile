@@ -1,14 +1,13 @@
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
-  isBornFromCreation,
-  isFinalisationFormValidated,
+  isStructureFermee,
+  isStructureFinalised,
 } from "@/app/api/structures/structure.util";
 import {
   compareSortValues,
   SortKind,
   SortValue,
 } from "@/app/utils/list.util";
-import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { AnomalieCode } from "@/types/anomalie.type";
@@ -46,7 +45,7 @@ export const buildDashboardAnomalies = (
       options.now
     );
 
-    if (!isEligibleStructure(structure, currentVersion, options)) {
+    if (!isEligibleStructure(structure, options)) {
       continue;
     }
 
@@ -115,24 +114,16 @@ const CODE_ORDER = new Map(
 
 const isEligibleStructure = (
   structure: AnomalieStructure,
-  currentVersion: AnomalieStructure["structureVersions"][number] | undefined,
   options: BuildDashboardAnomaliesOptions
 ): boolean => {
   if (structure.anomalies.length === 0) {
     return false;
   }
 
-  const isFinalised =
-    isFinalisationFormValidated(structure.forms) ||
-    isBornFromCreation(structure.structureVersions, options.now);
-  if (!isFinalised) {
-    return false;
-  }
-
-  const isClosed =
-    currentVersion?.structureVersionTransformation?.type ===
-    StructureVersionTransformationType.FERMETURE;
-  if (isClosed) {
+  if (
+    !isStructureFinalised(structure, options.now) ||
+    isStructureFermee(structure, options.now)
+  ) {
     return false;
   }
 
