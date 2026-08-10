@@ -111,7 +111,7 @@
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "patch-package": "^8.0.0",
-    "postcss": "^8.5.25",
+    "postcss": "^8.5.26",
     "prettier": "^3.9.6",
     "sass": "^1.102.0",
     "sql-formatter": "^15.8.2",
