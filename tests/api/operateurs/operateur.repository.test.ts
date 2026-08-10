@@ -12,7 +12,7 @@ describe("operateur.repository db integration", () => {
   let operateurId: number | undefined;
   let logoId: number | undefined;
   let logoKey: string | undefined;
-  let operateurAvecStructureId: number | undefined;
+  let operateurWithStructureId: number | undefined;
   let structureId: number | undefined;
 
   beforeAll(async () => {
@@ -34,15 +34,15 @@ describe("operateur.repository db integration", () => {
     operateurId = operateur.id;
     logoId = operateur.logo?.id;
 
-    const operateurAvecStructure = await prisma.operateur.create({
+    const operateurWithStructure = await prisma.operateur.create({
       data: {
         name: `OP-TEST-AVEC-STRUCTURE-${randomUUID()}`,
         structures: { create: { codeBhasile: `ST-TEST-${randomUUID()}` } },
       },
       select: { id: true, structures: { select: { id: true } } },
     });
-    operateurAvecStructureId = operateurAvecStructure.id;
-    structureId = operateurAvecStructure.structures[0]?.id;
+    operateurWithStructureId = operateurWithStructure.id;
+    structureId = operateurWithStructure.structures[0]?.id;
   });
 
   afterAll(async () => {
@@ -52,9 +52,9 @@ describe("operateur.repository db integration", () => {
     if (structureId) {
       await prisma.structure.deleteMany({ where: { id: structureId } });
     }
-    if (operateurAvecStructureId) {
+    if (operateurWithStructureId) {
       await prisma.operateur.deleteMany({
-        where: { id: operateurAvecStructureId },
+        where: { id: operateurWithStructureId },
       });
     }
     if (operateurId) {
@@ -78,7 +78,7 @@ describe("operateur.repository db integration", () => {
     const operateurs = await findBySearchTerm(null);
     const ids = operateurs.map((operateur) => operateur.id);
 
-    expect(ids).toContain(operateurAvecStructureId);
+    expect(ids).toContain(operateurWithStructureId);
     expect(ids).not.toContain(operateurId);
   });
 });
