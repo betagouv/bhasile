@@ -13,7 +13,7 @@ import {
   fetchAllDossiers,
   FIELD_FRAGMENT,
   getFieldValue,
-} from "../utils/demarches-numeriques.util";
+} from "../utils/demarche-numerique.util";
 
 const prisma = createPrismaClient();
 

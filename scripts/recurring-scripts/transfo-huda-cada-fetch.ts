@@ -25,7 +25,7 @@ import {
   fetchAllDossiers,
   FIELD_FRAGMENT,
   getFieldValue,
-} from "../utils/demarches-numeriques.util";
+} from "../utils/demarche-numerique.util";
 import {
   findHudaCadaTransformations,
   matchesEnvelope,
