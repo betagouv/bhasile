@@ -1,3 +1,5 @@
+-- Migration modifiée à la main pour gérer le one-off PENDANT la migration (test sur une migration facile)
+
 -- CpomDepartement : departementId -> departementNumero
 ALTER TABLE "public"."CpomDepartement" ADD COLUMN "departementNumero" TEXT;
 
