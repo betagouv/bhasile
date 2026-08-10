@@ -6,6 +6,7 @@ import {
   zId,
   zSafeDecimalsNullish,
 } from "@/app/utils/zodCustomFields";
+import { EVALUATION_NOTES_START_YEAR } from "@/constants";
 
 const fileUploadSchema = z.object({
   key: z.string().optional(),
@@ -34,7 +35,8 @@ const evaluationSchema = evaluationAutoSaveSchema
   .refine(
     (data) => {
       const year = data.date ? getYearFromDate(data.date) : undefined;
-      const requireNotes = year !== undefined && year >= 2022;
+      const requireNotes =
+        year !== undefined && year >= EVALUATION_NOTES_START_YEAR;
 
       if (requireNotes && getNotes(data).some((note) => note == null)) {
         return false;

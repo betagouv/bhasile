@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { SeeFileButton } from "@/app/components/common/SeeFileButton";
 import { formatDate } from "@/app/utils/date.util";
+import { EVALUATION_NOTES_START_YEAR } from "@/constants";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 
 export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
@@ -61,8 +62,8 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
         ]}
       />
       <span className="italic block border-t border-default-grey text-mention-grey py-2 px-4 text-xs">
-        Seules les évaluations menées à partir de 2022 prennent en compte des
-        notes et un plan d’action optionnel.
+        Seules les évaluations menées à partir de {EVALUATION_NOTES_START_YEAR}{" "}
+        prennent en compte des notes et un plan d’action optionnel.
       </span>
     </>
   );

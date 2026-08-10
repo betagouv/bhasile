@@ -1,6 +1,5 @@
 // One-off : une note d'évaluation à 0 est toujours une non-saisie, jamais une vraie note.
-// Les sous-notes à 0 repassent à null, et la note générale à 0 est recalculée
-// comme la moyenne des 3 sous-notes quand elles sont toutes renseignées.
+// Les sous-notes à 0 repassent à null, et la note générale à 0 est recalculée comme la moyenne des 3 sous-notes quand elles sont toutes renseignées.
 //
 // Usage : yarn one-off 20260810-nullify-evaluation-zero-notes
 
@@ -12,7 +11,7 @@ import { createPrismaClient } from "@/prisma-client";
 const prisma = createPrismaClient();
 
 async function main() {
-  console.log("🚀 Nettoyage des notes d'évaluation à 0…");
+  console.log("🚀 Nettoyage des notes d'évaluation à 0");
 
   const notePersonne = await prisma.evaluation.updateMany({
     where: { notePersonne: 0 },
