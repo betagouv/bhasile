@@ -54,6 +54,9 @@ const makeStructure = (
       formDefinition: { slug: string };
     }[];
     versionTransformationType: StructureVersionTransformationType | null;
+    versionTransformationFormStatus: boolean;
+    versionEffectiveDate: Date;
+    fermetureDate: Date | null;
   }> = {}
 ): RappelStructure => {
   const versionTransformationType = overrides.versionTransformationType ?? null;
@@ -62,9 +65,10 @@ const makeStructure = (
     id: overrides.id ?? 1,
     codeBhasile: "BHA-001",
     type: overrides.type ?? StructureType.CADA,
+    fermetureDate: overrides.fermetureDate ?? null,
     structureVersions: [
       {
-        effectiveDate: new Date("2020-01-01"),
+        effectiveDate: overrides.versionEffectiveDate ?? new Date("2020-01-01"),
         communeAdministrative: "Avranches",
         structureVersionTransformationId:
           versionTransformationType === null ? null : 7,
@@ -73,7 +77,11 @@ const makeStructure = (
             ? null
             : {
                 type: versionTransformationType,
-                transformation: { form: { status: true } },
+                transformation: {
+                  form: {
+                    status: overrides.versionTransformationFormStatus ?? true,
+                  },
+                },
               },
       },
     ],
@@ -235,7 +243,51 @@ describe("buildRappels — scoping & CPOM", () => {
       actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
     });
 
-    expect(buildRappels([structure], [], baseOptions)).toHaveLength(1);
+    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite).toBe(
+      "URGENT"
+    );
+  });
+
+  it("exclut une structure dont la transformation de création n'est pas validée", () => {
+    const structure = makeStructure({
+      forms: [],
+      versionTransformationType: StructureVersionTransformationType.CREATION,
+      versionTransformationFormStatus: false,
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("exclut une structure dont la création ne prend effet qu'à l'avenir", () => {
+    const structure = makeStructure({
+      forms: [],
+      versionTransformationType: StructureVersionTransformationType.CREATION,
+      versionEffectiveDate: new Date("2027-01-01"),
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("exclut une structure déjà fermée", () => {
+    const structure = makeStructure({
+      fermetureDate: new Date("2026-03-01"),
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("garde une structure dont la fermeture n'est pas encore effective", () => {
+    const structure = makeStructure({
+      fermetureDate: new Date("2026-12-31"),
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite).toBe(
+      "URGENT"
+    );
   });
 
   it("génère un rappel CPOM quand la convention CPOM finit dans la fenêtre", () => {

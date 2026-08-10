@@ -18,6 +18,7 @@ export const rappelStructureSelect = {
   codeBhasile: true,
   type: true,
   departementAdministratif: true,
+  fermetureDate: true,
   structureVersions: {
     select: {
       ...resolvableVersionSelect,

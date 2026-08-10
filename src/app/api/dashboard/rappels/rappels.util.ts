@@ -5,8 +5,8 @@ import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-ve
 import {
   getDatesConvention,
   getDatesPeriodeAutorisation,
-  isBornFromCreation,
-  isFinalisationFormValidated,
+  isStructureFermee,
+  isStructureFinalised,
 } from "@/app/api/structures/structure.util";
 import { RAPPEL_TASK_LABEL } from "@/app/utils/rappel.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
@@ -156,10 +156,7 @@ export const buildRappels = (
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
-    const isFinalised =
-      isFinalisationFormValidated(structure.forms) ||
-      isBornFromCreation(structure.structureVersions, now);
-    if (!isFinalised) {
+    if (!isStructureFinalised(structure, now) || isStructureFermee(structure, now)) {
       continue;
     }
     const departement = structure.departementAdministratif;

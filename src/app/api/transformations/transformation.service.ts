@@ -30,10 +30,7 @@ import {
   getResolvedStructure,
   mergeStructureWithVersion,
 } from "../structures/structure.service";
-import {
-  isBornFromCreation,
-  isFinalisationFormValidated,
-} from "../structures/structure.util";
+import { isStructureFinalised } from "../structures/structure.util";
 import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
@@ -93,12 +90,14 @@ const dbTransformationToApiRead = (
                   structure: resolvedSourceStructure
                     ? {
                         ...resolvedSourceStructure,
-                        isFinalised:
-                          isBornFromCreation(
-                            sourceStructure?.structureVersions,
-                            now
-                          ) ||
-                          isFinalisationFormValidated(sourceStructure?.forms),
+                        isFinalised: isStructureFinalised(
+                          {
+                            forms: sourceStructure?.forms,
+                            structureVersions:
+                              sourceStructure?.structureVersions,
+                          },
+                          now
+                        ),
                         forms: undefined,
                         placesAutorisees:
                           referenceVersion?.placesAutorisees ?? null,
