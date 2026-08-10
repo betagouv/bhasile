@@ -110,14 +110,17 @@ const buildLightStructure = (
     forms: [],
     actesAdministratifs: [],
     structureTypologies: [],
+    fermetureDate: null,
     structureVersions: [version],
     ...overrides,
   }) as unknown as StructureListLight;
 
+const fermetureDate = new Date("2025-03-10T00:00:00.000Z");
+
 const fermetureVersion = (overrides: Partial<StructureListLightVersion> = {}) =>
   buildVersion({
     id: 20,
-    effectiveDate: new Date("2025-03-10T00:00:00.000Z"),
+    effectiveDate: fermetureDate,
     structureVersionTransformationId: 7,
     structureVersionTransformation: {
       type: StructureVersionTransformationType.FERMETURE,
@@ -239,14 +242,14 @@ describe("computeStructureListRow", () => {
 
     // WHEN
     const row = computeStructureListRow(
-      buildLightStructure({}, version),
+      buildLightStructure({ fermetureDate }, version),
       version,
       now
     );
 
     // THEN
     expect(row?.isClosed).toBe(true);
-    expect(row?.fermetureDate).toEqual(new Date("2025-03-10T00:00:00.000Z"));
+    expect(row?.fermetureDate).toEqual(fermetureDate);
     expect(row?.fermetureMotif).toBe("Fin de prise en charge");
   });
 
@@ -270,7 +273,10 @@ describe("computeStructureListRow", () => {
   it("reste fermée quand la fermeture est la dernière version valide", () => {
     // GIVEN
     const versions = [buildVersion(), fermetureVersion()];
-    const structure = buildLightStructure({ structureVersions: versions });
+    const structure = buildLightStructure({
+      fermetureDate,
+      structureVersions: versions,
+    });
 
     // WHEN
     const current = resolveCurrentVersion(structure.structureVersions, now);
@@ -281,23 +287,27 @@ describe("computeStructureListRow", () => {
     );
   });
 
-  it("est de nouveau ouverte quand une version valide ultérieure remplace la fermeture", () => {
+  // Aucun chemin applicatif ne remet fermetureDate à null : une fermeture est définitive.
+  it("reste fermée même quand une version valide ultérieure existe", () => {
     // GIVEN
-    const reopen = buildVersion({
+    const laterVersion = buildVersion({
       id: 30,
       effectiveDate: new Date("2025-09-01T00:00:00.000Z"),
       structureVersionTransformationId: null,
       structureVersionTransformation: null,
     });
-    const versions = [fermetureVersion(), reopen];
-    const structure = buildLightStructure({ structureVersions: versions });
+    const versions = [fermetureVersion(), laterVersion];
+    const structure = buildLightStructure({
+      fermetureDate,
+      structureVersions: versions,
+    });
 
     // WHEN
     const current = resolveCurrentVersion(structure.structureVersions, now);
 
     // THEN
     expect(computeStructureListRow(structure, current, now)?.isClosed).toBe(
-      false
+      true
     );
   });
 });
