@@ -143,9 +143,10 @@ export const getOngoingTransformationsForUser = async (
   const now = getNow();
   return dbTransformations
     .map((dbTransformation) => dbTransformationToApiRead(dbTransformation, now))
-    .filter((transformation) =>
-      canUpdateDepartement(user, getTransformationDepartement(transformation))
-    );
+    .filter((transformation) => {
+      const departement = getTransformationDepartement(transformation);
+      return !departement || canUpdateDepartement(user, departement);
+    });
 };
 
 const prepareStructureVersionTransformations = async (

@@ -68,18 +68,13 @@ export const checkCanUpdateDepartements = (
     return;
   }
 
-  const departements = collectDepartements(structureVersionTransformations);
-
-  if (departements.length === 0) {
-    if (!defineAbilityFor(user).can("update", "Structure")) {
-      throw new ApiDomainError("Droits insuffisants", 403);
-    }
-    return;
+  if (!defineAbilityFor(user).can("update", "Structure")) {
+    throw new ApiDomainError("Droits insuffisants", 403);
   }
 
-  const refusedDepartement = departements.find(
-    (departement) => !canUpdateDepartement(user, departement)
-  );
+  const refusedDepartement = collectDepartements(
+    structureVersionTransformations
+  ).find((departement) => !canUpdateDepartement(user, departement));
   if (refusedDepartement) {
     throw new ApiDomainError(
       `Le département ${refusedDepartement} n'est pas dans votre périmètre.`,
