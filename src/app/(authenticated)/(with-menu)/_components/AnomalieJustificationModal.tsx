@@ -8,7 +8,6 @@ import {
   formatAnomalieLabel,
   formatAnomalieStructure,
 } from "@/app/utils/anomalie.util";
-import { COMMENTAIRE_MAX_LENGTH } from "@/schemas/api/anomalie.schema";
 import { DashboardAnomalie } from "@/types/dashboard.type";
 
 export const AnomalieJustificationModal = ({
@@ -57,12 +56,11 @@ export const AnomalieJustificationModal = ({
       )}
 
       <Input
-        label={`Justification (${COMMENTAIRE_MAX_LENGTH} caractères max)`}
+        label="Justification"
         textArea
         nativeTextAreaProps={{
           value: commentaire,
-          maxLength: COMMENTAIRE_MAX_LENGTH,
-          rows: 3,
+          rows: 4,
           onChange: (event) => setCommentaire(event.target.value),
         }}
       />

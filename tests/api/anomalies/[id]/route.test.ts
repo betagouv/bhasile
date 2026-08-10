@@ -87,14 +87,19 @@ describe("PUT /api/anomalies/[id]", () => {
     expect(mockSetAnomalieJustification).not.toHaveBeenCalled();
   });
 
-  it("rejette une justification de plus de 100 caractères", async () => {
+  it("accepte une justification longue", async () => {
+    const commentaire = "a".repeat(500);
+
     const response = await PUT(
-      buildRequest({ isJustified: true, commentaire: "a".repeat(101) }),
+      buildRequest({ isJustified: true, commentaire }),
       { params }
     );
 
-    expect(response.status).toBe(400);
-    expect(mockSetAnomalieJustification).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(mockSetAnomalieJustification).toHaveBeenCalledWith(
+      { id: 1, isJustified: true, commentaire },
+      "agent@gouv.fr"
+    );
   });
 
   it("renvoie 404 quand l'anomalie a disparu depuis le rendu", async () => {
