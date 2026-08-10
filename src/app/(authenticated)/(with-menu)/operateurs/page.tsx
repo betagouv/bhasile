@@ -6,6 +6,7 @@ import { ListLoader } from "@/app/components/lists/ListLoader";
 import { SearchBar } from "@/app/components/SearchBar";
 import { useOperateurSearch } from "@/app/hooks/useOperateurSearch";
 import { formatPlural } from "@/app/utils/string.util";
+import { SEARCH_NAVIGATION_KEY } from "@/constants";
 
 import { OperateurList } from "./OperateursList";
 
@@ -32,7 +33,7 @@ export default function Operateurs(): ReactElement {
         </div>
       </div>
       <ListLoader
-        fetchStateName={"operateurs-search"}
+        fetchStateName={SEARCH_NAVIGATION_KEY}
         items={operateurs}
         entityName="operateur"
       >

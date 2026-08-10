@@ -1,3 +1,5 @@
+"use client";
+
 import { PropsWithChildren, ReactElement } from "react";
 
 import { useFetchState } from "@/contexts/FetchStateContext";

@@ -22,6 +22,8 @@ export const SHORT_PAGE_SIZE = 6;
 
 export const SEARCH_PARAM_DEBOUNCE_MS = 300;
 
+export const SEARCH_NAVIGATION_KEY = "search-navigation";
+
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 
