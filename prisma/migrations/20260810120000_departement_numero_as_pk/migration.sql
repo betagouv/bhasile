@@ -28,7 +28,6 @@ ALTER TABLE "public"."RoleDepartement" DROP CONSTRAINT "RoleDepartement_pkey";
 ALTER TABLE "public"."RoleDepartement" DROP COLUMN "departementId";
 ALTER TABLE "public"."RoleDepartement" ADD CONSTRAINT "RoleDepartement_pkey" PRIMARY KEY ("departementNumero", "roleId");
 
--- Departement : numero devient la clé primaire, id disparaît
 ALTER TABLE "public"."Structure" DROP CONSTRAINT "Structure_departementAdministratif_fkey";
 ALTER TABLE "public"."StructureVersion" DROP CONSTRAINT "StructureVersion_departementAdministratif_fkey";
 ALTER TABLE "public"."Dna" DROP CONSTRAINT "Dna_departementAdministratif_fkey";
