@@ -18,7 +18,7 @@ export const StatistiquesContent = (): ReactElement => {
       <CustomNotice
         severity="warning"
         description="Les structures non finalisées et les PRAHDA ne sont pas comptabilisés ici."
-        className="rounded-lg"
+        className="rounded-lg bg-contrast-yellow-tournesol text-action-high-yellow-tournesol"
       />
       <Section id="structures">
         <StructuresBlock />
