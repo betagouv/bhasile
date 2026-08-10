@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
     const result = transformationApiCreateSchema.parse(body);
     const transformationId = await createTransformation(
       result,
-      undefined,
       session.user as SessionUser
     );
     return NextResponse.json({ transformationId }, { status: 201 });

@@ -16,6 +16,7 @@ import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { StepStatus } from "@/types/form.type";
 import { DeepPartial, FormKind } from "@/types/global";
 import {
+  DepartementBearingStructureVersionTransformation,
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
   TransformationFormType,
@@ -43,13 +44,6 @@ export const getTransformationTitle = (
     return "Nouvelle structure";
   }
   return "Transformer une structure";
-};
-
-export type DepartementBearingStructureVersionTransformation = {
-  structureVersion?: {
-    departementAdministratif?: string | null;
-    structure?: { departementAdministratif?: string | null } | null;
-  } | null;
 };
 
 export const getStructureVersionTransformationDepartement = (

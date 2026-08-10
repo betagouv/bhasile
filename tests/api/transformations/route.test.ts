@@ -52,11 +52,7 @@ describe("POST /api/transformations", () => {
 
     expect(response.status).toBe(201);
     expect(await response.json()).toEqual({ transformationId: 99 });
-    expect(mockCreateTransformation).toHaveBeenCalledWith(
-      body,
-      undefined,
-      agentParis
-    );
+    expect(mockCreateTransformation).toHaveBeenCalledWith(body, agentParis);
   });
 
   it("retourne 401 quand l'utilisateur n'est pas authentifié", async () => {

@@ -1,6 +1,5 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import {
-  DepartementBearingStructureVersionTransformation,
   getStructureVersionTransformationDepartement,
   isEffectiveDateValid,
 } from "@/app/utils/transformation.util";
@@ -16,7 +15,10 @@ import {
   StructureVersionTransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
-import { TransformationType } from "@/types/transformation.type";
+import {
+  DepartementBearingStructureVersionTransformation,
+  TransformationType,
+} from "@/types/transformation.type";
 
 export const checkNoDuplicateStructureIds = (
   structureVersionTransformations: StructureVersionTransformationApiCreate[]

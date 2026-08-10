@@ -3,10 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, PUT } from "@/app/api/transformations/[id]/route";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import {
-  StructureVersionTransformationType,
-  TransformationType,
-} from "@/types/transformation.type";
+import { TransformationType } from "@/types/transformation.type";
 
 const mockGetTransformation = vi.fn();
 const mockUpdateTransformation = vi.fn();
@@ -14,13 +11,6 @@ const mockDeleteTransformation = vi.fn();
 const mockGetServerSession = vi.fn();
 
 const agentParis = { role: "DEPARTEMENT_PARIS", allowedDepartements: ["75"] };
-
-const buildStructureVersionTransformation = (
-  departementAdministratif: string
-) => ({
-  type: StructureVersionTransformationType.FERMETURE,
-  structureVersion: { departementAdministratif },
-});
 
 vi.mock("@/app/api/transformations/transformation.service", () => ({
   getTransformation: (...args: unknown[]) => mockGetTransformation(...args),
@@ -90,26 +80,30 @@ describe("PUT /api/transformations/[id]", () => {
       body: JSON.stringify(body),
     }) as NextRequest;
 
+  const storedTransformation = {
+    id: 7,
+    type: TransformationType.FERMETURE_SANS_TRANSFERT,
+    structureVersionTransformations: [],
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetServerSession.mockResolvedValue({ user: agentParis });
-    mockGetTransformation.mockResolvedValue({
-      id: 7,
-      type: TransformationType.FERMETURE_SANS_TRANSFERT,
-      structureVersionTransformations: [
-        buildStructureVersionTransformation("75"),
-      ],
-    });
+    mockGetTransformation.mockResolvedValue(storedTransformation);
   });
 
-  it("retourne 201 quand le corps est valide et que l'utilisateur est autorisé", async () => {
+  it("retourne 201 et transmet la transformation stockée et l'agent au service", async () => {
     mockUpdateTransformation.mockResolvedValueOnce(7);
 
     const response = await PUT(buildRequest(validBody));
 
     expect(response.status).toBe(201);
     expect(await response.json()).toEqual({ transformationId: 7 });
-    expect(mockUpdateTransformation).toHaveBeenCalledWith(validBody);
+    expect(mockUpdateTransformation).toHaveBeenCalledWith(
+      validBody,
+      storedTransformation,
+      agentParis
+    );
   });
 
   it("retourne 401 quand l'utilisateur n'est pas authentifié", async () => {
@@ -121,73 +115,20 @@ describe("PUT /api/transformations/[id]", () => {
     expect(mockUpdateTransformation).not.toHaveBeenCalled();
   });
 
-  it("retourne 403 quand la transformation stockée est hors du périmètre de l'agent", async () => {
-    mockGetTransformation.mockResolvedValueOnce({
-      id: 7,
-      type: TransformationType.FERMETURE_SANS_TRANSFERT,
-      structureVersionTransformations: [
-        buildStructureVersionTransformation("92"),
-      ],
-    });
+  it("retourne 403 quand le service refuse le département", async () => {
+    mockUpdateTransformation.mockRejectedValueOnce(
+      new ApiDomainError(
+        "Le département 92 n'est pas dans votre périmètre.",
+        403
+      )
+    );
 
     const response = await PUT(buildRequest(validBody));
 
     expect(response.status).toBe(403);
-    expect(mockUpdateTransformation).not.toHaveBeenCalled();
-  });
-
-  it("retourne 403 quand le corps déclare un département hors du périmètre de l'agent", async () => {
-    const response = await PUT(
-      buildRequest({
-        ...validBody,
-        structureVersionTransformations: [
-          buildStructureVersionTransformation("92"),
-        ],
-      })
-    );
-
-    expect(response.status).toBe(403);
-    expect(mockUpdateTransformation).not.toHaveBeenCalled();
-  });
-
-  it("autorise une création ex-nihilo dont le département arrive avec le corps", async () => {
-    mockGetTransformation.mockResolvedValueOnce({
-      id: 7,
-      type: TransformationType.OUVERTURE_EX_NIHILO,
-      structureVersionTransformations: [
-        { type: StructureVersionTransformationType.CREATION },
-      ],
+    expect(await response.json()).toEqual({
+      error: "Le département 92 n'est pas dans votre périmètre.",
     });
-    mockUpdateTransformation.mockResolvedValueOnce(7);
-
-    const response = await PUT(
-      buildRequest({
-        ...validBody,
-        structureVersionTransformations: [
-          {
-            type: StructureVersionTransformationType.CREATION,
-            structureVersion: { departementAdministratif: "75" },
-          },
-        ],
-      })
-    );
-
-    expect(response.status).toBe(201);
-  });
-
-  it("autorise une transformation sans département, encore à l'état de brouillon", async () => {
-    mockGetTransformation.mockResolvedValueOnce({
-      id: 7,
-      type: TransformationType.FERMETURE_SANS_TRANSFERT,
-      structureVersionTransformations: [
-        { type: StructureVersionTransformationType.CREATION },
-      ],
-    });
-    mockUpdateTransformation.mockResolvedValueOnce(7);
-
-    const response = await PUT(buildRequest(validBody));
-
-    expect(response.status).toBe(201);
   });
 
   it("retourne 404 quand la transformation n'existe pas", async () => {

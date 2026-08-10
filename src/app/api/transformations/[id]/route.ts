@@ -79,12 +79,12 @@ export async function PUT(request: NextRequest) {
         { status: 404 }
       );
     }
-    checkCanUpdateDepartements(session.user as SessionUser, [
-      ...transformation.structureVersionTransformations,
-      ...(result.structureVersionTransformations ?? []),
-    ]);
 
-    const transformationId = await updateTransformation(result);
+    const transformationId = await updateTransformation(
+      result,
+      transformation,
+      session.user as SessionUser
+    );
     return NextResponse.json({ transformationId }, { status: 201 });
   } catch (error) {
     return apiErrorResponse(error);
