@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 
+import { ChartLegend } from "@/app/components/ChartLegend";
 import BarChart from "@/app/components/common/BarChart";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
@@ -78,25 +79,25 @@ export const DotationChart = ({
         <h5 className="text-title-blue-france text-sm font-medium mb-2">
           {getDotationLabel()}
         </h5>
-        <div className="flex items-center mb-2">
-          <div className="h-3 w-3 bg-(--yellow-moutarde-850-200)" />
-          <p className="pl-2 mb-0">Dotation demandée par l’opérateur</p>
-        </div>
-        <div className="flex items-center pb-6">
-          <div className="h-3 w-3 bg-(--yellow-moutarde-main-679)" />
-          <p className="pl-2 mb-0">Dotation totale accordée par l’État</p>
-        </div>
-        <h5 className="text-title-blue-france text-sm font-medium  mb-2">
+        <ChartLegend
+          label="Dotation demandée par l’opérateur"
+          color="var(--yellow-moutarde-850-200)"
+        />
+        <ChartLegend
+          label="Dotation totale accordée par l’État"
+          color="var(--yellow-moutarde-main-679)"
+        />
+        <h5 className="text-title-blue-france text-sm font-medium mb-2 mt-6">
           {getEquilibreEconomiqueLabel()}
         </h5>
-        <div className="flex items-center mb-2">
-          <div className="h-3 w-3 bg-(--purple-glycine-850-200)" />
-          <p className="pl-2 mb-0">Total des produits (dont dotation État)</p>
-        </div>
-        <div className="flex items-center">
-          <div className="h-3 w-3 bg-(--blue-cumulus-850-200)" />
-          <p className="pl-2 mb-0">Total des charges retenues</p>
-        </div>
+        <ChartLegend
+          label="Total des produits (dont dotation État)"
+          color="var(--purple-glycine-850-200)"
+        />
+        <ChartLegend
+          label="Total des charges retenues"
+          color="var(--blue-cumulus-850-200)"
+        />
       </div>
     </div>
   );

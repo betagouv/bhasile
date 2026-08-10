@@ -2,12 +2,12 @@
 
 import { ReactElement, useMemo, useState } from "react";
 
+import { ChartLegend } from "@/app/components/ChartLegend";
 import BarChart from "@/app/components/common/BarChart";
 import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { formatDate } from "@/app/utils/date.util";
 import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
@@ -24,10 +24,12 @@ export const RMUChart = (): ReactElement => {
       const date = new Date(periodStat.date);
 
       if (timePeriod === "byMonth") {
-        return formatDate(date, {
-          month: "short",
-          year: "numeric",
-        });
+        return date
+          .toLocaleDateString("fr-FR", {
+            month: "short",
+            year: "numeric",
+          })
+          .toLocaleUpperCase();
       }
 
       if (timePeriod === "byTrimester") {
@@ -80,14 +82,11 @@ export const RMUChart = (): ReactElement => {
             timePeriod={timePeriod}
             setTimePeriod={setTimePeriod}
           />
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#BD987A] shrink-0" />
-            <p className="pl-2 mb-0">Référés mesures utiles engagés</p>
-          </div>
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#EAC7AD] shrink-0" />
-            <p className="pl-2 mb-0">Référés mesures utiles exécutés</p>
-          </div>
+          <ChartLegend label="Référés mesures utiles engagés" color="#BD987A" />
+          <ChartLegend
+            label="Référés mesures utiles exécutés"
+            color="#EAC7AD"
+          />
         </div>
       </div>
     </>

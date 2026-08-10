@@ -1,5 +1,6 @@
 import { ReactElement, useMemo, useState } from "react";
 
+import { ChartLegend } from "@/app/components/ChartLegend";
 import { StackedBarChart } from "@/app/components/common/StackedBarChart";
 import {
   TimePeriod,
@@ -75,18 +76,14 @@ export const EIGChart = (): ReactElement => {
             timePeriod={timePeriod}
             setTimePeriod={setTimePeriod}
           />
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#4F9D91] shrink-0" />
-            <p className="pl-2 mb-0">
-              Nombre d’EIG au motif de “comportement violent“
-            </p>
-          </div>
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#73E0CF] shrink-0" />
-            <p className="pl-2 mb-0">
-              Nombre d’EIG au motif autre que “comportement violent“
-            </p>
-          </div>
+          <ChartLegend
+            label="Nombre d’EIG au motif de “comportement violent“"
+            color="#4F9D91"
+          />
+          <ChartLegend
+            label="Nombre d’EIG au motif autre que “comportement violent“"
+            color="#73E0CF"
+          />
         </div>
       </div>
     </>

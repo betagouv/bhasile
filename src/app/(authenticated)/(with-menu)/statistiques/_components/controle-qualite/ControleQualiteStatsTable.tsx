@@ -63,22 +63,42 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Moyenne totale",
         key: "noteGenerale",
-        format: (value) => <NumberDisplay value={Number(value)} />,
+        format: (value) => (
+          <>
+            <NumberDisplay value={Number(value)} />
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ),
       },
       {
         label: "Moyenne “La personne“",
         key: "notePersonne",
-        format: (value) => <NumberDisplay value={Number(value)} />,
+        format: (value) => (
+          <>
+            <NumberDisplay value={Number(value)} />
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ),
       },
       {
         label: "Moyenne “Les professionnels“",
         key: "notePro",
-        format: (value) => <NumberDisplay value={Number(value)} />,
+        format: (value) => (
+          <>
+            <NumberDisplay value={Number(value)} />
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ),
       },
       {
         label: "Moyenne “La structure",
         key: "noteStructure",
-        format: (value) => <NumberDisplay value={Number(value)} />,
+        format: (value) => (
+          <>
+            <NumberDisplay value={Number(value)} />
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ),
       },
     ],
   },
