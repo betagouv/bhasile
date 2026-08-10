@@ -6,66 +6,59 @@ import "dotenv/config";
 import { createPrismaClient } from "@/prisma-client";
 
 import {
+  FIELD_FRAGMENT,
   cleanDate,
-  DNColumn,
+  DNField,
+  DNFieldDescriptor,
   DNDossierNode,
   fetchAllDossiers,
-  getValueByLabel,
+  getFieldValue,
 } from "../utils/demarches-numeriques.util";
 
 const prisma = createPrismaClient();
 
 const EIG_DEMARCHE_NUMBER = 98768;
 
-type EIGDossierNode = DNDossierNode & {
-  champs: { columns: DNColumn[] }[];
+type EIGDossierNode = DNDossierNode & { champs: DNField[] };
+
+const DNA_CODE = {
+  id: "Q2hhbXAtNTAyNDgxMw==",
+  label: "Code du centre",
+};
+const EVENEMENT_DATE = {
+  id: "Q2hhbXAtNDU3MjkyMQ==",
+  label: "Date de l'événement déclaré",
+};
+const DECLARATION_DATE = {
+  id: "Q2hhbXAtMzczODE2MA==",
+  label: "Date et heure de la déclaration",
+};
+const TYPE = {
+  id: "Q2hhbXAtMzczODIzMw==",
+  label:
+    "Précisez la nature des faits, en vous appuyant si besoin sur le référentiel ci-dessus.",
+};
+const TYPE_STRUCTURE = {
+  id: "Q2hhbXAtNDMzMDY0NQ==",
+  label: "Type de structure",
 };
 
-const DNA_CODE_LABEL = "Code du centre";
-const NUMERO_DOSSIER_LABEL = "ID";
-const EVENEMENT_DATE_LABEL = "Date de l'événement déclaré";
-const DECLARATION_DATE_LABEL = "Date et heure de la déclaration";
-const TYPE_LABEL =
-  "Précisez la nature des faits, en vous appuyant si besoin sur le référentiel ci-dessus.";
-
-const fieldsToKeep = [
-  DNA_CODE_LABEL,
-  EVENEMENT_DATE_LABEL,
-  DECLARATION_DATE_LABEL,
-  TYPE_LABEL,
-];
+const fieldValue = (
+  dossier: EIGDossierNode,
+  descriptor: DNFieldDescriptor
+): string => getFieldValue(dossier.champs, descriptor);
 
 const isIn303 = (dossier: EIGDossierNode): boolean =>
-  dossier.champs
-    .flatMap((champ) => champ.columns)
-    .some(
-      (column) =>
-        column.label === "Type de structure" &&
-        column.stringValue.includes("303")
-    );
+  fieldValue(dossier, TYPE_STRUCTURE).includes("303");
 
-const getEIGsFromDN = async (): Promise<DNColumn[][]> => {
+const getEIGsFromDN = async (): Promise<EIGDossierNode[]> => {
   const dossiers = await fetchAllDossiers<EIGDossierNode>({
     demarcheNumber: EIG_DEMARCHE_NUMBER,
-    champsFragment: `champs {
-                      columns {
-                        label
-                        stringValue
-                      }
-                    }`,
+    champsFragment: FIELD_FRAGMENT,
     label: "EIGs",
   });
 
-  return dossiers.filter(isIn303).map((dossier) => {
-    const columns = dossier.champs.flatMap((champ) =>
-      champ.columns.filter((column) => fieldsToKeep.includes(column.label))
-    );
-    columns.push({
-      label: NUMERO_DOSSIER_LABEL,
-      stringValue: String(dossier.number),
-    });
-    return columns;
-  });
+  return dossiers.filter(isIn303);
 };
 
 type EIGFromAPI = {
@@ -77,26 +70,23 @@ type EIGFromAPI = {
 };
 
 const getAllEIGs = async (): Promise<EIGFromAPI[]> => {
-  const DNEIGs = await getEIGsFromDN();
-  const appEIGs = DNEIGs.map((DNEIG) => {
-    const dnaCode = getValueByLabel(DNEIG, DNA_CODE_LABEL);
-    const evenementDate = cleanDate(
-      getValueByLabel(DNEIG, EVENEMENT_DATE_LABEL)
-    );
-    const declarationDate = cleanDate(
-      getValueByLabel(DNEIG, DECLARATION_DATE_LABEL)
-    );
-    if (!dnaCode || !evenementDate || !declarationDate) {
-      return;
-    }
-    return {
-      dnaCode,
-      numeroDossier: getValueByLabel(DNEIG, NUMERO_DOSSIER_LABEL),
-      evenementDate,
-      declarationDate,
-      type: getValueByLabel(DNEIG, TYPE_LABEL),
-    };
-  })
+  const dossiers = await getEIGsFromDN();
+  const appEIGs = dossiers
+    .map((dossier) => {
+      const dnaCode = fieldValue(dossier, DNA_CODE);
+      const evenementDate = cleanDate(fieldValue(dossier, EVENEMENT_DATE));
+      const declarationDate = cleanDate(fieldValue(dossier, DECLARATION_DATE));
+      if (!dnaCode || !evenementDate || !declarationDate) {
+        return;
+      }
+      return {
+        dnaCode,
+        numeroDossier: String(dossier.number),
+        evenementDate,
+        declarationDate,
+        type: fieldValue(dossier, TYPE),
+      };
+    })
     .filter((eig): eig is EIGFromAPI => eig !== undefined)
     .filter((eig) => eig.dnaCode.length === 5);
 

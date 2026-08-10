@@ -17,11 +17,14 @@ import {
 } from "@/types/transformation.type";
 
 import {
-  DNColumn,
+  FIELD_FRAGMENT,
+  cleanDate,
+  DNField,
+  DNFieldDescriptor,
   DNDossierNode,
   DNDossierState,
   fetchAllDossiers,
-  getValueByLabel,
+  getFieldValue,
 } from "../utils/demarches-numeriques.util";
 import {
   findHudaCadaTransformations,
@@ -34,7 +37,6 @@ import {
   isAmbiguousFusion,
   isEffectiveDateInScope,
   parseDepartement,
-  parseFrenchDate,
   parseTransformationType,
 } from "../utils/transfo-huda-cada.util";
 
@@ -47,34 +49,75 @@ const STATES_TO_IMPORT: DNDossierState[] = ["accepte", "en_instruction"];
 
 const WINDOW_TO_FETCH_DAYS: number | null = null;
 
-const TYPE_LABEL = "Quelle type de transformation HUDA-CADA est prévue ?";
-const CADA_BHASILE_LABEL = "Code Bhasile du CADA";
-const CADA_DNA_LABEL = "Code OFII du CADA";
-const DEPARTEMENT_LABEL = "Département";
-const DATE_PREVISIONNELLE_LABEL = "Date prévisionnelle de la transformation";
-const DATE_EFFECTIVE_LABEL = "Date effective de la transformation";
-const CADA_ETENDU_CAPACITE_LABEL =
-  "Nouvelle capacité de l'établissement étendu";
-const HUDA_BHASILE_PATTERN = /^Code Bhasile de l['’]HUDA/i;
-const HUDA_DNA_PATTERN = /^Code\(s\) DNA (de l['’])?HUDA/i;
+const TYPE = {
+  id: "Q2hhbXAtNTYzODYzMg==",
+  label: "Quelle type de transformation HUDA-CADA est prévue ?",
+};
+const CADA_BHASILE = {
+  id: "Q2hhbXAtNjM0MzIyNw==",
+  label: "Code Bhasile du CADA",
+};
+const CADA_DNA = {
+  id: "Q2hhbXAtNTYzODc0Ng==",
+  label: "Code OFII du CADA",
+};
+const DEPARTEMENT = {
+  id: "Q2hhbXAtNTYzNzExNw==",
+  label: "Département",
+};
+const DATE_PREVISIONNELLE = {
+  id: "Q2hhbXAtNjMzOTY2Mg==",
+  label: "Date prévisionnelle de la transformation",
+};
+const DATE_EFFECTIVE = {
+  id: "Q2hhbXAtNjMzODMzOQ==",
+  label: "Date effective de la transformation",
+};
+const CADA_ETENDU_CAPACITE = {
+  id: "Q2hhbXAtNTYzODgzOA==",
+  label: "Nouvelle capacité de l'établissement étendu",
+};
+
+/* Un dossier ne renseigne qu'une branche du formulaire (extension ou création) :
+ * les champs des deux branches cohabitent ici, seuls les remplis ressortent. */
+const HUDA_BHASILE = [
+  { id: "Q2hhbXAtNjMzNjQ1OA==", label: "Code Bhasile de l'HUDA" },
+  { id: "Q2hhbXAtNTY4NDMzMg==", label: "Code Bhasile de l'HUDA 2 (extension)" },
+  { id: "Q2hhbXAtNjM0MzU1NA==", label: "Code Bhasile de l'HUDA 2 (création)" },
+];
+const HUDA_DNA = [
+  { id: "Q2hhbXAtNTYzNzcwNw==", label: "Code(s) DNA de l'HUDA" },
+  { id: "Q2hhbXAtNjM0MDAwMw==", label: "Code(s) DNA HUDA 2 (extension)" },
+  { id: "Q2hhbXAtNTY4ODA3Nw==", label: "Code(s) DNA de l'HUDA 2 (création)" },
+];
 
 /* La section « nouveau CADA » ne comporte pas de capacité propre bien remplie :
  * on retombe sur le nombre de places transformées, renseigné dans la majorité
- * des dossiers. */
-const CADA_NOUVEAU_CAPACITE_LABELS = [
-  "Nombre de places de l'établissement transformé",
-  "Capacité du nouveau CADA créé dans le cadre de la transformation",
+ * des dossiers. Le premier champ renseigné l'emporte. */
+const CADA_NOUVEAU_CAPACITE = [
+  {
+    id: "Q2hhbXAtNTYzODk5Ng==",
+    label: "Nombre de places de l'établissement transformé",
+  },
+  {
+    id: "Q2hhbXAtNTY1ODY1NQ==",
+    label: "Capacité du nouveau CADA créé dans le cadre de la transformation",
+  },
 ];
 
-type HudaCadaDossierNode = DNDossierNode & { champs: DNColumn[] };
+type HudaCadaDossierNode = DNDossierNode & { champs: DNField[] };
 
-const champValue = (dossier: HudaCadaDossierNode, label: string): string =>
-  getValueByLabel(dossier.champs, label);
+const champValue = (
+  dossier: HudaCadaDossierNode,
+  descriptor: DNFieldDescriptor
+): string => getFieldValue(dossier.champs, descriptor);
 
-const champValues = (dossier: HudaCadaDossierNode, pattern: RegExp): string[] =>
-  dossier.champs
-    .filter((champ) => pattern.test(champ.label))
-    .map((champ) => champ.stringValue?.trim() || "")
+const champValues = (
+  dossier: HudaCadaDossierNode,
+  descriptors: DNFieldDescriptor[]
+): string[] =>
+  descriptors
+    .map((descriptor) => champValue(dossier, descriptor).trim())
     .filter(Boolean);
 
 const fetchDossiers = async (): Promise<HudaCadaDossierNode[]> => {
@@ -83,10 +126,7 @@ const fetchDossiers = async (): Promise<HudaCadaDossierNode[]> => {
     dossiers.push(
       ...(await fetchAllDossiers<HudaCadaDossierNode>({
         demarcheNumber: HUDA_CADA_DEMARCHE_NUMBER,
-        champsFragment: `champs {
-					label
-					stringValue
-				}`,
+        champsFragment: FIELD_FRAGMENT,
         label: `dossiers HUDA>CADA (${state})`,
         windowToFetchDays: WINDOW_TO_FETCH_DAYS,
         state,
@@ -98,20 +138,19 @@ const fetchDossiers = async (): Promise<HudaCadaDossierNode[]> => {
 
 /** La date effective prime quand elle existe, sinon la prévisionnelle. */
 const resolveEffectiveDate = (dossier: HudaCadaDossierNode): Date | null =>
-  parseFrenchDate(champValue(dossier, DATE_EFFECTIVE_LABEL)) ??
-  parseFrenchDate(champValue(dossier, DATE_PREVISIONNELLE_LABEL));
+  cleanDate(champValue(dossier, DATE_EFFECTIVE)) ??
+  cleanDate(champValue(dossier, DATE_PREVISIONNELLE));
 
 const parsePositiveInt = (raw: string): number | null => {
   const value = Number.parseInt(raw.trim(), 10);
   return Number.isFinite(value) && value > 0 ? value : null;
 };
 
-/* Le premier libellé renseigné l'emporte. */
 const resolveNewCadaCapacity = (
   dossier: HudaCadaDossierNode
 ): number | null => {
-  for (const label of CADA_NOUVEAU_CAPACITE_LABELS) {
-    const capacity = parsePositiveInt(champValue(dossier, label));
+  for (const descriptor of CADA_NOUVEAU_CAPACITE) {
+    const capacity = parsePositiveInt(champValue(dossier, descriptor));
     if (capacity !== null) {
       return capacity;
     }
@@ -198,8 +237,8 @@ const buildCadaBrique = async (
   }
 
   const targetCada = await resolveTargetCada(prisma, {
-    rawBhasileCode: champValue(dossier, CADA_BHASILE_LABEL),
-    rawDnaCodes: [champValue(dossier, CADA_DNA_LABEL)],
+    rawBhasileCode: champValue(dossier, CADA_BHASILE),
+    rawDnaCodes: [champValue(dossier, CADA_DNA)],
     departement,
   });
   if (!targetCada.ok) {
@@ -207,7 +246,7 @@ const buildCadaBrique = async (
   }
 
   const { structureTypologies, placesAutorisees } = buildCapacityFields(
-    parsePositiveInt(champValue(dossier, CADA_ETENDU_CAPACITE_LABEL)),
+    parsePositiveInt(champValue(dossier, CADA_ETENDU_CAPACITE)),
     effectiveDate
   );
   const conventionEndDate = await findConventionEndDate(
@@ -281,7 +320,7 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     return;
   }
 
-  const rawType = champValue(dossier, TYPE_LABEL);
+  const rawType = champValue(dossier, TYPE);
   if (isAmbiguousFusion(rawType)) {
     skip(
       "fusion d'un CADA existant : le dossier ne désigne pas le CADA à absorber"
@@ -306,11 +345,11 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     return;
   }
 
-  const departement = parseDepartement(champValue(dossier, DEPARTEMENT_LABEL));
+  const departement = parseDepartement(champValue(dossier, DEPARTEMENT));
 
   const resolution = await resolveHudas(prisma, {
-    rawBhasileCodes: champValues(dossier, HUDA_BHASILE_PATTERN),
-    rawDnaCodes: champValues(dossier, HUDA_DNA_PATTERN),
+    rawBhasileCodes: champValues(dossier, HUDA_BHASILE),
+    rawDnaCodes: champValues(dossier, HUDA_DNA),
     departement,
   });
   if (!resolution.ok) {
