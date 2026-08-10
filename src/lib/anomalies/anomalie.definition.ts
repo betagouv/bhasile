@@ -76,7 +76,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
 
   PLACES_LABELLISEES_GT_AUTORISEES: {
     label:
-      "La somme des places labellisées doit être inférieure ou égale au nombre de places autorisées total",
+      "Le nombre de places labellisées (LGBT) doit être inférieur ou égal au nombre de places autorisées total",
     category: "PLACES",
     target: "STRUCTURE",
     targetFields: ["lgbt"],
@@ -121,7 +121,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
   },
   PLACES_ADRESSES_ECART_STRUCTURE: {
     label:
-      "Il y a un écart entre le nombre de places autorisées total et la somme des places aux adresses d’hébergement",
+      "Il y a un écart de plus de 10 % entre le nombre de places autorisées total et la somme des places aux adresses d’hébergement",
     category: "PLACES",
     target: "STRUCTURE",
     targetFields: ["placesAutorisees"],

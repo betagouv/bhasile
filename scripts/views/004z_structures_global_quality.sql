@@ -9,6 +9,8 @@ WITH
       ARRAY_AGG(DISTINCT a."code"::text) AS "codes"
     FROM
       public."Anomalie" a
+    WHERE
+      a."isJustified" IS DISTINCT FROM TRUE
     GROUP BY
       a."structureId"
   ),

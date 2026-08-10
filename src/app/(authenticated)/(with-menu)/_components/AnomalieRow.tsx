@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ReactElement, ReactNode } from "react";
 
+import { formatAnomalieLabel } from "@/app/utils/anomalie.util";
 import { ANOMALIE_NO_YEAR } from "@/types/anomalie.type";
 import { AnomalieGroupBy, DashboardAnomalie } from "@/types/dashboard.type";
 
@@ -20,7 +21,7 @@ export const AnomalieRow = ({
           className={`min-w-0 grow ${isIgnored ? "text-mention-grey" : ""}`}
         >
           {groupBy === "STRUCTURE"
-            ? formatLabel(anomalie)
+            ? formatAnomalieLabel(anomalie)
             : renderStructureLabel(anomalie)}
         </span>
 
@@ -52,11 +53,6 @@ export const AnomalieRow = ({
     </div>
   );
 };
-
-const formatLabel = (anomalie: DashboardAnomalie): string =>
-  anomalie.year === ANOMALIE_NO_YEAR
-    ? anomalie.label
-    : `${anomalie.label} (exercice ${anomalie.year})`;
 
 const renderStructureLabel = (anomalie: DashboardAnomalie): ReactNode => (
   <span className="grid grid-cols-[9rem_3.5rem_12rem_minmax(0,1fr)_4rem] items-center gap-x-3">

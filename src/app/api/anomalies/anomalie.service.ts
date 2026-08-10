@@ -9,6 +9,7 @@ import { buildAnomalieContext } from "@/app/api/anomalies/anomalie.util";
 import { findUserIdByEmail } from "@/app/api/user/user.repository";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { getNow } from "@/app/utils/now.util";
+import { Prisma } from "@/generated/prisma/client";
 import { computeAnomalies } from "@/lib/anomalies/anomalie.compute";
 import { AnomalieApiUpdate } from "@/schemas/api/anomalie.schema";
 
@@ -67,7 +68,7 @@ export const setAnomalieJustification = async (
   email: string
 ): Promise<void> => {
   if (!input.isJustified) {
-    await updateAnomalieJustification(input.id, { isJustified: false });
+    await updateJustificationOrThrowNotFound(input.id, { isJustified: false });
     return;
   }
 
@@ -77,12 +78,29 @@ export const setAnomalieJustification = async (
     throw new ApiDomainError("Utilisateur introuvable", 401);
   }
 
-  await updateAnomalieJustification(input.id, {
+  await updateJustificationOrThrowNotFound(input.id, {
     isJustified: true,
     commentaire: input.commentaire,
     justifiedById: user.id,
     justifiedAt: getNow(),
   });
+};
+
+const updateJustificationOrThrowNotFound = async (
+  id: number,
+  data: Parameters<typeof updateAnomalieJustification>[1]
+): Promise<void> => {
+  try {
+    await updateAnomalieJustification(id, data);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      throw new ApiDomainError("Anomalie introuvable", 404);
+    }
+    throw error;
+  }
 };
 
 export const recomputeAllAnomalies = async (): Promise<number> => {

@@ -4,6 +4,10 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ReactElement, useEffect, useState } from "react";
 
+import {
+  formatAnomalieLabel,
+  formatAnomalieStructure,
+} from "@/app/utils/anomalie.util";
 import { COMMENTAIRE_MAX_LENGTH } from "@/schemas/api/anomalie.schema";
 import { DashboardAnomalie } from "@/types/dashboard.type";
 
@@ -30,7 +34,7 @@ export const AnomalieJustificationModal = ({
 
   return (
     <anomalieJustificationModal.Component
-      title={`Justifier l’anomalie (${COMMENTAIRE_MAX_LENGTH} caractères max)`}
+      title="Justifier l’anomalie"
       size="large"
       buttons={[
         { doClosesModal: true, children: "Annuler", type: "button" },
@@ -43,8 +47,17 @@ export const AnomalieJustificationModal = ({
         },
       ]}
     >
+      {anomalie && (
+        <>
+          <p className="mb-1 text-sm text-mention-grey">
+            {formatAnomalieStructure(anomalie)}
+          </p>
+          <p className="mb-4 font-bold">{formatAnomalieLabel(anomalie)}</p>
+        </>
+      )}
+
       <Input
-        label=""
+        label={`Justification (${COMMENTAIRE_MAX_LENGTH} caractères max)`}
         textArea
         nativeTextAreaProps={{
           value: commentaire,

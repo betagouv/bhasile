@@ -7,7 +7,6 @@ import {
 } from "@/app/api/dashboard/anomalies/anomalies.util";
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
-import { AnomalieCode } from "@/types/anomalie.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
@@ -31,15 +30,11 @@ const baseOptions = {
   now: NOW,
 };
 
+type AnomalieFixture = AnomalieStructure["anomalies"][number];
+
 const makeAnomalie = (
-  overrides: Partial<{
-    id: number;
-    code: AnomalieCode;
-    year: number;
-    isJustified: boolean | null;
-    commentaire: string | null;
-  }> = {}
-) => ({
+  overrides: Partial<AnomalieFixture> = {}
+): AnomalieFixture => ({
   id: overrides.id ?? 1,
   code: overrides.code ?? "RESULTAT_NET_EQ_0",
   year: overrides.year ?? 2025,
@@ -48,16 +43,9 @@ const makeAnomalie = (
 });
 
 const makeStructure = (
-  overrides: Partial<{
-    id: number;
-    codeBhasile: string;
-    type: StructureType | null;
-    departementAdministratif: string | null;
-    operateur: { id: number; name: string } | null;
-    forms: { status: boolean; formDefinition: { slug: string } }[];
-    versionTransformationType: StructureVersionTransformationType | null;
-    anomalies: ReturnType<typeof makeAnomalie>[];
-  }> = {}
+  overrides: Partial<Omit<AnomalieStructure, "structureVersions">> & {
+    versionTransformationType?: StructureVersionTransformationType | null;
+  } = {}
 ): AnomalieStructure => {
   const versionTransformationType = overrides.versionTransformationType ?? null;
 
@@ -87,7 +75,7 @@ const makeStructure = (
       },
     ],
     anomalies: overrides.anomalies ?? [makeAnomalie()],
-  } as unknown as AnomalieStructure;
+  };
 };
 
 describe("buildDashboardAnomalies", () => {

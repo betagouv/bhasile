@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
+import { recomputeAllAnomalies } from "@/app/api/anomalies/anomalie.service";
 import {
   ACTUALISATION_FORM_STEP_SLUGS,
   getActualisationFormSlug,
@@ -414,6 +415,10 @@ async function seed(): Promise<void> {
   );
   await prisma.antenne.createMany({ data: antennes });
   console.log(`✅ ${antennes.length} antennes créées`);
+
+  console.log("🔎 Recalcul des anomalies...");
+  const structuresCount = await recomputeAllAnomalies();
+  console.log(`✅ Anomalies recalculées pour ${structuresCount} structures`);
 }
 
 seed();
