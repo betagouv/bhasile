@@ -1,9 +1,10 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ReactElement, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 import { SimplePagination } from "@/app/components/common/SimplePagination";
+import { useDashboardParams } from "@/app/hooks/useDashboardParams";
 import { cn } from "@/app/utils/classname.util";
 import { getSafePage } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
@@ -12,10 +13,8 @@ export const DashboardPagination = ({
   total,
   pageParam,
 }: Props): ReactElement | null => {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const { isPending, setParams } = useDashboardParams();
 
   const currentPage = getSafePage(
     Number(searchParams.get(pageParam)),
@@ -24,11 +23,7 @@ export const DashboardPagination = ({
   );
 
   const setCurrentPage = (page: number): void => {
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(pageParam, String(page));
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    });
+    setParams({ [pageParam]: String(page) });
   };
 
   if (total <= MIDDLE_PAGE_SIZE) {

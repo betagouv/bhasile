@@ -4,7 +4,10 @@ import {
   AnomalieCategory as PrismaAnomalieCategory,
   AnomalieCode as PrismaAnomalieCode,
 } from "@/generated/prisma/enums";
-import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
+import {
+  ANOMALIE_DEFINITIONS,
+  DISPLAYED_ANOMALIE_CODES,
+} from "@/lib/anomalies/anomalie.definition";
 import { AnomalieCategory, AnomalieCode } from "@/types/anomalie.type";
 
 describe("registre des anomalies", () => {
@@ -28,5 +31,13 @@ describe("registre des anomalies", () => {
     expect(Object.keys(ANOMALIE_DEFINITIONS).sort()).toEqual(
       [...AnomalieCode].sort()
     );
+  });
+
+  it("associe une section de modification à chaque code affiché", () => {
+    const codesSansDestination = DISPLAYED_ANOMALIE_CODES.filter(
+      (code) => !ANOMALIE_DEFINITIONS[code].modificationSection
+    );
+
+    expect(codesSansDestination).toEqual([]);
   });
 });

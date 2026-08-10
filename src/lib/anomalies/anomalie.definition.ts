@@ -1,8 +1,5 @@
-import type {
-  AnomalieCategory,
-  AnomalieCode,
-  AnomalieTarget,
-} from "@/types/anomalie.type";
+import type { AnomalieCategory, AnomalieTarget } from "@/types/anomalie.type";
+import { AnomalieCode } from "@/types/anomalie.type";
 
 // SSoT. `isDisplayed` pour affichage front
 export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
@@ -13,6 +10,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "ACTE_ADMINISTRATIF",
     targetFields: ["startDate", "endDate"],
     isDisplayed: true,
+    modificationSection: "actes-administratifs",
   },
   CONVENTION_AUTORISEE_DUREE_NOT_5Y: {
     label:
@@ -21,6 +19,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "ACTE_ADMINISTRATIF",
     targetFields: ["startDate", "endDate"],
     isDisplayed: true,
+    modificationSection: "actes-administratifs",
   },
   CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y: {
     label:
@@ -29,6 +28,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "ACTE_ADMINISTRATIF",
     targetFields: ["startDate", "endDate"],
     isDisplayed: true,
+    modificationSection: "actes-administratifs",
   },
   CONVENTION_HORS_PERIODE_AUTORISATION: {
     label:
@@ -37,6 +37,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "ACTE_ADMINISTRATIF",
     targetFields: ["startDate", "endDate"],
     isDisplayed: true,
+    modificationSection: "actes-administratifs",
   },
   CONVENTION_MANQUANTE_OU_EXPIREE: {
     label: "Aucune convention en cours n’est renseignée",
@@ -44,6 +45,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: [],
     isDisplayed: false,
+    modificationSection: "actes-administratifs",
   },
   CONVENTION_DATES_DIFFERENTES_ACTES: {
     label:
@@ -52,6 +54,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["debutConvention", "finConvention"],
     isDisplayed: false,
+    modificationSection: "actes-administratifs",
   },
   AUTORISATION_DATES_DIFFERENTES_ACTES: {
     label:
@@ -60,6 +63,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["debutPeriodeAutorisation", "finPeriodeAutorisation"],
     isDisplayed: false,
+    modificationSection: "actes-administratifs",
   },
   EVALUATION_HORS_DELAI: {
     label: "L’évaluation doit être réalisée au moins tous les 5 ans",
@@ -67,6 +71,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: [],
     isDisplayed: false,
+    modificationSection: "controle-qualite",
   },
 
   PLACES_LABELLISEES_GT_AUTORISEES: {
@@ -76,6 +81,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["lgbt"],
     isDisplayed: true,
+    modificationSection: "type-places",
   },
   PLACES_SPECIALISEES_GT_AUTORISEES: {
     label:
@@ -84,6 +90,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["fvvTeh"],
     isDisplayed: false,
+    modificationSection: "type-places",
   },
   PLACES_PMR_GT_AUTORISEES: {
     label:
@@ -92,6 +99,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["pmr"],
     isDisplayed: false,
+    modificationSection: "type-places",
   },
   INCOHERENCE_LGBT_PLACES: {
     label:
@@ -100,6 +108,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["lgbt"],
     isDisplayed: false,
+    modificationSection: "type-places",
   },
   INCOHERENCE_FVVTEH_PLACES: {
     label:
@@ -108,6 +117,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["fvvTeh"],
     isDisplayed: false,
+    modificationSection: "type-places",
   },
   PLACES_ADRESSES_ECART_STRUCTURE: {
     label:
@@ -116,6 +126,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["placesAutorisees"],
     isDisplayed: true,
+    modificationSection: "adresses",
   },
 
   DEPARTEMENT_INCOHERENT_CODE_DNA: {
@@ -124,6 +135,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "DNA",
     targetFields: ["departementAdministratif"],
     isDisplayed: false,
+    modificationSection: "description",
   },
   MULTI_DNA: {
     label: "La structure est rattachée à plusieurs codes DNA",
@@ -131,6 +143,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: [],
     isDisplayed: false,
+    modificationSection: "description",
   },
   CPOM_MONO_STRUCTURE: {
     label: "La structure est rattachée à un CPOM qui ne contient qu’elle",
@@ -147,6 +160,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["tauxEncadrement"],
     isDisplayed: false,
+    modificationSection: "finances",
   },
   TAUX_ENCADREMENT_LT_2: {
     label: "Le taux d’encadrement est à 0 ou anormalement bas (< 2)",
@@ -154,6 +168,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["tauxEncadrement"],
     isDisplayed: true,
+    modificationSection: "finances",
   },
   COUT_JOURNALIER_GT_TARIF_CIBLE: {
     label:
@@ -162,6 +177,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["coutJournalier"],
     isDisplayed: false,
+    modificationSection: "finances",
   },
   COUT_JOURNALIER_LT_15: {
     label: "Le coût journalier est inférieur à 15 €",
@@ -169,6 +185,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["coutJournalier"],
     isDisplayed: false,
+    modificationSection: "finances",
   },
   RESULTAT_NET_EQ_0: {
     label:
@@ -177,6 +194,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["totalProduits", "totalCharges"],
     isDisplayed: true,
+    modificationSection: "finances",
   },
   AFFECTATION_DETAIL_MANQUANT: {
     label:
@@ -185,6 +203,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["affectationReservesFondsDedies"],
     isDisplayed: true,
+    modificationSection: "finances",
   },
   AFFECTATION_DETAIL_ECART: {
     label:
@@ -201,6 +220,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
       "autre",
     ],
     isDisplayed: true,
+    modificationSection: "finances",
   },
   REPRISE_PLUS_AFFECTATION_ECART: {
     label:
@@ -209,6 +229,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["repriseEtat", "affectationReservesFondsDedies"],
     isDisplayed: true,
+    modificationSection: "finances",
   },
   REPRISE_ETAT_SIGNE_INVERSE: {
     label: "Le signe de la reprise État semble inversé",
@@ -216,6 +237,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["repriseEtat"],
     isDisplayed: false,
+    modificationSection: "finances",
   },
   SUBVENTIONNEE_DEFICIT_AVEC_EXCEDENT: {
     label:
@@ -224,6 +246,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["excedentRecupere", "excedentDeduit", "fondsDedies"],
     isDisplayed: true,
+    modificationSection: "finances",
   },
   SUBVENTIONNEE_EXCEDENT_AVEC_REPRISE_ETAT: {
     label:
@@ -232,6 +255,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["repriseEtat"],
     isDisplayed: false,
+    modificationSection: "finances",
   },
   SUBVENTIONNEE_EXCEDENT_ECART: {
     label:
@@ -240,6 +264,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: ["excedentRecupere", "excedentDeduit", "fondsDedies"],
     isDisplayed: false,
+    modificationSection: "finances",
   },
 
   DOCUMENT_CONVENTION_MANQUANT: {
@@ -248,6 +273,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: [],
     isDisplayed: false,
+    modificationSection: "actes-administratifs",
   },
   DOCUMENT_AUTORISATION_MANQUANT: {
     label: "Aucun document n’est rattaché à l’arrêté d’autorisation",
@@ -255,6 +281,7 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     target: "STRUCTURE",
     targetFields: [],
     isDisplayed: false,
+    modificationSection: "actes-administratifs",
   },
   DOCUMENT_CPOM_MANQUANT: {
     label: "Aucun document n’est rattaché à la convention du CPOM",
@@ -280,10 +307,23 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
   },
 };
 
+export const DISPLAYED_ANOMALIE_CODES: AnomalieCode[] = AnomalieCode.filter(
+  (code) => ANOMALIE_DEFINITIONS[code].isDisplayed
+);
+
+export type AnomalieModificationSection =
+  | "description"
+  | "type-places"
+  | "adresses"
+  | "actes-administratifs"
+  | "finances"
+  | "controle-qualite";
+
 export type AnomalieDefinition = {
   label: string;
   category: AnomalieCategory;
   target: AnomalieTarget;
   targetFields: string[];
   isDisplayed: boolean;
+  modificationSection?: AnomalieModificationSection;
 };
