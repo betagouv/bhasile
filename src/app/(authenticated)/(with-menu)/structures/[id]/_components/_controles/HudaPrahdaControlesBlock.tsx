@@ -32,10 +32,12 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
         <div className="pr-4">
           <LastVisitCard evaluations={evaluations} />
         </div>
-        <InformationCard
-          primaryInformation={evenementsIndesirablesGraves.length}
-          secondaryInformation="événements indésirables graves"
-        />
+        <div>
+          <InformationCard
+            primaryInformation={evenementsIndesirablesGraves.length}
+            secondaryInformation="événements indésirables graves"
+          />
+        </div>
       </div>
       <div className="pt-3">
         {evaluations.length > 0 ? (

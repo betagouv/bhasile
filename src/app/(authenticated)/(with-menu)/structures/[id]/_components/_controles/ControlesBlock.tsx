@@ -71,10 +71,12 @@ export const ControlesBlock = (): ReactElement => {
             />
           </div>
         )}
-        <InformationCard
-          primaryInformation={`${last12MonthsEIG.length} EIG`}
-          secondaryInformation="sur les 12 derniers mois"
-        />
+        <div>
+          <InformationCard
+            primaryInformation={`${last12MonthsEIG.length} EIG`}
+            secondaryInformation="sur les 12 derniers mois"
+          />
+        </div>
       </div>
       <div className="pt-12">
         {structure.isAutorisee && (
