@@ -1,10 +1,11 @@
 import { useFormContext } from "react-hook-form";
 
-import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 
-export const TypePlaceLine = ({ line, years }: Props) => {
+import { TypePlaceCell } from "./TypePlaceCell";
+
+export const TypePlaceLine = ({ line, years, messageId }: Props) => {
   const { control, watch } = useFormContext();
 
   const structureTypologies: StructureTypologieApiType[] = watch(
@@ -29,18 +30,14 @@ export const TypePlaceLine = ({ line, years }: Props) => {
         );
 
         return (
-          <td key={year}>
-            <InputWithValidation
-              name={`structureTypologies.${currentStructureTypologyIndex}.${line.name}`}
-              id={`structureTypologies.${currentStructureTypologyIndex}.${line.name}`}
-              control={control}
-              type="number"
-              min={0}
-              label=""
-              className="mb-0 items-center [&_p]:hidden [&_input]:w-full w-24 mx-auto"
-              variant="simple"
-            />
-          </td>
+          <TypePlaceCell
+            key={year}
+            control={control}
+            field={line.name}
+            year={year}
+            index={currentStructureTypologyIndex}
+            messageId={messageId}
+          />
         );
       })}
     </tr>
@@ -50,4 +47,5 @@ export const TypePlaceLine = ({ line, years }: Props) => {
 type Props = {
   line: { name: string; label: string; subLabel?: string };
   years: number[];
+  messageId: string;
 };

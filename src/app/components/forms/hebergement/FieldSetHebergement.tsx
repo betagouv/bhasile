@@ -3,6 +3,7 @@ import autoAnimate from "@formkit/auto-animate";
 import { useCallback, useEffect, useRef } from "react";
 import { useFieldArray, useForm, useFormContext } from "react-hook-form";
 
+import { AnomalieMessage } from "@/app/components/forms/AnomalieMessage";
 import { isAdresseEmpty } from "@/app/utils/adresse.util";
 import {
   getTransformationNounAvecArticle,
@@ -199,6 +200,10 @@ export const FieldSetHebergement = ({
             + Ajouter un hébergement
           </button>
         )}
+      <AnomalieMessage
+        id="anomalies-hebergement"
+        fields={["placesAutorisees"]}
+      />
       </fieldset>
     </div>
   );

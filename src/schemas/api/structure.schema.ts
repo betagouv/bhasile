@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { Repartition } from "@/types/adresse.type";
+import { AnomalieCode } from "@/types/anomalie.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 import { HistoryEvent } from "@/types/structure-history.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
@@ -163,4 +164,12 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   typeBati?: Repartition;
   lgbt: boolean;
   fvvTeh: boolean;
+  placesAutorisees: number | null;
+  anomalies: JustifiedAnomalie[];
+};
+
+export type JustifiedAnomalie = {
+  code: AnomalieCode;
+  year: number;
+  targetId: number;
 };

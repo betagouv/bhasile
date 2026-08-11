@@ -91,6 +91,10 @@ export const structureListInclude = {
 } satisfies Prisma.StructureInclude;
 
 export const structureDetailsInclude = {
+  anomalies: {
+    where: { isJustified: true },
+    select: { code: true, year: true, targetId: true },
+  },
   structureTypologies: {
     orderBy: { year: "desc" },
   },

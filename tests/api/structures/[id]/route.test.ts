@@ -185,6 +185,8 @@ describe("GET /api/structures/[id]", () => {
         qpv: 3,
         logementsSociaux: 2,
       },
+      // Total porté par la version, distinct de la somme des adresses ci-dessus.
+      placesAutorisees: null,
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,

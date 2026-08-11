@@ -378,12 +378,15 @@ const dbStructureToApiRead = (
         now
       );
 
-  const isCurrentVersionFromTransformation = simple
-    ? false
+  const currentVersion = simple
+    ? undefined
     : resolveCurrentVersion(
         (dbStructure as StructureDbDetails).structureVersions ?? [],
         now
-      )?.structureVersionTransformationId != null;
+      );
+
+  const isCurrentVersionFromTransformation =
+    currentVersion?.structureVersionTransformationId != null;
 
   return recursivelySerializeDates({
     ...dbStructure,
@@ -407,6 +410,9 @@ const dbStructureToApiRead = (
       qpv: getCurrentPlacesQpv(dbStructure),
       logementsSociaux: getCurrentPlacesLogementsSociaux(dbStructure),
     },
+    // Total autorisé porté par la version, à ne pas confondre avec
+    // currentPlaces.placesAutorisees qui somme les adresses.
+    placesAutorisees: currentVersion?.placesAutorisees ?? null,
     isInCpom: isStructureInCpom(dbStructure),
     isInCpomPerYear: isStructureInCpomPerYear(dbStructure),
     nom: dbStructure.nom ?? "",

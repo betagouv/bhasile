@@ -3,6 +3,7 @@
 import { useForm, useFormContext } from "react-hook-form";
 
 import { Table } from "@/app/components/common/Table";
+import { AnomalieMessage } from "@/app/components/forms/AnomalieMessage";
 import { getYearRange } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
@@ -68,6 +69,10 @@ export const IndicateursFinanciers = () => {
             {errorMessage}
           </p>
         ))}
+      <AnomalieMessage
+        id="anomalies-indicateurs"
+        fields={getIndicateurFinancierTableLines().map((line) => line.name)}
+      />
     </fieldset>
   );
 };

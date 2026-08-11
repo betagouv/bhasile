@@ -30,6 +30,7 @@ export default function InputWithValidation<
   addon,
   className,
   state,
+  describedById,
   stateRelatedMessage,
   variant,
   onChange,
@@ -112,6 +113,7 @@ export default function InputWithValidation<
     <InputSimple
       nativeInputProps={{
         id,
+        "aria-describedby": describedById,
         type,
         onChange: onInputChange,
         value:
@@ -174,6 +176,7 @@ type InputWithValidationProps<TFieldValues extends FieldValues = FieldValues> =
     addon?: React.ReactNode;
     className?: string;
     state?: "default" | "error" | "success";
+    describedById?: string;
     stateRelatedMessage?: string;
     variant?: "simple";
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
