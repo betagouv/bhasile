@@ -66,8 +66,8 @@ const testAdresse = (
 });
 
 const testDepartements = (): StatistiqueDbDepartement[] => [
-  { id: 1, numero: "01", name: "Ain", population: 100_000 },
-  { id: 2, numero: "02", name: "Aisne", population: 50_000 },
+  { numero: "01", name: "Ain", population: 100_000 },
+  { numero: "02", name: "Aisne", population: 50_000 },
 ];
 
 describe("places - agrégés sur le périmètre ouvert à la date de référence", () => {
@@ -227,7 +227,7 @@ describe("places - taux d'équipement", () => {
         typologies: [testTypologie(1, 1, 2024, 4155)],
         adresses: [],
         departements: [
-          { id: 1, numero: "75", name: "Paris", population: 59_931_329 },
+          { numero: "75", name: "Paris", population: 59_931_329 },
         ],
       })
     );
@@ -242,7 +242,7 @@ describe("places - taux d'équipement", () => {
         structures: [testStructure(1)],
         typologies: [testTypologie(1, 1, 2024, 100)],
         adresses: [],
-        departements: [{ id: 1, numero: "01", name: "Ain", population: null }],
+        departements: [{ numero: "01", name: "Ain", population: null }],
       })
     );
 
