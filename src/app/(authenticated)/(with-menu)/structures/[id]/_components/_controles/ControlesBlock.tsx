@@ -32,6 +32,9 @@ export const ControlesBlock = (): ReactElement => {
   const lastPastEvaluation = getLastPastVisit(evaluations);
   const lastPastControle = getLastPastVisit(controles);
 
+  const lastNote = lastPastEvaluation?.note;
+  const hasLastNote = lastNote !== undefined && lastNote !== null;
+
   return (
     <Block
       title="Controle qualité"
@@ -48,16 +51,23 @@ export const ControlesBlock = (): ReactElement => {
         <div className="pr-4">
           <LastVisitCard evaluations={evaluations} controles={controles} />
         </div>
-        {lastPastEvaluation?.note !== undefined && (
+        {lastPastEvaluation && (
           <div className="pr-4">
             <InformationCard
               primaryInformation={
-                <>
-                  {lastPastEvaluation.note}{" "}
-                  <span className="text-xl">/&nbsp;4</span>
-                </>
+                hasLastNote ? (
+                  <>
+                    {lastNote} <span className="text-xl">/&nbsp;4</span>
+                  </>
+                ) : (
+                  "Sans note"
+                )
               }
-              secondaryInformation="de moyenne à la dernière évaluation"
+              secondaryInformation={
+                hasLastNote
+                  ? "de moyenne à la dernière évaluation"
+                  : "à la dernière évaluation"
+              }
             />
           </div>
         )}
