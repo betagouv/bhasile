@@ -1,4 +1,5 @@
 import { parseDate } from "@/app/utils/date.util";
+import { parseFrenchNumber } from "@/app/utils/number.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { StructureType } from "@/types/structure.type";
@@ -16,7 +17,7 @@ export const buildFormAnomalieContext = (
     tarifJournalierCible: null,
     creationDate: parseDate(structure.creationDate),
     date303: parseDate(structure.date303),
-    placesAutorisees: structure.placesAutorisees ?? null,
+    placesAutorisees: parseFrenchNumber(structure.placesAutorisees),
     lgbt: structure.lgbt ?? null,
     fvvTeh: structure.fvvTeh ?? null,
     debutConvention: parseDate(structure.debutConvention),
@@ -26,10 +27,10 @@ export const buildFormAnomalieContext = (
   },
   typologies: (structure.structureTypologies ?? []).map((typologie) => ({
     year: typologie.year,
-    placesAutorisees: typologie.placesAutorisees ?? null,
-    pmr: typologie.pmr ?? null,
-    lgbt: typologie.lgbt ?? null,
-    fvvTeh: typologie.fvvTeh ?? null,
+    placesAutorisees: parseFrenchNumber(typologie.placesAutorisees),
+    pmr: parseFrenchNumber(typologie.pmr),
+    lgbt: parseFrenchNumber(typologie.lgbt),
+    fvvTeh: parseFrenchNumber(typologie.fvvTeh),
   })),
   actes: (structure.actesAdministratifs ?? []).flatMap((acte) =>
     acte.id === undefined
@@ -49,32 +50,43 @@ export const buildFormAnomalieContext = (
   adresses: (structure.adresses ?? []).flatMap((adresse) =>
     adresse.id === undefined
       ? []
-      : [{ id: adresse.id, placesAutorisees: adresse.placesAutorisees ?? null }]
+      : [
+          {
+            id: adresse.id,
+            placesAutorisees: parseFrenchNumber(adresse.placesAutorisees),
+          },
+        ]
   ),
   budgets: (structure.budgets ?? []).map((budget) => ({
     year: budget.year,
-    totalProduits: budget.totalProduits ?? null,
-    totalCharges: budget.totalCharges ?? null,
-    repriseEtat: budget.repriseEtat ?? null,
-    excedentRecupere: budget.excedentRecupere ?? null,
-    excedentDeduit: budget.excedentDeduit ?? null,
-    fondsDedies: budget.fondsDedies ?? null,
-    affectationReservesFondsDedies:
-      budget.affectationReservesFondsDedies ?? null,
-    reserveInvestissement: budget.reserveInvestissement ?? null,
-    chargesNonReconductibles: budget.chargesNonReconductibles ?? null,
-    reserveCompensationDeficits: budget.reserveCompensationDeficits ?? null,
-    reserveCompensationBFR: budget.reserveCompensationBFR ?? null,
-    reserveCompensationAmortissements:
-      budget.reserveCompensationAmortissements ?? null,
-    reportANouveau: budget.reportANouveau ?? null,
-    autre: budget.autre ?? null,
+    totalProduits: parseFrenchNumber(budget.totalProduits),
+    totalCharges: parseFrenchNumber(budget.totalCharges),
+    repriseEtat: parseFrenchNumber(budget.repriseEtat),
+    excedentRecupere: parseFrenchNumber(budget.excedentRecupere),
+    excedentDeduit: parseFrenchNumber(budget.excedentDeduit),
+    fondsDedies: parseFrenchNumber(budget.fondsDedies),
+    affectationReservesFondsDedies: parseFrenchNumber(
+      budget.affectationReservesFondsDedies
+    ),
+    reserveInvestissement: parseFrenchNumber(budget.reserveInvestissement),
+    chargesNonReconductibles: parseFrenchNumber(
+      budget.chargesNonReconductibles
+    ),
+    reserveCompensationDeficits: parseFrenchNumber(
+      budget.reserveCompensationDeficits
+    ),
+    reserveCompensationBFR: parseFrenchNumber(budget.reserveCompensationBFR),
+    reserveCompensationAmortissements: parseFrenchNumber(
+      budget.reserveCompensationAmortissements
+    ),
+    reportANouveau: parseFrenchNumber(budget.reportANouveau),
+    autre: parseFrenchNumber(budget.autre),
   })),
   indicateurs: (structure.indicateursFinanciers ?? []).map((indicateur) => ({
     year: indicateur.year,
     type: indicateur.type,
-    tauxEncadrement: indicateur.tauxEncadrement ?? null,
-    coutJournalier: indicateur.coutJournalier ?? null,
+    tauxEncadrement: parseFrenchNumber(indicateur.tauxEncadrement),
+    coutJournalier: parseFrenchNumber(indicateur.coutJournalier),
   })),
   ...overrides,
 });

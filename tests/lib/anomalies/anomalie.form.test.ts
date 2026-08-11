@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseDate } from "@/app/utils/date.util";
+import { computeAnomalies } from "@/lib/anomalies/anomalie.compute";
 import {
   ANOMALIE_DEFINITIONS,
   DISPLAYED_ANOMALIE_CODES,
@@ -62,7 +63,8 @@ describe("buildFormAnomalieContext", () => {
   it("couvre les tranches requises par chaque code affiché", () => {
     const produites = Object.keys(buildFormAnomalieContext(makeStructure()));
     const requises = DISPLAYED_ANOMALIE_CODES.flatMap(
-      (code) => ANOMALIE_RULES.find((rule) => rule.code === code)?.requires ?? []
+      (code) =>
+        ANOMALIE_RULES.find((rule) => rule.code === code)?.requires ?? []
     );
 
     expect(requises.filter((slice) => !produites.includes(slice))).toEqual([]);
@@ -108,6 +110,32 @@ describe("buildFormAnomalieContext", () => {
     expect(context.typologies).toEqual([
       { year: 2025, placesAutorisees: 10, pmr: 0, lgbt: 99, fvvTeh: 0 },
     ]);
+  });
+
+  it("ramène à null un montant que l'agent a vidé", () => {
+    const context = buildFormAnomalieContext(
+      makeStructure({
+        budgets: [{ year: 2025, totalProduits: "", totalCharges: "" }],
+      } as unknown as Partial<StructureApiRead>)
+    );
+
+    expect(context.budgets?.[0].totalProduits).toBeNull();
+    expect(context.budgets?.[0].totalCharges).toBeNull();
+  });
+
+  it("ne signale pas un résultat net nul quand les montants sont vidés", () => {
+    const { detected } = computeAnomalies(
+      buildFormAnomalieContext(
+        makeStructure({
+          budgets: [{ year: 2025, totalProduits: "", totalCharges: "" }],
+        } as unknown as Partial<StructureApiRead>)
+      ),
+      { currentYear: 2026 }
+    );
+
+    expect(detected.map((anomalie) => anomalie.code)).not.toContain(
+      "RESULTAT_NET_EQ_0"
+    );
   });
 
   it("n'expose aucun tarif journalier cible, calculé côté serveur uniquement", () => {
