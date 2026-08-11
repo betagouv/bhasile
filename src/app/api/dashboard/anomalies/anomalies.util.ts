@@ -3,11 +3,7 @@ import {
   isStructureClosed,
   isStructureFinalised,
 } from "@/app/api/structures/structure.util";
-import {
-  compareSortValues,
-  SortKind,
-  SortValue,
-} from "@/app/utils/list.util";
+import { compareSortValues, SortKind, SortValue } from "@/app/utils/list.util";
 import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { AnomalieCode } from "@/types/anomalie.type";
@@ -40,14 +36,14 @@ export const buildDashboardAnomalies = (
   const anomalies: DashboardAnomalie[] = [];
 
   for (const structure of structures) {
+    if (!isEligibleStructure(structure, options)) {
+      continue;
+    }
+
     const currentVersion = resolveCurrentVersion(
       structure.structureVersions,
       options.now
     );
-
-    if (!isEligibleStructure(structure, options)) {
-      continue;
-    }
 
     for (const anomalie of structure.anomalies) {
       if (!options.shouldShowIgnored && !isAnomalieActive(anomalie)) {
