@@ -6,13 +6,13 @@ import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
 import { getNow } from "@/app/utils/now.util";
-import { getLastVisitInMonths } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
 import { ControleTable } from "./ControleTable";
 import { EIGTable } from "./EIGTable";
 import { EvaluationTable } from "./EvaluationTable";
+import { LastVisitCard } from "./LastVisitCard";
 
 export const ControlesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -42,20 +42,7 @@ export const ControlesBlock = (): ReactElement => {
     >
       <div className="flex">
         <div className="pr-4">
-          {evaluations.length === 0 && controles.length === 0 ? (
-            <InformationCard
-              primaryInformation="Aucune visite"
-              secondaryInformation="renseignée"
-            />
-          ) : (
-            <InformationCard
-              primaryInformation={`${getLastVisitInMonths(
-                evaluations,
-                controles
-              )} mois`}
-              secondaryInformation="depuis la dernière visite"
-            />
-          )}
+          <LastVisitCard evaluations={evaluations} controles={controles} />
         </div>
         {evaluations[0]?.note !== undefined && (
           <div className="pr-4">

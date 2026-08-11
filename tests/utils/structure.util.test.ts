@@ -127,7 +127,7 @@ describe("structure util", () => {
     });
   });
   describe("getLastVisitInMonths", () => {
-    it("retourne 0 quand les deux tableaux sont vides", () => {
+    it("retourne null quand les deux tableaux sont vides", () => {
       // GIVEN
       const evaluations: EvaluationApiType[] = [];
       const controles: ControleApiType[] = [];
@@ -136,7 +136,39 @@ describe("structure util", () => {
       const result = getLastVisitInMonths(evaluations, controles);
 
       // THEN
-      expect(result).toBe(0);
+      expect(result).toBeNull();
+    });
+
+    it("ignore les visites à venir et se base sur la dernière visite passée", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        createEvaluation({ date: dayjs().subtract(5, "month").toISOString() }),
+      ];
+      const controles: ControleApiType[] = [
+        createControle({ date: dayjs().add(3, "year").toISOString() }),
+      ];
+
+      // WHEN
+      const result = getLastVisitInMonths(evaluations, controles);
+
+      // THEN
+      expect(result).toBe(5);
+    });
+
+    it("retourne null quand toutes les visites sont à venir", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        createEvaluation({ date: dayjs().add(1, "month").toISOString() }),
+      ];
+      const controles: ControleApiType[] = [
+        createControle({ date: dayjs().add(3, "year").toISOString() }),
+      ];
+
+      // WHEN
+      const result = getLastVisitInMonths(evaluations, controles);
+
+      // THEN
+      expect(result).toBeNull();
     });
 
     it("retourne l'écart en mois depuis l'évaluation la plus récente quand le tableau de controles est vide", () => {

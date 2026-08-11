@@ -105,22 +105,21 @@ export function getCommunesGroupedByDepartement(structure: {
 export const getLastVisitInMonths = (
   evaluations: EvaluationApiType[],
   controles: ControleApiType[]
-): number => {
-  let mostRecentVisit = null;
-  if (evaluations.length === 0 && controles.length === 0) {
-    return 0;
-  } else if (evaluations.length === 0) {
-    mostRecentVisit = dayjs(controles[0]?.date);
-  } else if (controles.length === 0) {
-    mostRecentVisit = dayjs(evaluations[0]?.date);
-  } else {
-    mostRecentVisit = dayjs(evaluations[0]?.date).isBefore(
-      dayjs(controles[0]?.date)
-    )
-      ? dayjs(controles[0]?.date)
-      : dayjs(evaluations[0]?.date);
+): number | null => {
+  const now = dayjs(getNow());
+  const pastVisits = [...evaluations, ...controles]
+    .map((visit) => dayjs(visit.date))
+    .filter((date) => date.isValid() && !date.isAfter(now));
+
+  if (pastVisits.length === 0) {
+    return null;
   }
-  return dayjs(getNow()).diff(mostRecentVisit, "month");
+
+  const mostRecentVisit = pastVisits.reduce((mostRecent, date) =>
+    date.isAfter(mostRecent) ? date : mostRecent
+  );
+
+  return now.diff(mostRecentVisit, "month");
 };
 
 export const isStructureAutorisee = (

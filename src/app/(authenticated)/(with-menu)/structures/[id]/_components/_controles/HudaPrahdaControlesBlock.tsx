@@ -2,13 +2,13 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
-import { getLastVisitInMonths } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
 import { DemarcheNumeriqueInfo } from "./DemarcheNumeriqueInfo";
 import { EIGTable } from "./EIGTable";
 import { EvaluationTable } from "./EvaluationTable";
+import { LastVisitCard } from "./LastVisitCard";
 
 export const HudaPrahdaControlesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -26,10 +26,7 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
     >
       <div className="flex">
         <div className="pr-4">
-          <InformationCard
-            primaryInformation={`${getLastVisitInMonths(evaluations, [])} mois`}
-            secondaryInformation="depuis la dernière visite"
-          />
+          <LastVisitCard evaluations={evaluations} />
         </div>
         <InformationCard
           primaryInformation={evenementsIndesirablesGraves.length}
