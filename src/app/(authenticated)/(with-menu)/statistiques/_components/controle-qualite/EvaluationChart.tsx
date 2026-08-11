@@ -44,8 +44,8 @@ export const EvaluationChart = (): ReactElement => {
       (item) => Number(item.nbStructuresEvaluees) || 0
     );
 
-    const moyenneGenerale = sortedEvaluationPeriodData.map(
-      (item) => Number(item.noteGenerale) || 0
+    const moyenneGenerale = sortedEvaluationPeriodData.map((item) =>
+      item.noteGenerale === null ? null : Number(item.noteGenerale)
     );
 
     return {
