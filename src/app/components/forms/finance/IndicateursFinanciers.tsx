@@ -70,7 +70,6 @@ export const IndicateursFinanciers = () => {
           </p>
         ))}
       <AnomalieMessage
-        id="anomalies-indicateurs"
         fields={getIndicateurFinancierTableLines().map((line) => line.name)}
       />
     </fieldset>

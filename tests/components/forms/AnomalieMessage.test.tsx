@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useFormContext } from "react-hook-form";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
@@ -12,6 +13,7 @@ vi.mock("next/navigation", () => ({
 import { AnomalieMessage } from "@/app/components/forms/AnomalieMessage";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
+import { TypePlaceCell } from "@/app/components/forms/typePlace/TypePlaceCell";
 import { StructureProvider } from "@/contexts/StructureContext";
 import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
@@ -79,12 +81,39 @@ const renderForm = (structure: StructureApiRead, lgbt: number) =>
               control={control}
               type="number"
               label="Places LGBT"
-              describedById="anomalies-test"
               variant="simple"
             />
-            <AnomalieMessage id="anomalies-test" fields={["lgbt"]} />
+            <AnomalieMessage fields={["lgbt"]} />
           </>
         )}
+      </FormWrapper>
+    </StructureProvider>
+  );
+
+// Comme en production : la cellule tient son control du contexte du formulaire.
+const TypePlaceCellHarness = () => {
+  const { control } = useFormContext();
+
+  return (
+    <table>
+      <tbody>
+        <tr>
+          <TypePlaceCell control={control} field="lgbt" year={ANNEE} index={0} />
+        </tr>
+      </tbody>
+    </table>
+  );
+};
+
+const renderTypePlaceCell = (structure: StructureApiRead, lgbt: number) =>
+  render(
+    <StructureProvider entity={structure}>
+      <FormWrapper
+        schema={schema}
+        showSubmitButton={false}
+        defaultValues={{ structureTypologies: [typologie(lgbt)] }}
+      >
+        <TypePlaceCellHarness />
       </FormWrapper>
     </StructureProvider>
   );
@@ -108,16 +137,9 @@ const renderActeMessages = () =>
       <FormWrapper schema={z.object({})} showSubmitButton={false}>
         {() => (
           <>
-            <AnomalieMessage
-              id="anomalies-convention"
-              fields={["startDate", "endDate"]}
-              targetIds={[7]}
-            />
-            <AnomalieMessage
-              id="anomalies-autorisation"
-              fields={["startDate", "endDate"]}
-              targetIds={[8]}
-            />
+            <AnomalieMessage fields={["startDate", "endDate"]} targetIds={[7]} />
+            <AnomalieMessage fields={["startDate", "endDate"]} targetIds={[8]} />
+            <AnomalieMessage fields={["startDate", "endDate"]} targetIds={[]} />
           </>
         )}
       </FormWrapper>
@@ -167,14 +189,33 @@ describe("marquage des anomalies dans un formulaire", () => {
   it("n'affiche l'anomalie d'un acte que sous la catégorie visée", async () => {
     renderActeMessages();
 
-    const message = await screen.findByText(
-      ANOMALIE_DEFINITIONS[CODE_ACTE].label,
-      { exact: false }
+    // Trois messages rendus, un seul rempli : celui de la catégorie visée.
+    // Le troisième cible une liste vide — un acte pas encore enregistré.
+    const messages = await screen.findAllByRole("status");
+    const filledMessages = messages.filter(
+      (message) => message.textContent !== ""
     );
-    expect(message).toHaveAttribute("id", "anomalies-convention");
-    expect(screen.getAllByText(ANOMALIE_DEFINITIONS[CODE_ACTE].label, {
-      exact: false,
-    })).toHaveLength(1);
+
+    expect(messages).toHaveLength(3);
+    expect(filledMessages).toHaveLength(1);
+    expect(filledMessages[0]).toHaveTextContent(
+      ANOMALIE_DEFINITIONS[CODE_ACTE].label
+    );
+  });
+
+  it("décrit l'anomalie au niveau de la cellule marquée", async () => {
+    renderTypePlaceCell(
+      makeStructure({ structureTypologies: [typologie(99)] }),
+      99
+    );
+
+    const anomalieId = "structureTypologies.0.lgbt-anomalie";
+    const input = await screen.findByRole("textbox");
+
+    expect(input).toHaveAttribute("aria-describedby", anomalieId);
+    expect(document.getElementById(anomalieId)).toHaveTextContent(
+      ANOMALIE_DEFINITIONS[CODE].label
+    );
   });
 
   it("tait une anomalie que l'agent a déclarée normale", async () => {

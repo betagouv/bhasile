@@ -27,6 +27,8 @@ export const formatAnomalieStructure = (anomalie: DashboardAnomalie): string =>
     .filter(Boolean)
     .join(" · ");
 
+export const ACTE_DATE_FIELDS = ["startDate", "endDate"] as const;
+
 export const ANOMALIE_MESSAGE_GENERIQUE =
   "Une ou plusieurs données sont manquantes ou incohérentes.";
 

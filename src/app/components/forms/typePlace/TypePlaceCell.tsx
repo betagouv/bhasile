@@ -1,17 +1,17 @@
 import { ReactElement } from "react";
 import { Control } from "react-hook-form";
 
-import { useFieldAnomalies } from "@/app/components/forms/AnomaliesContext";
+import { useAnomalies } from "@/app/components/forms/AnomaliesContext";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
+import { getAnomalieMessage } from "@/app/utils/anomalie.util";
 
 export const TypePlaceCell = ({
   control,
   field,
   year,
   index,
-  messageId,
 }: Props): ReactElement => {
-  const anomalies = useFieldAnomalies({ field, year });
+  const anomalies = useAnomalies({ fields: [field], year });
   const name = `structureTypologies.${index}.${field}`;
 
   return (
@@ -23,8 +23,7 @@ export const TypePlaceCell = ({
         type="number"
         min={0}
         label=""
-        describedById={anomalies.length > 0 ? messageId : undefined}
-        hasAnomalie={anomalies.length > 0}
+        anomalieMessage={getAnomalieMessage(anomalies)}
         className="mb-0 items-center [&_p]:hidden [&_input]:w-full w-24 mx-auto"
         variant="simple"
       />
@@ -37,5 +36,4 @@ type Props = {
   field: string;
   year: number;
   index: number;
-  messageId: string;
 };

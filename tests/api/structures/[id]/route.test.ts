@@ -187,6 +187,7 @@ describe("GET /api/structures/[id]", () => {
       },
       // Total porté par la version, distinct de la somme des adresses ci-dessus.
       placesAutorisees: null,
+      anomalies: [],
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,

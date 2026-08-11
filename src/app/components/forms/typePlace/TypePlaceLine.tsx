@@ -5,7 +5,7 @@ import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.sch
 
 import { TypePlaceCell } from "./TypePlaceCell";
 
-export const TypePlaceLine = ({ line, years, messageId }: Props) => {
+export const TypePlaceLine = ({ line, years }: Props) => {
   const { control, watch } = useFormContext();
 
   const structureTypologies: StructureTypologieApiType[] = watch(
@@ -36,7 +36,6 @@ export const TypePlaceLine = ({ line, years, messageId }: Props) => {
             field={line.name}
             year={year}
             index={currentStructureTypologyIndex}
-            messageId={messageId}
           />
         );
       })}
@@ -47,5 +46,4 @@ export const TypePlaceLine = ({ line, years, messageId }: Props) => {
 type Props = {
   line: { name: string; label: string; subLabel?: string };
   years: number[];
-  messageId: string;
 };

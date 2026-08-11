@@ -16,36 +16,13 @@ export const AnomaliesProvider = ({
   children: ReactNode;
 }) => <AnomaliesContext value={anomalies}>{children}</AnomaliesContext>;
 
-export const useFieldAnomalies = ({
-  field,
-  year,
-  targetId,
-}: {
-  field: string;
-  year?: number;
-  targetId?: number;
-}): DetectedAnomalie[] => {
-  const anomalies = useContext(AnomaliesContext);
-
-  return anomalies.filter(
-    (anomalie) =>
-      ANOMALIE_DEFINITIONS[anomalie.code].targetFields.includes(field) &&
-      (year === undefined || anomalie.year === year) &&
-      (targetId === undefined || anomalie.targetId === targetId)
-  );
-};
-
-/**
- * Les champs sont ceux que le composant rend, dérivés de la définition de son
- * tableau : on signale l'anomalie là où l'agent peut la corriger, pas là où le
- * registre l'a classée.
- */
-export const useSectionAnomalies = ({
+export const useAnomalies = ({
   fields,
+  year,
   targetIds,
 }: {
   fields: readonly string[];
-  /** Restreint aux anomalies portées par ces entités — les actes d'une catégorie. */
+  year?: number;
   targetIds?: readonly number[];
 }): DetectedAnomalie[] => {
   const anomalies = useContext(AnomaliesContext);
@@ -55,6 +32,7 @@ export const useSectionAnomalies = ({
       ANOMALIE_DEFINITIONS[anomalie.code].targetFields.some((targetField) =>
         fields.includes(targetField)
       ) &&
+      (year === undefined || anomalie.year === year) &&
       (targetIds === undefined || targetIds.includes(anomalie.targetId))
   );
 };

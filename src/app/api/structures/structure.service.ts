@@ -413,6 +413,7 @@ const dbStructureToApiRead = (
     // Total autorisé porté par la version, à ne pas confondre avec
     // currentPlaces.placesAutorisees qui somme les adresses.
     placesAutorisees: currentVersion?.placesAutorisees ?? null,
+    anomalies: "anomalies" in dbStructure ? dbStructure.anomalies : [],
     isInCpom: isStructureInCpom(dbStructure),
     isInCpomPerYear: isStructureInCpomPerYear(dbStructure),
     nom: dbStructure.nom ?? "",

@@ -14,8 +14,6 @@ import { getTypePlaceEditHeadings } from "./getTypePlaceEditHeadings";
 import { PlacesAutoriseesLine } from "./PlacesAutoriseesLine";
 import { TypePlaceLine } from "./TypePlaceLine";
 
-const PLACES_MESSAGE_ID = "anomalies-type-places";
-
 const TYPE_PLACE_LINES = [
   {
     name: "pmr",
@@ -90,12 +88,7 @@ export const FieldSetTypePlaces = ({
           isCapacityLocked={structure.isCurrentVersionFromTransformation}
         />
         {TYPE_PLACE_LINES.map((line) => (
-          <TypePlaceLine
-            key={line.name}
-            line={line}
-            years={years}
-            messageId={PLACES_MESSAGE_ID}
-          />
+          <TypePlaceLine key={line.name} line={line} years={years} />
         ))}
       </Table>
       {hasErrors && (
@@ -104,7 +97,6 @@ export const FieldSetTypePlaces = ({
         </p>
       )}
       <AnomalieMessage
-        id={PLACES_MESSAGE_ID}
         fields={TYPE_PLACE_LINES.map((line) => line.name)}
       />
     </fieldset>

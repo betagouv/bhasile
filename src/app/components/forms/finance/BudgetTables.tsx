@@ -57,7 +57,6 @@ export const BudgetTables = () => {
         )}
         <StructureTable />
         <AnomalieMessage
-          id="anomalies-budgets"
           fields={getBudgetTableLines(isAutorisee).flatMap((group) =>
             group.lines.map((line) => line.name)
           )}

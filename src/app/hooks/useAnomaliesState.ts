@@ -29,12 +29,14 @@ export const useAnomaliesState = (
       { currentYear: getNow().getFullYear() }
     );
 
-    setAnomalies(
-      detected.filter(
-        (anomalie) =>
-          ANOMALIE_DEFINITIONS[anomalie.code].isDisplayed &&
-          !isJustified(anomalie, structure)
-      )
+    const displayed = detected.filter(
+      (anomalie) =>
+        ANOMALIE_DEFINITIONS[anomalie.code].isDisplayed &&
+        !isJustified(anomalie, structure)
+    );
+
+    setAnomalies((previous) =>
+      isSameAnomalieList(previous, displayed) ? previous : displayed
     );
   }, [structure, getFormValues]);
 
@@ -44,6 +46,19 @@ export const useAnomaliesState = (
 
   return { anomalies, recomputeAnomalies };
 };
+
+const getAnomalieKey = (anomalie: DetectedAnomalie): string =>
+  `${anomalie.code}|${anomalie.year}|${anomalie.targetId}`;
+
+const isSameAnomalieList = (
+  previous: DetectedAnomalie[],
+  next: DetectedAnomalie[]
+): boolean =>
+  previous.length === next.length &&
+  previous.every(
+    (anomalie, index) =>
+      getAnomalieKey(anomalie) === getAnomalieKey(next[index])
+  );
 
 const isJustified = (
   anomalie: DetectedAnomalie,

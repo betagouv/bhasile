@@ -201,7 +201,6 @@ export const FieldSetHebergement = ({
           </button>
         )}
       <AnomalieMessage
-        id="anomalies-hebergement"
         fields={["placesAutorisees"]}
       />
       </fieldset>
