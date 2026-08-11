@@ -8,8 +8,12 @@ import { getAnomalieMessage } from "@/app/utils/anomalie.util";
 export const ANOMALIE_INPUT_BORDER =
   "[&_input]:border-1 [&_input]:border-solid [&_input]:border-plain-warning [&_input]:shadow-none";
 
-export const AnomalieMessage = ({ id, fields }: Props): ReactElement | null => {
-  const anomalies = useSectionAnomalies(fields);
+export const AnomalieMessage = ({
+  id,
+  fields,
+  targetIds,
+}: Props): ReactElement | null => {
+  const anomalies = useSectionAnomalies({ fields, targetIds });
   const message = getAnomalieMessage(anomalies);
 
   if (!message) {
@@ -20,9 +24,8 @@ export const AnomalieMessage = ({ id, fields }: Props): ReactElement | null => {
     <p
       id={id}
       role="status"
-      className="mb-0 mt-2 text-sm text-default-warning flex items-center gap-2"
+      className="mt-2 text-sm text-default-warning flex items-center gap-2"
     >
-      <span className=" fr-icon-warning-line fr-icon--sm" aria-hidden="true" />
       {message}
     </p>
   );
@@ -31,4 +34,5 @@ export const AnomalieMessage = ({ id, fields }: Props): ReactElement | null => {
 type Props = {
   id: string;
   fields: readonly string[];
+  targetIds?: readonly number[];
 };

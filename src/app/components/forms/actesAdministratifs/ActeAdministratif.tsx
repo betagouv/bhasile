@@ -20,6 +20,7 @@ export const ActeAdministratif = ({
   canAddAvenant = false,
   avenantCanExtendDateEnd = false,
   categoryShortName,
+  anomalieMessageId,
 }: UploadsByCategoryFileProps) => {
   const { control, watch } = useFormContext();
 
@@ -130,6 +131,9 @@ export const ActeAdministratif = ({
               label={`Début ${categoryShortName}`}
               className="mb-0"
               hasAnomalie={dateAnomalies.length > 0}
+              describedById={
+                dateAnomalies.length > 0 ? anomalieMessageId : undefined
+              }
               type="date"
             />
 
@@ -139,6 +143,9 @@ export const ActeAdministratif = ({
               label={`Fin ${categoryShortName}`}
               className="mb-0"
               hasAnomalie={dateAnomalies.length > 0}
+              describedById={
+                dateAnomalies.length > 0 ? anomalieMessageId : undefined
+              }
               type="date"
             />
           </div>
@@ -213,6 +220,7 @@ type UploadsByCategoryFileProps = {
   additionalFieldsType?: AdditionalFieldsType;
   documentLabel: string;
   categoryShortName: string;
+  anomalieMessageId: string;
   handleDeleteField: (index: number, shouldConfirm?: boolean) => void;
   canAddAvenant: boolean;
   avenantCanExtendDateEnd?: boolean;

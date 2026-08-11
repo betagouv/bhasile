@@ -40,14 +40,21 @@ export const useFieldAnomalies = ({
  * tableau : on signale l'anomalie là où l'agent peut la corriger, pas là où le
  * registre l'a classée.
  */
-export const useSectionAnomalies = (
-  fields: readonly string[]
-): DetectedAnomalie[] => {
+export const useSectionAnomalies = ({
+  fields,
+  targetIds,
+}: {
+  fields: readonly string[];
+  /** Restreint aux anomalies portées par ces entités — les actes d'une catégorie. */
+  targetIds?: readonly number[];
+}): DetectedAnomalie[] => {
   const anomalies = useContext(AnomaliesContext);
 
-  return anomalies.filter((anomalie) =>
-    ANOMALIE_DEFINITIONS[anomalie.code].targetFields.some((targetField) =>
-      fields.includes(targetField)
-    )
+  return anomalies.filter(
+    (anomalie) =>
+      ANOMALIE_DEFINITIONS[anomalie.code].targetFields.some((targetField) =>
+        fields.includes(targetField)
+      ) &&
+      (targetIds === undefined || targetIds.includes(anomalie.targetId))
   );
 };

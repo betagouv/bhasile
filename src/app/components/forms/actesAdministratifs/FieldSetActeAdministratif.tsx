@@ -5,6 +5,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { AnomalieMessage } from "@/app/components/forms/AnomalieMessage";
 import { useActeAdministratifRadios } from "@/app/hooks/useActeAdministratifRadios";
 import { cn } from "@/app/utils/classname.util";
 import {
@@ -108,6 +109,8 @@ export default function FieldSetActeAdministratif({
     });
   };
 
+  const anomalieMessageId = `anomalies-actes-${category}`;
+
   return (
     <fieldset className="flex flex-col gap-6 w-full">
       <legend
@@ -172,6 +175,7 @@ export default function FieldSetActeAdministratif({
           >
             <ActeAdministratif
               categoryShortName={categoryShortName}
+              anomalieMessageId={anomalieMessageId}
               acte={acte}
               additionalFieldsType={getAdditionalFieldsType(acte)}
               documentLabel={documentLabel}
@@ -181,6 +185,13 @@ export default function FieldSetActeAdministratif({
             />
           </div>
         ))}
+      <AnomalieMessage
+        id={anomalieMessageId}
+        fields={["startDate", "endDate"]}
+        targetIds={actesOfCategory
+          .map((acte) => acte.id)
+          .filter((id): id is number => id !== undefined)}
+      />
     </fieldset>
   );
 }

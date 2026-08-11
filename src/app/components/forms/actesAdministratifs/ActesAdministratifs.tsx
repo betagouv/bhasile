@@ -1,5 +1,4 @@
 import FieldSetActeAdministratif from "@/app/components/forms/actesAdministratifs/FieldSetActeAdministratif";
-import { AnomalieMessage } from "@/app/components/forms/AnomalieMessage";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { CategoryDisplayRules } from "@/config/acte-administratif.config";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
@@ -42,7 +41,6 @@ export const ActesAdministratifs = ({
           {index < filteredCategories.length - 1 && <hr />}
         </div>
       ))}
-      <AnomalieMessage id="anomalies-actes" fields={["startDate", "endDate"]} />
     </>
   );
 };

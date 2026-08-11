@@ -89,6 +89,41 @@ const renderForm = (structure: StructureApiRead, lgbt: number) =>
     </StructureProvider>
   );
 
+const CODE_ACTE = "CONVENTION_AUTORISEE_DUREE_NOT_5Y";
+
+const renderActeMessages = () =>
+  render(
+    <StructureProvider
+      entity={makeStructure({
+        actesAdministratifs: [
+          {
+            id: 7,
+            category: "CONVENTION",
+            startDate: "2020-01-01T12:00:00.000Z",
+            endDate: "2023-01-01T12:00:00.000Z",
+          },
+        ],
+      } as unknown as Partial<StructureApiRead>)}
+    >
+      <FormWrapper schema={z.object({})} showSubmitButton={false}>
+        {() => (
+          <>
+            <AnomalieMessage
+              id="anomalies-convention"
+              fields={["startDate", "endDate"]}
+              targetIds={[7]}
+            />
+            <AnomalieMessage
+              id="anomalies-autorisation"
+              fields={["startDate", "endDate"]}
+              targetIds={[8]}
+            />
+          </>
+        )}
+      </FormWrapper>
+    </StructureProvider>
+  );
+
 describe("marquage des anomalies dans un formulaire", () => {
   it("affiche l'anomalie détectée dès le montage", async () => {
     renderForm(makeStructure({ structureTypologies: [typologie(99)] }), 99);
@@ -127,6 +162,19 @@ describe("marquage des anomalies dans un formulaire", () => {
     expect(
       screen.queryByText(ANOMALIE_DEFINITIONS[CODE].label, { exact: false })
     ).not.toBeInTheDocument();
+  });
+
+  it("n'affiche l'anomalie d'un acte que sous la catégorie visée", async () => {
+    renderActeMessages();
+
+    const message = await screen.findByText(
+      ANOMALIE_DEFINITIONS[CODE_ACTE].label,
+      { exact: false }
+    );
+    expect(message).toHaveAttribute("id", "anomalies-convention");
+    expect(screen.getAllByText(ANOMALIE_DEFINITIONS[CODE_ACTE].label, {
+      exact: false,
+    })).toHaveLength(1);
   });
 
   it("tait une anomalie que l'agent a déclarée normale", async () => {
