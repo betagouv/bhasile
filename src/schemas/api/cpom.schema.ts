@@ -11,6 +11,7 @@ import { formApiSchema } from "./form.schema";
 import { operateurSuggestionApiSchema } from "./operateur.schema";
 import { regionApiSchema } from "./region.schema";
 
+// TODO : se passer de cet objet, departements peut être un simple string[] de numéros
 export const cpomDepartementApiSchema = z.object({
   cpomId: zId(),
   departement: departementApiSchema.optional(),
