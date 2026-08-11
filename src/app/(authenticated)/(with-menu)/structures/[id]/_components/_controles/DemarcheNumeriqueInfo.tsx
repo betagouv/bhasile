@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ReactElement } from "react";
 
-export const DemarchesNumeriquesInfo = (): ReactElement => {
+export const DemarcheNumeriqueInfo = (): ReactElement => {
   return (
     <span className="italic block border-b border-default-grey text-mention-grey py-2 px-4 text-xs">
       Actuellement, seuls les EIG renseignés sur Démarche Numérique sont
