@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
+import { useFieldAnomalies } from "@/app/components/forms/AnomaliesContext";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
 import { AdditionalFieldsType } from "@/config/acte-administratif.config";
@@ -21,6 +22,11 @@ export const ActeAdministratif = ({
   categoryShortName,
 }: UploadsByCategoryFileProps) => {
   const { control, watch } = useFormContext();
+
+  const dateAnomalies = useFieldAnomalies({
+    field: "startDate",
+    targetId: acte.id,
+  });
 
   const { append } = useFieldArray({
     control,
@@ -123,6 +129,7 @@ export const ActeAdministratif = ({
               control={control}
               label={`Début ${categoryShortName}`}
               className="mb-0"
+              hasAnomalie={dateAnomalies.length > 0}
               type="date"
             />
 
@@ -131,6 +138,7 @@ export const ActeAdministratif = ({
               control={control}
               label={`Fin ${categoryShortName}`}
               className="mb-0"
+              hasAnomalie={dateAnomalies.length > 0}
               type="date"
             />
           </div>

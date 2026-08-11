@@ -3,7 +3,6 @@ import { Control } from "react-hook-form";
 
 import { useFieldAnomalies } from "@/app/components/forms/AnomaliesContext";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
-import { cn } from "@/app/utils/classname.util";
 
 export const TypePlaceCell = ({
   control,
@@ -25,11 +24,8 @@ export const TypePlaceCell = ({
         min={0}
         label=""
         describedById={anomalies.length > 0 ? messageId : undefined}
-        className={cn(
-          "mb-0 items-center [&_p]:hidden [&_input]:w-full w-24 mx-auto",
-          anomalies.length > 0 &&
-            "[&_input]:border-2 [&_input]:border-solid [&_input]:border-default-warning"
-        )}
+        hasAnomalie={anomalies.length > 0}
+        className="mb-0 items-center [&_p]:hidden [&_input]:w-full w-24 mx-auto"
         variant="simple"
       />
     </td>

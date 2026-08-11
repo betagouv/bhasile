@@ -5,6 +5,9 @@ import { ReactElement } from "react";
 import { useSectionAnomalies } from "@/app/components/forms/AnomaliesContext";
 import { getAnomalieMessage } from "@/app/utils/anomalie.util";
 
+export const ANOMALIE_INPUT_BORDER =
+  "[&_input]:border-1 [&_input]:border-solid [&_input]:border-plain-warning [&_input]:shadow-none";
+
 export const AnomalieMessage = ({ id, fields }: Props): ReactElement | null => {
   const anomalies = useSectionAnomalies(fields);
   const message = getAnomalieMessage(anomalies);
@@ -19,7 +22,7 @@ export const AnomalieMessage = ({ id, fields }: Props): ReactElement | null => {
       role="status"
       className="mb-0 mt-2 text-sm text-default-warning flex items-center gap-2"
     >
-      <span className="fr-icon-warning-line fr-icon--sm" aria-hidden="true" />
+      <span className=" fr-icon-warning-line fr-icon--sm" aria-hidden="true" />
       {message}
     </p>
   );

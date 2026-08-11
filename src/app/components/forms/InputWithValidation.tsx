@@ -10,6 +10,7 @@ import {
   UseControllerProps,
 } from "react-hook-form";
 
+import { ANOMALIE_INPUT_BORDER } from "@/app/components/forms/AnomalieMessage";
 import { cn } from "@/app/utils/classname.util";
 import { getYearFromDate } from "@/app/utils/date.util";
 
@@ -31,6 +32,7 @@ export default function InputWithValidation<
   className,
   state,
   describedById,
+  hasAnomalie = false,
   stateRelatedMessage,
   variant,
   onChange,
@@ -109,6 +111,9 @@ export default function InputWithValidation<
     onChange?.(event);
   };
 
+  const anomalieClassName =
+    hasAnomalie && !fieldState.invalid ? ANOMALIE_INPUT_BORDER : undefined;
+
   return variant === "simple" ? (
     <InputSimple
       nativeInputProps={{
@@ -133,6 +138,7 @@ export default function InputWithValidation<
       className={cn(
         "transition-all",
         className,
+        anomalieClassName,
         disabled && "cursor-not-allowed! bg-disabled-grey border-transparent"
       )}
       state={state || (fieldState.invalid ? "error" : "default")}
@@ -155,7 +161,7 @@ export default function InputWithValidation<
       hintText={hintText}
       disabled={disabled}
       addon={addon}
-      className={className}
+      className={cn(className, anomalieClassName)}
       state={state || (fieldState.invalid ? "error" : "default")}
       stateRelatedMessage={stateRelatedMessage || fieldState.error?.message}
     />
@@ -177,6 +183,7 @@ type InputWithValidationProps<TFieldValues extends FieldValues = FieldValues> =
     className?: string;
     state?: "default" | "error" | "success";
     describedById?: string;
+    hasAnomalie?: boolean;
     stateRelatedMessage?: string;
     variant?: "simple";
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;

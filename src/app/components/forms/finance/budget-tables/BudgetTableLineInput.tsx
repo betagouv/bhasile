@@ -1,5 +1,6 @@
 import { Control, FieldValues } from "react-hook-form";
 
+import { useFieldAnomalies } from "@/app/components/forms/AnomaliesContext";
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
@@ -21,6 +22,11 @@ export const BudgetTableLineInput = ({
   enabledYears,
   isCurrency = true,
 }: Props) => {
+  const anomalies = useFieldAnomalies({
+    field: cpomStructures ? "" : name,
+    year,
+  });
+
   return (
     <>
       <InputWithValidation
@@ -44,6 +50,7 @@ export const BudgetTableLineInput = ({
         type="number"
         min={0}
         label=""
+        hasAnomalie={anomalies.length > 0}
         className="mb-0 items-center [&_p]:hidden [&_input]:w-full"
         variant="simple"
         disabled={isInputDisabled(
