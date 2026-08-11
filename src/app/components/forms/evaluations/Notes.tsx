@@ -1,6 +1,8 @@
 import { ReactElement } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { EVALUATION_NOTE_MAX, EVALUATION_NOTE_MIN } from "@/constants";
+
 import InputWithValidation from "../InputWithValidation";
 
 export const Notes = ({ index }: Props): ReactElement => {
@@ -14,8 +16,8 @@ export const Notes = ({ index }: Props): ReactElement => {
           <div className="flex pr-6 items-start">
             <InputWithValidation
               name={`evaluations.${index}.notePersonne`}
-              min={0}
-              max={4}
+              min={EVALUATION_NOTE_MIN}
+              max={EVALUATION_NOTE_MAX}
               control={control}
               label="La personne"
               className="w-full mb-0 [&>label]:italic [&>label]:text-sm"
@@ -26,8 +28,8 @@ export const Notes = ({ index }: Props): ReactElement => {
           <div className="flex pr-6 items-start">
             <InputWithValidation
               name={`evaluations.${index}.notePro`}
-              min={0}
-              max={4}
+              min={EVALUATION_NOTE_MIN}
+              max={EVALUATION_NOTE_MAX}
               control={control}
               label="Les professionnels"
               className="w-full mb-0 [&>label]:italic [&>label]:text-sm"
@@ -38,8 +40,8 @@ export const Notes = ({ index }: Props): ReactElement => {
           <div className="flex pr-6 items-start">
             <InputWithValidation
               name={`evaluations.${index}.noteStructure`}
-              min={0}
-              max={4}
+              min={EVALUATION_NOTE_MIN}
+              max={EVALUATION_NOTE_MAX}
               control={control}
               label="La structure"
               className="w-full mb-0 [&>label]:italic [&>label]:text-sm"
@@ -50,8 +52,8 @@ export const Notes = ({ index }: Props): ReactElement => {
           <div className="flex items-start">
             <InputWithValidation
               name={`evaluations.${index}.note`}
-              min={0}
-              max={4}
+              min={EVALUATION_NOTE_MIN}
+              max={EVALUATION_NOTE_MAX}
               control={control}
               label="Moyenne"
               className="w-full mb-0 [&>label]:italic [&>label]:text-sm"
