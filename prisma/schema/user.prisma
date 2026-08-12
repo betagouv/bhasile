@@ -1,14 +1,14 @@
 model User {
-  id             Int           @id @default(autoincrement())
-  name           String?
-  email          String        @unique
-  lastConnection DateTime
-  userActions    UserAction[]
-  role           Role?         @relation(fields: [roleId], references: [id])
-  roleId         Int?
-  emailPattern   EmailPattern? @relation(fields: [emailPatternId], references: [id])
-  emailPatternId Int?
-  notes          Note[]
+  id                  Int           @id @default(autoincrement())
+  name                String?
+  email               String        @unique
+  lastConnection      DateTime
+  userActions         UserAction[]
+  role                Role?         @relation(fields: [roleId], references: [id])
+  roleId              Int?
+  emailPattern        EmailPattern? @relation(fields: [emailPatternId], references: [id])
+  emailPatternId      Int?
+  notes               Note[]
   anomaliesJustifiees Anomalie[]
 
   createdAt DateTime @default(now())
@@ -28,6 +28,7 @@ model UserAction {
   cpomId      Int?
   operateur   Operateur?         @relation(fields: [operateurId], references: [id])
   operateurId Int?
+  description String?
 
   createdAt DateTime @default(now())
 
