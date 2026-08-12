@@ -1,3 +1,4 @@
+import { ActeAdministratifDates } from "@/app/api/actes-administratifs/acte-administratif.util";
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { resolvableVersionSelect } from "@/app/api/structure-versions/structure-version.db.type";
 import { Prisma } from "@/generated/prisma/client";
@@ -51,3 +52,11 @@ export const rappelStructureSelect = {
 export type RappelStructure = Prisma.StructureGetPayload<{
   select: typeof rappelStructureSelect;
 }>;
+
+export type RappelCpom = {
+  id: number;
+  name: string | null;
+  operateur: { id: number; name: string };
+  departements: { departement: { numero: string } }[];
+  actesAdministratifs: ActeAdministratifDates[];
+};

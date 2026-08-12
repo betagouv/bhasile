@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 
-import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   getDatesConvention,
@@ -23,7 +22,7 @@ import {
   EVALUATION_PERIOD_YEARS,
   EVALUATION_PERIODS_COUNT,
 } from "./rappels.constants";
-import { RappelStructure } from "./rappels.db.type";
+import { RappelCpom, RappelStructure } from "./rappels.db.type";
 
 const getCriticiteForDeadline = (
   deadline: Date | null,
@@ -147,7 +146,7 @@ export type BuildRappelsOptions = {
 
 export const buildRappels = (
   structures: RappelStructure[],
-  cpoms: CpomDbList[],
+  cpoms: RappelCpom[],
   options: BuildRappelsOptions
 ): DashboardRappel[] => {
   const { user, departementList, operateurList, typeList, now } = options;
