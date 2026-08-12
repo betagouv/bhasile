@@ -6,7 +6,7 @@ import { formatDate } from "@/app/utils/date.util";
 import { SHORT_PAGE_SIZE } from "@/constants";
 import { useStructureContext } from "@/contexts/StructureContext";
 
-import { DemarchesNumeriquesInfo } from "./DemarchesNumeriquesInfo";
+import { DemarcheNumeriqueInfo } from "./DemarcheNumeriqueInfo";
 
 export const EIGTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -30,7 +30,7 @@ export const EIGTable = (): ReactElement => {
 
   return (
     <>
-      <DemarchesNumeriquesInfo />
+      <DemarcheNumeriqueInfo />
       <Table
         bordered={true}
         className="full-width-table"

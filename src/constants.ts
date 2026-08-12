@@ -34,6 +34,12 @@ export const TRANSFORMATION_START_YEAR = 2026;
 export const EIG_START_YEAR = 2025;
 export const EVALUATION_START_YEAR = 2023;
 
+// Première année où les évaluations sont notées
+export const EVALUATION_NOTES_START_YEAR = 2022;
+
+export const EVALUATION_NOTE_MIN = 1;
+export const EVALUATION_NOTE_MAX = 4;
+
 export const CURRENT_YEAR = getNow().getFullYear();
 
 export const DEFAULT_CARTOGRAPHIE_ANNEE = CURRENT_YEAR - 1;

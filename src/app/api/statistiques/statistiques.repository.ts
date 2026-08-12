@@ -205,7 +205,7 @@ export const findDepartementsWithPopulation = async (
       departementNumeros.length > 0
         ? { numero: { in: departementNumeros } }
         : undefined,
-    select: { id: true, numero: true, name: true, population: true },
+    select: { numero: true, name: true, population: true },
   });
 };
 

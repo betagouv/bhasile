@@ -45,12 +45,12 @@ model Role {
 }
 
 model RoleDepartement {
-  departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
-  departementId Int
-  role          Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  roleId        Int
+  departement       Departement @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
+  departementNumero String
+  role              Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId            Int
 
-  @@id([departementId, roleId])
+  @@id([departementNumero, roleId])
   @@index([roleId])
   @@schema("public")
 }

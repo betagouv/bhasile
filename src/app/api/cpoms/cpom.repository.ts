@@ -110,7 +110,7 @@ const syncCpomDepartements = async (
 
   const departements = await tx.departement.findMany({
     where: { numero: { in: departementNumeros } },
-    select: { id: true },
+    select: { numero: true },
   });
 
   if (!departements.length) {
@@ -120,7 +120,7 @@ const syncCpomDepartements = async (
   await tx.cpomDepartement.createMany({
     data: departements.map((departement) => ({
       cpomId,
-      departementId: departement.id,
+      departementNumero: departement.numero,
     })),
   });
 };
