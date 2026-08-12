@@ -70,7 +70,7 @@ export const buildDashboardAnomalies = (
         structureCodeBhasile: structure.codeBhasile,
         structureType: structure.type,
         structureCommune: currentVersion?.communeAdministrative ?? null,
-        structureDepartement: structure.departementAdministratif,
+        structureDepartement: currentVersion?.departementAdministratif ?? null,
         operateurName: structure.operateur?.name ?? null,
       });
     }
@@ -136,13 +136,16 @@ const isEligibleStructure = (
     return false;
   }
 
-  const departement = structure.departementAdministratif;
-  if (!departement || !canUpdateDepartement(options.user, departement)) {
+  const referenceDepartement = structure.departementAdministratif;
+  if (
+    !referenceDepartement ||
+    !canUpdateDepartement(options.user, referenceDepartement)
+  ) {
     return false;
   }
   if (
     options.departementList.length > 0 &&
-    !options.departementList.includes(departement)
+    !options.departementList.includes(referenceDepartement)
   ) {
     return false;
   }
