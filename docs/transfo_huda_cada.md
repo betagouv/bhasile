@@ -1,4 +1,4 @@
-# Import des transformations HUDA -> CADA depuis Démarches Numériques
+# Import des transformations HUDA -> CADA depuis Démarche Numérique
 
 `scripts/recurring-scripts/transfo-huda-cada-fetch.ts` - hypothèses retenues.
 
@@ -14,7 +14,7 @@
 
 ## Identité du dossier
 
-- `Transformation.numeroDossier` = numéro DN, unique. Pas d'enum `source` : rempli ⇒ Démarches Numériques, nul ⇒ agent.
+- `Transformation.numeroDossier` = numéro DN, unique. Pas d'enum `source` : rempli ⇒ Démarche Numérique, nul ⇒ agent.
 - Dossier déjà importé -> ignoré. Le marquage des étapes n'a lieu qu'à la création.
 - Transfo déjà saisie dans Bhasile -> on rattache le `numeroDossier` **si** elle est seule, sans numéro, et porte exactement la même enveloppe. Aucun champ n'est écrasé.
 

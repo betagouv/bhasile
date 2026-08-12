@@ -5,6 +5,8 @@ import { ReactElement } from "react";
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
 
+import { NumberDisplay } from "../common/NumberDisplay";
+
 const pieChartOptions = {
   showLabel: false,
   donut: true,
@@ -21,7 +23,7 @@ export const ActivitePlaces = ({
     <div className="flex items-center pt-3">
       <div>
         <PieChart
-          size={160}
+          size={180}
           data={{
             labels: ["Places indisponibles", "Places disponibles"],
             series: [placesIndisponibles, placesDisponibles],
@@ -31,18 +33,27 @@ export const ActivitePlaces = ({
           isDonut={true}
         >
           <div className="absolute w-22 top-13 left-26 text-sm text-center">
-            <strong>{placesAutorisees}</strong> places enregistrées DNA
+            <strong>
+              <NumberDisplay value={placesAutorisees} />
+            </strong>{" "}
+            places enregistrées DNA
           </div>
         </PieChart>
         <div className="pt-2 text-center">
           <div>
-            <strong>{placesIndisponibles}</strong> indisponibles{" "}
+            <strong>
+              <NumberDisplay value={placesIndisponibles} />
+            </strong>{" "}
+            indisponibles{" "}
             <span className="text-mention-grey">
               ({getPercentage(placesIndisponibles || 0, placesAutorisees)})
             </span>
           </div>
           <div>
-            <strong>{placesDisponibles}</strong> disponibles{" "}
+            <strong>
+              <NumberDisplay value={placesDisponibles} />
+            </strong>{" "}
+            disponibles{" "}
             <span className="text-mention-grey">
               ({getPercentage(placesDisponibles || 0, placesAutorisees)})
             </span>

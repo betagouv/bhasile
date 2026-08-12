@@ -10,7 +10,7 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-import { normalizeBhasileCode, parseDnaCodes } from "./transfo-huda-cada.util";
+import { normalizeBhasileCodes, parseDnaCodes } from "./transfo-huda-cada.util";
 
 type StructureWithDnaCodes = Awaited<
   ReturnType<typeof findStructuresByCurrentDnaCodes>
@@ -157,11 +157,7 @@ export const resolveHudas = async (
   const resolved = new Map<number, ResolvedStructure>();
 
   const bhasileCodes = [
-    ...new Set(
-      rawBhasileCodes
-        .map((raw) => normalizeBhasileCode(raw))
-        .filter((code) => code !== null)
-    ),
+    ...new Set(rawBhasileCodes.flatMap((raw) => normalizeBhasileCodes(raw))),
   ];
 
   const structuresByCode = new Map(
@@ -239,13 +235,23 @@ type TargetCadaInput = {
   departement: string | null;
 };
 
-/* Une extension n'a qu'une structure d'accueil. */
+// TODO : reprendre plus tard lorsque l'app gèrera 2+ structures destinatrices
 export const resolveTargetCada = async (
   prisma: PrismaClient,
   { rawBhasileCode, rawDnaCodes, departement }: TargetCadaInput,
   now: Date = getNow()
 ): Promise<Resolution<ResolvedStructure>> => {
-  const codeBhasile = normalizeBhasileCode(rawBhasileCode);
+  const codesBhasile = normalizeBhasileCodes(rawBhasileCode);
+  if (codesBhasile.length > 1) {
+    return {
+      ok: false,
+      failure: {
+        reason: `${codesBhasile.length} CADA d'accueil (${codesBhasile.join(", ")}), cas non géré par l'app`,
+      },
+    };
+  }
+
+  const [codeBhasile] = codesBhasile;
 
   if (codeBhasile) {
     const structure = await prisma.structure.findUnique({

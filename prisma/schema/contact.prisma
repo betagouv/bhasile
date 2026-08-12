@@ -14,5 +14,7 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([structureVersionId])
+  @@index([operateurId])
   @@schema("public")
 }

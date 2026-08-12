@@ -54,6 +54,7 @@ export const IndicateursFinanciers = () => {
         hasErrors={errorMessages.length > 0}
         enableBorders
         stickFirstColumn
+        firstColumnWidth="17rem"
       >
         <IndicateurFinancierTableLines
           lines={getIndicateurFinancierTableLines()}

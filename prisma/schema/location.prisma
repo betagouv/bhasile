@@ -1,6 +1,5 @@
 model Departement {
-  id                   Int                @id @default(autoincrement())
-  numero               String             @unique
+  numero               String             @id
   name                 String
   population           Int?
   structures           Structure[]

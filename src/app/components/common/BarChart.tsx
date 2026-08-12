@@ -5,6 +5,9 @@ import "chartist/dist/index.css";
 import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
+import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
+import { withCompactAxisY } from "@/app/utils/chart.util";
+
 const defaultColors = [
   "var(--yellow-moutarde-850-200)",
   "var(--yellow-moutarde-main-679)",
@@ -16,6 +19,7 @@ export default function BarChart({
   data,
   options,
   colors = defaultColors,
+  axisYLabel,
 }: Props) {
   const chartRef = useRef(null);
   const id = useId();
@@ -24,7 +28,11 @@ export default function BarChart({
   useEffect(() => {
     let chart = null;
     if (chartRef.current) {
-      chart = new Chartist.BarChart(chartRef.current, data, options);
+      chart = new Chartist.BarChart(
+        chartRef.current,
+        data,
+        withCompactAxisY(options)
+      );
       const extraSpace = 10;
 
       chart.on("draw", function (ctx) {
@@ -45,6 +53,7 @@ export default function BarChart({
 
   return (
     <div className={chartClass}>
+      <ChartAxisLabels startLabel={axisYLabel} />
       <div ref={chartRef} style={{ height: 340 }} />
       <style>
         {`
@@ -62,4 +71,5 @@ type Props = {
   data: Chartist.BarChartData;
   options: Chartist.BarChartOptions;
   colors?: string[];
+  axisYLabel?: string;
 };

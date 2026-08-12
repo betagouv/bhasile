@@ -5,6 +5,9 @@ import "chartist/dist/index.css";
 import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
+import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
+import { withCompactAxisY } from "@/app/utils/chart.util";
+
 export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
   const barChartRef = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -32,7 +35,7 @@ export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
       barChart = new Chartist.BarChart(
         barChartRef.current,
         barData,
-        barOptions
+        withCompactAxisY(barOptions)
       );
 
       barChart.on("draw", function (ctx) {
@@ -54,25 +57,13 @@ export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
   }, [data, colors]);
 
   return (
-    <div className={chartClass} style={{ position: "relative", height: 340 }}>
-      {axisYLabel && (
-        <span
-          style={{
-            position: "absolute",
-            top: -20,
-            left: 0,
-            fontSize: 12,
-            color: "#666",
-          }}
-        >
-          {axisYLabel}
-        </span>
-      )}
+    <div className={chartClass}>
+      <ChartAxisLabels startLabel={axisYLabel} />
       <div
         ref={barChartRef}
         style={{
           width: "100%",
-          height: "100%",
+          height: 340,
         }}
       />
     </div>

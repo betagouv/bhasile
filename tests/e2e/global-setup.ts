@@ -1,80 +1,66 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { chromium, type FullConfig } from "@playwright/test";
+import type { FullConfig } from "@playwright/test";
+import { encode } from "next-auth/jwt";
 
-import { authenticateWithProConnect } from "./proconnect-login";
+import { E2E_AGENT_EMAIL, E2E_AGENT_NAME, seedAgent } from "./seed/agent.seed";
 import { cleanupOrphans } from "./seed/orphan-cleanup";
 
-// ProConnect émet des sessions valides 12h
-// (https://partenaires.proconnect.gouv.fr/docs/fournisseur-service/implementation_technique).
-const AUTH_TTL_MS = 12 * 60 * 60 * 1000;
+const SESSION_MAX_AGE_SECONDS = 24 * 60 * 60;
 
 async function globalSetup(config: FullConfig): Promise<void> {
   await cleanupOrphans();
+  await seedAgent();
 
-  const email = process.env.E2E_AGENT_EMAIL;
-  const password = process.env.E2E_AGENT_PASSWORD;
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    throw new Error("AUTH_SECRET doit être défini pour le global setup e2e.");
+  }
+
   const baseURL =
     config.projects[0]?.use?.baseURL ??
     process.env.E2E_BASE_URL ??
     "http://localhost:3000";
 
-  if (!email || !password) {
-    throw new Error(
-      "E2E_AGENT_EMAIL et E2E_AGENT_PASSWORD doivent être définis pour le global setup e2e."
-    );
-  }
+  // Reproduit la dérivation de next-auth (`getToken`) : le nom du cookie dépend
+  // de NEXTAUTH_URL, pas de l'URL visée par les tests.
+  const isSecureCookie =
+    process.env.NEXTAUTH_URL?.startsWith("https://") ?? !!process.env.VERCEL;
 
-  const authDir = path.join(process.cwd(), "playwright/.auth");
-  const authFile = path.join(authDir, "agent.json");
-  fs.mkdirSync(authDir, { recursive: true });
-
-  if (isAuthFileUsable(authFile)) {
-    console.log(
-      "Authentification ProConnect ignorée (fichier d'auth réutilisable)"
-    );
-    return;
-  }
-
-  const browser = await chromium.launch({
-    headless: process.env.E2E_AUTH_HEADED !== "1",
+  const sessionToken = await encode({
+    token: {
+      sub: E2E_AGENT_EMAIL,
+      email: E2E_AGENT_EMAIL,
+      name: E2E_AGENT_NAME,
+      prenom: "E2E",
+      nom: "Agent",
+    },
+    secret,
+    maxAge: SESSION_MAX_AGE_SECONDS,
   });
-  const context = await browser.newContext({
-    baseURL,
-    ignoreHTTPSErrors: true,
-  });
-  const page = await context.newPage();
-  await authenticateWithProConnect(page, { email, password });
 
-  await context.storageState({ path: authFile });
-  await browser.close();
+  const storageState = {
+    cookies: [
+      {
+        name: isSecureCookie
+          ? "__Secure-next-auth.session-token"
+          : "next-auth.session-token",
+        value: sessionToken,
+        domain: new URL(baseURL).hostname,
+        path: "/",
+        expires: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SECONDS,
+        httpOnly: true,
+        secure: isSecureCookie,
+        sameSite: "Lax" as const,
+      },
+    ],
+    origins: [],
+  };
+
+  const authFile = path.join(process.cwd(), "playwright/.auth/agent.json");
+  fs.mkdirSync(path.dirname(authFile), { recursive: true });
+  fs.writeFileSync(authFile, JSON.stringify(storageState, null, 2));
 }
-
-const isAuthFileUsable = (authFile: string): boolean => {
-  if (!fs.existsSync(authFile)) {
-    return false;
-  }
-  const stat = (() => {
-    try {
-      return fs.statSync(authFile);
-    } catch {
-      return undefined;
-    }
-  })();
-  if (!stat || Date.now() - stat.mtimeMs >= AUTH_TTL_MS) {
-    return false;
-  }
-  try {
-    const parsed = JSON.parse(fs.readFileSync(authFile, "utf8")) as unknown;
-    return (
-      typeof parsed === "object" &&
-      parsed !== null &&
-      Array.isArray((parsed as { cookies?: unknown }).cookies)
-    );
-  } catch {
-    return false;
-  }
-};
 
 export default globalSetup;

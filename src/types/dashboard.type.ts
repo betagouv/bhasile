@@ -1,4 +1,5 @@
 import type { StructureType } from "@/generated/prisma/client";
+import type { AnomalieCode } from "@/types/anomalie.type";
 
 export const InitialisationStatus = [
   "A_INITIALISER",
@@ -108,3 +109,28 @@ type RappelGroupNodeBase = {
 export type RappelGroupNode =
   | (RappelGroupNodeBase & { children: RappelGroupNode[] })
   | (RappelGroupNodeBase & { rappels: DashboardRappel[] });
+
+export type AnomalieGroupBy = "STRUCTURE" | "CODE";
+
+export type DashboardAnomalie = {
+  id: number;
+  code: AnomalieCode;
+  label: string;
+  year: number;
+  isJustified: boolean | null;
+  commentaire: string | null;
+  actionUrl: string | null;
+
+  structureId: number;
+  structureCodeBhasile: string | null;
+  structureType: StructureType | null;
+  structureCommune: string | null;
+  structureDepartement: string | null;
+  operateurName: string | null;
+};
+
+export type AnomalieGroupNode = {
+  key: string;
+  activeCount: number;
+  anomalies: DashboardAnomalie[];
+};

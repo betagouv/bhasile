@@ -12,7 +12,7 @@ describe("cpom.repository db integration", () => {
   let cpomId: number | undefined;
   let operateurId: number | undefined;
   let regionId: number | undefined;
-  let departementId: number | undefined;
+  let departementNumero: string | undefined;
   let structureId: number | undefined;
 
   beforeAll(async () => {
@@ -29,7 +29,7 @@ describe("cpom.repository db integration", () => {
     const departement = await prisma.departement.create({
       data: { numero: `T${randomUUID().slice(0, 6)}`, name: "Test Dept" },
     });
-    departementId = departement.id;
+    departementNumero = departement.numero;
 
     const structure = await prisma.structure.create({
       data: { codeBhasile: `CPOM-TEST-${randomUUID()}` },
@@ -41,7 +41,9 @@ describe("cpom.repository db integration", () => {
         operateur: { connect: { id: operateur.id } },
         region: { connect: { id: region.id } },
         departements: {
-          create: { departement: { connect: { id: departement.id } } },
+          create: {
+            departement: { connect: { numero: departement.numero } },
+          },
         },
         structures: {
           create: { structure: { connect: { id: structure.id } } },
@@ -66,8 +68,10 @@ describe("cpom.repository db integration", () => {
     if (structureId) {
       await prisma.structure.deleteMany({ where: { id: structureId } });
     }
-    if (departementId) {
-      await prisma.departement.deleteMany({ where: { id: departementId } });
+    if (departementNumero) {
+      await prisma.departement.deleteMany({
+        where: { numero: departementNumero },
+      });
     }
     if (regionId) {
       await prisma.region.deleteMany({ where: { id: regionId } });
@@ -84,7 +88,7 @@ describe("cpom.repository db integration", () => {
     expect(cpom).toBeDefined();
     expect(cpom?.operateur.name).toContain("CPOM-TEST-");
     expect(cpom?.region?.id).toBe(regionId);
-    expect(cpom?.departements[0]?.departement.id).toBe(departementId);
+    expect(cpom?.departements[0]?.departement.numero).toBe(departementNumero);
     expect(cpom?.structures[0]?.structureId).toBe(structureId);
     expect(cpom?.budgets[0]?.year).toBe(2024);
     expect(cpom?.actesAdministratifs[0]?.category).toBe("CONVENTION_CPOM");

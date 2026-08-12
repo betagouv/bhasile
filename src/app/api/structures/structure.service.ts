@@ -1,3 +1,4 @@
+import { recomputeAnomaliesSafely } from "@/app/api/anomalies/anomalie.service";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
@@ -93,7 +94,7 @@ export const updateStructureAgent = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
   const coordinates = await getAdresseAdministrativeCoordinates(structure);
-  return await updateOne(
+  return await updateStructureAndRecomputeAnomalies(
     {
       ...structure,
       ...coordinates,
@@ -117,19 +118,31 @@ export const updateActualisation = async (
     );
   }
 
-  return updateOne(structure, false, { skipActesOrphanDelete: true });
+  return updateStructureAndRecomputeAnomalies(structure, false, {
+    skipActesOrphanDelete: true,
+  });
 };
 export const updateStructureOperateur = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
   const coordinates = await getAdresseAdministrativeCoordinates(structure);
-  return await updateOne(
+  return await updateStructureAndRecomputeAnomalies(
     {
       ...structure,
       ...coordinates,
     },
     true
   );
+};
+
+// Le recalcul suit le commit et n'est jamais dans la transaction d'écriture.
+const updateStructureAndRecomputeAnomalies = async (
+  ...args: Parameters<typeof updateOne>
+): Promise<Structure> => {
+  const updated = await updateOne(...args);
+  await recomputeAnomaliesSafely(updated.id);
+
+  return updated;
 };
 
 const computeAllStructureRows = async (

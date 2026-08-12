@@ -38,6 +38,7 @@ const redCross = `\x1b[31m\u274C\x1b[0m`;
 copyAssets(staticSrcPath, staticDestPath)
   .then(() => copyAssets(publicSrcPath, publicDestPath))
   .then(() => console.log(`${greenTick} Assets copied successfully`))
-  .catch((error: Error) =>
-    console.error(`${redCross} Failed to copy assets: ${error}`)
-  );
+  .catch((error: Error) => {
+    console.error(`${redCross} Failed to copy assets: ${error}`);
+    process.exitCode = 1;
+  });

@@ -5,6 +5,7 @@ import "chartist/dist/index.css";
 import * as Chartist from "chartist";
 import { useId, useMemo } from "react";
 
+import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
 import { useBarLineChart } from "@/app/hooks/useBarLineChart";
 
 type ChartData = {
@@ -44,7 +45,7 @@ export const DoubleYAxisBarLineChart = ({
         offset: yAxisOffset,
         showGrid: true,
       },
-      chartPadding: { left: 0, right: yAxisOffset, top: 40, bottom: 20 },
+      chartPadding: { left: 0, right: yAxisOffset, top: 15, bottom: 20 },
       seriesBarDistance: 0,
     };
   }, []);
@@ -61,7 +62,7 @@ export const DoubleYAxisBarLineChart = ({
         offset: yAxisOffset,
         showGrid: false,
       },
-      chartPadding: { left: yAxisOffset, right: 0, top: 40, bottom: 20 },
+      chartPadding: { left: yAxisOffset, right: 0, top: 15, bottom: 20 },
     };
   }, []);
 
@@ -76,57 +77,32 @@ export const DoubleYAxisBarLineChart = ({
   });
 
   return (
-    <div
-      className={chartClass}
-      style={{ position: "relative", height: 340, width: "100%" }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 10,
-          fontSize: "14px",
-          color: "#666",
-          zIndex: 20,
-        }}
-      >
-        {leftAxisLabel}
+    <div className={chartClass} style={{ width: "100%" }}>
+      <ChartAxisLabels startLabel={leftAxisLabel} endLabel={rightAxisLabel} />
+      <div style={{ position: "relative", height: 340, width: "100%" }}>
+        <div
+          ref={barChartRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        />
+        <div
+          ref={lineChartRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 10,
+            pointerEvents: "none",
+          }}
+        />
       </div>
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 10,
-          fontSize: "14px",
-          color: "#666",
-          zIndex: 20,
-        }}
-      >
-        {rightAxisLabel}
-      </div>
-
-      <div
-        ref={barChartRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-        }}
-      />
-      <div
-        ref={lineChartRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 10,
-          pointerEvents: "none",
-        }}
-      />
     </div>
   );
 };

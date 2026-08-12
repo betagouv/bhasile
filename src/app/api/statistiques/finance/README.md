@@ -6,7 +6,7 @@ Valider le comportement fallback de `REALISE` vers `PREVISIONNEL`
 
 ## Millésimes
 
-Union des années présentes dans `Budget` ou `IndicateurFinancier` (hors `isMissing`).
+Union des années présentes dans `Budget` ou `IndicateurFinancier`.
 
 Le front choisit l'année affichée dans `byYear`.
 
