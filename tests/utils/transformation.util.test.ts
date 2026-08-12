@@ -1182,21 +1182,7 @@ describe("getTransformationDepartement", () => {
 });
 
 describe("getStructureVersionTransformationDepartement", () => {
-  it("retourne le département de la structureVersion quand il est présent", () => {
-    const structureVersionTransformation = createStructureVersionTransformation(
-      {
-        structureVersion: { departementAdministratif: "50" },
-      }
-    );
-
-    expect(
-      getStructureVersionTransformationDepartement(
-        structureVersionTransformation
-      )
-    ).toBe("50");
-  });
-
-  it("retombe sur le département de la structure liée quand la version n'en a pas", () => {
+  it("retourne le département de la structure liée quand il est présent", () => {
     const structureVersionTransformation = createStructureVersionTransformation(
       {
         structureVersion: {
@@ -1210,6 +1196,37 @@ describe("getStructureVersionTransformationDepartement", () => {
         structureVersionTransformation
       )
     ).toBe("13");
+  });
+
+  it("ignore le département de la version quand la structure porte le sien", () => {
+    const structureVersionTransformation = createStructureVersionTransformation(
+      {
+        structureVersion: {
+          departementAdministratif: "50",
+          structure: { codeBhasile: "ABC", isFinalised: true, departementAdministratif: "13" },
+        },
+      }
+    );
+
+    expect(
+      getStructureVersionTransformationDepartement(
+        structureVersionTransformation
+      )
+    ).toBe("13");
+  });
+
+  it("retombe sur le département de la version pour un bloc création sans structure", () => {
+    const structureVersionTransformation = createStructureVersionTransformation(
+      {
+        structureVersion: { departementAdministratif: "50" },
+      }
+    );
+
+    expect(
+      getStructureVersionTransformationDepartement(
+        structureVersionTransformation
+      )
+    ).toBe("50");
   });
 
   it("retourne undefined quand ni la version ni la structure n'ont de département", () => {

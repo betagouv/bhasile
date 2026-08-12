@@ -48,9 +48,9 @@ export const getTransformationTitle = (
 export const getStructureVersionTransformationDepartement = (
   structureVersionTransformation?: StructureVersionTransformationApiRead
 ): string | undefined =>
-  structureVersionTransformation?.structureVersion?.departementAdministratif ??
   structureVersionTransformation?.structureVersion?.structure
     ?.departementAdministratif ??
+  structureVersionTransformation?.structureVersion?.departementAdministratif ??
   undefined;
 
 export const getStructureVersionTransformationOperateur = (

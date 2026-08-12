@@ -101,17 +101,17 @@ export const buildDashboardRows = (
       continue;
     }
 
-    const departement = currentVersion.departementAdministratif;
+    const referenceDepartement = structure.departementAdministratif;
     if (
-      departement === null ||
+      referenceDepartement === null ||
       !options.user ||
-      !canUpdateDepartement(options.user, departement)
+      !canUpdateDepartement(options.user, referenceDepartement)
     ) {
       continue;
     }
     if (
       options.departementList.length > 0 &&
-      !options.departementList.includes(departement)
+      !options.departementList.includes(referenceDepartement)
     ) {
       continue;
     }
@@ -153,7 +153,7 @@ export const buildDashboardRows = (
       type,
       operateurName: structure.operateur?.name ?? null,
       communeAdministrative: currentVersion.communeAdministrative,
-      departementAdministratif: departement,
+      departementAdministratif: currentVersion.departementAdministratif,
       initialisationStatus,
       actualisationStatus,
       actionUrl: getMostUrgentActionUrl(

@@ -1651,54 +1651,29 @@ describe("structure.repository db integration", () => {
       }
     });
 
-    it("getStructureDepartement résout le département de la version courante", async () => {
-      // GIVEN: a structure whose departement lives only on its current version
-      const structure = await createStructure();
-      const departement = await prisma.departement.findFirstOrThrow();
-      await updateOne({
-        id: structure.id,
-        departementAdministratif: departement.numero,
-      });
-
-      // WHEN: the PUT gate resolves the structure departement
-      const resolved = await getStructureDepartement(structure.id);
-
-      // THEN: it reflects the version, not the frozen (null) scalar on Structure
-      expect(resolved).toBe(departement.numero);
-    });
-
-    it("getStructureDepartement suit une transfo finalisée et ignore un brouillon", async () => {
-      // GIVEN: a current version (effective 2020) in an initial departement
+    it("getStructureDepartement lit le scalaire immuable et ignore les versions", async () => {
+      // GIVEN: a structure whose reference departement is frozen on Structure
       const structure = await createStructure();
       const firstDepartement = await prisma.departement.findFirstOrThrow();
       const secondDepartement = await prisma.departement.findFirstOrThrow({
         where: { numero: { not: firstDepartement.numero } },
       });
-      await updateOne({
-        id: structure.id,
-        departementAdministratif: firstDepartement.numero,
+      await prisma.structure.update({
+        where: { id: structure.id },
+        data: { departementAdministratif: firstDepartement.numero },
       });
 
-      // AND: a more recent (but still past) transfo version in another
-      // departement, not finalised
-      const { form } = await createTransfoVersion(structure.id, {
+      // AND: a finalised transfo version claiming another departement — an
+      // inconsistency the app guard forbids but legacy rows can still carry
+      await createTransfoVersion(structure.id, {
         effectiveDate: "2021-01-01T00:00:00.000Z",
-        formStatus: false,
+        formStatus: true,
         departementAdministratif: secondDepartement.numero,
       });
 
-      // WHEN: the transfo is a draft -> the gate keeps the initial departement
+      // WHEN/THEN: the PUT gate stays on the structure scalar
       expect(await getStructureDepartement(structure.id)).toBe(
         firstDepartement.numero
-      );
-
-      // WHEN: the transfo is finalised -> the gate follows the new departement
-      await prisma.form.update({
-        where: { id: form.id },
-        data: { status: true },
-      });
-      expect(await getStructureDepartement(structure.id)).toBe(
-        secondDepartement.numero
       );
     });
 

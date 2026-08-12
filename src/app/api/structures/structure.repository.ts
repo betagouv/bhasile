@@ -17,10 +17,7 @@ import {
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
-import {
-  currentVersionArgs,
-  currentVersionWhere,
-} from "../structure-versions/structure-version.db.type";
+import { currentVersionWhere } from "../structure-versions/structure-version.db.type";
 import {
   createOrUpdateStructureVersion,
   mirrorLegacyPlacesToBaseVersions,
@@ -75,23 +72,12 @@ export const findOneOperateur = async (
 };
 
 export const findStructureDepartement = async (
-  id: number,
-  now: Date
-): Promise<{ departementAdministratif: string | null }> => {
-  const structure = await prisma.structure.findUniqueOrThrow({
+  id: number
+): Promise<{ departementAdministratif: string | null }> =>
+  prisma.structure.findUniqueOrThrow({
     where: { id },
-    select: {
-      structureVersions: {
-        ...currentVersionArgs(now),
-        select: { departementAdministratif: true },
-      },
-    },
+    select: { departementAdministratif: true },
   });
-  return {
-    departementAdministratif:
-      structure.structureVersions[0]?.departementAdministratif ?? null,
-  };
-};
 
 export const findValidatedActualisationForm = (
   structureId: number,

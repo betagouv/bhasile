@@ -16,7 +16,11 @@ export const rappelStructureSelect = {
   type: true,
   departementAdministratif: true,
   structureVersions: {
-    select: { ...resolvableVersionSelect, communeAdministrative: true },
+    select: {
+      ...resolvableVersionSelect,
+      communeAdministrative: true,
+      departementAdministratif: true,
+    },
   },
   operateur: { select: { id: true, name: true } },
   forms: {

@@ -157,11 +157,17 @@ export const buildRappels = (
     if (!structure.forms[0]?.status) {
       continue;
     }
-    const departement = structure.departementAdministratif;
-    if (!departement || !canUpdateDepartement(user, departement)) {
+    const referenceDepartement = structure.departementAdministratif;
+    if (
+      !referenceDepartement ||
+      !canUpdateDepartement(user, referenceDepartement)
+    ) {
       continue;
     }
-    if (departementList.length > 0 && !departementList.includes(departement)) {
+    if (
+      departementList.length > 0 &&
+      !departementList.includes(referenceDepartement)
+    ) {
       continue;
     }
     const operateurId = structure.operateur?.id ?? null;
@@ -179,14 +185,16 @@ export const buildRappels = (
     }
 
     const currentCpom = findCurrentCpom(structure.cpomStructures, now);
+    const currentVersion = resolveCurrentVersion(
+      structure.structureVersions,
+      now
+    );
     const context = {
       structureId: structure.id,
       structureCodeBhasile: structure.codeBhasile,
       structureType: structure.type,
-      structureCommune:
-        resolveCurrentVersion(structure.structureVersions, now)
-          ?.communeAdministrative ?? null,
-      structureDepartement: departement,
+      structureCommune: currentVersion?.communeAdministrative ?? null,
+      structureDepartement: currentVersion?.departementAdministratif ?? null,
       operateurName: structure.operateur?.name ?? null,
       cpomId: currentCpom?.id ?? null,
       cpomLabel: currentCpom?.label ?? null,

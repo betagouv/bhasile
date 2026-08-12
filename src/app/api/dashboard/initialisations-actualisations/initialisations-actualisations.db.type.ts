@@ -9,6 +9,7 @@ export const dashboardStructureSelect = {
   id: true,
   codeBhasile: true,
   type: true,
+  departementAdministratif: true,
   operateur: { select: { id: true, name: true } },
   forms: {
     select: {

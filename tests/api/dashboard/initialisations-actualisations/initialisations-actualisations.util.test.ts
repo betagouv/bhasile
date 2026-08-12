@@ -163,6 +163,7 @@ const makeStructure = (
   id: 1,
   codeBhasile: "BHA-001",
   type: StructureType.CADA,
+  departementAdministratif: "75",
   operateur: { id: 1, name: "Adoma" },
   forms: [],
   structureVersions: [makeVersion()],
@@ -197,19 +198,30 @@ describe("buildDashboardRows", () => {
   });
 
   it("exclut une structure hors des départements autorisés (scope)", () => {
-    const structure = makeStructure({
-      structureVersions: [makeVersion({ departementAdministratif: "69" })],
-    });
+    const structure = makeStructure({ departementAdministratif: "69" });
 
     expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
   });
 
-  it("exclut une structure dont le département courant est null", () => {
+  it("exclut une structure dont le département de référence est null", () => {
+    const structure = makeStructure({ departementAdministratif: null });
+
+    expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
+  });
+
+  it("filtre sur le département de la structure mais affiche celui de la version", () => {
     const structure = makeStructure({
+      departementAdministratif: "75",
       structureVersions: [makeVersion({ departementAdministratif: null })],
     });
 
-    expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
+    const rows = buildDashboardRows([structure], {
+      ...baseOptions,
+      departementList: ["75"],
+    });
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].departementAdministratif).toBeNull();
   });
 
   it("applique le filtre départements", () => {
