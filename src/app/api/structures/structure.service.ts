@@ -66,9 +66,8 @@ import {
   getReadableAdresses,
   getReadableNotes,
   getTypeBati,
-  isBornFromCreation,
-  isFinalisationFormValidated,
   isStructureClosed,
+  isStructureFinalised,
   isStructureInCpom,
   isStructureInCpomPerYear,
   sortStructureRows,
@@ -191,7 +190,7 @@ export const getFullStructures = async (
           fermetureDate: row.fermetureDate,
         } as unknown as StructureDbList,
         now,
-        true
+        { isFinalised: row.isFinalised, simple: true }
       )
     );
     return { structures, totalStructures: sorted.length };
@@ -219,12 +218,10 @@ export const getFullStructures = async (
       const resolvedStructure = currentVersion
         ? mergeStructureWithVersion(dbStructure, currentVersion)
         : dbStructure;
-      const structure = dbStructureToApiRead(
-        resolvedStructure,
-        now,
-        true,
-        row.bornFromCreation
-      );
+      const structure = dbStructureToApiRead(resolvedStructure, now, {
+        isFinalised: row.isFinalised,
+        simple: true,
+      });
       structure.currentPlaces.placesAutorisees = row.placesAutorisees ?? 0;
       structure.adresses = getReadableAdresses(structure, user);
       structure.notes = null;
@@ -269,12 +266,9 @@ export const getFullStructure = async (
     return null;
   }
 
-  const structure = dbStructureToApiRead(
-    resolvedDbStructure,
-    now,
-    false,
-    isBornFromCreation(resolvedDbStructure.structureVersions, now)
-  );
+  const structure = dbStructureToApiRead(resolvedDbStructure, now, {
+    isFinalised: isStructureFinalised(resolvedDbStructure, now),
+  });
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
 
@@ -312,8 +306,7 @@ const dbStructureToApiRead = (
       Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>
     >,
   now: Date,
-  simple: boolean = false,
-  bornFromCreation: boolean = false
+  { isFinalised, simple = false }: { isFinalised: boolean; simple?: boolean }
 ): StructureApiRead => {
   const [debutConvention, finConvention] = getDatesConvention(dbStructure);
   const [debutPeriodeAutorisation, finPeriodeAutorisation] =
@@ -435,11 +428,9 @@ const dbStructureToApiRead = (
     dnaStructures,
     structureFinesses,
     adresses,
-    isFinalised:
-      bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    isFinalised,
     isClosed: isStructureClosed(dbStructure, now),
     isCurrentVersionFromTransformation,
-    bornFromCreation: undefined,
     structureVersions: undefined,
   }) as StructureApiRead;
 };
