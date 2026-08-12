@@ -79,7 +79,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 1, adresses: [] });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
+      const typeBati = getTypeBati(
+        structure as unknown as ResolvedStructureDetails
+      );
 
       // THEN
       expect(typeBati).toBeUndefined();
@@ -93,7 +95,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 2, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
+      const typeBati = getTypeBati(
+        structure as unknown as ResolvedStructureDetails
+      );
 
       // THEN
       expect(typeBati).toBe(Repartition.COLLECTIF);
@@ -107,7 +111,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 3, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
+      const typeBati = getTypeBati(
+        structure as unknown as ResolvedStructureDetails
+      );
 
       // THEN
       expect(typeBati).toBe(Repartition.DIFFUS);
@@ -120,7 +126,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 4, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
+      const typeBati = getTypeBati(
+        structure as unknown as ResolvedStructureDetails
+      );
 
       // THEN
       expect(typeBati).toBe(Repartition.MIXTE);
@@ -153,6 +161,36 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toBe(5);
+    });
+
+    it("ignore les visites sans date", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        { ...createEvaluation({}), date: undefined },
+      ];
+      const controles: ControleApiType[] = [
+        createControle({ date: dayjs().subtract(7, "month").toISOString() }),
+      ];
+
+      // WHEN
+      const result = getLastVisitInMonths(evaluations, controles);
+
+      // THEN
+      expect(result).toBe(7);
+    });
+
+    it("retourne null quand aucune visite n'a de date", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        { ...createEvaluation({}), date: undefined },
+      ];
+      const controles: ControleApiType[] = [];
+
+      // WHEN
+      const result = getLastVisitInMonths(evaluations, controles);
+
+      // THEN
+      expect(result).toBeNull();
     });
 
     it("retourne null quand toutes les visites sont à venir", () => {

@@ -6,6 +6,7 @@ import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
 import { getNow } from "@/app/utils/now.util";
+import { filterPastVisits } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
@@ -28,6 +29,9 @@ export const ControlesBlock = (): ReactElement => {
     dayjs(eig.evenementDate).isAfter(dayjs(getNow()).subtract(12, "month"))
   );
 
+  const lastPastEvaluation = filterPastVisits(evaluations)[0];
+  const lastPastControle = filterPastVisits(controles)[0];
+
   return (
     <Block
       title="Controle qualité"
@@ -44,12 +48,12 @@ export const ControlesBlock = (): ReactElement => {
         <div className="pr-4">
           <LastVisitCard evaluations={evaluations} controles={controles} />
         </div>
-        {evaluations[0]?.note !== undefined && (
+        {lastPastEvaluation?.note !== undefined && (
           <div className="pr-4">
             <InformationCard
               primaryInformation={
                 <>
-                  {evaluations[0]?.note}{" "}
+                  {lastPastEvaluation.note}{" "}
                   <span className="text-xl">/&nbsp;4</span>
                 </>
               }
@@ -68,7 +72,7 @@ export const ControlesBlock = (): ReactElement => {
             {evaluations.length > 0 ? (
               <ControleAccordion
                 title="Évaluations"
-                lastVisit={evaluations[0]?.date}
+                lastVisit={lastPastEvaluation?.date}
               >
                 <EvaluationTable evaluations={evaluations} />
               </ControleAccordion>
@@ -83,7 +87,7 @@ export const ControlesBlock = (): ReactElement => {
         {controles.length > 0 ? (
           <ControleAccordion
             title="Inspections-contrôles"
-            lastVisit={controles?.[0]?.date}
+            lastVisit={lastPastControle?.date}
           >
             <ControleTable />
           </ControleAccordion>

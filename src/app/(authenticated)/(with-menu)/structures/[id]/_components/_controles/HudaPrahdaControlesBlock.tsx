@@ -2,6 +2,8 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
+import { NoDataAccordion } from "@/app/components/NoDataAccordion";
+import { filterPastVisits } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
@@ -16,6 +18,8 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
   const evaluations = structure.evaluations || [];
   const evenementsIndesirablesGraves =
     structure.evenementsIndesirablesGraves || [];
+
+  const lastPastEvaluation = filterPastVisits(evaluations)[0];
 
   return (
     <Block
@@ -34,18 +38,35 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
         />
       </div>
       <div className="pt-3">
-        <ControleAccordion title="Évaluations" lastVisit={evaluations[0].date}>
-          <EvaluationTable evaluations={evaluations} />
-        </ControleAccordion>
-        <ControleAccordion
-          title="Événements indésirables graves"
-          lastVisit={evenementsIndesirablesGraves[0].evenementDate}
-        >
-          <>
-            <EIGTable />
-            <DemarcheNumeriqueInfo />
-          </>
-        </ControleAccordion>
+        {evaluations.length > 0 ? (
+          <ControleAccordion
+            title="Évaluations"
+            lastVisit={lastPastEvaluation?.date}
+          >
+            <EvaluationTable evaluations={evaluations} />
+          </ControleAccordion>
+        ) : (
+          <NoDataAccordion
+            title="Évaluations"
+            description="Aucune évaluation renseignée"
+          />
+        )}
+        {evenementsIndesirablesGraves.length > 0 ? (
+          <ControleAccordion
+            title="Événements indésirables graves"
+            lastVisit={evenementsIndesirablesGraves[0]?.evenementDate}
+          >
+            <>
+              <EIGTable />
+              <DemarcheNumeriqueInfo />
+            </>
+          </ControleAccordion>
+        ) : (
+          <NoDataAccordion
+            title="Événements indésirables graves"
+            description="Aucun EIG trouvé sur Démarche Numérique"
+          />
+        )}
       </div>
     </Block>
   );
