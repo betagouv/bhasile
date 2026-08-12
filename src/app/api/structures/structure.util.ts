@@ -320,17 +320,20 @@ export const computeStructureListRow = (
     ),
   ].filter((value): value is string => Boolean(value));
 
-  const fermetureTransformation = currentVersion.structureVersionTransformation;
-  const isClosed =
-    fermetureTransformation?.type ===
-    StructureVersionTransformationType.FERMETURE;
+  const currentTransformation = currentVersion.structureVersionTransformation;
+  const fermetureTransformation =
+    currentTransformation?.type ===
+    StructureVersionTransformationType.FERMETURE
+      ? currentTransformation
+      : null;
+  const isClosed = isStructureClosed(structure, now);
 
   return {
     id: structure.id,
     codeBhasile: structure.codeBhasile,
     currentVersionId: currentVersion.id,
     isClosed,
-    fermetureDate: isClosed ? currentVersion.effectiveDate : null,
+    fermetureDate: structure.fermetureDate,
     fermetureMotif: isClosed ? (fermetureTransformation?.motif ?? null) : null,
     bornFromCreation,
     hasForm: structure.forms.length > 0,

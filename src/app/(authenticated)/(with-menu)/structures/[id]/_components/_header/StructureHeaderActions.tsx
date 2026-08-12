@@ -4,6 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
+import { FermetureBadge } from "@/app/components/structures/FermetureBadge";
 import { UpcomingTransformationBadge } from "@/app/components/structures/UpcomingTransformationBadge";
 import { ACTUALISATION_SAVE_KEY, useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
@@ -78,6 +79,10 @@ export const StructureHeaderActions = ({
         </Button>
       </div>
     );
+  }
+
+  if (structure.isClosed && structure.fermetureDate) {
+    return <FermetureBadge fermetureDate={structure.fermetureDate} />;
   }
 
   return (

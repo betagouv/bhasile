@@ -68,6 +68,7 @@ import {
   getTypeBati,
   isBornFromCreation,
   isFinalisationFormValidated,
+  isStructureClosed,
   isStructureInCpom,
   isStructureInCpomPerYear,
   sortStructureRows,
@@ -187,6 +188,7 @@ export const getFullStructures = async (
           id: row.id,
           latitude: row.latitude,
           longitude: row.longitude,
+          fermetureDate: row.fermetureDate,
         } as unknown as StructureDbList,
         now,
         true
@@ -435,6 +437,7 @@ const dbStructureToApiRead = (
     adresses,
     isFinalised:
       bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    isClosed: isStructureClosed(dbStructure, now),
     isCurrentVersionFromTransformation,
     bornFromCreation: undefined,
     structureVersions: undefined,

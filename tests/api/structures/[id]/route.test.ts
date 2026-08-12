@@ -68,6 +68,7 @@ vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
     getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
     isBornFromCreation: vi.fn().mockReturnValue(false),
     isFinalisationFormValidated: vi.fn().mockReturnValue(false),
+    isStructureClosed: vi.fn().mockReturnValue(false),
   };
 });
 
@@ -188,6 +189,7 @@ describe("GET /api/structures/[id]", () => {
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,
+      isClosed: false,
       isCurrentVersionFromTransformation: false,
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);

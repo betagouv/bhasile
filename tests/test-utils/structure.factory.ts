@@ -111,6 +111,7 @@ export const createStructure = ({
           form.formDefinition.version === 1 &&
           form.status
       ),
+    isClosed: false,
     isCurrentVersionFromTransformation: false,
   };
 };
