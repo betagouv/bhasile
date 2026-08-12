@@ -353,13 +353,21 @@ const createStructureFromCreationBlock = async (
     );
   }
 
+  const { departementAdministratif } = structureVersion;
+
+  if (!departementAdministratif) {
+    throw new ApiDomainError(
+      "Un bloc de création doit avoir un département avant la finalisation."
+    );
+  }
+
   const regionCode = getNormalizedRegionCodeFromDepartement(
-    structureVersion.departementAdministratif
+    departementAdministratif
   );
 
   if (!regionCode) {
     throw new Error(
-      `Bloc création ${structureVersionTransformation.id} : région indérivable pour le département ${structureVersion.departementAdministratif}`
+      `Bloc création ${structureVersionTransformation.id} : région indérivable pour le département ${departementAdministratif}`
     );
   }
 
@@ -374,7 +382,7 @@ const createStructureFromCreationBlock = async (
       codeBhasile,
       operateurId,
       creationDate: structureVersion.effectiveDate,
-      departementAdministratif: structureVersion.departementAdministratif,
+      departementAdministratif,
       type: structureType,
     },
   });

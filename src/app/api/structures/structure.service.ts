@@ -285,7 +285,7 @@ export const getStructureForOperateur = async (
 
 export const getStructureDepartement = async (
   id: number
-): Promise<string | null> => {
+): Promise<string> => {
   const { departementAdministratif } = await findStructureDepartement(id);
   return departementAdministratif;
 };

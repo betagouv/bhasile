@@ -137,10 +137,7 @@ const isEligibleStructure = (
   }
 
   const referenceDepartement = structure.departementAdministratif;
-  if (
-    !referenceDepartement ||
-    !canUpdateDepartement(options.user, referenceDepartement)
-  ) {
+  if (!canUpdateDepartement(options.user, referenceDepartement)) {
     return false;
   }
   if (

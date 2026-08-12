@@ -203,12 +203,6 @@ describe("buildDashboardRows", () => {
     expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
   });
 
-  it("exclut une structure dont le département de référence est null", () => {
-    const structure = makeStructure({ departementAdministratif: null });
-
-    expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
-  });
-
   it("filtre sur le département de la structure mais affiche celui de la version", () => {
     const structure = makeStructure({
       departementAdministratif: "75",

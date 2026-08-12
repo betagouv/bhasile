@@ -70,13 +70,6 @@ describe("groupStructureIdsByDepartement", () => {
     expect(groups.get("75")).toEqual(new Set([3]));
   });
 
-  it("ignore les structures sans departementAdministratif", () => {
-    const groups = groupStructureIdsByDepartement([
-      { id: 1, type: StructureType.CADA, departementAdministratif: null },
-    ]);
-
-    expect(groups.size).toBe(0);
-  });
 });
 
 describe("resolveZoneDepartementNumeros", () => {

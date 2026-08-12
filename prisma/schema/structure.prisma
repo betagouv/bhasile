@@ -3,7 +3,7 @@ model Structure {
   codeBhasile              String                @unique
   filiale                  String? // TODO: retirer après phase d'initialisation + backfill des filiales en DB
   type                     StructureType?
-  departementAdministratif String? // Correspond au département de référence de la structure immuable
+  departementAdministratif String // Correspond au département de référence de la structure immuable
   debutConvention          DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   finConvention            DateTime? // TODO: conservé pour la vue reporting. À supprimer quand les indicateurs qualité ne seront plus pertinents (après actualisation 1).
   creationDate             DateTime?
@@ -23,7 +23,7 @@ model Structure {
   operateur                Operateur?            @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]
-  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero])
+  departement              Departement           @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
   userNotes                Note[]
   structureVersions        StructureVersion[]

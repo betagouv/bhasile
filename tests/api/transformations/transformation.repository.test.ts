@@ -33,6 +33,7 @@ describe("transformation.repository db integration", () => {
     const structure = await prisma.structure.create({
       data: {
         codeBhasile: `BHA-TF-TEST-${Date.now()}-${Math.random()}`,
+        departementAdministratif: "50",
         structureVersions: {
           create: {
             effectiveDate: new Date("2020-01-01T12:00:00.000Z"),

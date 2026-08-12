@@ -31,6 +31,7 @@ describe("structure.repository db integration", () => {
       data: {
         codeBhasile: `BHA-DB-TEST-${Date.now()}-${Math.random()}`,
         type,
+        departementAdministratif: "50",
         structureVersions: {
           create: { effectiveDate: new Date("2020-01-01T12:00:00.000Z") },
         },
@@ -166,9 +167,11 @@ describe("structure.repository db integration", () => {
   });
 
   it("met à jour la relation departementAdministratif", async () => {
-    // GIVEN: a structure and an existing department
+    // GIVEN: a structure and its invariant department
     const structure = await createStructure();
-    const departement = await prisma.departement.findFirstOrThrow();
+    const departement = await prisma.departement.findFirstOrThrow({
+      where: { numero: structure.departementAdministratif },
+    });
 
     // WHEN: department number is updated
     await updateOne({
@@ -363,6 +366,7 @@ describe("structure.repository db integration", () => {
     const structure = await prisma.structure.create({
       data: {
         codeBhasile: `BHA-DB-TEST-${Date.now()}-${Math.random()}`,
+        departementAdministratif: "50",
         structureVersions: {
           create: { effectiveDate: new Date("2099-01-01T12:00:00.000Z") },
         },
@@ -1383,7 +1387,10 @@ describe("structure.repository db integration", () => {
     // Coquille sans version (comme une structure née d'une transfo, avant versions)
     const createShellStructure = async () => {
       const structure = await prisma.structure.create({
-        data: { codeBhasile: `BHA-DB-TEST-${Date.now()}-${randomUUID()}` },
+        data: {
+          codeBhasile: `BHA-DB-TEST-${Date.now()}-${randomUUID()}`,
+          departementAdministratif: "50",
+        },
       });
       createdStructureIds.push(structure.id);
       return structure;

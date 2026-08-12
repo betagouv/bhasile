@@ -37,7 +37,12 @@ describe("operateur.repository db integration", () => {
     const operateurWithStructure = await prisma.operateur.create({
       data: {
         name: `OP-TEST-AVEC-STRUCTURE-${randomUUID()}`,
-        structures: { create: { codeBhasile: `ST-TEST-${randomUUID()}` } },
+        structures: {
+          create: {
+            codeBhasile: `ST-TEST-${randomUUID()}`,
+            departementAdministratif: "50",
+          },
+        },
       },
       select: { id: true, structures: { select: { id: true } } },
     });

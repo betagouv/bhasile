@@ -73,7 +73,7 @@ export const findOneOperateur = async (
 
 export const findStructureDepartement = async (
   id: number
-): Promise<{ departementAdministratif: string | null }> =>
+): Promise<{ departementAdministratif: string }> =>
   prisma.structure.findUniqueOrThrow({
     where: { id },
     select: { departementAdministratif: true },

@@ -157,10 +157,7 @@ export const buildRappels = (
       continue;
     }
     const referenceDepartement = structure.departementAdministratif;
-    if (
-      !referenceDepartement ||
-      !canUpdateDepartement(user, referenceDepartement)
-    ) {
+    if (!canUpdateDepartement(user, referenceDepartement)) {
       continue;
     }
     if (

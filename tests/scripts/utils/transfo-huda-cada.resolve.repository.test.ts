@@ -45,6 +45,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
         codeBhasile: await pickFreeCodeBhasile(),
         type,
         fermetureDate,
+        departementAdministratif: "50",
       },
     });
 

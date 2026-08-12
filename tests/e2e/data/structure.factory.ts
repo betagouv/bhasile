@@ -10,7 +10,7 @@ export type StructureSeedInput = {
   adresseAdministrative: string;
   codePostalAdministratif: string;
   communeAdministrative: string;
-  departementAdministratif?: string;
+  departementAdministratif: string;
   creationDate: string;
   public: "TOUT_PUBLIC" | "FAMILLE" | "PERSONNES_ISOLEES";
   dnaCodes: { code: string }[];

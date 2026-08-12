@@ -103,7 +103,6 @@ export const buildDashboardRows = (
 
     const referenceDepartement = structure.departementAdministratif;
     if (
-      referenceDepartement === null ||
       !options.user ||
       !canUpdateDepartement(options.user, referenceDepartement)
     ) {

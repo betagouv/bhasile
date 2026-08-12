@@ -32,7 +32,10 @@ describe("cpom.repository db integration", () => {
     departementNumero = departement.numero;
 
     const structure = await prisma.structure.create({
-      data: { codeBhasile: `CPOM-TEST-${randomUUID()}` },
+      data: {
+        codeBhasile: `CPOM-TEST-${randomUUID()}`,
+        departementAdministratif: "50",
+      },
     });
     structureId = structure.id;
 
