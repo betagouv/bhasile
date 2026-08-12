@@ -6,13 +6,14 @@ import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
 import { getNow } from "@/app/utils/now.util";
-import { getLastVisitInMonths } from "@/app/utils/structure.util";
+import { getLastPastVisit } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
 import { ControleTable } from "./ControleTable";
 import { EIGTable } from "./EIGTable";
 import { EvaluationTable } from "./EvaluationTable";
+import { LastVisitCard } from "./LastVisitCard";
 
 export const ControlesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -28,6 +29,12 @@ export const ControlesBlock = (): ReactElement => {
     dayjs(eig.evenementDate).isAfter(dayjs(getNow()).subtract(12, "month"))
   );
 
+  const lastPastEvaluation = getLastPastVisit(evaluations);
+  const lastPastControle = getLastPastVisit(controles);
+
+  const lastNote = lastPastEvaluation?.note;
+  const hasLastNote = lastNote !== undefined && lastNote !== null;
+
   return (
     <Block
       title="Controle qualité"
@@ -42,38 +49,34 @@ export const ControlesBlock = (): ReactElement => {
     >
       <div className="flex">
         <div className="pr-4">
-          {evaluations.length === 0 && controles.length === 0 ? (
-            <InformationCard
-              primaryInformation="Aucune visite"
-              secondaryInformation="renseignée"
-            />
-          ) : (
-            <InformationCard
-              primaryInformation={`${getLastVisitInMonths(
-                evaluations,
-                controles
-              )} mois`}
-              secondaryInformation="depuis la dernière visite"
-            />
-          )}
+          <LastVisitCard evaluations={evaluations} controles={controles} />
         </div>
-        {evaluations[0]?.note !== undefined && (
+        {lastPastEvaluation && (
           <div className="pr-4">
             <InformationCard
               primaryInformation={
-                <>
-                  {evaluations[0]?.note}{" "}
-                  <span className="text-xl">/&nbsp;4</span>
-                </>
+                hasLastNote ? (
+                  <>
+                    {lastNote} <span className="text-xl">/&nbsp;4</span>
+                  </>
+                ) : (
+                  "Sans note"
+                )
               }
-              secondaryInformation="de moyenne à la dernière évaluation"
+              secondaryInformation={
+                hasLastNote
+                  ? "de moyenne à la dernière évaluation"
+                  : "à la dernière évaluation"
+              }
             />
           </div>
         )}
-        <InformationCard
-          primaryInformation={`${last12MonthsEIG.length} EIG`}
-          secondaryInformation="sur les 12 derniers mois"
-        />
+        <div>
+          <InformationCard
+            primaryInformation={`${last12MonthsEIG.length} EIG`}
+            secondaryInformation="sur les 12 derniers mois"
+          />
+        </div>
       </div>
       <div className="pt-12">
         {structure.isAutorisee && (
@@ -81,7 +84,7 @@ export const ControlesBlock = (): ReactElement => {
             {evaluations.length > 0 ? (
               <ControleAccordion
                 title="Évaluations"
-                lastVisit={evaluations[0]?.date}
+                lastVisit={lastPastEvaluation?.date}
               >
                 <EvaluationTable evaluations={evaluations} />
               </ControleAccordion>
@@ -96,7 +99,7 @@ export const ControlesBlock = (): ReactElement => {
         {controles.length > 0 ? (
           <ControleAccordion
             title="Inspections-contrôles"
-            lastVisit={controles?.[0]?.date}
+            lastVisit={lastPastControle?.date}
           >
             <ControleTable />
           </ControleAccordion>
@@ -116,7 +119,7 @@ export const ControlesBlock = (): ReactElement => {
         ) : (
           <NoDataAccordion
             title="Événements indésirables graves"
-            description="Aucun EIG trouvé sur Démarches Numériques"
+            description="Aucun EIG trouvé sur Démarche Numérique"
           />
         )}
       </div>

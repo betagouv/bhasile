@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/next-auth/auth";
 import { structureAgentUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
 
-import { createStructureEvent } from "../../../user-action/user-action.service";
+import { createStructureEvent } from "../../../user-actions/user-action.service";
 import { getActualisationYear } from "../../actualisation.util";
 import {
   getStructureDepartement,

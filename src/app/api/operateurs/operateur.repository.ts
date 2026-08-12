@@ -14,7 +14,14 @@ import {
 export const findBySearchTerm = async (
   searchTerm: string | null
 ): Promise<Operateur[]> => {
-  const operateurs = await prisma.operateur.findMany({});
+  const operateurs = await prisma.operateur.findMany({
+    where: {
+      OR: [
+        { structures: { some: {} } },
+        { filiales: { some: { structures: { some: {} } } } },
+      ],
+    },
+  });
   if (!searchTerm) {
     return operateurs;
   }

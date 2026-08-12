@@ -1,3 +1,9 @@
+import {
+  COMPACT_FORMAT_OPTIONS,
+  CURRENCY_FORMAT_OPTIONS,
+  formatNumber,
+} from "@/app/utils/number.util";
+
 /**
  * Displays a number as formatted French number or currency (EUR).
  * @param value - The number to display as number or currency
@@ -5,6 +11,7 @@
  * @param showZero - If false, displays "-" for zero/null/undefined values
  * @param className - Optional CSS class for the span
  * @param compact - Optional boolean to display in k or M (ex : 10000 => 10k)
+ * @param maximumFractionDigits - Optional maximum number of decimals (ex : 0 => 1 815 873 €)
  */
 
 export const NumberDisplay = ({
@@ -13,26 +20,17 @@ export const NumberDisplay = ({
   showZero = true,
   className,
   compact = false,
+  maximumFractionDigits,
 }: Props) => {
   if (!showZero && (value === 0 || value === null || value === undefined)) {
     return <span className={className}>-</span>;
   }
 
-  const numericValue =
-    value === null || value === undefined ? 0 : Number(value);
-
-  const options: Intl.NumberFormatOptions = {
-    notation: compact ? "compact" : "standard",
-  };
-
-  if (type === "currency") {
-    options.style = "currency";
-    options.currency = "EUR";
-  }
-
-  const valueToDisplay = new Intl.NumberFormat("fr-FR", options).format(
-    numericValue
-  );
+  const valueToDisplay = formatNumber(value ?? 0, {
+    ...(compact ? COMPACT_FORMAT_OPTIONS : {}),
+    ...(type === "currency" ? CURRENCY_FORMAT_OPTIONS : {}),
+    ...(maximumFractionDigits === undefined ? {} : { maximumFractionDigits }),
+  });
 
   return <span className={className}>{valueToDisplay}</span>;
 };
@@ -43,4 +41,5 @@ type Props = {
   className?: string;
   showZero?: boolean;
   compact?: boolean;
+  maximumFractionDigits?: number;
 };

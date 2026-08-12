@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { createCpomEvent } from "@/app/api/user-actions/user-action.service";
 import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { cpomApiAjoutSchema } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
-import { createCpomEvent } from "../user-action/user-action.service";
 import { getCpoms, saveCpom } from "./cpom.service";
 
 export async function GET(request: NextRequest) {
@@ -15,9 +15,7 @@ export async function GET(request: NextRequest) {
     "column"
   ) as CpomColumn | null;
   const direction = request.nextUrl.searchParams.get("direction") as
-    | "asc"
-    | "desc"
-    | null;
+    "asc" | "desc" | null;
 
   try {
     const { cpoms, totalCpoms } = await getCpoms({
@@ -46,4 +44,3 @@ export async function POST(request: NextRequest) {
     return apiErrorResponse(error);
   }
 }
-

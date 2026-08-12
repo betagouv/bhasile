@@ -4,7 +4,8 @@ export const minioClient = new Client({
   endPoint: process.env.S3_URL!,
   accessKey: process.env.S3_ACCESS!,
   secretKey: process.env.S3_SECRET!,
-  useSSL: true,
+  useSSL: process.env.S3_USE_SSL !== "0",
+  port: process.env.S3_PORT ? Number(process.env.S3_PORT) : undefined,
 });
 
 export const checkBucket = async (bucketName: string): Promise<void> => {

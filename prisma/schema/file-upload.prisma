@@ -17,6 +17,10 @@ model FileUpload {
 
   createdAt DateTime @default(now())
 
+  @@index([acteAdministratifId])
+  @@index([documentFinancierId])
+  @@index([controleId])
+  @@index([evaluationId])
   @@schema("public")
 }
 
@@ -39,13 +43,17 @@ model ActeAdministratif {
   name          String?
   parent        ActeAdministratif?         @relation("ActeAdministratifToActeAdministratif", fields: [parentId], references: [id], onDelete: Cascade)
   parentId      Int?
-  isMissing     Boolean?
   children      ActeAdministratif[]        @relation("ActeAdministratifToActeAdministratif")
   fileUploads   FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([structureId])
+  @@index([cpomId])
+  @@index([operateurId])
+  @@index([structureVersionTransformationId])
+  @@index([parentId])
   @@schema("public")
 }
 
@@ -59,13 +67,14 @@ model DocumentFinancier {
   category      DocumentFinancierCategory?
   year          Int
   name          String?
-  isMissing     Boolean?
   granularity   DocumentFinancierGranularity @default(STRUCTURE) // TODO: décommissionner le champ (plus lu ni écrit) une fois les contrôles qualité de la phase d'initialisation terminés
   fileUploads   FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([structureId])
+  @@index([cpomId])
   @@schema("public")
 }
 

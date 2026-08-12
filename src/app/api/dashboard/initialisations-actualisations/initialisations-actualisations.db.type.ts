@@ -7,6 +7,7 @@ import {
 
 export const dashboardStructureSelect = {
   id: true,
+  fermetureDate: true,
   codeBhasile: true,
   type: true,
   operateur: { select: { id: true, name: true } },

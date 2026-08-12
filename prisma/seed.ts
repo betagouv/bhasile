@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
+import { recomputeAllAnomalies } from "@/app/api/anomalies/anomalie.service";
 import {
   ACTUALISATION_FORM_STEP_SLUGS,
   getActualisationFormSlug,
@@ -52,6 +53,10 @@ import { getRegionFromDepartement } from "./utils/region.util";
 import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();
+
+// Graine fixe : les tests repository tournent en CI sur ce jeu de données.
+// Surcharger via FAKER_SEED pour rejouer un échec observé avec une autre graine.
+faker.seed(Number(process.env.FAKER_SEED) || 20260804);
 
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
@@ -410,6 +415,10 @@ async function seed(): Promise<void> {
   );
   await prisma.antenne.createMany({ data: antennes });
   console.log(`✅ ${antennes.length} antennes créées`);
+
+  console.log("🔎 Recalcul des anomalies...");
+  const structuresCount = await recomputeAllAnomalies();
+  console.log(`✅ Anomalies recalculées pour ${structuresCount} structures`);
 }
 
 seed();

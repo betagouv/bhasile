@@ -94,21 +94,18 @@ describe("resolveZoneDepartementNumeros", () => {
 describe("buildZoneDefinitions", () => {
   const allDepartements: CartographieDbDepartement[] = [
     {
-      id: 1,
       numero: "01",
       name: "Ain",
       regionCode: "ARA",
       regionName: "Auvergne-Rhône-Alpes",
     },
     {
-      id: 2,
       numero: "75",
       name: "Paris",
       regionCode: "IDF",
       regionName: "Île-de-France",
     },
     {
-      id: 3,
       numero: "92",
       name: "Hauts-de-Seine",
       regionCode: "IDF",
