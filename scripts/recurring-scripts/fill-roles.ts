@@ -28,12 +28,12 @@ const fetchRoles = async (): Promise<RoleCsvRow[]> => {
   return loadCsvFromS3<RoleCsvRow>(process.env.DOCS_BUCKET_NAME!, csvFilename);
 };
 
-const getTargetDepartementIds = (
+const getTargetDepartementNumeros = (
   row: RoleCsvRow,
   allDepartements: DepartementWithRegion[]
-): number[] => {
+): string[] => {
   if (row.name === "NATIONAL") {
-    return allDepartements.map((departement) => departement.id);
+    return allDepartements.map((departement) => departement.numero);
   }
   if (row.name.startsWith("REGION")) {
     return allDepartements
@@ -41,19 +41,19 @@ const getTargetDepartementIds = (
         return departement.regionAdministrative?.code === row.region;
       })
       .map((departement) => {
-        return departement.id;
+        return departement.numero;
       });
   }
   if (row.name.startsWith("DEPARTEMENT")) {
     const departement = allDepartements.find(
       (departement) => departement.numero === row.departement
     );
-    return departement ? [departement.id] : [];
+    return departement ? [departement.numero] : [];
   }
   return [];
 };
 
-const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
+const createRoles = async (row: RoleCsvRow, departementNumeros: string[]) => {
   const pattern = row.emailPattern?.trim();
 
   // Role et departements.
@@ -62,7 +62,9 @@ const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
     update: {
       roleDepartements: {
         createMany: {
-          data: departementIds.map((departementId) => ({ departementId })),
+          data: departementNumeros.map((departementNumero) => ({
+            departementNumero,
+          })),
           skipDuplicates: true,
         },
       },
@@ -71,7 +73,9 @@ const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
       name: row.name,
       roleDepartements: {
         createMany: {
-          data: departementIds.map((departementId) => ({ departementId })),
+          data: departementNumeros.map((departementNumero) => ({
+            departementNumero,
+          })),
           skipDuplicates: true,
         },
       },
@@ -121,8 +125,8 @@ const run = async () => {
 
     await createAnonymousRole();
     for (const row of csvRows) {
-      const targetIds = getTargetDepartementIds(row, allDepartements);
-      await createRoles(row, targetIds);
+      const targetNumeros = getTargetDepartementNumeros(row, allDepartements);
+      await createRoles(row, targetNumeros);
     }
     console.log("✅ Rôles créés");
   } catch (error) {

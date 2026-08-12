@@ -4,10 +4,25 @@ const PAGE_SIZE = 100;
 const getDaysAgo = (days: number): Date =>
   new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-export type DNColumn = {
+/* Le rattachement se fait sur l'id stable, le libellé n'est là que pour lisibilité. */
+export type DNFieldDescriptor = {
+  id: string;
   label: string;
-  stringValue: string;
 };
+
+export type DNField = {
+  champDescriptorId: string;
+  columns: { stringValue: string | null }[];
+};
+
+/* La valeur est lue sur la colonne et non sur le champ : `Champ.stringValue`
+ * renvoie une date localisée (« 10 août 2026 »), la colonne la valeur brute. */
+export const FIELD_FRAGMENT = `champs {
+  champDescriptorId
+  columns {
+    stringValue
+  }
+}`;
 
 // L'API renvoie `Dossier.number` en Int, pas en String.
 export type DNDossierNode = {
@@ -169,8 +184,12 @@ export const fetchAllDossiers = async <TNode extends DNDossierNode>(
   return nodes;
 };
 
-export const getValueByLabel = (columns: DNColumn[], label: string): string =>
-  columns.find((column) => column.label === label)?.stringValue || "";
+export const getFieldValue = (
+  fields: DNField[],
+  descriptor: DNFieldDescriptor
+): string =>
+  fields.find((field) => field.champDescriptorId === descriptor.id)?.columns[0]
+    ?.stringValue || "";
 
 export const cleanDate = (dateValue: string): Date | null => {
   if (!dateValue) {
