@@ -129,7 +129,7 @@ Pour définir un ou plusieurs mots de passe, il suffit d'ajouter la variable `OP
 
 Les pages sont accessibles via :
 
-- http://localhost:3000/ajout-structure/123abc pour créer une structure (ici `123abc`)
+- http://localhost:3000/ajout-structure pour créer une structure
 - http://localhost:3000/structures pour accéder au tableau de bord
 
 ## 🚀 Mise en production
