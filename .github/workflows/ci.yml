@@ -2,7 +2,6 @@ name: CI
 
 on:
   pull_request:
-    branches: [dev]
   push:
     branches: [dev]
 
@@ -14,6 +13,9 @@ permissions:
   contents: read
 
 env:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: test
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test?schema=public
 
 jobs:
@@ -50,16 +52,16 @@ jobs:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
+          --health-interval 2s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -79,3 +81,61 @@ jobs:
           echo "DATABASE_URL=\"${DATABASE_URL}\"" >> .env.test
       - name: Repository tests
         run: yarn test:db
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@v5
+      # Avant tout le reste : les NEXT_PUBLIC_* sont inlinés au build.
+      - name: Build env file
+        run: cp .env.ci .env
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            minio/minio server /data
+          for _ in $(seq 1 30); do
+            if curl -sf http://localhost:9000/minio/health/live; then exit 0; fi
+            sleep 1
+          done
+          echo "MinIO n'a pas démarré :"
+          docker logs minio
+          exit 1
+      - name: Apply migrations
+        run: npx prisma migrate deploy
+      - name: Seed database
+        run: npx prisma db seed
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps --only-shell chromium
+      - name: Build
+        run: yarn build
+      - name: E2E tests
+        run: yarn test:e2e
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
