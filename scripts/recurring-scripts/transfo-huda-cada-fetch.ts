@@ -423,6 +423,7 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
         cadaBrique.brique,
       ],
     },
+    undefined,
     String(dossier.number)
   );
   const steps = await markStepsPrefilled(id);

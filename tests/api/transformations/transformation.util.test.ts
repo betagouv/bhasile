@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyPrefill,
+  checkCanUpdateDepartements,
   checkEffectiveDatesAreValid,
   checkNoDuplicateStructureIds,
   checkUniqueDepartement,
 } from "@/app/api/transformations/transformation.util";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { SessionUser } from "@/types/global";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -260,6 +262,125 @@ describe("checkUniqueDepartement", () => {
 
     expect(() =>
       checkUniqueDepartement(structureVersionTransformations)
+    ).not.toThrow();
+  });
+
+  it("traite une chaîne vide comme une absence de département", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
+      [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { departementAdministratif: "75" },
+        },
+        {
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: { departementAdministratif: "" },
+        },
+      ];
+
+    expect(() =>
+      checkUniqueDepartement(structureVersionTransformations)
+    ).not.toThrow();
+  });
+});
+
+describe("checkCanUpdateDepartements", () => {
+  const agentParis = {
+    role: "DEPARTEMENT_PARIS",
+    allowedDepartements: ["75"],
+  } as unknown as SessionUser;
+
+  const agentNational = {
+    role: "NATIONAL",
+    allowedDepartements: [],
+  } as unknown as SessionUser;
+
+  const buildStructureVersionTransformation = (
+    departementAdministratif: string
+  ) => ({ structureVersion: { departementAdministratif } });
+
+  it("laisse passer un département du périmètre de l'agent", () => {
+    expect(() =>
+      checkCanUpdateDepartements(agentParis, [
+        buildStructureVersionTransformation("75"),
+      ])
+    ).not.toThrow();
+  });
+
+  it("rejette un département hors du périmètre de l'agent", () => {
+    expect(() =>
+      checkCanUpdateDepartements(agentParis, [
+        buildStructureVersionTransformation("92"),
+      ])
+    ).toThrow("Le département 92 n'est pas dans votre périmètre.");
+  });
+
+  it("rejette dès qu'un seul des départements est hors périmètre", () => {
+    expect(() =>
+      checkCanUpdateDepartements(agentParis, [
+        buildStructureVersionTransformation("75"),
+        buildStructureVersionTransformation("92"),
+      ])
+    ).toThrow("Le département 92 n'est pas dans votre périmètre.");
+  });
+
+  it("rejette un département hérité de la structure source", () => {
+    expect(() =>
+      checkCanUpdateDepartements(agentParis, [
+        { structureVersion: { structure: { departementAdministratif: "92" } } },
+      ])
+    ).toThrow(ApiDomainError);
+  });
+
+  it("retient le département de la version plutôt que celui de la structure", () => {
+    expect(() =>
+      checkCanUpdateDepartements(agentParis, [
+        {
+          structureVersion: {
+            departementAdministratif: "75",
+            structure: { departementAdministratif: "92" },
+          },
+        },
+      ])
+    ).not.toThrow();
+  });
+
+  it("laisse un agent démarrer une création dont le département est encore inconnu", () => {
+    expect(() => checkCanUpdateDepartements(agentParis, [{}])).not.toThrow();
+  });
+
+  it("ignore une chaîne vide plutôt que de la comparer au périmètre", () => {
+    expect(() =>
+      checkCanUpdateDepartements(agentParis, [
+        buildStructureVersionTransformation(""),
+      ])
+    ).not.toThrow();
+  });
+
+  it("refuse un utilisateur sans droit d'écriture quand le département est inconnu", () => {
+    const operateur = {
+      role: "ANONYMOUS",
+      allowedDepartements: [],
+    } as unknown as SessionUser;
+
+    expect(() => checkCanUpdateDepartements(operateur, [{}])).toThrow(
+      "Droits insuffisants"
+    );
+  });
+
+  it("laisse passer un agent national sur n'importe quel département", () => {
+    expect(() =>
+      checkCanUpdateDepartements(agentNational, [
+        buildStructureVersionTransformation("92"),
+      ])
+    ).not.toThrow();
+  });
+
+  it("ne rejette rien sans utilisateur, pour les scripts", () => {
+    expect(() =>
+      checkCanUpdateDepartements(undefined, [
+        buildStructureVersionTransformation("92"),
+      ])
     ).not.toThrow();
   });
 });
