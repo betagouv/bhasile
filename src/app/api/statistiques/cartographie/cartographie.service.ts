@@ -45,6 +45,7 @@ export const getCartographieStatistiques = async (
     departements: departementNumerosRestriction
       ? [...departementNumerosRestriction].join(",")
       : null,
+    arrondissements: null,
     operateurs: filters.operateurs,
     types: filters.types,
     aggregation,

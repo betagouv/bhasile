@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
 
   const filters = statistiquesFiltersSchema.parse({
     departements: searchParams.get("departements"),
+    arrondissements: searchParams.get("arrondissements"),
     operateurs: searchParams.get("operateurs"),
     types: searchParams.get("types"),
     aggregation: searchParams.get("aggregation"),

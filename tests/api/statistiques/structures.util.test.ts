@@ -24,7 +24,7 @@ const testStructure = (
 ): StatistiqueDbStructure => ({
   id,
   type,
-  departementAdministratif: "01",
+  departementAdministratif: "01", arrondissementCode: null,
 });
 
 const testTypologie = (

@@ -8,10 +8,10 @@ import {
 
 import type {
   StatistiqueDbAdresse,
-  StatistiqueDbDepartement,
   StatistiqueDbStructure,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologieValues,
+  StatistiquePopulationScope,
   StatistiquesAdresseSnapshotContext,
   StatistiquesContext,
   StatistiquesTypologieYearContext,
@@ -85,21 +85,21 @@ const sumAdressePlacesSpeciales = (
 
 const computeTauxEquipementAgrege = (
   totalPlaces: number,
-  departements: StatistiqueDbDepartement[]
+  populationScope: StatistiquePopulationScope[]
 ): TauxEquipement => {
-  if (departements.length === 0) {
+  if (populationScope.length === 0) {
     return { population: null, tauxEquipement: null };
   }
 
-  const hasAllPopulations = departements.every(
-    (departement) => departement.population != null
+  const hasAllPopulations = populationScope.every(
+    (scope) => scope.population != null
   );
   if (!hasAllPopulations) {
     return { population: null, tauxEquipement: null };
   }
 
-  const population = departements.reduce(
-    (sum, departement) => sum + (departement.population ?? 0),
+  const population = populationScope.reduce(
+    (sum, scope) => sum + (scope.population ?? 0),
     0
   );
 
@@ -114,7 +114,7 @@ const computeTauxEquipementAgrege = (
 const computePlacesTypologieIndicators = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>,
-  departements: StatistiqueDbDepartement[]
+  populationScope: StatistiquePopulationScope[]
 ): PlacesTypologieIndicators => {
   const structuresWithTypologie = filterStructuresWithTypologie(
     structures,
@@ -124,7 +124,7 @@ const computePlacesTypologieIndicators = (
 
   return {
     totalPlaces,
-    ...computeTauxEquipementAgrege(totalPlaces, departements),
+    ...computeTauxEquipementAgrege(totalPlaces, populationScope),
     ...sumStructureTypologiePlacesSpeciales(
       structuresWithTypologie,
       typologieMap
@@ -159,13 +159,21 @@ export const computePlacesStatistiques = (
     typologies,
     adresses,
     departements,
+    arrondissements,
     structureVersionTimeline,
   } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const now = getNow();
+  // Filtre arrondissements actif : le dénominateur descend à la maille arrondissement.
+  const populationScope =
+    arrondissements.length > 0 ? arrondissements : departements;
 
   return {
-    ...computePlacesTypologieIndicators(structures, typologieMap, departements),
+    ...computePlacesTypologieIndicators(
+      structures,
+      typologieMap,
+      populationScope
+    ),
     ...computeAdressePlacesSpecialesSnapshot(
       structures,
       adresses,
@@ -180,7 +188,7 @@ export const computePlacesStatistiques = (
         computePlacesTypologieIndicators(
           structuresForYear,
           getTypologieMapForExactYear(typologies, year),
-          departements
+          populationScope
         )
     ),
   };

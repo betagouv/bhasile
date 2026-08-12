@@ -32,6 +32,7 @@
     "prepare": "husky || true",
     "pre-push": "yarn lint && yarn check:ts && yarn sql:format:check",
     "apply-views": "npx tsx scripts/apply-views.ts",
+    "referentiel:arrondissements": "npx tsx scripts/generate-referentiel-arrondissements.ts",
     "apply-views:dev": "npx tsx -r dotenv/config scripts/apply-views.ts",
     "delete-views": "npx tsx scripts/apply-views.ts delete",
     "delete-views:dev": "npx tsx -r dotenv/config scripts/apply-views.ts delete",

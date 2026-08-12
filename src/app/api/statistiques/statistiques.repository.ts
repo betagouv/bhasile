@@ -6,6 +6,7 @@ import { finalizedVersionWhere } from "../structure-versions/structure-version.d
 import type {
   StatistiqueDbActivite,
   StatistiqueDbAdresse,
+  StatistiqueDbArrondissement,
   StatistiqueDbBudget,
   StatistiqueDbCpomStructure,
   StatistiqueDbDepartement,
@@ -47,6 +48,9 @@ export const findPerimeterStructures = async (
       ...(resolved.departements
         ? { departementAdministratif: { in: [...resolved.departements] } }
         : {}),
+      ...(resolved.arrondissements
+        ? { arrondissementCode: { in: [...resolved.arrondissements] } }
+        : {}),
       ...(resolved.operateurIds
         ? { operateurId: { in: [...resolved.operateurIds] } }
         : {}),
@@ -64,7 +68,12 @@ export const findPerimeterStructures = async (
         },
       },
     },
-    select: { id: true, type: true, departementAdministratif: true },
+    select: {
+      id: true,
+      type: true,
+      departementAdministratif: true,
+      arrondissementCode: true,
+    },
   });
 
 export const findStructureActivityDates = async (
@@ -206,6 +215,20 @@ export const findDepartementsWithPopulation = async (
         ? { numero: { in: departementNumeros } }
         : undefined,
     select: { numero: true, name: true, population: true },
+  });
+};
+
+export const findArrondissementsWithPopulation = async (
+  arrondissementCodes: string[]
+): Promise<StatistiqueDbArrondissement[]> => {
+  return prisma.arrondissement.findMany({
+    where: { code: { in: arrondissementCodes } },
+    select: {
+      code: true,
+      name: true,
+      departementNumero: true,
+      population: true,
+    },
   });
 };
 

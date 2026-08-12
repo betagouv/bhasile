@@ -13,6 +13,7 @@ import { StructureType } from "@/types/structure.type";
 import { createPrismaClient } from "./client";
 import { createFakeActivites } from "./seeders/activite.seed";
 import { createAntenneList } from "./seeders/antenne.seed";
+import { seedArrondissementsAndCommunes } from "./seeders/arrondissements.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
 import { seedRegionsAndDepartements } from "./seeders/departements.seed";
 import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
@@ -157,6 +158,7 @@ async function seed(): Promise<void> {
   );
 
   await seedRegionsAndDepartements(prisma);
+  await seedArrondissementsAndCommunes(prisma);
 
   console.log("🚓 Création des données RMU...");
   await createFakeRmus(prisma);

@@ -43,6 +43,20 @@ Enfin, vous pouvez vérifier le contenu de la base de données en exécutant :
 yarn prisma:studio
 ```
 
+## 🗺️ Référentiel arrondissements et communes
+
+`Arrondissement` et `Commune` portent le découpage préfectoral (arrondissements **départementaux**, pas municipaux : Paris, Lyon et Marseille ne comptent chacun qu'un arrondissement). Les données sont versionnées dans `prisma/data/arrondissements.csv` et `prisma/data/communes.csv`, lues aussi bien par le seeder que par le script de chargement en production.
+
+Pour changer de millésime COG, mettre à jour `COG_MILLESIME` et `COG_FILE_ID` dans le script de génération (l'identifiant de dossier INSEE change à chaque publication annuelle), puis :
+
+```bash
+yarn referentiel:arrondissements
+```
+
+Le script croise le COG INSEE (rattachement commune vers arrondissement) et `geo.api.gouv.fr` (codes postaux et populations), et recalcule la population de chaque arrondissement par somme de ses communes. En production, le référentiel se charge avec `yarn one-off 20260807-load-arrondissements-referentiel` : rejouable, il upserte les arrondissements et remplace les communes.
+
+`Structure.arrondissementCode` est figé à la création, comme `departementAdministratif`. La résolution se fait sur le couple code postal + nom de commune (strictement discriminant sur le référentiel), avec repli sur le code postal seul lorsqu'il ne recouvre qu'un arrondissement. Mayotte n'est pas découpée en arrondissements par le COG : ses structures gardent un `arrondissementCode` nul.
+
 ## 🪿 Focus sur les migrations
 
 Le temps de développer la branche, il peut être utile d'utiliser l'outil de prototypage `yarn prisma:push`. Cela va venir faire évoluer la base en local mais ne générera pas les migrations, limitant ainsi le nombre de "micro migrations" associées à une PR.

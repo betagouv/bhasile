@@ -31,17 +31,18 @@ Schéma : `src/schemas/api/statistique.schema.ts`.
 
 ## Paramètres
 
-| Paramètre      | Description                                                             |
-| -------------- | ----------------------------------------------------------------------- |
-| `departements` | Numéros séparés par des virgules (`01,02`)                              |
-| `operateurs`   | IDs séparés par des virgules (filiales incluses)                        |
-| `types`        | `StructureType` (`CADA,CPH`)                                            |
-| `aggregation`  | `moyenne` (défaut) ou `mediane` (utile pour finance + contrôle qualité) |
+| Paramètre         | Description                                                             |
+| ----------------- | ----------------------------------------------------------------------- |
+| `departements`    | Numéros séparés par des virgules (`01,02`)                              |
+| `arrondissements` | Codes INSEE d'arrondissement séparés par des virgules (`011,012`)       |
+| `operateurs`      | IDs séparés par des virgules (filiales incluses)                        |
+| `types`           | `StructureType` (`CADA,CPH`)                                            |
+| `aggregation`     | `moyenne` (défaut) ou `mediane` (utile pour finance + contrôle qualité) |
 
 Sans filtre l'API retourne tout le parc, et si le périmètre retourné est vide l'API retourne `null`.
 Les filtres sont en **ET**.
 
-> Exception `rmu` (donnée départementale) : ne suit que `departements`, et vaut `null` dès qu'un filtre `operateurs`/`types` est actif. Cf. [rmu/README.md](./rmu/README.md#périmètre).
+> Exception `rmu` (donnée départementale) : ne suit que `departements`, et vaut `null` dès qu'un filtre `operateurs`/`types`/`arrondissements` est actif. Cf. [rmu/README.md](./rmu/README.md#périmètre).
 
 Exemple :
 
@@ -58,7 +59,9 @@ curl -s "http://localhost:3000/api/statistiques" | jq > tmp/statistiques.json
 
 ## Périmètre
 
-Filtre structures via `findPerimeterStructures` : `type` / `operateurId` / `departementAdministratif`.
+Filtre structures via `findPerimeterStructures` : `type` / `operateurId` / `departementAdministratif` / `arrondissementCode`.
+
+**Arrondissements** : `Structure.arrondissementCode` est figé à la création (résolu depuis le couple code postal + commune de l'adresse administrative, cf. `communes/commune.service.ts`), au même titre que `departementAdministratif`. Quand le filtre `arrondissements` est actif, le dénominateur du taux d'équipement bascule sur `Arrondissement.population` au lieu de `Departement.population` — sinon la population du département entier écraserait un périmètre plus fin. Les structures de Mayotte ont un `arrondissementCode` nul : le COG ne découpe pas le 976 en arrondissements.
 
 **Structures actives (indicateurs globaux)** : `activeStructureIdsNow` sur `StatistiquesContext` - structures ouvertes au jour de référence (`Structure.creationDate` / `fermetureDate`). `context.structures` en est la projection typée.
 

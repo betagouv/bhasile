@@ -10,6 +10,7 @@ export type StatistiquesAggregation = NumericAggregation;
 
 export const statistiquesFiltersSchema = z.object({
   departements: z.string().nullable(),
+  arrondissements: z.string().nullable(),
   operateurs: z.string().nullable(),
   types: z.string().nullable(),
   aggregation: z

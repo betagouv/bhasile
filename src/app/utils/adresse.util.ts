@@ -14,6 +14,15 @@ export const getCoordinates = async (address: string): Promise<Coordinates> => {
   };
 };
 
+/** Clé de rapprochement entre `Adresse.commune` (saisie libre) et `Commune.nameNormalized`. */
+export const normalizeCommuneName = (commune: string): string =>
+  commune
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, " ")
+    .trim();
+
 export const getDepartementFromCodePostal = (codePostal: string) =>
   (codePostal?.trim().match(/^(97|98)\d/)
     ? (codePostal?.trim().slice(0, 3) ?? "")

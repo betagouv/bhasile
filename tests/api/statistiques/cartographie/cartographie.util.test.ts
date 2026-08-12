@@ -72,7 +72,7 @@ describe("groupStructureIdsByDepartement", () => {
 
   it("ignore les structures sans departementAdministratif", () => {
     const groups = groupStructureIdsByDepartement([
-      { id: 1, type: StructureType.CADA, departementAdministratif: null },
+      { id: 1, type: StructureType.CADA, departementAdministratif: null, arrondissementCode: null },
     ]);
 
     expect(groups.size).toBe(0);

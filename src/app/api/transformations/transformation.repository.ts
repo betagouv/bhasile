@@ -15,6 +15,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
+import { resolveArrondissementCode } from "../communes/commune.service";
 import { TRANSFORMATION_FORM_SLUG } from "../forms/form.constants";
 import {
   createOrUpdateForm,
@@ -369,12 +370,19 @@ const createStructureFromCreationBlock = async (
     bhasileCounterCache
   );
 
+  const arrondissementCode = await resolveArrondissementCode(
+    structureVersion.codePostalAdministratif,
+    structureVersion.communeAdministrative,
+    tx
+  );
+
   const structure = await tx.structure.create({
     data: {
       codeBhasile,
       operateurId,
       creationDate: structureVersion.effectiveDate,
       departementAdministratif: structureVersion.departementAdministratif,
+      arrondissementCode,
       type: structureType,
     },
   });

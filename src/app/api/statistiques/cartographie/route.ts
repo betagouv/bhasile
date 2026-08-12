@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const body: CartographieNotImplementedApiRead = {
       error: "NOT_IMPLEMENTED",
       message:
-        "La cartographie par arrondissement n'est pas encore disponible (aucun modèle de données correspondant).",
+        "La cartographie par arrondissement n'est pas encore disponible (zones et découpage du contexte non implémentés).",
     };
     return NextResponse.json(body, { status: 501 });
   }

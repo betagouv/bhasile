@@ -78,6 +78,8 @@ SELECT
   sc."dna_codes" AS "dna_codes",
   sc."departement_administratif" AS "departement_administratif",
   sc."departement" AS "departement",
+  sc."arrondissement_code" AS "arrondissement_code",
+  sc."arrondissement" AS "arrondissement",
   sc."region" AS "region",
   sc."operateur" AS "operateur",
   sc."structure_type" AS "structure_type",

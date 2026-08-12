@@ -20,8 +20,14 @@ import { StructureType } from "@/types/structure.type";
 export const testStructure = (
   id: number,
   departementAdministratif: string,
-  type: StructureType = StructureType.CADA
-): StatistiqueDbStructure => ({ id, type, departementAdministratif });
+  type: StructureType = StructureType.CADA,
+  arrondissementCode: string | null = null
+): StatistiqueDbStructure => ({
+  id,
+  type,
+  departementAdministratif,
+  arrondissementCode,
+});
 
 export const testTypologie = (
   id: number,
@@ -170,6 +176,7 @@ export const buildTestStatistiquesContext = (
         | "cpomLinks"
         | "dnaLinks"
         | "structureVersionTimeline"
+        | "arrondissements"
         | "allStructures"
         | "activeStructureIdsNow"
         | "activeStructureIdsByPeriod"
@@ -218,6 +225,7 @@ export const buildTestStatistiquesContext = (
     typologies: partial.typologies,
     adresses: partial.adresses,
     departements: partial.departements,
+    arrondissements: partial.arrondissements ?? [],
     cpomLinks: partial.cpomLinks ?? [],
     dnaLinks,
     structureVersionTimeline,

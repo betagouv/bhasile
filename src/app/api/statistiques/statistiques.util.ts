@@ -44,6 +44,7 @@ const NON_EXCLUDED_STRUCTURE_TYPES: StructureType[] = Object.values(
 
 export type StatistiquesResolvedPerimeterFilters = {
   departements: Set<string> | null;
+  arrondissements: Set<string> | null;
   types: Set<StructureType>;
   operateurIds: Set<number> | null;
 };
@@ -51,6 +52,7 @@ export type StatistiquesResolvedPerimeterFilters = {
 /** Filtres parsés mais pas encore résolus : les filiales des `operateurIds` ne sont pas encore ajoutées (accès BDD, cf. service). */
 export type StatistiquesParsedPerimeterFilters = {
   departements: Set<string> | null;
+  arrondissements: Set<string> | null;
   types: Set<StructureType>;
   operateurIds: number[];
 };
@@ -59,6 +61,8 @@ export const parseStatistiquesPerimeterFilters = (
   filters: StatistiquesFilters
 ): StatistiquesParsedPerimeterFilters => {
   const depList = filters.departements?.split(",").filter(Boolean) ?? [];
+  const arrondissementList =
+    filters.arrondissements?.split(",").filter(Boolean) ?? [];
   const requestedTypes = new Set(
     filters.types?.split(",").filter(Boolean) ?? []
   );
@@ -72,6 +76,8 @@ export const parseStatistiquesPerimeterFilters = (
 
   return {
     departements: depList.length > 0 ? new Set(depList) : null,
+    arrondissements:
+      arrondissementList.length > 0 ? new Set(arrondissementList) : null,
     types,
     operateurIds,
   };
@@ -825,6 +831,9 @@ export const sliceStatistiquesContext = (
   ),
   departements: context.departements.filter((departement) =>
     departementNumerosInZone.has(departement.numero)
+  ),
+  arrondissements: context.arrondissements.filter((arrondissement) =>
+    departementNumerosInZone.has(arrondissement.departementNumero)
   ),
   // Les RMU sont rattachés à un département (pas à une structure)
   rmus:
