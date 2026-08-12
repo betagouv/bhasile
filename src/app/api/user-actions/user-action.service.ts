@@ -1,3 +1,5 @@
+import { UserActionDescription } from "@/generated/prisma/enums";
+
 import { createUserAction } from "./user-action.repository";
 
 // Les fonctions de ce fichier sont asynchrones mais il faut les appeler sans
@@ -22,9 +24,15 @@ export const createOperateurEvent = async (
 };
 
 export const createStatistiquesEvent = async (method: string) => {
-  await createUserAction({ method, description: "statistiques" });
+  await createUserAction({
+    method,
+    description: UserActionDescription.STATISTIQUES_TABLE,
+  });
 };
 
 export const createStatistiquesCartographieEvent = async (method: string) => {
-  await createUserAction({ method, description: "statistiques-cartographie" });
+  await createUserAction({
+    method,
+    description: UserActionDescription.STATISTIQUES_CARTOGRAPHIE,
+  });
 };

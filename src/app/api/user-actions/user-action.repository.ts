@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 
+import { UserActionDescription } from "@/generated/prisma/enums";
 import { authOptions } from "@/lib/next-auth/auth";
 import prisma from "@/lib/prisma";
 
@@ -54,5 +55,5 @@ type CreateUserActionArgs = {
   structureId?: number;
   cpomId?: number;
   operateurId?: number;
-  description?: string;
+  description?: UserActionDescription;
 };

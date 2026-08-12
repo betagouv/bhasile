@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { statistiquesFiltersSchema } from "@/schemas/api/statistique.schema";
 
-import { createStatistiquesEvent } from "../user-action/user-action.service";
 import { getStatistiques } from "./statistique.service";
 
 export async function GET(request: NextRequest) {
@@ -16,6 +15,5 @@ export async function GET(request: NextRequest) {
   });
 
   const result = await getStatistiques(filters);
-  createStatistiquesEvent(request.method);
   return NextResponse.json(result);
 }

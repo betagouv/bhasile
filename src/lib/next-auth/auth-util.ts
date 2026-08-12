@@ -1,8 +1,8 @@
 import { Session, User } from "next-auth";
 
 import { getEmailPatterns } from "@/app/api/email-patterns/email-pattern.repository";
-import { getAnonymousRole } from "@/app/api/role/role.repository";
-import { getUserByEmail } from "@/app/api/user/user.repository";
+import { getAnonymousRole } from "@/app/api/roles/role.repository";
+import { getUserByEmail } from "@/app/api/users/user.repository";
 import { Prisma } from "@/generated/prisma/client";
 
 export type ProConnectUser = User & {

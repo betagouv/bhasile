@@ -5,7 +5,6 @@ import {
   statistiqueCartographieFiltersSchema,
 } from "@/schemas/api/statistique-cartographie.schema";
 
-import { createStatistiquesCartographieEvent } from "../../user-action/user-action.service";
 import { getCartographieStatistiques } from "./cartographie.service";
 
 export async function GET(request: NextRequest) {
@@ -43,6 +42,5 @@ export async function GET(request: NextRequest) {
     ...filters,
     granularite: filters.granularite,
   });
-  createStatistiquesCartographieEvent(request.method);
   return NextResponse.json(result);
 }

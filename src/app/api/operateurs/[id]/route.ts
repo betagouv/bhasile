@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { operateurWriteApiSchema } from "@/schemas/api/operateur.schema";
 
-import { createOperateurEvent } from "../../user-action/user-action.service";
+import { createOperateurEvent } from "../../user-actions/user-action.service";
 import { getOperateur, updateOperateur } from "../operateur.service";
 
 export async function GET(
