@@ -1,9 +1,5 @@
 import { StepStatus } from "@/generated/prisma/client";
 
-export const isTransformationFinalised = (
-  transformation: { form?: { status: boolean | null } | null } | null | undefined
-): boolean => transformation?.form?.status === true;
-
 export const convertToStepStatus = (
   stepStatus: string | null | undefined
 ): StepStatus => {

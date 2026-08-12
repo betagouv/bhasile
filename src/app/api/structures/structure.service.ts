@@ -74,6 +74,11 @@ import {
   StructureListComputedRow,
 } from "./structure.util";
 
+type StructureMapPoint = Pick<
+  StructureApiRead,
+  "id" | "latitude" | "longitude"
+>;
+
 export type SearchProps = {
   search: string | null;
   page: number | null;
@@ -181,15 +186,15 @@ export const getFullStructures = async (
   );
 
   if (props.map) {
-    const structures = sorted.map(
-      (row) =>
-        ({
-          id: row.id,
-          latitude: row.latitude?.toString(),
-          longitude: row.longitude?.toString(),
-        }) as StructureApiRead
-    );
-    return { structures, totalStructures: sorted.length };
+    const points: StructureMapPoint[] = sorted.map((row) => ({
+      id: row.id,
+      latitude: row.latitude?.toString(),
+      longitude: row.longitude?.toString(),
+    }));
+    return {
+      structures: points as StructureApiRead[],
+      totalStructures: sorted.length,
+    };
   }
 
   const { total: totalStructures, rows: pageRows } = props.selection

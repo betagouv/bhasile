@@ -2,6 +2,7 @@ import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
   StructureVersionTransformationApiCreate,
@@ -16,7 +17,6 @@ import { TransformationType } from "@/types/transformation.type";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
-import { isTransformationFinalised } from "../forms/form.util";
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,

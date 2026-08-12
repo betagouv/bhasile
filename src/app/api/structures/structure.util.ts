@@ -14,6 +14,7 @@ import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
 import { getMostRecentMillesime } from "@/app/utils/structure.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
   PublicType,
@@ -37,7 +38,6 @@ import {
 import { UpcomingTransformation } from "@/types/transformation.type";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
-import { isTransformationFinalised } from "../forms/form.util";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
   getValidVersions,
@@ -237,7 +237,7 @@ export const isBornFromCreation = (
         effectiveDate: Date | null;
         structureVersionTransformation?: {
           type: StructureVersionTransformationType;
-          transformation?: { form?: { status: boolean } | null } | null;
+          transformation?: { form: { status: boolean } | null } | null;
         } | null;
       }[]
     | null

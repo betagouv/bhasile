@@ -3,6 +3,7 @@ import {
   getNextBhasileCode,
   getNormalizedRegionCodeFromDepartement,
 } from "@/app/utils/bhasile.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
@@ -20,7 +21,6 @@ import {
   createOrUpdateForm,
   initializeStructureVersionTransformationDefaultForms,
 } from "../forms/form.repository";
-import { isTransformationFinalised } from "../forms/form.util";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { transformationInclude } from "./transformation.db.type";

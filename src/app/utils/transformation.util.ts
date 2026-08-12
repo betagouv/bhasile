@@ -514,3 +514,7 @@ export const setStructureVersionTransformationFormStepStatus = (
     formSteps,
   };
 };
+
+export const isTransformationFinalised = (
+  transformation: { form: { status: boolean } | null } | null | undefined
+): boolean => transformation?.form?.status === true;

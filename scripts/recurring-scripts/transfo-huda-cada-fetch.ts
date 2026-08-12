@@ -236,11 +236,15 @@ const buildCadaBrique = async (
     };
   }
 
-  const targetCada = await resolveTargetCada(prisma, {
-    rawBhasileCode: champValue(dossier, CADA_BHASILE),
-    rawDnaCodes: [champValue(dossier, CADA_DNA)],
-    departement,
-  });
+  const targetCada = await resolveTargetCada(
+    prisma,
+    {
+      rawBhasileCode: champValue(dossier, CADA_BHASILE),
+      rawDnaCodes: [champValue(dossier, CADA_DNA)],
+      departement,
+    },
+    effectiveDate
+  );
   if (!targetCada.ok) {
     return { ok: false, reason: `CADA cible : ${targetCada.failure.reason}` };
   }
@@ -347,11 +351,15 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
 
   const departement = parseDepartement(champValue(dossier, DEPARTEMENT));
 
-  const resolution = await resolveHudas(prisma, {
-    rawBhasileCodes: champValues(dossier, HUDA_BHASILE),
-    rawDnaCodes: champValues(dossier, HUDA_DNA),
-    departement,
-  });
+  const resolution = await resolveHudas(
+    prisma,
+    {
+      rawBhasileCodes: champValues(dossier, HUDA_BHASILE),
+      rawDnaCodes: champValues(dossier, HUDA_DNA),
+      departement,
+    },
+    effectiveDate
+  );
   if (!resolution.ok) {
     skip(`HUDA non rattaché — ${resolution.failure.reason}`);
     return;

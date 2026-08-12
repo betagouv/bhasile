@@ -1,6 +1,6 @@
-import { isTransformationFinalised } from "@/app/api/forms/form.util";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 
 export const checkNoDepartementAdministratifChange = (
   structureDepartement: string | null | undefined,
@@ -45,7 +45,7 @@ export type OrderableVersion = {
 export type ResolvableVersion = OrderableVersion & {
   structureVersionTransformationId: number | null;
   structureVersionTransformation: {
-    transformation: { form: { status: boolean | null } | null } | null;
+    transformation: { form: { status: boolean } | null } | null;
   } | null;
 };
 
