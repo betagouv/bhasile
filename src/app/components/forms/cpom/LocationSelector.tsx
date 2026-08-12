@@ -39,7 +39,10 @@ export const LocationSelector = () => {
   };
 
   const departementLength = useMemo(() => departements.length, [departements]);
-  const firstDepartement = useMemo(() => departements[0], [departements]);
+  const firstDepartementNumero = useMemo(
+    () => departements[0]?.departement?.numero,
+    [departements]
+  );
   const prevRegion = useRef(region);
   const prevGranularity = useRef(granularity);
   useEffect(() => {
@@ -58,7 +61,7 @@ export const LocationSelector = () => {
       if (
         departementLength > 1 ||
         DEPARTEMENTS.find(
-          (departement) => departement.numero === firstDepartement
+          (departement) => departement.numero === firstDepartementNumero
         )?.region !== region
       ) {
         setValue("departements", [], { shouldValidate: true });
@@ -78,7 +81,7 @@ export const LocationSelector = () => {
     }
   }, [
     departementLength,
-    firstDepartement,
+    firstDepartementNumero,
     region,
     setValue,
     departementsOfRegion,

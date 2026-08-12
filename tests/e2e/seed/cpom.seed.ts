@@ -8,7 +8,7 @@ export type SeededCpom = {
   name: string;
   granularity: CpomGranularity;
   operateurId: number;
-  departementIds: number[];
+  departementNumeros: string[];
   regionId: number | null;
 };
 
@@ -26,16 +26,15 @@ export const createCpomForTest = async (
     regionId = region?.id ?? undefined;
   }
 
-  const departementNumeros =
-    input.departementNumeros ?? (regionId ? ["75"] : []);
+  const requestedNumeros = input.departementNumeros ?? (regionId ? ["75"] : []);
 
-  const departementIds = departementNumeros.length
+  const departementNumeros = requestedNumeros.length
     ? (
         await prisma.departement.findMany({
-          where: { numero: { in: departementNumeros } },
-          select: { id: true },
+          where: { numero: { in: requestedNumeros } },
+          select: { numero: true },
         })
-      ).map((d) => d.id)
+      ).map((d) => d.numero)
     : [];
 
   const cpom = await prisma.cpom.create({
@@ -44,10 +43,12 @@ export const createCpomForTest = async (
       granularity: input.granularity,
       operateurId: input.operateurId,
       regionId,
-      departements: departementIds.length
+      departements: departementNumeros.length
         ? {
             createMany: {
-              data: departementIds.map((departementId) => ({ departementId })),
+              data: departementNumeros.map((departementNumero) => ({
+                departementNumero,
+              })),
             },
           }
         : undefined,
@@ -74,7 +75,7 @@ export const createCpomForTest = async (
     name: cpom.name ?? input.name,
     granularity: cpom.granularity,
     operateurId: cpom.operateurId,
-    departementIds,
+    departementNumeros,
     regionId: cpom.regionId,
   };
 };

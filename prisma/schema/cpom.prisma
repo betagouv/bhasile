@@ -22,13 +22,13 @@ model Cpom {
 }
 
 model CpomDepartement {
-  cpom          Cpom        @relation(fields: [cpomId], references: [id], onDelete: Cascade)
-  cpomId        Int
-  departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
-  departementId Int
+  cpom              Cpom        @relation(fields: [cpomId], references: [id], onDelete: Cascade)
+  cpomId            Int
+  departement       Departement @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
+  departementNumero String
 
-  @@id([cpomId, departementId])
-  @@index([departementId])
+  @@id([cpomId, departementNumero])
+  @@index([departementNumero])
   @@schema("public")
 }
 

@@ -31,12 +31,12 @@ export const StructuresBlock = (): ReactElement => {
         </div>
         <InformationCard
           primaryInformation={statistiques.structures.totalCpoms}
-          secondaryInformation="CPOM"
+          secondaryInformation="CPOM complets ou partiels"
         />
         <InformationCardBridge />
         <InformationCard
           primaryInformation={statistiques.structures.structuresAvecCpom}
-          secondaryInformation="structures concernées"
+          secondaryInformation="structures sous CPOM"
         />
       </div>
       <div className="grid grid-cols-2 pb-16">
