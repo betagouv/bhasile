@@ -67,7 +67,8 @@ export const ControleQualiteBlock = (): ReactElement => {
                 "N/A"
               ) : (
                 <>
-                  {moyenneEvaluations} <span className="text-xl">/&nbsp;4</span>
+                  {formatNumber(moyenneEvaluations)}{" "}
+                  <span className="text-xl">/&nbsp;4</span>
                 </>
               )
             }
