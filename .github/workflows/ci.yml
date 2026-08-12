@@ -56,9 +56,9 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
+          --health-interval 2s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -82,7 +82,7 @@ jobs:
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:17
@@ -94,29 +94,14 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
+          --health-interval 2s
           --health-timeout 5s
-          --health-retries 5
-    env:
-      AUTH_SECRET: ci-auth-secret-not-a-real-secret
-      NEXTAUTH_URL: http://localhost:3000
-      NEXT_PUBLIC_URL: http://localhost:3000
-      E2E_BASE_URL: http://localhost:3000
-      OPERATEUR_PASSWORDS: password
-      ACTUALISATION_YEAR: "2026"
-      NEXT_PUBLIC_EMULATED_NOW: "2026-06-15T12:00:00Z"
-      S3_URL: localhost
-      S3_PORT: "9000"
-      S3_USE_SSL: "0"
-      S3_ACCESS: minioadmin
-      S3_SECRET: minioadmin
-      S3_BUCKET_NAME: bhasile-e2e
-      SENTRY_AUTH_TOKEN: ""
-      IS_PRODUCTION: "false"
-      SMALL_SEED: "1"
-      E2E_WORKERS: "2"
+          --health-retries 15
     steps:
       - uses: actions/checkout@v5
+      # Avant tout le reste : les NEXT_PUBLIC_* sont inlinés au build.
+      - name: Build env file
+        run: cp .env.ci .env
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
@@ -125,8 +110,8 @@ jobs:
       - name: Start MinIO
         run: |
           docker run -d --name minio -p 9000:9000 \
-            -e MINIO_ROOT_USER="${S3_ACCESS}" \
-            -e MINIO_ROOT_PASSWORD="${S3_SECRET}" \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
             minio/minio server /data
           for _ in $(seq 1 30); do
             if curl -sf http://localhost:9000/minio/health/live; then exit 0; fi
@@ -135,8 +120,6 @@ jobs:
           echo "MinIO n'a pas démarré :"
           docker logs minio
           exit 1
-      - name: Build env file
-        run: cp .env.example .env
       - name: Apply migrations
         run: npx prisma migrate deploy
       - name: Seed database
