@@ -133,7 +133,6 @@ export type StatistiqueDbRmu = Prisma.RmuGetPayload<{
 
 export type StatistiqueDbDepartement = Prisma.DepartementGetPayload<{
   select: {
-    id: true;
     numero: true;
     name: true;
     population: true;

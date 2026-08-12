@@ -89,5 +89,12 @@ export const updateOperateur = async (
 export const getOperateursSuggestions = async (
   search: string | null
 ): Promise<Operateur[]> => {
-  return findBySearchTerm(search);
+  const operateurs = await findBySearchTerm(search);
+
+  return sortRows(
+    operateurs,
+    (operateur) => ({ value: operateur.name, kind: "text" }),
+    (operateur) => ({ value: operateur.id, kind: "number" }),
+    "asc"
+  );
 };

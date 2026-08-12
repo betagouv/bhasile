@@ -7,7 +7,6 @@ export const findAllDepartementsWithRegion = async (): Promise<
 > => {
   const departements = await prisma.departement.findMany({
     select: {
-      id: true,
       numero: true,
       name: true,
       regionAdministrative: { select: { code: true, name: true } },
@@ -15,7 +14,6 @@ export const findAllDepartementsWithRegion = async (): Promise<
   });
 
   return departements.map((departement) => ({
-    id: departement.id,
     numero: departement.numero,
     name: departement.name,
     regionCode: departement.regionAdministrative?.code ?? null,

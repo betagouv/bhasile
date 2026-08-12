@@ -49,6 +49,5 @@ const hasDocument = (
     (acte) =>
       acte.category === category &&
       acte.parentId === null &&
-      acte.isMissing !== true &&
       acte.hasFile
   );

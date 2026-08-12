@@ -36,7 +36,6 @@ export const acteContext = (
   category: "CONVENTION",
   startDate: new Date("2020-01-01"),
   endDate: new Date("2025-01-01"),
-  isMissing: null,
   parentId: null,
   cpomId: null,
   hasFile: true,
@@ -58,7 +57,6 @@ export const budgetContext = (
   overrides: Partial<BudgetContext> = {}
 ): BudgetContext => ({
   year: 2024,
-  isMissing: null,
   totalProduits: 1_000,
   totalCharges: 900,
   repriseEtat: null,
@@ -81,7 +79,6 @@ export const indicateurContext = (
 ): IndicateurContext => ({
   year: 2024,
   type: "REALISE",
-  isMissing: null,
   tauxEncadrement: 10,
   coutJournalier: 30,
   ...overrides,

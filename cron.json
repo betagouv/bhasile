@@ -1,11 +1,11 @@
 {
   "jobs": [
     {
-      "command": "0 10 * * 1-5 yarn cronify eig-fetch; yarn cronify transfo-huda-cada-fetch; yarn cronify recompute-anomalies",
+      "command": "0 5 * * 1-5 yarn cronify eig-fetch; yarn cronify transfo-huda-cada-fetch; yarn cronify recompute-anomalies",
       "size": "S"
     },
     {
-      "command": "30 10 * * 1 yarn cronify clean-old-user-actions",
+      "command": "30 5 * * 1 yarn cronify clean-old-user-actions",
       "size": "S"
     },
     {

@@ -12,7 +12,7 @@ const TABS: { value: Statut; label: string }[] = [
   { value: "fermees", label: "Fermées" },
 ];
 
-export const StatutTabs = (): ReactElement | null => {
+export const StatutTabs = (): ReactElement => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentStatut: Statut =
@@ -29,11 +29,6 @@ export const StatutTabs = (): ReactElement | null => {
     params.delete("direction");
     router.push(`?${params.toString()}`);
   };
-
-  //TODO: remove this once transformation is ready
-  if (process.env.NEXT_PUBLIC_SHOW_TRANSFORMATION !== "true") {
-    return null;
-  }
 
   return (
     <div

@@ -18,7 +18,7 @@ export const seedAgent = async (): Promise<void> => {
 
   const departement = await prisma.departement.findUnique({
     where: { numero: E2E_AGENT_DEPARTEMENT },
-    select: { id: true },
+    select: { numero: true },
   });
   if (!departement) {
     throw new Error(
@@ -37,7 +37,7 @@ export const seedAgent = async (): Promise<void> => {
   // d'autres départements, qu'un simple upsert laisserait en place.
   await prisma.roleDepartement.deleteMany({ where: { roleId: role.id } });
   await prisma.roleDepartement.create({
-    data: { departementId: departement.id, roleId: role.id },
+    data: { departementNumero: departement.numero, roleId: role.id },
   });
 
   const emailPattern = await prisma.emailPattern.upsert({

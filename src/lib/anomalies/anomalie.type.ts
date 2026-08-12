@@ -44,7 +44,6 @@ export type ActeContext = {
   category: ActeAdministratifCategory;
   startDate: Date | null;
   endDate: Date | null;
-  isMissing: boolean | null;
   parentId: number | null;
   cpomId: number | null;
   hasFile: boolean;
@@ -57,7 +56,6 @@ export type AdresseContext = {
 
 export type BudgetContext = {
   year: number;
-  isMissing: boolean | null;
   totalProduits: number | null;
   totalCharges: number | null;
   repriseEtat: number | null;
@@ -77,7 +75,6 @@ export type BudgetContext = {
 export type IndicateurContext = {
   year: number;
   type: IndicateurFinancierType;
-  isMissing: boolean | null;
   tauxEncadrement: number | null;
   coutJournalier: number | null;
 };

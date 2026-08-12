@@ -247,7 +247,7 @@ export const createFakeCpoms = async (
                     departement.regionAdministrative?.name === regionName
                 )
                 .map((departement) => ({
-                  departementId: departement.id,
+                  departementNumero: departement.numero,
                 })),
             }
           : undefined,
