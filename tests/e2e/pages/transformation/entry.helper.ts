@@ -5,8 +5,6 @@ import type { Page } from "@playwright/test";
  * de la liste / le menu 3-points de la fiche structure (navigation client-side
  * dans une app déjà hydratée), plutôt que par un `goto` direct sur l'URL du
  * formulaire (qui atterrit avant hydratation → interactions perdues).
- *
- * Nécessite `NEXT_PUBLIC_SHOW_TRANSFORMATION=true` (déjà dans `.env`).
  */
 
 const waitHydrated = async (page: Page): Promise<void> => {

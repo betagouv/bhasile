@@ -23,7 +23,7 @@ export const ActivitePlaces = ({
     <div className="flex items-center pt-3">
       <div>
         <PieChart
-          size={160}
+          size={180}
           data={{
             labels: ["Places indisponibles", "Places disponibles"],
             series: [placesIndisponibles, placesDisponibles],

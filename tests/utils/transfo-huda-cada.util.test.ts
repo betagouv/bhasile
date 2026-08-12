@@ -9,7 +9,6 @@ import {
   padDnaCode,
   parseDepartement,
   parseDnaCodes,
-  parseFrenchDate,
   parseTransformationType,
 } from "../../scripts/utils/transfo-huda-cada.util";
 
@@ -153,39 +152,6 @@ describe("transfo huda cada util", () => {
 
     it("dédoublonne", () => {
       expect(normalizeDnaCodes("H5412 H5412").codes).toEqual(["H5412"]);
-    });
-  });
-
-  describe("parseFrenchDate", () => {
-    it("parse une date au format de Démarche Numérique", () => {
-      expect(parseFrenchDate("01 juillet 2026")?.toISOString()).toBe(
-        "2026-07-01T12:00:00.000Z"
-      );
-      expect(parseFrenchDate("15 mai 2026")?.toISOString()).toBe(
-        "2026-05-15T12:00:00.000Z"
-      );
-    });
-
-    it("gère les mois accentués", () => {
-      expect(parseFrenchDate("03 février 2027")?.toISOString()).toBe(
-        "2027-02-03T12:00:00.000Z"
-      );
-      expect(parseFrenchDate("09 août 2026")?.toISOString()).toBe(
-        "2026-08-09T12:00:00.000Z"
-      );
-    });
-
-    it("rejette une date ISO, que new Date() aurait pourtant acceptée", () => {
-      expect(parseFrenchDate("2026-07-01")).toBeNull();
-    });
-
-    it("rejette un jour inexistant", () => {
-      expect(parseFrenchDate("31 février 2026")).toBeNull();
-    });
-
-    it("rejette une chaîne vide ou un mois inconnu", () => {
-      expect(parseFrenchDate("")).toBeNull();
-      expect(parseFrenchDate("01 juilet 2026")).toBeNull();
     });
   });
 

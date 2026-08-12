@@ -104,45 +104,6 @@ export const parseDnaCodes = (
   return { codes, padded, unreadable, outsideDepartement };
 };
 
-const FRENCH_MONTHS = [
-  "janvier",
-  "février",
-  "mars",
-  "avril",
-  "mai",
-  "juin",
-  "juillet",
-  "août",
-  "septembre",
-  "octobre",
-  "novembre",
-  "décembre",
-];
-
-/** Démarche Numérique renvoie les dates en français (« 01 juillet 2026 »), pas en ISO. */
-export const parseFrenchDate = (raw: string): Date | null => {
-  const match = raw
-    .trim()
-    .toLowerCase()
-    .match(/^(\d{1,2})\s+([a-zéûôà]+)\s+(\d{4})$/);
-  if (!match) {
-    return null;
-  }
-
-  const [, day, month, year] = match;
-  const monthIndex = FRENCH_MONTHS.indexOf(month);
-  if (monthIndex === -1) {
-    return null;
-  }
-
-  const date = new Date(Date.UTC(Number(year), monthIndex, Number(day), 12));
-  if (date.getUTCDate() !== Number(day)) {
-    return null;
-  }
-
-  return date;
-};
-
 export const isEffectiveDateInScope = (date: Date): boolean =>
   date.getUTCFullYear() >= TRANSFORMATION_START_YEAR;
 

@@ -1,11 +1,17 @@
 import {
   findAllStructureIds,
+  findAnomalieForUpdate,
   findStructureForAnomalies,
   reconcileAnomalies,
+  updateAnomalieJustification,
 } from "@/app/api/anomalies/anomalie.repository";
 import { buildAnomalieContext } from "@/app/api/anomalies/anomalie.util";
+import { findUserIdByEmail } from "@/app/api/user/user.repository";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { getNow } from "@/app/utils/now.util";
+import { Prisma } from "@/generated/prisma/client";
 import { computeAnomalies } from "@/lib/anomalies/anomalie.compute";
+import { AnomalieApiUpdate } from "@/schemas/api/anomalie.schema";
 
 export const recomputeAnomalies = async (
   structureId: number
@@ -36,6 +42,64 @@ export const recomputeAnomaliesSafely = async (
       `Recalcul des anomalies échoué pour la structure ${structureId}`,
       error
     );
+  }
+};
+
+export const getAnomalieForUpdate = async (
+  id: number
+): Promise<{
+  structureId: number;
+  departementAdministratif: string | null;
+} | null> => {
+  const anomalie = await findAnomalieForUpdate(id);
+
+  if (anomalie === null) {
+    return null;
+  }
+
+  return {
+    structureId: anomalie.structureId,
+    departementAdministratif: anomalie.structure.departementAdministratif,
+  };
+};
+
+export const setAnomalieJustification = async (
+  input: AnomalieApiUpdate,
+  email: string
+): Promise<void> => {
+  if (!input.isJustified) {
+    await updateJustificationOrThrowNotFound(input.id, { isJustified: false });
+    return;
+  }
+
+  const user = await findUserIdByEmail(email);
+
+  if (user === null) {
+    throw new ApiDomainError("Utilisateur introuvable", 401);
+  }
+
+  await updateJustificationOrThrowNotFound(input.id, {
+    isJustified: true,
+    commentaire: input.commentaire,
+    justifiedById: user.id,
+    justifiedAt: getNow(),
+  });
+};
+
+const updateJustificationOrThrowNotFound = async (
+  id: number,
+  data: Parameters<typeof updateAnomalieJustification>[1]
+): Promise<void> => {
+  try {
+    await updateAnomalieJustification(id, data);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      throw new ApiDomainError("Anomalie introuvable", 404);
+    }
+    throw error;
   }
 };
 

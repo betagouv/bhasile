@@ -191,7 +191,10 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
 
   return (
     <div className="h-full w-full z-0">
-      <div ref={containerRef} className="h-full w-full" />
+      <div
+        ref={containerRef}
+        className="h-full w-full [&_.maplibregl-ctrl-top-left]:mt-16"
+      />
       <MapLibreProvider map={readyMap} registerPoint={registerPoint}>
         {children}
       </MapLibreProvider>

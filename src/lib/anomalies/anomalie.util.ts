@@ -25,7 +25,6 @@ export const actesWithDates = (
   actes.filter(
     (acte): acte is ActeDate =>
       acte.category === category &&
-      acte.isMissing !== true &&
       acte.startDate !== null &&
       acte.endDate !== null
   );
@@ -74,11 +73,7 @@ export const relevantBudgets = (
   structure: StructureContext,
   currentYear: number
 ): BudgetContext[] =>
-  budgets.filter(
-    (budget) =>
-      budget.isMissing !== true &&
-      isInWindow(budget.year, structure, currentYear)
-  );
+  budgets.filter((budget) => isInWindow(budget.year, structure, currentYear));
 
 // Un seul indicateur par exercice : le réalisé prime sur le prévisionnel.
 export const relevantIndicateurs = (
@@ -89,10 +84,7 @@ export const relevantIndicateurs = (
   const byYear = new Map<number, IndicateurContext>();
 
   for (const indicateur of indicateurs) {
-    if (
-      indicateur.isMissing === true ||
-      !isInWindow(indicateur.year, structure, currentYear)
-    ) {
+    if (!isInWindow(indicateur.year, structure, currentYear)) {
       continue;
     }
 

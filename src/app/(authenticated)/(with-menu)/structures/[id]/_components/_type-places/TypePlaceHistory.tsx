@@ -77,7 +77,7 @@ export const TypePlaceHistory = (): ReactElement => {
               )}
             </td>
             {years.map((year) => (
-              <td key={year} className="min-w-[100px] whitespace-nowrap">
+              <td key={year} className="min-w-25 whitespace-nowrap">
                 {row.getValue(year) ?? <EmptyCell />}
               </td>
             ))}

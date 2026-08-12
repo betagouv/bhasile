@@ -1,5 +1,6 @@
 import { ReactElement, useMemo, useState } from "react";
 
+import { ChartLegend } from "@/app/components/ChartLegend";
 import { DoubleYAxisBarLineChart } from "@/app/components/common/DoubleYAxisBarLineChart";
 import {
   TimePeriod,
@@ -43,8 +44,8 @@ export const EvaluationChart = (): ReactElement => {
       (item) => Number(item.nbStructuresEvaluees) || 0
     );
 
-    const moyenneGenerale = sortedEvaluationPeriodData.map(
-      (item) => Number(item.noteGenerale) || 0
+    const moyenneGenerale = sortedEvaluationPeriodData.map((item) =>
+      item.noteGenerale === null ? null : Number(item.noteGenerale)
     );
 
     return {
@@ -81,19 +82,21 @@ export const EvaluationChart = (): ReactElement => {
             timePeriod={timePeriod}
             setTimePeriod={setTimePeriod}
           />
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#FA7659] shrink-0" />
-            <p className="pl-2 mb-0">Moyenne générale de la note totale</p>
-          </div>
-          <div className="pb-2 flex items-center">
-            <div className="w-[40px] border-b-2 border-b-action-high-blue-france mr-2 shrink-0 grow-0" />
-            Nombre de structures évaluées
-          </div>
+          <ChartLegend
+            label="Moyenne générale de la note totale"
+            color="#FA7659"
+          />
+          <ChartLegend
+            label="Nombre de structures évaluées"
+            color="var(--border-action-high-blue-france)"
+            type="line"
+          />
         </div>
       </div>
       <span className="italic">
-        Pour rappel, seules les structures autorisées (CADA et CPH) sont
-        concernées par les évaluations.
+        Seules les structures autorisées (CADA et CPH) sont concernées par les
+        évaluations. Seuls les EIG déclarés via démarches numériques sont
+        affichés.
       </span>
     </>
   );
