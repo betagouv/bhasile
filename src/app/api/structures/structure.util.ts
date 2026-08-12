@@ -337,7 +337,7 @@ export const computeStructureListRow = (
     fermetureMotif: isClosed ? (fermetureTransformation?.motif ?? null) : null,
     bornFromCreation,
     hasForm: structure.forms.length > 0,
-    finalised: bornFromCreation || isFinalisationFormValidated(structure.forms),
+    finalised: isStructureFinalised(structure, now),
     type: structure.type,
     operateurName,
     departementAdministratif: currentVersion.departementAdministratif,

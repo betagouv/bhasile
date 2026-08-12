@@ -205,6 +205,24 @@ describe("transfo-huda-cada.resolve db integration", () => {
       expect(reasonOf(resolution)).toContain("est fermé depuis le 01/03/2026");
     });
 
+    it("rattache un HUDA dont la fermeture n'a pas encore pris effet", async () => {
+      const structure = await createStructure(StructureType.HUDA, {
+        fermetureDate: new Date("2026-09-01T00:00:00.000Z"),
+      });
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [structure.codeBhasile],
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        now
+      );
+
+      expect(resolution.ok).toBe(true);
+    });
+
     it("ignore une non-valeur saisie dans le champ code Bhasile", async () => {
       const { structure, dna } = await createHudaWithDna(
         "35",

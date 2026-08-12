@@ -1,4 +1,5 @@
 import { findStructuresByCurrentDnaCodes } from "@/app/api/dna-structures/dna-structure.repository";
+import { isStructureClosed } from "@/app/api/structures/structure.util";
 import { getNow } from "@/app/utils/now.util";
 import {
   PrismaClient,
@@ -38,8 +39,11 @@ const hasExpectedType = (
 const describeType = (structure: StructureCandidate): string =>
   structure.type ?? "type non renseigné";
 
-const describeClosure = (structure: StructureCandidate): string | null =>
-  structure.fermetureDate
+const describeClosure = (
+  structure: StructureCandidate,
+  now: Date
+): string | null =>
+  isStructureClosed(structure, now) && structure.fermetureDate
     ? `${structure.codeBhasile} est fermé depuis le ${structure.fermetureDate.toLocaleDateString("fr-FR")}`
     : null;
 
@@ -67,9 +71,10 @@ const structureSelect = {
 
 const checkStructure = (
   structure: StructureCandidate,
-  expectedType: StructureType
+  expectedType: StructureType,
+  now: Date
 ): string | null => {
-  const closure = describeClosure(structure);
+  const closure = describeClosure(structure, now);
   if (closure) {
     return closure;
   }
@@ -178,7 +183,7 @@ export const resolveHudas = async (
         failure: { reason: `code Bhasile ${codeBhasile} inconnu en base` },
       };
     }
-    const failureReason = checkStructure(structure, StructureType.HUDA);
+    const failureReason = checkStructure(structure, StructureType.HUDA, now);
     if (failureReason) {
       return { ok: false, failure: { reason: failureReason } };
     }
@@ -200,7 +205,7 @@ export const resolveHudas = async (
   }
 
   for (const structure of byDnaCodes.value) {
-    const failureReason = checkStructure(structure, StructureType.HUDA);
+    const failureReason = checkStructure(structure, StructureType.HUDA, now);
     if (failureReason) {
       return {
         ok: false,
@@ -264,7 +269,7 @@ export const resolveTargetCada = async (
         failure: { reason: `${codeBhasile} inconnu en base` },
       };
     }
-    const failureReason = checkStructure(structure, StructureType.CADA);
+    const failureReason = checkStructure(structure, StructureType.CADA, now);
     if (failureReason) {
       return { ok: false, failure: { reason: failureReason } };
     }
@@ -304,7 +309,7 @@ export const resolveTargetCada = async (
   }
 
   const [structure] = structures;
-  const failureReason = checkStructure(structure, StructureType.CADA);
+  const failureReason = checkStructure(structure, StructureType.CADA, now);
   if (failureReason) {
     return {
       ok: false,

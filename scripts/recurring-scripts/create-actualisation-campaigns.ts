@@ -14,12 +14,10 @@ import {
   ACTUALISATION_FORM_STEP_SLUGS,
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
-import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
-  isBornFromCreation,
-  isFinalisationFormValidated,
+  isStructureClosed,
+  isStructureFinalised,
 } from "@/app/api/structures/structure.util";
-import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { createPrismaClient } from "@/prisma-client";
 import { StepStatus } from "@/types/form.type";
 
@@ -116,21 +114,10 @@ const run = async () => {
         continue;
       }
 
-      const isFinalised =
-        isBornFromCreation(structure.structureVersions, now) ||
-        isFinalisationFormValidated(structure.forms);
-      if (!isFinalised) {
-        continue;
-      }
-
-      const currentVersion = resolveCurrentVersion(
-        structure.structureVersions,
-        now
-      );
-      const isClosed =
-        currentVersion?.structureVersionTransformation?.type ===
-        StructureVersionTransformationType.FERMETURE;
-      if (isClosed) {
+      if (
+        !isStructureFinalised(structure, now) ||
+        isStructureClosed(structure, now)
+      ) {
         continue;
       }
 
