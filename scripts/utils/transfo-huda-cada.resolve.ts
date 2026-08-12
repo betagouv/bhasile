@@ -1,6 +1,5 @@
 import { findStructuresByCurrentDnaCodes } from "@/app/api/dna-structures/dna-structure.repository";
 import { isStructureClosed } from "@/app/api/structures/structure.util";
-import { getNow } from "@/app/utils/now.util";
 import {
   PrismaClient,
   StructureType as DbStructureType,
@@ -41,10 +40,10 @@ const describeType = (structure: StructureCandidate): string =>
 
 const describeClosure = (
   structure: StructureCandidate,
-  now: Date
+  effectiveDate: Date
 ): string | null =>
-  isStructureClosed(structure, now) && structure.fermetureDate
-    ? `${structure.codeBhasile} est fermé depuis le ${structure.fermetureDate.toLocaleDateString("fr-FR")}`
+  isStructureClosed(structure, effectiveDate) && structure.fermetureDate
+    ? `${structure.codeBhasile} est fermé à la date d'effet (fermeture le ${structure.fermetureDate.toLocaleDateString("fr-FR")})`
     : null;
 
 export type ResolvedStructure = {
@@ -72,9 +71,9 @@ const structureSelect = {
 const checkStructure = (
   structure: StructureCandidate,
   expectedType: StructureType,
-  now: Date
+  effectiveDate: Date
 ): string | null => {
-  const closure = describeClosure(structure, now);
+  const closure = describeClosure(structure, effectiveDate);
   if (closure) {
     return closure;
   }
@@ -87,7 +86,7 @@ const checkStructure = (
 const resolveStructuresByDnaCodes = async (
   rawValues: string[],
   departement: string | null,
-  now: Date
+  effectiveDate: Date
 ): Promise<Resolution<StructureWithDnaCodes[]>> => {
   const { codes, padded, unreadable, outsideDepartement } = parseDnaCodes(
     rawValues,
@@ -98,7 +97,7 @@ const resolveStructuresByDnaCodes = async (
     codes.length > 0 || padded.size > 0
       ? await findStructuresByCurrentDnaCodes(
           [...codes, ...padded.values()],
-          now
+          effectiveDate
         )
       : [];
   const matched = new Set(structures.flatMap(({ dnaCodes }) => dnaCodes));
@@ -157,7 +156,7 @@ type HudaEnvelopeInput = {
 export const resolveHudas = async (
   prisma: PrismaClient,
   { rawBhasileCodes, rawDnaCodes, departement }: HudaEnvelopeInput,
-  now: Date = getNow()
+  effectiveDate: Date
 ): Promise<Resolution<ResolvedStructure[]>> => {
   const resolved = new Map<number, ResolvedStructure>();
 
@@ -183,7 +182,7 @@ export const resolveHudas = async (
         failure: { reason: `code Bhasile ${codeBhasile} inconnu en base` },
       };
     }
-    const failureReason = checkStructure(structure, StructureType.HUDA, now);
+    const failureReason = checkStructure(structure, StructureType.HUDA, effectiveDate);
     if (failureReason) {
       return { ok: false, failure: { reason: failureReason } };
     }
@@ -198,14 +197,14 @@ export const resolveHudas = async (
   const byDnaCodes = await resolveStructuresByDnaCodes(
     rawDnaCodes,
     departement,
-    now
+    effectiveDate
   );
   if (!byDnaCodes.ok) {
     return byDnaCodes;
   }
 
   for (const structure of byDnaCodes.value) {
-    const failureReason = checkStructure(structure, StructureType.HUDA, now);
+    const failureReason = checkStructure(structure, StructureType.HUDA, effectiveDate);
     if (failureReason) {
       return {
         ok: false,
@@ -244,7 +243,7 @@ type TargetCadaInput = {
 export const resolveTargetCada = async (
   prisma: PrismaClient,
   { rawBhasileCode, rawDnaCodes, departement }: TargetCadaInput,
-  now: Date = getNow()
+  effectiveDate: Date
 ): Promise<Resolution<ResolvedStructure>> => {
   const codesBhasile = normalizeBhasileCodes(rawBhasileCode);
   if (codesBhasile.length > 1) {
@@ -269,7 +268,7 @@ export const resolveTargetCada = async (
         failure: { reason: `${codeBhasile} inconnu en base` },
       };
     }
-    const failureReason = checkStructure(structure, StructureType.CADA, now);
+    const failureReason = checkStructure(structure, StructureType.CADA, effectiveDate);
     if (failureReason) {
       return { ok: false, failure: { reason: failureReason } };
     }
@@ -287,7 +286,7 @@ export const resolveTargetCada = async (
   const byDnaCodes = await resolveStructuresByDnaCodes(
     rawDnaCodes,
     departement,
-    now
+    effectiveDate
   );
   if (!byDnaCodes.ok) {
     return byDnaCodes;
@@ -309,7 +308,7 @@ export const resolveTargetCada = async (
   }
 
   const [structure] = structures;
-  const failureReason = checkStructure(structure, StructureType.CADA, now);
+  const failureReason = checkStructure(structure, StructureType.CADA, effectiveDate);
   if (failureReason) {
     return {
       ok: false,
