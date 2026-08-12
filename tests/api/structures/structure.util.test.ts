@@ -310,6 +310,32 @@ describe("computeStructureListRow", () => {
       true
     );
   });
+
+  it("n’emprunte pas le motif d’une transformation qui n’est pas la fermeture", () => {
+    // GIVEN
+    const extensionVersion = buildVersion({
+      id: 30,
+      effectiveDate: new Date("2025-09-01T00:00:00.000Z"),
+      structureVersionTransformationId: 9,
+      structureVersionTransformation: {
+        type: StructureVersionTransformationType.EXTENSION,
+        motif: "Ajout de places",
+        transformation: { form: { status: true } },
+      } as unknown as StructureListLightVersion["structureVersionTransformation"],
+    });
+    const structure = buildLightStructure({
+      fermetureDate,
+      structureVersions: [fermetureVersion(), extensionVersion],
+    });
+
+    // WHEN
+    const current = resolveCurrentVersion(structure.structureVersions, now);
+    const row = computeStructureListRow(structure, current, now);
+
+    // THEN
+    expect(row?.isClosed).toBe(true);
+    expect(row?.fermetureMotif).toBe(null);
+  });
 });
 
 describe("isBornFromCreation", () => {

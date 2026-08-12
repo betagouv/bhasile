@@ -320,7 +320,12 @@ export const computeStructureListRow = (
     ),
   ].filter((value): value is string => Boolean(value));
 
-  const fermetureTransformation = currentVersion.structureVersionTransformation;
+  const currentTransformation = currentVersion.structureVersionTransformation;
+  const fermetureTransformation =
+    currentTransformation?.type ===
+    StructureVersionTransformationType.FERMETURE
+      ? currentTransformation
+      : null;
   const isClosed = isStructureClosed(structure, now);
 
   return {

@@ -188,7 +188,7 @@ export const getFullStructures = async (
           id: row.id,
           latitude: row.latitude,
           longitude: row.longitude,
-          fermetureDate: null,
+          fermetureDate: row.fermetureDate,
         } as unknown as StructureDbList,
         now,
         true

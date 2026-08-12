@@ -81,7 +81,7 @@ export const StructureHeaderActions = ({
     );
   }
 
-  if (structure.isClosed) {
+  if (structure.isClosed && structure.fermetureDate) {
     return <FermetureBadge fermetureDate={structure.fermetureDate} />;
   }
 
