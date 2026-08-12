@@ -87,7 +87,7 @@ export type SearchProps = {
   direction?: "asc" | "desc" | null;
   map?: boolean;
   selection?: boolean;
-  finalised?: boolean;
+  isFinalised?: boolean;
   isClosed?: boolean;
 };
 

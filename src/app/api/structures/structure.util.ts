@@ -276,7 +276,7 @@ export type StructureListComputedRow = {
   currentVersionId: number;
   bornFromCreation: boolean;
   hasForm: boolean;
-  finalised: boolean;
+  isFinalised: boolean;
   type: StructureType | null;
   operateurName: string | null;
   departementAdministratif: string | null;
@@ -337,7 +337,7 @@ export const computeStructureListRow = (
     fermetureMotif: isClosed ? (fermetureTransformation?.motif ?? null) : null,
     bornFromCreation,
     hasForm: structure.forms.length > 0,
-    finalised: isStructureFinalised(structure, now),
+    isFinalised: isStructureFinalised(structure, now),
     type: structure.type,
     operateurName,
     departementAdministratif: currentVersion.departementAdministratif,
@@ -413,7 +413,7 @@ export const filterStructureRows = (
     if (!filters.isClosed && row.isClosed) {
       return false;
     }
-    if (filters.finalised && !row.finalised) {
+    if (filters.isFinalised && !row.isFinalised) {
       return false;
     }
     if (typeList.length > 0 && (!row.type || !typeList.includes(row.type))) {
