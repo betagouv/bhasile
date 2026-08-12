@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   StructureDbList,
@@ -16,6 +17,8 @@ import {
   getReadableAdresses,
   getReadableNotes,
   isBornFromCreation,
+  isStructureClosed,
+  isStructureFinalised,
   sortStructureRows,
   StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
@@ -331,6 +334,104 @@ describe("isBornFromCreation", () => {
       effectiveDate: new Date("2099-01-01T00:00:00.000Z"),
     });
     expect(isBornFromCreation([version], now)).toBe(false);
+  });
+});
+
+describe("isStructureFinalised", () => {
+  const finalisationForm = (status: boolean) => ({
+    status,
+    formDefinition: { slug: FINALISATION_FORM_SLUG },
+  });
+
+  const creationVersion = (formStatus = true) =>
+    buildVersion({
+      structureVersionTransformationId: 5,
+      structureVersionTransformation: {
+        type: StructureVersionTransformationType.CREATION,
+        transformation: { form: { status: formStatus } },
+      } as unknown as StructureListLightVersion["structureVersionTransformation"],
+    });
+
+  it("est vrai quand le formulaire de finalisation est validé", () => {
+    expect(
+      isStructureFinalised(
+        { forms: [finalisationForm(true)], structureVersions: [] },
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est vrai pour une structure née d'une création, sans formulaire de finalisation", () => {
+    expect(
+      isStructureFinalised(
+        { forms: [], structureVersions: [creationVersion()] },
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est faux quand le formulaire existe sans être validé et qu'aucune création n'a eu lieu", () => {
+    expect(
+      isStructureFinalised(
+        { forms: [finalisationForm(false)], structureVersions: [] },
+        now
+      )
+    ).toBe(false);
+  });
+
+  it("ignore un formulaire validé qui n'est pas celui de finalisation", () => {
+    expect(
+      isStructureFinalised(
+        {
+          forms: [{ status: true, formDefinition: { slug: "actualisation-2026" } }],
+          structureVersions: [],
+        },
+        now
+      )
+    ).toBe(false);
+  });
+
+  it("est faux quand la transformation de création n'est pas validée", () => {
+    expect(
+      isStructureFinalised(
+        { forms: [], structureVersions: [creationVersion(false)] },
+        now
+      )
+    ).toBe(false);
+  });
+});
+
+describe("isStructureClosed", () => {
+  it("est faux sans date de fermeture", () => {
+    expect(isStructureClosed({ fermetureDate: null }, now)).toBe(false);
+  });
+
+  it("est vrai quand la fermeture a pris effet la veille", () => {
+    expect(
+      isStructureClosed(
+        { fermetureDate: new Date("2026-06-23T00:00:00.000Z") },
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est vrai le jour même de la prise d'effet", () => {
+    expect(
+      isStructureClosed(
+        { fermetureDate: new Date("2026-06-24T00:00:00.000Z") },
+        now
+      )
+    ).toBe(true);
+  });
+
+  // La date stockée est celle de l'effet, pas celle de la validation.
+  it("est faux quand la fermeture ne prend effet que le lendemain", () => {
+    expect(
+      isStructureClosed(
+        { fermetureDate: new Date("2026-06-25T00:00:00.000Z") },
+        now
+      )
+    ).toBe(false);
   });
 });
 

@@ -253,6 +253,23 @@ export const isBornFromCreation = (
     );
   }) ?? false;
 
+export const isStructureFinalised = (
+  structure: {
+    forms: Parameters<typeof isFinalisationFormValidated>[0];
+    structureVersions: Parameters<typeof isBornFromCreation>[0];
+  },
+  now: Date
+): boolean =>
+  isFinalisationFormValidated(structure.forms) ||
+  isBornFromCreation(structure.structureVersions, now);
+
+export const isStructureClosed = (
+  structure: { fermetureDate: Date | null },
+  now: Date
+): boolean =>
+  structure.fermetureDate !== null &&
+  structure.fermetureDate < startOfNextUtcDay(now);
+
 export type StructureListComputedRow = {
   id: number;
   codeBhasile: string | null;

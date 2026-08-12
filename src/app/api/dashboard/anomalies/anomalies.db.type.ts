@@ -11,6 +11,7 @@ export const anomalieStructureSelect = {
   codeBhasile: true,
   type: true,
   departementAdministratif: true,
+  fermetureDate: true,
   operateur: { select: { id: true, name: true } },
   forms: {
     where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
