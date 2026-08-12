@@ -5,7 +5,7 @@ import {
 } from "next";
 import { getServerSession, NextAuthOptions } from "next-auth";
 
-import { createOrUpdateUser } from "@/app/api/user/user.service";
+import { createOrUpdateUser } from "@/app/api/users/user.service";
 
 import {
   getIsUserAuthorized,
