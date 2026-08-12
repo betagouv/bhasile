@@ -1,8 +1,5 @@
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
-import {
-  isStructureClosed,
-  isStructureFinalised,
-} from "@/app/api/structures/structure.util";
+import { isStructureFinalisedAndOpen } from "@/app/api/structures/structure.util";
 import { compareSortValues, SortKind, SortValue } from "@/app/utils/list.util";
 import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
@@ -116,10 +113,7 @@ const isEligibleStructure = (
     return false;
   }
 
-  if (
-    !isStructureFinalised(structure, options.now) ||
-    isStructureClosed(structure, options.now)
-  ) {
+  if (!isStructureFinalisedAndOpen(structure, options.now)) {
     return false;
   }
 

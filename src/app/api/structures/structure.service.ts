@@ -66,14 +66,18 @@ import {
   getReadableAdresses,
   getReadableNotes,
   getTypeBati,
-  isBornFromCreation,
-  isFinalisationFormValidated,
   isStructureClosed,
+  isStructureFinalised,
   isStructureInCpom,
   isStructureInCpomPerYear,
   sortStructureRows,
   StructureListComputedRow,
 } from "./structure.util";
+
+type StructureMapPoint = Pick<
+  StructureApiRead,
+  "id" | "latitude" | "longitude"
+>;
 
 export type SearchProps = {
   search: string | null;
@@ -87,7 +91,7 @@ export type SearchProps = {
   direction?: "asc" | "desc" | null;
   map?: boolean;
   selection?: boolean;
-  finalised?: boolean;
+  isFinalised?: boolean;
   isClosed?: boolean;
 };
 
@@ -182,19 +186,15 @@ export const getFullStructures = async (
   );
 
   if (props.map) {
-    const structures = sorted.map((row) =>
-      dbStructureToApiRead(
-        {
-          id: row.id,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          fermetureDate: row.fermetureDate,
-        } as unknown as StructureDbList,
-        now,
-        true
-      )
-    );
-    return { structures, totalStructures: sorted.length };
+    const points: StructureMapPoint[] = sorted.map((row) => ({
+      id: row.id,
+      latitude: row.latitude?.toString(),
+      longitude: row.longitude?.toString(),
+    }));
+    return {
+      structures: points as StructureApiRead[],
+      totalStructures: sorted.length,
+    };
   }
 
   const { total: totalStructures, rows: pageRows } = props.selection
@@ -219,12 +219,10 @@ export const getFullStructures = async (
       const resolvedStructure = currentVersion
         ? mergeStructureWithVersion(dbStructure, currentVersion)
         : dbStructure;
-      const structure = dbStructureToApiRead(
-        resolvedStructure,
-        now,
-        true,
-        row.bornFromCreation
-      );
+      const structure = dbStructureToApiRead(resolvedStructure, now, {
+        isFinalised: row.isFinalised,
+        simple: true,
+      });
       structure.currentPlaces.placesAutorisees = row.placesAutorisees ?? 0;
       structure.adresses = getReadableAdresses(structure, user);
       structure.notes = null;
@@ -269,12 +267,9 @@ export const getFullStructure = async (
     return null;
   }
 
-  const structure = dbStructureToApiRead(
-    resolvedDbStructure,
-    now,
-    false,
-    isBornFromCreation(resolvedDbStructure.structureVersions, now)
-  );
+  const structure = dbStructureToApiRead(resolvedDbStructure, now, {
+    isFinalised: isStructureFinalised(resolvedDbStructure, now),
+  });
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
 
@@ -312,8 +307,7 @@ const dbStructureToApiRead = (
       Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>
     >,
   now: Date,
-  simple: boolean = false,
-  bornFromCreation: boolean = false
+  { isFinalised, simple = false }: { isFinalised: boolean; simple?: boolean }
 ): StructureApiRead => {
   const [debutConvention, finConvention] = getDatesConvention(dbStructure);
   const [debutPeriodeAutorisation, finPeriodeAutorisation] =
@@ -435,11 +429,9 @@ const dbStructureToApiRead = (
     dnaStructures,
     structureFinesses,
     adresses,
-    isFinalised:
-      bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    isFinalised,
     isClosed: isStructureClosed(dbStructure, now),
     isCurrentVersionFromTransformation,
-    bornFromCreation: undefined,
     structureVersions: undefined,
   }) as StructureApiRead;
 };

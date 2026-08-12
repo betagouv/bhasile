@@ -1130,7 +1130,7 @@ describe("structure.repository db integration", () => {
       direction: null,
       map: false,
       selection: true,
-      finalised: false,
+      isFinalised: false,
     };
 
     const listStructures = async (overrides: Partial<SearchProps>) => {
@@ -1360,7 +1360,7 @@ describe("structure.repository db integration", () => {
       direction: null,
       map: false,
       selection: false,
-      finalised: false,
+      isFinalised: false,
     };
 
     const listBy = async (
@@ -1568,13 +1568,13 @@ describe("structure.repository db integration", () => {
       // THEN: the finalised filter keeps the CREATION-born, drops the in-progress
       expect(
         findRow(
-          await listBy(creationBorn.codeBhasile, { finalised: true }),
+          await listBy(creationBorn.codeBhasile, { isFinalised: true }),
           creationBorn.codeBhasile
         )
       ).toBeDefined();
       expect(
         findRow(
-          await listBy(inProgress.codeBhasile, { finalised: true }),
+          await listBy(inProgress.codeBhasile, { isFinalised: true }),
           inProgress.codeBhasile
         )
       ).toBeUndefined();

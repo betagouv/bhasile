@@ -2,6 +2,7 @@ import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
   StructureVersionTransformationApiCreate,
@@ -224,7 +225,7 @@ export const updateTransformation = async (
 
 export const deleteTransformation = async (id: number): Promise<void> => {
   const transformation = await findOne(id);
-  if (transformation?.form?.status === true) {
+  if (isTransformationFinalised(transformation)) {
     throw new ApiDomainError(
       "Impossible de supprimer une transformation finalisée"
     );

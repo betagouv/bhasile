@@ -66,8 +66,7 @@ vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
     isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
     getDatesConvention: vi.fn().mockReturnValue([null, null]),
     getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
-    isBornFromCreation: vi.fn().mockReturnValue(false),
-    isFinalisationFormValidated: vi.fn().mockReturnValue(false),
+    isStructureFinalised: vi.fn().mockReturnValue(false),
     isStructureClosed: vi.fn().mockReturnValue(false),
   };
 });

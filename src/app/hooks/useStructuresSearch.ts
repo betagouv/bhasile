@@ -80,7 +80,7 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
           params.append("direction", direction);
         }
         if (isClosed) {
-          params.append("isClosed", "true");
+          params.append("closed", "true");
         }
         const result = await fetch(
           `${baseUrl}/api/structures?${params.toString()}`

@@ -19,6 +19,7 @@ import {
   isBornFromCreation,
   isStructureClosed,
   isStructureFinalised,
+  isStructureFinalisedAndOpen,
   sortStructureRows,
   StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
@@ -471,6 +472,45 @@ describe("isStructureClosed", () => {
   });
 });
 
+describe("isStructureFinalisedAndOpen", () => {
+  const finalisedStructure = (fermetureDate: Date | null) => ({
+    forms: [{ status: true, formDefinition: { slug: FINALISATION_FORM_SLUG } }],
+    structureVersions: [],
+    fermetureDate,
+  });
+
+  it("est vrai pour une structure finalisée et non fermée", () => {
+    expect(isStructureFinalisedAndOpen(finalisedStructure(null), now)).toBe(true);
+  });
+
+  it("est faux pour une structure finalisée dont la fermeture a pris effet", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        finalisedStructure(new Date("2026-06-23T00:00:00.000Z")),
+        now
+      )
+    ).toBe(false);
+  });
+
+  it("est vrai pour une structure finalisée dont la fermeture ne prend effet que plus tard", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        finalisedStructure(new Date("2026-06-25T00:00:00.000Z")),
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est faux pour une structure non finalisée, même ouverte", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        { forms: [], structureVersions: [], fermetureDate: null },
+        now
+      )
+    ).toBe(false);
+  });
+});
+
 const buildRow = (
   overrides: Partial<StructureListComputedRow> = {}
 ): StructureListComputedRow => ({
@@ -479,7 +519,7 @@ const buildRow = (
   currentVersionId: 10,
   bornFromCreation: false,
   hasForm: true,
-  finalised: false,
+  isFinalised: false,
   type: StructureType.CADA,
   operateurName: "Operateur Alpha",
   departementAdministratif: "75",
@@ -562,14 +602,14 @@ describe("filterStructureRows", () => {
 
   it("restreint aux lignes finalisées quand c'est demandé", () => {
     const rows = [
-      buildRow({ id: 1, finalised: true }),
-      buildRow({ id: 2, finalised: false }),
+      buildRow({ id: 1, isFinalised: true }),
+      buildRow({ id: 2, isFinalised: false }),
     ];
 
     expect(
       filterStructureRows(
         rows,
-        { ...emptyFilters, finalised: true },
+        { ...emptyFilters, isFinalised: true },
         { includeNonVisible: false }
       )
     ).toHaveLength(1);
