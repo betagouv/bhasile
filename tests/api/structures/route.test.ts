@@ -50,7 +50,7 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   isStructureFinalised: vi.fn().mockReturnValue(false),
 }));
 
-vi.mock("@/app/api/user-action/user-action.repository", () => ({
+vi.mock("@/app/api/user-actions/user-action.repository", () => ({
   createUserAction: (...args: unknown[]) => mockCreateUserAction(...args),
 }));
 
