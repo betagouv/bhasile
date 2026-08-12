@@ -9,6 +9,7 @@ import {
   getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getCurrentCpomStructureDates,
   getFermetureEvent,
+  getLastPastVisit,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
   getMostRecentMillesime,
@@ -79,9 +80,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 1, adresses: [] });
 
       // WHEN
-      const typeBati = getTypeBati(
-        structure as unknown as ResolvedStructureDetails
-      );
+      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
 
       // THEN
       expect(typeBati).toBeUndefined();
@@ -95,9 +94,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 2, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(
-        structure as unknown as ResolvedStructureDetails
-      );
+      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.COLLECTIF);
@@ -111,9 +108,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 3, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(
-        structure as unknown as ResolvedStructureDetails
-      );
+      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.DIFFUS);
@@ -126,9 +121,7 @@ describe("structure util", () => {
       const structure = createStructure({ id: 4, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(
-        structure as unknown as ResolvedStructureDetails
-      );
+      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
 
       // THEN
       expect(typeBati).toBe(Repartition.MIXTE);
@@ -267,6 +260,96 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toBe(2);
+    });
+  });
+  describe("getLastPastVisit", () => {
+    it("retourne la visite passée la plus récente quand le tableau n'est pas trié", () => {
+      // GIVEN
+      const lastVisit = createEvaluation({
+        id: 2,
+        date: dayjs().subtract(1, "month").toISOString(),
+      });
+      const evaluations: EvaluationApiType[] = [
+        createEvaluation({
+          id: 1,
+          date: dayjs().subtract(8, "month").toISOString(),
+        }),
+        lastVisit,
+        createEvaluation({
+          id: 3,
+          date: dayjs().subtract(4, "month").toISOString(),
+        }),
+      ];
+
+      // WHEN
+      const result = getLastPastVisit(evaluations);
+
+      // THEN
+      expect(result).toBe(lastVisit);
+    });
+
+    it("ignore les visites à venir", () => {
+      // GIVEN
+      const lastPastVisit = createControle({
+        id: 1,
+        date: dayjs().subtract(3, "month").toISOString(),
+      });
+      const controles: ControleApiType[] = [
+        createControle({ id: 2, date: dayjs().add(1, "month").toISOString() }),
+        lastPastVisit,
+      ];
+
+      // WHEN
+      const result = getLastPastVisit(controles);
+
+      // THEN
+      expect(result).toBe(lastPastVisit);
+    });
+
+    it("ignore les visites sans date", () => {
+      // GIVEN
+      const datedVisit = createEvaluation({
+        id: 1,
+        date: dayjs().subtract(6, "month").toISOString(),
+      });
+      const evaluations: EvaluationApiType[] = [
+        { ...createEvaluation({ id: 2 }), date: undefined },
+        datedVisit,
+      ];
+
+      // WHEN
+      const result = getLastPastVisit(evaluations);
+
+      // THEN
+      expect(result).toBe(datedVisit);
+    });
+
+    it("retourne undefined quand aucune visite n'est passée", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        createEvaluation({
+          id: 1,
+          date: dayjs().add(2, "month").toISOString(),
+        }),
+        { ...createEvaluation({ id: 2 }), date: undefined },
+      ];
+
+      // WHEN
+      const result = getLastPastVisit(evaluations);
+
+      // THEN
+      expect(result).toBeUndefined();
+    });
+
+    it("retourne undefined quand le tableau est vide", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [];
+
+      // WHEN
+      const result = getLastPastVisit(evaluations);
+
+      // THEN
+      expect(result).toBeUndefined();
     });
   });
   describe("isStructureAutorisee", () => {

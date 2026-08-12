@@ -6,7 +6,7 @@ import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
 import { getNow } from "@/app/utils/now.util";
-import { filterPastVisits } from "@/app/utils/structure.util";
+import { getLastPastVisit } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
@@ -29,8 +29,8 @@ export const ControlesBlock = (): ReactElement => {
     dayjs(eig.evenementDate).isAfter(dayjs(getNow()).subtract(12, "month"))
   );
 
-  const lastPastEvaluation = filterPastVisits(evaluations)[0];
-  const lastPastControle = filterPastVisits(controles)[0];
+  const lastPastEvaluation = getLastPastVisit(evaluations);
+  const lastPastControle = getLastPastVisit(controles);
 
   return (
     <Block

@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
-import { filterPastVisits } from "@/app/utils/structure.util";
+import { getLastPastVisit } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
@@ -19,7 +19,7 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
   const evenementsIndesirablesGraves =
     structure.evenementsIndesirablesGraves || [];
 
-  const lastPastEvaluation = filterPastVisits(evaluations)[0];
+  const lastPastEvaluation = getLastPastVisit(evaluations);
 
   return (
     <Block

@@ -102,9 +102,7 @@ export function getCommunesGroupedByDepartement(structure: {
   }));
 }
 
-export const filterPastVisits = <T extends { date?: string }>(
-  visits: T[]
-): T[] => {
+const filterPastVisits = <T extends { date?: string }>(visits: T[]): T[] => {
   const now = dayjs(getNow());
 
   return visits.filter((visit) => {
@@ -117,22 +115,28 @@ export const filterPastVisits = <T extends { date?: string }>(
   });
 };
 
+export const getLastPastVisit = <T extends { date?: string }>(
+  visits: T[]
+): T | undefined =>
+  filterPastVisits(visits).reduce<T | undefined>(
+    (mostRecent, visit) =>
+      mostRecent && dayjs(mostRecent.date).isAfter(dayjs(visit.date))
+        ? mostRecent
+        : visit,
+    undefined
+  );
+
 export const getLastVisitInMonths = (
   evaluations: EvaluationApiType[],
   controles: ControleApiType[]
 ): number | null => {
-  const pastVisits = filterPastVisits([...evaluations, ...controles]);
+  const lastVisit = getLastPastVisit([...evaluations, ...controles]);
 
-  if (pastVisits.length === 0) {
+  if (!lastVisit) {
     return null;
   }
 
-  const now = dayjs(getNow());
-  const mostRecentVisit = pastVisits.reduce((mostRecent, visit) =>
-    dayjs(visit.date).isAfter(dayjs(mostRecent.date)) ? visit : mostRecent
-  );
-
-  return now.diff(dayjs(mostRecentVisit.date), "month");
+  return dayjs(getNow()).diff(dayjs(lastVisit.date), "month");
 };
 
 export const isStructureAutorisee = (
