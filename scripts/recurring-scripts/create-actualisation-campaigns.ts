@@ -14,10 +14,7 @@ import {
   ACTUALISATION_FORM_STEP_SLUGS,
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
-import {
-  isStructureClosed,
-  isStructureFinalised,
-} from "@/app/api/structures/structure.util";
+import { isStructureFinalisedAndOpen } from "@/app/api/structures/structure.util";
 import { createPrismaClient } from "@/prisma-client";
 import { StepStatus } from "@/types/form.type";
 
@@ -114,10 +111,7 @@ const run = async () => {
         continue;
       }
 
-      if (
-        !isStructureFinalised(structure, now) ||
-        isStructureClosed(structure, now)
-      ) {
+      if (!isStructureFinalisedAndOpen(structure, now)) {
         continue;
       }
 

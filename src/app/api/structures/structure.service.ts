@@ -181,17 +181,13 @@ export const getFullStructures = async (
   );
 
   if (props.map) {
-    const structures = sorted.map((row) =>
-      dbStructureToApiRead(
-        {
+    const structures = sorted.map(
+      (row) =>
+        ({
           id: row.id,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          fermetureDate: row.fermetureDate,
-        } as unknown as StructureDbList,
-        now,
-        { isFinalised: row.isFinalised, simple: true }
-      )
+          latitude: row.latitude?.toString(),
+          longitude: row.longitude?.toString(),
+        }) as StructureApiRead
     );
     return { structures, totalStructures: sorted.length };
   }

@@ -19,6 +19,7 @@ import {
   isBornFromCreation,
   isStructureClosed,
   isStructureFinalised,
+  isStructureFinalisedAndOpen,
   sortStructureRows,
   StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
@@ -465,6 +466,45 @@ describe("isStructureClosed", () => {
     expect(
       isStructureClosed(
         { fermetureDate: new Date("2026-06-25T00:00:00.000Z") },
+        now
+      )
+    ).toBe(false);
+  });
+});
+
+describe("isStructureFinalisedAndOpen", () => {
+  const finalisedStructure = (fermetureDate: Date | null) => ({
+    forms: [{ status: true, formDefinition: { slug: FINALISATION_FORM_SLUG } }],
+    structureVersions: [],
+    fermetureDate,
+  });
+
+  it("est vrai pour une structure finalisée et non fermée", () => {
+    expect(isStructureFinalisedAndOpen(finalisedStructure(null), now)).toBe(true);
+  });
+
+  it("est faux pour une structure finalisée dont la fermeture a pris effet", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        finalisedStructure(new Date("2026-06-23T00:00:00.000Z")),
+        now
+      )
+    ).toBe(false);
+  });
+
+  it("est vrai pour une structure finalisée dont la fermeture ne prend effet que plus tard", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        finalisedStructure(new Date("2026-06-25T00:00:00.000Z")),
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est faux pour une structure non finalisée, même ouverte", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        { forms: [], structureVersions: [], fermetureDate: null },
         now
       )
     ).toBe(false);

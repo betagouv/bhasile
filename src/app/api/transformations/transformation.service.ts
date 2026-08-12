@@ -16,6 +16,7 @@ import { TransformationType } from "@/types/transformation.type";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
+import { isTransformationFinalised } from "../forms/form.util";
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
@@ -224,7 +225,7 @@ export const updateTransformation = async (
 
 export const deleteTransformation = async (id: number): Promise<void> => {
   const transformation = await findOne(id);
-  if (transformation?.form?.status === true) {
+  if (isTransformationFinalised(transformation)) {
     throw new ApiDomainError(
       "Impossible de supprimer une transformation finalisée"
     );

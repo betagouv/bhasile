@@ -20,6 +20,7 @@ import {
   createOrUpdateForm,
   initializeStructureVersionTransformationDefaultForms,
 } from "../forms/form.repository";
+import { isTransformationFinalised } from "../forms/form.util";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { transformationInclude } from "./transformation.db.type";
@@ -66,20 +67,27 @@ export const createOne = async (
   });
 };
 
+const checkTransformationNotFinalised = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const transformation = await tx.transformation.findUniqueOrThrow({
+    where: { id: transformationId },
+    select: { form: { select: { status: true } } },
+  });
+
+  if (isTransformationFinalised(transformation)) {
+    throw new ApiDomainError(
+      "Impossible de modifier une transformation finalisée"
+    );
+  }
+};
+
 export const updateOne = async (
   input: TransformationApiUpdate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
-    const finalisedTransformation = await tx.transformation.findUniqueOrThrow({
-      where: { id: input.id },
-      select: { form: { select: { status: true } } },
-    });
-
-    if (finalisedTransformation.form?.status === true) {
-      throw new ApiDomainError(
-        "Impossible de modifier une transformation finalisée"
-      );
-    }
+    await checkTransformationNotFinalised(tx, input.id);
 
     const isFinalizing = input.form?.status === true;
     if (isFinalizing) {
@@ -146,16 +154,7 @@ export const resetSelection = async (
   input: TransformationSelectionApiUpdate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
-    const finalisedTransformation = await tx.transformation.findUniqueOrThrow({
-      where: { id: input.id },
-      select: { form: { select: { status: true } } },
-    });
-
-    if (finalisedTransformation.form?.status === true) {
-      throw new ApiDomainError(
-        "Impossible de modifier une transformation finalisée"
-      );
-    }
+    await checkTransformationNotFinalised(tx, input.id);
 
     await tx.structureVersionTransformation.deleteMany({
       where: { transformationId: input.id },

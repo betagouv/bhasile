@@ -37,6 +37,7 @@ import {
 import { UpcomingTransformation } from "@/types/transformation.type";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
+import { isTransformationFinalised } from "../forms/form.util";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
   getValidVersions,
@@ -247,7 +248,7 @@ export const isBornFromCreation = (
     const transformation = version.structureVersionTransformation;
     return (
       transformation?.type === StructureVersionTransformationType.CREATION &&
-      transformation.transformation?.form?.status === true &&
+      isTransformationFinalised(transformation.transformation) &&
       version.effectiveDate !== null &&
       version.effectiveDate < startOfNextUtcDay(now)
     );
@@ -269,6 +270,14 @@ export const isStructureClosed = (
 ): boolean =>
   structure.fermetureDate !== null &&
   structure.fermetureDate < startOfNextUtcDay(now);
+
+export const isStructureFinalisedAndOpen = (
+  structure: Parameters<typeof isStructureFinalised>[0] & {
+    fermetureDate: Date | null;
+  },
+  now: Date
+): boolean =>
+  isStructureFinalised(structure, now) && !isStructureClosed(structure, now);
 
 export type StructureListComputedRow = {
   id: number;

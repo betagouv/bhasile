@@ -1,3 +1,4 @@
+import { isTransformationFinalised } from "@/app/api/forms/form.util";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 
@@ -50,9 +51,8 @@ export type ResolvableVersion = OrderableVersion & {
 
 export const isVersionValid = (version: ResolvableVersion): boolean => {
   if (version.structureVersionTransformationId !== null) {
-    return (
-      version.structureVersionTransformation?.transformation?.form?.status ===
-      true
+    return isTransformationFinalised(
+      version.structureVersionTransformation?.transformation
     );
   }
   return true;
