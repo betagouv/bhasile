@@ -18,53 +18,38 @@ describe("useListNavigation", () => {
     vi.clearAllMocks();
   });
 
-  it("ne publie rien tant qu'aucune navigation n'est lancée", () => {
-    // WHEN
-    render(<Navigator onNavigate={never} />);
-
-    // THEN
-    expect(mockSetFetchState).not.toHaveBeenCalled();
-  });
-
-  it("signale la navigation puis la libère quand elle aboutit", async () => {
+  it("publie l'attente au démarrage de la navigation, pas au montage", async () => {
     // GIVEN
     const user = userEvent.setup();
-    let resolveNavigation: (() => void) | undefined;
-    render(
-      <Navigator
-        onNavigate={() =>
-          new Promise<void>((resolve) => {
-            resolveNavigation = resolve;
-          })
-        }
-      />
-    );
+    const navigation = createPendingNavigation();
+    render(<Navigator onNavigate={navigation.start} />);
+    expect(mockSetFetchState).not.toHaveBeenCalled();
 
     // WHEN
     await user.click(screen.getByRole("button", { name: "naviguer" }));
 
     // THEN
-    expect(mockSetFetchState).toHaveBeenLastCalledWith(
-      LIST_NAVIGATION_KEY,
-      FetchState.LOADING
-    );
+    expect(mockSetFetchState.mock.calls).toEqual([
+      [LIST_NAVIGATION_KEY, FetchState.LOADING],
+    ]);
 
     // WHEN
     await act(async () => {
-      resolveNavigation?.();
+      navigation.resolve();
     });
 
     // THEN
-    expect(mockSetFetchState).toHaveBeenLastCalledWith(
-      LIST_NAVIGATION_KEY,
-      FetchState.IDLE
-    );
+    expect(mockSetFetchState.mock.calls).toEqual([
+      [LIST_NAVIGATION_KEY, FetchState.LOADING],
+      [LIST_NAVIGATION_KEY, FetchState.IDLE],
+    ]);
   });
 
-  it("libère la navigation quand le composant est démonté en cours de route", async () => {
-    // GIVEN — une navigation qui ne se résoudra jamais
+  it("libère l'attente quand le composant est démonté en pleine navigation", async () => {
+    // GIVEN
     const user = userEvent.setup();
-    render(<UnmountableNavigator />);
+    const navigation = createPendingNavigation();
+    render(<UnmountableNavigator onNavigate={navigation.start} />);
     await user.click(screen.getByRole("button", { name: "naviguer" }));
 
     // WHEN
@@ -75,6 +60,10 @@ describe("useListNavigation", () => {
       LIST_NAVIGATION_KEY,
       FetchState.IDLE
     );
+
+    await act(async () => {
+      navigation.resolve();
+    });
   });
 });
 
@@ -91,14 +80,27 @@ const Navigator = ({
   );
 };
 
-const UnmountableNavigator = (): ReactElement => {
+const UnmountableNavigator = ({
+  onNavigate,
+}: {
+  onNavigate: () => Promise<void>;
+}): ReactElement => {
   const [isMounted, setIsMounted] = useState(true);
   return (
     <>
-      {isMounted && <Navigator onNavigate={never} />}
+      {isMounted && <Navigator onNavigate={onNavigate} />}
       <button onClick={() => setIsMounted(false)}>démonter</button>
     </>
   );
 };
 
-const never = (): Promise<void> => new Promise<void>(() => {});
+const createPendingNavigation = () => {
+  let resolveNavigation: () => void = () => {};
+  return {
+    start: (): Promise<void> =>
+      new Promise<void>((resolve) => {
+        resolveNavigation = resolve;
+      }),
+    resolve: (): void => resolveNavigation(),
+  };
+};
