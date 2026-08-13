@@ -13,13 +13,15 @@ import {
   resolveHudas,
   resolveTargetCada,
 } from "../../../scripts/utils/transfo-huda-cada.resolve";
+import { createReferentialDna } from "../../test-utils/referential-dna";
 
 const CODE_BHASILE_PREFIX = "BHA-ZZZ-";
 
 describe("transfo-huda-cada.resolve db integration", () => {
-  const now = new Date("2026-07-01T00:00:00.000Z");
+  const effectiveDate = new Date("2026-07-01T00:00:00.000Z");
   const createdTransformationIds: number[] = [];
   const createdDnaIds: number[] = [];
+  const createdOperateurIds: number[] = [];
 
   const pickFreeCodeBhasile = async () => {
     for (let attempt = 0; attempt < 50; attempt++) {
@@ -57,8 +59,9 @@ describe("transfo-huda-cada.resolve db integration", () => {
       if (await prisma.dna.findUnique({ where: { code } })) {
         continue;
       }
-      const dna = await prisma.dna.create({ data: { code } });
+      const dna = await createReferentialDna(code);
       createdDnaIds.push(dna.id);
+      createdOperateurIds.push(dna.operateurId);
       return dna;
     }
     throw new Error("Impossible de générer un code DNA libre");
@@ -98,6 +101,9 @@ describe("transfo-huda-cada.resolve db integration", () => {
     await prisma.structure.deleteMany({
       where: { codeBhasile: { startsWith: CODE_BHASILE_PREFIX } },
     });
+    await prisma.operateur.deleteMany({
+      where: { id: { in: createdOperateurIds } },
+    });
   });
 
   const reasonOf = (resolution: { ok: boolean } & Record<string, unknown>) =>
@@ -116,7 +122,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
       expect(resolution.ok && resolution.value).toEqual([
@@ -129,6 +135,26 @@ describe("transfo-huda-cada.resolve db integration", () => {
       ]);
     });
 
+    it("rattache les deux HUDA quand un même champ contient deux codes Bhasile", async () => {
+      const premier = await createStructure(StructureType.HUDA);
+      const second = await createStructure(StructureType.HUDA);
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [`${premier.codeBhasile} et ${second.codeBhasile}`],
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        effectiveDate
+      );
+
+      expect(resolution.ok).toBe(true);
+      expect(
+        resolution.ok && resolution.value.map(({ structureId }) => structureId)
+      ).toEqual([premier.id, second.id]);
+    });
+
     it("rejette une structure qui n'est pas un HUDA", async () => {
       const structure = await createStructure(StructureType.CADA);
 
@@ -139,7 +165,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
       expect(reasonOf(resolution)).toContain("n'est pas un HUDA");
@@ -155,7 +181,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
       expect(reasonOf(resolution)).toContain("type non renseigné");
@@ -173,10 +199,30 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
-      expect(reasonOf(resolution)).toContain("est fermé depuis le 01/03/2026");
+      expect(reasonOf(resolution)).toContain(
+        "est fermé à la date d'effet (fermeture le 01/03/2026)"
+      );
+    });
+
+    it("rattache un HUDA dont la fermeture est postérieure à la date d'effet", async () => {
+      const structure = await createStructure(StructureType.HUDA, {
+        fermetureDate: new Date("2026-09-01T00:00:00.000Z"),
+      });
+
+      const resolution = await resolveHudas(
+        prisma,
+        {
+          rawBhasileCodes: [structure.codeBhasile],
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        effectiveDate
+      );
+
+      expect(resolution.ok).toBe(true);
     });
 
     it("ignore une non-valeur saisie dans le champ code Bhasile", async () => {
@@ -192,7 +238,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [dna.code],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
       expect(resolution.ok && resolution.value).toEqual([
@@ -219,7 +265,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [dna.code],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
       expect(resolution.ok).toBe(true);
@@ -245,7 +291,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [`${premier.dna.code} et ${second.dna.code}`],
           departement: "83",
         },
-        now
+        effectiveDate
       );
 
       expect(resolution.ok).toBe(true);
@@ -264,7 +310,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
       const resolution = await resolveHudas(
         prisma,
         { rawBhasileCodes: [], rawDnaCodes: [dna.code], departement: "35" },
-        now
+        effectiveDate
       );
 
       expect(reasonOf(resolution)).toContain(`inconnus en base : ${dna.code}`);
@@ -283,7 +329,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [`${dna.code} H351`],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
       expect(reasonOf(resolution)).toContain("illisibles : H351");
@@ -303,7 +349,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [codeSansZero],
           departement: "09",
         },
-        now
+        effectiveDate
       );
 
       expect(
@@ -320,7 +366,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
       const resolution = await resolveHudas(
         prisma,
         { rawBhasileCodes: [], rawDnaCodes: [dna.code], departement: "02" },
-        now
+        effectiveDate
       );
 
       expect(reasonOf(resolution)).toContain(
@@ -340,7 +386,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
       expect(resolution.ok && resolution.value.structureId).toBe(cada.id);
@@ -358,7 +404,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
       const resolution = await resolveTargetCada(
         prisma,
         { rawBhasileCode: "", rawDnaCodes: [dna.code], departement: "35" },
-        now
+        effectiveDate
       );
 
       expect(resolution.ok && resolution.value.structureId).toBe(cada.id);
@@ -386,10 +432,27 @@ describe("transfo-huda-cada.resolve db integration", () => {
           rawDnaCodes: [`${premierDna.code} ${secondDna.code}`],
           departement: "35",
         },
-        now
+        effectiveDate
       );
 
       expect(reasonOf(resolution)).toContain("pointent vers 2 structures");
+    });
+
+    it("rejette un dossier qui prévoit plusieurs CADA d'accueil", async () => {
+      const premier = await createStructure(StructureType.CADA);
+      const second = await createStructure(StructureType.CADA);
+
+      const resolution = await resolveTargetCada(
+        prisma,
+        {
+          rawBhasileCode: `${premier.codeBhasile} et ${second.codeBhasile}`,
+          rawDnaCodes: [],
+          departement: "35",
+        },
+        effectiveDate
+      );
+
+      expect(reasonOf(resolution)).toContain("2 CADA d'accueil");
     });
   });
 

@@ -19,11 +19,6 @@ const buildStructureFinessWhere = (
       },
     };
   }
-  if (entityId.structureId != null) {
-    return {
-      structureId_finessId: { structureId: entityId.structureId, finessId },
-    };
-  }
   return { id: 0 };
 };
 

@@ -16,16 +16,19 @@ model Cpom {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([operateurId])
+  @@index([regionId])
   @@schema("public")
 }
 
 model CpomDepartement {
-  cpom          Cpom        @relation(fields: [cpomId], references: [id], onDelete: Cascade)
-  cpomId        Int
-  departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
-  departementId Int
+  cpom              Cpom        @relation(fields: [cpomId], references: [id], onDelete: Cascade)
+  cpomId            Int
+  departement       Departement @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
+  departementNumero String
 
-  @@id([cpomId, departementId])
+  @@id([cpomId, departementNumero])
+  @@index([departementNumero])
   @@schema("public")
 }
 
@@ -50,32 +53,6 @@ model CpomStructure {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([cpomId, structureId])
-  @@schema("public")
-}
-
-// TODO: to delete once the migration is done
-model CpomMillesime {
-  id                                Int     @id @default(autoincrement())
-  cpomId                            Int
-  year                              Int     @default(0)
-  dotationDemandee                  Float?
-  dotationAccordee                  Float?
-  cumulResultatNet                  Float?
-  repriseEtat                       Float?
-  affectationReservesFondsDedies    Float?
-  reserveInvestissement             Float?
-  chargesNonReconductibles          Float?
-  reserveCompensationDeficits       Float?
-  reserveCompensationBFR            Float?
-  reserveCompensationAmortissements Float?
-  fondsDedies                       Float?
-  reportANouveau                    Float?
-  autre                             Float?
-  commentaire                       String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([cpomId, year])
+  @@index([structureId])
   @@schema("public")
 }

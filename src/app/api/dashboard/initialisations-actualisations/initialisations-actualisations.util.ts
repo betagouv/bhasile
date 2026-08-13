@@ -1,12 +1,14 @@
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
+  isStructureClosed,
+  isStructureFinalised,
+} from "@/app/api/structures/structure.util";
+import {
   ActualisationStatusForm,
   findActualisationForm,
 } from "@/app/utils/actualisationForm.util";
-import { paginateRows, sortRows } from "@/app/utils/list.util";
-import { MIDDLE_PAGE_SIZE } from "@/constants";
-import { StructureVersionTransformationType } from "@/generated/prisma/enums";
+import { sortRows } from "@/app/utils/list.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
   ActualisationStatus,
@@ -18,13 +20,21 @@ import { SessionUser } from "@/types/global";
 import { DashboardStructure } from "./initialisations-actualisations.db.type";
 
 export const getInitialisationStatus = (
-  finalisationForms: { status: boolean }[]
+  structure: {
+    forms: { status: boolean; formDefinition: { slug: string } }[];
+    structureVersions: Parameters<typeof isStructureFinalised>[0]["structureVersions"];
+  },
+  now: Date
 ): InitialisationStatus => {
-  const finalisationForm = finalisationForms[0];
-  if (!finalisationForm) {
-    return "A_INITIALISER";
+  if (isStructureFinalised(structure, now)) {
+    return "FINALISEE";
   }
-  return finalisationForm.status ? "FINALISEE" : "A_FINALISER";
+
+  const hasFinalisationForm = structure.forms.some(
+    (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG
+  );
+
+  return hasFinalisationForm ? "A_FINALISER" : "A_INITIALISER";
 };
 
 export const getActualisationStatus = (
@@ -95,10 +105,7 @@ export const buildDashboardRows = (
       continue;
     }
 
-    const isClosed =
-      currentVersion.structureVersionTransformation?.type ===
-      StructureVersionTransformationType.FERMETURE;
-    if (isClosed) {
+    if (isStructureClosed(structure, options.now)) {
       continue;
     }
 
@@ -135,9 +142,8 @@ export const buildDashboardRows = (
     }
 
     const initialisationStatus = getInitialisationStatus(
-      structure.forms.filter(
-        (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG
-      )
+      structure,
+      options.now
     );
     const actualisationStatus = getActualisationStatus(
       structure.forms,
@@ -172,16 +178,4 @@ export const buildDashboardRows = (
     (row) => ({ value: row.id, kind: "number" }),
     "asc"
   );
-};
-
-export const paginateDashboardRows = (
-  rows: DashboardStructureRow[],
-  page: number
-): { total: number; rows: DashboardStructureRow[] } => {
-  const total = rows.length;
-  const lastPage = Math.max(0, Math.ceil(total / MIDDLE_PAGE_SIZE) - 1);
-  return {
-    total,
-    rows: paginateRows(rows, Math.min(page, lastPage), MIDDLE_PAGE_SIZE),
-  };
 };

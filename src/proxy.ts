@@ -70,15 +70,6 @@ const protectApiWithAuth = async (
 };
 
 export async function proxy(request: NextRequest) {
-  const doBypass =
-    process.env.DEV_AUTH_BYPASS ||
-    (process.env.NODE_ENV !== "production" &&
-      request.headers.get("x-dev-auth-bypass") === "1");
-
-  if (doBypass) {
-    return NextResponse.next();
-  }
-
   const { pathname } = request.nextUrl;
   const isProtected = proConnectProtectedPages.some((path) =>
     path === "/" ? pathname === "/" : pathname.startsWith(path)
@@ -110,6 +101,7 @@ export const config = {
     "/structures/:path*",
     "/operateurs/:path*",
     "/statistiques/:path*",
+    "/ressources/:path*",
     "/ajout-structure/:path*",
     "/ajout-adresses/:path*",
     "/mot-de-passe",

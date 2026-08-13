@@ -1,10 +1,11 @@
 import { headers } from "next/headers";
 
+import { SearchParams } from "@/app/utils/searchParams.util";
+import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
 import { StatistiquesHeader } from "./_components/StatistiquesHeader";
-import { StatistiquesProvider } from "./_context/StatistiquesContext";
 
 type GetStatistiquesArgs = {
   departements?: string;
@@ -29,11 +30,14 @@ async function getStatistiques({
     params.append("types", types);
   }
 
-  const result = await fetch(`${baseUrl}/api/statistiques?${params.toString()}`, {
-    cache: "no-store",
-    // Requête côté serveur donc il faut appeler les headers manuellement
-    headers: await headers(),
-  });
+  const result = await fetch(
+    `${baseUrl}/api/statistiques?${params.toString()}`,
+    {
+      cache: "no-store",
+      // Requête côté serveur donc il faut appeler les headers manuellement
+      headers: await headers(),
+    }
+  );
   if (!result.ok) {
     throw new Error(
       `Impossible de récupérer les statistiques : ${result.status}`
@@ -45,7 +49,7 @@ async function getStatistiques({
 export default async function StatistiquesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const awaitedSearchParams = await searchParams;
 
@@ -69,7 +73,7 @@ export default async function StatistiquesPage({
   });
 
   return (
-    <StatistiquesProvider statistiques={statistiques}>
+    <StatistiquesProvider entity={statistiques}>
       <div className="flex flex-col h-full">
         <StatistiquesHeader />
         <StatistiquesContent />

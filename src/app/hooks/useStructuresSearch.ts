@@ -1,13 +1,12 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { useFetchState } from "@/contexts/FetchStateContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FetchState } from "@/types/fetch-state.type";
 import { StructureColumn } from "@/types/ListColumn";
 import { StructureType } from "@/types/structure.type";
-
-import { useFetchState } from "../context/FetchStateContext";
 
 export const useStructuresSearch = ({ map }: { map?: boolean }) => {
   const [structures, setStructures] = useState<StructureApiRead[] | undefined>(
@@ -81,7 +80,7 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
           params.append("direction", direction);
         }
         if (isClosed) {
-          params.append("isClosed", "true");
+          params.append("closed", "true");
         }
         const result = await fetch(
           `${baseUrl}/api/structures?${params.toString()}`

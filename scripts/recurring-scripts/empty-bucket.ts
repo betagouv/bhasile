@@ -3,14 +3,7 @@
 
 import "dotenv/config";
 
-import { Client } from "minio";
-
-export const minioClient = new Client({
-  endPoint: process.env.S3_URL!,
-  accessKey: process.env.S3_ACCESS!,
-  secretKey: process.env.S3_SECRET!,
-  useSSL: true,
-});
+import { minioClient } from "@/lib/minio";
 
 const emptyBucket = async (): Promise<void> => {
   const bucketName = process.env.S3_BUCKET_NAME;

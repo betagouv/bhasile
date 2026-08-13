@@ -3,9 +3,9 @@
 import { ReactElement } from "react";
 
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { BalanceChart } from "./BalanceChart";
 import { FinanceCards } from "./FinanceCards";
 import { FinancesStatsTable } from "./FinancesStatsTable";
@@ -28,7 +28,7 @@ export const FinancesBlock = (): ReactElement => {
         <FinanceCards />
       </div>
       <h4 className="text-title-blue-france text-lg">
-        Dotation et équilibre économique
+        Dotations et équilibres économiques
       </h4>
       <div className="pb-12">
         <DotationChart

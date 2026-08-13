@@ -8,8 +8,8 @@ import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/B
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
 import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
 

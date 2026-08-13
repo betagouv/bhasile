@@ -1,34 +1,42 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ReactElement, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 import { SimplePagination } from "@/app/components/common/SimplePagination";
+import { useDashboardParams } from "@/app/hooks/useDashboardParams";
+import { cn } from "@/app/utils/classname.util";
+import { getSafePage } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 
 export const DashboardPagination = ({
   total,
   pageParam,
-}: Props): ReactElement => {
-  const router = useRouter();
-  const pathname = usePathname();
+}: Props): ReactElement | null => {
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const { isPending, setParams } = useDashboardParams();
 
-  const lastPage = Math.max(0, Math.ceil(total / MIDDLE_PAGE_SIZE) - 1);
-  const rawPage = Number(searchParams.get(pageParam)) || 0;
-  const currentPage = Math.min(Math.max(0, rawPage), lastPage);
+  const currentPage = getSafePage(
+    Number(searchParams.get(pageParam)),
+    total,
+    MIDDLE_PAGE_SIZE
+  );
 
   const setCurrentPage = (page: number): void => {
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(pageParam, String(page));
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    });
+    setParams({ [pageParam]: String(page) });
   };
 
+  if (total <= MIDDLE_PAGE_SIZE) {
+    return null;
+  }
+
   return (
-    <div className={isPending ? "pointer-events-none opacity-50" : ""}>
+    <div
+      className={cn(
+        "flex justify-center mt-4",
+        isPending && "pointer-events-none opacity-50"
+      )}
+    >
       <SimplePagination
         totalElements={total}
         currentPage={currentPage}

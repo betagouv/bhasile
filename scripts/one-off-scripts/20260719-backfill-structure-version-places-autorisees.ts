@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off : dé-versionnement des typologies.
 // 1. Reporte StructureVersion.placesAutorisees (versions de base) depuis la
 //    typologie de l'année PLACES_VERSIONED_FROM_YEAR - 1 (dernière année legacy).

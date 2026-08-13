@@ -8,13 +8,10 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { formatDate } from "@/app/utils/date.util";
-import { formatNumber } from "@/app/utils/number.util";
-import {
-  RmuPeriodStat,
-  StatistiqueApiRead,
-} from "@/schemas/api/statistique.schema";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
+import { formatPercentage } from "@/app/utils/number.util";
+import { filterDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { RmuPeriodStat } from "@/schemas/api/statistique.schema";
 
 const rmuLines: RMULine[] = [
   {
@@ -28,10 +25,7 @@ const rmuLines: RMULine[] = [
   {
     label: "Taux de RMU exécuté",
     key: "tauxExecute",
-    format: (value) =>
-      `${formatNumber(Number(value), {
-        maximumFractionDigits: 2,
-      })} %`,
+    format: (value) => formatPercentage(Number(value)),
   },
 ];
 
@@ -39,7 +33,9 @@ export const RMUStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
-  const RMUPeriods = statistiques?.rmu?.[timePeriod] ?? [];
+  const RMUPeriods = filterDisplayedPeriods(
+    statistiques?.rmu?.[timePeriod] ?? []
+  );
 
   const renderPeriodHeader = (period: RmuPeriodStat) => {
     const periodDate = new Date(period.date);
@@ -56,12 +52,12 @@ export const RMUStatsTable = (): ReactElement => {
     return periodDate.getFullYear();
   };
 
-  const getHeadings = (statistiques: StatistiqueApiRead) => {
+  const getHeadings = (periods: RmuPeriodStat[]) => {
     return [
-      <th scope="col" key="heading-label" className="min-w-[240px]">
+      <th scope="col" key="heading-label">
         {" "}
       </th>,
-      ...(statistiques?.rmu?.[timePeriod] ?? []).map((period, index) => (
+      ...periods.map((period, index) => (
         <th
           scope="col"
           key={`${period.date}-${index}`}
@@ -101,11 +97,12 @@ export const RMUStatsTable = (): ReactElement => {
         />
       </div>
       <Table
-        headings={getHeadings(statistiques)}
+        headings={getHeadings(RMUPeriods)}
         ariaLabelledBy="rmu-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
         stickFirstColumn
+        firstColumnWidth="18rem"
         defaultScrollRight
       >
         {rmuStats.map((line, rowIndex) => (

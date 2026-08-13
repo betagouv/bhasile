@@ -1,12 +1,32 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  formatBytes,
+  formatCompactNumber,
   formatCurrency,
   formatNumber,
+  formatPerMille,
   parseFrenchNumber,
 } from "@/app/utils/number.util";
 
 describe("number util", () => {
+  describe("formatBytes", () => {
+    it("utilise la virgule décimale française", () => {
+      expect(formatBytes(11825)).toBe("11,8 kB");
+      expect(formatBytes(4792017)).toBe("4,79 MB");
+    });
+
+    it("garde les unités SI en anglais", () => {
+      expect(formatBytes(360375)).toBe("360 kB");
+    });
+
+    it("affiche 0 B pour une taille nulle comme pour une taille absente", () => {
+      expect(formatBytes(0)).toBe("0 B");
+      expect(formatBytes(null)).toBe("0 B");
+      expect(formatBytes(undefined)).toBe("0 B");
+    });
+  });
+
   describe("formatNumber", () => {
     it("formate correctement les entiers positifs", () => {
       expect(formatNumber(1234)).toBe("1\u202f234");
@@ -39,6 +59,48 @@ describe("number util", () => {
       expect(formatNumber(12.345, { maximumFractionDigits: 1 })).toBe("12,3");
       expect(formatNumber(12.345, { maximumFractionDigits: 3 })).toBe("12,345");
       expect(formatNumber(12.345, { maximumFractionDigits: 0 })).toBe("12");
+    });
+  });
+
+  describe("formatCompactNumber", () => {
+    it("laisse les valeurs inférieures au millier telles quelles", () => {
+      expect(formatCompactNumber(0)).toBe("0");
+      expect(formatCompactNumber(250)).toBe("250");
+      expect(formatCompactNumber(999)).toBe("999");
+    });
+
+    it("abrège les milliers en k", () => {
+      expect(formatCompactNumber(1000)).toBe("1\u00a0k");
+      expect(formatCompactNumber(12500)).toBe("12,5\u00a0k");
+      expect(formatCompactNumber(750000)).toBe("750\u00a0k");
+    });
+
+    it("abrège les millions en M", () => {
+      expect(formatCompactNumber(1000000)).toBe("1\u00a0M");
+      expect(formatCompactNumber(1500000)).toBe("1,5\u00a0M");
+    });
+
+    it("gère les nombres négatifs", () => {
+      expect(formatCompactNumber(-1500000)).toBe("-1,5\u00a0M");
+    });
+
+    it("gère les valeurs null, undefined et NaN", () => {
+      expect(formatCompactNumber(null)).toBe("0");
+      expect(formatCompactNumber(undefined)).toBe("0");
+      expect(formatCompactNumber(NaN)).toBe("0");
+    });
+  });
+
+  describe("formatPerMille", () => {
+    it("convertit un ratio en pour mille", () => {
+      expect(formatPerMille(0.00148)).toBe("1,48\u202f\u2030");
+      expect(formatPerMille(0.01)).toBe("10\u202f\u2030");
+    });
+
+    it("gère les valeurs null, undefined et NaN", () => {
+      expect(formatPerMille(null)).toBe("0\u202f\u2030");
+      expect(formatPerMille(undefined)).toBe("0\u202f\u2030");
+      expect(formatPerMille(NaN)).toBe("0\u202f\u2030");
     });
   });
 

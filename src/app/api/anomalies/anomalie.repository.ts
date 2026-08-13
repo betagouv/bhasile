@@ -1,0 +1,76 @@
+import {
+  type StructureAnomalieDb,
+  structureAnomalieInclude,
+} from "@/app/api/anomalies/anomalie.db.type";
+import type { DetectedAnomalie } from "@/lib/anomalies/anomalie.rule";
+import prisma from "@/lib/prisma";
+import type { AnomalieCode } from "@/types/anomalie.type";
+
+export const findStructureForAnomalies = (
+  structureId: number,
+  now: Date
+): Promise<StructureAnomalieDb | null> =>
+  prisma.structure.findUnique({
+    where: { id: structureId },
+    include: structureAnomalieInclude(now),
+  });
+
+export const findAllStructureIds = async (): Promise<number[]> => {
+  const structures = await prisma.structure.findMany({
+    select: { id: true },
+    orderBy: { id: "asc" },
+  });
+
+  return structures.map(({ id }) => id);
+};
+
+export const findAnomalieForUpdate = (id: number) =>
+  prisma.anomalie.findUnique({
+    where: { id },
+    select: {
+      structureId: true,
+      structure: { select: { departementAdministratif: true } },
+    },
+  });
+
+export const updateAnomalieJustification = (
+  id: number,
+  data: AnomalieJustificationData
+) => prisma.anomalie.update({ where: { id }, data });
+
+type AnomalieJustificationData = {
+  isJustified: boolean;
+  commentaire?: string | null;
+  justifiedById?: number;
+  justifiedAt?: Date;
+};
+
+export const findAnomaliesByStructureId = (structureId: number) =>
+  prisma.anomalie.findMany({
+    where: { structureId },
+    include: { justifiedBy: { select: { id: true, name: true, email: true } } },
+  });
+
+// La suppression est restreinte aux codes réellement évalués
+export const reconcileAnomalies = (
+  structureId: number,
+  detected: DetectedAnomalie[],
+  evaluatedCodes: AnomalieCode[]
+): Promise<unknown> =>
+  prisma.$transaction([
+    prisma.anomalie.createMany({
+      data: detected.map((detectee) => ({ structureId, ...detectee })),
+      skipDuplicates: true,
+    }),
+    prisma.anomalie.deleteMany({
+      where: {
+        structureId,
+        code: { in: evaluatedCodes },
+        NOT: detected.map(({ code, year, targetId }) => ({
+          code,
+          year,
+          targetId,
+        })),
+      },
+    }),
+  ]);

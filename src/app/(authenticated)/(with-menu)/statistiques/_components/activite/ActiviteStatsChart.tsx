@@ -9,6 +9,8 @@ import {
   getLastMonths,
   getYearFromDate,
 } from "@/app/utils/date.util";
+import { formatCompactNumber } from "@/app/utils/number.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { ActiviteByMonthStat } from "@/schemas/api/statistique.schema";
 
 import {
@@ -16,7 +18,6 @@ import {
   typesActivite,
 } from "../../../structures/[id]/_components/_activite/activite.constants";
 import { ActiviteTypes } from "../../../structures/[id]/_components/_activite/ActiviteTypes";
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
 export const ActiviteStatsChart = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
@@ -78,6 +79,7 @@ export const ActiviteStatsChart = (): ReactElement => {
       <div className="flex">
         <div className="flex-4">
           <LineChart
+            axisYLabel="% des places DNA"
             data={{
               labels: selectedMonths.map(formatForCharts),
               series: [getActivitesData(), getSeuilCahierDesCharges()],
@@ -93,9 +95,8 @@ export const ActiviteStatsChart = (): ReactElement => {
               },
               axisY: {
                 offset: 50,
-                labelInterpolationFnc: (value) => {
-                  return value + " %";
-                },
+                labelInterpolationFnc: (value) =>
+                  `${formatCompactNumber(value as number)} %`,
               },
             }}
           />

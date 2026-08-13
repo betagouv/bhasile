@@ -3,6 +3,7 @@ import {
   getNextBhasileCode,
   getNormalizedRegionCodeFromDepartement,
 } from "@/app/utils/bhasile.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
@@ -66,20 +67,27 @@ export const createOne = async (
   });
 };
 
+const checkTransformationNotFinalised = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const transformation = await tx.transformation.findUniqueOrThrow({
+    where: { id: transformationId },
+    select: { form: { select: { status: true } } },
+  });
+
+  if (isTransformationFinalised(transformation)) {
+    throw new ApiDomainError(
+      "Impossible de modifier une transformation finalisée"
+    );
+  }
+};
+
 export const updateOne = async (
   input: TransformationApiUpdate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
-    const finalisedTransformation = await tx.transformation.findUniqueOrThrow({
-      where: { id: input.id },
-      select: { form: { select: { status: true } } },
-    });
-
-    if (finalisedTransformation.form?.status === true) {
-      throw new ApiDomainError(
-        "Impossible de modifier une transformation finalisée"
-      );
-    }
+    await checkTransformationNotFinalised(tx, input.id);
 
     const isFinalizing = input.form?.status === true;
     if (isFinalizing) {
@@ -135,7 +143,6 @@ export const updateOne = async (
       await createStructuresForCreationBlocks(tx, input.id);
       await copyStructureTypologiesToStructures(tx, input.id);
       await moveActesAdministratifsToStructures(tx, input.id);
-      await endDnaStructuresForFermetureBlocks(tx, input.id);
       await setFermetureDates(tx, input.id);
     }
 
@@ -147,16 +154,7 @@ export const resetSelection = async (
   input: TransformationSelectionApiUpdate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
-    const finalisedTransformation = await tx.transformation.findUniqueOrThrow({
-      where: { id: input.id },
-      select: { form: { select: { status: true } } },
-    });
-
-    if (finalisedTransformation.form?.status === true) {
-      throw new ApiDomainError(
-        "Impossible de modifier une transformation finalisée"
-      );
-    }
+    await checkTransformationNotFinalised(tx, input.id);
 
     await tx.structureVersionTransformation.deleteMany({
       where: { transformationId: input.id },
@@ -211,33 +209,6 @@ const createStructuresForCreationBlocks = async (
       structureVersionTransformation,
       bhasileCounterCache
     );
-  }
-};
-
-const endDnaStructuresForFermetureBlocks = async (
-  tx: PrismaTransaction,
-  transformationId: number
-): Promise<void> => {
-  const fermetureBlocks = await tx.structureVersionTransformation.findMany({
-    where: {
-      transformationId,
-      type: StructureVersionTransformationType.FERMETURE,
-    },
-    select: {
-      structureVersion: { select: { id: true, effectiveDate: true } },
-    },
-  });
-
-  for (const fermetureBlock of fermetureBlocks) {
-    const { structureVersion } = fermetureBlock;
-    if (!structureVersion?.effectiveDate) {
-      continue;
-    }
-
-    await tx.dnaStructure.updateMany({
-      where: { structureVersionId: structureVersion.id, endDate: null },
-      data: { endDate: structureVersion.effectiveDate },
-    });
   }
 };
 

@@ -1,6 +1,6 @@
+import { useFetchState } from "@/contexts/FetchStateContext";
 import { FetchState } from "@/types/fetch-state.type";
 
-import { useFetchState } from "../context/FetchStateContext";
 import { ApiError } from "../utils/apiError.util";
 
 export const useSaveMutation = <TArgs extends unknown[], TData>(

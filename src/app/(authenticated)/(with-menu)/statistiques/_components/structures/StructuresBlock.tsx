@@ -4,8 +4,9 @@ import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
 import { InformationCardBridge } from "@/app/components/InformationCardBridge";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
+import { AnnualDataNote } from "../AnnualDataNote";
 import { StructuresStatsTable } from "./StructuresStatsTable";
 import { TypesBatis } from "./TypesBatis";
 import { TypesStructures } from "./TypesStructures";
@@ -28,15 +29,19 @@ export const StructuresBlock = (): ReactElement => {
             secondaryInformation="structures"
           />
         </div>
-        <InformationCard
-          primaryInformation={statistiques.structures.totalCpoms}
-          secondaryInformation="CPOM"
-        />
+        <div>
+          <InformationCard
+            primaryInformation={statistiques.structures.totalCpoms}
+            secondaryInformation="CPOM complets ou partiels"
+          />
+        </div>
         <InformationCardBridge />
-        <InformationCard
-          primaryInformation={statistiques.structures.structuresAvecCpom}
-          secondaryInformation="structures concernées"
-        />
+        <div>
+          <InformationCard
+            primaryInformation={statistiques.structures.structuresAvecCpom}
+            secondaryInformation="structures sous CPOM"
+          />
+        </div>
       </div>
       <div className="grid grid-cols-2 pb-16">
         <div className="border-r border-default-grey mr-10">
@@ -45,10 +50,7 @@ export const StructuresBlock = (): ReactElement => {
         <TypesBatis />
       </div>
       <StructuresStatsTable />
-      <div className="italic text-sm pt-3">
-        Les chiffres correspondent au 31 décembre de chaque année, et à la
-        dernière mise à jour pour l’année en cours.
-      </div>
+      <AnnualDataNote />
     </div>
   );
 };

@@ -20,6 +20,8 @@ export const DEFAULT_PAGE_SIZE = 20;
 export const MIDDLE_PAGE_SIZE = 12;
 export const SHORT_PAGE_SIZE = 6;
 
+export const SEARCH_PARAM_DEBOUNCE_MS = 300;
+
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 
@@ -27,6 +29,16 @@ export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 
 export const START_YEAR = 2021;
 export const TRANSFORMATION_START_YEAR = 2026;
+
+// Premières années de collecte, côté contrôle qualité
+export const EIG_START_YEAR = 2025;
+export const EVALUATION_START_YEAR = 2023;
+
+// Première année où les évaluations sont notées
+export const EVALUATION_NOTES_START_YEAR = 2022;
+
+export const EVALUATION_NOTE_MIN = 1;
+export const EVALUATION_NOTE_MAX = 4;
 
 export const CURRENT_YEAR = getNow().getFullYear();
 

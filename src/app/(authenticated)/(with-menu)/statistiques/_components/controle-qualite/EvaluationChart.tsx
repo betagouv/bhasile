@@ -1,38 +1,24 @@
 import { ReactElement, useMemo, useState } from "react";
 
+import { ChartLegend } from "@/app/components/ChartLegend";
 import { DoubleYAxisBarLineChart } from "@/app/components/common/DoubleYAxisBarLineChart";
 import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { getYearRange } from "@/app/utils/date.util";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
-
-const MAX_DISPLAYED_TIME_PERIODS = 10;
+import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { EVALUATION_START_YEAR } from "@/constants";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const EvaluationChart = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const evaluationPeriodData = statistiques.controleQualite[timePeriod] || [];
-
-    const { years } = getYearRange();
-    const filteredEvaluationPeriodData = evaluationPeriodData.filter(
-      (periodStat) => {
-        const itemYear = new Date(periodStat.date).getFullYear();
-        return years.includes(itemYear);
-      }
+    const sortedEvaluationPeriodData = getLastDisplayedPeriods(
+      statistiques.controleQualite[timePeriod] || [],
+      EVALUATION_START_YEAR
     );
-
-    const sortedEvaluationPeriodData = [...filteredEvaluationPeriodData]
-      .sort(
-        (firstEvaluationPeriod, secondEvaluationPeriod) =>
-          new Date(firstEvaluationPeriod.date).getTime() -
-          new Date(secondEvaluationPeriod.date).getTime()
-      )
-      .slice(-MAX_DISPLAYED_TIME_PERIODS);
 
     const labels = sortedEvaluationPeriodData.map((item) => {
       const date = new Date(item.date);
@@ -58,8 +44,8 @@ export const EvaluationChart = (): ReactElement => {
       (item) => Number(item.nbStructuresEvaluees) || 0
     );
 
-    const moyenneGenerale = sortedEvaluationPeriodData.map(
-      (item) => Number(item.noteGenerale) || 0
+    const moyenneGenerale = sortedEvaluationPeriodData.map((item) =>
+      item.noteGenerale === null ? null : Number(item.noteGenerale)
     );
 
     return {
@@ -87,8 +73,8 @@ export const EvaluationChart = (): ReactElement => {
           <DoubleYAxisBarLineChart
             data={chartData}
             colors={colors}
-            leftAxisLabel="note"
-            rightAxisLabel="structures"
+            leftAxisLabel="Note"
+            rightAxisLabel="Nb structures"
           />
         </div>
         <div>
@@ -96,19 +82,21 @@ export const EvaluationChart = (): ReactElement => {
             timePeriod={timePeriod}
             setTimePeriod={setTimePeriod}
           />
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#FA7659] shrink-0" />
-            <p className="pl-2 mb-0">Moyenne générale de la note totale</p>
-          </div>
-          <div className="pb-2 flex items-center">
-            <div className="w-[40px] border-b-2 border-b-action-high-blue-france mr-2 shrink-0 grow-0" />
-            Nombre de structures évaluées
-          </div>
+          <ChartLegend
+            label="Moyenne générale de la note totale"
+            color="#FA7659"
+          />
+          <ChartLegend
+            label="Nombre de structures évaluées"
+            color="var(--border-action-high-blue-france)"
+            type="line"
+          />
         </div>
       </div>
       <span className="italic">
-        Pour rappel, seules les structures autorisées (CADA et CPH) sont
-        concernées par les évaluations.
+        Seules les structures autorisées (CADA et CPH) sont concernées par les
+        évaluations. Seuls les EIG déclarés via démarches numériques sont
+        affichés.
       </span>
     </>
   );

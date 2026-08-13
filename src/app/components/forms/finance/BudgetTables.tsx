@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../../(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { CustomNotice } from "../../common/CustomNotice";
 import { StructureCpomTable } from "./budget-tables/StructureCpomTable";
 import { StructureTable } from "./budget-tables/StructureTable";

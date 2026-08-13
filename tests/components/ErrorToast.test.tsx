@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/structures/1",
 }));
 
-vi.mock("@/app/context/FetchStateContext", () => ({
+vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({
     fetchStates: mocks.fetchStates,
     getErrorMessage: mocks.getErrorMessage,

@@ -205,7 +205,7 @@ export const findDepartementsWithPopulation = async (
       departementNumeros.length > 0
         ? { numero: { in: departementNumeros } }
         : undefined,
-    select: { id: true, numero: true, name: true, population: true },
+    select: { numero: true, name: true, population: true },
   });
 };
 
@@ -291,7 +291,6 @@ export const findBudgets = async (
   const budgets = await prisma.budget.findMany({
     where: {
       structureId: { in: structureIds },
-      OR: [{ isMissing: null }, { isMissing: false }],
     },
     select: {
       id: true,
@@ -333,7 +332,6 @@ export const findIndicateursFinanciers = async (
   return prisma.indicateurFinancier.findMany({
     where: {
       structureId: { in: structureIds },
-      OR: [{ isMissing: null }, { isMissing: false }],
     },
     select: {
       id: true,

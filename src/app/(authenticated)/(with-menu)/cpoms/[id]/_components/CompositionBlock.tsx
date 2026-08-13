@@ -8,8 +8,7 @@ import { Table } from "@/app/components/common/Table";
 import { InformationCard } from "@/app/components/InformationCard";
 import { formatDate } from "@/app/utils/date.util";
 import { pluralize } from "@/app/utils/string.util";
-
-import { useCpomContext } from "../_context/CpomClientContext";
+import { useCpomContext } from "@/contexts/CpomContext";
 
 export const CompositionBlock = () => {
   const { cpom } = useCpomContext();
@@ -35,9 +34,10 @@ export const CompositionBlock = () => {
       <Table
         headings={["", "Entrée", "", "Sortie", ""]}
         ariaLabelledBy="composition"
-        className="max-w-3xl [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12!"
+        className="[&_thead_tr]:bg-transparent! [&_thead_tr]:h-12!"
         enableBorders
         stickFirstColumn
+        firstColumnWidth="30rem"
       >
         {cpom.structures?.map((structure) => (
           <tr key={structure.id}>

@@ -1,13 +1,15 @@
 import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
-import { getFirstParam } from "@/app/utils/searchParams.util";
+import { getFirstParam, SearchParams } from "@/app/utils/searchParams.util";
 import { authOptions } from "@/lib/next-auth/auth";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
+import { AnomaliesBlock } from "./_components/AnomaliesBlock";
 import { BlockSkeleton } from "./_components/BlockSkeleton";
 import {
+  ANOMALIES_BLOCK_HEADER,
   INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER,
   RAPPELS_BLOCK_HEADER,
   TRANSFORMATIONS_BLOCK_HEADER,
@@ -17,8 +19,6 @@ import { InitialisationsActualisationsBlock } from "./_components/Initialisation
 import { NotificationsBlock } from "./_components/NotificationsBlock";
 import { RappelsBlock } from "./_components/RappelsBlock";
 import { TransformationsBlock } from "./_components/TransformationsBlock";
-
-type SearchParams = { [key: string]: string | string[] | undefined };
 
 export default async function DashboardPage({
   searchParams,
@@ -34,7 +34,6 @@ export default async function DashboardPage({
     operateurs: getFirstParam(params.operateurs),
     type: getFirstParam(params.types),
   };
-  const page = Number(getFirstParam(params.actualisationsPage)) || 0;
 
   return (
     <>
@@ -51,16 +50,23 @@ export default async function DashboardPage({
           <InitialisationsActualisationsBlock
             filters={filters}
             user={user}
-            page={page}
+            searchParams={params}
           />
         </Suspense>
         <Suspense
           fallback={<BlockSkeleton {...TRANSFORMATIONS_BLOCK_HEADER} />}
         >
-          <TransformationsBlock filters={filters} user={user} />
+          <TransformationsBlock
+            filters={filters}
+            user={user}
+            searchParams={params}
+          />
         </Suspense>
         <Suspense fallback={<BlockSkeleton {...RAPPELS_BLOCK_HEADER} />}>
           <RappelsBlock filters={filters} user={user} searchParams={params} />
+        </Suspense>
+        <Suspense fallback={<BlockSkeleton {...ANOMALIES_BLOCK_HEADER} />}>
+          <AnomaliesBlock filters={filters} user={user} searchParams={params} />
         </Suspense>
       </div>
     </>

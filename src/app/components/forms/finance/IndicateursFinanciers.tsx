@@ -2,11 +2,11 @@
 
 import { useForm, useFormContext } from "react-hook-form";
 
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 import { CustomNotice } from "../../common/CustomNotice";
 import { getIndicateurFinancierTableHeading } from "./budget-tables/getIndicateurFinancierTableHeading";
@@ -54,6 +54,7 @@ export const IndicateursFinanciers = () => {
         hasErrors={errorMessages.length > 0}
         enableBorders
         stickFirstColumn
+        firstColumnWidth="17rem"
       >
         <IndicateurFinancierTableLines
           lines={getIndicateurFinancierTableLines()}

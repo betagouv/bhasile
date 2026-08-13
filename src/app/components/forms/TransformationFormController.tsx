@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 
-import { useOptionalTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
+import { useTransformationContext } from "@/contexts/TransformationContext";
 import { AnyZodSchema } from "@/types/form.type";
 
 export const TransformationFormController = <TSchema extends AnyZodSchema>({
@@ -18,16 +18,18 @@ export const TransformationFormController = <TSchema extends AnyZodSchema>({
     formState: { isDirty },
   } = useFormContext<z.infer<TSchema>>();
   const { registerSaver, shouldShowIncompleteSteps } =
-    useOptionalTransformationContext();
+    useTransformationContext();
 
   const onSaveRef = useRef(onSave);
+  const schemaRef = useRef(schema);
   useEffect(() => {
     onSaveRef.current = onSave;
+    schemaRef.current = schema;
   });
 
   useEffect(() => {
     const saveCurrentForm = async () => {
-      const result = schema.safeParse(getValues());
+      const result = schemaRef.current.safeParse(getValues());
       if (!result.success) {
         console.error(
           "TransformationFormController: données invalides",
@@ -42,7 +44,7 @@ export const TransformationFormController = <TSchema extends AnyZodSchema>({
     registerSaver(saveCurrentForm);
 
     return () => registerSaver(null);
-  }, [registerSaver, schema, getValues, trigger]);
+  }, [registerSaver, getValues, trigger]);
 
   useEffect(() => {
     if (!isDirty) {

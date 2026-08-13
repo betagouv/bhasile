@@ -21,7 +21,7 @@ yarn test                     # Tests unitaires/intégration (hors DB)
 yarn test:db                  # Tests repository (nécessite .env.test)
 yarn lint                     # ESLint + Stylelint
 yarn check:ts                 # Vérification TypeScript sans build
-yarn pre-push                 # lint + check:ts + test + sql:format:check (lancé par Husky)
+yarn pre-push                 # lint + check:ts + sql:format:check (lancé par Husky ; les tests tournent en CI)
 
 # Base de données
 yarn prisma:migrate            # Crée et applique les migrations + génère le client
@@ -53,6 +53,7 @@ src/
     components/              # Composants réutilisables
     hooks/                   # Hooks React (logique + appels réseau)
     utils/                   # Utilitaires transverses
+  contexts/                  # Contextes React partagés (un fichier par contexte)
   schemas/                   # Schémas Zod partagés (API + forms) + types inférrés
   types/                     # Types de l'application non inférrés des schemas
   lib/
@@ -60,6 +61,14 @@ src/
     next-auth/               # Config NextAuth
 tests/                       # Même arborescence que src/
 ```
+
+### Emplacement du code partagé
+
+`src/app/` ne contient que du routage : pages, layouts et `api/`. Tout code partagé vit à la racine de `src/` — c'est déjà le cas de `lib/`, `schemas/`, `types/` et `contexts/`.
+
+Migration en cours : `components/`, `hooks/` et `utils/` sont encore sous `src/app/` et remonteront un dossier à la fois. Ne pas prendre leur emplacement actuel comme modèle pour du nouveau code partagé.
+
+Un contexte vit dans `src/contexts/` si son provider est monté par une route ou par `Providers.tsx`. Il reste colocalisé avec son composant si c'est ce composant qui le fournit (par ex. `MapContext`).
 
 ## Patterns et conventions
 
@@ -123,13 +132,13 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 
 - **ProConnect** : agents DREETS/DDETS uniquement, donne accès au dashboard
 - **Mot de passe** : opérateurs, accès limité aux formulaires `/ajout-structure` et `/ajout-adresses`
-- **Dev bypass** : `DEV_AUTH_BYPASS=1` dans `.env` pour bypasser les accès privés en local
 
 ## Documentation détaillée
 
 - [Architecture](docs/architecture.md) — stack, arborescence, services externes, schéma BDD
 - [Base de données](docs/database.md) — migrations, vues SQL, process recommandé
 - [Scripts](docs/scripts.md) — scripts one-off et récurrents (Scalingo)
+- [Anomalies](docs/anomalies.md) — détection des incohérences de données (moteur isomorphe, registre, réconciliation)
 - [Référentiel OFII](docs/ofii_referential.md) — mise à jour mensuelle du référentiel OFII
 - [Tests](docs/tests.md) — outils, nommage des fichiers et des cas (`it` en français)
 

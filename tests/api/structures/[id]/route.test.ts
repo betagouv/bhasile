@@ -22,6 +22,10 @@ vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
 }));
 
+vi.mock("@/app/api/anomalies/anomalie.service", () => ({
+  recomputeAnomaliesSafely: vi.fn(),
+}));
+
 vi.mock("@/lib/casl/abilities", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
   canUpdateDepartement: (...args: unknown[]) =>
@@ -42,7 +46,9 @@ vi.mock("@/app/api/activites/activite.util", () => ({
 
 vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("@/app/api/structures/structure.util")>();
+    await importOriginal<
+      typeof import("@/app/api/structures/structure.util")
+    >();
   return {
     getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
       mockGetAdresseAdministrativeCoordinates(...args),
@@ -60,8 +66,8 @@ vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
     isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
     getDatesConvention: vi.fn().mockReturnValue([null, null]),
     getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
-    isBornFromCreation: vi.fn().mockReturnValue(false),
-    isFinalisationFormValidated: vi.fn().mockReturnValue(false),
+    isStructureFinalised: vi.fn().mockReturnValue(false),
+    isStructureClosed: vi.fn().mockReturnValue(false),
   };
 });
 
@@ -78,16 +84,23 @@ vi.mock("@/app/api/finesses/finess.util", () => ({
 }));
 
 vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
-  ...(await importOriginal<
-    typeof import("@/app/api/adresses/adresse.util")
-  >()),
+  ...(await importOriginal<typeof import("@/app/api/adresses/adresse.util")>()),
   getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
-vi.mock("@/app/api/user-action/user-action.service", () => ({
+vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createStructureEvent: (...args: unknown[]) =>
     mockCreateStructureEvent(...args),
 }));
+
+const buildCurrentVersion = (version: Record<string, unknown> = {}) => ({
+  id: 10,
+  effectiveDate: new Date("2021-01-01"),
+  structureVersionTransformationId: null,
+  structureVersionTransformation: null,
+  dnaStructures: [],
+  ...version,
+});
 
 describe("GET /api/structures/[id]", () => {
   beforeEach(() => {
@@ -103,14 +116,16 @@ describe("GET /api/structures/[id]", () => {
       filiale: null,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
-      adresses: [],
       cpomStructures: [],
       creationDate: new Date("2020-01-01"),
       date303: null,
-      dnaStructures: [],
-      latitude: 48.86,
-      longitude: 2.34,
-      structureVersions: [],
+      structureVersions: [
+        buildCurrentVersion({
+          adresses: [],
+          latitude: 48.86,
+          longitude: 2.34,
+        }),
+      ],
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);
@@ -173,6 +188,7 @@ describe("GET /api/structures/[id]", () => {
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,
+      isClosed: false,
       isCurrentVersionFromTransformation: false,
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
@@ -183,13 +199,7 @@ describe("GET /api/structures/[id]", () => {
     // GIVEN : le millésime le plus récent (2024) a des places LGBT mais pas FVV/TEH,
     // un millésime antérieur (2023) avait des places FVV/TEH -> ne doit pas fuiter.
     // Les typologies sont dé-versionnées : elles vivent sur la Structure.
-    const currentVersion = {
-      id: 20,
-      effectiveDate: new Date("2021-01-01"),
-      structureVersionTransformationId: null,
-      structureVersionTransformation: null,
-      dnaStructures: [],
-    };
+    const currentVersion = buildCurrentVersion({ id: 20 });
     const dbStructure = {
       id: 2,
       name: "Test",
@@ -227,11 +237,9 @@ describe("GET /api/structures/[id]", () => {
     const dbStructure = {
       id: 1,
       type: "CADA",
-      adresses: [{ id: 42 }],
       cpomStructures: [],
       creationDate: new Date("2020-01-01"),
-      dnaStructures: [],
-      structureVersions: [],
+      structureVersions: [buildCurrentVersion({ adresses: [{ id: 42 }] })],
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);

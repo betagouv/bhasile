@@ -3,8 +3,10 @@ import {
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
 import { getActualisationYear } from "@/app/api/structures/actualisation.util";
+import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { parseCommaList } from "@/app/utils/string.util";
+import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { InitialisationsActualisationsApiRead } from "@/types/dashboard.type";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
@@ -13,10 +15,7 @@ import {
   findDashboardStructures,
   findFormDefinitionDeadline,
 } from "./initialisations-actualisations.repository";
-import {
-  buildDashboardRows,
-  paginateDashboardRows,
-} from "./initialisations-actualisations.util";
+import { buildDashboardRows } from "./initialisations-actualisations.util";
 
 export const getInitialisationsActualisations = async (
   filters: Filters,
@@ -46,7 +45,11 @@ export const getInitialisationsActualisations = async (
     ]
   );
 
-  const { total, rows: pageRows } = paginateDashboardRows(rows, page);
+  const { total, rows: pageRows } = paginateWithTotal(
+    rows,
+    page,
+    MIDDLE_PAGE_SIZE
+  );
 
   return {
     initialisationDeadline:

@@ -4,9 +4,9 @@ import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
 import { InformationCardBridge } from "@/app/components/InformationCardBridge";
-import { formatNumber } from "@/app/utils/number.util";
+import { formatNumber, formatPercentage } from "@/app/utils/number.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { ControleQualiteStatsTable } from "./ControleQualiteStatsTable";
 import { EIGChart } from "./EIGChart";
 import { EvaluationChart } from "./EvaluationChart";
@@ -14,12 +14,13 @@ import { EvaluationChart } from "./EvaluationChart";
 export const ControleQualiteBlock = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
-  const tauxEigComportementViolent = formatNumber(
-    Number(statistiques.controleQualite.eig.tauxEigComportementViolent),
-    {
-      maximumFractionDigits: 1,
-    }
+  const tauxEigComportementViolent = formatPercentage(
+    statistiques.controleQualite.eig.tauxEigComportementViolent,
+    { maximumFractionDigits: 0 }
   );
+
+  const moyenneEvaluations =
+    statistiques.controleQualite.eig.moyenneEvaluationsLast12Months;
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -49,10 +50,11 @@ export const ControleQualiteBlock = (): ReactElement => {
           <InformationCard
             primaryInformation={
               <>
-                dont {statistiques.controleQualite.eig.nbEigComportementViolent}{" "}
-                <span className="text-xl">
-                  ({tauxEigComportementViolent}&nbsp;%)
-                </span>
+                dont{" "}
+                {formatNumber(
+                  statistiques.controleQualite.eig.nbEigComportementViolent
+                )}{" "}
+                <span className="text-xl">({tauxEigComportementViolent})</span>
               </>
             }
             secondaryInformation="au motif de comportements violents"
@@ -61,11 +63,14 @@ export const ControleQualiteBlock = (): ReactElement => {
         <div>
           <InformationCard
             primaryInformation={
-              <>
-                {statistiques.controleQualite.eig
-                  .moyenneEvaluationsLast12Months || "N/A"}{" "}
-                <span className="text-xl">/&nbsp;4</span>
-              </>
+              moyenneEvaluations === null ? (
+                "N/A"
+              ) : (
+                <>
+                  {formatNumber(moyenneEvaluations)}{" "}
+                  <span className="text-xl">/&nbsp;4</span>
+                </>
+              )
             }
             secondaryInformation={
               <>

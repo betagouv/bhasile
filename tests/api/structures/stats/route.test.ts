@@ -8,6 +8,10 @@ vi.mock("@/app/api/structures/structure.repository", () => ({
   findAllStructures: (...args: unknown[]) => mockfindAllStructures(...args),
 }));
 
+vi.mock("@/app/api/anomalies/anomalie.service", () => ({
+  recomputeAnomaliesSafely: vi.fn(),
+}));
+
 const lightStructureWithPlaces = (id: number, placesAutorisees: number) =>
   ({
     id,

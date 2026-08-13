@@ -5,15 +5,28 @@ import { Fragment, ReactElement, useState } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
-import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
+import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
 
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { FinanceTypeSelector } from "./FinanceTypeSelector";
+
+const formatNumberCell = (value?: number | null): ReactElement | string =>
+  value !== null && value !== undefined ? <NumberDisplay value={value} /> : "•";
+
+const formatAmountCell = (value?: number | null): ReactElement | string =>
+  value !== null && value !== undefined ? (
+    <NumberDisplay value={value} type="currency" maximumFractionDigits={0} />
+  ) : (
+    "•"
+  );
 
 export const FinancesStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
-  const financeYears = statistiques?.finance?.byYear ?? [];
+  const financeYears = filterDisplayedYears(
+    statistiques?.finance?.byYear ?? []
+  );
 
   const [visualization, setVisualization] = useState<
     "total" | "autorisees" | "subventionnees"
@@ -26,22 +39,12 @@ export const FinancesStatsTable = (): ReactElement => {
         {
           label: "Nombre d’ETP",
           key: "totalETP",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} />
-            ) : (
-              "•"
-            ),
+          format: formatNumberCell,
         },
         {
           label: "Taux d’encadrement moyen",
           key: "tauxEncadrement",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} />
-            ) : (
-              "•"
-            ),
+          format: formatNumberCell,
         },
         {
           label: "Coût journalier moyen",
@@ -61,22 +64,12 @@ export const FinancesStatsTable = (): ReactElement => {
         {
           label: "Dotation demandée",
           key: "dotationDemandee",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
         },
         {
           label: "Dotation accordée",
           key: "dotationAccordee",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
         },
       ],
     },
@@ -87,34 +80,19 @@ export const FinancesStatsTable = (): ReactElement => {
           label: "Total des produits retenu",
           subLabel: "dont dotation État",
           key: "totalProduits",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
         },
         {
           label: "Total charges retenu",
           subLabel: "par les autorités tarifaires",
           key: "totalCharges",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
         },
         {
           label: "Résultat net retenu",
           subLabel: "par les autorités tarifaires",
           key: "resultatNet",
-          format: (value) =>
-            value !== null && value !== undefined ? (
-              <NumberDisplay value={value} type="currency" />
-            ) : (
-              "•"
-            ),
+          format: formatAmountCell,
           isBadge: true,
         },
       ],
@@ -163,7 +141,7 @@ export const FinancesStatsTable = (): ReactElement => {
         />
       </div>
       <Table
-        headings={getHeadings(statistiques)}
+        headings={getHeadings(financeYears)}
         ariaLabelledBy="finances-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
@@ -224,9 +202,7 @@ export const FinancesStatsTable = (): ReactElement => {
   );
 };
 
-const getHeadings = (statistiques: StatistiqueApiRead) => {
-  const financeYears = statistiques?.finance?.byYear ?? [];
-
+const getHeadings = (financeYears: FinanceByYearStat[]) => {
   const dates = financeYears.map((yearItem) => (
     <th scope="col" key={yearItem.year} className="text-center font-bold">
       {yearItem.year}
@@ -234,7 +210,7 @@ const getHeadings = (statistiques: StatistiqueApiRead) => {
   ));
 
   return [
-    <th scope="col" key="heading-label" className="min-w-[240px]">
+    <th scope="col" key="heading-label">
       {" "}
     </th>,
     ...dates,

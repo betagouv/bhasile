@@ -19,9 +19,12 @@ import { ControleType } from "@/types/controle.type";
 import { StepStatus } from "@/types/form.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
+import { createReferentialDna } from "../../test-utils/referential-dna";
+
 describe("structure.repository db integration", () => {
   const createdStructureIds: number[] = [];
   const createdOperateurIds: number[] = [];
+  const createdDnaIds: number[] = [];
 
   const createStructure = async (type?: StructureType) => {
     const structure = await prisma.structure.create({
@@ -35,6 +38,13 @@ describe("structure.repository db integration", () => {
     });
     createdStructureIds.push(structure.id);
     return structure;
+  };
+
+  const createDna = async (code: string) => {
+    const dna = await createReferentialDna(code);
+    createdDnaIds.push(dna.id);
+    createdOperateurIds.push(dna.operateurId);
+    return dna;
   };
 
   const createFileUpload = async (prefix: string) => {
@@ -82,6 +92,16 @@ describe("structure.repository db integration", () => {
         where: {
           id: {
             in: createdStructureIds,
+          },
+        },
+      });
+    }
+
+    if (createdDnaIds.length > 0) {
+      await prisma.dna.deleteMany({
+        where: {
+          id: {
+            in: createdDnaIds,
           },
         },
       });
@@ -613,14 +633,14 @@ describe("structure.repository db integration", () => {
   it("remplace la liste des dnaStructures sur la version courante", async () => {
     // GIVEN: a rolling version with one dna link
     const structure = await createStructure();
-    const oldCode = `DNA-OLD-${Date.now()}-${randomUUID()}`;
+    const { code: oldCode } = await createDna(`DNA-OLD-${randomUUID()}`);
     await updateOne({
       id: structure.id,
       dnaStructures: [{ dna: { code: oldCode } }],
     });
 
     // WHEN: a different dna code is provided
-    const newCode = `DNA-NEW-${Date.now()}-${randomUUID()}`;
+    const { code: newCode } = await createDna(`DNA-NEW-${randomUUID()}`);
     await updateOne({
       id: structure.id,
       dnaStructures: [{ description: "New DNA", dna: { code: newCode } }],
@@ -636,7 +656,7 @@ describe("structure.repository db integration", () => {
   it("fusionne les codes DNA en doublon en un seul lien au lieu de planter", async () => {
     // GIVEN: an empty structure
     const structure = await createStructure();
-    const duplicatedCode = `DNA-DUP-${Date.now()}-${randomUUID()}`;
+    const { code: duplicatedCode } = await createDna(`DNA-DUP-${randomUUID()}`);
 
     // WHEN: the same DNA code is sent twice in one update (e.g. an autosaved draft)
     await updateOne({
@@ -1110,7 +1130,7 @@ describe("structure.repository db integration", () => {
       direction: null,
       map: false,
       selection: true,
-      finalised: false,
+      isFinalised: false,
     };
 
     const listStructures = async (overrides: Partial<SearchProps>) => {
@@ -1181,7 +1201,7 @@ describe("structure.repository db integration", () => {
       // GIVEN: a structure (type = invariant Structure scalar) edited via the rolling write
       const structure = await createStructure(StructureType.HUDA);
       const nom = `Liste-Nom-${randomUUID()}`;
-      const dnaCode = `DNA-LST-${randomUUID()}`;
+      const { code: dnaCode } = await createDna(`DNA-LST-${randomUUID()}`);
       await updateOne({
         id: structure.id,
         nom,
@@ -1340,7 +1360,7 @@ describe("structure.repository db integration", () => {
       direction: null,
       map: false,
       selection: false,
-      finalised: false,
+      isFinalised: false,
     };
 
     const listBy = async (
@@ -1548,13 +1568,13 @@ describe("structure.repository db integration", () => {
       // THEN: the finalised filter keeps the CREATION-born, drops the in-progress
       expect(
         findRow(
-          await listBy(creationBorn.codeBhasile, { finalised: true }),
+          await listBy(creationBorn.codeBhasile, { isFinalised: true }),
           creationBorn.codeBhasile
         )
       ).toBeDefined();
       expect(
         findRow(
-          await listBy(inProgress.codeBhasile, { finalised: true }),
+          await listBy(inProgress.codeBhasile, { isFinalised: true }),
           inProgress.codeBhasile
         )
       ).toBeUndefined();

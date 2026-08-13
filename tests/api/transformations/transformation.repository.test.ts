@@ -16,22 +16,37 @@ import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
+import { SessionUser } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
+import { createReferentialDna } from "../../test-utils/referential-dna";
+
+const NATIONAL_USER = {
+  role: "NATIONAL",
+  allowedDepartements: [],
+} as unknown as SessionUser;
+
 describe("transformation.repository db integration", () => {
   const createdStructureIds: number[] = [];
   const createdTransformationIds: number[] = [];
   const createdOperateurIds: number[] = [];
 
-  const createStructure = async () => {
+  const createStructure = async (versionData: Record<string, unknown> = {}) => {
     const structure = await prisma.structure.create({
       data: {
         codeBhasile: `BHA-TF-TEST-${Date.now()}-${Math.random()}`,
+        structureVersions: {
+          create: {
+            effectiveDate: new Date("2020-01-01T12:00:00.000Z"),
+            ...versionData,
+          },
+        },
       },
+      include: { structureVersions: true },
     });
     createdStructureIds.push(structure.id);
     return structure;
@@ -43,6 +58,12 @@ describe("transformation.repository db integration", () => {
     });
     createdOperateurIds.push(operateur.id);
     return operateur;
+  };
+
+  const createDna = async (code: string) => {
+    const dna = await createReferentialDna(code);
+    createdOperateurIds.push(dna.operateurId);
+    return dna;
   };
 
   const createFileUpload = async (prefix: string) => {
@@ -151,14 +172,14 @@ describe("transformation.repository db integration", () => {
         where: { id: { in: createdStructureIds } },
       });
     }
+    await prisma.dna.deleteMany({
+      where: { code: { startsWith: "DNA-TF-TEST-" } },
+    });
     if (createdOperateurIds.length > 0) {
       await prisma.operateur.deleteMany({
         where: { id: { in: createdOperateurIds } },
       });
     }
-    await prisma.dna.deleteMany({
-      where: { code: { startsWith: "DNA-TF-TEST-" } },
-    });
     await prisma.fileUpload.deleteMany({
       where: { key: { startsWith: "FILE-TF-TEST-" } },
     });
@@ -534,16 +555,14 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformationId,
       structureVersionId,
     } = await createBareTransformation();
-    const oldDna = await prisma.dna.create({
-      data: { code: `DNA-TF-TEST-OLD-${randomUUID()}` },
-    });
+    const oldDna = await createDna(`DNA-TF-TEST-OLD-${randomUUID()}`);
     await prisma.dnaStructure.create({
       data: {
         structureVersionId,
         dnaId: oldDna.id,
       },
     });
-    const newCode = `DNA-TF-TEST-${randomUUID()}`;
+    const { code: newCode } = await createDna(`DNA-TF-TEST-${randomUUID()}`);
     await updateOne({
       id: transformationId,
       structureVersionTransformations: [
@@ -961,9 +980,10 @@ describe("transformation.repository db integration", () => {
 
   const seedRichStructure = async () => {
     const structure = await createStructure();
+    const structureVersionId = structure.structureVersions[0].id;
     const contact = await prisma.contact.create({
       data: {
-        structureId: structure.id,
+        structureVersionId,
         prenom: "Nicolas",
         nom: "Leboeuf",
         telephone: "0652464214",
@@ -974,7 +994,7 @@ describe("transformation.repository db integration", () => {
     });
     const antenne = await prisma.antenne.create({
       data: {
-        structureId: structure.id,
+        structureVersionId,
         name: "Avranches Nord",
         adresse: "2 rue B",
         codePostal: "50300",
@@ -984,7 +1004,7 @@ describe("transformation.repository db integration", () => {
     });
     await prisma.adresse.create({
       data: {
-        structureId: structure.id,
+        structureVersionId,
         adresse: "3 rue C",
         codePostal: "50300",
         commune: "Avranches",
@@ -994,15 +1014,13 @@ describe("transformation.repository db integration", () => {
         isLogementSocial: false,
       },
     });
-    const dna = await prisma.dna.create({
-      data: { code: `DNA-TF-TEST-${randomUUID()}` },
-    });
+    const dna = await createDna(`DNA-TF-TEST-${randomUUID()}`);
     await prisma.dnaStructure.create({
-      data: { structureId: structure.id, dnaId: dna.id },
+      data: { structureVersionId, dnaId: dna.id },
     });
     const structureFiness = await prisma.structureFiness.create({
       data: {
-        structure: { connect: { id: structure.id } },
+        structureVersion: { connect: { id: structureVersionId } },
         finess: {
           create: { code: `FIN-TF-TEST-${randomUUID()}` },
         },
@@ -1069,20 +1087,23 @@ describe("transformation.repository db integration", () => {
     // dnaStructures : nouvelle ligne de jonction, mais même Dna réutilisé.
     expect(version.dnaStructures).toHaveLength(1);
     expect(version.dnaStructures[0].dnaId).toBe(dnaId);
-    expect(version.dnaStructures[0].structureId).toBeNull();
     const dnaCount = await prisma.dna.count({ where: { id: dnaId } });
     expect(dnaCount).toBe(1);
 
     // structureFinesses : nouvelle ligne de jonction, mais même Finess réutilisé.
     expect(version.structureFinesses).toHaveLength(1);
     expect(version.structureFinesses[0].finessId).toBe(finessId);
-    expect(version.structureFinesses[0].structureId).toBeNull();
     const finessCount = await prisma.finess.count({ where: { id: finessId } });
     expect(finessCount).toBe(1);
 
-    // La structure source n'est pas modifiée.
+    // La version de base de la structure source n'est pas modifiée.
     const sourceContacts = await prisma.contact.findMany({
-      where: { structureId: structure.id },
+      where: {
+        structureVersion: {
+          structureId: structure.id,
+          structureVersionTransformationId: null,
+        },
+      },
     });
     expect(sourceContacts).toHaveLength(1);
     expect(sourceContacts[0].id).toBe(contactId);
@@ -1676,64 +1697,6 @@ describe("transformation.repository db integration", () => {
     );
   });
 
-  it("date les dnaStructures encore ouvertes d'une structure fermée à la finalisation, sans toucher celles déjà fermées", async () => {
-    const structure = await createStructure();
-    const openDna = await prisma.dna.create({
-      data: { code: `DNA-TF-TEST-OPEN-${randomUUID()}` },
-    });
-    const alreadyClosedDna = await prisma.dna.create({
-      data: { code: `DNA-TF-TEST-CLOSED-${randomUUID()}` },
-    });
-    const preexistingEndDate = new Date("2020-01-01T00:00:00.000Z");
-    await prisma.dnaStructure.create({
-      data: { structureId: structure.id, dnaId: openDna.id },
-    });
-    await prisma.dnaStructure.create({
-      data: {
-        structureId: structure.id,
-        dnaId: alreadyClosedDna.id,
-        endDate: preexistingEndDate,
-      },
-    });
-
-    const transformationId = await createTransformation({
-      type: TransformationType.FERMETURE_SANS_TRANSFERT,
-      structureVersionTransformations: [
-        {
-          type: StructureVersionTransformationType.FERMETURE,
-          structureVersion: { structureId: structure.id },
-        },
-      ],
-    });
-    createdTransformationIds.push(transformationId);
-
-    const fermeture =
-      await prisma.structureVersionTransformation.findFirstOrThrow({
-        where: {
-          transformationId,
-          type: StructureVersionTransformationType.FERMETURE,
-        },
-        include: { structureVersion: true },
-      });
-    const fermetureVersionId = fermeture.structureVersion?.id;
-    if (!fermetureVersionId) {
-      throw new Error("La version de la fermeture devrait exister");
-    }
-
-    await finalizeTransformation(transformationId);
-
-    const links = await prisma.dnaStructure.findMany({
-      where: { structureVersionId: fermetureVersionId },
-    });
-    const effectiveDate = "2024-01-01T00:00:00.000Z";
-    const openLink = links.find((link) => link.dnaId === openDna.id);
-    const closedLink = links.find((link) => link.dnaId === alreadyClosedDna.id);
-    expect(openLink?.endDate?.toISOString()).toBe(effectiveDate);
-    expect(closedLink?.endDate?.toISOString()).toBe(
-      preexistingEndDate.toISOString()
-    );
-  });
-
   it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
@@ -2044,15 +2007,11 @@ describe("transformation.repository db integration", () => {
     effectiveDate: string,
     versionData: Record<string, unknown> = {}
   ) => {
-    const structure = await createStructure();
-    const version = await prisma.structureVersion.create({
-      data: {
-        structureId: structure.id,
-        effectiveDate: new Date(effectiveDate),
-        ...versionData,
-      },
+    const structure = await createStructure({
+      effectiveDate: new Date(effectiveDate),
+      ...versionData,
     });
-    return { structure, version };
+    return { structure, version: structure.structureVersions[0] };
   };
 
   const createExtensionTransfo = async (
@@ -2136,16 +2095,19 @@ describe("transformation.repository db integration", () => {
     ).toBeGreaterThan(0);
 
     const closingStructure = await createStructure();
-    await resetTransformationSelection({
-      id: transformationId,
-      type: TransformationType.FERMETURE_SANS_TRANSFERT,
-      structureVersionTransformations: [
-        {
-          type: StructureVersionTransformationType.FERMETURE,
-          structureVersion: { structureId: closingStructure.id },
-        },
-      ],
-    });
+    await resetTransformationSelection(
+      {
+        id: transformationId,
+        type: TransformationType.FERMETURE_SANS_TRANSFERT,
+        structureVersionTransformations: [
+          {
+            type: StructureVersionTransformationType.FERMETURE,
+            structureVersion: { structureId: closingStructure.id },
+          },
+        ],
+      },
+      NATIONAL_USER
+    );
 
     // Ancien sous-arbre effacé (cascade).
     expect(
@@ -2209,16 +2171,19 @@ describe("transformation.repository db integration", () => {
       });
     const oldVersionId = beforeBlock.structureVersion?.id;
 
-    await resetTransformationSelection({
-      id: transformationId,
-      type: TransformationType.EXTENSION_EX_NIHILO,
-      structureVersionTransformations: [
-        {
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: { structureId: structure.id },
-        },
-      ],
-    });
+    await resetTransformationSelection(
+      {
+        id: transformationId,
+        type: TransformationType.EXTENSION_EX_NIHILO,
+        structureVersionTransformations: [
+          {
+            type: StructureVersionTransformationType.EXTENSION,
+            structureVersion: { structureId: structure.id },
+          },
+        ],
+      },
+      NATIONAL_USER
+    );
 
     const afterBlock =
       await prisma.structureVersionTransformation.findFirstOrThrow({
@@ -2273,16 +2238,19 @@ describe("transformation.repository db integration", () => {
 
     const closingStructure = await createStructure();
     await expect(
-      resetTransformationSelection({
-        id: transformationId,
-        type: TransformationType.FERMETURE_SANS_TRANSFERT,
-        structureVersionTransformations: [
-          {
-            type: StructureVersionTransformationType.FERMETURE,
-            structureVersion: { structureId: closingStructure.id },
-          },
-        ],
-      })
+      resetTransformationSelection(
+        {
+          id: transformationId,
+          type: TransformationType.FERMETURE_SANS_TRANSFERT,
+          structureVersionTransformations: [
+            {
+              type: StructureVersionTransformationType.FERMETURE,
+              structureVersion: { structureId: closingStructure.id },
+            },
+          ],
+        },
+        NATIONAL_USER
+      )
     ).rejects.toThrow("finalisée");
   });
 
@@ -2300,10 +2268,10 @@ describe("transformation.repository db integration", () => {
       ],
     };
 
-    await resetTransformationSelection(selection);
+    await resetTransformationSelection(selection, NATIONAL_USER);
     const firstState = await readSelectionState(transformationId);
 
-    await resetTransformationSelection(selection);
+    await resetTransformationSelection(selection, NATIONAL_USER);
     const secondState = await readSelectionState(transformationId);
 
     expect(secondState).toEqual(firstState);

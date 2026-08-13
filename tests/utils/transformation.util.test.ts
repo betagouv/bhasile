@@ -891,7 +891,7 @@ describe("transformation util", () => {
           structureVersion: {
             effectiveDate: "2025-08-25T12:00:00.000Z",
             structure: {
-              codeBhasile: "BHA-NOR-001",
+              codeBhasile: "BHA-NOR-001", isFinalised: true,
               placesAutorisees: 40,
             },
           },
@@ -1163,7 +1163,11 @@ describe("getTransformationDepartement", () => {
         createStructureVersionTransformation({
           id: 2,
           structureVersion: {
-            structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+            structure: {
+              codeBhasile: "ABC",
+              isFinalised: true,
+              departementAdministratif: "13",
+            },
           },
         }),
       ],
@@ -1200,7 +1204,7 @@ describe("getStructureVersionTransformationDepartement", () => {
     const structureVersionTransformation = createStructureVersionTransformation(
       {
         structureVersion: {
-          structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+          structure: { codeBhasile: "ABC", isFinalised: true, departementAdministratif: "13" },
         },
       }
     );

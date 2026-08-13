@@ -110,7 +110,7 @@ const syncCpomDepartements = async (
 
   const departements = await tx.departement.findMany({
     where: { numero: { in: departementNumeros } },
-    select: { id: true },
+    select: { numero: true },
   });
 
   if (!departements.length) {
@@ -120,7 +120,7 @@ const syncCpomDepartements = async (
   await tx.cpomDepartement.createMany({
     data: departements.map((departement) => ({
       cpomId,
-      departementId: departement.id,
+      departementNumero: departement.numero,
     })),
   });
 };
@@ -146,12 +146,4 @@ const createOrUpdateCpomStructures = async (
       dateEnd: structure.dateEnd,
     })),
   });
-};
-
-export const deleteCpom = async (id: number): Promise<void> => {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("deleteCpom is only used in e2e tests");
-  }
-  await prisma.cpomMillesime.deleteMany({ where: { cpomId: id } });
-  await prisma.cpom.delete({ where: { id } });
 };

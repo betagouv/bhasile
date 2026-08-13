@@ -6,9 +6,11 @@ export const AccordionTitle = ({ title, lastVisit }: Props): ReactElement => {
   return (
     <div className="flex justify-between w-full">
       <span>{title}</span>
-      <span className="text-mention-grey italic fr-pr-1w">
-        Dernier le <strong>{formatDate(lastVisit)}</strong>
-      </span>
+      {lastVisit && (
+        <span className="text-mention-grey italic fr-pr-1w">
+          Dernier le <strong>{formatDate(lastVisit)}</strong>
+        </span>
+      )}
     </div>
   );
 };

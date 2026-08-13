@@ -8,35 +8,31 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { formatNumber } from "@/app/utils/number.util";
-import {
-  ControleQualitePeriodStat,
-  StatistiqueApiRead,
-} from "@/schemas/api/statistique.schema";
+import { getYearFromDate } from "@/app/utils/date.util";
+import { formatPercentage } from "@/app/utils/number.util";
+import { filterDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { EIG_START_YEAR, EVALUATION_START_YEAR } from "@/constants";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { ControleQualitePeriodStat } from "@/schemas/api/statistique.schema";
 
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
+import { EvaluationNote } from "./EvaluationNote";
 
 const sectionsConfig: ControleQualiteSectionConfig[] = [
   {
     title: "EIG",
+    startYear: EIG_START_YEAR,
     rows: [
       {
         label: "Structures ne déclarant aucun EIG",
         key: "nbStructuresSansDeclarationEig",
         format: (value, periodItem) => (
           <span>
-            {Number(value)}{" "}
-            <span className="text-disabled-grey pl-2">
-              <NumberDisplay
-                value={formatNumber(
-                  Number(periodItem.partStructuresSansDeclarationEig),
-                  {
-                    maximumFractionDigits: 2,
-                  }
-                )}
-              />
-              &nbsp;%
-            </span>
+            <NumberDisplay value={Number(value)} />{" "}
+            {periodItem.partStructuresSansDeclarationEig !== null && (
+              <span className="text-disabled-grey pl-2">
+                {formatPercentage(periodItem.partStructuresSansDeclarationEig)}
+              </span>
+            )}
           </span>
         ),
       },
@@ -53,15 +49,13 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Taux d'EIG “comportement violent“",
         key: "tauxEigComportementViolent",
-        format: (value) =>
-          `${formatNumber(Number(value), {
-            maximumFractionDigits: 2,
-          })} %`,
+        format: (value) => formatPercentage(Number(value)),
       },
     ],
   },
   {
     title: "Évaluations",
+    startYear: EVALUATION_START_YEAR,
     rows: [
       {
         label: "Structures évaluées",
@@ -71,22 +65,22 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Moyenne totale",
         key: "noteGenerale",
-        format: (value) => <NumberDisplay value={Number(value)} />,
+        format: (value) => <EvaluationNote value={value} />,
       },
       {
         label: "Moyenne “La personne“",
         key: "notePersonne",
-        format: (value) => <NumberDisplay value={Number(value)} />,
+        format: (value) => <EvaluationNote value={value} />,
       },
       {
         label: "Moyenne “Les professionnels“",
         key: "notePro",
-        format: (value) => <NumberDisplay value={Number(value)} />,
+        format: (value) => <EvaluationNote value={value} />,
       },
       {
         label: "Moyenne “La structure",
         key: "noteStructure",
-        format: (value) => <NumberDisplay value={Number(value)} />,
+        format: (value) => <EvaluationNote value={value} />,
       },
     ],
   },
@@ -96,8 +90,10 @@ export const ControleQualiteStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
-  const controleQualitePeriods =
-    statistiques?.controleQualite?.[timePeriod] ?? [];
+  const controleQualitePeriods = filterDisplayedPeriods(
+    statistiques?.controleQualite?.[timePeriod] ?? [],
+    Math.min(...sectionsConfig.map((section) => section.startYear))
+  );
 
   const renderPeriodHeader = (period: ControleQualitePeriodStat) => {
     const periodDate = new Date(period.date);
@@ -114,22 +110,20 @@ export const ControleQualiteStatsTable = (): ReactElement => {
     return periodDate.getFullYear();
   };
 
-  const getHeadings = (statistiques: StatistiqueApiRead) => {
+  const getHeadings = (periods: ControleQualitePeriodStat[]) => {
     return [
-      <th scope="col" key="heading-label" className="min-w-[240px]">
+      <th scope="col" key="heading-label">
         {" "}
       </th>,
-      ...(statistiques?.controleQualite?.[timePeriod] ?? []).map(
-        (period, index) => (
-          <th
-            scope="col"
-            key={`${period.date}-${index}`}
-            className="text-center font-bold"
-          >
-            {renderPeriodHeader(period)}
-          </th>
-        )
-      ),
+      ...periods.map((period, index) => (
+        <th
+          scope="col"
+          key={`${period.date}-${index}`}
+          className="text-center font-bold"
+        >
+          {renderPeriodHeader(period)}
+        </th>
+      )),
     ];
   };
 
@@ -137,9 +131,12 @@ export const ControleQualiteStatsTable = (): ReactElement => {
     title: section.title,
     rows: section.rows.map((row) => {
       const values = controleQualitePeriods.map((periodItem) => {
-        const rawValue = periodItem
-          ? periodItem[row.key as keyof ControleQualitePeriodStat]
-          : null;
+        const isBeforeCollection =
+          getYearFromDate(periodItem.date) < section.startYear;
+        const rawValue =
+          periodItem && !isBeforeCollection
+            ? periodItem[row.key as keyof ControleQualitePeriodStat]
+            : null;
 
         return row.format && rawValue !== null && rawValue !== undefined
           ? row.format(rawValue, periodItem)
@@ -170,11 +167,12 @@ export const ControleQualiteStatsTable = (): ReactElement => {
         />
       </div>
       <Table
-        headings={getHeadings(statistiques)}
+        headings={getHeadings(controleQualitePeriods)}
         ariaLabelledBy="controle-qualite-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
         stickFirstColumn
+        firstColumnWidth="18rem"
         defaultScrollRight
       >
         {controleQualiteStats.map((section) => (
@@ -224,5 +222,6 @@ type ControleQualiteRowConfig = {
 
 type ControleQualiteSectionConfig = {
   title: string;
+  startYear: number;
   rows: ControleQualiteRowConfig[];
 };

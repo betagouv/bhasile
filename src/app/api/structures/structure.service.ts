@@ -1,12 +1,14 @@
+import { recomputeAnomaliesSafely } from "@/app/api/anomalies/anomalie.service";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
-import { paginateRows } from "@/app/utils/list.util";
+import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import {
   getMostRecentMillesime,
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
+import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Structure } from "@/generated/prisma/client";
 import {
   StructureAgentUpdateApiType,
@@ -26,9 +28,14 @@ import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
-import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
+import type { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
+import {
+  resolveCurrentVersion,
+  resolveDisplayVersion,
+} from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
+  ResolvedStructureDetails,
   StructureDbDetails,
   StructureDbList,
   StructureDbOperateur,
@@ -59,13 +66,18 @@ import {
   getReadableAdresses,
   getReadableNotes,
   getTypeBati,
-  isBornFromCreation,
-  isFinalisationFormValidated,
+  isStructureClosed,
+  isStructureFinalised,
   isStructureInCpom,
   isStructureInCpomPerYear,
   sortStructureRows,
   StructureListComputedRow,
 } from "./structure.util";
+
+type StructureMapPoint = Pick<
+  StructureApiRead,
+  "id" | "latitude" | "longitude"
+>;
 
 export type SearchProps = {
   search: string | null;
@@ -79,7 +91,7 @@ export type SearchProps = {
   direction?: "asc" | "desc" | null;
   map?: boolean;
   selection?: boolean;
-  finalised?: boolean;
+  isFinalised?: boolean;
   isClosed?: boolean;
 };
 
@@ -87,7 +99,7 @@ export const updateStructureAgent = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
   const coordinates = await getAdresseAdministrativeCoordinates(structure);
-  return await updateOne(
+  return await updateStructureAndRecomputeAnomalies(
     {
       ...structure,
       ...coordinates,
@@ -111,19 +123,31 @@ export const updateActualisation = async (
     );
   }
 
-  return updateOne(structure, false, { skipActesOrphanDelete: true });
+  return updateStructureAndRecomputeAnomalies(structure, false, {
+    skipActesOrphanDelete: true,
+  });
 };
 export const updateStructureOperateur = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
   const coordinates = await getAdresseAdministrativeCoordinates(structure);
-  return await updateOne(
+  return await updateStructureAndRecomputeAnomalies(
     {
       ...structure,
       ...coordinates,
     },
     true
   );
+};
+
+// Le recalcul suit le commit et n'est jamais dans la transaction d'écriture.
+const updateStructureAndRecomputeAnomalies = async (
+  ...args: Parameters<typeof updateOne>
+): Promise<Structure> => {
+  const updated = await updateOne(...args);
+  await recomputeAnomaliesSafely(updated.id);
+
+  return updated;
 };
 
 const computeAllStructureRows = async (
@@ -162,23 +186,20 @@ export const getFullStructures = async (
   );
 
   if (props.map) {
-    const structures = sorted.map((row) =>
-      dbStructureToApiRead(
-        {
-          id: row.id,
-          latitude: row.latitude,
-          longitude: row.longitude,
-        } as unknown as StructureDbList,
-        now,
-        true
-      )
-    );
-    return { structures, totalStructures: sorted.length };
+    const points: StructureMapPoint[] = sorted.map((row) => ({
+      id: row.id,
+      latitude: row.latitude?.toString(),
+      longitude: row.longitude?.toString(),
+    }));
+    return {
+      structures: points as StructureApiRead[],
+      totalStructures: sorted.length,
+    };
   }
 
-  const pageRows = props.selection
-    ? sorted
-    : paginateRows(sorted, props.page ?? 0);
+  const { total: totalStructures, rows: pageRows } = props.selection
+    ? { total: sorted.length, rows: sorted }
+    : paginateWithTotal(sorted, props.page, DEFAULT_PAGE_SIZE);
 
   const dbStructures = await findStructuresByIds(
     pageRows.map((row) => row.id),
@@ -198,12 +219,10 @@ export const getFullStructures = async (
       const resolvedStructure = currentVersion
         ? mergeStructureWithVersion(dbStructure, currentVersion)
         : dbStructure;
-      const structure = dbStructureToApiRead(
-        resolvedStructure,
-        now,
-        true,
-        row.bornFromCreation
-      );
+      const structure = dbStructureToApiRead(resolvedStructure, now, {
+        isFinalised: row.isFinalised,
+        simple: true,
+      });
       structure.currentPlaces.placesAutorisees = row.placesAutorisees ?? 0;
       structure.adresses = getReadableAdresses(structure, user);
       structure.notes = null;
@@ -216,24 +235,25 @@ export const getFullStructures = async (
       (structure): structure is StructureApiRead => structure !== undefined
     );
 
-  return { structures, totalStructures: sorted.length };
+  return { structures, totalStructures };
 };
 
 export const getResolvedStructure = async (
   id: number,
   now: Date = getNow()
-): Promise<StructureDbDetails | null> => {
+): Promise<ResolvedStructureDetails | null> => {
   const dbStructure = await findOne(id);
   if (!dbStructure) {
     return null;
   }
-  const currentVersion = resolveCurrentVersion(
+  const displayVersion = resolveDisplayVersion(
     dbStructure.structureVersions,
     now
   );
-  return currentVersion
-    ? mergeStructureWithVersion(dbStructure, currentVersion)
-    : dbStructure;
+  if (!displayVersion) {
+    throw new Error(`Aucune version affichable pour la structure ${id}`);
+  }
+  return mergeStructureWithVersion(dbStructure, displayVersion);
 };
 
 export const getFullStructure = async (
@@ -247,12 +267,9 @@ export const getFullStructure = async (
     return null;
   }
 
-  const structure = dbStructureToApiRead(
-    resolvedDbStructure,
-    now,
-    false,
-    isBornFromCreation(resolvedDbStructure.structureVersions, now)
-  );
+  const structure = dbStructureToApiRead(resolvedDbStructure, now, {
+    isFinalised: isStructureFinalised(resolvedDbStructure, now),
+  });
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
 
@@ -276,43 +293,50 @@ export const getStructureDepartement = async (
 export const mergeStructureWithVersion = <T>(
   dbStructure: T,
   version: Record<(typeof VERSIONED_FIELD_KEYS)[number], unknown>
-): T => {
+): T &
+  Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]> => {
   const versionedOverlay = Object.fromEntries(
     VERSIONED_FIELD_KEYS.map((key) => [key, version[key]])
-  ) as Partial<T>;
+  ) as Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>;
   return { ...dbStructure, ...versionedOverlay };
 };
 
 const dbStructureToApiRead = (
-  dbStructure: StructureDbDetails | StructureDbList,
+  dbStructure: (StructureDbDetails | StructureDbList) &
+    Partial<
+      Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>
+    >,
   now: Date,
-  simple: boolean = false,
-  bornFromCreation: boolean = false
+  { isFinalised, simple = false }: { isFinalised: boolean; simple?: boolean }
 ): StructureApiRead => {
   const [debutConvention, finConvention] = getDatesConvention(dbStructure);
   const [debutPeriodeAutorisation, finPeriodeAutorisation] =
     getDatesPeriodeAutorisation(dbStructure);
   const allActivites = simple
     ? []
-    : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
+    : (dbStructure as ResolvedStructureDetails).dnaStructures.flatMap(
         (dnaStructure) => dnaStructure.dna.activites
       );
   const activites = processActivitesForStructure(allActivites);
 
   const aggregatedEIGs = simple
     ? []
-    : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
+    : (dbStructure as ResolvedStructureDetails).dnaStructures.flatMap(
         (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
       );
 
   const antennes = getAntennesApiRead(
-    (dbStructure as StructureDbDetails).antennes
+    (dbStructure as ResolvedStructureDetails).antennes
   );
-  const dnaStructures = getDnaStructuresApiRead(dbStructure.dnaStructures);
+  const dnaStructures = getDnaStructuresApiRead(
+    (dbStructure as ResolvedStructureDetails).dnaStructures
+  );
   const structureFinesses = getStructureFinessesApiRead(
-    (dbStructure as StructureDbDetails).structureFinesses
+    (dbStructure as ResolvedStructureDetails).structureFinesses
   );
-  const adresses = getAdressesApiRead(dbStructure.adresses);
+  const adresses = getAdressesApiRead(
+    (dbStructure as ResolvedStructureDetails).adresses
+  );
   const adresseAdministrativeComplete =
     buildAdresseAdministrativeComplete(dbStructure);
   const typeBati = getTypeBati(dbStructure);
@@ -392,7 +416,7 @@ const dbStructureToApiRead = (
     codePostalAdministratif: dbStructure.codePostalAdministratif ?? "",
     communeAdministrative: dbStructure.communeAdministrative ?? "",
     departementAdministratif: dbStructure.departementAdministratif ?? "",
-    contacts: (dbStructure as StructureDbDetails).contacts ?? [],
+    contacts: (dbStructure as ResolvedStructureDetails).contacts ?? [],
     documentsFinanciers:
       (dbStructure as StructureDbDetails).documentsFinanciers ?? [],
     adresseAdministrativeComplete,
@@ -405,10 +429,9 @@ const dbStructureToApiRead = (
     dnaStructures,
     structureFinesses,
     adresses,
-    isFinalised:
-      bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    isFinalised,
+    isClosed: isStructureClosed(dbStructure, now),
     isCurrentVersionFromTransformation,
-    bornFromCreation: undefined,
     structureVersions: undefined,
   }) as StructureApiRead;
 };

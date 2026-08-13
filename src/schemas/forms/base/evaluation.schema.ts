@@ -6,13 +6,25 @@ import {
   zId,
   zSafeDecimalsNullish,
 } from "@/app/utils/zodCustomFields";
+import {
+  EVALUATION_NOTE_MAX,
+  EVALUATION_NOTE_MIN,
+  EVALUATION_NOTES_START_YEAR,
+} from "@/constants";
 
 const fileUploadSchema = z.object({
   key: z.string().optional(),
   id: zId(),
 });
 
-const evaluationAutoSaveSchema = z.object({
+const noteFields = [
+  "notePersonne",
+  "notePro",
+  "noteStructure",
+  "note",
+] as const;
+
+const evaluationBaseSchema = z.object({
   id: zId(),
   date: optionalFrenchDateToISO(),
   notePersonne: zSafeDecimalsNullish(),
@@ -23,27 +35,49 @@ const evaluationAutoSaveSchema = z.object({
   uuid: z.string().optional(), // Used to identify the evaluation when it is not saved in the database (and so does not have an id)
 });
 
-const evaluationSchema = evaluationAutoSaveSchema
-  .refine(
-    (data) => {
-      const year = data.date ? getYearFromDate(data.date) : undefined;
-      const requireNotes = year !== undefined && year >= 2022;
+type EvaluationBase = z.infer<typeof evaluationBaseSchema>;
 
+// Une note reste sur 1-4 quelle que soit l'année. Seules les évaluations post 2022 DOIVENT en porter.
+const requiresNotes = (data: EvaluationBase): boolean => {
+  const year = data.date ? getYearFromDate(data.date) : undefined;
+  return year !== undefined && year >= EVALUATION_NOTES_START_YEAR;
+};
+
+const evaluationAutoSaveSchema = evaluationBaseSchema.check(
+  z.superRefine((data, ctx) => {
+    for (const field of noteFields) {
+      const note = data[field];
       if (
-        requireNotes &&
-        (data.notePersonne === undefined ||
-          data.notePro === undefined ||
-          data.noteStructure === undefined ||
-          data.note === undefined)
+        note !== null &&
+        note !== undefined &&
+        (note < EVALUATION_NOTE_MIN || note > EVALUATION_NOTE_MAX)
       ) {
-        return false;
+        ctx.addIssue({
+          code: "custom",
+          message: `Les notes doivent être comprises entre ${EVALUATION_NOTE_MIN} et ${EVALUATION_NOTE_MAX}`,
+          path: [field],
+        });
       }
-      return true;
-    },
-    {
-      error: "Les notes doivent être renseignées",
-      path: ["notePersonne", "notePro", "noteStructure", "note"],
     }
+  })
+);
+
+const evaluationSchema = evaluationAutoSaveSchema
+  .check(
+    z.superRefine((data, ctx) => {
+      if (!requiresNotes(data)) {
+        return;
+      }
+      for (const field of noteFields) {
+        if (data[field] === null) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Les notes doivent être renseignées",
+            path: [field],
+          });
+        }
+      }
+    })
   )
   .refine(
     (data) => {

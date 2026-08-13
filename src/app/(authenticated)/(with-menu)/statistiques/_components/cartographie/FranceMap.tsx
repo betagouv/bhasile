@@ -1,18 +1,13 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
+import { useUserAction } from "@/app/hooks/useUserAction";
+import { useStatistiquesCartographieContext } from "@/contexts/StatistiquesCartographieContext";
 import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.schema";
 import { ZoneDataInfo } from "@/types/map.type";
 
-import { useStatistiquesCartographieContext } from "../../_context/StatistiquesCartographieClientContext";
 import {
   getDepartementNumerosForRegion,
   zonesToRichRecord,
@@ -21,6 +16,13 @@ import {
 import { MapLayout } from "./MapLayout";
 
 export const FranceMap = (): ReactElement => {
+  const { trackStatistiquesCartographie } = useUserAction();
+
+  useEffect(() => {
+    trackStatistiquesCartographie();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { statistiques } = useStatistiquesCartographieContext();
   const router = useRouter();
   const pathname = usePathname();

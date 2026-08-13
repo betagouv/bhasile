@@ -6,9 +6,9 @@ import { ReactElement, useState } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { BatiStat, TypeStructureStat } from "@/schemas/api/statistique.schema";
-
-import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
+import { RepartitionLabel } from "@/types/adresse.type";
 
 export const GenericTypeChart = ({
   title,
@@ -36,9 +36,18 @@ export const GenericTypeChart = ({
       return statItem.type;
     }
     if (labelAccessor === "bati" && "bati" in statItem) {
-      return statItem.bati;
+      return RepartitionLabel[statItem.bati];
     }
     return "";
+  };
+
+  const getIntermediateLabel = () => {
+    if (typeAccessor === "structureTypes") {
+      return visualization === "structures" ? " " : "places en ";
+    }
+    return visualization === "structures"
+      ? "structures en bâti "
+      : "places en bâti ";
   };
 
   return (
@@ -89,16 +98,14 @@ export const GenericTypeChart = ({
             <div className="pt-2" key={`${typeAccessor}-${index}`}>
               <div className="pb-2 flex items-center text-sm">
                 <div
-                  className="w-[15px] h-[15px] mr-2 shrink-0 grow-0"
+                  className="w-3.75 h-3.75 mr-2 shrink-0 grow-0"
                   style={{ backgroundColor: colors[index] }}
                 />
                 <span className="whitespace-nowrap">
                   <strong>
                     <NumberDisplay value={statItem[typeStructureAccessor]} />
                   </strong>{" "}
-                  {visualization === "structures"
-                    ? "structures "
-                    : "places en "}
+                  {getIntermediateLabel()}
                   {getStatItemLabel(statItem)}{" "}
                   <span className="text-mention-grey">
                     (

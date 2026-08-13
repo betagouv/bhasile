@@ -12,9 +12,9 @@ import { getBudgetTableLines } from "@/app/components/forms/finance/budget-table
 import { getCpomStructureTypes } from "@/app/utils/cpom.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { useCpomContext } from "@/contexts/CpomContext";
 import { StructureType } from "@/types/structure.type";
 
-import { useCpomContext } from "../_context/CpomClientContext";
 import { CpomFinancesDocuments } from "./CpomFinancesDocuments";
 import { FinanceTypeSwitch } from "./FinanceTypeSwitch";
 
@@ -61,7 +61,7 @@ export const FinancesBlock = () => {
       >
         Gestion budgétaire ({currentType})
       </h4>
-      <p className="max-w-4xl mb-6">
+      <p className="mb-6">
         Dans cette vue, l’ensemble des montants correspond à la gestion
         budgétaire{" "}
         <strong>

@@ -3,9 +3,8 @@ import { ReactElement } from "react";
 
 import { SeeFileButton } from "@/app/components/common/SeeFileButton";
 import { formatDate } from "@/app/utils/date.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 import { ControleType } from "@/types/controle.type";
-
-import { useStructureContext } from "../../_context/StructureClientContext";
 
 export const ControleTable = (): ReactElement => {
   const { structure } = useStructureContext();

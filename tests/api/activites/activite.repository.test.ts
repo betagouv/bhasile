@@ -5,21 +5,20 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { findActivitesByDnaCodesAndDate } from "@/app/api/activites/activite.repository";
 import prisma from "@/lib/prisma";
 
+import { createReferentialDna } from "../../test-utils/referential-dna";
+
 describe("activite.repository db integration", () => {
   let dnaCode = "";
 
   beforeAll(async () => {
     dnaCode = `ACT-TEST-${randomUUID()}`;
-    await prisma.dna.create({
-      data: {
-        code: dnaCode,
-        activites: {
-          create: [
-            { date: new Date("2023-06-01T00:00:00.000Z"), placesAutorisees: 10 },
-            { date: new Date("2023-12-31T00:00:00.000Z"), placesAutorisees: 20 },
-            { date: new Date("2024-06-01T00:00:00.000Z"), placesAutorisees: 99 },
-          ],
-        },
+    await createReferentialDna(dnaCode, {
+      activites: {
+        create: [
+          { date: new Date("2023-06-01T00:00:00.000Z"), placesAutorisees: 10 },
+          { date: new Date("2023-12-31T00:00:00.000Z"), placesAutorisees: 20 },
+          { date: new Date("2024-06-01T00:00:00.000Z"), placesAutorisees: 99 },
+        ],
       },
     });
   });

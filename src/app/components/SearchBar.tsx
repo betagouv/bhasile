@@ -4,8 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ReactElement, useEffect, useState } from "react";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
-
-const DEBOUNCE_TIME = 300;
+import { SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
 
 export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
   const router = useRouter();
@@ -27,7 +26,7 @@ export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
     }
 
     router.replace(`?${params.toString()}`);
-  }, DEBOUNCE_TIME);
+  }, SEARCH_PARAM_DEBOUNCE_MS);
 
   useEffect(() => {
     handleSearchUpdate();

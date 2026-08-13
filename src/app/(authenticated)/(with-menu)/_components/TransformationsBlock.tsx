@@ -1,25 +1,33 @@
 import { ReactElement } from "react";
 
 import { getDashboardTransformations } from "@/app/api/dashboard/transformations/transformations.service";
+import { getPageParam, SearchParams } from "@/app/utils/searchParams.util";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
 import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
 import { TRANSFORMATIONS_BLOCK_HEADER } from "./dashboardBlocks";
+import { DashboardPagination } from "./DashboardPagination";
 import { TransformationRow } from "./TransformationRow";
 
 export const TransformationsBlock = async ({
   filters,
   user,
+  searchParams,
 }: Props): Promise<ReactElement> => {
-  const rows = await getDashboardTransformations(filters, user);
+  const page = getPageParam(searchParams, "transformationsPage");
+  const { total, rows } = await getDashboardTransformations(
+    filters,
+    user,
+    page
+  );
 
   return (
     <Block>
       <BlockTitle
         title={TRANSFORMATIONS_BLOCK_HEADER.title}
-        total={rows.length}
+        total={total}
         iconClassName={TRANSFORMATIONS_BLOCK_HEADER.icon}
       />
 
@@ -34,6 +42,8 @@ export const TransformationsBlock = async ({
           Aucune création, transformation ou fermeture en cours.
         </p>
       )}
+
+      <DashboardPagination total={total} pageParam="transformationsPage" />
     </Block>
   );
 };
@@ -41,4 +51,5 @@ export const TransformationsBlock = async ({
 type Props = {
   filters: Filters;
   user: SessionUser | undefined;
+  searchParams: SearchParams;
 };

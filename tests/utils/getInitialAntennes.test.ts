@@ -22,7 +22,7 @@ const createSvtWithAntennes = (
     type,
     structureVersion: {
       antennes: versionAntennes,
-      structure: { codeBhasile: "", antennes: structureAntennes },
+      structure: { codeBhasile: "", isFinalised: true, antennes: structureAntennes },
     },
   });
 

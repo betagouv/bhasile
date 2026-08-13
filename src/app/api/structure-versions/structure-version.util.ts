@@ -1,14 +1,12 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 
 export const checkNoDepartementAdministratifChange = (
   structureDepartement: string | null | undefined,
   versionDepartement: string | null | undefined
 ): void => {
-  if (structureDepartement == null) {
-    return;
-  }
-  if (versionDepartement == null) {
+  if (!structureDepartement || !versionDepartement) {
     return;
   }
   if (versionDepartement !== structureDepartement) {
@@ -44,15 +42,14 @@ export type OrderableVersion = {
 export type ResolvableVersion = OrderableVersion & {
   structureVersionTransformationId: number | null;
   structureVersionTransformation: {
-    transformation: { form: { status: boolean | null } | null } | null;
+    transformation: { form: { status: boolean } | null } | null;
   } | null;
 };
 
 export const isVersionValid = (version: ResolvableVersion): boolean => {
   if (version.structureVersionTransformationId !== null) {
-    return (
-      version.structureVersionTransformation?.transformation?.form?.status ===
-      true
+    return isTransformationFinalised(
+      version.structureVersionTransformation?.transformation
     );
   }
   return true;
@@ -123,6 +120,20 @@ export const resolveCurrentVersion = <TVersion extends ResolvableVersion>(
   versions: TVersion[],
   now: Date
 ): TVersion | undefined => getValidVersions(versions, now)[0];
+
+// Afficher la version courante ou pour une structure dont la création est dans le futur la première version valide à venir.
+export const resolveDisplayVersion = <TVersion extends ResolvableVersion>(
+  versions: TVersion[],
+  now: Date
+): TVersion | undefined =>
+  resolveCurrentVersion(versions, now) ??
+  versions
+    .filter(isVersionValid)
+    .sort(
+      (first, second) =>
+        (first.effectiveDate?.getTime() ?? 0) -
+        (second.effectiveDate?.getTime() ?? 0)
+    )[0];
 
 export const resolvePredecessor = <TVersion extends ResolvableVersion>(
   versions: TVersion[],

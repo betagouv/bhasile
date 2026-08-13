@@ -8,8 +8,8 @@ import { Table } from "@/app/components/common/Table";
 import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { getTypePlaceHistoryHeadings } from "./getTypePlaceHistoryHeadings";
 
 export const TypePlaceHistory = (): ReactElement => {
@@ -67,7 +67,7 @@ export const TypePlaceHistory = (): ReactElement => {
       >
         {rows.map((row) => (
           <tr key={row.label}>
-            <td className="text-left! min-w-[240px]">
+            <td className="text-left!">
               <strong>{row.label}</strong>
               {row.subLabel && (
                 <>
@@ -77,7 +77,7 @@ export const TypePlaceHistory = (): ReactElement => {
               )}
             </td>
             {years.map((year) => (
-              <td key={year} className="min-w-[100px] whitespace-nowrap">
+              <td key={year} className="min-w-25 whitespace-nowrap">
                 {row.getValue(year) ?? <EmptyCell />}
               </td>
             ))}

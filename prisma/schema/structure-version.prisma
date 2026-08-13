@@ -1,7 +1,3 @@
-// Phase 1 (hors transfo) : StructureVersion + FK optionnelles pour backfill.
-// TODO: retirer les liens à structureId après backfill, et rendre structureVersionId obligatoire sur les tables liées
-// Retirer les FK / scalaires redondants sur Structure.
-
 model StructureVersion {
   id          Int        @id @default(autoincrement())
   structureId Int?
@@ -17,14 +13,12 @@ model StructureVersion {
   adresseAdministrative    String?
   codePostalAdministratif  String?
   communeAdministrative    String?
-  departementAdministratif String?
+  departementAdministratif String? // Correspond au département associé à l'adresse administrative versionnée (in app on bloque le fait de pouvoir le modifier)
   latitude                 Decimal?
   longitude                Decimal?
   nom                      String?
-  creationDate             DateTime? // TODO: drop — immutable, remis sur Structure
-  date303                  DateTime? // TODO: drop — immutable, remis sur Structure
-  lgbt                     Boolean? // TODO: remove after quality check
-  fvvTeh                   Boolean? // TODO: remove after quality check
+  lgbt                     Boolean? // TODO: remove after quality check between boolean and integer on adresses
+  fvvTeh                   Boolean? // TODO: remove after quality check between boolean and integer on adresses
   public                   PublicType?
   notes                    String?
   nomOfii                  String?
@@ -36,9 +30,7 @@ model StructureVersion {
   adresses            Adresse[]
   antennes            Antenne[]
   structureFinesses   StructureFiness[]
-  finesses            Finess[] // TODO: remove after backfill structure finess
   dnaStructures       DnaStructure[]
-  structureTypologies StructureTypologie[] // Drop en PR cleaning.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

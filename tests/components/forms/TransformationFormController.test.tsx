@@ -7,13 +7,13 @@ import { z } from "zod";
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 
 const mockRegisterSaver = vi.fn();
-const mockUseOptionalTransformationContext = vi.fn();
+const mockUseTransformationContext = vi.fn();
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  "@/contexts/TransformationContext",
   () => ({
-    useOptionalTransformationContext: () =>
-      mockUseOptionalTransformationContext(),
+    useTransformationContext: () =>
+      mockUseTransformationContext(),
   })
 );
 
@@ -57,7 +57,7 @@ const ControllerTestForm = ({
 describe("TransformationFormController", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseOptionalTransformationContext.mockReturnValue({
+    mockUseTransformationContext.mockReturnValue({
       registerSaver: mockRegisterSaver,
       shouldShowIncompleteSteps: false,
     });
@@ -82,7 +82,7 @@ describe("TransformationFormController", () => {
   });
 
   it("déclenche la validation au montage quand shouldShowIncompleteSteps est true, faisant apparaître les erreurs strictes", async () => {
-    mockUseOptionalTransformationContext.mockReturnValue({
+    mockUseTransformationContext.mockReturnValue({
       registerSaver: mockRegisterSaver,
       shouldShowIncompleteSteps: true,
     });
@@ -97,7 +97,7 @@ describe("TransformationFormController", () => {
   });
 
   it("n'affiche aucune erreur quand le formulaire satisfait déjà le schéma strict", async () => {
-    mockUseOptionalTransformationContext.mockReturnValue({
+    mockUseTransformationContext.mockReturnValue({
       registerSaver: mockRegisterSaver,
       shouldShowIncompleteSteps: true,
     });

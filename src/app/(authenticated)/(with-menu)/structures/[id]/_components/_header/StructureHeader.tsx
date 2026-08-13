@@ -9,8 +9,9 @@ import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { hasOpenActualisation } from "@/app/utils/actualisationForm.util";
+import { cn } from "@/app/utils/classname.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActualisationHeader } from "./ActualisationHeader";
 import { FinalisationHeader } from "./FinalisationHeader";
 import { StructureHeaderActions } from "./StructureHeaderActions";
@@ -27,6 +28,7 @@ export const StructureHeader = ({
   const showActualisation =
     actualisationYear !== null &&
     structure.isFinalised &&
+    !structure.isClosed &&
     hasOpenActualisation(structure.forms, actualisationYear);
 
   const { headerRef } = useHeaderHeight();
@@ -47,7 +49,10 @@ export const StructureHeader = ({
   return (
     <>
       <div
-        className="sticky top-0 z-50 bg-lifted-grey shadow-sm"
+        className={cn(
+          "sticky top-0 z-50 shadow-sm",
+          structure.isClosed ? "bg-contrast-grey" : "bg-lifted-grey"
+        )}
         ref={headerRef}
       >
         <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center relative z-20">
@@ -120,7 +125,9 @@ export const StructureHeader = ({
                 ]}
               />
             )}
-            {isRootPath && !isStructureFinalisee && <FinalisationHeader />}
+            {isRootPath && !isStructureFinalisee && !structure.isClosed && (
+              <FinalisationHeader />
+            )}
             {isRootPath && showActualisation && actualisationYear && (
               <ActualisationHeader actualisationYear={actualisationYear} />
             )}

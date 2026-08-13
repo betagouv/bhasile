@@ -118,6 +118,15 @@ export type BuildDashboardTransformationRowsOptions = {
   typeList: string[];
 };
 
+const hasNonFinalisedStructure = (
+  transformation: TransformationApiRead
+): boolean =>
+  transformation.structureVersionTransformations.some(
+    (structureVersionTransformation) =>
+      structureVersionTransformation.structureVersion?.structure
+        ?.isFinalised === false
+  );
+
 export const buildDashboardTransformationRows = (
   transformations: TransformationApiRead[],
   options: BuildDashboardTransformationRowsOptions
@@ -125,17 +134,18 @@ export const buildDashboardTransformationRows = (
   const rows: DashboardTransformationRow[] = [];
 
   for (const transformation of transformations) {
+    if (hasNonFinalisedStructure(transformation)) {
+      continue;
+    }
+
     const referenceStructureVersionTransformation =
       getReferenceStructureVersionTransformation(transformation);
     const departement = getStructureVersionTransformationDepartement(
       referenceStructureVersionTransformation
     );
-    if (!departement) {
-      continue;
-    }
     if (
       options.departementList.length > 0 &&
-      !options.departementList.includes(departement)
+      (!departement || !options.departementList.includes(departement))
     ) {
       continue;
     }
@@ -169,7 +179,7 @@ export const buildDashboardTransformationRows = (
     rows.push({
       transformationId: transformation.id,
       operateurName: operateur?.name ?? null,
-      departementAdministratif: departement,
+      departementAdministratif: departement ?? null,
       summary: buildTransformationSummary(
         transformation.structureVersionTransformations
       ),

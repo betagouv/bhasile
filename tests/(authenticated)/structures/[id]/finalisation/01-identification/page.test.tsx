@@ -125,7 +125,7 @@ describe("FinalisationIdentification page integration", () => {
         id: 1,
         name: "Adoma",
       },
-      creationDate: "2007-01-01T12:00:00.000Z",
+      creationDate: "2007-01-02T12:00:00.000Z",
       public: "Tout public",
       contacts: [newContact],
       dnaStructures: [
@@ -135,8 +135,6 @@ describe("FinalisationIdentification page integration", () => {
           dna: {
             code: "C0001",
           },
-          startDate: null,
-          endDate: null,
         },
       ],
       structureFinesses: [

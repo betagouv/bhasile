@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { areCodesUnique } from "@/app/utils/common.util";
-import { nullishFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
+import { zId } from "@/app/utils/zodCustomFields";
 
 const dnaSchema = z.object({
   id: zId(),
@@ -13,8 +13,6 @@ const dnaStructureSchema = z.object({
   description: z.string().nullish(),
   dna: dnaSchema,
   structureId: zId(),
-  startDate: nullishFrenchDateToISO(),
-  endDate: nullishFrenchDateToISO(),
 });
 
 const uniqueDnaCodesError = {

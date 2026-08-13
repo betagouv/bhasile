@@ -36,7 +36,6 @@ WITH
       public."Budget" b
     WHERE
       b."structureId" IS NOT NULL
-      AND b."isMissing" IS NOT TRUE
       AND (
         b."dotationAccordee" IS NOT NULL
         OR b."dotationDemandee" IS NOT NULL

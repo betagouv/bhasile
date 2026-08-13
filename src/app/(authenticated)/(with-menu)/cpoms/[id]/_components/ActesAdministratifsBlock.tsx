@@ -8,8 +8,8 @@ import { Block } from "@/app/components/common/Block";
 import { getActesCategoriesToDisplay } from "@/app/utils/acteAdministratif.util";
 import { CpomActeScope, getCpomActesScopes } from "@/app/utils/cpom.util";
 import { ACTE_ADMINISTRATIF_CATEGORY_LABELS } from "@/config/acte-administratif.config";
+import { useCpomContext } from "@/contexts/CpomContext";
 
-import { useCpomContext } from "../_context/CpomClientContext";
 import { ActesScopeSwitch } from "./ActesScopeSwitch";
 
 export const ActesAdministratifsBlock = () => {

@@ -1,7 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { deleteStructure } from "@/app/api/structures/structure.repository";
-
+import { deleteStructure } from "./cleanup";
 import { mockAddressApi } from "./mocks/address-api";
 import { seedStructureForSelection } from "./structure-creator";
 import { TestStructureData } from "./test-data/types";
@@ -17,9 +16,8 @@ export async function beforeFlow(
   }
 
   // Sometimes the cleanup doesn't happen
-  try {
-    await deleteStructure(data.codeBhasile as string);
-  } catch {}
+  await deleteStructure(data.codeBhasile as string);
+
   const id = await seedStructureForSelection(
     data as Partial<TestStructureData> & { codeBhasile: string }
   );
