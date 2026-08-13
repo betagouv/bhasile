@@ -27,7 +27,7 @@ vi.mock("@/app/api/anomalies/anomalie.service", () => ({
     mockSetAnomalieJustification(...args),
 }));
 
-vi.mock("@/app/api/user-action/user-action.service", () => ({
+vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createStructureEvent: (...args: unknown[]) =>
     mockCreateStructureEvent(...args),
 }));

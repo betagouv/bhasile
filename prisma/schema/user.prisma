@@ -1,14 +1,14 @@
 model User {
-  id             Int           @id @default(autoincrement())
-  name           String?
-  email          String        @unique
-  lastConnection DateTime
-  userActions    UserAction[]
-  role           Role?         @relation(fields: [roleId], references: [id])
-  roleId         Int?
-  emailPattern   EmailPattern? @relation(fields: [emailPatternId], references: [id])
-  emailPatternId Int?
-  notes          Note[]
+  id                  Int           @id @default(autoincrement())
+  name                String?
+  email               String        @unique
+  lastConnection      DateTime
+  userActions         UserAction[]
+  role                Role?         @relation(fields: [roleId], references: [id])
+  roleId              Int?
+  emailPattern        EmailPattern? @relation(fields: [emailPatternId], references: [id])
+  emailPatternId      Int?
+  notes               Note[]
   anomaliesJustifiees Anomalie[]
 
   createdAt DateTime @default(now())
@@ -18,16 +18,17 @@ model User {
 }
 
 model UserAction {
-  id          Int                @id @default(autoincrement())
+  id          Int                    @id @default(autoincrement())
   userId      Int
-  user        User               @relation(fields: [userId], references: [id])
+  user        User                   @relation(fields: [userId], references: [id])
   action      UserActionCategory
-  structure   Structure?         @relation(fields: [structureId], references: [id])
+  structure   Structure?             @relation(fields: [structureId], references: [id])
   structureId Int?
-  cpom        Cpom?              @relation(fields: [cpomId], references: [id])
+  cpom        Cpom?                  @relation(fields: [cpomId], references: [id])
   cpomId      Int?
-  operateur   Operateur?         @relation(fields: [operateurId], references: [id])
+  operateur   Operateur?             @relation(fields: [operateurId], references: [id])
   operateurId Int?
+  description UserActionDescription?
 
   createdAt DateTime @default(now())
 
@@ -70,6 +71,13 @@ enum UserActionCategory {
   READ
   UPDATE
   DELETE
+
+  @@schema("public")
+}
+
+enum UserActionDescription {
+  STATISTIQUES_TABLE
+  STATISTIQUES_CARTOGRAPHIE
 
   @@schema("public")
 }

@@ -1,7 +1,9 @@
+import { UserActionDescription } from "@/generated/prisma/enums";
+
 import { createUserAction } from "./user-action.repository";
 
 // Les fonctions de ce fichier sont asynchrones mais il faut les appeler sans
-//  await pour ne pas bloquer l'exécution de la requête principale
+// await pour ne pas bloquer l'exécution de la requête principale
 
 export const createStructureEvent = async (
   method: string,
@@ -19,4 +21,18 @@ export const createOperateurEvent = async (
   operateurId: number
 ) => {
   await createUserAction({ method, operateurId });
+};
+
+export const createStatistiquesEvent = async (method: string) => {
+  await createUserAction({
+    method,
+    description: UserActionDescription.STATISTIQUES_TABLE,
+  });
+};
+
+export const createStatistiquesCartographieEvent = async (method: string) => {
+  await createUserAction({
+    method,
+    description: UserActionDescription.STATISTIQUES_CARTOGRAPHIE,
+  });
 };

@@ -5,7 +5,7 @@ import {
   getAnomalieForUpdate,
   setAnomalieJustification,
 } from "@/app/api/anomalies/anomalie.service";
-import { createStructureEvent } from "@/app/api/user-action/user-action.service";
+import { createStructureEvent } from "@/app/api/user-actions/user-action.service";
 import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";

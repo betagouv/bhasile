@@ -1163,7 +1163,11 @@ describe("getTransformationDepartement", () => {
         createStructureVersionTransformation({
           id: 2,
           structureVersion: {
-            structure: { codeBhasile: "ABC", isFinalised: true, departementAdministratif: "13" },
+            structure: {
+              codeBhasile: "ABC",
+              isFinalised: true,
+              departementAdministratif: "13",
+            },
           },
         }),
       ],

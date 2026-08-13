@@ -41,7 +41,7 @@ export type DashboardTransformationStatus = "A_INITIALISER" | "A_FINALISER";
 export type DashboardTransformationRow = {
   transformationId: number;
   operateurName: string | null;
-  departementAdministratif: string;
+  departementAdministratif: string | null;
   summary: string;
   status: DashboardTransformationStatus;
   updatedAt: string | null;

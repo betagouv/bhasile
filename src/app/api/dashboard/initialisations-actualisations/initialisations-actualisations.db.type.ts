@@ -7,6 +7,7 @@ import {
 
 export const dashboardStructureSelect = {
   id: true,
+  fermetureDate: true,
   codeBhasile: true,
   type: true,
   departementAdministratif: true,

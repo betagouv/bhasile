@@ -6,7 +6,7 @@ import {
   updateAnomalieJustification,
 } from "@/app/api/anomalies/anomalie.repository";
 import { buildAnomalieContext } from "@/app/api/anomalies/anomalie.util";
-import { findUserIdByEmail } from "@/app/api/user/user.repository";
+import { findUserIdByEmail } from "@/app/api/users/user.repository";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { getNow } from "@/app/utils/now.util";
 import { Prisma } from "@/generated/prisma/client";

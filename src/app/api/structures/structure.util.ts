@@ -14,6 +14,7 @@ import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
 import { getMostRecentMillesime } from "@/app/utils/structure.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
   PublicType,
@@ -236,7 +237,7 @@ export const isBornFromCreation = (
         effectiveDate: Date | null;
         structureVersionTransformation?: {
           type: StructureVersionTransformationType;
-          transformation?: { form?: { status: boolean } | null } | null;
+          transformation?: { form: { status: boolean } | null } | null;
         } | null;
       }[]
     | null
@@ -247,11 +248,36 @@ export const isBornFromCreation = (
     const transformation = version.structureVersionTransformation;
     return (
       transformation?.type === StructureVersionTransformationType.CREATION &&
-      transformation.transformation?.form?.status === true &&
+      isTransformationFinalised(transformation.transformation) &&
       version.effectiveDate !== null &&
       version.effectiveDate < startOfNextUtcDay(now)
     );
   }) ?? false;
+
+export const isStructureFinalised = (
+  structure: {
+    forms: Parameters<typeof isFinalisationFormValidated>[0];
+    structureVersions: Parameters<typeof isBornFromCreation>[0];
+  },
+  now: Date
+): boolean =>
+  isFinalisationFormValidated(structure.forms) ||
+  isBornFromCreation(structure.structureVersions, now);
+
+export const isStructureClosed = (
+  structure: { fermetureDate: Date | null },
+  now: Date
+): boolean =>
+  structure.fermetureDate !== null &&
+  structure.fermetureDate < startOfNextUtcDay(now);
+
+export const isStructureFinalisedAndOpen = (
+  structure: Parameters<typeof isStructureFinalised>[0] & {
+    fermetureDate: Date | null;
+  },
+  now: Date
+): boolean =>
+  isStructureFinalised(structure, now) && !isStructureClosed(structure, now);
 
 export type StructureListComputedRow = {
   id: number;
@@ -259,7 +285,7 @@ export type StructureListComputedRow = {
   currentVersionId: number;
   bornFromCreation: boolean;
   hasForm: boolean;
-  finalised: boolean;
+  isFinalised: boolean;
   type: StructureType | null;
   operateurName: string | null;
   departementAdministratif: string | null;
@@ -303,21 +329,24 @@ export const computeStructureListRow = (
     ),
   ].filter((value): value is string => Boolean(value));
 
-  const fermetureTransformation = currentVersion.structureVersionTransformation;
-  const isClosed =
-    fermetureTransformation?.type ===
-    StructureVersionTransformationType.FERMETURE;
+  const currentTransformation = currentVersion.structureVersionTransformation;
+  const fermetureTransformation =
+    currentTransformation?.type ===
+    StructureVersionTransformationType.FERMETURE
+      ? currentTransformation
+      : null;
+  const isClosed = isStructureClosed(structure, now);
 
   return {
     id: structure.id,
     codeBhasile: structure.codeBhasile,
     currentVersionId: currentVersion.id,
     isClosed,
-    fermetureDate: isClosed ? currentVersion.effectiveDate : null,
+    fermetureDate: structure.fermetureDate,
     fermetureMotif: isClosed ? (fermetureTransformation?.motif ?? null) : null,
     bornFromCreation,
     hasForm: structure.forms.length > 0,
-    finalised: bornFromCreation || isFinalisationFormValidated(structure.forms),
+    isFinalised: isStructureFinalised(structure, now),
     type: structure.type,
     operateurName,
     departementAdministratif: currentVersion.departementAdministratif,
@@ -393,7 +422,7 @@ export const filterStructureRows = (
     if (!filters.isClosed && row.isClosed) {
       return false;
     }
-    if (filters.finalised && !row.finalised) {
+    if (filters.isFinalised && !row.isFinalised) {
       return false;
     }
     if (typeList.length > 0 && (!row.type || !typeList.includes(row.type))) {

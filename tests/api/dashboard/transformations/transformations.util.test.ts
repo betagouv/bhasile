@@ -229,7 +229,23 @@ describe("buildDashboardTransformationRows", () => {
       ],
     });
 
-  it("exclut une transformation sans département résolvable (création ex-nihilo)", () => {
+  it("affiche une transformation sans département résolvable (création ex-nihilo)", () => {
+    const transformation = makeTransformation({
+      svts: [
+        makeSvt({
+          type: StructureVersionTransformationType.CREATION,
+          departement: undefined,
+        }),
+      ],
+    });
+
+    const rows = buildDashboardTransformationRows([transformation], noFilters);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].departementAdministratif).toBeNull();
+  });
+
+  it("exclut une transformation sans département quand un filtre département est actif", () => {
     const transformation = makeTransformation({
       svts: [
         makeSvt({
@@ -240,7 +256,10 @@ describe("buildDashboardTransformationRows", () => {
     });
 
     expect(
-      buildDashboardTransformationRows([transformation], noFilters)
+      buildDashboardTransformationRows([transformation], {
+        ...noFilters,
+        departementList: ["75"],
+      })
     ).toHaveLength(0);
   });
 

@@ -6,6 +6,8 @@ import {
   RappelStructure,
 } from "@/app/api/dashboard/rappels/rappels.db.type";
 import { buildRappels } from "@/app/api/dashboard/rappels/rappels.util";
+import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
+import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
@@ -52,32 +54,57 @@ const makeStructure = (
     actesAdministratifs: RappelStructure["actesAdministratifs"];
     evaluations: { date: Date | null }[];
     cpomStructures: RappelStructure["cpomStructures"];
-    forms: { status: boolean }[];
+    forms: {
+      status: boolean;
+      formDefinition: { slug: string };
+    }[];
+    versionTransformationType: StructureVersionTransformationType | null;
+    versionTransformationFormStatus: boolean;
+    versionEffectiveDate: Date;
+    fermetureDate: Date | null;
   }> = {}
-): RappelStructure => ({
-  id: overrides.id ?? 1,
-  codeBhasile: "BHA-001",
-  type: overrides.type ?? StructureType.CADA,
-  structureVersions: [
-    {
-      id: 1,
-      effectiveDate: new Date("2020-01-01"),
-      communeAdministrative: "Avranches",
-      departementAdministratif:
-        overrides.versionDepartement === undefined
-          ? "50"
-          : overrides.versionDepartement,
-      structureVersionTransformationId: null,
-      structureVersionTransformation: null,
-    },
-  ],
-  departementAdministratif: overrides.departementAdministratif ?? "50",
-  operateur: overrides.operateur ?? { id: 1, name: "Adoma" },
-  forms: overrides.forms ?? [{ status: true }],
-  actesAdministratifs: overrides.actesAdministratifs ?? [],
-  evaluations: overrides.evaluations ?? [],
-  cpomStructures: overrides.cpomStructures ?? [],
-});
+): RappelStructure => {
+  const versionTransformationType = overrides.versionTransformationType ?? null;
+
+  return {
+    id: overrides.id ?? 1,
+    codeBhasile: "BHA-001",
+    type: overrides.type ?? StructureType.CADA,
+    fermetureDate: overrides.fermetureDate ?? null,
+    structureVersions: [
+      {
+        id: 1,
+        effectiveDate: overrides.versionEffectiveDate ?? new Date("2020-01-01"),
+        communeAdministrative: "Avranches",
+        departementAdministratif:
+          overrides.versionDepartement === undefined
+            ? "50"
+            : overrides.versionDepartement,
+        structureVersionTransformationId:
+          versionTransformationType === null ? null : 7,
+        structureVersionTransformation:
+          versionTransformationType === null
+            ? null
+            : {
+                type: versionTransformationType,
+                transformation: {
+                  form: {
+                    status: overrides.versionTransformationFormStatus ?? true,
+                  },
+                },
+              },
+      },
+    ],
+    departementAdministratif: overrides.departementAdministratif ?? "50",
+    operateur: overrides.operateur ?? { id: 1, name: "Adoma" },
+    forms: overrides.forms ?? [
+      { status: true, formDefinition: { slug: FINALISATION_FORM_SLUG } },
+    ],
+    actesAdministratifs: overrides.actesAdministratifs ?? [],
+    evaluations: overrides.evaluations ?? [],
+    cpomStructures: overrides.cpomStructures ?? [],
+  };
+};
 
 const makeCpom = (
   overrides: Partial<{
@@ -226,10 +253,66 @@ describe("buildRappels — scoping & CPOM", () => {
 
   it("exclut une structure non finalisée", () => {
     const structure = makeStructure({
-      forms: [{ status: false }],
+      forms: [
+        { status: false, formDefinition: { slug: FINALISATION_FORM_SLUG } },
+      ],
       actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
     });
     expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("remonte les rappels d'une structure née d'une création, sans formulaire de finalisation", () => {
+    const structure = makeStructure({
+      forms: [],
+      versionTransformationType: StructureVersionTransformationType.CREATION,
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite).toBe(
+      "URGENT"
+    );
+  });
+
+  it("exclut une structure dont la transformation de création n'est pas validée", () => {
+    const structure = makeStructure({
+      forms: [],
+      versionTransformationType: StructureVersionTransformationType.CREATION,
+      versionTransformationFormStatus: false,
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("exclut une structure dont la création ne prend effet qu'à l'avenir", () => {
+    const structure = makeStructure({
+      forms: [],
+      versionTransformationType: StructureVersionTransformationType.CREATION,
+      versionEffectiveDate: new Date("2027-01-01"),
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("exclut une structure déjà fermée", () => {
+    const structure = makeStructure({
+      fermetureDate: new Date("2026-03-01"),
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("garde une structure dont la fermeture n'est pas encore effective", () => {
+    const structure = makeStructure({
+      fermetureDate: new Date("2026-12-31"),
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite).toBe(
+      "URGENT"
+    );
   });
 
   it("génère un rappel CPOM quand la convention CPOM finit dans la fenêtre", () => {

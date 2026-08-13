@@ -37,17 +37,57 @@ const actualisationStatusForm = (
   formSteps,
 });
 
+const NOW = new Date("2026-07-10T00:00:00.000Z");
+
+const creationVersion = (formStatus = true) => ({
+  effectiveDate: new Date("2026-01-01"),
+  structureVersionTransformation: {
+    type: StructureVersionTransformationType.CREATION,
+    transformation: { form: { status: formStatus } },
+  },
+});
+
 describe("getInitialisationStatus", () => {
   it("renvoie A_INITIALISER quand aucun formulaire de finalisation n'existe", () => {
-    expect(getInitialisationStatus([])).toBe("A_INITIALISER");
+    expect(
+      getInitialisationStatus({ forms: [], structureVersions: [] }, NOW)
+    ).toBe("A_INITIALISER");
   });
 
   it("renvoie A_FINALISER quand le formulaire existe mais n'est pas validé", () => {
-    expect(getInitialisationStatus([{ status: false }])).toBe("A_FINALISER");
+    expect(
+      getInitialisationStatus(
+        { forms: [finalisationForm(false)], structureVersions: [] },
+        NOW
+      )
+    ).toBe("A_FINALISER");
   });
 
   it("renvoie FINALISEE quand le formulaire est validé", () => {
-    expect(getInitialisationStatus([{ status: true }])).toBe("FINALISEE");
+    expect(
+      getInitialisationStatus(
+        { forms: [finalisationForm(true)], structureVersions: [] },
+        NOW
+      )
+    ).toBe("FINALISEE");
+  });
+
+  it("renvoie FINALISEE pour une structure née d'une création, sans formulaire de finalisation", () => {
+    expect(
+      getInitialisationStatus(
+        { forms: [], structureVersions: [creationVersion()] },
+        NOW
+      )
+    ).toBe("FINALISEE");
+  });
+
+  it("renvoie A_INITIALISER quand la transformation de création n'est pas validée", () => {
+    expect(
+      getInitialisationStatus(
+        { forms: [], structureVersions: [creationVersion(false)] },
+        NOW
+      )
+    ).toBe("A_INITIALISER");
   });
 });
 
@@ -165,6 +205,7 @@ const makeStructure = (
   type: StructureType.CADA,
   departementAdministratif: "75",
   operateur: { id: 1, name: "Adoma" },
+  fermetureDate: null,
   forms: [],
   structureVersions: [makeVersion()],
   ...overrides,
@@ -263,8 +304,9 @@ describe("buildDashboardRows", () => {
     ).toHaveLength(1);
   });
 
-  it("exclut une structure fermée (dernière version = FERMETURE validée)", () => {
+  it("exclut une structure dont la fermeture a pris effet", () => {
     const structure = makeStructure({
+      fermetureDate: new Date("2026-03-01"),
       structureVersions: [
         makeVersion({
           structureVersionTransformationId: 9,
@@ -277,6 +319,15 @@ describe("buildDashboardRows", () => {
     });
 
     expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
+  });
+
+  it("garde une structure dont la fermeture n'est pas encore effective", () => {
+    const structure = makeStructure({
+      fermetureDate: new Date("2026-12-31"),
+      forms: [finalisationForm(false)],
+    });
+
+    expect(buildDashboardRows([structure], baseOptions)).toHaveLength(1);
   });
 
   it("exclut une structure finalisée ET actualisée (rien d'ouvert)", () => {

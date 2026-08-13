@@ -55,6 +55,7 @@ const makeStructure = (
     codeBhasile: overrides.codeBhasile ?? "BHA-NOR-024",
     type: overrides.type ?? StructureType.CADA,
     departementAdministratif: overrides.departementAdministratif ?? "50",
+    fermetureDate: overrides.fermetureDate ?? null,
     operateur: overrides.operateur ?? { id: 1, name: "Adoma" },
     forms: overrides.forms ?? [
       { status: true, formDefinition: { slug: FINALISATION_FORM_SLUG } },
@@ -114,12 +115,16 @@ describe("buildDashboardAnomalies", () => {
     expect(buildDashboardAnomalies([structure], baseOptions)).toEqual([]);
   });
 
-  it("écarte une structure fermée", () => {
-    const structure = makeStructure({
-      versionTransformationType: StructureVersionTransformationType.FERMETURE,
-    });
+  it("écarte une structure dont la fermeture a pris effet", () => {
+    const structure = makeStructure({ fermetureDate: new Date("2026-03-01") });
 
     expect(buildDashboardAnomalies([structure], baseOptions)).toEqual([]);
+  });
+
+  it("garde une structure dont la fermeture n'est pas encore effective", () => {
+    const structure = makeStructure({ fermetureDate: new Date("2026-12-31") });
+
+    expect(buildDashboardAnomalies([structure], baseOptions)).toHaveLength(1);
   });
 
   it("écarte une structure hors du périmètre de l'agent", () => {
