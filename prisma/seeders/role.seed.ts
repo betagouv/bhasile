@@ -1,20 +1,20 @@
 import { PrismaClient } from "@/generated/prisma/client";
+import { getDepartementNumerosForRegion } from "@/utils/region.util";
 
 // Comptes du fournisseur d'identité de test ProConnect (FIA1) : il accepte
 // n'importe quelle adresse du domaine, donc aucune donnée d'agent réel n'est
 // nécessaire pour se connecter en local ou sur une review app.
 const TEST_EMAIL_DOMAIN = "test.proconnect.gouv.fr";
 
-const ILE_DE_FRANCE_DEPARTEMENTS = [
-  "75",
-  "77",
-  "78",
-  "91",
-  "92",
-  "93",
-  "94",
-  "95",
-];
+// Le rôle régional sans département serait un agent qui ne peut rien éditer,
+// sans le moindre message d'erreur.
+const getRegionDepartements = (regionName: string): string[] => {
+  const numeros = getDepartementNumerosForRegion(regionName);
+  if (numeros.length === 0) {
+    throw new Error(`Région ${regionName} absente de DEPARTEMENTS`);
+  }
+  return numeros;
+};
 
 export const ANONYMOUS_ROLE_NAME = "ANONYMOUS";
 
@@ -35,7 +35,7 @@ export const AGENT_ROLES: AgentRoleSeed[] = [
   {
     roleName: "REGION_ILE_DE_FRANCE",
     email: `regional@${TEST_EMAIL_DOMAIN}`,
-    departementNumeros: ILE_DE_FRANCE_DEPARTEMENTS,
+    departementNumeros: getRegionDepartements("Île-de-France"),
   },
   {
     roleName: "DEPARTEMENT_PARIS",

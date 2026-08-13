@@ -9,6 +9,7 @@ import {
 } from "@/app/api/forms/form.constants";
 import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { StructureType } from "@/types/structure.type";
+import { getRegionFromDepartement } from "@/utils/region.util";
 
 import { createPrismaClient, DATABASE_POOL_MAX } from "./client";
 import { createFakeActivites } from "./seeders/activite.seed";
@@ -50,7 +51,6 @@ import {
   getNextBhasileCode,
 } from "./utils/code-bhasile.util";
 import { convertToPrismaObject } from "./utils/common.util";
-import { getRegionFromDepartement } from "./utils/region.util";
 import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();

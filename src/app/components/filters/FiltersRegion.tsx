@@ -3,7 +3,10 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { Dispatch, SetStateAction, useEffect, useMemo, useRef } from "react";
 
 import { cn } from "@/app/utils/classname.util";
-import { DEPARTEMENTS } from "@/constants";
+import {
+  getDepartementNumerosForRegion,
+  getRegionFromDepartement,
+} from "@/utils/region.util";
 
 const REGIONS_WITH_ONE_DEPARTEMENT = [
   "Guadeloupe",
@@ -20,11 +23,10 @@ export const FiltersRegion = ({
   children,
 }: Props) => {
   const checkedStatus = useMemo(() => {
-    const numOfDepartementsInRegion = DEPARTEMENTS.filter(
-      (departement) => departement.region === region
-    ).length;
-    const numOfDepartementsChecked = departements.filter((departement) =>
-      DEPARTEMENTS.some((d) => d.numero === departement && d.region === region)
+    const numOfDepartementsInRegion =
+      getDepartementNumerosForRegion(region).length;
+    const numOfDepartementsChecked = departements.filter(
+      (departement) => getRegionFromDepartement(departement) === region
     ).length;
 
     if (numOfDepartementsChecked === numOfDepartementsInRegion) {
@@ -58,19 +60,14 @@ export const FiltersRegion = ({
       if (checkedStatus === "checked") {
         setDepartements((prevDepartements) =>
           prevDepartements.filter(
-            (departement) =>
-              !DEPARTEMENTS.some(
-                (d) => d.numero === departement && d.region === region
-              )
+            (departement) => getRegionFromDepartement(departement) !== region
           )
         );
       } else {
         setDepartements((prevDepartements) => {
           const newDepartements = [
             ...prevDepartements,
-            ...DEPARTEMENTS.filter(
-              (departement) => departement.region === region
-            ).map((departement) => departement.numero),
+            ...getDepartementNumerosForRegion(region),
           ];
           return [...new Set(newDepartements)];
         });
