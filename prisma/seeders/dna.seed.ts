@@ -49,8 +49,7 @@ type DnaSeedRefs = {
   departementNumeros: string[];
 };
 
-// dnaCode est porté par la ligne pour éviter de relire la base au moment de
-// générer activités et événements indésirables graves.
+// dnaCode est porté par la ligne pour faciliter le lien avec activités et EIG
 export type DnaStructureSeed = {
   dnaId: number;
   dnaCode: string;

@@ -61,8 +61,7 @@ const prisma = createPrismaClient();
 // Surcharger via FAKER_SEED pour rejouer un échec observé avec une autre graine.
 faker.seed(Number(process.env.FAKER_SEED) || 20260804);
 
-// Les structures sont générées puis écrites par lots : le pic mémoire reste
-// borné par la taille du lot, pas par le nombre total de structures.
+// Les structures sont écrites par lots, pic mémoire borné par la taille du lot.
 const STRUCTURE_BATCH_SIZE = 200;
 
 const seedNumber = (number: number): number =>
@@ -346,7 +345,9 @@ async function seed(): Promise<void> {
   ]);
   const dnaList = createDnaList(totalDnasNeeded + numberOfUnusedDnas, {
     operateurIds: allOperateurs.map((operateur) => operateur.id),
-    departementNumeros: allDepartements.map((departement) => departement.numero),
+    departementNumeros: allDepartements.map(
+      (departement) => departement.numero
+    ),
   });
   const dnaIds = await insertManyReturningIds(
     (data) => prisma.dna.createManyAndReturn({ data, select: { id: true } }),
