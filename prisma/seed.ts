@@ -277,7 +277,7 @@ async function seed(): Promise<void> {
     start < structureParams.length;
     start += STRUCTURE_BATCH_SIZE
   ) {
-    const created = await prisma.$transaction(
+    const created = await Promise.all(
       structureParams.slice(start, start + STRUCTURE_BATCH_SIZE).map((params) =>
         prisma.structure.create({
           data: buildStructureCreate(params),
