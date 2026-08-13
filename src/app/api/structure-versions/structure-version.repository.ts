@@ -27,26 +27,17 @@ export const mirrorLegacyPlacesToBaseVersions = async (
     select: { structureId: true, placesAutorisees: true },
   });
 
-  // Une mise à jour par valeur de places plutôt qu'une par structure : sur un
-  // parc entier cela fait quelques centaines de requêtes au lieu de milliers.
-  const structureIdsByPlaces = new Map<number | null, number[]>();
-  for (const { structureId, placesAutorisees } of legacyTypologies) {
-    if (structureId === null) {
+  let alignedVersions = 0;
+  for (const legacyTypologie of legacyTypologies) {
+    if (legacyTypologie.structureId === null) {
       continue;
     }
-    const structureIds = structureIdsByPlaces.get(placesAutorisees) ?? [];
-    structureIds.push(structureId);
-    structureIdsByPlaces.set(placesAutorisees, structureIds);
-  }
-
-  let alignedVersions = 0;
-  for (const [placesAutorisees, structureIds] of structureIdsByPlaces) {
     const { count } = await tx.structureVersion.updateMany({
       where: {
-        structureId: { in: structureIds },
+        structureId: legacyTypologie.structureId,
         structureVersionTransformationId: null,
       },
-      data: { placesAutorisees },
+      data: { placesAutorisees: legacyTypologie.placesAutorisees },
     });
     alignedVersions += count;
   }

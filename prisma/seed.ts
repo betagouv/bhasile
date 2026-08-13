@@ -36,17 +36,16 @@ import {
   createFakeOperateur,
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
-import { insertStructures } from "./seeders/structure-version.insert";
 import {
+  buildStructureCreate,
   COLOCATED_COORDINATES,
   COLOCATED_STRUCTURES_COUNT,
   FormDefLookup,
-  planStructure,
+  resolveCurrentVersionId,
   SeededStructure,
   SeedStructureParams,
 } from "./seeders/structure-version.seed";
 import { upsertBhasileUser } from "./seeders/user.seed";
-import { insertMany, insertManyReturningIds } from "./utils/bulk";
 import {
   generateAllBhasileCodes,
   getNextBhasileCode,
@@ -61,8 +60,9 @@ const prisma = createPrismaClient();
 // Surcharger via FAKER_SEED pour rejouer un échec observé avec une autre graine.
 faker.seed(Number(process.env.FAKER_SEED) || 20260804);
 
-// Les structures sont écrites par lots, pic mémoire borné par la taille du lot.
-const STRUCTURE_BATCH_SIZE = 200;
+// Les structures sont construites puis écrites par lots : le pic mémoire est
+// borné par la taille du lot, pas par le nombre total de structures.
+const STRUCTURE_BATCH_SIZE = 50;
 
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
@@ -276,9 +276,25 @@ async function seed(): Promise<void> {
     start < structureParams.length;
     start += STRUCTURE_BATCH_SIZE
   ) {
-    const batch = structureParams.slice(start, start + STRUCTURE_BATCH_SIZE);
+    const created = await prisma.$transaction(
+      structureParams.slice(start, start + STRUCTURE_BATCH_SIZE).map((params) =>
+        prisma.structure.create({
+          data: buildStructureCreate(params),
+          select: {
+            id: true,
+            structureVersions: { select: { id: true, effectiveDate: true } },
+          },
+        })
+      )
+    );
     seededStructures.push(
-      ...(await insertStructures(prisma, batch.map(planStructure)))
+      ...created.map((structure) => ({
+        structureId: structure.id,
+        currentVersionId: resolveCurrentVersionId(
+          structure.structureVersions,
+          now
+        ),
+      }))
     );
   }
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
@@ -293,7 +309,7 @@ async function seed(): Promise<void> {
     structures: seededStructures.map((seeded) => ({ id: seeded.structureId })),
     userId: notesUser.id,
   });
-  await insertMany((data) => prisma.note.createMany({ data }), notesToCreate);
+  await prisma.note.createMany({ data: notesToCreate });
   console.log(`✅ ${notesToCreate.length} notes créées`);
 
   console.log("📣 Seed des notifications");
@@ -307,22 +323,24 @@ async function seed(): Promise<void> {
       structureVersionId: seeded.currentVersionId,
     }))
   );
-  const finessIds = await insertManyReturningIds(
-    (data) => prisma.finess.createManyAndReturn({ data, select: { id: true } }),
-    finessList.map((finess) => ({
+  const createdFinesses = await prisma.finess.createManyAndReturn({
+    data: finessList.map((finess) => ({
       code: finess.code,
       createdAt: finess.createdAt,
       updatedAt: finess.updatedAt,
-    }))
+    })),
+    select: { id: true, code: true },
+  });
+  const finessIdByCode = new Map(
+    createdFinesses.map((finess) => [finess.code, finess.id])
   );
-  await insertMany(
-    (data) => prisma.structureFiness.createMany({ data }),
-    finessList.map((finess, index) => ({
-      finessId: finessIds[index],
+  await prisma.structureFiness.createMany({
+    data: finessList.map((finess) => ({
+      finessId: finessIdByCode.get(finess.code)!,
       structureVersionId: finess.structureVersionId,
       description: finess.description,
-    }))
-  );
+    })),
+  });
   console.log(
     `✅ ${finessList.length} codes FINESS créés et autant de liens StructureFiness`
   );
@@ -349,31 +367,30 @@ async function seed(): Promise<void> {
       (departement) => departement.numero
     ),
   });
-  const dnaIds = await insertManyReturningIds(
-    (data) => prisma.dna.createManyAndReturn({ data, select: { id: true } }),
-    dnaList
-  );
+  const createdDnas = await prisma.dna.createManyAndReturn({
+    data: dnaList,
+    select: { id: true, code: true },
+  });
   console.log(`✅ ${dnaList.length} codes DNA créés`);
 
   const dnaStructures = createDnaStructures({
-    dnas: dnaList.map((dna, index) => ({ id: dnaIds[index], code: dna.code })),
+    dnas: createdDnas,
     perVersionCounts,
   });
-  await insertMany(
-    (data) => prisma.dnaStructure.createMany({ data }),
-    dnaStructures.map((dnaStructure) => ({
+  await prisma.dnaStructure.createMany({
+    data: dnaStructures.map((dnaStructure) => ({
       dnaId: dnaStructure.dnaId,
       structureVersionId: dnaStructure.structureVersionId,
       description: dnaStructure.description,
-    }))
-  );
+    })),
+  });
   console.log(`✅ ${dnaStructures.length} liens DnaStructure créés`);
 
   console.log("📊 Création des activités...");
   const activites = dnaStructures.flatMap(({ dnaCode }) =>
     createFakeActivites({ dnaCode })
   );
-  await insertMany((data) => prisma.activite.createMany({ data }), activites);
+  await prisma.activite.createMany({ data: activites });
   console.log(`✅ ${activites.length} activités créées`);
 
   console.log("📊 Création des événements indésirables graves...");
@@ -389,10 +406,9 @@ async function seed(): Promise<void> {
       dnaCodes: dnaCodesByVersion.get(seeded.currentVersionId) ?? [],
     }))
   );
-  await insertMany(
-    (data) => prisma.evenementIndesirableGrave.createMany({ data }),
-    evenementsIndesirablesGraves
-  );
+  await prisma.evenementIndesirableGrave.createMany({
+    data: evenementsIndesirablesGraves,
+  });
 
   console.log("📡 Création des antennes...");
   const antennes = createAntenneList(
@@ -400,7 +416,7 @@ async function seed(): Promise<void> {
       structureVersionId: seeded.currentVersionId,
     }))
   );
-  await insertMany((data) => prisma.antenne.createMany({ data }), antennes);
+  await prisma.antenne.createMany({ data: antennes });
   console.log(`✅ ${antennes.length} antennes créées`);
 
   console.log("🔎 Recalcul des anomalies...");

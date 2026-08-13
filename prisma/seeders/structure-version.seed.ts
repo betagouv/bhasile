@@ -19,7 +19,6 @@ import { createFakeContact } from "./contact.seed";
 import { createFakeControle } from "./controle.seed";
 import { createFakeDocumentFinancier } from "./document-financier";
 import { createFakeEvaluation } from "./evaluation.seed";
-import { createFakeFileUpload } from "./file-upload.seed";
 import { createFakeFormWithSteps } from "./form.seed";
 import { createFakeIndicateurFinancier } from "./indicateur-financier";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
@@ -28,88 +27,6 @@ export type FormDefInfo = { id: number; stepDefinitionIds: number[] };
 export type FormDefLookup = Map<string, FormDefInfo>;
 
 export type Coordinates = { latitude: number; longitude: number };
-
-export type FileUploadPlan = ReturnType<typeof createFakeFileUpload>;
-
-// La ligne à insérer et ses pièces jointes restent séparées : les fichiers sont
-// écrits dans un second temps, une fois l'identifiant du parent connu.
-export type WithFileUploads<TRow> = {
-  row: TRow;
-  fileUploads: FileUploadPlan[];
-};
-
-const splitFileUploads = <TEntity extends { fileUploads: FileUploadPlan[] }>(
-  entity: TEntity
-): WithFileUploads<Omit<TEntity, "fileUploads">> => {
-  const { fileUploads, ...row } = entity;
-  return { row, fileUploads };
-};
-
-export type FormPlan = {
-  form: Omit<Prisma.FormCreateManyInput, "id">;
-  formSteps: Omit<Prisma.FormStepCreateManyInput, "id" | "formId">[];
-};
-
-export type ActePlan = WithFileUploads<
-  Omit<Prisma.ActeAdministratifCreateManyInput, "id">
->;
-
-export type DocumentFinancierPlan = WithFileUploads<
-  Omit<Prisma.DocumentFinancierCreateManyInput, "id">
->;
-
-export type ControlePlan = WithFileUploads<
-  Omit<Prisma.ControleCreateManyInput, "id">
->;
-
-export type EvaluationPlan = WithFileUploads<
-  Omit<Prisma.EvaluationCreateManyInput, "id">
->;
-
-export type TransformationPlan = {
-  type: TransformationType;
-  form: FormPlan;
-  structureVersionTransformation: Omit<
-    Prisma.StructureVersionTransformationCreateManyInput,
-    "id" | "transformationId"
-  >;
-  actes: ActePlan[];
-  structureVersionTransformationForm: FormPlan;
-};
-
-export type VersionPlan = {
-  version: Omit<
-    Prisma.StructureVersionCreateManyInput,
-    "id" | "structureId" | "structureVersionTransformationId"
-  >;
-  contacts: Omit<Prisma.ContactCreateManyInput, "id" | "structureVersionId">[];
-  adresses: Omit<Prisma.AdresseCreateManyInput, "id" | "structureVersionId">[];
-  transformation: TransformationPlan | null;
-};
-
-export type StructureRelationsPlan = {
-  actes: ActePlan[];
-  documentsFinanciers: DocumentFinancierPlan[];
-  forms: FormPlan[];
-  typologies: Omit<
-    Prisma.StructureTypologieCreateManyInput,
-    "id" | "structureId"
-  >[];
-  budgets: Omit<Prisma.BudgetCreateManyInput, "id" | "structureId">[];
-  indicateursFinanciers: Omit<
-    Prisma.IndicateurFinancierCreateManyInput,
-    "id" | "structureId"
-  >[];
-  controles: ControlePlan[];
-  evaluations: EvaluationPlan[];
-};
-
-export type StructurePlan = {
-  structure: Omit<Prisma.StructureCreateManyInput, "id">;
-  relations: StructureRelationsPlan | null;
-  versions: VersionPlan[];
-  currentVersionIndex: number;
-};
 
 const STRUCTURE_ZONE = {
   minLatitude: 43.550851,
@@ -318,6 +235,21 @@ const buildVersionScalars = (
   };
 };
 
+const stripVersionId = <T extends { structureVersionId?: unknown }>(
+  entity: T
+): Omit<T, "structureVersionId"> => {
+  const clone: Record<string, unknown> = { ...entity };
+  delete clone.structureVersionId;
+  return clone as Omit<T, "structureVersionId">;
+};
+
+const nestFileUploads = <TFileUpload, TEntity extends object>(
+  entity: TEntity & { fileUploads: TFileUpload[] }
+) => {
+  const { fileUploads, ...rest } = entity;
+  return { ...rest, fileUploads: { create: fileUploads } };
+};
+
 type StableContacts = ReturnType<typeof createFakeContact>[];
 
 type TypologieSpec = { year: number; placesAutorisees: number };
@@ -358,12 +290,15 @@ const acteWithCategory = (
   category: ActeAdministratifCategory,
   startDate: Date,
   endDate: Date
-): ActePlan => {
-  const { fileUploads, ...acte } = createFakeActeAdministratif();
-  return { row: { ...acte, category, startDate, endDate }, fileUploads };
-};
+) =>
+  nestFileUploads({
+    ...createFakeActeAdministratif(),
+    category,
+    startDate,
+    endDate,
+  });
 
-const buildStructureLevelActes = (creationDate: Date): ActePlan[] => [
+const buildStructureLevelActes = (creationDate: Date) => [
   acteWithCategory(
     "CONVENTION",
     creationDate,
@@ -402,7 +337,7 @@ const TRANSFO_ACTE_CATEGORIES: Record<
 const buildTransfoActes = (
   svtType: StructureVersionTransformationType,
   effectiveDate: Date
-): ActePlan[] =>
+) =>
   TRANSFO_ACTE_CATEGORIES[svtType].map((category) =>
     acteWithCategory(
       category,
@@ -411,69 +346,95 @@ const buildTransfoActes = (
     )
   );
 
-const planStructureRelations = (params: {
+type StructureRelations = Pick<
+  Prisma.StructureCreateInput,
+  | "actesAdministratifs"
+  | "documentsFinanciers"
+  | "forms"
+  | "structureTypologies"
+  | "budgets"
+  | "indicateursFinanciers"
+  | "controles"
+  | "evaluations"
+>;
+
+const buildStructureRelations = (params: {
   type: StructureType;
   isFinalised: boolean;
   creationDate: Date;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
   typologieSpecs: TypologieSpec[];
-}): StructureRelationsPlan => {
+}): StructureRelations => {
   const { formSteps, ...finalisationForm } = createFakeFormWithSteps(
     params.finalisationFormDefId,
     params.finalisationStepDefinitions,
     { isFinalised: params.isFinalised }
   );
 
-  const relations: StructureRelationsPlan = {
-    actes: buildStructureLevelActes(params.creationDate),
-    documentsFinanciers: Array.from({ length: 5 }, () =>
-      splitFileUploads(createFakeDocumentFinancier())
-    ),
-    forms: [
-      {
-        form: { ...finalisationForm, status: params.isFinalised },
-        formSteps,
-      },
-    ],
-    typologies: params.typologieSpecs.map((spec) =>
-      createFakeStructureTypologie(spec)
-    ),
-    budgets: [],
-    indicateursFinanciers: [],
-    controles: [],
-    evaluations: [],
+  const relations: StructureRelations = {
+    actesAdministratifs: {
+      create: buildStructureLevelActes(params.creationDate),
+    },
+    documentsFinanciers: {
+      create: Array.from({ length: 5 }, () =>
+        nestFileUploads(createFakeDocumentFinancier())
+      ),
+    },
+    forms: {
+      create: [
+        {
+          ...finalisationForm,
+          status: params.isFinalised,
+          formSteps: { create: formSteps },
+        },
+      ],
+    },
+    structureTypologies: {
+      create: params.typologieSpecs.map((spec) =>
+        createFakeStructureTypologie(spec)
+      ),
+    },
   };
 
   if (!params.isFinalised) {
     return relations;
   }
 
-  relations.budgets = [2026, 2025, 2024, 2023, 2022, 2021].map((year) =>
-    createFakeBudget({ year, type: params.type })
-  );
-  relations.indicateursFinanciers = [
-    createFakeIndicateurFinancier({ year: 2026, type: "PREVISIONNEL" }),
-    createFakeIndicateurFinancier({ year: 2025, type: "PREVISIONNEL" }),
-    createFakeIndicateurFinancier({ year: 2024, type: "REALISE" }),
-    createFakeIndicateurFinancier({ year: 2023, type: "REALISE" }),
-    createFakeIndicateurFinancier({ year: 2022, type: "REALISE" }),
-    createFakeIndicateurFinancier({ year: 2021, type: "REALISE" }),
-  ];
-  relations.controles = Array.from({ length: 3 }, () =>
-    splitFileUploads(createFakeControle())
-  );
-  relations.evaluations = isStructureAutorisee(params.type)
-    ? Array.from({ length: faker.number.int({ min: 0, max: 5 }) }, () =>
-        splitFileUploads(createFakeEvaluation())
-      )
-    : [];
-
-  return relations;
+  return {
+    ...relations,
+    budgets: {
+      create: [2026, 2025, 2024, 2023, 2022, 2021].map((year) =>
+        createFakeBudget({ year, type: params.type })
+      ),
+    },
+    indicateursFinanciers: {
+      create: [
+        createFakeIndicateurFinancier({ year: 2026, type: "PREVISIONNEL" }),
+        createFakeIndicateurFinancier({ year: 2025, type: "PREVISIONNEL" }),
+        createFakeIndicateurFinancier({ year: 2024, type: "REALISE" }),
+        createFakeIndicateurFinancier({ year: 2023, type: "REALISE" }),
+        createFakeIndicateurFinancier({ year: 2022, type: "REALISE" }),
+        createFakeIndicateurFinancier({ year: 2021, type: "REALISE" }),
+      ],
+    },
+    controles: {
+      create: Array.from({ length: 3 }, () =>
+        nestFileUploads(createFakeControle())
+      ),
+    },
+    evaluations: {
+      create: isStructureAutorisee(params.type)
+        ? Array.from({ length: faker.number.int({ min: 0, max: 5 }) }, () =>
+            nestFileUploads(createFakeEvaluation())
+          )
+        : [],
+    },
+  };
 };
 
 const TRANSFO_TYPE_BY_KIND: Record<
-  "CREATION" | TransfoKind,
+  StructureVersionTransformationType,
   TransformationType
 > = {
   CREATION: TransformationType.OUVERTURE_EX_NIHILO,
@@ -489,7 +450,40 @@ const BLOCK_FORM_SLUG: Record<StructureVersionTransformationType, string> = {
   FERMETURE: "structure-transformation-fermeture-v1",
 };
 
-const planTransformedVersion = (params: {
+type VersionCreate = Prisma.StructureVersionCreateWithoutStructureInput;
+
+const buildVersion = (
+  scalars: VersionScalars,
+  effectiveDate: Date | null,
+  places: number,
+  contacts: StableContacts,
+  ofii: boolean,
+  placesAutorisees: number | null = places
+): VersionCreate => {
+  const { departementAdministratif, ...versionScalars } = scalars;
+  const base = {
+    effectiveDate,
+    placesAutorisees,
+    ...versionScalars,
+    departement: { connect: { numero: departementAdministratif } },
+  };
+
+  if (ofii) {
+    return base;
+  }
+
+  return {
+    ...base,
+    contacts: { create: contacts.map(stripVersionId) },
+    adresses: {
+      create: createFakeAdresses({ placesAutorisees: places }).map(
+        stripVersionId
+      ),
+    },
+  };
+};
+
+const buildTransformedVersion = (params: {
   operateurId: number;
   structureType: StructureType;
   svtType: StructureVersionTransformationType;
@@ -498,7 +492,7 @@ const planTransformedVersion = (params: {
   scalars: VersionScalars;
   contacts: StableContacts;
   formDefs: FormDefLookup;
-}): VersionPlan => {
+}): VersionCreate => {
   const topForm = params.formDefs.get("transformation-v1");
   const blockForm = params.formDefs.get(BLOCK_FORM_SLUG[params.svtType]);
   if (!topForm || !blockForm) {
@@ -508,63 +502,54 @@ const planTransformedVersion = (params: {
   }
 
   return {
-    version: {
-      effectiveDate: params.effectiveDate,
-      placesAutorisees:
-        params.svtType === "FERMETURE" ? null : params.places,
-      ...params.scalars,
-    },
-    contacts: params.contacts,
-    adresses: createFakeAdresses({ placesAutorisees: params.places }),
-    transformation: {
-      type: TRANSFO_TYPE_BY_KIND[params.svtType],
-      form: {
-        form: { formDefinitionId: topForm.id, status: true },
-        formSteps: [],
-      },
-      structureVersionTransformation: {
+    ...buildVersion(
+      params.scalars,
+      params.effectiveDate,
+      params.places,
+      params.contacts,
+      false,
+      params.svtType === "FERMETURE" ? null : params.places
+    ),
+    structureVersionTransformation: {
+      create: {
         type: params.svtType,
-        operateurId: params.operateurId,
+        operateur: { connect: { id: params.operateurId } },
         structureType: params.structureType,
         motif: params.svtType === "FERMETURE" ? faker.lorem.sentence() : null,
-      },
-      actes: buildTransfoActes(params.svtType, params.effectiveDate),
-      structureVersionTransformationForm: {
-        form: { formDefinitionId: blockForm.id, status: true },
-        formSteps: blockForm.stepDefinitionIds.map((stepDefinitionId) => ({
-          stepDefinitionId,
-          status: StepStatus.VALIDE,
-        })),
+        transformation: {
+          create: {
+            type: TRANSFO_TYPE_BY_KIND[params.svtType],
+            form: {
+              create: {
+                formDefinition: { connect: { id: topForm.id } },
+                status: true,
+              },
+            },
+          },
+        },
+        actesAdministratifs: {
+          create: buildTransfoActes(params.svtType, params.effectiveDate),
+        },
+        form: {
+          create: {
+            formDefinition: { connect: { id: blockForm.id } },
+            status: true,
+            formSteps: {
+              create: blockForm.stepDefinitionIds.map((stepDefinitionId) => ({
+                stepDefinition: { connect: { id: stepDefinitionId } },
+                status: StepStatus.VALIDE,
+              })),
+            },
+          },
+        },
       },
     },
   };
 };
 
-// La version socle n'a pas de date effective : c'est la dernière version datée
-// passée qui fait foi, sinon le socle lui-même.
-const resolveCurrentVersionIndex = (
-  timeline: VersionSpec[],
-  now: Date
-): number => {
-  let currentIndex = -1;
-  timeline.forEach((version, index) => {
-    if (version.provenance === "INITIALE") {
-      return;
-    }
-    if (version.effectiveDate > now) {
-      return;
-    }
-    if (
-      currentIndex === -1 ||
-      version.effectiveDate >= timeline[currentIndex].effectiveDate
-    ) {
-      currentIndex = index;
-    }
-  });
-  return currentIndex === -1 ? 0 : currentIndex;
-};
-
-export const planStructure = (params: SeedStructureParams): StructurePlan => {
+export const buildStructureCreate = (
+  params: SeedStructureParams
+): Prisma.StructureCreateInput => {
   const history = planStructureHistory(params.ofii, params.now);
   const scalars = buildVersionScalars(
     params.departementAdministratif,
@@ -577,14 +562,14 @@ export const planStructure = (params: SeedStructureParams): StructurePlan => {
         createFakeContact()
       );
 
-  const typologieSpecs: TypologieSpec[] = params.ofii
-    ? []
-    : buildTypologieSpecs(history.versions, history.creationDate, params.now);
-
-  const relations = params.ofii
-    ? null
-    : planStructureRelations({
-        typologieSpecs,
+  const relations: StructureRelations = params.ofii
+    ? {}
+    : buildStructureRelations({
+        typologieSpecs: buildTypologieSpecs(
+          history.versions,
+          history.creationDate,
+          params.now
+        ),
         type: params.type,
         isFinalised: params.isFinalised,
         creationDate: history.creationDate,
@@ -597,50 +582,55 @@ export const planStructure = (params: SeedStructureParams): StructurePlan => {
       version.provenance === "TRANSFO" && version.transfoType === "FERMETURE"
   );
 
-  const versions = history.versions.map((version): VersionPlan => {
-    if (version.provenance === "INITIALE") {
-      return {
-        version: {
-          effectiveDate: null,
-          placesAutorisees: version.places,
-          ...scalars,
-        },
-        contacts,
-        adresses: params.ofii
-          ? []
-          : createFakeAdresses({ placesAutorisees: version.places }),
-        transformation: null,
-      };
-    }
-
-    return planTransformedVersion({
-      operateurId: params.operateurId,
-      structureType: params.type,
-      svtType:
-        version.provenance === "CREATION" ? "CREATION" : version.transfoType,
-      effectiveDate: version.effectiveDate,
-      places: version.places,
-      scalars,
-      contacts,
-      formDefs: params.formDefs,
-    });
-  });
-
   return {
-    structure: {
-      codeBhasile: params.codeBhasile,
-      operateurId: params.operateurId,
-      filiale: params.filiale,
-      creationDate: history.creationDate,
-      fermetureDate: fermeture?.effectiveDate ?? null,
-      departementAdministratif: params.departementAdministratif,
-      type: params.type,
+    codeBhasile: params.codeBhasile,
+    operateur: { connect: { id: params.operateurId } },
+    filiale: params.filiale,
+    creationDate: history.creationDate,
+    fermetureDate: fermeture?.effectiveDate ?? null,
+    departement: { connect: { numero: params.departementAdministratif } },
+    type: params.type,
+    ...relations,
+    structureVersions: {
+      create: history.versions.map((version) =>
+        version.provenance === "INITIALE"
+          ? buildVersion(scalars, null, version.places, contacts, params.ofii)
+          : buildTransformedVersion({
+              operateurId: params.operateurId,
+              structureType: params.type,
+              svtType:
+                version.provenance === "CREATION"
+                  ? "CREATION"
+                  : version.transfoType,
+              effectiveDate: version.effectiveDate,
+              places: version.places,
+              scalars,
+              contacts,
+              formDefs: params.formDefs,
+            })
+      ),
     },
-    relations,
-    versions,
-    currentVersionIndex: resolveCurrentVersionIndex(
-      history.versions,
-      params.now
-    ),
   };
+};
+
+export const resolveCurrentVersionId = (
+  versions: { id: number; effectiveDate: Date | null }[],
+  now: Date
+): number => {
+  const upperBound = now.getTime();
+  const dated = versions.filter(
+    (version): version is { id: number; effectiveDate: Date } =>
+      version.effectiveDate !== null &&
+      version.effectiveDate.getTime() <= upperBound
+  );
+  if (dated.length > 0) {
+    return dated.reduce((latest, version) =>
+      version.effectiveDate.getTime() >= latest.effectiveDate.getTime()
+        ? version
+        : latest
+    ).id;
+  }
+  // Si aucune version datée effective le socle (effectiveDate null) fait foi.
+  const socle = versions.find((version) => version.effectiveDate === null);
+  return (socle ?? versions[0]).id;
 };
