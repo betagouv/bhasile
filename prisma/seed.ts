@@ -29,13 +29,13 @@ import {
   createFakeStructureVersionTransformationCreationFormStepDefinition,
   createFakeStructureVersionTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
-import { createNotesList } from "./seeders/note.seed";
 import { createNotificationsList } from "./seeders/notification.seed";
 import {
   createFakeFiliale,
   createFakeOperateur,
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
+import { seedRolesAndAgents } from "./seeders/role.seed";
 import {
   buildStructureCreate,
   COLOCATED_COORDINATES,
@@ -45,7 +45,6 @@ import {
   SeededStructure,
   SeedStructureParams,
 } from "./seeders/structure-version.seed";
-import { upsertBhasileUser } from "./seeders/user.seed";
 import {
   generateAllBhasileCodes,
   getNextBhasileCode,
@@ -163,6 +162,9 @@ async function seed(): Promise<void> {
   );
 
   await seedRegionsAndDepartements(prisma);
+
+  console.log("🧑 Création des rôles et des agents de test...");
+  await seedRolesAndAgents(prisma);
 
   console.log("🚓 Création des données RMU...");
   await createFakeRmus(prisma);
@@ -311,15 +313,6 @@ async function seed(): Promise<void> {
   await mirrorLegacyPlacesToBaseVersions(prisma);
 
   await createFakeCpoms(prisma);
-
-  console.log("🗒️ Seed des notes");
-  const notesUser = await upsertBhasileUser(prisma);
-  const notesToCreate = createNotesList({
-    structures: seededStructures.map((seeded) => ({ id: seeded.structureId })),
-    userId: notesUser.id,
-  });
-  await prisma.note.createMany({ data: notesToCreate });
-  console.log(`✅ ${notesToCreate.length} notes créées`);
 
   console.log("📣 Seed des notifications");
   const notificationsToCreate = createNotificationsList();
