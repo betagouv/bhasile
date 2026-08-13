@@ -24,3 +24,17 @@ if (
 if (typeof window !== "undefined" && !window.dsfr) {
   window.dsfr = () => ({ modal: { disclose: () => {}, conceal: () => {} } });
 }
+
+// Node 26 expose un localStorage/sessionStorage global, vide sans --localstorage-file.
+// Vitest ne recopie pas depuis jsdom les clés déjà présentes sur globalThis, donc les
+// storages restent ceux de Node, à undefined. window pointe sur globalThis une fois
+// l'environnement installé : les vrais storages ne sont atteignables que via globalThis.jsdom.
+if (globalThis.jsdom && !globalThis.localStorage) {
+  for (const storageName of ["localStorage", "sessionStorage"]) {
+    Object.defineProperty(globalThis, storageName, {
+      value: globalThis.jsdom.window[storageName],
+      configurable: true,
+      writable: true,
+    });
+  }
+}
