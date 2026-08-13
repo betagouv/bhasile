@@ -13,7 +13,10 @@ export const useCpomFormHandling = ({ cpomId, nextRoute, callBack }: Props) => {
   const { updateCpom } = useCpom();
   const { mutate: saveCpom } = useSaveMutation(
     "cpom-save",
-    (id: number, data: Partial<CpomFormValues>) => updateCpom(id, data, setCpom)
+    (id: number, data: Partial<CpomFormValues>) => updateCpom(id, data, setCpom),
+    // shouldRefresh: false tant que cette entité passe par refreshBestEffort —
+    // à retirer avec sa migration en RSC.
+    { shouldRefresh: false }
   );
 
   const handleSubmit = async (data: Partial<CpomFormValues>) => {

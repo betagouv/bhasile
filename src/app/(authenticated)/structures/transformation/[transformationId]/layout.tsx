@@ -1,33 +1,10 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { getTransformation } from "@/app/api/transformations/transformation.service";
 import { TransformationProvider } from "@/contexts/TransformationContext";
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 
 import { TransformationHeader } from "../_components/TransformationHeader";
 import { TransformationMenu } from "../_components/TransformationMenu";
-
-async function getTransformation(id: string): Promise<TransformationApiRead> {
-  try {
-    const baseUrl = process.env.NEXT_URL || "";
-    const result = await fetch(`${baseUrl}/api/transformations/${id}`, {
-      cache: "no-store",
-      // Requête côté serveur donc il faut appeler les headers manuellement
-      headers: await headers(),
-    });
-
-    if (!result.ok) {
-      throw new Error(
-        `Impossible de récupérer la structure : ${result.status}`
-      );
-    }
-
-    return await result.json();
-  } catch (error) {
-    console.error(error);
-    notFound();
-  }
-}
 
 export default async function TransformationLayout({
   children,
@@ -37,7 +14,17 @@ export default async function TransformationLayout({
   params: Promise<{ transformationId: string }>;
 }) {
   const { transformationId } = await params;
-  const transformation = await getTransformation(transformationId);
+  const id = Number(transformationId);
+
+  if (!Number.isInteger(id)) {
+    notFound();
+  }
+
+  const transformation = await getTransformation(id);
+
+  if (!transformation) {
+    notFound();
+  }
 
   return (
     <TransformationProvider transformation={transformation}>

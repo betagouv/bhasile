@@ -1,4 +1,3 @@
-import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
@@ -7,6 +6,7 @@ import {
   OperateurApiRead,
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { getContactsApiRead } from "../contacts/contact.util";
 import { findAllStructures } from "../structures/structure.repository";
@@ -73,7 +73,7 @@ export const getOperateurs = async ({
 export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
   const operateur = await findOne(id);
 
-  return recursivelySerializeDates({
+  return recursivelySerializeForClient({
     ...operateur,
     actesAdministratifs: operateur.actesAdministratifs,
     contacts: getContactsApiRead(operateur.contacts),

@@ -41,11 +41,18 @@ export async function PUT(
       transformation.structureVersionTransformations
     );
 
-    const transformationId = await resetTransformationSelection(
+    const resetTransformation = await resetTransformationSelection(
       result,
       session.user as SessionUser
     );
-    return NextResponse.json({ transformationId }, { status: 200 });
+    if (!resetTransformation) {
+      return NextResponse.json(
+        { error: "Transformation non trouvée" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(resetTransformation, { status: 200 });
   } catch (error) {
     return apiErrorResponse(error);
   }

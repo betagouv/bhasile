@@ -28,7 +28,10 @@ export const useAgentFormHandling = ({
   const { mutate: saveStructure } = useSaveMutation(
     "structure-save",
     (data: StructureAgentUpdateApiClient) =>
-      updateAndRefreshStructure(structure.id, data, setStructure)
+      updateAndRefreshStructure(structure.id, data, setStructure),
+    // shouldRefresh: false tant que cette entité passe par refreshBestEffort —
+    // à retirer avec sa migration en RSC.
+    { shouldRefresh: false }
   );
 
   const handleAutoSave = async (data: StructureAgentUpdateApiClient) => {

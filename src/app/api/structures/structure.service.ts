@@ -1,6 +1,5 @@
 import { recomputeAnomaliesSafely } from "@/app/api/anomalies/anomalie.service";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import {
@@ -17,6 +16,7 @@ import {
 import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { processActivitesForStructure } from "../activites/activite.util";
 import {
@@ -381,7 +381,7 @@ const dbStructureToApiRead = (
         now
       )?.structureVersionTransformationId != null;
 
-  return recursivelySerializeDates({
+  return recursivelySerializeForClient({
     ...dbStructure,
     structureTypologies,
     debutConvention,

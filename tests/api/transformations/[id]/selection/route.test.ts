@@ -66,17 +66,35 @@ describe("PUT /api/transformations/[id]/selection", () => {
     });
   });
 
-  it("retourne 200 et transmet l'agent au service", async () => {
-    mockResetTransformationSelection.mockResolvedValueOnce(7);
+  it("retourne 200 avec la transformation réinitialisée et transmet l'agent au service", async () => {
+    const resetTransformation = {
+      id: 7,
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        buildStructureVersionTransformation("75"),
+      ],
+    };
+    mockResetTransformationSelection.mockResolvedValueOnce(resetTransformation);
 
     const response = await PUT(buildRequest(validBody), { params });
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ transformationId: 7 });
+    expect(await response.json()).toEqual(resetTransformation);
     expect(mockResetTransformationSelection).toHaveBeenCalledWith(
       { ...validBody, id: 7 },
       agentParis
     );
+  });
+
+  it("retourne 404 quand la réinitialisation ne retrouve pas la transformation", async () => {
+    mockResetTransformationSelection.mockResolvedValueOnce(null);
+
+    const response = await PUT(buildRequest(validBody), { params });
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      error: "Transformation non trouvée",
+    });
   });
 
   it("retourne 401 quand l'utilisateur n'est pas authentifié", async () => {

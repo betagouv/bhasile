@@ -36,7 +36,8 @@ export const TransformationHeader = () => {
   const deleteState = getFetchState("transformation-delete");
   const { mutate: deleteCurrentTransformation } = useSaveMutation(
     "transformation-delete",
-    (id: number) => deleteTransformation(id)
+    (id: number) => deleteTransformation(id),
+    { shouldRefresh: false }
   );
 
   const title = getTransformationTitle(

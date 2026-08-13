@@ -7,7 +7,6 @@ import { getCoordinates } from "@/app/utils/adresse.util";
 import {
   getYearFromDate,
   getYearRange,
-  recursivelySerializeDates,
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
@@ -36,6 +35,7 @@ import {
   StructureRef,
 } from "@/types/structure-history.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
@@ -522,7 +522,7 @@ export const getCpomStructuresWithDates = (
     const linkedStructures =
       cpom && "structures" in cpom ? cpom.structures : undefined;
 
-    return recursivelySerializeDates({
+    return recursivelySerializeForClient({
       ...cpomStructure,
       cpom: cpom
         ? {

@@ -28,7 +28,10 @@ export const useActualisationFormHandling = ({ year, currentStep }: Props) => {
   const { mutate } = useSaveMutation(
     ACTUALISATION_SAVE_KEY,
     (payload: unknown) =>
-      updateActualisation(structure.id, payload, setStructure)
+      updateActualisation(structure.id, payload, setStructure),
+    // shouldRefresh: false tant que cette entité passe par refreshBestEffort —
+    // à retirer avec sa migration en RSC.
+    { shouldRefresh: false }
   );
 
   const slug = getActualisationFormSlug(year);

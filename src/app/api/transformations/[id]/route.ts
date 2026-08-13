@@ -13,25 +13,6 @@ import {
 } from "../transformation.service";
 import { checkCanUpdateDepartements } from "../transformation.util";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const transformation = await getTransformation(Number(id));
-    if (!transformation) {
-      return NextResponse.json(
-        { error: "Transformation non trouvée" },
-        { status: 404 }
-      );
-    }
-    return NextResponse.json(transformation);
-  } catch (error) {
-    return apiErrorResponse(error);
-  }
-}
-
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

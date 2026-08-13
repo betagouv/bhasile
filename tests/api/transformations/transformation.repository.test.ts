@@ -25,6 +25,15 @@ import {
 
 import { createReferentialDna } from "../../test-utils/referential-dna";
 
+const findOneOrFail = async (id: number) => {
+  const row = await findOne(id);
+  if (!row) {
+    throw new Error(`Transformation ${id} introuvable`);
+  }
+
+  return row;
+};
+
 const NATIONAL_USER = {
   role: "NATIONAL",
   allowedDepartements: [],
@@ -224,7 +233,7 @@ describe("transformation.repository db integration", () => {
 
   it("retourne les includes imbriqués via findOne après createOne", async () => {
     const { transformationId } = await createBareTransformation();
-    const row = await findOne(transformationId);
+    const row = await findOneOrFail(transformationId);
     expect(row.id).toBe(transformationId);
     expect(row.structureVersionTransformations.length).toBeGreaterThanOrEqual(
       1
@@ -236,6 +245,10 @@ describe("transformation.repository db integration", () => {
       row.structureVersionTransformations[0].structureVersion?.structure
     ).toBeDefined();
     expect(row.form?.formDefinition).toBeDefined();
+  });
+
+  it("renvoie null via findOne quand la transformation n'existe pas", async () => {
+    expect(await findOne(-1)).toBeNull();
   });
 
   it("met à jour la structureVersion existante d'un bloc quand l'id n'est pas renvoyé, sans créer de doublon", async () => {
@@ -826,7 +839,7 @@ describe("transformation.repository db integration", () => {
     });
     createdTransformationIds.push(transformationId);
 
-    const row = await findOne(transformationId);
+    const row = await findOneOrFail(transformationId);
     const fetchedOperateur = row.structureVersionTransformations[0].operateur;
     expect(fetchedOperateur).toEqual({
       id: operateur.id,
@@ -908,7 +921,7 @@ describe("transformation.repository db integration", () => {
     expect(persisted[0].fileUploads).toMatchObject([{ key: file.key }]);
 
     // read back through the findOne include
-    const row = await findOne(transformationId);
+    const row = await findOneOrFail(transformationId);
     const structureVersionTransformation =
       row.structureVersionTransformations.find(
         (candidate) => candidate.id === structureVersionTransformationId
@@ -1183,7 +1196,7 @@ describe("transformation.repository db integration", () => {
     const { transformationId, structureVersionTransformationId } =
       await createBareTransformation();
 
-    const row = await findOne(transformationId);
+    const row = await findOneOrFail(transformationId);
     const structureVersionTransformation =
       row.structureVersionTransformations.find(
         (candidate) => candidate.id === structureVersionTransformationId

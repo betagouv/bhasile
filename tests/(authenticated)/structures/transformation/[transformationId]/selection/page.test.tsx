@@ -12,13 +12,12 @@ import {
 
 const mockRouterPush = vi.fn();
 const mockUseTransformationContext = vi.fn();
-const mockSetTransformation = vi.fn();
 const mockResetTransformationSelection = vi.fn();
 const mockModalOpen = vi.fn();
 const mockModalClose = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush }),
+  useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
   usePathname: () => "/",
 }));
 
@@ -117,7 +116,6 @@ describe("TransformationSelectionsPage", () => {
     vi.clearAllMocks();
     mockUseTransformationContext.mockReturnValue({
       transformation: oldTransformation,
-      setTransformation: mockSetTransformation,
     });
     mockResetTransformationSelection.mockResolvedValue(freshTransformation);
   });
@@ -145,19 +143,15 @@ describe("TransformationSelectionsPage", () => {
     await user.click(screen.getByTestId("confirm-reset"));
 
     // THEN
-    expect(mockResetTransformationSelection).toHaveBeenCalledWith(
-      42,
-      {
-        type: TransformationType.FERMETURE_SANS_TRANSFERT,
-        structureVersionTransformations: [
-          {
-            type: StructureVersionTransformationType.FERMETURE,
-            structureVersion: { structureId: 7 },
-          },
-        ],
-      },
-      mockSetTransformation
-    );
+    expect(mockResetTransformationSelection).toHaveBeenCalledWith(42, {
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: 7 },
+        },
+      ],
+    });
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledTimes(1));
     // Route construite avec le NOUVEL id de SVT (999), pas l'ancien (1).
     expect(mockRouterPush).toHaveBeenCalledWith(

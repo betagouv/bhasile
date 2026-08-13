@@ -1,9 +1,9 @@
-import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
 import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
@@ -34,7 +34,7 @@ type ResolvedCpomDetails = Omit<CpomDbDetails, "structures"> & {
 const getFullCpom = (cpom: CpomDbList | ResolvedCpomDetails): CpomApiRead => {
   const [dateStart, dateEnd] = getDatesConvention(cpom);
 
-  return recursivelySerializeDates({
+  return recursivelySerializeForClient({
     ...cpom,
     dateStart,
     dateEnd,

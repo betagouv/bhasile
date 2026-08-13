@@ -20,10 +20,9 @@ const mockUseTransformationContext = vi.fn();
 const mockUpdateTransformation = vi.fn();
 const mockGetFetchState = vi.fn();
 const setShouldShowIncompleteSteps = vi.fn();
-const mockSetTransformation = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush }),
+  useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
   usePathname: () => "/",
 }));
 
@@ -132,7 +131,6 @@ const mockContext = (
 ) => {
   mockUseTransformationContext.mockReturnValue({
     transformation,
-    setTransformation: mockSetTransformation,
     shouldShowIncompleteSteps,
     setShouldShowIncompleteSteps,
   });
@@ -226,14 +224,10 @@ describe("TransformationVerificationPage", () => {
     await user.click(certifyButton());
 
     // THEN
-    expect(mockUpdateTransformation).toHaveBeenCalledWith(
-      42,
-      {
-        id: 42,
-        form: { ...buildForm(false), status: true },
-      },
-      mockSetTransformation
-    );
+    expect(mockUpdateTransformation).toHaveBeenCalledWith(42, {
+      id: 42,
+      form: { ...buildForm(false), status: true },
+    });
     await waitFor(() => expect(mockModalOpen).toHaveBeenCalled());
     expect(setShouldShowIncompleteSteps).not.toHaveBeenCalled();
     expect(mockRouterPush).not.toHaveBeenCalled();

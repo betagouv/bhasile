@@ -26,7 +26,7 @@ import { createOrUpdateStructureVersion } from "../structure-versions/structure-
 import { transformationInclude } from "./transformation.db.type";
 
 export const findOne = async (id: number) => {
-  return prisma.transformation.findUniqueOrThrow({
+  return prisma.transformation.findUnique({
     where: { id },
     include: transformationInclude,
   });

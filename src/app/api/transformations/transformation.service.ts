@@ -1,5 +1,4 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
-import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
@@ -18,6 +17,7 @@ import {
   DepartementBearingStructureVersionTransformation,
   TransformationType,
 } from "@/types/transformation.type";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
@@ -69,7 +69,7 @@ const dbTransformationToApiRead = (
   transformation: TransformationDbDetails,
   now: Date
 ): TransformationApiRead =>
-  recursivelySerializeDates({
+  recursivelySerializeForClient({
     ...transformation,
     structureVersionTransformations:
       transformation.structureVersionTransformations.map(
@@ -190,7 +190,7 @@ export const createTransformation = async (
 export const resetTransformationSelection = async (
   input: TransformationSelectionApiUpdate,
   user: SessionUser
-): Promise<number> => {
+): Promise<TransformationApiRead | null> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
       input.type,
@@ -198,7 +198,12 @@ export const resetTransformationSelection = async (
       user
     );
 
-  return resetSelection({ ...input, structureVersionTransformations });
+  const transformationId = await resetSelection({
+    ...input,
+    structureVersionTransformations,
+  });
+
+  return getTransformation(transformationId);
 };
 
 const enrichStructureVersionTransformationFromSource = async (
@@ -277,6 +282,9 @@ export const updateTransformation = async (
 
 export const deleteTransformation = async (id: number): Promise<void> => {
   const transformation = await findOne(id);
+  if (!transformation) {
+    throw new ApiDomainError("Transformation non trouvée", 404);
+  }
   if (isTransformationFinalised(transformation)) {
     throw new ApiDomainError(
       "Impossible de supprimer une transformation finalisée"
