@@ -1128,7 +1128,6 @@ describe("structure.repository db integration", () => {
       operateurs: null,
       column: null,
       direction: null,
-      map: false,
       selection: true,
       isFinalised: false,
     };
@@ -1358,7 +1357,6 @@ describe("structure.repository db integration", () => {
       operateurs: null,
       column: null,
       direction: null,
-      map: false,
       selection: false,
       isFinalised: false,
     };
