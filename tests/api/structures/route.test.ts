@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, POST } from "@/app/api/structures/route";
+import { UserActionCategory } from "@/generated/prisma/enums";
 import { PublicType } from "@/types/structure.type";
 
 import { createStructure } from "../../test-utils/structure.factory";
@@ -138,7 +139,7 @@ describe("POST /api/structures", () => {
     expect(response.status).toBe(201);
     expect(await response.json()).toBe("Structure créée avec succès");
     expect(mockCreateUserAction).toHaveBeenCalledWith({
-      method: "POST",
+      action: UserActionCategory.CREATE,
       structureId: 1,
     });
   });

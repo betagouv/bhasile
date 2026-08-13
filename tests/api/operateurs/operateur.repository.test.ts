@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   findAllOperateurs,
   findBySearchTerm,
+  findOne,
 } from "@/app/api/operateurs/operateur.repository";
 import prisma from "@/lib/prisma";
 
@@ -72,6 +73,10 @@ describe("operateur.repository db integration", () => {
     expect(operateur?.name).toContain("OP-TEST-");
     expect(operateur?.parentId).toBeNull();
     expect(operateur?.logo?.key).toBe(logoKey);
+  });
+
+  it("findOne renvoie null quand l'opérateur n'existe pas", async () => {
+    expect(await findOne(-1)).toBeNull();
   });
 
   it("findBySearchTerm écarte les opérateurs sans aucune structure", async () => {

@@ -1,6 +1,5 @@
 import { useRouter } from "next/navigation";
 
-import { useOperateurContext } from "@/contexts/OperateurContext";
 import { OperateurUpdateFormValues } from "@/schemas/forms/base/operateur.schema";
 
 import { useOperateur } from "./useOperateur";
@@ -13,17 +12,12 @@ export const useOperateurFormHandling = ({
 }: Props) => {
   const router = useRouter();
 
-  const { setOperateur } = useOperateurContext();
-
   const { updateOperateur } = useOperateur();
 
   const { mutate: saveOperateur } = useSaveMutation(
     "operateur-save",
     (data: Partial<OperateurUpdateFormValues>) =>
-      updateOperateur({ id: operateurId, ...data }, setOperateur),
-    // shouldRefresh: false tant que cette entité passe par refreshBestEffort —
-    // à retirer avec sa migration en RSC.
-    { shouldRefresh: false }
+      updateOperateur({ id: operateurId, ...data })
   );
 
   const handleSubmit = async (data: Partial<OperateurUpdateFormValues>) => {

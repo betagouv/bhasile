@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GET, PUT } from "@/app/api/operateurs/[id]/route";
+import { PUT } from "@/app/api/operateurs/[id]/route";
 
 const mockFindOne = vi.fn();
 const mockUpdateOne = vi.fn();
@@ -20,79 +20,6 @@ vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createOperateurEvent: (...args: unknown[]) =>
     mockCreateOperateurEvent(...args),
 }));
-
-describe("GET /api/operateurs/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("renvoie l'opérateur quand il est trouvé", async () => {
-    // GIVEN
-    const operateur = {
-      id: 1,
-      name: "Adoma",
-      logo: {
-        key: "uuid-file-key",
-      },
-      contacts: [
-        {
-          prenom: "John",
-          nom: "Doe",
-          perimetre: "Sud Ouest",
-          role: "Directeur",
-          email: "john.doe@example.com",
-          telephone: "0123456789",
-        },
-      ],
-    };
-    mockFindOne.mockResolvedValueOnce(operateur);
-
-    const request = new NextRequest("http://localhost/api/operateurs/1");
-
-    // WHEN
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "1" }),
-    });
-
-    // THEN
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(operateur);
-    expect(mockFindOne).toHaveBeenCalledWith(1);
-    expect(mockCreateOperateurEvent).toHaveBeenCalledWith("GET", 1);
-  });
-
-  it("renvoie 500 quand l'opérateur n'est pas trouvé", async () => {
-    // GIVEN
-    mockFindOne.mockRejectedValueOnce(new Error("Not found"));
-
-    const request = new NextRequest("http://localhost/api/operateurs/99");
-
-    // WHEN
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "99" }),
-    });
-
-    // THEN
-    expect(response.status).toBe(500);
-    expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
-  });
-
-  it("renvoie 500 quand le service jette", async () => {
-    // GIVEN
-    mockFindOne.mockRejectedValueOnce(new Error("DB error"));
-
-    const request = new NextRequest("http://localhost/api/operateurs/1");
-
-    // WHEN
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "1" }),
-    });
-
-    // THEN
-    expect(response.status).toBe(500);
-    expect(mockFindOne).toHaveBeenCalledWith(1);
-  });
-});
 
 describe("PUT /api/operateurs/[id]", () => {
   beforeEach(() => {

@@ -33,8 +33,10 @@ export const findBySearchTerm = async (
 export const findAllOperateurs = (): Promise<OperateurListRow[]> =>
   prisma.operateur.findMany({ select: operateurListSelect });
 
-export const findOne = async (id: number): Promise<OperateurDbDetail> => {
-  return prisma.operateur.findFirstOrThrow({
+export const findOne = async (
+  id: number
+): Promise<OperateurDbDetail | null> => {
+  return prisma.operateur.findFirst({
     where: { id },
     include: {
       contacts: true,
