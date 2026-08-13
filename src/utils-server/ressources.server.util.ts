@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync, Stats, statSync } from "fs";
-import MarkdownIt from "markdown-it";
-import type Token from "markdown-it/lib/token.mjs";
+import MarkdownIt, { type Token } from "markdown-it";
 import path from "path";
 import { z } from "zod";
 
@@ -353,7 +352,7 @@ const extractLinks = (tokens: Token[]): { label: string; href: string }[] => {
 
     for (const child of token.children) {
       if (child.type === "link_open") {
-        currentLink = { label: "", href: child.attrGet("href") ?? "" };
+        currentLink = { label: "", href: String(child.attrGet("href") ?? "") };
       } else if (child.type === "link_close" && currentLink) {
         links.push({ ...currentLink, label: currentLink.label.trim() });
         currentLink = null;
