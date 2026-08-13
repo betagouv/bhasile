@@ -23,6 +23,13 @@ export const TransformationType = {
 export type TransformationType =
   (typeof TransformationType)[keyof typeof TransformationType];
 
+export type DepartementBearingStructureVersionTransformation = {
+  structureVersion?: {
+    departementAdministratif?: string | null;
+    structure?: { departementAdministratif?: string | null } | null;
+  } | null;
+};
+
 export const StructureVersionTransformationType = {
   CREATION: "CREATION",
   FERMETURE: "FERMETURE",

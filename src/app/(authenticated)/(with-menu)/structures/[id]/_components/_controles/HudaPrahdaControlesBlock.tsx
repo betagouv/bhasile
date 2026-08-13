@@ -2,13 +2,15 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
-import { getLastVisitInMonths } from "@/app/utils/structure.util";
+import { NoDataAccordion } from "@/app/components/NoDataAccordion";
+import { getLastPastVisit } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
 import { DemarcheNumeriqueInfo } from "./DemarcheNumeriqueInfo";
 import { EIGTable } from "./EIGTable";
 import { EvaluationTable } from "./EvaluationTable";
+import { LastVisitCard } from "./LastVisitCard";
 
 export const HudaPrahdaControlesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -16,6 +18,8 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
   const evaluations = structure.evaluations || [];
   const evenementsIndesirablesGraves =
     structure.evenementsIndesirablesGraves || [];
+
+  const lastPastEvaluation = getLastPastVisit(evaluations);
 
   return (
     <Block
@@ -26,29 +30,45 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
     >
       <div className="flex">
         <div className="pr-4">
+          <LastVisitCard evaluations={evaluations} />
+        </div>
+        <div>
           <InformationCard
-            primaryInformation={`${getLastVisitInMonths(evaluations, [])} mois`}
-            secondaryInformation="depuis la dernière visite"
+            primaryInformation={evenementsIndesirablesGraves.length}
+            secondaryInformation="événements indésirables graves"
           />
         </div>
-        <InformationCard
-          primaryInformation={evenementsIndesirablesGraves.length}
-          secondaryInformation="événements indésirables graves"
-        />
       </div>
       <div className="pt-3">
-        <ControleAccordion title="Évaluations" lastVisit={evaluations[0].date}>
-          <EvaluationTable evaluations={evaluations} />
-        </ControleAccordion>
-        <ControleAccordion
-          title="Événements indésirables graves"
-          lastVisit={evenementsIndesirablesGraves[0].evenementDate}
-        >
-          <>
-            <EIGTable />
-            <DemarcheNumeriqueInfo />
-          </>
-        </ControleAccordion>
+        {evaluations.length > 0 ? (
+          <ControleAccordion
+            title="Évaluations"
+            lastVisit={lastPastEvaluation?.date}
+          >
+            <EvaluationTable evaluations={evaluations} />
+          </ControleAccordion>
+        ) : (
+          <NoDataAccordion
+            title="Évaluations"
+            description="Aucune évaluation renseignée"
+          />
+        )}
+        {evenementsIndesirablesGraves.length > 0 ? (
+          <ControleAccordion
+            title="Événements indésirables graves"
+            lastVisit={evenementsIndesirablesGraves[0]?.evenementDate}
+          >
+            <>
+              <EIGTable />
+              <DemarcheNumeriqueInfo />
+            </>
+          </ControleAccordion>
+        ) : (
+          <NoDataAccordion
+            title="Événements indésirables graves"
+            description="Aucun EIG trouvé sur Démarche Numérique"
+          />
+        )}
       </div>
     </Block>
   );

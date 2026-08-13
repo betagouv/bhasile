@@ -1,9 +1,10 @@
 "use client";
 
-import { ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Section } from "@/app/components/common/Section";
+import { useUserAction } from "@/app/hooks/useUserAction";
 
 import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";
@@ -13,6 +14,13 @@ import { StructuresBlock } from "./structures/StructuresBlock";
 import { TypesPlacesBlock } from "./type-places/TypesPlacesBlock";
 
 export const StatistiquesContent = (): ReactElement => {
+  const { trackStatistiques } = useUserAction();
+
+  useEffect(() => {
+    trackStatistiques();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="flex flex-col gap-3 px-3 pt-3">
       <CustomNotice

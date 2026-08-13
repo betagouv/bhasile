@@ -18,7 +18,8 @@ export const TransformationRow = ({ row }: Props): ReactElement => {
     <div className="col-span-full grid grid-cols-subgrid items-center text-default-grey whitespace-nowrap border-b border-default-grey py-3 px-6 text-sm [&:last-child]:border-none">
       <span className="font-bold">{row.operateurName}</span>
       <span>
-        {departementName} ({row.departementAdministratif})
+        {row.departementAdministratif &&
+          `${departementName} (${row.departementAdministratif})`}
       </span>
       <span className="whitespace-normal">{row.summary}</span>
       <span>

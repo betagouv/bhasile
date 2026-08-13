@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { cpomApiSchema } from "@/schemas/api/cpom.schema";
 
-import { createCpomEvent } from "../../user-action/user-action.service";
+import { createCpomEvent } from "../../user-actions/user-action.service";
 import { getCpomById, saveCpom } from "../cpom.service";
 
 export async function GET(

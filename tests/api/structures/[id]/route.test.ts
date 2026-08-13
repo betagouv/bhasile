@@ -66,8 +66,8 @@ vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
     isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
     getDatesConvention: vi.fn().mockReturnValue([null, null]),
     getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
-    isBornFromCreation: vi.fn().mockReturnValue(false),
-    isFinalisationFormValidated: vi.fn().mockReturnValue(false),
+    isStructureFinalised: vi.fn().mockReturnValue(false),
+    isStructureClosed: vi.fn().mockReturnValue(false),
   };
 });
 
@@ -88,7 +88,7 @@ vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
   getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
-vi.mock("@/app/api/user-action/user-action.service", () => ({
+vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createStructureEvent: (...args: unknown[]) =>
     mockCreateStructureEvent(...args),
 }));
@@ -191,6 +191,7 @@ describe("GET /api/structures/[id]", () => {
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,
+      isClosed: false,
       isCurrentVersionFromTransformation: false,
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);

@@ -156,6 +156,7 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   isInCpom: boolean;
   isInCpomPerYear: Record<number, boolean>;
   isFinalised: boolean;
+  isClosed: boolean;
   isCurrentVersionFromTransformation: boolean;
   nom: string;
   adresseAdministrativeComplete: string;

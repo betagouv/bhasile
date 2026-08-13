@@ -19,6 +19,9 @@ export const ControleQualiteBlock = (): ReactElement => {
     { maximumFractionDigits: 0 }
   );
 
+  const moyenneEvaluations =
+    statistiques.controleQualite.eig.moyenneEvaluationsLast12Months;
+
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
@@ -60,11 +63,14 @@ export const ControleQualiteBlock = (): ReactElement => {
         <div>
           <InformationCard
             primaryInformation={
-              <>
-                {statistiques.controleQualite.eig
-                  .moyenneEvaluationsLast12Months || "N/A"}{" "}
-                <span className="text-xl">/&nbsp;4</span>
-              </>
+              moyenneEvaluations === null ? (
+                "N/A"
+              ) : (
+                <>
+                  {formatNumber(moyenneEvaluations)}{" "}
+                  <span className="text-xl">/&nbsp;4</span>
+                </>
+              )
             }
             secondaryInformation={
               <>

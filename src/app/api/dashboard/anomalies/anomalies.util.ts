@@ -1,14 +1,6 @@
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
-import {
-  isBornFromCreation,
-  isFinalisationFormValidated,
-} from "@/app/api/structures/structure.util";
-import {
-  compareSortValues,
-  SortKind,
-  SortValue,
-} from "@/app/utils/list.util";
-import { StructureVersionTransformationType } from "@/generated/prisma/enums";
+import { isStructureFinalisedAndOpen } from "@/app/api/structures/structure.util";
+import { compareSortValues, SortKind, SortValue } from "@/app/utils/list.util";
 import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { AnomalieCode } from "@/types/anomalie.type";
@@ -41,14 +33,14 @@ export const buildDashboardAnomalies = (
   const anomalies: DashboardAnomalie[] = [];
 
   for (const structure of structures) {
+    if (!isEligibleStructure(structure, options)) {
+      continue;
+    }
+
     const currentVersion = resolveCurrentVersion(
       structure.structureVersions,
       options.now
     );
-
-    if (!isEligibleStructure(structure, currentVersion, options)) {
-      continue;
-    }
 
     for (const anomalie of structure.anomalies) {
       if (!options.shouldShowIgnored && !isAnomalieActive(anomalie)) {
@@ -115,24 +107,13 @@ const CODE_ORDER = new Map(
 
 const isEligibleStructure = (
   structure: AnomalieStructure,
-  currentVersion: AnomalieStructure["structureVersions"][number] | undefined,
   options: BuildDashboardAnomaliesOptions
 ): boolean => {
   if (structure.anomalies.length === 0) {
     return false;
   }
 
-  const isFinalised =
-    isFinalisationFormValidated(structure.forms) ||
-    isBornFromCreation(structure.structureVersions, options.now);
-  if (!isFinalised) {
-    return false;
-  }
-
-  const isClosed =
-    currentVersion?.structureVersionTransformation?.type ===
-    StructureVersionTransformationType.FERMETURE;
-  if (isClosed) {
+  if (!isStructureFinalisedAndOpen(structure, options.now)) {
     return false;
   }
 
