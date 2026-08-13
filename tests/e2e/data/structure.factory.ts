@@ -20,7 +20,11 @@ export type StructureSeedInput = {
 export const buildStructureSeed = (
   overrides: Partial<StructureSeedInput> = {}
 ): StructureSeedInput => {
-  const codeBhasile = overrides.codeBhasile ?? uniqueCodeBhasile();
+  const definedOverrides = Object.fromEntries(
+    Object.entries(overrides).filter(([, value]) => value !== undefined)
+  ) as Partial<StructureSeedInput>;
+  const codeBhasile = definedOverrides.codeBhasile ?? uniqueCodeBhasile();
+
   return {
     codeBhasile,
     type: StructureType.CADA,
@@ -34,6 +38,6 @@ export const buildStructureSeed = (
     public: "TOUT_PUBLIC",
     dnaCodes: [{ code: uniqueDnaCode() }],
     finessCode: uniqueFinessCode(),
-    ...overrides,
+    ...definedOverrides,
   };
 };

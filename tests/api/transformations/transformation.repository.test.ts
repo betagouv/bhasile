@@ -1949,6 +1949,39 @@ describe("transformation.repository db integration", () => {
     );
   });
 
+  it("interrompt et annule la finalisation quand un bloc CREATION n'a pas de département", async () => {
+    // GIVEN: a CREATION block whose version never received a departement
+    const operateur = await createOperateur();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
+          operateurId: operateur.id,
+          structureVersion: {},
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    // WHEN/THEN: finalisation stops on the guard, before any Bhasile code is burnt
+    await expect(finalizeTransformation(transformationId)).rejects.toThrow(
+      "doit avoir un département"
+    );
+
+    // AND: the transaction rolled back — no structure, form still open
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+      include: { structureVersion: true },
+    });
+    expect(block.structureVersion?.structureId).toBeNull();
+    const form = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    expect(form.status).toBe(false);
+  });
+
   it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
