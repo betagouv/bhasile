@@ -6,10 +6,7 @@ export const checkNoDepartementAdministratifChange = (
   structureDepartement: string | null | undefined,
   versionDepartement: string | null | undefined
 ): void => {
-  if (structureDepartement == null) {
-    return;
-  }
-  if (versionDepartement == null) {
+  if (!structureDepartement || !versionDepartement) {
     return;
   }
   if (versionDepartement !== structureDepartement) {

@@ -6,6 +6,7 @@ import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
   StructureVersionTransformationApiCreate,
+  StructureVersionTransformationApiUpdate,
   TransformationApiCreate,
   TransformationApiRead,
   TransformationApiUpdate,
@@ -13,7 +14,10 @@ import {
 } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
-import { TransformationType } from "@/types/transformation.type";
+import {
+  DepartementBearingStructureVersionTransformation,
+  TransformationType,
+} from "@/types/transformation.type";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
@@ -27,6 +31,7 @@ import {
   resolvePredecessor,
 } from "../structure-versions/structure-version.util";
 import type { ResolvedStructureDetails } from "../structures/structure.db.type";
+import { findStructureDepartement } from "../structures/structure.repository";
 import {
   getResolvedStructure,
   mergeStructureWithVersion,
@@ -43,6 +48,7 @@ import {
 } from "./transformation.repository";
 import {
   applyPrefill,
+  checkCanUpdateDepartements,
   checkEffectiveDatesAreValid,
   checkNoDuplicateStructureIds,
   checkUniqueDepartement,
@@ -137,14 +143,16 @@ export const getOngoingTransformationsForUser = async (
   const now = getNow();
   return dbTransformations
     .map((dbTransformation) => dbTransformationToApiRead(dbTransformation, now))
-    .filter((transformation) =>
-      canUpdateDepartement(user, getTransformationDepartement(transformation))
-    );
+    .filter((transformation) => {
+      const departement = getTransformationDepartement(transformation);
+      return !departement || canUpdateDepartement(user, departement);
+    });
 };
 
 const prepareStructureVersionTransformations = async (
   type: TransformationType,
-  structureVersionTransformations: StructureVersionTransformationApiCreate[]
+  structureVersionTransformations: StructureVersionTransformationApiCreate[],
+  user: SessionUser | undefined
 ): Promise<StructureVersionTransformationApiCreate[]> => {
   checkNoDuplicateStructureIds(structureVersionTransformations);
   checkEffectiveDatesAreValid(structureVersionTransformations);
@@ -156,18 +164,21 @@ const prepareStructureVersionTransformations = async (
   );
 
   checkUniqueDepartement(structureVersionTransformationsWithSource);
+  checkCanUpdateDepartements(user, structureVersionTransformationsWithSource);
 
   return applyPrefill(type, structureVersionTransformationsWithSource);
 };
 
 export const createTransformation = async (
   transformation: TransformationApiCreate,
+  user?: SessionUser,
   numeroDossier?: string
 ): Promise<number> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
       transformation.type,
-      transformation.structureVersionTransformations
+      transformation.structureVersionTransformations,
+      user
     );
 
   return createOne(
@@ -177,12 +188,14 @@ export const createTransformation = async (
 };
 
 export const resetTransformationSelection = async (
-  input: TransformationSelectionApiUpdate
+  input: TransformationSelectionApiUpdate,
+  user: SessionUser
 ): Promise<number> => {
   const structureVersionTransformations =
     await prepareStructureVersionTransformations(
       input.type,
-      input.structureVersionTransformations
+      input.structureVersionTransformations,
+      user
     );
 
   return resetSelection({ ...input, structureVersionTransformations });
@@ -208,17 +221,56 @@ const enrichStructureVersionTransformationFromSource = async (
     structureType: structure.type
       ? StructureType[structure.type as keyof typeof StructureType]
       : undefined,
-    structureVersion: copyStructureVersion(
-      structure,
-      structureVersionTransformation.structureVersion
-    ),
+    structureVersion: {
+      ...copyStructureVersion(
+        structure,
+        structureVersionTransformation.structureVersion
+      ),
+      departementAdministratif: structure.departementAdministratif ?? undefined,
+    },
   };
 };
 
+const resolveStructureDepartements = async (
+  structureVersionTransformations: StructureVersionTransformationApiUpdate[],
+  now: Date
+): Promise<DepartementBearingStructureVersionTransformation[]> => {
+  const structureIds = [
+    ...new Set(
+      structureVersionTransformations
+        .map(
+          (structureVersionTransformation) =>
+            structureVersionTransformation.structureVersion?.structureId
+        )
+        .filter((structureId): structureId is number => structureId != null)
+    ),
+  ];
+
+  return Promise.all(
+    structureIds.map(async (structureId) => ({
+      structureVersion: await findStructureDepartement(structureId, now),
+    }))
+  );
+};
+
 export const updateTransformation = async (
-  input: TransformationApiUpdate
+  input: TransformationApiUpdate,
+  transformation: TransformationApiRead,
+  user?: SessionUser
 ): Promise<number> => {
   checkEffectiveDatesAreValid(input.structureVersionTransformations ?? []);
+
+  const inputStructureVersionTransformations =
+    input.structureVersionTransformations ?? [];
+
+  checkCanUpdateDepartements(user, [
+    ...transformation.structureVersionTransformations,
+    ...inputStructureVersionTransformations,
+    ...(await resolveStructureDepartements(
+      inputStructureVersionTransformations,
+      getNow()
+    )),
+  ]);
 
   return updateOne(input);
 };
