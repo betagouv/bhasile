@@ -17,7 +17,7 @@ export const StatsCta = (): ReactElement => {
         <div className="text-action-high-blue-france pb-2">
           Pour visualiser l’évolution des <strong>places indisponibles</strong>,
           des <strong>EIG</strong>, du cumul des{" "}
-          <strong>excédents et déficits</strong>... de cet opérateurà l’échelle
+          <strong>excédents et déficits</strong>... de cet opérateur à l’échelle
           départementale, régionale et nationale
         </div>
         <Link href="/statistiques" className="fr-btn">

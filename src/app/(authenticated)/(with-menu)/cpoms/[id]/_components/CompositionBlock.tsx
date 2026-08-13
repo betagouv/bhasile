@@ -34,9 +34,10 @@ export const CompositionBlock = () => {
       <Table
         headings={["", "Entrée", "", "Sortie", ""]}
         ariaLabelledBy="composition"
-        className="max-w-3xl [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12!"
+        className="[&_thead_tr]:bg-transparent! [&_thead_tr]:h-12!"
         enableBorders
         stickFirstColumn
+        firstColumnWidth="30rem"
       >
         {cpom.structures?.map((structure) => (
           <tr key={structure.id}>

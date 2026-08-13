@@ -27,7 +27,6 @@ export const createFakeActeAdministratif = (): Omit<
     structureType: null,
     startDate: faker.date.past(),
     endDate: faker.date.future(),
-    isMissing: false,
     parentId: null,
     fileUploads: [createFakeFileUpload()],
     createdAt: faker.date.past(),

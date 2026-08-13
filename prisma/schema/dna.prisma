@@ -20,6 +20,8 @@ model Dna {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([operateurId])
+  @@index([departementAdministratif])
   @@schema("public")
 }
 
@@ -35,6 +37,7 @@ model DnaStructure {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([structureVersionId, dnaId])
+  @@index([dnaId])
   @@schema("public")
 }
 
@@ -50,6 +53,7 @@ model Antenne {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
 
+  @@index([structureVersionId])
   @@schema("public")
 }
 
@@ -75,5 +79,6 @@ model StructureFiness {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([structureVersionId, finessId])
+  @@index([finessId])
   @@schema("public")
 }

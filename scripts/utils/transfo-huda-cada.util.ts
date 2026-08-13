@@ -1,17 +1,16 @@
 import { TRANSFORMATION_START_YEAR } from "@/constants";
 import { TransformationType } from "@/types/transformation.type";
 
-/* Le dernier segment d'un code Bhasile est numérique : on change les O en 0 */
-export const normalizeBhasileCode = (raw: string): string | null => {
-  const BHASILE_CODE_PATTERN = /BHA[\s-]*([A-Z]{3})[\s-]*([0-9O]{3})(?![0-9O])/;
-  const match = raw.toUpperCase().match(BHASILE_CODE_PATTERN);
-  if (!match) {
-    return null;
-  }
+const BHASILE_CODE_PATTERN = /BHA[\s-]*([A-Z]{3})[\s-]*([0-9O]{3})(?![0-9O])/g;
 
-  const [, region, numero] = match;
-  return `BHA-${region}-${numero.replace(/O/g, "0")}`;
-};
+/* Un champ peut désigner plusieurs codes. Le dernier segment est numérique : on change les O en 0 */
+export const normalizeBhasileCodes = (raw: string): string[] => [
+  ...new Set(
+    [...raw.toUpperCase().matchAll(BHASILE_CODE_PATTERN)].map(
+      ([, region, numero]) => `BHA-${region}-${numero.replace(/O/g, "0")}`
+    )
+  ),
+];
 
 const DNA_CODE = /^[A-Z]\d{4}$/;
 const DNA_CODE_LIKE = /^[A-Z]\d+$/;
@@ -105,52 +104,23 @@ export const parseDnaCodes = (
   return { codes, padded, unreadable, outsideDepartement };
 };
 
-const FRENCH_MONTHS = [
-  "janvier",
-  "février",
-  "mars",
-  "avril",
-  "mai",
-  "juin",
-  "juillet",
-  "août",
-  "septembre",
-  "octobre",
-  "novembre",
-  "décembre",
-];
-
-/** Démarches Numériques renvoie les dates en français (« 01 juillet 2026 »), pas en ISO. */
-export const parseFrenchDate = (raw: string): Date | null => {
-  const match = raw
-    .trim()
-    .toLowerCase()
-    .match(/^(\d{1,2})\s+([a-zéûôà]+)\s+(\d{4})$/);
-  if (!match) {
-    return null;
-  }
-
-  const [, day, month, year] = match;
-  const monthIndex = FRENCH_MONTHS.indexOf(month);
-  if (monthIndex === -1) {
-    return null;
-  }
-
-  const date = new Date(Date.UTC(Number(year), monthIndex, Number(day), 12));
-  if (date.getUTCDate() !== Number(day)) {
-    return null;
-  }
-
-  return date;
-};
-
 export const isEffectiveDateInScope = (date: Date): boolean =>
   date.getUTCFullYear() >= TRANSFORMATION_START_YEAR;
+
+const FUSION_PATTERN = /fusion/i;
+
+/* Une variante du libellé « création » couvre aussi l'absorption d'un CADA existant.
+ * Le dossier ne dit pas lequel absorber : on créerait un CADA neuf en laissant l'ancien ouvert. */
+export const isAmbiguousFusion = (raw: string): boolean =>
+  FUSION_PATTERN.test(raw);
 
 /* Deux libellés coexistent pour chaque branche : on matche sur le préfixe */
 export const parseTransformationType = (
   raw: string
 ): TransformationType | null => {
+  if (isAmbiguousFusion(raw)) {
+    return null;
+  }
   if (raw.startsWith("Extension d'un CADA")) {
     return TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR;
   }

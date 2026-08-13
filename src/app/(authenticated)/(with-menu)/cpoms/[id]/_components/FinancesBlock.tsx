@@ -61,7 +61,7 @@ export const FinancesBlock = () => {
       >
         Gestion budgétaire ({currentType})
       </h4>
-      <p className="max-w-4xl mb-6">
+      <p className="mb-6">
         Dans cette vue, l’ensemble des montants correspond à la gestion
         budgétaire{" "}
         <strong>

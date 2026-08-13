@@ -1,5 +1,6 @@
 import { ReactElement, useMemo } from "react";
 
+import { ChartLegend } from "@/app/components/ChartLegend";
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
@@ -66,25 +67,24 @@ export const BalanceChart = (): ReactElement => {
   return (
     <>
       <h4 className="text-title-blue-france text-lg" id="structure-stats-table">
-        Excédent et déficit cumulé
+        Excédents et déficits cumulés
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarLineChart data={getChartData()} colors={colors} />
+          <StackedBarLineChart
+            data={getChartData()}
+            colors={colors}
+            axisYLabel="Montant (€)"
+          />
         </div>
         <div>
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#18753CB2]" />
-            <p className="pl-2 mb-0">Excédents</p>
-          </div>
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#CE0500B2]" />
-            <p className="pl-2 mb-0">Déficits</p>
-          </div>
-          <div className="pb-2 flex items-center">
-            <div className="w-[40px] border-b-2 border-b-action-high-blue-france mr-2 shrink-0 grow-0" />
-            Cumul des montants des déficits et excédents
-          </div>
+          <ChartLegend label="Excédents" color="#18753CB2" />
+          <ChartLegend label="Déficits" color="#CE0500B2" />
+          <ChartLegend
+            label="Cumul des montants des déficits et excédents"
+            color="var(--border-action-high-blue-france)"
+            type="line"
+          />
         </div>
       </div>
     </>

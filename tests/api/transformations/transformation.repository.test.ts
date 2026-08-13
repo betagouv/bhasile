@@ -16,6 +16,7 @@ import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
+import { SessionUser } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
@@ -32,6 +33,11 @@ const findOneOrFail = async (id: number) => {
 
   return row;
 };
+
+const NATIONAL_USER = {
+  role: "NATIONAL",
+  allowedDepartements: [],
+} as unknown as SessionUser;
 
 describe("transformation.repository db integration", () => {
   const createdStructureIds: number[] = [];
@@ -2102,16 +2108,19 @@ describe("transformation.repository db integration", () => {
     ).toBeGreaterThan(0);
 
     const closingStructure = await createStructure();
-    await resetTransformationSelection({
-      id: transformationId,
-      type: TransformationType.FERMETURE_SANS_TRANSFERT,
-      structureVersionTransformations: [
-        {
-          type: StructureVersionTransformationType.FERMETURE,
-          structureVersion: { structureId: closingStructure.id },
-        },
-      ],
-    });
+    await resetTransformationSelection(
+      {
+        id: transformationId,
+        type: TransformationType.FERMETURE_SANS_TRANSFERT,
+        structureVersionTransformations: [
+          {
+            type: StructureVersionTransformationType.FERMETURE,
+            structureVersion: { structureId: closingStructure.id },
+          },
+        ],
+      },
+      NATIONAL_USER
+    );
 
     // Ancien sous-arbre effacé (cascade).
     expect(
@@ -2175,16 +2184,19 @@ describe("transformation.repository db integration", () => {
       });
     const oldVersionId = beforeBlock.structureVersion?.id;
 
-    await resetTransformationSelection({
-      id: transformationId,
-      type: TransformationType.EXTENSION_EX_NIHILO,
-      structureVersionTransformations: [
-        {
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: { structureId: structure.id },
-        },
-      ],
-    });
+    await resetTransformationSelection(
+      {
+        id: transformationId,
+        type: TransformationType.EXTENSION_EX_NIHILO,
+        structureVersionTransformations: [
+          {
+            type: StructureVersionTransformationType.EXTENSION,
+            structureVersion: { structureId: structure.id },
+          },
+        ],
+      },
+      NATIONAL_USER
+    );
 
     const afterBlock =
       await prisma.structureVersionTransformation.findFirstOrThrow({
@@ -2239,16 +2251,19 @@ describe("transformation.repository db integration", () => {
 
     const closingStructure = await createStructure();
     await expect(
-      resetTransformationSelection({
-        id: transformationId,
-        type: TransformationType.FERMETURE_SANS_TRANSFERT,
-        structureVersionTransformations: [
-          {
-            type: StructureVersionTransformationType.FERMETURE,
-            structureVersion: { structureId: closingStructure.id },
-          },
-        ],
-      })
+      resetTransformationSelection(
+        {
+          id: transformationId,
+          type: TransformationType.FERMETURE_SANS_TRANSFERT,
+          structureVersionTransformations: [
+            {
+              type: StructureVersionTransformationType.FERMETURE,
+              structureVersion: { structureId: closingStructure.id },
+            },
+          ],
+        },
+        NATIONAL_USER
+      )
     ).rejects.toThrow("finalisée");
   });
 
@@ -2266,10 +2281,10 @@ describe("transformation.repository db integration", () => {
       ],
     };
 
-    await resetTransformationSelection(selection);
+    await resetTransformationSelection(selection, NATIONAL_USER);
     const firstState = await readSelectionState(transformationId);
 
-    await resetTransformationSelection(selection);
+    await resetTransformationSelection(selection, NATIONAL_USER);
     const secondState = await readSelectionState(transformationId);
 
     expect(secondState).toEqual(firstState);

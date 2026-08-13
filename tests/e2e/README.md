@@ -23,18 +23,17 @@ yarn test:e2e -g notes # filtre par grep
 ## 📦 Pré-requis
 
 - L'application tourne sur `E2E_BASE_URL` (défaut `http://localhost:3000`).
-- DB Postgres accessible via `DATABASE_URL` (lecture/écriture).
-- Variables d'env : `E2E_AGENT_EMAIL`, `E2E_AGENT_PASSWORD` pour ProConnect. `E2E_WORKERS` définit le nombre de tests en parallèle
+- DB Postgres accessible via `DATABASE_URL` (lecture/écriture), seedée (`npx prisma db seed`).
+- `AUTH_SECRET` identique côté application et côté tests.
+- `E2E_WORKERS` définit le nombre de tests en parallèle.
 
-## 🔐 Re-vérification ProConnect
+## 🔐 Authentification
 
-Périodiquement, ProConnect exige de reconfirmer l'adresse email via un code à 10 chiffres envoyé par mail : le login headless ne peut pas passer cette étape et le setup s'arrête avec un message explicite. Débloquer en saisissant le code une fois à la main :
+Aucun passage par ProConnect : `global-setup` **forge** un cookie de session NextAuth avec `encode()` de `next-auth/jwt` et `AUTH_SECRET`. Le cookie produit est celui d'un vrai login — proxy, `getServerSession`, `useSession` et CASL tournent normalement. La suite est donc hermétique : aucun secret, aucun appel réseau sortant.
 
-```bash
-E2E_AUTH_HEADED=1 yarn test:e2e
-```
+L'agent est seedé par `seed/agent.seed.ts` : rôle **`DEPARTEMENT_PARIS`** (département `75`) rattaché par `EmailPattern`, plus le rôle `ANONYMOUS` dont `getRoleFromSession` a besoin. Les droits sont donc réellement restreints au département `75` — **toute donnée seedée doit vivre en `75`** (défaut de `data/structure.factory.ts`), sinon les écritures partent en 403.
 
-Un navigateur s'ouvre, on saisit le code, la session est enregistrée dans `playwright/.auth/agent.json` et réutilisée pendant 12h.
+Le seed suppose que `npx prisma db seed` a déjà tourné (il lui faut le département `75`) et doit passer **après** lui : `wipeTables` détruit `Role`, `EmailPattern` et `User`.
 
 ## 🧱 Principes
 

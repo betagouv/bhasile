@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   StructureDbList,
@@ -16,6 +17,9 @@ import {
   getReadableAdresses,
   getReadableNotes,
   isBornFromCreation,
+  isStructureClosed,
+  isStructureFinalised,
+  isStructureFinalisedAndOpen,
   sortStructureRows,
   StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
@@ -107,14 +111,17 @@ const buildLightStructure = (
     forms: [],
     actesAdministratifs: [],
     structureTypologies: [],
+    fermetureDate: null,
     structureVersions: [version],
     ...overrides,
   }) as unknown as StructureListLight;
 
+const fermetureDate = new Date("2025-03-10T00:00:00.000Z");
+
 const fermetureVersion = (overrides: Partial<StructureListLightVersion> = {}) =>
   buildVersion({
     id: 20,
-    effectiveDate: new Date("2025-03-10T00:00:00.000Z"),
+    effectiveDate: fermetureDate,
     structureVersionTransformationId: 7,
     structureVersionTransformation: {
       type: StructureVersionTransformationType.FERMETURE,
@@ -236,14 +243,14 @@ describe("computeStructureListRow", () => {
 
     // WHEN
     const row = computeStructureListRow(
-      buildLightStructure({}, version),
+      buildLightStructure({ fermetureDate }, version),
       version,
       now
     );
 
     // THEN
     expect(row?.isClosed).toBe(true);
-    expect(row?.fermetureDate).toEqual(new Date("2025-03-10T00:00:00.000Z"));
+    expect(row?.fermetureDate).toEqual(fermetureDate);
     expect(row?.fermetureMotif).toBe("Fin de prise en charge");
   });
 
@@ -267,7 +274,10 @@ describe("computeStructureListRow", () => {
   it("reste fermée quand la fermeture est la dernière version valide", () => {
     // GIVEN
     const versions = [buildVersion(), fermetureVersion()];
-    const structure = buildLightStructure({ structureVersions: versions });
+    const structure = buildLightStructure({
+      fermetureDate,
+      structureVersions: versions,
+    });
 
     // WHEN
     const current = resolveCurrentVersion(structure.structureVersions, now);
@@ -278,24 +288,54 @@ describe("computeStructureListRow", () => {
     );
   });
 
-  it("est de nouveau ouverte quand une version valide ultérieure remplace la fermeture", () => {
+  // Aucun chemin applicatif ne remet fermetureDate à null : une fermeture est définitive.
+  it("reste fermée même quand une version valide ultérieure existe", () => {
     // GIVEN
-    const reopen = buildVersion({
+    const laterVersion = buildVersion({
       id: 30,
       effectiveDate: new Date("2025-09-01T00:00:00.000Z"),
       structureVersionTransformationId: null,
       structureVersionTransformation: null,
     });
-    const versions = [fermetureVersion(), reopen];
-    const structure = buildLightStructure({ structureVersions: versions });
+    const versions = [fermetureVersion(), laterVersion];
+    const structure = buildLightStructure({
+      fermetureDate,
+      structureVersions: versions,
+    });
 
     // WHEN
     const current = resolveCurrentVersion(structure.structureVersions, now);
 
     // THEN
     expect(computeStructureListRow(structure, current, now)?.isClosed).toBe(
-      false
+      true
     );
+  });
+
+  it("n’emprunte pas le motif d’une transformation qui n’est pas la fermeture", () => {
+    // GIVEN
+    const extensionVersion = buildVersion({
+      id: 30,
+      effectiveDate: new Date("2025-09-01T00:00:00.000Z"),
+      structureVersionTransformationId: 9,
+      structureVersionTransformation: {
+        type: StructureVersionTransformationType.EXTENSION,
+        motif: "Ajout de places",
+        transformation: { form: { status: true } },
+      } as unknown as StructureListLightVersion["structureVersionTransformation"],
+    });
+    const structure = buildLightStructure({
+      fermetureDate,
+      structureVersions: [fermetureVersion(), extensionVersion],
+    });
+
+    // WHEN
+    const current = resolveCurrentVersion(structure.structureVersions, now);
+    const row = computeStructureListRow(structure, current, now);
+
+    // THEN
+    expect(row?.isClosed).toBe(true);
+    expect(row?.fermetureMotif).toBe(null);
   });
 });
 
@@ -334,6 +374,143 @@ describe("isBornFromCreation", () => {
   });
 });
 
+describe("isStructureFinalised", () => {
+  const finalisationForm = (status: boolean) => ({
+    status,
+    formDefinition: { slug: FINALISATION_FORM_SLUG },
+  });
+
+  const creationVersion = (formStatus = true) =>
+    buildVersion({
+      structureVersionTransformationId: 5,
+      structureVersionTransformation: {
+        type: StructureVersionTransformationType.CREATION,
+        transformation: { form: { status: formStatus } },
+      } as unknown as StructureListLightVersion["structureVersionTransformation"],
+    });
+
+  it("est vrai quand le formulaire de finalisation est validé", () => {
+    expect(
+      isStructureFinalised(
+        { forms: [finalisationForm(true)], structureVersions: [] },
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est vrai pour une structure née d'une création, sans formulaire de finalisation", () => {
+    expect(
+      isStructureFinalised(
+        { forms: [], structureVersions: [creationVersion()] },
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est faux quand le formulaire existe sans être validé et qu'aucune création n'a eu lieu", () => {
+    expect(
+      isStructureFinalised(
+        { forms: [finalisationForm(false)], structureVersions: [] },
+        now
+      )
+    ).toBe(false);
+  });
+
+  it("ignore un formulaire validé qui n'est pas celui de finalisation", () => {
+    expect(
+      isStructureFinalised(
+        {
+          forms: [{ status: true, formDefinition: { slug: "actualisation-2026" } }],
+          structureVersions: [],
+        },
+        now
+      )
+    ).toBe(false);
+  });
+
+  it("est faux quand la transformation de création n'est pas validée", () => {
+    expect(
+      isStructureFinalised(
+        { forms: [], structureVersions: [creationVersion(false)] },
+        now
+      )
+    ).toBe(false);
+  });
+});
+
+describe("isStructureClosed", () => {
+  it("est faux sans date de fermeture", () => {
+    expect(isStructureClosed({ fermetureDate: null }, now)).toBe(false);
+  });
+
+  it("est vrai quand la fermeture a pris effet la veille", () => {
+    expect(
+      isStructureClosed(
+        { fermetureDate: new Date("2026-06-23T00:00:00.000Z") },
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est vrai le jour même de la prise d'effet", () => {
+    expect(
+      isStructureClosed(
+        { fermetureDate: new Date("2026-06-24T00:00:00.000Z") },
+        now
+      )
+    ).toBe(true);
+  });
+
+  // La date stockée est celle de l'effet, pas celle de la validation.
+  it("est faux quand la fermeture ne prend effet que le lendemain", () => {
+    expect(
+      isStructureClosed(
+        { fermetureDate: new Date("2026-06-25T00:00:00.000Z") },
+        now
+      )
+    ).toBe(false);
+  });
+});
+
+describe("isStructureFinalisedAndOpen", () => {
+  const finalisedStructure = (fermetureDate: Date | null) => ({
+    forms: [{ status: true, formDefinition: { slug: FINALISATION_FORM_SLUG } }],
+    structureVersions: [],
+    fermetureDate,
+  });
+
+  it("est vrai pour une structure finalisée et non fermée", () => {
+    expect(isStructureFinalisedAndOpen(finalisedStructure(null), now)).toBe(true);
+  });
+
+  it("est faux pour une structure finalisée dont la fermeture a pris effet", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        finalisedStructure(new Date("2026-06-23T00:00:00.000Z")),
+        now
+      )
+    ).toBe(false);
+  });
+
+  it("est vrai pour une structure finalisée dont la fermeture ne prend effet que plus tard", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        finalisedStructure(new Date("2026-06-25T00:00:00.000Z")),
+        now
+      )
+    ).toBe(true);
+  });
+
+  it("est faux pour une structure non finalisée, même ouverte", () => {
+    expect(
+      isStructureFinalisedAndOpen(
+        { forms: [], structureVersions: [], fermetureDate: null },
+        now
+      )
+    ).toBe(false);
+  });
+});
+
 const buildRow = (
   overrides: Partial<StructureListComputedRow> = {}
 ): StructureListComputedRow => ({
@@ -342,7 +519,7 @@ const buildRow = (
   currentVersionId: 10,
   bornFromCreation: false,
   hasForm: true,
-  finalised: false,
+  isFinalised: false,
   type: StructureType.CADA,
   operateurName: "Operateur Alpha",
   departementAdministratif: "75",
@@ -425,14 +602,14 @@ describe("filterStructureRows", () => {
 
   it("restreint aux lignes finalisées quand c'est demandé", () => {
     const rows = [
-      buildRow({ id: 1, finalised: true }),
-      buildRow({ id: 2, finalised: false }),
+      buildRow({ id: 1, isFinalised: true }),
+      buildRow({ id: 2, isFinalised: false }),
     ];
 
     expect(
       filterStructureRows(
         rows,
-        { ...emptyFilters, finalised: true },
+        { ...emptyFilters, isFinalised: true },
         { includeNonVisible: false }
       )
     ).toHaveLength(1);

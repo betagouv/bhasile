@@ -12,7 +12,7 @@ vi.mock("@/app/api/cpoms/cpom.repository", () => ({
   createOrUpdateCpom: (...args: unknown[]) => mockCreateOrUpdateCpom(...args),
 }));
 
-vi.mock("@/app/api/user-action/user-action.service", () => ({
+vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createCpomEvent: (...args: unknown[]) => mockCreateCpomEvent(...args),
 }));
 

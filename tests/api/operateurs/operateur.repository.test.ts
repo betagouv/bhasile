@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   findAllOperateurs,
+  findBySearchTerm,
   findOne,
 } from "@/app/api/operateurs/operateur.repository";
 import prisma from "@/lib/prisma";
@@ -12,6 +13,8 @@ describe("operateur.repository db integration", () => {
   let operateurId: number | undefined;
   let logoId: number | undefined;
   let logoKey: string | undefined;
+  let operateurWithStructureId: number | undefined;
+  let structureId: number | undefined;
 
   beforeAll(async () => {
     logoKey = `op-test-${randomUUID()}`;
@@ -31,11 +34,29 @@ describe("operateur.repository db integration", () => {
     });
     operateurId = operateur.id;
     logoId = operateur.logo?.id;
+
+    const operateurWithStructure = await prisma.operateur.create({
+      data: {
+        name: `OP-TEST-AVEC-STRUCTURE-${randomUUID()}`,
+        structures: { create: { codeBhasile: `ST-TEST-${randomUUID()}` } },
+      },
+      select: { id: true, structures: { select: { id: true } } },
+    });
+    operateurWithStructureId = operateurWithStructure.id;
+    structureId = operateurWithStructure.structures[0]?.id;
   });
 
   afterAll(async () => {
     if (logoId) {
       await prisma.fileUpload.deleteMany({ where: { id: logoId } });
+    }
+    if (structureId) {
+      await prisma.structure.deleteMany({ where: { id: structureId } });
+    }
+    if (operateurWithStructureId) {
+      await prisma.operateur.deleteMany({
+        where: { id: operateurWithStructureId },
+      });
     }
     if (operateurId) {
       await prisma.operateur.deleteMany({ where: { id: operateurId } });
@@ -56,5 +77,13 @@ describe("operateur.repository db integration", () => {
 
   it("findOne renvoie null quand l'opérateur n'existe pas", async () => {
     expect(await findOne(-1)).toBeNull();
+  });
+
+  it("findBySearchTerm écarte les opérateurs sans aucune structure", async () => {
+    const operateurs = await findBySearchTerm(null);
+    const ids = operateurs.map((operateur) => operateur.id);
+
+    expect(ids).toContain(operateurWithStructureId);
+    expect(ids).not.toContain(operateurId);
   });
 });

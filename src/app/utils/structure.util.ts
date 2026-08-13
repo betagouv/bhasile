@@ -102,25 +102,41 @@ export function getCommunesGroupedByDepartement(structure: {
   }));
 }
 
+const filterPastVisits = <T extends { date?: string }>(visits: T[]): T[] => {
+  const now = dayjs(getNow());
+
+  return visits.filter((visit) => {
+    if (!visit.date) {
+      return false;
+    }
+    const date = dayjs(visit.date);
+
+    return date.isValid() && !date.isAfter(now);
+  });
+};
+
+export const getLastPastVisit = <T extends { date?: string }>(
+  visits: T[]
+): T | undefined =>
+  filterPastVisits(visits).reduce<T | undefined>(
+    (mostRecent, visit) =>
+      mostRecent && dayjs(mostRecent.date).isAfter(dayjs(visit.date))
+        ? mostRecent
+        : visit,
+    undefined
+  );
+
 export const getLastVisitInMonths = (
   evaluations: EvaluationApiType[],
   controles: ControleApiType[]
-): number => {
-  let mostRecentVisit = null;
-  if (evaluations.length === 0 && controles.length === 0) {
-    return 0;
-  } else if (evaluations.length === 0) {
-    mostRecentVisit = dayjs(controles[0]?.date);
-  } else if (controles.length === 0) {
-    mostRecentVisit = dayjs(evaluations[0]?.date);
-  } else {
-    mostRecentVisit = dayjs(evaluations[0]?.date).isBefore(
-      dayjs(controles[0]?.date)
-    )
-      ? dayjs(controles[0]?.date)
-      : dayjs(evaluations[0]?.date);
+): number | null => {
+  const lastVisit = getLastPastVisit([...evaluations, ...controles]);
+
+  if (!lastVisit) {
+    return null;
   }
-  return dayjs(getNow()).diff(mostRecentVisit, "month");
+
+  return dayjs(getNow()).diff(dayjs(lastVisit.date), "month");
 };
 
 export const isStructureAutorisee = (

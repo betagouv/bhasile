@@ -16,7 +16,7 @@ vi.mock("@/app/api/structures/structure.repository", () => ({
   findAllStructures: vi.fn(),
 }));
 
-vi.mock("@/app/api/user-action/user-action.service", () => ({
+vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createOperateurEvent: (...args: unknown[]) =>
     mockCreateOperateurEvent(...args),
 }));

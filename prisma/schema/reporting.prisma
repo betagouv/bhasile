@@ -231,22 +231,27 @@ view StructuresGlobalQuality {
   @@schema("reporting")
 }
 
-view StructuresMissingHistory {
-  id                        Int
-  code_bhasile              String
+view StructuresAnomalies {
+  id           Int  @unique
+  structure_id Int
+
+  code_bhasile              String?
   operateur                 String?
   departement_administratif String?
   departement               String?
   region                    String?
+  structure_type            String?
   dna_codes                 String?
 
-  has_missing_acte_administratif   Boolean
-  has_missing_budget               Boolean
-  has_missing_document_financier   Boolean
-  has_missing_indicateur_financier Boolean
-  has_any_missing                  Boolean
+  code         String
+  year         Int
+  target_id    Int
+  is_justified Boolean?
+  commentaire  String?
+  justified_at DateTime?
+  created_at   DateTime
+  updated_at   DateTime
 
-  @@unique([id])
-  @@map("structures_missing_history")
+  @@map("structures_anomalies")
   @@schema("reporting")
 }
