@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
@@ -6,6 +8,7 @@ import {
   OperateurApiRead,
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
+import type { OperateurListItem } from "@/types/operateur.type";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { getContactsApiRead } from "../contacts/contact.util";
@@ -21,54 +24,57 @@ import {
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
   groupStructureStatsByOperateur,
-  OperateurListItem,
 } from "./operateur.util";
 
-export const getOperateurs = async ({
-  page,
-  search,
-}: {
-  page: number | null;
-  search: string | null;
-}): Promise<{ operateurs: OperateurListItem[]; totalOperateurs: number }> => {
-  const now = getNow();
-  const [structures, operateurs] = await Promise.all([
-    findAllStructures(),
-    findAllOperateurs(),
-  ]);
+// Arguments primitifs obligatoires : cache() compare avec Object.is, un objet
+// littéral serait recréé à chaque appel et les Suspense requêteraient deux fois.
+export const getOperateurs = cache(
+  async (
+    page: number | null,
+    search: string | null
+  ): Promise<{
+    operateurs: OperateurListItem[];
+    totalOperateurs: number;
+  }> => {
+    const now = getNow();
+    const [structures, operateurs] = await Promise.all([
+      findAllStructures(),
+      findAllOperateurs(),
+    ]);
 
-  const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
-  const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
-    structures,
-    topLevelByOperateurId,
-    now
-  );
+    const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
+    const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
+      structures,
+      topLevelByOperateurId,
+      now
+    );
 
-  const items = operateurs
-    .filter((operateur) => operateur.parentId === null)
-    .flatMap((operateur) => {
-      const stats = statsByOperateurId.get(operateur.id);
-      if (!stats) {
-        return [];
-      }
-      return [buildOperateurListItem(operateur, stats, globalPlaces)];
-    });
+    const items = operateurs
+      .filter((operateur) => operateur.parentId === null)
+      .flatMap((operateur) => {
+        const stats = statsByOperateurId.get(operateur.id);
+        if (!stats) {
+          return [];
+        }
+        return [buildOperateurListItem(operateur, stats, globalPlaces)];
+      });
 
-  const filtered = filterOperateursBySearch(items, search);
-  const sorted = sortRows(
-    filtered,
-    (operateur) => ({ value: operateur.nbStructures, kind: "number" }),
-    (operateur) => ({ value: operateur.id, kind: "number" }),
-    "desc"
-  );
+    const filtered = filterOperateursBySearch(items, search);
+    const sorted = sortRows(
+      filtered,
+      (operateur) => ({ value: operateur.nbStructures, kind: "number" }),
+      (operateur) => ({ value: operateur.id, kind: "number" }),
+      "desc"
+    );
 
-  const { total, rows } = paginateWithTotal(sorted, page, MIDDLE_PAGE_SIZE);
+    const { total, rows } = paginateWithTotal(sorted, page, MIDDLE_PAGE_SIZE);
 
-  return {
-    operateurs: rows,
-    totalOperateurs: total,
-  };
-};
+    return {
+      operateurs: rows,
+      totalOperateurs: total,
+    };
+  }
+);
 
 export const getOperateur = async (
   id: number

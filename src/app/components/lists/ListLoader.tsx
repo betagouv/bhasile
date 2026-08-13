@@ -14,7 +14,7 @@ import {
 
 export const ListLoader = ({
   fetchStateName,
-  items,
+  itemCount,
   entityName,
   children,
 }: Props): ReactElement => {
@@ -22,13 +22,17 @@ export const ListLoader = ({
   const fetchState = getFetchState(fetchStateName);
   const entity = LIST_ENTITIES[entityName];
 
+  // TODO: ces deux branches ne servent plus qu'aux listes encore clientes
+  // (cpoms, structures). Les supprimer une fois qu'elles seront en RSC : l'erreur
+  // remonte alors à error.tsx et l'attente est tenue par <Suspense>.
   if (fetchState === FetchState.ERROR) {
     return (
       <p className="p-16">Erreur lors de la récupération des {entity.plural}</p>
     );
   }
 
-  if (!items) {
+  // TODO: deuxième branche à supprimer
+  if (itemCount === undefined) {
     return (
       <div className="flex items-center p-16 gap-4">
         <Loader />
@@ -37,7 +41,7 @@ export const ListLoader = ({
     );
   }
 
-  if (items.length === 0) {
+  if (itemCount === 0) {
     return <p className="p-16">{formatEmptyList(entity)}</p>;
   }
 
@@ -52,6 +56,6 @@ export const ListLoader = ({
 
 type Props = PropsWithChildren<{
   fetchStateName: string;
-  items: unknown[] | undefined;
+  itemCount: number | undefined;
   entityName: ListEntityKey;
 }>;

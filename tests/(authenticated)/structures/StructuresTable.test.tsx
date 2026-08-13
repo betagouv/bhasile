@@ -16,6 +16,10 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams("page=0"),
 }));
 
+vi.mock("@/contexts/FetchStateContext", () => ({
+  useFetchState: () => ({ setFetchState: vi.fn() }),
+}));
+
 vi.mock("next-auth/react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("next-auth/react")>();
   return {

@@ -1,18 +1,16 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { ReactElement, useEffect, useState, useTransition } from "react";
+import { ReactElement, useEffect, useState } from "react";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
-import { SEARCH_NAVIGATION_KEY, SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
-import { useFetchState } from "@/contexts/FetchStateContext";
-import { FetchState } from "@/types/fetch-state.type";
+import { useListNavigation } from "@/app/hooks/useListNavigation";
+import { SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
 
 export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setFetchState } = useFetchState();
-  const [isPending, startTransition] = useTransition();
+  const startNavigation = useListNavigation();
 
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
@@ -29,19 +27,12 @@ export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
       params.delete("search");
     }
 
-    startTransition(() => router.replace(`?${params.toString()}`));
+    startNavigation(() => router.replace(`?${params.toString()}`));
   }, SEARCH_PARAM_DEBOUNCE_MS);
 
   useEffect(() => {
     handleSearchUpdate();
   }, [searchTerm, handleSearchUpdate]);
-
-  useEffect(() => {
-    setFetchState(
-      SEARCH_NAVIGATION_KEY,
-      isPending ? FetchState.LOADING : FetchState.IDLE
-    );
-  }, [isPending, setFetchState]);
 
   return (
     <div className="border border-disabled-grey h-8 flex items-center bg-white">

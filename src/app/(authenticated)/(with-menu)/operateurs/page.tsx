@@ -1,17 +1,24 @@
-"use client";
+import { ReactElement, Suspense } from "react";
 
-import { ReactElement } from "react";
-
-import { ListLoader } from "@/app/components/lists/ListLoader";
 import { SearchBar } from "@/app/components/SearchBar";
-import { useOperateurSearch } from "@/app/hooks/useOperateurSearch";
-import { formatPlural } from "@/app/utils/string.util";
-import { SEARCH_NAVIGATION_KEY } from "@/constants";
+import {
+  getFirstParam,
+  getPageParam,
+  SearchParams,
+} from "@/app/utils/searchParams.util";
 
-import { OperateurList } from "./OperateursList";
+import { OperateursContent } from "./OperateursContent";
+import { OperateursCount } from "./OperateursCount";
+import { OperateursSkeleton } from "./OperateursSkeleton";
 
-export default function Operateurs(): ReactElement {
-  const { operateurs, totalOperateurs } = useOperateurSearch();
+export default async function Operateurs({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<ReactElement> {
+  const params = await searchParams;
+  const page = getPageParam(params, "page");
+  const search = getFirstParam(params.search);
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -27,23 +34,14 @@ export default function Operateurs(): ReactElement {
             placeholder="Nom d'opérateur"
             inputId="operateurs-search"
           />
-          <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-            {formatPlural(totalOperateurs, "entrée")}
-          </p>
+          <Suspense fallback={<div className="pl-3 min-w-24" />}>
+            <OperateursCount page={page} search={search} />
+          </Suspense>
         </div>
       </div>
-      <ListLoader
-        fetchStateName={SEARCH_NAVIGATION_KEY}
-        items={operateurs}
-        entityName="operateur"
-      >
-        {operateurs && (
-          <OperateurList
-            operateurs={operateurs}
-            totalOperateurs={totalOperateurs}
-          />
-        )}
-      </ListLoader>
+      <Suspense fallback={<OperateursSkeleton />}>
+        <OperateursContent page={page} search={search} />
+      </Suspense>
     </div>
   );
 }

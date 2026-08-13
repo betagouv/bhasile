@@ -130,7 +130,7 @@ export default function Structures(): ReactElement {
           <div id="tableau">
             <ListLoader
               fetchStateName={"structure-search"}
-              items={structures}
+              itemCount={structures?.length}
               entityName="structure"
             >
               {structures && (

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SearchBar } from "@/app/components/SearchBar";
-import { SEARCH_NAVIGATION_KEY, SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
+import { LIST_NAVIGATION_KEY, SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
 import { FetchState } from "@/types/fetch-state.type";
 
 const mockRouterReplace = vi.fn();
@@ -43,7 +43,7 @@ describe("SearchBar", () => {
 
     // THEN — au montage, aucune navigation en cours
     expect(mockSetFetchState).toHaveBeenCalledWith(
-      SEARCH_NAVIGATION_KEY,
+      LIST_NAVIGATION_KEY,
       FetchState.IDLE
     );
   });

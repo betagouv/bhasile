@@ -1,10 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import { ReactElement, useEffect, useState } from "react";
 
 import Loader from "@/app/components/ui/Loader";
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { useFetchState } from "@/contexts/FetchStateContext";
-import { FileUploadApiType } from "@/schemas/api/file.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 export const OperateurLogo = ({
@@ -87,6 +88,6 @@ export const OperateurLogo = ({
 type Props = {
   name: string;
   size?: number;
-  logo?: FileUploadApiType;
+  logo?: { key: string | null };
   id: number;
 };

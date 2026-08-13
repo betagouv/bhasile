@@ -4,8 +4,7 @@ import { ReactElement } from "react";
 import { Badge, BadgeType } from "@/app/components/common/Badge";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { pluralize } from "@/app/utils/string.util";
-import { FileUploadApiType } from "@/schemas/api/file.schema";
-import { StructureType } from "@/types/structure.type";
+import type { OperateurListItem } from "@/types/operateur.type";
 
 import { OperateurLogo } from "./OperateurLogo";
 
@@ -28,7 +27,7 @@ export const OperateurItem = ({
   pourcentageParc,
   structureTypes,
   logo,
-}: Props): ReactElement => {
+}: OperateurListItem): ReactElement => {
   return (
     <div className="border border-default-grey rounded-[10px] bg-white">
       <div className="flex px-6 py-4 justify-between">
@@ -94,14 +93,4 @@ export const OperateurItem = ({
       </div>
     </div>
   );
-};
-
-type Props = {
-  id: number;
-  name: string;
-  nbStructures: number;
-  totalPlaces: number;
-  pourcentageParc: number;
-  structureTypes: StructureType[];
-  logo: FileUploadApiType;
 };
