@@ -3,23 +3,39 @@
 import { ReactElement } from "react";
 
 import { useAnomalies } from "@/app/components/forms/AnomaliesContext";
-import { getAnomalieMessage } from "@/app/utils/anomalie.util";
+import { formatAnomalieLabel } from "@/app/utils/anomalie.util";
 
-export const AnomalieMessage = ({ fields, targetIds }: Props): ReactElement => {
+export const AnomalieMessage = ({
+  fields,
+  targetIds,
+  details,
+}: Props): ReactElement => {
   const anomalies = useAnomalies({ fields, targetIds });
-  const message = getAnomalieMessage(anomalies);
 
   return (
-    <p
+    <div
       role="status"
-      className={message ? "mt-2 text-sm text-default-warning" : "sr-only"}
+      className={
+        anomalies.length > 0
+          ? "my-2 flex flex-col gap-1 text-sm text-default-warning"
+          : "sr-only"
+      }
     >
-      {message}
-    </p>
+      {anomalies.map((anomalie) => (
+        <p
+          key={`${anomalie.code}-${anomalie.year}-${anomalie.targetId}`}
+          className="mb-0"
+        >
+          {formatAnomalieLabel(anomalie)}
+          {details && ` (${details})`}
+        </p>
+      ))}
+    </div>
   );
 };
 
 type Props = {
   fields: readonly string[];
   targetIds?: readonly number[];
+  details?: string;
 };

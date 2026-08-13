@@ -9,6 +9,7 @@ import {
   getTransformationNounAvecArticle,
   isTransformationSurStructureExistante,
 } from "@/app/utils/transformation.util";
+import { useOptionalStructure } from "@/contexts/StructureContext";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
@@ -23,6 +24,8 @@ export const FieldSetHebergement = ({
 }: Props) => {
   const parentFormContext = useFormContext();
   const localForm = useForm();
+  const structureTotalPlaces = useOptionalStructure()?.placesAutorisees;
+
   const { control, setValue, watch, getValues, setError } =
     parentFormContext || localForm;
 
@@ -200,9 +203,14 @@ export const FieldSetHebergement = ({
             + Ajouter un hébergement
           </button>
         )}
-      <AnomalieMessage
-        fields={["placesAutorisees"]}
-      />
+        <AnomalieMessage
+          fields={["placesAutorisees"]}
+          details={
+            structureTotalPlaces
+              ? `${structureTotalPlaces} places autorisées déclarées`
+              : undefined
+          }
+        />
       </fieldset>
     </div>
   );

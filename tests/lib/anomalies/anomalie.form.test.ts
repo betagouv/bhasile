@@ -77,6 +77,21 @@ describe("buildFormAnomalieContext", () => {
     expect(produites).not.toContain("activites");
   });
 
+  it("laisse indéfinie une tranche absente du payload plutôt que vide", () => {
+    const { evaluatedCodes } = computeAnomalies(
+      buildFormAnomalieContext(
+        makeStructure({ budgets: undefined, actesAdministratifs: undefined })
+      ),
+      { currentYear: 2025 }
+    );
+
+    // Une tranche absente n'est pas une tranche vide : les règles qui en
+    // dépendent ne doivent pas être évaluées, sinon elles concluent à tort.
+    expect(evaluatedCodes).not.toContain("RESULTAT_NET_EQ_0");
+    expect(evaluatedCodes).not.toContain("CONVENTION_MANQUANTE_OU_EXPIREE");
+    expect(evaluatedCodes).toContain("PLACES_LABELLISEES_GT_AUTORISEES");
+  });
+
   it("hydrate les dates de la structure et des actes", () => {
     const context = buildFormAnomalieContext(
       makeStructure({

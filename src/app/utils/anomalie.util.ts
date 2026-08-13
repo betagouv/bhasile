@@ -29,18 +29,7 @@ export const formatAnomalieStructure = (anomalie: DashboardAnomalie): string =>
 
 export const ACTE_DATE_FIELDS = ["startDate", "endDate"] as const;
 
-export const ANOMALIE_MESSAGE_GENERIQUE =
-  "Une ou plusieurs données sont manquantes ou incohérentes.";
-
 export const getAnomalieMessage = (
   anomalies: DetectedAnomalie[]
-): string | undefined => {
-  if (anomalies.length === 0) {
-    return undefined;
-  }
-  if (anomalies.length > 1) {
-    return ANOMALIE_MESSAGE_GENERIQUE;
-  }
-
-  return formatAnomalieLabel(anomalies[0]);
-};
+): string | undefined =>
+  anomalies.map(formatAnomalieLabel).join(" — ") || undefined;

@@ -25,14 +25,14 @@ export const buildFormAnomalieContext = (
     debutPeriodeAutorisation: parseDate(structure.debutPeriodeAutorisation),
     finPeriodeAutorisation: parseDate(structure.finPeriodeAutorisation),
   },
-  typologies: (structure.structureTypologies ?? []).map((typologie) => ({
+  typologies: structure.structureTypologies?.map((typologie) => ({
     year: typologie.year,
     placesAutorisees: parseFrenchNumber(typologie.placesAutorisees),
     pmr: parseFrenchNumber(typologie.pmr),
     lgbt: parseFrenchNumber(typologie.lgbt),
     fvvTeh: parseFrenchNumber(typologie.fvvTeh),
   })),
-  actes: (structure.actesAdministratifs ?? []).flatMap((acte) =>
+  actes: structure.actesAdministratifs?.flatMap((acte) =>
     acte.id === undefined
       ? []
       : [
@@ -47,7 +47,7 @@ export const buildFormAnomalieContext = (
           },
         ]
   ),
-  adresses: (structure.adresses ?? []).flatMap((adresse) =>
+  adresses: structure.adresses?.flatMap((adresse) =>
     adresse.id === undefined
       ? []
       : [
@@ -57,7 +57,7 @@ export const buildFormAnomalieContext = (
           },
         ]
   ),
-  budgets: (structure.budgets ?? []).map((budget) => ({
+  budgets: structure.budgets?.map((budget) => ({
     year: budget.year,
     totalProduits: parseFrenchNumber(budget.totalProduits),
     totalCharges: parseFrenchNumber(budget.totalCharges),
@@ -82,7 +82,7 @@ export const buildFormAnomalieContext = (
     reportANouveau: parseFrenchNumber(budget.reportANouveau),
     autre: parseFrenchNumber(budget.autre),
   })),
-  indicateurs: (structure.indicateursFinanciers ?? []).map((indicateur) => ({
+  indicateurs: structure.indicateursFinanciers?.map((indicateur) => ({
     year: indicateur.year,
     type: indicateur.type,
     tauxEncadrement: parseFrenchNumber(indicateur.tauxEncadrement),

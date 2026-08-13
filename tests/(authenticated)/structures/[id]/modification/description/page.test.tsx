@@ -15,7 +15,7 @@ import {
 import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush }),
+  useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
   useParams: () => ({}),
   usePathname: () => "/",
 }));

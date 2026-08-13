@@ -23,7 +23,7 @@ const setShouldShowIncompleteSteps = vi.fn();
 const mockSetTransformation = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush }),
+  useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
   usePathname: () => "/",
 }));
 

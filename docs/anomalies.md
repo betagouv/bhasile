@@ -17,17 +17,17 @@ Elle sert deux usages :
 | -------------------------- | ---------------------------------------- | ---------------------------- | ----------- |
 | Tableau de bord / Metabase | table `Anomalie`                         | dernier recalcul persisté    | fait        |
 | Fiche structure            | calcul à la lecture                      | toujours à jour              | **à faire** |
-| Formulaire                 | calcul sur les valeurs `react-hook-form` | temps réel, avant sauvegarde | **à faire** |
+| Formulaire                 | calcul sur les valeurs `react-hook-form` | temps réel, avant sauvegarde | fait        |
 
 Les deux derniers ne passent pas par la table : ils appellent `computeAnomalies` directement, donc aucune péremption possible. La table ne les sert que pour récupérer `commentaire` et `isJustified`.
 
 ### Qui écrit dans la table
 
-| Déclencheur                 | Comment                                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
+| Déclencheur                 | Comment                                                                                        |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
 | Écriture sur une structure  | Automatique, après le commit : `updateStructureAndRecomputeAnomalies` dans `structure.service` |
-| Une structure, à la demande | `recomputeAnomalies(structureId)`                                                        |
-| Toutes les structures       | `yarn script recompute-anomalies`                                                        |
+| Une structure, à la demande | `recomputeAnomalies(structureId)`                                                              |
+| Toutes les structures       | `yarn script recompute-anomalies`                                                              |
 
 Les écritures hors routes `structures` (CPOM, fichiers, import OFII) ne déclenchent rien : elles n'impactent que des règles non affichées, et le recalcul complet les rattrape.
 
@@ -74,14 +74,29 @@ Les 34 règles sont **toutes calculées et persistées**. `isDisplayed` ne gouve
 
 Toutes les tranches de `AnomalieContext` sont optionnelles. Une règle déclare celles dont elle a besoin dans `requires` et n'est évaluée que si elles sont **toutes** présentes, ce qui permet au formulaire de n'en fournir qu'une partie. Dans `evaluates`, elles sont typées non-optionnelles.
 
-Le formulaire construit son contexte en écrasant la seule tranche en cours d'édition :
+Le formulaire construit son contexte avec `buildFormAnomalieContext` ([anomalie.form.ts](../src/lib/anomalies/anomalie.form.ts)), qui part de la structure chargée et laisse les valeurs `react-hook-form` écraser les champs en cours d'édition :
 
 ```ts
-computeAnomalies(
-  { ...serverContext, typologies: watch("typologies") },
-  { currentYear }
-);
+buildFormAnomalieContext({ ...structure, ...getValues() });
 ```
+
+Il ne produit que les tranches dont les codes affichés ont besoin : un test échoue si un code affiché en réclame une qui manque. **Une tranche absente du payload reste `undefined`**, jamais `[]` : une tranche vide ferait tourner la règle et conclure à tort (par exemple "aucune convention" alors qu'on n'a simplement pas chargé les actes).
+
+Les valeurs saisies sont des chaînes au format français : `parseFrenchNumber` les ramène en nombre ou `null`, sinon un champ vidé serait lu comme `0`.
+
+## Affichage dans les formulaires
+
+`FormWrapper` calcule les anomalies et les diffuse par contexte à tous les champs qu'il enveloppe ([AnomaliesContext.tsx](../src/app/components/forms/AnomaliesContext.tsx)).
+
+| Aspect               | Comportement                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
+| Périmètre            | `isDisplayed: true` uniquement, et les anomalies déjà justifiées sont masquées                            |
+| Déclenchement        | à la sortie d'un champ (`onBlur`), plus tout changement programmatique (suppression de ligne, `setValue`) |
+| Marquage             | bordure orange sur l'input, plus une description `sr-only` reliée par `aria-describedby`                  |
+| Message              | un libellé par anomalie, en bas de la section concernée                                                   |
+| Erreur de validation | prime sur l'anomalie : un champ invalide est marqué en rouge                                              |
+
+`modificationSection` donne le segment de route du formulaire où l'anomalie se corrige, utilisé par le tableau de bord pour construire son lien d'action.
 
 ## Réconciliation
 

@@ -30,7 +30,7 @@ const actualisationForm = {
 };
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush }),
+  useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
 }));
 vi.mock(
   "@/contexts/StructureContext",

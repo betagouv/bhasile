@@ -160,7 +160,19 @@ export default function FormWrapper<TSchema extends AnyZodSchema>({
 
   // State for alert
   const [showAlert, setShowAlert] = useState(false);
-  const { anomalies, recomputeAnomalies } = useAnomaliesState(methods.getValues);
+  const { anomalies, recomputeAnomalies } = useAnomaliesState(
+    methods.getValues
+  );
+
+  useEffect(() => {
+    const subscription = methods.watch((_, { type }) => {
+      if (type === undefined) {
+        recomputeAnomalies();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [methods, recomputeAnomalies]);
 
   const showSavedAlert = () => setShowAlert(true);
   const hideAlert = () => setShowAlert(false);
