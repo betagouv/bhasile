@@ -187,7 +187,7 @@ async function seed(): Promise<void> {
       index === 0
         ? await prisma.operateur.create({
             data: convertToPrismaObject(
-              createFakeFiliale(operateur.id, operateur.name, 0)
+              createFakeFiliale(operateur.id, operateur.name)
             ),
             select: { id: true, name: true },
           })
