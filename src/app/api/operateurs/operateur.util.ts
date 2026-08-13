@@ -1,20 +1,11 @@
 import { roundTo } from "@/app/utils/math.util";
 import { normalizeAccents } from "@/app/utils/string.util";
 import { StructureType } from "@/generated/prisma/client";
+import type { OperateurListItem } from "@/types/operateur.type";
 
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { StructureListLight } from "../structures/structure.db.type";
 import { OperateurListRow } from "./operateur.db.type";
-
-export type OperateurListItem = {
-  id: number;
-  name: string;
-  nbStructures: number;
-  totalPlaces: number;
-  pourcentageParc: number;
-  structureTypes: StructureType[];
-  logo: { key: string | null };
-};
 
 type OperateurStats = {
   nbStructures: number;
@@ -92,6 +83,7 @@ export const buildOperateurListItem = (
       : 0,
   structureTypes: [...stats.structureTypes].sort(),
   logo: { key: operateur.logo?.key ?? null },
+  logoUrl: null,
 });
 
 export const filterOperateursBySearch = (

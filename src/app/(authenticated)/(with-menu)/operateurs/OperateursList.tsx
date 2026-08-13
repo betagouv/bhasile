@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ReactElement } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
-import { OperateurStatsApiType } from "@/app/hooks/useOperateurSearch";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
+import type { OperateurListItem } from "@/types/operateur.type";
 
 import { OperateurItem } from "./OperateurItem";
 
@@ -16,19 +16,11 @@ export const OperateurList = ({
       {operateurs.map((operateur) => (
         <Link
           title={`Détails de l'operateur ${operateur.name}`}
-          className="px-3 pt-3 block"
+          className={`${OPERATEUR_ROW_CLASSES} block`}
           key={operateur.id}
           href={`operateurs/${operateur.id}`}
         >
-          <OperateurItem
-            id={operateur.id}
-            name={operateur.name}
-            nbStructures={operateur.nbStructures}
-            totalPlaces={operateur.totalPlaces}
-            pourcentageParc={operateur.pourcentageParc}
-            structureTypes={operateur.structureTypes}
-            logo={operateur.logo}
-          />
+          <OperateurItem {...operateur} />
         </Link>
       ))}
       <div className="pt-4 flex justify-center items-center">
@@ -42,6 +34,8 @@ export const OperateurList = ({
 };
 
 type Props = {
-  operateurs: OperateurStatsApiType[];
+  operateurs: OperateurListItem[];
   totalOperateurs: number;
 };
+
+export const OPERATEUR_ROW_CLASSES = "px-3 pt-3";

@@ -34,7 +34,7 @@ export default function Structures(): ReactElement {
       </div>
       <ListLoader
         fetchStateName={"cpoms-search"}
-        items={cpoms}
+        itemCount={cpoms?.length}
         entityName="cpom"
       >
         {cpoms && (

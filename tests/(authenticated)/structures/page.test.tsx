@@ -29,6 +29,10 @@ vi.mock("@/app/hooks/useStructuresSearch", () => ({
   useStructuresSearch: () => ({ structures: [], totalStructures: 0 }),
 }));
 
+vi.mock("@/contexts/FetchStateContext", () => ({
+  useFetchState: () => ({ setFetchState: vi.fn() }),
+}));
+
 vi.mock("@/app/components/lists/ListLoader", () => ({
   ListLoader: ({ children }: { children: ReactNode }) => (
     <div data-testid="list-loader">{children}</div>

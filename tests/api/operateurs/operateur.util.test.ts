@@ -6,8 +6,8 @@ import {
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
   groupStructureStatsByOperateur,
-  OperateurListItem,
 } from "@/app/api/operateurs/operateur.util";
+import type { OperateurListItem } from "@/types/operateur.type";
 import { StructureType } from "@/types/structure.type";
 
 const now = new Date("2025-01-01T00:00:00.000Z");
@@ -199,6 +199,7 @@ describe("filterOperateursBySearch", () => {
       pourcentageParc: 1,
       structureTypes: [],
       logo: { key: null },
+      logoUrl: null,
     },
     {
       id: 2,
@@ -208,6 +209,7 @@ describe("filterOperateursBySearch", () => {
       pourcentageParc: 1,
       structureTypes: [],
       logo: { key: null },
+      logoUrl: null,
     },
   ];
 

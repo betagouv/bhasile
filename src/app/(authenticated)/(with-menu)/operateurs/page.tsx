@@ -1,16 +1,25 @@
-"use client";
+import { ReactElement, Suspense } from "react";
 
-import { ReactElement } from "react";
-
-import { ListLoader } from "@/app/components/lists/ListLoader";
+import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
 import { SearchBar } from "@/app/components/SearchBar";
-import { useOperateurSearch } from "@/app/hooks/useOperateurSearch";
-import { formatPlural } from "@/app/utils/string.util";
+import {
+  getFirstParam,
+  getPageParam,
+  SearchParams,
+} from "@/app/utils/searchParams.util";
 
-import { OperateurList } from "./OperateursList";
+import { OperateursContent } from "./OperateursContent";
+import { OperateursCount } from "./OperateursCount";
+import { OperateursSkeleton } from "./OperateursSkeleton";
 
-export default function Operateurs(): ReactElement {
-  const { operateurs, totalOperateurs } = useOperateurSearch();
+export default async function Operateurs({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<ReactElement> {
+  const params = await searchParams;
+  const page = getPageParam(params, "page");
+  const search = getFirstParam(params.search);
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -26,23 +35,25 @@ export default function Operateurs(): ReactElement {
             placeholder="Nom d'opérateur"
             inputId="operateurs-search"
           />
-          <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-            {formatPlural(totalOperateurs, "entrée")}
-          </p>
+          <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
+            <Suspense fallback={<div className="pl-3 min-w-24" />}>
+              <OperateursCount page={page} search={search} />
+            </Suspense>
+          </ContentErrorBoundary>
         </div>
       </div>
-      <ListLoader
-        fetchStateName={"operateurs-search"}
-        items={operateurs}
-        entityName="operateur"
+      <ContentErrorBoundary
+        fallback={
+          <p className="p-16">
+            Erreur lors de la récupération des opérateurs. Modifiez votre
+            recherche ou réessayez plus tard.
+          </p>
+        }
       >
-        {operateurs && (
-          <OperateurList
-            operateurs={operateurs}
-            totalOperateurs={totalOperateurs}
-          />
-        )}
-      </ListLoader>
+        <Suspense fallback={<OperateursSkeleton />}>
+          <OperateursContent page={page} search={search} />
+        </Suspense>
+      </ContentErrorBoundary>
     </div>
   );
 }
