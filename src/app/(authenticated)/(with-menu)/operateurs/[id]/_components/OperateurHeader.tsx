@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { usePathname, useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
@@ -12,7 +12,7 @@ import { useOperateurContext } from "@/contexts/OperateurContext";
 export const OperateurHeader = (): ReactElement | null => {
   const { operateur } = useOperateurContext();
   const pathname = usePathname();
-
+  const router = useRouter();
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
 
@@ -26,13 +26,13 @@ export const OperateurHeader = (): ReactElement | null => {
       ref={headerRef}
     >
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
-        <Link
+        <Button
           className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
           title="Retour"
-          href="/operateurs"
+          onClick={() => router.back()}
         >
           Retour
-        </Link>
+        </Button>
         <div>
           <h2 className="text-title-blue-france text-xs uppercase mb-0">
             <strong className="pr-3">Opérateur</strong>

@@ -13,15 +13,10 @@ export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
 
   const urlSearchTerm = searchParams.get("search") ?? "";
   const [searchTerm, setSearchTerm] = useState(urlSearchTerm);
-  const [lastUrlSearchTerm, setLastUrlSearchTerm] = useState(urlSearchTerm);
-  const pushedSearchTerm = useRef(urlSearchTerm);
 
-  if (urlSearchTerm !== lastUrlSearchTerm) {
-    setLastUrlSearchTerm(urlSearchTerm);
-    if (urlSearchTerm !== pushedSearchTerm.current) {
-      setSearchTerm(urlSearchTerm);
-    }
-  }
+  useEffect(() => {
+    setSearchTerm(urlSearchTerm);
+  }, [urlSearchTerm]);
 
   const handleSearchUpdate = useDebounceCallback((): void => {
     if (searchTerm === urlSearchTerm) {
@@ -31,9 +26,11 @@ export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
     navigateWithFilter("search", searchTerm.length > 0 ? [searchTerm] : []);
   }, SEARCH_PARAM_DEBOUNCE_MS);
 
-  useEffect(() => {
-    handleSearchUpdate();
-  }, [searchTerm, handleSearchUpdate]);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+    updateUrl(value);
+  };
 
   return (
     <div className="border border-disabled-grey h-8 flex items-center bg-white">
@@ -43,7 +40,7 @@ export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
         placeholder={placeholder}
         id={inputId}
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={handleChange}
       />
     </div>
   );
