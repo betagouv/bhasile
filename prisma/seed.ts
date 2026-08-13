@@ -60,9 +60,8 @@ const prisma = createPrismaClient();
 // Surcharger via FAKER_SEED pour rejouer un échec observé avec une autre graine.
 faker.seed(Number(process.env.FAKER_SEED) || 20260804);
 
-// Les structures sont construites puis écrites par lots : le pic mémoire est
-// borné par la taille du lot, pas par le nombre total de structures.
-const STRUCTURE_BATCH_SIZE = 50;
+// Structures construites puis écrites par lots : pic mémoire borné par la taille du lot.
+const STRUCTURE_BATCH_SIZE = 100;
 
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
@@ -183,14 +182,16 @@ async function seed(): Promise<void> {
       select: { id: true, name: true },
     });
 
-    const filiale = faker.datatype.boolean({ probability: 0.2 })
-      ? await prisma.operateur.create({
-          data: convertToPrismaObject(
-            createFakeFiliale(operateur.id, operateur.name, 0)
-          ),
-          select: { id: true, name: true },
-        })
-      : null;
+    // Une seule filiale dans le jeu de données, portée par le premier opérateur.
+    const filiale =
+      index === 0
+        ? await prisma.operateur.create({
+            data: convertToPrismaObject(
+              createFakeFiliale(operateur.id, operateur.name, 0)
+            ),
+            select: { id: true, name: true },
+          })
+        : null;
 
     if (filiale) {
       console.log(`🏢 Filiale créée : ${filiale.name}`);
@@ -235,7 +236,7 @@ async function seed(): Promise<void> {
     });
 
     console.log(
-      `🏠 Ajout de ${nonOfiiCount} structures et ${ofiiCount} structures OFII pour ${operateur.name}`
+      `🏠 ${nonOfiiCount} structures et ${ofiiCount} structures OFII prévues pour ${operateur.name}`
     );
 
     for (let index = 0; index < nonOfiiCount + ofiiCount; index++) {
@@ -295,6 +296,9 @@ async function seed(): Promise<void> {
           now
         ),
       }))
+    );
+    console.log(
+      `🏠 ${seededStructures.length}/${structureParams.length} structures créées`
     );
   }
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
