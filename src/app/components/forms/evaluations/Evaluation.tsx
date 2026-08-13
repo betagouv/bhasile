@@ -2,6 +2,7 @@ import { ReactElement, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { formatDate, getYearFromDate } from "@/app/utils/date.util";
+import { EVALUATION_NOTES_START_YEAR } from "@/constants";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
 
 import { DeleteButton } from "../../common/DeleteButton";
@@ -24,10 +25,10 @@ export const Evaluation = ({
     if (!evaluationYear) {
       setType("empty");
     }
-    if (evaluationYear < 2022) {
+    if (evaluationYear < EVALUATION_NOTES_START_YEAR) {
       setType("old");
     }
-    if (evaluationYear >= 2022) {
+    if (evaluationYear >= EVALUATION_NOTES_START_YEAR) {
       setType("new");
     }
   };
@@ -85,7 +86,7 @@ export const Evaluation = ({
                 />
               </div>
             )}
-            {type === "new" && <Notes index={index} field={field} />}
+            {type === "new" && <Notes index={index} />}
           </div>
           {type === "new" && (
             <div className="grid grid-cols-2 gap-8">

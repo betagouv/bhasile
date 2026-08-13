@@ -22,6 +22,10 @@ vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
 }));
 
+vi.mock("@/app/api/anomalies/anomalie.service", () => ({
+  recomputeAnomaliesSafely: vi.fn(),
+}));
+
 vi.mock("@/lib/casl/abilities", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
   canUpdateDepartement: (...args: unknown[]) =>
@@ -42,7 +46,9 @@ vi.mock("@/app/api/activites/activite.util", () => ({
 
 vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("@/app/api/structures/structure.util")>();
+    await importOriginal<
+      typeof import("@/app/api/structures/structure.util")
+    >();
   return {
     getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
       mockGetAdresseAdministrativeCoordinates(...args),
@@ -60,8 +66,8 @@ vi.mock("@/app/api/structures/structure.util", async (importOriginal) => {
     isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
     getDatesConvention: vi.fn().mockReturnValue([null, null]),
     getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
-    isBornFromCreation: vi.fn().mockReturnValue(false),
-    isFinalisationFormValidated: vi.fn().mockReturnValue(false),
+    isStructureFinalised: vi.fn().mockReturnValue(false),
+    isStructureClosed: vi.fn().mockReturnValue(false),
   };
 });
 
@@ -78,9 +84,7 @@ vi.mock("@/app/api/finesses/finess.util", () => ({
 }));
 
 vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
-  ...(await importOriginal<
-    typeof import("@/app/api/adresses/adresse.util")
-  >()),
+  ...(await importOriginal<typeof import("@/app/api/adresses/adresse.util")>()),
   getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
@@ -184,6 +188,7 @@ describe("GET /api/structures/[id]", () => {
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,
+      isClosed: false,
       isCurrentVersionFromTransformation: false,
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);

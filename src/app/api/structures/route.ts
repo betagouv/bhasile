@@ -7,7 +7,7 @@ import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schem
 import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 
-import { createStructureEvent } from "../user-action/user-action.service";
+import { createStructureEvent } from "../user-actions/user-action.service";
 import {
   getFullStructures,
   updateStructureOperateur,
@@ -20,22 +20,18 @@ export async function GET(request: NextRequest) {
   const page = Number.isInteger(pageParam) ? pageParam : null;
   const type = request.nextUrl.searchParams.get("type");
   const bati = request.nextUrl.searchParams.get("bati");
-  const placesAutorisees = request.nextUrl.searchParams.get("places") as
-    | string
-    | null;
+  const placesAutorisees = request.nextUrl.searchParams.get("places");
   const departements = request.nextUrl.searchParams.get("departements");
   const operateurs = request.nextUrl.searchParams.get("operateurs");
   const column = request.nextUrl.searchParams.get(
     "column"
   ) as StructureColumn | null;
   const direction = request.nextUrl.searchParams.get("direction") as
-    | "asc"
-    | "desc"
-    | null;
+    "asc" | "desc" | null;
   const map = request.nextUrl.searchParams.get("map") === "true";
   const selection = request.nextUrl.searchParams.get("selection") === "true";
-  const finalised = request.nextUrl.searchParams.get("finalised") === "true";
-  const isClosed = request.nextUrl.searchParams.get("isClosed") === "true";
+  const isFinalised = request.nextUrl.searchParams.get("finalised") === "true";
+  const isClosed = request.nextUrl.searchParams.get("closed") === "true";
 
   const { structures, totalStructures } = await getFullStructures(
     {
@@ -50,7 +46,7 @@ export async function GET(request: NextRequest) {
       direction,
       operateurs,
       selection,
-      finalised,
+      isFinalised,
       isClosed,
     },
     session?.user as SessionUser | undefined
@@ -70,4 +66,3 @@ export async function POST(request: NextRequest) {
     return apiErrorResponse(error);
   }
 }
-

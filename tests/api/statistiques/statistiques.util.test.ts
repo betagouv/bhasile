@@ -430,8 +430,8 @@ describe("sliceStatistiquesContext - restriction à une zone", () => {
     typologies: [],
     adresses: [],
     departements: [
-      { id: 1, numero: "01", name: "Département 01", population: 100 },
-      { id: 2, numero: "02", name: "Département 02", population: 200 },
+      { numero: "01", name: "Département 01", population: 100 },
+      { numero: "02", name: "Département 02", population: 200 },
     ],
   });
 
@@ -461,7 +461,7 @@ describe("sliceStatistiquesContext - restriction à une zone", () => {
 
   it("ne garde que les départements de la zone", () => {
     expect(sliced.departements).toEqual([
-      { id: 1, numero: "01", name: "Département 01", population: 100 },
+      { numero: "01", name: "Département 01", population: 100 },
     ]);
   });
 

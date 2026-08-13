@@ -1,6 +1,7 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { getNow } from "@/app/utils/now.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
   StructureVersionTransformationApiCreate,
@@ -30,10 +31,7 @@ import {
   getResolvedStructure,
   mergeStructureWithVersion,
 } from "../structures/structure.service";
-import {
-  isBornFromCreation,
-  isFinalisationFormValidated,
-} from "../structures/structure.util";
+import { isStructureFinalised } from "../structures/structure.util";
 import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
@@ -93,12 +91,14 @@ const dbTransformationToApiRead = (
                   structure: resolvedSourceStructure
                     ? {
                         ...resolvedSourceStructure,
-                        isFinalised:
-                          isBornFromCreation(
-                            sourceStructure?.structureVersions,
-                            now
-                          ) ||
-                          isFinalisationFormValidated(sourceStructure?.forms),
+                        isFinalised: isStructureFinalised(
+                          {
+                            forms: sourceStructure?.forms,
+                            structureVersions:
+                              sourceStructure?.structureVersions,
+                          },
+                          now
+                        ),
                         forms: undefined,
                         placesAutorisees:
                           referenceVersion?.placesAutorisees ?? null,
@@ -233,7 +233,7 @@ export const deleteTransformation = async (id: number): Promise<void> => {
   if (!transformation) {
     throw new ApiDomainError("Transformation non trouvée", 404);
   }
-  if (transformation.form?.status === true) {
+  if (isTransformationFinalised(transformation)) {
     throw new ApiDomainError(
       "Impossible de supprimer une transformation finalisée"
     );

@@ -2,45 +2,34 @@
 
 import { ReactElement, useMemo, useState } from "react";
 
+import { ChartLegend } from "@/app/components/ChartLegend";
 import BarChart from "@/app/components/common/BarChart";
 import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { formatDate, getYearRange } from "@/app/utils/date.util";
+import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-
-const MAX_DISPLAYED_TIME_PERIODS = 10;
 
 export const RMUChart = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const rmuPeriodData = statistiques.rmu?.[timePeriod] || [];
-
-    const { years } = getYearRange();
-    const filteredRmuPeriodData = rmuPeriodData.filter((periodStat) => {
-      const itemYear = new Date(periodStat.date).getFullYear();
-      return years.includes(itemYear);
-    });
-
-    const sortedRmuPeriodData = [...filteredRmuPeriodData]
-      .sort(
-        (firstRmuPeriod, secondRmuPeriod) =>
-          new Date(firstRmuPeriod.date).getTime() -
-          new Date(secondRmuPeriod.date).getTime()
-      )
-      .slice(-MAX_DISPLAYED_TIME_PERIODS);
+    const sortedRmuPeriodData = getLastDisplayedPeriods(
+      statistiques.rmu?.[timePeriod] || []
+    );
 
     const labels = sortedRmuPeriodData.map((periodStat) => {
       const date = new Date(periodStat.date);
 
       if (timePeriod === "byMonth") {
-        return formatDate(date, {
-          month: "short",
-          year: "numeric",
-        });
+        return date
+          .toLocaleDateString("fr-FR", {
+            month: "short",
+            year: "numeric",
+          })
+          .toLocaleUpperCase();
       }
 
       if (timePeriod === "byTrimester") {
@@ -68,10 +57,7 @@ export const RMUChart = (): ReactElement => {
   const options = useMemo(
     () => ({
       seriesBarDistance: 10,
-      axisY: {
-        offset: 70,
-        labelInterpolationFnc: (value: number) => value.toLocaleString(),
-      },
+      axisY: { offset: 50 },
       axisX: { showGrid: false },
     }),
     []
@@ -84,21 +70,26 @@ export const RMUChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <BarChart data={chartData} options={options} colors={colors} />
+          <BarChart
+            data={chartData}
+            options={options}
+            colors={colors}
+            axisYLabel="Nb RMU"
+          />
         </div>
         <div>
           <TimePeriodSelector
             timePeriod={timePeriod}
             setTimePeriod={setTimePeriod}
           />
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#BD987A] shrink-0" />
-            <p className="pl-2 mb-0">Référés mesures utiles engagés</p>
-          </div>
-          <div className="flex items-center pb-6">
-            <div className="h-3 w-3 bg-[#EAC7AD] shrink-0" />
-            <p className="pl-2 mb-0">Référés mesures utiles exécutés</p>
-          </div>
+          <ChartLegend
+            label="Référés mesures utiles engagés"
+            color="var(--brown-opera-main-680)"
+          />
+          <ChartLegend
+            label="Référés mesures utiles exécutés"
+            color="var(--brown-opera-850-200)"
+          />
         </div>
       </div>
     </>

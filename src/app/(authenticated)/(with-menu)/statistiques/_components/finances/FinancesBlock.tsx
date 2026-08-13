@@ -28,7 +28,7 @@ export const FinancesBlock = (): ReactElement => {
         <FinanceCards />
       </div>
       <h4 className="text-title-blue-france text-lg">
-        Dotation et équilibre économique
+        Dotations et équilibres économiques
       </h4>
       <div className="pb-12">
         <DotationChart

@@ -54,6 +54,27 @@ describe("useStructuresSearch", () => {
     expect(fetchCall).toContain("direction=asc");
   });
 
+  // L'onglet se lit `statut=fermees` côté navigateur mais s'envoie `closed=true` à l'API.
+  it("traduit l'onglet des structures fermées en query param closed", async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("statut=fermees"));
+
+    globalFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        structures: [],
+        totalStructures: 0,
+      }),
+    });
+
+    renderHook(() => useStructuresSearch({ map: false }));
+
+    await waitFor(() => {
+      expect(globalFetch).toHaveBeenCalled();
+    });
+
+    expect(globalFetch.mock.calls[0][0]).toContain("closed=true");
+  });
+
   it("récupère les structures avec les paramètres de filtre", async () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("type=CADA&departements=75,92&bati=DIFFUS")

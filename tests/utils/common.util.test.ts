@@ -12,12 +12,9 @@ import {
 
 describe("common util", () => {
   describe("isEmptyValue", () => {
-    it.each([undefined, null, "", []])(
-      "retourne true pour %s",
-      (value) => {
-        expect(isEmptyValue(value)).toStrictEqual(true);
-      }
-    );
+    it.each([undefined, null, "", []])("retourne true pour %s", (value) => {
+      expect(isEmptyValue(value)).toStrictEqual(true);
+    });
 
     it.each(["text", 0, 42, false, ["item"]])(
       "retourne false pour %s",
@@ -82,7 +79,7 @@ describe("common util", () => {
     });
   });
   describe("getPercentage", () => {
-    it("retourne < 1% quand le pourcentage est inférieur à 1", () => {
+    it("retourne < 1 % quand le pourcentage est inférieur à 1", () => {
       // GIVEN
       const partialValue = 1;
       const totalValue = 300;
@@ -91,7 +88,7 @@ describe("common util", () => {
       const percentage = getPercentage(partialValue, totalValue);
 
       // THEN
-      expect(percentage).toBe("< 1%");
+      expect(percentage).toBe("< 1 %");
     });
     it("retourne le bon pourcentage quand il est supérieur à 1", () => {
       // GIVEN
@@ -102,7 +99,18 @@ describe("common util", () => {
       const percentage = getPercentage(partialValue, totalValue);
 
       // THEN
-      expect(percentage).toBe("33%");
+      expect(percentage).toBe("33\u00a0%");
+    });
+    it("tronque le pourcentage plut\u00f4t que de l'arrondir", () => {
+      // GIVEN
+      const partialValue = 999;
+      const totalValue = 1000;
+
+      // WHEN
+      const percentage = getPercentage(partialValue, totalValue);
+
+      // THEN
+      expect(percentage).toBe("99\u00a0%");
     });
   });
   describe("computeAverage", () => {
