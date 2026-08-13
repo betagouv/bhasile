@@ -1,13 +1,9 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { getDepartementNumerosForRegion } from "@/utils/region.util";
 
-// Comptes du fournisseur d'identité de test ProConnect (FIA1) : il accepte
-// n'importe quelle adresse du domaine, donc aucune donnée d'agent réel n'est
-// nécessaire pour se connecter en local ou sur une review app.
+// Comptes du fournisseur d'identité de test ProConnect (FIA1)
 const TEST_EMAIL_DOMAIN = "test.proconnect.gouv.fr";
 
-// Le rôle régional sans département serait un agent qui ne peut rien éditer,
-// sans le moindre message d'erreur.
 const getRegionDepartements = (regionName: string): string[] => {
   const numeros = getDepartementNumerosForRegion(regionName);
   if (numeros.length === 0) {
@@ -16,18 +12,15 @@ const getRegionDepartements = (regionName: string): string[] => {
   return numeros;
 };
 
-export const ANONYMOUS_ROLE_NAME = "ANONYMOUS";
+const ANONYMOUS_ROLE_NAME = "ANONYMOUS";
 
-// Le nom du rôle est significatif : CASL n'ouvre les droits agent qu'aux rôles
-// NATIONAL, REGION* et DEPARTEMENT* (voir src/lib/casl/abilities.ts).
-export type AgentRoleSeed = {
+type AgentRoleSeed = {
   roleName: string;
   email: string;
-  // undefined = tous les départements, comme le fait fill-roles pour NATIONAL.
   departementNumeros?: string[];
 };
 
-export const AGENT_ROLES: AgentRoleSeed[] = [
+const AGENT_ROLES: AgentRoleSeed[] = [
   {
     roleName: "NATIONAL",
     email: `national@${TEST_EMAIL_DOMAIN}`,
@@ -44,11 +37,8 @@ export const AGENT_ROLES: AgentRoleSeed[] = [
   },
 ];
 
-// getIsUserAuthorized fait `new RegExp(pattern, "i")` : sans ancrage le motif
-// matcherait en sous-chaîne, et deux motifs qui se recouvrent donneraient un
-// rôle non déterministe.
-export const toEmailPattern = (email: string): string =>
-  `^${email.replace(/\./g, "\\.")}$`;
+const toEmailPattern = (email: string): string =>
+  `^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`;
 
 export const seedRolesAndAgents = async (
   prisma: PrismaClient

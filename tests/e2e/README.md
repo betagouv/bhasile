@@ -31,11 +31,9 @@ yarn test:e2e -g notes # filtre par grep
 
 Aucun passage par ProConnect : `global-setup` **forge** un cookie de session NextAuth avec `encode()` de `next-auth/jwt` et `AUTH_SECRET`. Le cookie produit est celui d'un vrai login — proxy, `getServerSession`, `useSession` et CASL tournent normalement. La suite est donc hermétique : aucun secret, aucun appel réseau sortant.
 
-L'agent est seedé par `seed/agent.seed.ts` : il se rattache par `EmailPattern` au rôle **`DEPARTEMENT_PARIS`** (département `75`), que `prisma db seed` a déjà créé via `prisma/seeders/role.seed.ts`. Les droits sont donc réellement restreints au département `75` — **toute donnée seedée doit vivre en `75`** (défaut de `data/structure.factory.ts`), sinon les écritures partent en 403.
+L'agent est seedé par `seed/agent.seed.ts` : rôle **`DEPARTEMENT_PARIS`** (département `75`) rattaché par `EmailPattern`, plus le rôle `ANONYMOUS` dont `getRoleFromSession` a besoin. Les droits sont donc réellement restreints au département `75` — **toute donnée seedée doit vivre en `75`** (défaut de `data/structure.factory.ts`), sinon les écritures partent en 403.
 
-L'agent garde son propre email (`e2e.agent@bhasile.local`) plutôt qu'un des comptes de test FIA1 : le cookie étant forgé, il ne passe jamais par ProConnect.
-
-Le seed suppose que `npx prisma db seed` a déjà tourné (il lui faut le rôle et le département `75`) et doit passer **après** lui : `wipeTables` détruit `Role`, `EmailPattern` et `User`.
+Le seed suppose que `npx prisma db seed` a déjà tourné (il lui faut le département `75`) et doit passer **après** lui : `wipeTables` détruit `Role`, `EmailPattern` et `User`.
 
 ## 🧱 Principes
 

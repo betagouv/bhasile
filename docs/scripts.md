@@ -44,16 +44,6 @@ Par souci de clarté, deux routes sont possibles selon le cas décrit dessus :
    ```
    ⚠️ Certains scripts nécessitent un second argument comme le nom du fichier source.
 
-### Cas particulier : `fill-roles`
-
-`fill-roles` provisionne les rôles, leurs départements et les `EmailPattern` qui autorisent les agents à se connecter via ProConnect. Il lit un CSV dans le bucket S3 et **n'est appelé par aucun cron ni aucune commande npm** : il se lance à la main après chaque évolution du fichier de rôles.
-
-```bash
-scalingo -a <scalingo_app_name> run "yarn script fill-roles roles_v2.csv"
-```
-
-Il ne tourne **que** sur les environnements où de vrais agents se connectent. En local, sur les review apps et en CI, `prisma db seed` crée à la place trois agents de test rattachés aux comptes FIA1 du bac à sable ProConnect (voir `prisma/seeders/role.seed.ts`) — aucune donnée d'agent réel n'est rapatriée.
-
 ## Crons et postdeploy
 
 Les crons sont déclarés dans `cron.json` à la racine et exécutés par Scalingo. Chaque job passe par `yarn cronify` qui ne lance le script que si la variable d'environnement `IS_PRODUCTION=true` est présente (en prod donc).

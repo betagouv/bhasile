@@ -72,7 +72,7 @@ async function seed(): Promise<void> {
 
   await seedRegionsAndDepartements(prisma);
 
-  console.log("🧑 Création des rôles et des agents de test...");
+  console.log("🧑 Création des rôles et des utilisateurs test...");
   await seedRolesAndAgents(prisma);
 
   console.log("📋 Création des FormDefinitions...");
