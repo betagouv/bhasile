@@ -70,6 +70,11 @@ async function seed(): Promise<void> {
   console.log("🗑️ Suppression des données existantes...");
   await wipeTables(prisma);
 
+  await seedRegionsAndDepartements(prisma);
+
+  console.log("🧑 Création des rôles et des agents de test...");
+  await seedRolesAndAgents(prisma);
+
   console.log("📋 Création des FormDefinitions...");
   await prisma.formDefinition.create({
     data: createFakeFormTransformation(),
@@ -160,11 +165,6 @@ async function seed(): Promise<void> {
       },
     ])
   );
-
-  await seedRegionsAndDepartements(prisma);
-
-  console.log("🧑 Création des rôles et des agents de test...");
-  await seedRolesAndAgents(prisma);
 
   console.log("🚓 Création des données RMU...");
   await createFakeRmus(prisma);
