@@ -30,7 +30,7 @@ export const ActiviteBlock = () => {
               )}
             </span>
           </span>
-          <div className="relative h-[38px] w-[68px]">
+          <div className="relative h-9.5 w-17">
             <Image
               src="/ofii.webp"
               alt="Logo de l'OFII"

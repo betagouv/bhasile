@@ -183,6 +183,10 @@ describe("checkNoDepartementAdministratifChange", () => {
     ).not.toThrow();
   });
 
+  it("laisse passer quand la version vide le département (chaîne vide)", () => {
+    expect(() => checkNoDepartementAdministratifChange("75", "")).not.toThrow();
+  });
+
   it("rejette quand la version change de département", () => {
     expect(() => checkNoDepartementAdministratifChange("75", "69")).toThrow(
       ApiDomainError

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
-import { canUpdateTransformation } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { transformationSelectionApiUpdateSchema } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
@@ -11,6 +10,7 @@ import {
   getTransformation,
   resetTransformationSelection,
 } from "../../transformation.service";
+import { checkCanUpdateDepartements } from "../../transformation.util";
 
 export async function PUT(
   request: NextRequest,
@@ -36,14 +36,15 @@ export async function PUT(
         { status: 404 }
       );
     }
-    if (!canUpdateTransformation(session.user as SessionUser, transformation)) {
-      return NextResponse.json(
-        { error: "Droits insuffisants" },
-        { status: 403 }
-      );
-    }
+    checkCanUpdateDepartements(
+      session.user as SessionUser,
+      transformation.structureVersionTransformations
+    );
 
-    const resetTransformation = await resetTransformationSelection(result);
+    const resetTransformation = await resetTransformationSelection(
+      result,
+      session.user as SessionUser
+    );
     if (!resetTransformation) {
       return NextResponse.json(
         { error: "Transformation non trouvée" },

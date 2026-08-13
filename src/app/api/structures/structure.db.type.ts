@@ -29,6 +29,7 @@ export const structureListLightSelect = {
   id: true,
   codeBhasile: true,
   type: true,
+  fermetureDate: true,
   operateurId: true,
   operateur: { select: { name: true } },
   forms: {

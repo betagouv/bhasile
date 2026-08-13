@@ -1,14 +1,12 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 
 export const checkNoDepartementAdministratifChange = (
   structureDepartement: string | null | undefined,
   versionDepartement: string | null | undefined
 ): void => {
-  if (structureDepartement == null) {
-    return;
-  }
-  if (versionDepartement == null) {
+  if (!structureDepartement || !versionDepartement) {
     return;
   }
   if (versionDepartement !== structureDepartement) {
@@ -44,15 +42,14 @@ export type OrderableVersion = {
 export type ResolvableVersion = OrderableVersion & {
   structureVersionTransformationId: number | null;
   structureVersionTransformation: {
-    transformation: { form: { status: boolean | null } | null } | null;
+    transformation: { form: { status: boolean } | null } | null;
   } | null;
 };
 
 export const isVersionValid = (version: ResolvableVersion): boolean => {
   if (version.structureVersionTransformationId !== null) {
-    return (
-      version.structureVersionTransformation?.transformation?.form?.status ===
-      true
+    return isTransformationFinalised(
+      version.structureVersionTransformation?.transformation
     );
   }
   return true;

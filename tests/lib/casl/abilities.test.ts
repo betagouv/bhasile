@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
-// eslint-disable-next-line no-restricted-imports
 import { Structure } from "@/generated/prisma/client";
 import {
   canDeleteFile,

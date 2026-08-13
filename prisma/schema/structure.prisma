@@ -27,10 +27,13 @@ model Structure {
   userActions              UserAction[]
   userNotes                Note[]
   structureVersions        StructureVersion[]
+  anomalies                Anomalie[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([operateurId])
+  @@index([departementAdministratif])
   @@schema("public")
 }
 

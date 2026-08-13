@@ -24,21 +24,18 @@ vi.mock("@/app/api/statistiques/cartographie/cartographie.repository", () => ({
 
 const ALL_DEPARTEMENTS: CartographieDbDepartement[] = [
   {
-    id: 1,
     numero: "01",
     name: "Ain",
     regionCode: "ARA",
     regionName: "Auvergne-Rhône-Alpes",
   },
   {
-    id: 2,
     numero: "38",
     name: "Isère",
     regionCode: "ARA",
     regionName: "Auvergne-Rhône-Alpes",
   },
   {
-    id: 3,
     numero: "75",
     name: "Paris",
     regionCode: "IDF",

@@ -13,6 +13,7 @@ const mockUpdateOne = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
 const mockCreateUserAction = vi.fn();
 const mockGetServerSession = vi.fn();
+const mockFilterStructureRows = vi.fn((...args: unknown[]) => args[0]);
 
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
@@ -20,6 +21,10 @@ vi.mock("next-auth", () => ({
 
 vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
+}));
+
+vi.mock("@/app/api/anomalies/anomalie.service", () => ({
+  recomputeAnomaliesSafely: vi.fn(),
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
@@ -40,13 +45,13 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   isStructureInCpom: vi.fn().mockReturnValue(false),
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
   computeStructureListRow: vi.fn(),
-  filterStructureRows: vi.fn((rows: unknown[]) => rows),
+  filterStructureRows: (...args: unknown[]) => mockFilterStructureRows(...args),
   sortStructureRows: vi.fn((rows: unknown[]) => rows),
-  isBornFromCreation: vi.fn().mockReturnValue(false),
-  isFinalisationFormValidated: vi.fn().mockReturnValue(false),
+  isStructureClosed: vi.fn().mockReturnValue(false),
+  isStructureFinalised: vi.fn().mockReturnValue(false),
 }));
 
-vi.mock("@/app/api/user-action/user-action.repository", () => ({
+vi.mock("@/app/api/user-actions/user-action.repository", () => ({
   createUserAction: (...args: unknown[]) => mockCreateUserAction(...args),
 }));
 
@@ -71,6 +76,40 @@ describe("GET /api/structures", () => {
       structures: [],
       totalStructures: 0,
     });
+  });
+
+  // Les noms des query params sont le contrat avec le front : `closed` et
+  // `finalised` côté URL, `isClosed` et `isFinalised` côté code.
+  it("traduit les query params closed et finalised en filtres de recherche", async () => {
+    mockfindAllStructures.mockResolvedValueOnce([]);
+    mockFindStructuresByIds.mockResolvedValueOnce([]);
+
+    const request = new NextRequest(
+      "http://localhost/api/structures?closed=true&finalised=true"
+    );
+
+    await GET(request);
+
+    expect(mockFilterStructureRows).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({ isClosed: true, isFinalised: true }),
+      expect.anything()
+    );
+  });
+
+  it("laisse les filtres closed et finalised à faux quand les query params sont absents", async () => {
+    mockfindAllStructures.mockResolvedValueOnce([]);
+    mockFindStructuresByIds.mockResolvedValueOnce([]);
+
+    const request = new NextRequest("http://localhost/api/structures");
+
+    await GET(request);
+
+    expect(mockFilterStructureRows).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({ isClosed: false, isFinalised: false }),
+      expect.anything()
+    );
   });
 });
 

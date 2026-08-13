@@ -19,3 +19,8 @@ if (
 ) {
   HTMLElement.prototype.scrollIntoView = () => {};
 }
+
+// Le runtime DSFR n'est pas chargé en jsdom : createModal().open()/close() l'appellent.
+if (typeof window !== "undefined" && !window.dsfr) {
+  window.dsfr = () => ({ modal: { disclose: () => {}, conceal: () => {} } });
+}

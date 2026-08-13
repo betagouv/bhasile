@@ -11,10 +11,10 @@ export const getEvaluationsDefaultValues = (
     return {
       id: evaluation.id ?? undefined,
       date: evaluation.date ?? "",
-      notePersonne: evaluation.notePersonne ?? 0,
-      notePro: evaluation.notePro ?? 0,
-      noteStructure: evaluation.noteStructure ?? 0,
-      note: evaluation.note ?? 0,
+      notePersonne: evaluation.notePersonne ?? null,
+      notePro: evaluation.notePro ?? null,
+      noteStructure: evaluation.noteStructure ?? null,
+      note: evaluation.note ?? null,
       fileUploads: evaluation.fileUploads || [],
     };
   });

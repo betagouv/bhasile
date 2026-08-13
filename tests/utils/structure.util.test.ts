@@ -9,6 +9,7 @@ import {
   getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getCurrentCpomStructureDates,
   getFermetureEvent,
+  getLastPastVisit,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
   getMostRecentMillesime,
@@ -127,7 +128,7 @@ describe("structure util", () => {
     });
   });
   describe("getLastVisitInMonths", () => {
-    it("retourne 0 quand les deux tableaux sont vides", () => {
+    it("retourne null quand les deux tableaux sont vides", () => {
       // GIVEN
       const evaluations: EvaluationApiType[] = [];
       const controles: ControleApiType[] = [];
@@ -136,7 +137,69 @@ describe("structure util", () => {
       const result = getLastVisitInMonths(evaluations, controles);
 
       // THEN
-      expect(result).toBe(0);
+      expect(result).toBeNull();
+    });
+
+    it("ignore les visites à venir et se base sur la dernière visite passée", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        createEvaluation({ date: dayjs().subtract(5, "month").toISOString() }),
+      ];
+      const controles: ControleApiType[] = [
+        createControle({ date: dayjs().add(3, "year").toISOString() }),
+      ];
+
+      // WHEN
+      const result = getLastVisitInMonths(evaluations, controles);
+
+      // THEN
+      expect(result).toBe(5);
+    });
+
+    it("ignore les visites sans date", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        { ...createEvaluation({}), date: undefined },
+      ];
+      const controles: ControleApiType[] = [
+        createControle({ date: dayjs().subtract(7, "month").toISOString() }),
+      ];
+
+      // WHEN
+      const result = getLastVisitInMonths(evaluations, controles);
+
+      // THEN
+      expect(result).toBe(7);
+    });
+
+    it("retourne null quand aucune visite n'a de date", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        { ...createEvaluation({}), date: undefined },
+      ];
+      const controles: ControleApiType[] = [];
+
+      // WHEN
+      const result = getLastVisitInMonths(evaluations, controles);
+
+      // THEN
+      expect(result).toBeNull();
+    });
+
+    it("retourne null quand toutes les visites sont à venir", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        createEvaluation({ date: dayjs().add(1, "month").toISOString() }),
+      ];
+      const controles: ControleApiType[] = [
+        createControle({ date: dayjs().add(3, "year").toISOString() }),
+      ];
+
+      // WHEN
+      const result = getLastVisitInMonths(evaluations, controles);
+
+      // THEN
+      expect(result).toBeNull();
     });
 
     it("retourne l'écart en mois depuis l'évaluation la plus récente quand le tableau de controles est vide", () => {
@@ -197,6 +260,96 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toBe(2);
+    });
+  });
+  describe("getLastPastVisit", () => {
+    it("retourne la visite passée la plus récente quand le tableau n'est pas trié", () => {
+      // GIVEN
+      const lastVisit = createEvaluation({
+        id: 2,
+        date: dayjs().subtract(1, "month").toISOString(),
+      });
+      const evaluations: EvaluationApiType[] = [
+        createEvaluation({
+          id: 1,
+          date: dayjs().subtract(8, "month").toISOString(),
+        }),
+        lastVisit,
+        createEvaluation({
+          id: 3,
+          date: dayjs().subtract(4, "month").toISOString(),
+        }),
+      ];
+
+      // WHEN
+      const result = getLastPastVisit(evaluations);
+
+      // THEN
+      expect(result).toBe(lastVisit);
+    });
+
+    it("ignore les visites à venir", () => {
+      // GIVEN
+      const lastPastVisit = createControle({
+        id: 1,
+        date: dayjs().subtract(3, "month").toISOString(),
+      });
+      const controles: ControleApiType[] = [
+        createControle({ id: 2, date: dayjs().add(1, "month").toISOString() }),
+        lastPastVisit,
+      ];
+
+      // WHEN
+      const result = getLastPastVisit(controles);
+
+      // THEN
+      expect(result).toBe(lastPastVisit);
+    });
+
+    it("ignore les visites sans date", () => {
+      // GIVEN
+      const datedVisit = createEvaluation({
+        id: 1,
+        date: dayjs().subtract(6, "month").toISOString(),
+      });
+      const evaluations: EvaluationApiType[] = [
+        { ...createEvaluation({ id: 2 }), date: undefined },
+        datedVisit,
+      ];
+
+      // WHEN
+      const result = getLastPastVisit(evaluations);
+
+      // THEN
+      expect(result).toBe(datedVisit);
+    });
+
+    it("retourne undefined quand aucune visite n'est passée", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [
+        createEvaluation({
+          id: 1,
+          date: dayjs().add(2, "month").toISOString(),
+        }),
+        { ...createEvaluation({ id: 2 }), date: undefined },
+      ];
+
+      // WHEN
+      const result = getLastPastVisit(evaluations);
+
+      // THEN
+      expect(result).toBeUndefined();
+    });
+
+    it("retourne undefined quand le tableau est vide", () => {
+      // GIVEN
+      const evaluations: EvaluationApiType[] = [];
+
+      // WHEN
+      const result = getLastPastVisit(evaluations);
+
+      // THEN
+      expect(result).toBeUndefined();
     });
   });
   describe("isStructureAutorisee", () => {

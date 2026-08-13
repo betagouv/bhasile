@@ -16,6 +16,7 @@ import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { StepStatus } from "@/types/form.type";
 import { DeepPartial, FormKind } from "@/types/global";
 import {
+  DepartementBearingStructureVersionTransformation,
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
   TransformationFormType,
@@ -46,7 +47,7 @@ export const getTransformationTitle = (
 };
 
 export const getStructureVersionTransformationDepartement = (
-  structureVersionTransformation?: StructureVersionTransformationApiRead
+  structureVersionTransformation?: DepartementBearingStructureVersionTransformation
 ): string | undefined =>
   structureVersionTransformation?.structureVersion?.departementAdministratif ??
   structureVersionTransformation?.structureVersion?.structure
@@ -514,3 +515,7 @@ export const setStructureVersionTransformationFormStepStatus = (
     formSteps,
   };
 };
+
+export const isTransformationFinalised = (
+  transformation: { form: { status: boolean } | null } | null | undefined
+): boolean => transformation?.form?.status === true;
