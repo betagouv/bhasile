@@ -1,6 +1,9 @@
-import readXlsxFile, {
+import {
+  parseSheetData,
+  ParseSheetDataError,
+  readSheet,
+  Row,
   Schema,
-  SchemaParseCellValueError,
 } from "read-excel-file/browser";
 
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
@@ -9,54 +12,91 @@ import { Repartition } from "@/types/adresse.type";
 export const useSpreadsheetParse = (): UseExcelParseResult => {
   const parseSpreadsheet = async (
     file: File,
-    repartitionColumnIndex: number,
     isMixte: boolean
-  ): ParseXlsxResult => {
-    const adresses: FormAdresse[] = [];
-    const schema = getSchema(isMixte);
-    const { rows, errors } = await readXlsxFile(file, { schema });
-    const filteredErrors = errors.filter(
-      (error) => (error as unknown as SchemaParseCellValueError).row !== 2
-    ) as unknown as SchemaParseCellValueError[];
-    if (filteredErrors.length > 0) {
-      const errorMessage = filteredErrors
-        .map(
-          (error) => `Valeur invalide (${error.column} : ligne ${error.row})`
-        )
-        .join(", ");
-      throw new Error(errorMessage);
+  ): ParseSpreadsheetResult => {
+    const [headerRow, ...rowsBelowHeader] = await readSheet(file);
+    const filledRows = rowsBelowHeader
+      .map((cells, index) => ({
+        cells,
+        spreadsheetRowNumber: index + FIRST_ROW_BELOW_HEADER_NUMBER,
+      }))
+      .filter(({ cells }) => cells.some((cell) => cell !== null));
+    const adresseRows = isExampleRow(filledRows[0]?.cells)
+      ? filledRows.slice(1)
+      : filledRows;
+
+    const parsed = parseSheetData<ImportedAdresseRow>(
+      [headerRow, ...adresseRows.map(({ cells }) => cells)],
+      getSchema(isMixte)
+    );
+
+    if (parsed.errors) {
+      throw new Error(buildErrorMessage(parsed.errors, adresseRows));
     }
-    rows.shift();
-    rows.forEach((row) => {
-      const adresse = {
-        adresse: row.adresse,
-        codePostal: row.codePostal,
-        commune: row.ville,
-        adresseComplete: `${row.adresse} ${row.codePostal} ${row.ville}`,
-        departement: String(row.codePostal).substring(0, 2),
-        repartition:
-          repartitionColumnIndex === -1 ? Repartition.DIFFUS : row.repartition,
-        placesAutorisees: row.placesAutorisees,
-        isQpv: row.qpv?.toLowerCase() === "oui",
-        isLogementSocial: row.logementSocial?.toLowerCase() === "oui",
-      } as unknown as FormAdresse;
-      adresses.push(adresse);
-    });
-    return adresses;
+
+    if (parsed.objects.length === 0) {
+      throw new Error("Aucune adresse n'a été trouvée dans le tableur");
+    }
+
+    return parsed.objects.map((row) => buildFormAdresse(row, isMixte));
   };
 
-  const parseAdressesDiffuses = async (file: File): ParseXlsxResult => {
-    return parseSpreadsheet(file, -1, false);
+  const parseAdressesDiffuses = (file: File): ParseSpreadsheetResult => {
+    return parseSpreadsheet(file, false);
   };
 
-  const parseAdressesMixtes = (file: File): ParseXlsxResult => {
-    return parseSpreadsheet(file, 6, true);
+  const parseAdressesMixtes = (file: File): ParseSpreadsheetResult => {
+    return parseSpreadsheet(file, true);
   };
 
   return { parseAdressesDiffuses, parseAdressesMixtes };
 };
 
-const getSchema = (isMixte: boolean): Schema => ({
+const FIRST_ROW_BELOW_HEADER_NUMBER = 2;
+
+const EXAMPLE_CELL_PREFIX = "Ex :";
+
+const isExampleRow = (cells: Row | undefined): boolean => {
+  const firstCell = cells?.[0];
+
+  return (
+    typeof firstCell === "string" && firstCell.startsWith(EXAMPLE_CELL_PREFIX)
+  );
+};
+
+const buildFormAdresse = (
+  row: ImportedAdresseRow,
+  isMixte: boolean
+): FormAdresse => ({
+  adresse: row.adresse,
+  codePostal: row.codePostal,
+  commune: row.ville,
+  adresseComplete: `${row.adresse} ${row.codePostal} ${row.ville}`,
+  departement: row.codePostal.substring(0, 2),
+  repartition: isMixte ? parseRepartition(row.typeBati) : Repartition.DIFFUS,
+  placesAutorisees: row.placesAutorisees,
+  isQpv: row.qpv.toLowerCase() === "oui",
+  isLogementSocial: row.logementSocial.toLowerCase() === "oui",
+});
+
+const parseRepartition = (typeBati: string | undefined): Repartition =>
+  typeBati?.toUpperCase() === Repartition.COLLECTIF
+    ? Repartition.COLLECTIF
+    : Repartition.DIFFUS;
+
+const buildErrorMessage = (
+  errors: ParseSheetDataError[],
+  filledRows: FilledRow[]
+): string =>
+  errors
+    .map((error) => {
+      const rowNumber = filledRows[error.row - 1]?.spreadsheetRowNumber;
+
+      return `Valeur invalide (${error.column} : ligne ${rowNumber ?? "inconnue"})`;
+    })
+    .join(", ");
+
+const getSchema = (isMixte: boolean): Schema<ImportedAdresseRow> => ({
   adresse: {
     column: "Adresse",
     type: String,
@@ -96,17 +136,32 @@ const getSchema = (isMixte: boolean): Schema => ({
     oneOf: ["Oui", "oui", "OUI", "Non", "non", "NON"],
     required: true,
   },
-  repartition: {
+  typeBati: {
     column: "Type de bâti",
     type: String,
-    oneOf: [Repartition.DIFFUS, Repartition.COLLECTIF],
+    oneOf: ["Collectif", "collectif", "COLLECTIF", "Diffus", "diffus", "DIFFUS"],
     required: isMixte,
   },
 });
 
-type ParseXlsxResult = Promise<FormAdresse[]>;
+type FilledRow = {
+  cells: Row;
+  spreadsheetRowNumber: number;
+};
+
+type ImportedAdresseRow = {
+  adresse: string;
+  codePostal: string;
+  ville: string;
+  placesAutorisees: number;
+  logementSocial: string;
+  qpv: string;
+  typeBati?: string;
+};
+
+type ParseSpreadsheetResult = Promise<FormAdresse[]>;
 
 type UseExcelParseResult = {
-  parseAdressesDiffuses: (file: File) => ParseXlsxResult;
-  parseAdressesMixtes: (file: File) => ParseXlsxResult;
+  parseAdressesDiffuses: (file: File) => ParseSpreadsheetResult;
+  parseAdressesMixtes: (file: File) => ParseSpreadsheetResult;
 };
