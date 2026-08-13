@@ -1,4 +1,5 @@
 import { StructureCard } from "@/app/components/StructureCard";
+import { getStructureVersionDepartement } from "@/app/utils/transformation.util";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 
 type Props = {
@@ -16,8 +17,7 @@ export const TransformationSelectionSummaryItem = ({
   const operateur =
     structure?.operateur ?? structureVersionTransformation.operateur;
   const departementAdministratif =
-    structureVersion?.departementAdministratif ??
-    structure?.departementAdministratif;
+    getStructureVersionDepartement(structureVersion);
 
   if (nom && type && operateur && departementAdministratif) {
     return (

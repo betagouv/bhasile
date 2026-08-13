@@ -10,7 +10,6 @@ import {
 } from "@/app/utils/list.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
-import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { AnomalieCode } from "@/types/anomalie.type";
 import {
   AnomalieGroupBy,
@@ -19,6 +18,7 @@ import {
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
 
+import { isStructureInDashboardScope } from "../dashboard.util";
 import { AnomalieStructure } from "./anomalies.db.type";
 
 export const isAnomalieActive = (anomalie: {
@@ -136,30 +136,7 @@ const isEligibleStructure = (
     return false;
   }
 
-  const referenceDepartement = structure.departementAdministratif;
-  if (!canUpdateDepartement(options.user, referenceDepartement)) {
-    return false;
-  }
-  if (
-    options.departementList.length > 0 &&
-    !options.departementList.includes(referenceDepartement)
-  ) {
-    return false;
-  }
-
-  const operateurId = structure.operateur?.id ?? null;
-  if (
-    options.operateurList.length > 0 &&
-    (operateurId === null ||
-      !options.operateurList.includes(String(operateurId)))
-  ) {
-    return false;
-  }
-
-  if (
-    options.typeList.length > 0 &&
-    (structure.type === null || !options.typeList.includes(structure.type))
-  ) {
+  if (!isStructureInDashboardScope(structure, options)) {
     return false;
   }
 

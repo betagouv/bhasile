@@ -15,6 +15,7 @@ import {
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
 
+import { isStructureInDashboardScope } from "../dashboard.util";
 import {
   AUTORISATION_ADVANCE_MONTHS,
   CONVENTION_ADVANCE_MONTHS,
@@ -149,34 +150,14 @@ export const buildRappels = (
   cpoms: RappelCpom[],
   options: BuildRappelsOptions
 ): DashboardRappel[] => {
-  const { user, departementList, operateurList, typeList, now } = options;
+  const { user, departementList, operateurList, now } = options;
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
     if (!structure.forms[0]?.status) {
       continue;
     }
-    const referenceDepartement = structure.departementAdministratif;
-    if (!canUpdateDepartement(user, referenceDepartement)) {
-      continue;
-    }
-    if (
-      departementList.length > 0 &&
-      !departementList.includes(referenceDepartement)
-    ) {
-      continue;
-    }
-    const operateurId = structure.operateur?.id ?? null;
-    if (
-      operateurList.length > 0 &&
-      (operateurId === null || !operateurList.includes(String(operateurId)))
-    ) {
-      continue;
-    }
-    if (
-      typeList.length > 0 &&
-      (structure.type === null || !typeList.includes(structure.type))
-    ) {
+    if (!isStructureInDashboardScope(structure, options)) {
       continue;
     }
 

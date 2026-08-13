@@ -6,7 +6,6 @@ import {
 } from "@/app/utils/actualisationForm.util";
 import { sortRows } from "@/app/utils/list.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
-import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
   ActualisationStatus,
   DashboardStructureRow,
@@ -14,6 +13,7 @@ import {
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
 
+import { isStructureInDashboardScope } from "../dashboard.util";
 import { DashboardStructure } from "./initialisations-actualisations.db.type";
 
 export const getInitialisationStatus = (
@@ -101,34 +101,7 @@ export const buildDashboardRows = (
       continue;
     }
 
-    const referenceDepartement = structure.departementAdministratif;
-    if (
-      !options.user ||
-      !canUpdateDepartement(options.user, referenceDepartement)
-    ) {
-      continue;
-    }
-    if (
-      options.departementList.length > 0 &&
-      !options.departementList.includes(referenceDepartement)
-    ) {
-      continue;
-    }
-
-    const operateurId = structure.operateur?.id ?? null;
-    if (
-      options.operateurList.length > 0 &&
-      (operateurId === null ||
-        !options.operateurList.includes(String(operateurId)))
-    ) {
-      continue;
-    }
-
-    const type = structure.type;
-    if (
-      options.typeList.length > 0 &&
-      (type === null || !options.typeList.includes(type))
-    ) {
+    if (!isStructureInDashboardScope(structure, options)) {
       continue;
     }
 
@@ -149,7 +122,7 @@ export const buildDashboardRows = (
     rows.push({
       id: structure.id,
       codeBhasile: structure.codeBhasile,
-      type,
+      type: structure.type,
       operateurName: structure.operateur?.name ?? null,
       communeAdministrative: currentVersion.communeAdministrative,
       departementAdministratif: currentVersion.departementAdministratif,

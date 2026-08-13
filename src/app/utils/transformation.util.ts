@@ -45,13 +45,24 @@ export const getTransformationTitle = (
   return "Transformer une structure";
 };
 
+type StructureVersionDepartementSource = {
+  departementAdministratif?: string | null;
+  structure?: { departementAdministratif?: string | null } | null;
+};
+
+export const getStructureVersionDepartement = (
+  structureVersion?: StructureVersionDepartementSource | null
+): string | undefined =>
+  structureVersion?.structure?.departementAdministratif ??
+  structureVersion?.departementAdministratif ??
+  undefined;
+
 export const getStructureVersionTransformationDepartement = (
   structureVersionTransformation?: StructureVersionTransformationApiRead
 ): string | undefined =>
-  structureVersionTransformation?.structureVersion?.structure
-    ?.departementAdministratif ??
-  structureVersionTransformation?.structureVersion?.departementAdministratif ??
-  undefined;
+  getStructureVersionDepartement(
+    structureVersionTransformation?.structureVersion
+  );
 
 export const getStructureVersionTransformationOperateur = (
   structureVersionTransformation?: StructureVersionTransformationApiRead
