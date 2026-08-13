@@ -7,11 +7,14 @@ import { useFetchState } from "@/contexts/FetchStateContext";
 import { FileUploadApiType } from "@/schemas/api/file.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const OperateurLogo = ({
   name,
   size = 80,
   logo,
   id,
+  maxRetries = 3,
 }: Props): ReactElement => {
   const fetchName = `operateur-logo-${id}`;
   const { getFetchState, setFetchState } = useFetchState();
@@ -21,26 +24,50 @@ export const OperateurLogo = ({
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
+    let isSubscribed = true;
+
     const loadLogo = async () => {
       if (!logo?.key) {
         setFetchState(fetchName, FetchState.IDLE);
         return;
       }
 
-      try {
-        setFetchState(fetchName, FetchState.LOADING);
-        const { fileUrl } = await getFile(logo.key);
-        setLogoUrl(fileUrl);
-        setImageError(false);
-        setFetchState(fetchName, FetchState.IDLE);
-      } catch (error) {
-        console.error("Erreur lors du chargement du logo:", error);
+      setFetchState(fetchName, FetchState.LOADING);
+      setImageError(false);
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const { fileUrl } = await getFile(logo.key);
+          if (!isSubscribed) {
+            return;
+          }
+
+          setLogoUrl(fileUrl);
+          setFetchState(fetchName, FetchState.IDLE);
+          return;
+        } catch (error) {
+          console.warn(
+            `Tentative ${attempt}/${maxRetries} échouée pour le logo ${id}:`,
+            error
+          );
+
+          if (attempt < maxRetries) {
+            await wait(Math.pow(2, attempt - 1) * 500);
+          }
+        }
+      }
+
+      if (isSubscribed) {
         setFetchState(fetchName, FetchState.ERROR);
       }
     };
 
     loadLogo();
-  }, [logo?.key, getFile, setFetchState, fetchName]);
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [logo?.key, getFile, setFetchState, fetchName, maxRetries, id]);
 
   const handleImageError = () => {
     setImageError(true);
@@ -89,4 +116,5 @@ type Props = {
   size?: number;
   logo?: FileUploadApiType;
   id: number;
+  maxRetries?: number;
 };
