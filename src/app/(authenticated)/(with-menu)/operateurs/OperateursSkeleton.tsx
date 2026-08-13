@@ -1,13 +1,16 @@
 import { ReactElement } from "react";
 
-const VISIBLE_ROW_COUNT = 6;
+import { cn } from "@/app/utils/classname.util";
+
+import { OPERATEUR_CARD_CLASSES } from "./OperateurItem";
+import { OPERATEUR_ROW_CLASSES } from "./OperateursList";
 
 export const OperateursSkeleton = (): ReactElement => (
   <div className="motion-safe:animate-pulse" role="status" aria-busy="true">
     <span className="sr-only">Chargement des opérateurs...</span>
     {[...Array(VISIBLE_ROW_COUNT).keys()].map((index) => (
-      <div key={index} className="px-3 pt-3">
-        <div className="h-28 border border-default-grey rounded-[10px] bg-white">
+      <div key={index} className={OPERATEUR_ROW_CLASSES}>
+        <div className={cn(OPERATEUR_CARD_CLASSES, "h-28")}>
           <div className="flex h-full px-6 py-4 justify-between items-center">
             <div className="flex items-center">
               <div className="size-20 mr-10 rounded bg-contrast-grey" />
@@ -30,3 +33,5 @@ export const OperateursSkeleton = (): ReactElement => (
     ))}
   </div>
 );
+
+const VISIBLE_ROW_COUNT = 6;

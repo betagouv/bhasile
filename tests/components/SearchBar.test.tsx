@@ -3,12 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SearchBar } from "@/app/components/SearchBar";
-import { LIST_NAVIGATION_KEY, SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
-import { FetchState } from "@/types/fetch-state.type";
+import { SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
+
+const PLACEHOLDER = "Nom d'opérateur";
 
 const mockRouterReplace = vi.fn();
-const mockSetFetchState = vi.fn();
-const mockSearchParams = new URLSearchParams();
+let mockSearchParams = new URLSearchParams();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mockRouterReplace }),
@@ -16,35 +16,43 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/contexts/FetchStateContext", () => ({
-  useFetchState: () => ({ setFetchState: mockSetFetchState }),
+  useFetchState: () => ({ setFetchState: vi.fn() }),
 }));
 
 describe("SearchBar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSearchParams = new URLSearchParams();
   });
 
   it("écrit le terme recherché dans l'URL après le debounce", async () => {
     // GIVEN
     const user = userEvent.setup();
-    render(<SearchBar placeholder="Nom d'opérateur" inputId="search" />);
+    render(<SearchBar placeholder={PLACEHOLDER} inputId="search" />);
 
     // WHEN
-    await user.type(screen.getByPlaceholderText("Nom d'opérateur"), "coquelic");
+    await user.type(screen.getByPlaceholderText(PLACEHOLDER), "coquelic");
+
+    // THEN
     await vi.waitFor(
       () => expect(mockRouterReplace).toHaveBeenCalledWith("?search=coquelic"),
       { timeout: SEARCH_PARAM_DEBOUNCE_MS * 4 }
     );
   });
 
-  it("publie l'attente de navigation sous la clé partagée", async () => {
-    // WHEN
-    render(<SearchBar placeholder="Nom d'opérateur" inputId="search" />);
-
-    // THEN — au montage, aucune navigation en cours
-    expect(mockSetFetchState).toHaveBeenCalledWith(
-      LIST_NAVIGATION_KEY,
-      FetchState.IDLE
+  it("réaligne le champ quand l'URL change sans passer par la saisie", () => {
+    // GIVEN — l'agent a déjà cherché « coquelic »
+    mockSearchParams = new URLSearchParams("search=coquelic");
+    const { rerender } = render(
+      <SearchBar placeholder={PLACEHOLDER} inputId="search" />
     );
+    expect(screen.getByPlaceholderText(PLACEHOLDER)).toHaveValue("coquelic");
+
+    // WHEN — retour arrière : l'URL repasse sans recherche
+    mockSearchParams = new URLSearchParams();
+    rerender(<SearchBar placeholder={PLACEHOLDER} inputId="search" />);
+
+    // THEN
+    expect(screen.getByPlaceholderText(PLACEHOLDER)).toHaveValue("");
   });
 });

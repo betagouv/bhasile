@@ -28,6 +28,7 @@ export type OperateurApiRead = {
   actesAdministratifs: ActeAdministratifApiType[];
   contacts: ContactApiType[];
   logo: FileUploadApiType;
+  logoUrl: string | null;
 };
 
 export const operateurWriteApiSchema = z.object({

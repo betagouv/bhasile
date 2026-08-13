@@ -11,10 +11,11 @@ export const useListNavigation = (): TransitionStartFunction => {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    setFetchState(
-      LIST_NAVIGATION_KEY,
-      isPending ? FetchState.LOADING : FetchState.IDLE
-    );
+    if (!isPending) {
+      return;
+    }
+    setFetchState(LIST_NAVIGATION_KEY, FetchState.LOADING);
+    return () => setFetchState(LIST_NAVIGATION_KEY, FetchState.IDLE);
   }, [isPending, setFetchState]);
 
   return startTransition;

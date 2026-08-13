@@ -20,19 +20,18 @@ const getBadgeColor = (structureType: string): BadgeType => {
 };
 
 export const OperateurItem = ({
-  id,
   name,
   nbStructures,
   totalPlaces,
   pourcentageParc,
   structureTypes,
-  logo,
+  logoUrl,
 }: OperateurListItem): ReactElement => {
   return (
-    <div className="border border-default-grey rounded-[10px] bg-white">
+    <div className={OPERATEUR_CARD_CLASSES}>
       <div className="flex px-6 py-4 justify-between">
         <div className="flex">
-          <OperateurLogo name={name} logo={logo} id={id} />
+          <OperateurLogo name={name} url={logoUrl} />
           <div className="flex-col">
             <h3 className="text-title-blue-france text-xl mb-2">{name}</h3>
             <div className="flex pb-1.5">
@@ -94,3 +93,6 @@ export const OperateurItem = ({
     </div>
   );
 };
+
+export const OPERATEUR_CARD_CLASSES =
+  "border border-default-grey rounded-[10px] bg-white";

@@ -6,6 +6,10 @@ import { GET } from "@/app/api/operateurs/route";
 const mockFindAllStructures = vi.fn();
 const mockFindAllOperateurs = vi.fn();
 
+vi.mock("@/app/api/files/file.service", () => ({
+  getDownloadLink: vi.fn().mockResolvedValue("https://exemple.test/logo"),
+}));
+
 vi.mock("@/app/api/structures/structure.repository", () => ({
   findAllStructures: () => mockFindAllStructures(),
 }));
@@ -72,6 +76,7 @@ describe("GET /api/operateurs", () => {
         pourcentageParc: 70,
         structureTypes: ["CADA", "HUDA"],
         logo: { key: "logo-a" },
+        logoUrl: "https://exemple.test/logo",
       },
       {
         id: 2,
@@ -81,6 +86,7 @@ describe("GET /api/operateurs", () => {
         pourcentageParc: 30,
         structureTypes: ["CADA"],
         logo: { key: null },
+        logoUrl: null,
       },
     ]);
   });

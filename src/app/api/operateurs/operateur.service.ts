@@ -12,6 +12,7 @@ import type { OperateurListItem } from "@/types/operateur.type";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { getContactsApiRead } from "../contacts/contact.util";
+import { getDownloadLink } from "../files/file.service";
 import { findAllStructures } from "../structures/structure.repository";
 import {
   findAllOperateurs,
@@ -70,11 +71,27 @@ export const getOperateurs = cache(
     const { total, rows } = paginateWithTotal(sorted, page, MIDDLE_PAGE_SIZE);
 
     return {
-      operateurs: rows,
+      operateurs: await Promise.all(
+        rows.map(async (operateur) => ({
+          ...operateur,
+          logoUrl: await resolveLogoUrl(operateur.logo.key),
+        }))
+      ),
       totalOperateurs: total,
     };
   }
 );
+
+const resolveLogoUrl = async (key: string | null): Promise<string | null> => {
+  if (!key) {
+    return null;
+  }
+  try {
+    return await getDownloadLink(process.env.S3_BUCKET_NAME!, key);
+  } catch {
+    return null;
+  }
+};
 
 export const getOperateur = async (
   id: number
@@ -84,11 +101,14 @@ export const getOperateur = async (
     return null;
   }
 
-  return recursivelySerializeForClient({
-    ...operateur,
-    actesAdministratifs: operateur.actesAdministratifs,
-    contacts: getContactsApiRead(operateur.contacts),
-  }) as OperateurApiRead;
+  return {
+    ...(recursivelySerializeForClient({
+      ...operateur,
+      actesAdministratifs: operateur.actesAdministratifs,
+      contacts: getContactsApiRead(operateur.contacts),
+    }) as OperateurApiRead),
+    logoUrl: await resolveLogoUrl(operateur.logo?.key ?? null),
+  };
 };
 
 export const updateOperateur = async (

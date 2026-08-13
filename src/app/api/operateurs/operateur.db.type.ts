@@ -6,6 +6,7 @@ export type OperateurDbDetail = Prisma.OperateurGetPayload<{
     actesAdministratifs: {
       include: { fileUploads: true };
     };
+    logo: true;
   };
 }>;
 

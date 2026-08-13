@@ -25,8 +25,7 @@ export const DescriptionBlock = () => {
         <OperateurLogo
           name={operateur.name}
           size={160}
-          logo={operateur.logo}
-          id={operateur.id}
+          url={operateur.logoUrl}
         />
         <div className="grid grid-cols-2">
           <div className="flex gap-2 mb-3">

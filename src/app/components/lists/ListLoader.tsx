@@ -47,7 +47,9 @@ export const ListLoader = ({
 
   return (
     <div
-      className={`${fetchState === FetchState.LOADING ? "opacity-20 pointer-events-none" : ""}`}
+      className={
+        fetchState === FetchState.LOADING ? "opacity-20 pointer-events-none" : ""
+      }
     >
       {children}
     </div>

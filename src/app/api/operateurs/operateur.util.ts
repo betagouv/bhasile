@@ -83,6 +83,7 @@ export const buildOperateurListItem = (
       : 0,
   structureTypes: [...stats.structureTypes].sort(),
   logo: { key: operateur.logo?.key ?? null },
+  logoUrl: null,
 });
 
 export const filterOperateursBySearch = (

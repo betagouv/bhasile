@@ -8,4 +8,5 @@ export type OperateurListItem = {
   pourcentageParc: number;
   structureTypes: StructureType[];
   logo: { key: string | null };
+  logoUrl: string | null;
 };

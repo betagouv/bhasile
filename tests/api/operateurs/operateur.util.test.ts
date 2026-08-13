@@ -199,6 +199,7 @@ describe("filterOperateursBySearch", () => {
       pourcentageParc: 1,
       structureTypes: [],
       logo: { key: null },
+      logoUrl: null,
     },
     {
       id: 2,
@@ -208,6 +209,7 @@ describe("filterOperateursBySearch", () => {
       pourcentageParc: 1,
       structureTypes: [],
       logo: { key: null },
+      logoUrl: null,
     },
   ];
 

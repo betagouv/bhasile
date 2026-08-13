@@ -1,5 +1,6 @@
 import { ReactElement, Suspense } from "react";
 
+import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
 import { SearchBar } from "@/app/components/SearchBar";
 import {
   getFirstParam,
@@ -34,14 +35,25 @@ export default async function Operateurs({
             placeholder="Nom d'opérateur"
             inputId="operateurs-search"
           />
-          <Suspense fallback={<div className="pl-3 min-w-24" />}>
-            <OperateursCount page={page} search={search} />
-          </Suspense>
+          <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
+            <Suspense fallback={<div className="pl-3 min-w-24" />}>
+              <OperateursCount page={page} search={search} />
+            </Suspense>
+          </ContentErrorBoundary>
         </div>
       </div>
-      <Suspense fallback={<OperateursSkeleton />}>
-        <OperateursContent page={page} search={search} />
-      </Suspense>
+      <ContentErrorBoundary
+        fallback={
+          <p className="p-16">
+            Erreur lors de la récupération des opérateurs. Modifiez votre
+            recherche ou réessayez plus tard.
+          </p>
+        }
+      >
+        <Suspense fallback={<OperateursSkeleton />}>
+          <OperateursContent page={page} search={search} />
+        </Suspense>
+      </ContentErrorBoundary>
     </div>
   );
 }

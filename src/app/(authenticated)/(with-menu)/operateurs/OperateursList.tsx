@@ -16,7 +16,7 @@ export const OperateurList = ({
       {operateurs.map((operateur) => (
         <Link
           title={`Détails de l'operateur ${operateur.name}`}
-          className="px-3 pt-3 block"
+          className={`${OPERATEUR_ROW_CLASSES} block`}
           key={operateur.id}
           href={`operateurs/${operateur.id}`}
         >
@@ -37,3 +37,5 @@ type Props = {
   operateurs: OperateurListItem[];
   totalOperateurs: number;
 };
+
+export const OPERATEUR_ROW_CLASSES = "px-3 pt-3";
