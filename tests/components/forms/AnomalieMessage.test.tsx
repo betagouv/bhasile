@@ -33,8 +33,8 @@ const schema = z.object({
   ),
 });
 
-const typologie = (lgbt: number) => ({
-  year: ANNEE,
+const typologie = (lgbt: number, year: number = ANNEE) => ({
+  year,
   placesAutorisees: 10,
   lgbt,
   pmr: 0,
@@ -216,6 +216,29 @@ describe("marquage des anomalies dans un formulaire", () => {
     expect(document.getElementById(anomalieId)).toHaveTextContent(
       ANOMALIE_DEFINITIONS[CODE].label
     );
+  });
+
+  it("fusionne une même anomalie sur plusieurs exercices", async () => {
+    const typologies = [typologie(99, 2023), typologie(99, ANNEE)];
+    render(
+      <StructureProvider
+        entity={makeStructure({ structureTypologies: typologies })}
+      >
+        <FormWrapper
+          schema={schema}
+          showSubmitButton={false}
+          defaultValues={{ structureTypologies: typologies }}
+        >
+          <AnomalieMessage fields={["lgbt"]} />
+        </FormWrapper>
+      </StructureProvider>
+    );
+
+    expect(
+      await screen.findByText(
+        `${ANOMALIE_DEFINITIONS[CODE].label} (exercices 2023, ${ANNEE})`
+      )
+    ).toBeInTheDocument();
   });
 
   it("tait une anomalie que l'agent a déclarée normale", async () => {

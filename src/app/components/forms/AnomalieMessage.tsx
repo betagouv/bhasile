@@ -3,7 +3,7 @@
 import { ReactElement } from "react";
 
 import { useAnomalies } from "@/app/components/forms/AnomaliesContext";
-import { formatAnomalieLabel } from "@/app/utils/anomalie.util";
+import { getGroupedAnomalieLabels } from "@/app/utils/anomalie.util";
 
 export const AnomalieMessage = ({
   fields,
@@ -11,22 +11,20 @@ export const AnomalieMessage = ({
   details,
 }: Props): ReactElement => {
   const anomalies = useAnomalies({ fields, targetIds });
+  const messages = getGroupedAnomalieLabels(anomalies);
 
   return (
     <div
       role="status"
       className={
-        anomalies.length > 0
+        messages.length > 0
           ? "my-2 flex flex-col gap-1 text-sm text-default-warning"
           : "sr-only"
       }
     >
-      {anomalies.map((anomalie) => (
-        <p
-          key={`${anomalie.code}-${anomalie.year}-${anomalie.targetId}`}
-          className="mb-0"
-        >
-          {formatAnomalieLabel(anomalie)}
+      {messages.map((message) => (
+        <p key={message} className="mb-0">
+          {message}
           {details && ` (${details})`}
         </p>
       ))}
