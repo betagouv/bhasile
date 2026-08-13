@@ -143,12 +143,9 @@ export const buildDashboardTransformationRows = (
     const departement = getStructureVersionTransformationDepartement(
       referenceStructureVersionTransformation
     );
-    if (!departement) {
-      continue;
-    }
     if (
       options.departementList.length > 0 &&
-      !options.departementList.includes(departement)
+      (!departement || !options.departementList.includes(departement))
     ) {
       continue;
     }
@@ -182,7 +179,7 @@ export const buildDashboardTransformationRows = (
     rows.push({
       transformationId: transformation.id,
       operateurName: operateur?.name ?? null,
-      departementAdministratif: departement,
+      departementAdministratif: departement ?? null,
       summary: buildTransformationSummary(
         transformation.structureVersionTransformations
       ),

@@ -88,7 +88,7 @@ vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
   getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
-vi.mock("@/app/api/user-action/user-action.service", () => ({
+vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createStructureEvent: (...args: unknown[]) =>
     mockCreateStructureEvent(...args),
 }));
