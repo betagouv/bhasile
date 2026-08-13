@@ -1,7 +1,6 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
-import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import {
   getMostRecentMillesime,
   isStructureAutorisee,
@@ -16,6 +15,7 @@ import {
 import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { processActivitesForStructure } from "../activites/activite.util";
 import {

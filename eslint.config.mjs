@@ -38,12 +38,12 @@ const eslintConfig = [
             {
               name: "@prisma/client",
               message:
-                "L'import de @prisma/client est interdit en dehors de src/app/api/, lib/ ou prisma/.",
+                "L'import de @prisma/client est interdit en dehors de src/app/api/, lib/, utils-server/ ou prisma/.",
             },
             {
               name: "@/generated/prisma/client",
               message:
-                "L'import de @/generated/prisma/client est interdit en dehors de src/app/api/, lib/ ou prisma/.",
+                "L'import de @/generated/prisma/client est interdit en dehors de src/app/api/, lib/, utils-server/ ou prisma/.",
             },
           ],
         },
@@ -58,9 +58,11 @@ const eslintConfig = [
       "src/app/api/**/*.{js,ts,jsx,tsx}",
       "src/lib/**/*.{js,ts,jsx,tsx}",
       "lib/**/*.{js,ts,jsx,tsx}",
+      "src/utils-server/**/*.{js,ts,jsx,tsx}",
       "prisma/**/*.{js,ts,jsx,tsx}",
       "scripts/**/*.{js,ts,jsx,tsx}",
       "src/types/**/*.{js,ts,jsx,tsx}",
+      "tests/**/*.{js,ts,jsx,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",

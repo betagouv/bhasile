@@ -11,7 +11,6 @@ import {
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
-import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
 import { getMostRecentMillesime } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
@@ -35,6 +34,7 @@ import {
   StructureRef,
 } from "@/types/structure-history.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";

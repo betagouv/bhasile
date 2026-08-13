@@ -1,6 +1,5 @@
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { getNow } from "@/app/utils/now.util";
-import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
@@ -13,6 +12,7 @@ import {
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";

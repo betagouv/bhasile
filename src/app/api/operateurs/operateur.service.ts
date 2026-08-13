@@ -1,12 +1,12 @@
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
-import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Operateur } from "@/generated/prisma/client";
 import {
   OperateurApiRead,
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { getContactsApiRead } from "../contacts/contact.util";
 import { findAllStructures } from "../structures/structure.repository";

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { recursivelySerializeForClient } from "@/app/utils/serialization.util";
+import { Prisma } from "@/generated/prisma/client";
+import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 describe("recursivelySerializeForClient", () => {
   it("convertit correctement une Date au premier instant de l'année", () => {
@@ -26,25 +27,18 @@ describe("recursivelySerializeForClient", () => {
   });
 
   it("sérialise un Decimal Prisma en chaîne plutôt que de descendre dans ses entrailles", () => {
-    // GIVEN — une doublure structurelle du Decimal de Prisma : sa représentation
-    // interne (signe, exposant, chiffres) plus toNumber et toJSON.
-    const decimalDouble = {
-      s: 1,
-      e: 1,
-      d: [48, 8566],
-      toNumber: () => 48.8566,
-      toJSON: () => "48.8566",
-    };
+    // GIVEN
+    const latitude = new Prisma.Decimal("48.8566");
 
     // WHEN
-    const result = recursivelySerializeForClient({ latitude: decimalDouble });
+    const result = recursivelySerializeForClient({ latitude });
 
     // THEN
     expect(result).toEqual({ latitude: "48.8566" });
   });
 
   it("laisse intact un objet qui expose un toNumber sans être un Decimal", () => {
-    // GIVEN — un objet valeur quelconque : le prédicat ne doit pas l'écraser en chaîne
+    // GIVEN — un objet valeur quelconque : il ne doit pas être écrasé en chaîne
     const montant = { cents: 1250, toNumber: () => 12.5 };
 
     // WHEN
