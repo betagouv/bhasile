@@ -47,6 +47,9 @@ export const COLOCATED_COORDINATES: Coordinates = {
 
 export const COLOCATED_STRUCTURES_COUNT = 4;
 
+// Première année de typologie en prod
+const TYPOLOGIE_START_YEAR = 2022;
+
 export type SeedStructureParams = {
   operateurId: number;
   filiale: string | null;
@@ -264,7 +267,7 @@ const buildTypologieSpecs = (
   creationDate: Date,
   now: Date
 ): TypologieSpec[] => {
-  const startYear = creationDate.getFullYear();
+  const startYear = Math.max(TYPOLOGIE_START_YEAR, creationDate.getFullYear());
   const lastVersion = timeline[timeline.length - 1];
   const endYear = Math.max(
     now.getFullYear(),
