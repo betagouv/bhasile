@@ -4,7 +4,9 @@ import { PrismaClient } from "@/generated/prisma/client";
 
 export const DATABASE_POOL_MAX = Number(process.env.DATABASE_POOL_MAX) || 10;
 
-export const createPrismaClient = () => {
+export const createPrismaClient = ({
+  queryPlanCacheMaxSize,
+}: { queryPlanCacheMaxSize?: number } = {}) => {
   const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
@@ -17,5 +19,5 @@ export const createPrismaClient = () => {
     connectionTimeoutMillis: 5_000,
     application_name: process.env.CONTAINER ?? "bhasile",
   });
-  return new PrismaClient({ adapter });
+  return new PrismaClient({ adapter, queryPlanCacheMaxSize });
 };

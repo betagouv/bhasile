@@ -53,7 +53,8 @@ import {
 import { convertToPrismaObject } from "./utils/common.util";
 import { wipeTables } from "./utils/wipe";
 
-const prisma = createPrismaClient();
+// Le cache ne sert à rien et retient un plan par structure jusqu'à saturation (1000 par défaut) -> on l'annule.
+const prisma = createPrismaClient({ queryPlanCacheMaxSize: 0 });
 
 // Graine fixe : les tests repository tournent en CI sur ce jeu de données.
 // Surcharger via FAKER_SEED pour rejouer un échec observé avec une autre graine.
