@@ -69,12 +69,11 @@ export const createFakeOperateur = (
 
 export const createFakeFiliale = (
   parentOperateurId: number,
-  parentOperateurName: string,
-  index: number
+  parentOperateurName: string
 ): Omit<Operateur, "id"> => {
   const createdAt = faker.date.past();
   return {
-    name: `${parentOperateurName} - Filiale ${index + 1}`,
+    name: `${parentOperateurName} - Filiale`,
     directionGenerale: faker.lorem.words(2),
     siret: faker.number.int(10000000000000).toString(),
     siegeSocial: faker.lorem.words(2),

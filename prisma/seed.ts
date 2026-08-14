@@ -10,7 +10,7 @@ import {
 import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { StructureType } from "@/types/structure.type";
 
-import { createPrismaClient } from "./client";
+import { createPrismaClient, DATABASE_POOL_MAX } from "./client";
 import { createFakeActivites } from "./seeders/activite.seed";
 import { createAntenneList } from "./seeders/antenne.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
@@ -37,11 +37,13 @@ import {
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
 import {
+  buildStructureCreate,
   COLOCATED_COORDINATES,
   COLOCATED_STRUCTURES_COUNT,
   FormDefLookup,
+  resolveCurrentVersionId,
   SeededStructure,
-  seedStructureWithVersions,
+  SeedStructureParams,
 } from "./seeders/structure-version.seed";
 import { upsertBhasileUser } from "./seeders/user.seed";
 import {
@@ -57,6 +59,10 @@ const prisma = createPrismaClient();
 // Graine fixe : les tests repository tournent en CI sur ce jeu de données.
 // Surcharger via FAKER_SEED pour rejouer un échec observé avec une autre graine.
 faker.seed(Number(process.env.FAKER_SEED) || 20260804);
+
+// Un create imbriqué tient une connexion : au-delà du pool, la file finit par expirer.
+const STRUCTURE_BATCH_SIZE = DATABASE_POOL_MAX;
+const STRUCTURE_LOG_STEP = 200;
 
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
@@ -165,9 +171,34 @@ async function seed(): Promise<void> {
   const bhasileCodesMap = generateAllBhasileCodes(seedNumber(5000)); // Not all codes will be used
   console.log("✅ Codes Bhasile générés");
 
-  const operateursToInsert = Array.from({ length: 5 }, (_, index) =>
-    createFakeOperateur(index)
-  );
+  console.log("🏢 Création des opérateurs et de leurs filiales...");
+  const operateurs: {
+    id: number;
+    name: string;
+    filiale: { id: number; name: string } | null;
+  }[] = [];
+  for (let index = 0; index < 5; index++) {
+    const operateur = await prisma.operateur.create({
+      data: convertToPrismaObject(createFakeOperateur(index)),
+      select: { id: true, name: true },
+    });
+
+    // Une seule filiale dans le jeu de données, portée par le premier opérateur.
+    const filiale =
+      index === 0
+        ? await prisma.operateur.create({
+            data: convertToPrismaObject(
+              createFakeFiliale(operateur.id, operateur.name)
+            ),
+            select: { id: true, name: true },
+          })
+        : null;
+
+    if (filiale) {
+      console.log(`🏢 Filiale créée : ${filiale.name}`);
+    }
+    operateurs.push({ ...operateur, filiale });
+  }
 
   const randomDepartement = (): string =>
     String(faker.number.int({ min: 1, max: 95 })).padStart(2, "0");
@@ -192,15 +223,10 @@ async function seed(): Promise<void> {
   };
 
   const now = new Date();
-  const seededStructures: SeededStructure[] = [];
+  const structureParams: SeedStructureParams[] = [];
   let colocatedLeft = COLOCATED_STRUCTURES_COUNT;
 
-  for (const operateurToInsert of operateursToInsert) {
-    const createdOperateur = await prisma.operateur.create({
-      data: convertToPrismaObject(operateurToInsert),
-      select: { id: true, name: true },
-    });
-
+  for (const operateur of operateurs) {
     const nonOfiiCount = faker.number.int({
       min: seedNumber(200),
       max: seedNumber(250),
@@ -211,10 +237,9 @@ async function seed(): Promise<void> {
     });
 
     console.log(
-      `🏠 Ajout de ${nonOfiiCount} structures et ${ofiiCount} structures OFII pour ${createdOperateur.name}`
+      `🏠 ${nonOfiiCount} structures et ${ofiiCount} structures OFII prévues pour ${operateur.name}`
     );
 
-    const operateurStructureIds: number[] = [];
     for (let index = 0; index < nonOfiiCount + ofiiCount; index++) {
       const ofii = index >= nonOfiiCount;
       const departementAdministratif = randomDepartement();
@@ -225,8 +250,14 @@ async function seed(): Promise<void> {
         colocatedLeft--;
       }
 
-      const seeded = await seedStructureWithVersions(prisma, {
-        operateurId: createdOperateur.id,
+      const filiale =
+        operateur.filiale && faker.datatype.boolean({ probability: 0.2 })
+          ? operateur.filiale
+          : null;
+
+      structureParams.push({
+        operateurId: filiale?.id ?? operateur.id,
+        filiale: filiale?.name ?? null,
         codeBhasile,
         departementAdministratif,
         type: randomType(),
@@ -238,42 +269,43 @@ async function seed(): Promise<void> {
         finalisationStepDefinitions: stepDefinitions,
         coordinates: colocated ? COLOCATED_COORDINATES : undefined,
       });
-      seededStructures.push(seeded);
-      operateurStructureIds.push(seeded.structureId);
     }
-
-    const hasFiliale = faker.datatype.boolean({ probability: 0.2 });
-    if (!hasFiliale) {
-      continue;
-    }
-
-    const filiale = await prisma.operateur.create({
-      data: convertToPrismaObject(
-        createFakeFiliale(createdOperateur.id, createdOperateur.name, 0)
-      ),
-      select: { id: true, name: true },
-    });
-
-    const structureIdsToMove = operateurStructureIds.filter(() =>
-      faker.datatype.boolean({ probability: 0.2 })
-    );
-
-    if (structureIdsToMove.length > 0) {
-      await prisma.structure.updateMany({
-        where: { id: { in: structureIdsToMove } },
-        data: { operateurId: filiale.id, filiale: filiale.name },
-      });
-      await prisma.structureVersionTransformation.updateMany({
-        where: {
-          structureVersion: { structureId: { in: structureIdsToMove } },
-        },
-        data: { operateurId: filiale.id },
-      });
-    }
-
-    console.log(`🏢 Filiale créée : ${filiale.name}`);
   }
 
+  const seededStructures: SeededStructure[] = [];
+  let lastLoggedTotal = 0;
+  for (
+    let start = 0;
+    start < structureParams.length;
+    start += STRUCTURE_BATCH_SIZE
+  ) {
+    const created = await Promise.all(
+      structureParams.slice(start, start + STRUCTURE_BATCH_SIZE).map((params) =>
+        prisma.structure.create({
+          data: buildStructureCreate(params),
+          select: {
+            id: true,
+            structureVersions: { select: { id: true, effectiveDate: true } },
+          },
+        })
+      )
+    );
+    seededStructures.push(
+      ...created.map((structure) => ({
+        structureId: structure.id,
+        currentVersionId: resolveCurrentVersionId(
+          structure.structureVersions,
+          now
+        ),
+      }))
+    );
+    if (seededStructures.length - lastLoggedTotal >= STRUCTURE_LOG_STEP) {
+      lastLoggedTotal = seededStructures.length;
+      console.log(
+        `🏠 ${seededStructures.length}/${structureParams.length} structures créées`
+      );
+    }
+  }
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
 
   await mirrorLegacyPlacesToBaseVersions(prisma);
@@ -300,42 +332,29 @@ async function seed(): Promise<void> {
       structureVersionId: seeded.currentVersionId,
     }))
   );
-  await prisma.finess.createMany({
+  const createdFinesses = await prisma.finess.createManyAndReturn({
     data: finessList.map((finess) => ({
       code: finess.code,
       createdAt: finess.createdAt,
       updatedAt: finess.updatedAt,
     })),
-  });
-  const createdFinesses = await prisma.finess.findMany({
-    where: { code: { in: finessList.map((finess) => finess.code) } },
     select: { id: true, code: true },
   });
-  const finessIdByCode = new Map<string, number>();
-  for (const finess of createdFinesses) {
-    if (finess.code) {
-      finessIdByCode.set(finess.code, finess.id);
-    }
-  }
-  const structureFinessLinks = finessList.flatMap((finess) => {
-    const finessId = finessIdByCode.get(finess.code);
-    return finessId
-      ? [
-          {
-            finessId,
-            structureVersionId: finess.structureVersionId,
-            description: finess.description,
-          },
-        ]
-      : [];
+  const finessIdByCode = new Map(
+    createdFinesses.map((finess) => [finess.code, finess.id])
+  );
+  await prisma.structureFiness.createMany({
+    data: finessList.map((finess) => ({
+      finessId: finessIdByCode.get(finess.code)!,
+      structureVersionId: finess.structureVersionId,
+      description: finess.description,
+    })),
   });
-  await prisma.structureFiness.createMany({ data: structureFinessLinks });
   console.log(
-    `✅ ${finessList.length} codes FINESS créés et ${structureFinessLinks.length} liens StructureFiness`
+    `✅ ${finessList.length} codes FINESS créés et autant de liens StructureFiness`
   );
 
   console.log("🧬 Création des codes DNA (1 à 3 par structure)...");
-
   const perVersionCounts = seededStructures.map((seeded) => ({
     structureVersionId: seeded.currentVersionId,
     count: faker.number.int({ min: 1, max: 3 }),
@@ -353,55 +372,48 @@ async function seed(): Promise<void> {
   ]);
   const dnaList = createDnaList(totalDnasNeeded + numberOfUnusedDnas, {
     operateurIds: allOperateurs.map((operateur) => operateur.id),
-    departementNumeros: allDepartements.map((departement) => departement.numero),
+    departementNumeros: allDepartements.map(
+      (departement) => departement.numero
+    ),
   });
-  await prisma.dna.createMany({ data: dnaList });
-  console.log(`✅ ${dnaList.length} codes DNA créés`);
-
-  const createdDnas = await prisma.dna.findMany({
-    where: { code: { in: dnaList.map((dna) => dna.code) } },
+  const createdDnas = await prisma.dna.createManyAndReturn({
+    data: dnaList,
     select: { id: true, code: true },
   });
-  const dnaByCode = new Map<string, number>();
-  for (const dna of createdDnas) {
-    dnaByCode.set(dna.code, dna.id);
-  }
+  console.log(`✅ ${dnaList.length} codes DNA créés`);
 
   const dnaStructures = createDnaStructures({
-    dnaList,
-    dnaByCode,
+    dnas: createdDnas,
     perVersionCounts,
   });
-
-  await prisma.dnaStructure.createMany({ data: dnaStructures });
+  await prisma.dnaStructure.createMany({
+    data: dnaStructures.map((dnaStructure) => ({
+      dnaId: dnaStructure.dnaId,
+      structureVersionId: dnaStructure.structureVersionId,
+      description: dnaStructure.description,
+    })),
+  });
   console.log(`✅ ${dnaStructures.length} liens DnaStructure créés`);
 
   console.log("📊 Création des activités...");
-  const dnaStructuresWithDna = await prisma.dnaStructure.findMany({
-    select: { dna: { select: { code: true } } },
-  });
-  const activites = dnaStructuresWithDna.flatMap((dnaStructure) => {
-    const dnaCode = dnaStructure.dna?.code;
-    if (!dnaCode) {
-      return [];
-    }
-    return createFakeActivites({ dnaCode });
-  });
+  const activites = dnaStructures.flatMap(({ dnaCode }) =>
+    createFakeActivites({ dnaCode })
+  );
   await prisma.activite.createMany({ data: activites });
   console.log(`✅ ${activites.length} activités créées`);
 
   console.log("📊 Création des événements indésirables graves...");
-  const currentVersionsWithDna = await prisma.structureVersion.findMany({
-    where: {
-      id: { in: seededStructures.map((seeded) => seeded.currentVersionId) },
-    },
-    select: {
-      id: true,
-      dnaStructures: { select: { dna: { select: { code: true } } } },
-    },
-  });
+  const dnaCodesByVersion = new Map<number, string[]>();
+  for (const dnaStructure of dnaStructures) {
+    const dnaCodes =
+      dnaCodesByVersion.get(dnaStructure.structureVersionId) ?? [];
+    dnaCodes.push(dnaStructure.dnaCode);
+    dnaCodesByVersion.set(dnaStructure.structureVersionId, dnaCodes);
+  }
   const evenementsIndesirablesGraves = createEvenementsIndesirablesGraves(
-    currentVersionsWithDna
+    seededStructures.map((seeded) => ({
+      dnaCodes: dnaCodesByVersion.get(seeded.currentVersionId) ?? [],
+    }))
   );
   await prisma.evenementIndesirableGrave.createMany({
     data: evenementsIndesirablesGraves,

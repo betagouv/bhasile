@@ -1,5 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
+import { DOCUMENTS_FINANCIERS_OPEN_YEAR, START_YEAR } from "@/constants";
 import {
   DocumentFinancier,
   DocumentFinancierCategory,
@@ -16,7 +17,10 @@ export const createFakeDocumentFinancier = (): Omit<
   "id" | "structureDnaCode" | "cpomId" | "structureId" | "granularity"
 > => {
   return {
-    year: faker.number.int({ min: 2021, max: 2025 }),
+    year: faker.number.int({
+      min: START_YEAR,
+      max: DOCUMENTS_FINANCIERS_OPEN_YEAR,
+    }),
     name: faker.lorem.word(),
     category: faker.helpers.enumValue(DocumentFinancierCategory),
     structureType: null,
