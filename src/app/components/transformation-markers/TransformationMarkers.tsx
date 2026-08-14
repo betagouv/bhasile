@@ -57,11 +57,11 @@ export const TransformationMarkers = ({ markers, years }: Props) => {
             <div key={marker.year}>
               <span
                 aria-hidden
-                className="absolute top-0 bottom-0 z-50 w-[1.5px] bg-[radial-gradient(circle,#6b7cff_0.5px,transparent_1px)] bg-[length:1.5px_5px] bg-repeat-y bg-top"
+                className="absolute top-0 bottom-0 z-30 w-[1.5px] bg-[radial-gradient(circle,#6b7cff_0.5px,transparent_1px)] bg-[length:1.5px_5px] bg-repeat-y bg-top"
                 style={{ left }}
               />
               <span
-                className="absolute z-50 -translate-x-1/2 -translate-y-1/2"
+                className="absolute z-30 -translate-x-1/2 -translate-y-1/2"
                 style={{ left, top: layout.headerCenter }}
               >
                 <TransformationMarkerBadge marker={marker} />
