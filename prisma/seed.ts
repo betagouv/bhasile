@@ -10,7 +10,7 @@ import {
 import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { StructureType } from "@/types/structure.type";
 
-import { createPrismaClient } from "./client";
+import { createPrismaClient, DATABASE_POOL_MAX } from "./client";
 import { createFakeActivites } from "./seeders/activite.seed";
 import { createAntenneList } from "./seeders/antenne.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
@@ -60,8 +60,9 @@ const prisma = createPrismaClient();
 // Surcharger via FAKER_SEED pour rejouer un échec observé avec une autre graine.
 faker.seed(Number(process.env.FAKER_SEED) || 20260804);
 
-// Structures construites puis écrites par lots : pic mémoire borné par la taille du lot.
-const STRUCTURE_BATCH_SIZE = 100;
+// Un create imbriqué tient une connexion : au-delà du pool, la file finit par expirer.
+const STRUCTURE_BATCH_SIZE = DATABASE_POOL_MAX;
+const STRUCTURE_LOG_STEP = 200;
 
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
@@ -272,6 +273,7 @@ async function seed(): Promise<void> {
   }
 
   const seededStructures: SeededStructure[] = [];
+  let lastLoggedTotal = 0;
   for (
     let start = 0;
     start < structureParams.length;
@@ -297,9 +299,12 @@ async function seed(): Promise<void> {
         ),
       }))
     );
-    console.log(
-      `🏠 ${seededStructures.length}/${structureParams.length} structures créées`
-    );
+    if (seededStructures.length - lastLoggedTotal >= STRUCTURE_LOG_STEP) {
+      lastLoggedTotal = seededStructures.length;
+      console.log(
+        `🏠 ${seededStructures.length}/${structureParams.length} structures créées`
+      );
+    }
   }
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
 
