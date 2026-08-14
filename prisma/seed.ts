@@ -67,6 +67,18 @@ const STRUCTURE_LOG_STEP = 200;
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
 
+// Au-delà de 65 535 paramètres Postgres refuse la requête : Prisma découpe alors
+// lui-même, mais construit tous les morceaux d'un coup. On découpe en amont.
+const CREATE_CHUNK_SIZE = 1000;
+
+const chunkElementToSeed = <T>(rows: T[]): T[][] => {
+  const chunks: T[][] = [];
+  for (let start = 0; start < rows.length; start += CREATE_CHUNK_SIZE) {
+    chunks.push(rows.slice(start, start + CREATE_CHUNK_SIZE));
+  }
+  return chunks;
+};
+
 // SEED_HEAP_LOG=1 pour situer une phase qui accumule.
 const logHeap = (phase: string): void => {
   if (!process.env.SEED_HEAP_LOG) {
@@ -339,24 +351,33 @@ async function seed(): Promise<void> {
       structureVersionId: seeded.currentVersionId,
     }))
   );
-  const createdFinesses = await prisma.finess.createManyAndReturn({
-    data: finessList.map((finess) => ({
+  const createdFinesses: { id: number; code: string }[] = [];
+  for (const data of chunkElementToSeed(
+    finessList.map((finess) => ({
       code: finess.code,
       createdAt: finess.createdAt,
       updatedAt: finess.updatedAt,
-    })),
-    select: { id: true, code: true },
-  });
+    }))
+  )) {
+    createdFinesses.push(
+      ...(await prisma.finess.createManyAndReturn({
+        data,
+        select: { id: true, code: true },
+      }))
+    );
+  }
   const finessIdByCode = new Map(
     createdFinesses.map((finess) => [finess.code, finess.id])
   );
-  await prisma.structureFiness.createMany({
-    data: finessList.map((finess) => ({
+  for (const data of chunkElementToSeed(
+    finessList.map((finess) => ({
       finessId: finessIdByCode.get(finess.code)!,
       structureVersionId: finess.structureVersionId,
       description: finess.description,
-    })),
-  });
+    }))
+  )) {
+    await prisma.structureFiness.createMany({ data });
+  }
   console.log(
     `✅ ${finessList.length} codes FINESS créés et autant de liens StructureFiness`
   );
@@ -383,10 +404,15 @@ async function seed(): Promise<void> {
       (departement) => departement.numero
     ),
   });
-  const createdDnas = await prisma.dna.createManyAndReturn({
-    data: dnaList,
-    select: { id: true, code: true },
-  });
+  const createdDnas: { id: number; code: string }[] = [];
+  for (const data of chunkElementToSeed(dnaList)) {
+    createdDnas.push(
+      ...(await prisma.dna.createManyAndReturn({
+        data,
+        select: { id: true, code: true },
+      }))
+    );
+  }
   console.log(`✅ ${dnaList.length} codes DNA créés`);
   logHeap("codes DNA");
 
@@ -394,13 +420,15 @@ async function seed(): Promise<void> {
     dnas: createdDnas,
     perVersionCounts,
   });
-  await prisma.dnaStructure.createMany({
-    data: dnaStructures.map((dnaStructure) => ({
+  for (const data of chunkElementToSeed(
+    dnaStructures.map((dnaStructure) => ({
       dnaId: dnaStructure.dnaId,
       structureVersionId: dnaStructure.structureVersionId,
       description: dnaStructure.description,
-    })),
-  });
+    }))
+  )) {
+    await prisma.dnaStructure.createMany({ data });
+  }
   console.log(`✅ ${dnaStructures.length} liens DnaStructure créés`);
   logHeap("liens DnaStructure");
 
@@ -408,7 +436,9 @@ async function seed(): Promise<void> {
   const activites = dnaStructures.flatMap(({ dnaCode }) =>
     createFakeActivites({ dnaCode })
   );
-  await prisma.activite.createMany({ data: activites });
+  for (const data of chunkElementToSeed(activites)) {
+    await prisma.activite.createMany({ data });
+  }
   console.log(`✅ ${activites.length} activités créées`);
   logHeap("activités");
 
@@ -425,9 +455,9 @@ async function seed(): Promise<void> {
       dnaCodes: dnaCodesByVersion.get(seeded.currentVersionId) ?? [],
     }))
   );
-  await prisma.evenementIndesirableGrave.createMany({
-    data: evenementsIndesirablesGraves,
-  });
+  for (const data of chunkElementToSeed(evenementsIndesirablesGraves)) {
+    await prisma.evenementIndesirableGrave.createMany({ data });
+  }
   logHeap("EIG");
 
   console.log("📡 Création des antennes...");
@@ -436,7 +466,9 @@ async function seed(): Promise<void> {
       structureVersionId: seeded.currentVersionId,
     }))
   );
-  await prisma.antenne.createMany({ data: antennes });
+  for (const data of chunkElementToSeed(antennes)) {
+    await prisma.antenne.createMany({ data });
+  }
   console.log(`✅ ${antennes.length} antennes créées`);
   logHeap("antennes");
 
