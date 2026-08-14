@@ -9,7 +9,7 @@ import { CartographieApiRead } from "@/schemas/api/statistique-cartographie.sche
 import { ZoneDataInfo } from "@/types/map.type";
 
 import {
-  getDepartementNumerosForRegion,
+  getDepartementNumerosForRegionCode,
   zonesToRichRecord,
   zonesToValueRecord,
 } from "./cartographie.util";
@@ -65,7 +65,7 @@ export const FranceMap = (): ReactElement => {
       return;
     }
 
-    const regionNumeros = getDepartementNumerosForRegion(selectedRegion);
+    const regionNumeros = getDepartementNumerosForRegionCode(selectedRegion);
     const activeDepartements = searchParams
       .get("departements")
       ?.split(",")

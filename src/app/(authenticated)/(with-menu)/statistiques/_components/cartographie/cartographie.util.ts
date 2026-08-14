@@ -1,6 +1,7 @@
-import { DEPARTEMENTS, REGIONS } from "@/constants";
+import { REGIONS } from "@/constants";
 import { CartographieZoneStat } from "@/schemas/api/statistique-cartographie.schema";
 import { ZoneDataInfo } from "@/types/map.type";
+import { getDepartementNumerosForRegion } from "@/utils/region.util";
 
 export const cleanZoneCode = (code: string): string => code.replace(/^FR-/, "");
 
@@ -35,12 +36,12 @@ export const richRecordToValueRecord = (
     Object.entries(richRecord).map(([code, info]) => [code, info.value])
   );
 
-export const getDepartementNumerosForRegion = (regionCode: string): string[] => {
+export const getDepartementNumerosForRegionCode = (
+  regionCode: string
+): string[] => {
   const region = REGIONS.find((r) => cleanZoneCode(r.code) === regionCode);
   if (!region) {
     return [];
   }
-  return DEPARTEMENTS.filter((departement) => departement.region === region.name).map(
-    (departement) => departement.numero
-  );
+  return getDepartementNumerosForRegion(region.name);
 };

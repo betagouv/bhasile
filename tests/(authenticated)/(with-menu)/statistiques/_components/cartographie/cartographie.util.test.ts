@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   cleanZoneCode,
-  getDepartementNumerosForRegion,
+  getDepartementNumerosForRegionCode,
   richRecordToValueRecord,
   zonesToRichRecord,
   zonesToValueRecord,
@@ -68,9 +68,9 @@ describe("richRecordToValueRecord", () => {
   });
 });
 
-describe("getDepartementNumerosForRegion", () => {
+describe("getDepartementNumerosForRegionCode", () => {
   it("retourne les numéros de département d'une région métropolitaine", () => {
-    expect(getDepartementNumerosForRegion("BRE").sort()).toEqual([
+    expect(getDepartementNumerosForRegionCode("BRE").sort()).toEqual([
       "22",
       "29",
       "35",
@@ -79,6 +79,6 @@ describe("getDepartementNumerosForRegion", () => {
   });
 
   it("retourne un tableau vide pour un code région inconnu", () => {
-    expect(getDepartementNumerosForRegion("ZZZ")).toEqual([]);
+    expect(getDepartementNumerosForRegionCode("ZZZ")).toEqual([]);
   });
 });

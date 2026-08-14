@@ -1,4 +1,5 @@
-import { DEPARTEMENTS, REGIONS } from "@/constants";
+import { REGIONS } from "@/constants";
+import { getDepartementsForRegion } from "@/utils/region.util";
 
 export const buildZoneSummary = (
   departementNumeros: string[]
@@ -8,9 +9,7 @@ export const buildZoneSummary = (
   const looseDepartements: string[] = [];
 
   for (const region of REGIONS) {
-    const regionDepartements = DEPARTEMENTS.filter(
-      (departement) => departement.region === region.name
-    );
+    const regionDepartements = getDepartementsForRegion(region.name);
     const selectedInRegion = regionDepartements.filter((departement) =>
       selected.has(departement.numero)
     );
