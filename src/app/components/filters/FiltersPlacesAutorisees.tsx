@@ -1,6 +1,6 @@
 import { Range } from "@codegouvfr/react-dsfr/Range";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
 import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
@@ -42,8 +42,12 @@ export const FiltersPlacesAutorisees = () => {
     navigateWithFilter("places", placesAutorisees);
   }, SEARCH_PARAM_DEBOUNCE_MS);
 
+  const previousPlacesAutorisees = useRef(placesAutorisees);
   useEffect(() => {
-    handlePlacesAutoriseesUpdate();
+    if (previousPlacesAutorisees.current !== placesAutorisees) {
+      handlePlacesAutoriseesUpdate();
+      previousPlacesAutorisees.current = placesAutorisees;
+    }
   }, [placesAutorisees, handlePlacesAutoriseesUpdate]);
 
   return (

@@ -24,6 +24,9 @@ export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
   }
 
   const handleSearchUpdate = useDebounceCallback((): void => {
+    if (searchTerm === urlSearchTerm) {
+      return;
+    }
     pushedSearchTerm.current = searchTerm;
     navigateWithFilter("search", searchTerm.length > 0 ? [searchTerm] : []);
   }, SEARCH_PARAM_DEBOUNCE_MS);

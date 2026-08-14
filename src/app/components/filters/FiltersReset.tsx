@@ -1,6 +1,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 
 import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
+import { deletePaginationParams } from "@/app/utils/searchParams.util";
 
 export const FiltersReset = ({
   closePanel,
@@ -15,6 +16,7 @@ export const FiltersReset = ({
       filters.forEach((filter) => {
         params.delete(filter);
       });
+      deletePaginationParams(params);
     });
     closePanel();
   };
