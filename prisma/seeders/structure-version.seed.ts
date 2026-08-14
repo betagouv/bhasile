@@ -1,7 +1,12 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
+import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
+import {
+  INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE,
+  INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE,
+  PLACES_VERSIONED_FROM_YEAR,
+} from "@/constants";
 import {
   ActeAdministratifCategory,
   Prisma,
@@ -401,22 +406,25 @@ const buildStructureRelations = (params: {
     return relations;
   }
 
+  const { years } = getYearRange();
+  const indicateurCutoffYear = isStructureAutorisee(params.type)
+    ? INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE
+    : INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE;
+
   return {
     ...relations,
     budgets: {
-      create: [2026, 2025, 2024, 2023, 2022, 2021].map((year) =>
+      create: years.map((year) =>
         createFakeBudget({ year, type: params.type })
       ),
     },
     indicateursFinanciers: {
-      create: [
-        createFakeIndicateurFinancier({ year: 2026, type: "PREVISIONNEL" }),
-        createFakeIndicateurFinancier({ year: 2025, type: "PREVISIONNEL" }),
-        createFakeIndicateurFinancier({ year: 2024, type: "REALISE" }),
-        createFakeIndicateurFinancier({ year: 2023, type: "REALISE" }),
-        createFakeIndicateurFinancier({ year: 2022, type: "REALISE" }),
-        createFakeIndicateurFinancier({ year: 2021, type: "REALISE" }),
-      ],
+      create: years.map((year) =>
+        createFakeIndicateurFinancier({
+          year,
+          type: year <= indicateurCutoffYear ? "REALISE" : "PREVISIONNEL",
+        })
+      ),
     },
     controles: {
       create: Array.from({ length: 3 }, () =>
