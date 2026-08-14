@@ -10,6 +10,9 @@ import { StructureType } from "@/types/structure.type";
 export const EPSILON_AMOUNT = 0.01;
 export const PLACES_ADRESSES_GAP_THRESHOLD_PCT = 10;
 
+// TODO: valider la tolérance appliquée aux durées d'actes (ici 6 mois, uniquement en moins jamais en plus)
+export const DURATION_TOLERANCE_DAYS = 183;
+
 export const isAutorisee = (type: StructureType | null): boolean =>
   type === StructureType.CADA || type === StructureType.CPH;
 
@@ -29,8 +32,17 @@ export const actesWithDates = (
       acte.endDate !== null
   );
 
-export const durationInYears = ({ startDate, endDate }: ActeDate): number =>
-  endDate.getFullYear() - startDate.getFullYear();
+export const exceedsDuration = (
+  { startDate, endDate }: ActeDate,
+  years: number
+): boolean => endDate > shiftDate(startDate, years);
+
+export const isDurationOutsideTolerance = (
+  { startDate, endDate }: ActeDate,
+  years: number
+): boolean =>
+  endDate > shiftDate(startDate, years) ||
+  endDate < shiftDate(startDate, years, -DURATION_TOLERANCE_DAYS);
 
 export const minDate = (dates: Date[]): Date | null =>
   dates.length === 0
@@ -123,3 +135,10 @@ export const sumExcedents = (budget: BudgetContext): number =>
 
 export const differsFrom = (value: number, reference: number): boolean =>
   Math.abs(value - reference) > EPSILON_AMOUNT;
+
+const shiftDate = (date: Date, years: number, days = 0): Date => {
+  const shifted = new Date(date);
+  shifted.setUTCFullYear(shifted.getUTCFullYear() + years);
+  shifted.setUTCDate(shifted.getUTCDate() + days);
+  return shifted;
+};

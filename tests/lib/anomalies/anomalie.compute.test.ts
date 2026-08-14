@@ -66,7 +66,7 @@ describe("computeAnomalies", () => {
           acteContext({
             id: 10,
             startDate: new Date("2015-01-01"),
-            endDate: new Date("2019-01-01"),
+            endDate: new Date("2018-01-01"),
           }),
           acteContext({
             id: 11,
