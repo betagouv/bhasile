@@ -58,7 +58,7 @@ describe("AUTORISATION_DUREE_NOT_15Y", () => {
     expect(detections).toEqual([]);
   });
 
-  it("ignore un arrêté saisi avec une date de fin incluse", () => {
+  it("ignore un arrêté de 15 ans qui se termine au 31 décembre", () => {
     const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
       structure: structureContext(),
       actes: [
@@ -73,7 +73,7 @@ describe("AUTORISATION_DUREE_NOT_15Y", () => {
     expect(detections).toEqual([]);
   });
 
-  it("signale l'arrêté écourté au-delà de la tolérance", () => {
+  it("signale un arrêté écourté de plus de 6 mois", () => {
     const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
       structure: structureContext(),
       actes: [
@@ -89,7 +89,7 @@ describe("AUTORISATION_DUREE_NOT_15Y", () => {
     expect(detections).toEqual([{ year: 0, targetId: 7 }]);
   });
 
-  it("ignore un arrêté écourté dans la tolérance", () => {
+  it("ignore un arrêté écourté de moins de 6 mois", () => {
     const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
       structure: structureContext(),
       actes: [
@@ -165,7 +165,7 @@ describe("CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y", () => {
     expect(detections).toEqual([]);
   });
 
-  it("accepte une convention de 3 ans saisie avec une date de fin incluse", () => {
+  it("accepte une convention de 3 ans qui se termine au 31 décembre", () => {
     const detections = detectionsOf("CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y", {
       structure: structureContext({ type: StructureType.HUDA }),
       actes: [
@@ -211,7 +211,7 @@ describe("CONVENTION_AUTORISEE_DUREE_NOT_5Y", () => {
     expect(detections).toEqual([{ year: 0, targetId: 4 }]);
   });
 
-  it("accepte une convention de 5 ans saisie avec une date de fin incluse", () => {
+  it("accepte une convention de 5 ans qui se termine au 31 décembre", () => {
     const detections = detectionsOf("CONVENTION_AUTORISEE_DUREE_NOT_5Y", {
       structure: structureContext(),
       actes: [
