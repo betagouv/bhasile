@@ -1,5 +1,6 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useRouter, useSearchParams } from "next/navigation";
+
+import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
 
 export const FiltersReset = ({
   closePanel,
@@ -7,16 +8,14 @@ export const FiltersReset = ({
   filters = ["search", "type", "bati", "places"],
   isActive,
 }: Props) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigateWithParams = useSearchParamsNavigation();
 
   const handleReset = () => {
-    const params = new URLSearchParams(Array.from(searchParams.entries()));
-    filters.forEach((filter) => {
-      params.delete(filter);
+    navigateWithParams((params) => {
+      filters.forEach((filter) => {
+        params.delete(filter);
+      });
     });
-
-    router.replace(`?${params.toString()}`);
     closePanel();
   };
 

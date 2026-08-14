@@ -35,7 +35,9 @@ describe("SearchBar", () => {
 
     // THEN
     await vi.waitFor(
-      () => expect(mockRouterReplace).toHaveBeenCalledWith("?search=coquelic"),
+      () => expect(mockRouterReplace).toHaveBeenCalledWith("?search=coquelic", {
+        scroll: true,
+      }),
       { timeout: SEARCH_PARAM_DEBOUNCE_MS * 4 }
     );
   });

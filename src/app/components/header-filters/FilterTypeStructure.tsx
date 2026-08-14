@@ -1,9 +1,9 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { FiltersTypesCheckbox } from "@/app/components/filters/FiltersTypesCheckbox";
-import { deletePaginationParams } from "@/app/utils/searchParams.util";
+import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { StructureType } from "@/types/structure.type";
 
 const ALL_STRUCTURE_TYPES: StructureType[] = [
@@ -14,9 +14,9 @@ const ALL_STRUCTURE_TYPES: StructureType[] = [
 ];
 
 export const FilterTypeStructure = () => {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const navigateWithFilter = useFilterNavigation();
 
   const urlTypes = searchParams.get("types")?.split(",").filter(Boolean);
   const currentTypes =
@@ -25,16 +25,11 @@ export const FilterTypeStructure = () => {
   const isAllChecked = currentTypes.length === ALL_STRUCTURE_TYPES.length;
 
   const updateUrl = (newTypes: string[]) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (newTypes.length > 0 && newTypes.length < ALL_STRUCTURE_TYPES.length) {
-      params.set("types", newTypes.join(","));
-    } else {
-      params.delete("types");
-    }
-
-    deletePaginationParams(params);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    navigateWithFilter(
+      "types",
+      newTypes.length < ALL_STRUCTURE_TYPES.length ? newTypes : [],
+      { pathname, scroll: false }
+    );
   };
 
   const handleSelectAllChange = (

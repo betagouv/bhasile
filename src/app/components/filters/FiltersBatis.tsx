@@ -1,12 +1,13 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { Repartition } from "@/types/adresse.type";
 
 export const FiltersBatis = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const navigateWithFilter = useFilterNavigation();
 
   const [batis, setBatis] = useState(
     searchParams.get("bati")?.split(",").filter(Boolean) || []
@@ -39,16 +40,10 @@ export const FiltersBatis = () => {
   const previousBati = useRef(batis);
   useEffect(() => {
     if (previousBati.current !== batis) {
-      const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (batis.length > 0) {
-        params.set("bati", batis.join(","));
-      } else {
-        params.delete("bati");
-      }
-      router.replace(`?${params.toString()}`);
+      navigateWithFilter("bati", batis);
       previousBati.current = batis;
     }
-  }, [batis, searchParams, router]);
+  }, [batis, navigateWithFilter]);
 
   return (
     <div className="px-6 pt-5 pb-6">
