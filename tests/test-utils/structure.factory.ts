@@ -52,6 +52,8 @@ export const createStructure = ({
   return {
     id,
     codeBhasile: `BHA-${id}`,
+    placesAutorisees: null,
+    anomalies: [],
     operateur: createOperateur(id),
     filiale: undefined,
     operateurLabel: "Adoma",

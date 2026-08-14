@@ -89,7 +89,6 @@ export type SearchProps = {
   operateurs: string | null;
   column?: StructureColumn | null;
   direction?: "asc" | "desc" | null;
-  map?: boolean;
   selection?: boolean;
   isFinalised?: boolean;
   isClosed?: boolean;
@@ -165,6 +164,35 @@ const computeAllStructureRows = async (
     .filter((row): row is StructureListComputedRow => row !== null);
 };
 
+const getSortedStructureRows = async (
+  props: SearchProps,
+  now: Date
+): Promise<StructureListComputedRow[]> => {
+  const rows = await computeAllStructureRows(now);
+
+  const filtered = filterStructureRows(rows, props, {
+    includeNonVisible: Boolean(props.selection),
+  });
+
+  return sortStructureRows(
+    filtered,
+    props.column ?? "departementAdministratif",
+    props.direction ?? "asc"
+  );
+};
+
+export const getStructureMapPoints = async (
+  props: SearchProps
+): Promise<StructureMapPoint[]> => {
+  const sorted = await getSortedStructureRows(props, getNow());
+
+  return sorted.map((row) => ({
+    id: row.id,
+    latitude: row.latitude?.toString(),
+    longitude: row.longitude?.toString(),
+  }));
+};
+
 export const getFullStructures = async (
   props: SearchProps,
   user?: SessionUser
@@ -173,29 +201,7 @@ export const getFullStructures = async (
   totalStructures: number;
 }> => {
   const now = getNow();
-  const rows = await computeAllStructureRows(now);
-
-  const filtered = filterStructureRows(rows, props, {
-    includeNonVisible: Boolean(props.selection),
-  });
-
-  const sorted = sortStructureRows(
-    filtered,
-    props.column ?? "departementAdministratif",
-    props.direction ?? "asc"
-  );
-
-  if (props.map) {
-    const points: StructureMapPoint[] = sorted.map((row) => ({
-      id: row.id,
-      latitude: row.latitude?.toString(),
-      longitude: row.longitude?.toString(),
-    }));
-    return {
-      structures: points as StructureApiRead[],
-      totalStructures: sorted.length,
-    };
-  }
+  const sorted = await getSortedStructureRows(props, now);
 
   const { total: totalStructures, rows: pageRows } = props.selection
     ? { total: sorted.length, rows: sorted }
@@ -374,12 +380,15 @@ const dbStructureToApiRead = (
         now
       );
 
-  const isCurrentVersionFromTransformation = simple
-    ? false
+  const currentVersion = simple
+    ? undefined
     : resolveCurrentVersion(
         (dbStructure as StructureDbDetails).structureVersions ?? [],
         now
-      )?.structureVersionTransformationId != null;
+      );
+
+  const isCurrentVersionFromTransformation =
+    currentVersion?.structureVersionTransformationId != null;
 
   return recursivelySerializeForClient({
     ...dbStructure,
@@ -403,6 +412,10 @@ const dbStructureToApiRead = (
       qpv: getCurrentPlacesQpv(dbStructure),
       logementsSociaux: getCurrentPlacesLogementsSociaux(dbStructure),
     },
+    // Total autorisé porté par la version, à ne pas confondre avec
+    // currentPlaces.placesAutorisees qui somme les adresses.
+    placesAutorisees: currentVersion?.placesAutorisees ?? null,
+    anomalies: "anomalies" in dbStructure ? dbStructure.anomalies : [],
     isInCpom: isStructureInCpom(dbStructure),
     isInCpomPerYear: isStructureInCpomPerYear(dbStructure),
     nom: dbStructure.nom ?? "",

@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 
 export const mockRouterPush = vi.fn();
+export const mockRouterRefresh = vi.fn();
 
 vi.mock(
   "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/_components/Tabs",

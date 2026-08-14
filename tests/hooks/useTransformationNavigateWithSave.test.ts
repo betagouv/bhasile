@@ -11,7 +11,7 @@ const mockUseOptionalTransformationContext =
   vi.fn<() => Partial<{ saveCurrentForm: () => Promise<boolean> }>>();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush }),
+  useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
   usePathname: () => "/",
 }));
 

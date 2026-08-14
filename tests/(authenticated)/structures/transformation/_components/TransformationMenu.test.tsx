@@ -17,7 +17,7 @@ const mockUseOptionalTransformationContext =
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
-  useRouter: () => ({ push: mockRouterPush }),
+  useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
 }));
 
 vi.mock("next-auth/react");

@@ -108,7 +108,13 @@ export const useAgentFormHandling = ({
 
   const handleSubmit = async (data: StructureAgentUpdateApiClient) => {
     const result = await saveStructure(data);
-    if (result !== null && nextRoute) {
+    if (result === null) {
+      return;
+    }
+
+    router.refresh();
+
+    if (nextRoute) {
       router.push(nextRoute);
     }
   };

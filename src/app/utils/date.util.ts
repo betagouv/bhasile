@@ -64,6 +64,17 @@ export const formatDateToIsoString = (
   return undefined;
 };
 
+export const parseDate = (
+  value: string | Date | null | undefined
+): Date | null => {
+  if (value instanceof Date) {
+    return value;
+  }
+  const isoString = formatDateToIsoString(value);
+
+  return isoString ? new Date(isoString) : null;
+};
+
 export const startOfUtcDay = (reference: Date = getNow()): Date => {
   const startDay = new Date(reference);
   startDay.setUTCHours(0, 0, 0, 0);
