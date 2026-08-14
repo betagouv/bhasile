@@ -1,8 +1,9 @@
 import { defineRule } from "@/lib/anomalies/anomalie.rule";
 import {
   actesWithDates,
-  durationInYears,
+  exceedsDuration,
   isAutorisee,
+  isDurationOutsideTolerance,
   isSubventionnee,
   maxDate,
   minDate,
@@ -27,7 +28,7 @@ export const CALENDAR_RULES = [
       }
 
       return actesWithDates(actes, "ARRETE_AUTORISATION")
-        .filter((acte) => durationInYears(acte) !== 15)
+        .filter((acte) => isDurationOutsideTolerance(acte, 15))
         .map((acte) => ({
           year: ANOMALIE_NO_YEAR,
           targetId: acte.id,
@@ -44,7 +45,7 @@ export const CALENDAR_RULES = [
       }
 
       return actesWithDates(actes, "CONVENTION")
-        .filter((acte) => durationInYears(acte) !== 5)
+        .filter((acte) => isDurationOutsideTolerance(acte, 5))
         .map((acte) => ({
           year: ANOMALIE_NO_YEAR,
           targetId: acte.id,
@@ -61,7 +62,7 @@ export const CALENDAR_RULES = [
       }
 
       return actesWithDates(actes, "CONVENTION")
-        .filter((acte) => durationInYears(acte) > 3)
+        .filter((acte) => exceedsDuration(acte, 3))
         .map((acte) => ({
           year: ANOMALIE_NO_YEAR,
           targetId: acte.id,

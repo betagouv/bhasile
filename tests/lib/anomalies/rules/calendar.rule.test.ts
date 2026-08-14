@@ -11,7 +11,7 @@ import { StructureType } from "@/types/structure.type";
 const onStructure = [{ year: 0, targetId: ANOMALIE_TARGET_STRUCTURE }];
 
 describe("AUTORISATION_DUREE_NOT_15Y", () => {
-  it("signale l'arrêté d'autorisation dont la durée n'est pas de 15 ans", () => {
+  it("signale l’arrêté d’autorisation trop court", () => {
     const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
       structure: structureContext(),
       actes: [
@@ -27,6 +27,22 @@ describe("AUTORISATION_DUREE_NOT_15Y", () => {
     expect(detections).toEqual([{ year: 0, targetId: 7 }]);
   });
 
+  it("signale l'arrêté d'autorisation de plus de 15 ans", () => {
+    const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
+      structure: structureContext(),
+      actes: [
+        acteContext({
+          id: 7,
+          category: "ARRETE_AUTORISATION",
+          startDate: new Date("2010-01-01"),
+          endDate: new Date("2025-01-02"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([{ year: 0, targetId: 7 }]);
+  });
+
   it("ignore un arrêté de 15 ans", () => {
     const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
       structure: structureContext(),
@@ -35,6 +51,52 @@ describe("AUTORISATION_DUREE_NOT_15Y", () => {
           category: "ARRETE_AUTORISATION",
           startDate: new Date("2010-01-01"),
           endDate: new Date("2025-01-01"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([]);
+  });
+
+  it("ignore un arrêté saisi avec une date de fin incluse", () => {
+    const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
+      structure: structureContext(),
+      actes: [
+        acteContext({
+          category: "ARRETE_AUTORISATION",
+          startDate: new Date("2023-01-01"),
+          endDate: new Date("2037-12-31"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([]);
+  });
+
+  it("signale l'arrêté écourté au-delà de la tolérance", () => {
+    const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
+      structure: structureContext(),
+      actes: [
+        acteContext({
+          id: 7,
+          category: "ARRETE_AUTORISATION",
+          startDate: new Date("2016-07-01"),
+          endDate: new Date("2030-06-30"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([{ year: 0, targetId: 7 }]);
+  });
+
+  it("ignore un arrêté écourté dans la tolérance", () => {
+    const detections = detectionsOf("AUTORISATION_DUREE_NOT_15Y", {
+      structure: structureContext(),
+      actes: [
+        acteContext({
+          category: "ARRETE_AUTORISATION",
+          startDate: new Date("2016-07-01"),
+          endDate: new Date("2030-12-31"),
         }),
       ],
     });
@@ -74,6 +136,21 @@ describe("CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y", () => {
     expect(detections).toEqual([{ year: 0, targetId: 3 }]);
   });
 
+  it("signale une convention qui dépasse 3 ans de quelques mois", () => {
+    const detections = detectionsOf("CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y", {
+      structure: structureContext({ type: StructureType.HUDA }),
+      actes: [
+        acteContext({
+          id: 3,
+          startDate: new Date("2020-01-01"),
+          endDate: new Date("2023-06-30"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([{ year: 0, targetId: 3 }]);
+  });
+
   it("accepte une convention de 3 ans", () => {
     const detections = detectionsOf("CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y", {
       structure: structureContext({ type: StructureType.HUDA }),
@@ -81,6 +158,66 @@ describe("CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y", () => {
         acteContext({
           startDate: new Date("2020-01-01"),
           endDate: new Date("2023-01-01"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([]);
+  });
+
+  it("accepte une convention de 3 ans saisie avec une date de fin incluse", () => {
+    const detections = detectionsOf("CONVENTION_SUBVENTIONNEE_DUREE_GT_3Y", {
+      structure: structureContext({ type: StructureType.HUDA }),
+      actes: [
+        acteContext({
+          startDate: new Date("2023-01-01"),
+          endDate: new Date("2025-12-31"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([]);
+  });
+});
+
+describe("CONVENTION_AUTORISEE_DUREE_NOT_5Y", () => {
+  it("signale une convention trop courte", () => {
+    const detections = detectionsOf("CONVENTION_AUTORISEE_DUREE_NOT_5Y", {
+      structure: structureContext(),
+      actes: [
+        acteContext({
+          id: 4,
+          startDate: new Date("2020-01-01"),
+          endDate: new Date("2023-01-01"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([{ year: 0, targetId: 4 }]);
+  });
+
+  it("signale une convention de plus de 5 ans", () => {
+    const detections = detectionsOf("CONVENTION_AUTORISEE_DUREE_NOT_5Y", {
+      structure: structureContext(),
+      actes: [
+        acteContext({
+          id: 4,
+          startDate: new Date("2020-01-01"),
+          endDate: new Date("2025-01-02"),
+        }),
+      ],
+    });
+
+    expect(detections).toEqual([{ year: 0, targetId: 4 }]);
+  });
+
+  it("accepte une convention de 5 ans saisie avec une date de fin incluse", () => {
+    const detections = detectionsOf("CONVENTION_AUTORISEE_DUREE_NOT_5Y", {
+      structure: structureContext(),
+      actes: [
+        acteContext({
+          startDate: new Date("2023-01-01"),
+          endDate: new Date("2027-12-31"),
         }),
       ],
     });
