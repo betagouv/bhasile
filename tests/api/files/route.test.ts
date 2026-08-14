@@ -15,9 +15,9 @@ vi.mock("uuid", () => ({
 
 vi.mock("@/lib/minio", () => ({
   checkBucket: (...args: unknown[]) => mockCheckBucket(...args),
-  minioClient: {
+  getMinioClient: () => ({
     putObject: (...args: unknown[]) => mockPutObject(...args),
-  },
+  }),
 }));
 
 vi.mock("@/app/api/files/file.repository", () => ({

@@ -8,7 +8,7 @@ import {
 } from "@/constants";
 import { FileUpload } from "@/generated/prisma/client";
 import { canDeleteFile } from "@/lib/casl/abilities";
-import { checkBucket, minioClient } from "@/lib/minio";
+import { checkBucket, getMinioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { SessionUser } from "@/types/global";
@@ -59,7 +59,7 @@ export const uploadFile = async (
   try {
     await checkBucket(bucketName);
     const key = `${uuidv4()}-${fileName}`;
-    await minioClient.putObject(bucketName, key, fileBuffer);
+    await getMinioClient().putObject(bucketName, key, fileBuffer);
     return {
       key,
       mimeType,
@@ -76,7 +76,7 @@ export const deleteFile = async (
   fileName: string
 ): Promise<void> => {
   try {
-    await minioClient.removeObject(bucketName, fileName);
+    await getMinioClient().removeObject(bucketName, fileName);
   } catch (error) {
     console.error(error);
     throw new Error("Erreur lors de la suppression du fichier");
@@ -88,7 +88,7 @@ export const getDownloadLink = async (
   fileName: string
 ): Promise<string> => {
   try {
-    return minioClient.presignedGetObject(
+    return getMinioClient().presignedGetObject(
       bucketName,
       fileName,
       FILE_UPLOAD_EXPIRATION_DELAY

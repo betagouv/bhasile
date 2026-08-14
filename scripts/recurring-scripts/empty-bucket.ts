@@ -3,7 +3,7 @@
 
 import "dotenv/config";
 
-import { minioClient } from "@/lib/minio";
+import { getMinioClient } from "@/lib/minio";
 
 const emptyBucket = async (): Promise<void> => {
   const bucketName = process.env.S3_BUCKET_NAME;
@@ -18,7 +18,7 @@ const emptyBucket = async (): Promise<void> => {
   }
   try {
     const allFiles = [];
-    const stream = minioClient.listObjects(bucketName, "", true);
+    const stream = getMinioClient().listObjects(bucketName, "", true);
 
     for await (const file of stream) {
       allFiles.push(file.name);
@@ -29,7 +29,7 @@ const emptyBucket = async (): Promise<void> => {
       return;
     }
 
-    await minioClient.removeObjects(bucketName, allFiles);
+    await getMinioClient().removeObjects(bucketName, allFiles);
     console.log(`${allFiles.length} objets ont été supprimés avec succès.`);
   } catch (error) {
     console.error(
