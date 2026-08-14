@@ -1,6 +1,14 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
+import {
+  endOfMonthUtcFromMonth,
+  endOfPreviousMonthUtc,
+  getMonthsBetween,
+} from "@/app/utils/date.util";
 import { type PrismaClient, type Rmu } from "@/generated/prisma/client";
+
+// Premier mois de collecte en prod ; la collecte arrive après coup, d'où le mois clos.
+const RMU_START_MONTH = "2025-06";
 
 type FakeRmu = Omit<Rmu, "id" | "departementNumero"> & {
   departementNumero: string;
@@ -23,17 +31,20 @@ export const createFakeRmus = async (prisma: PrismaClient): Promise<void> => {
     select: { numero: true },
   });
 
+  const months = getMonthsBetween(
+    RMU_START_MONTH,
+    endOfPreviousMonthUtc().toISOString()
+  );
+
   const rmus = departements.flatMap(({ numero }) => {
     if (!faker.helpers.maybe(() => true, { probability: 0.3 })) {
       return [];
     }
 
-    const startMonth = 5; // seed from june
-    const count = 12 - startMonth;
-    return Array.from({ length: count }, (_, index) =>
+    return months.map((month) =>
       createFakeRmu(
         numero,
-        new Date(Date.UTC(2025, startMonth + index + 1, 0, 12))
+        endOfMonthUtcFromMonth(month.year(), month.month() + 1)
       )
     );
   });

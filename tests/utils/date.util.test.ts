@@ -3,6 +3,7 @@ import "dayjs/locale/fr";
 import dayjs from "dayjs";
 
 import {
+  endOfPreviousMonthUtc,
   formatDate,
   formatDateToIsoString,
   formatForCharts,
@@ -127,6 +128,20 @@ describe("date util", () => {
       expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
   });
+  describe("endOfPreviousMonthUtc", () => {
+    it("renvoie le dernier jour du mois précédent à midi UTC", () => {
+      expect(
+        endOfPreviousMonthUtc(new Date("2026-08-14T07:51:50.899Z"))
+      ).toEqual(new Date("2026-07-31T12:00:00.000Z"));
+    });
+
+    it("ne renvoie jamais le mois de la référence, même le dernier jour", () => {
+      expect(
+        endOfPreviousMonthUtc(new Date("2026-08-31T23:59:59.999Z"))
+      ).toEqual(new Date("2026-07-31T12:00:00.000Z"));
+    });
+  });
+
   describe("getMonthsBetween", () => {
     it("retourne un tableau vide pour une date de début ou de fin invalide", () => {
       // GIVEN

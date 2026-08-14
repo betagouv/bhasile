@@ -1,7 +1,14 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { endOfMonthUtcFromMonth } from "@/app/utils/date.util";
+import {
+  endOfMonthUtcFromMonth,
+  endOfPreviousMonthUtc,
+  getMonthsBetween,
+} from "@/app/utils/date.util";
 import { Activite, Prisma } from "@/generated/prisma/client";
+
+// Premier mois de collecte en prod ; la collecte arrive après coup, d'où le mois clos.
+const ACTIVITE_START_MONTH = "2025-01";
 
 export const createFakeActivites = ({
   dnaCode,
@@ -10,14 +17,17 @@ export const createFakeActivites = ({
     return [];
   }
 
-  const count = faker.number.int({ min: 1, max: 12 });
-  const startMonth = 12 - count; // 0..11
-  const months = Array.from({ length: count }, (_, i) => startMonth + i);
+  const months = getMonthsBetween(
+    ACTIVITE_START_MONTH,
+    endOfPreviousMonthUtc().toISOString()
+  );
+  // Toutes les structures ne remontent pas depuis le début : fenêtre tirée au sort.
+  const count = faker.number.int({ min: 1, max: months.length });
 
-  return months.map((month) =>
+  return months.slice(-count).map((month) =>
     createFakeActivite({
       dnaCode,
-      date: endOfMonthUtcFromMonth(2025, month + 1),
+      date: endOfMonthUtcFromMonth(month.year(), month.month() + 1),
     })
   );
 };
