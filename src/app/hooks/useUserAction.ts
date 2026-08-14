@@ -18,5 +18,13 @@ export const useUserAction = () => {
     postUserAction("/api/user-actions/statistiques-cartographie");
   };
 
-  return { trackStatistiques, trackStatistiquesCartographie };
+  const trackStructuresCartographie = async (): Promise<void> => {
+    postUserAction("/api/user-actions/structures-cartographie");
+  };
+
+  return {
+    trackStatistiques,
+    trackStatistiquesCartographie,
+    trackStructuresCartographie,
+  };
 };

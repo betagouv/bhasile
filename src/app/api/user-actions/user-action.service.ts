@@ -60,3 +60,10 @@ export const createStatistiquesCartographieEvent = async (method: string) => {
     description: UserActionDescription.STATISTIQUES_CARTOGRAPHIE,
   });
 };
+
+export const createStructuresCartographieEvent = async (method: string) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    description: UserActionDescription.STRUCTURES_CARTOGRAPHIE,
+  });
+};

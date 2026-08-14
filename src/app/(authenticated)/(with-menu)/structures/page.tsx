@@ -1,6 +1,5 @@
 "use client";
 
-import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -11,6 +10,7 @@ import { ListLoader } from "@/app/components/lists/ListLoader";
 import Loader from "@/app/components/ui/Loader";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
+import { useUserAction } from "@/app/hooks/useUserAction";
 
 import { StructuresTable } from "./_components/StructuresTable";
 import { Toolbar } from "./_components/Toolbar";
@@ -18,6 +18,8 @@ import { Toolbar } from "./_components/Toolbar";
 type Visualization = "tableau" | "carte";
 
 export default function Structures(): ReactElement {
+  const { trackStructuresCartographie } = useUserAction();
+
   const [selectedVisualization, setSelectedVisualization] =
     useState<Visualization>(() => {
       if (typeof window === "undefined") {
@@ -49,11 +51,16 @@ export default function Structures(): ReactElement {
     []
   );
 
-  const setVisualization = useCallback((next: "tableau" | "carte") => {
-    setSelectedVisualization(next);
-    sendEvent({ category: "visualisation", action: next });
-    window.location.hash = next;
-  }, []);
+  const setVisualization = useCallback(
+    (next: "tableau" | "carte") => {
+      setSelectedVisualization(next);
+      if (next === "carte") {
+        trackStructuresCartographie();
+      }
+      window.location.hash = next;
+    },
+    [trackStructuresCartographie]
+  );
 
   const options = useMemo(
     () => [

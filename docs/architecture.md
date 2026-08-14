@@ -58,13 +58,17 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 Exemple typique (`src/schemas/api/transformation.schema.ts`) :
 
 ```ts
-export const transformationApiUpdateSchema = z.object({ /* ... */ });
+export const transformationApiUpdateSchema = z.object({/* ... */});
 
 // Type vu côté serveur après validation (sortie de Zod) :
-export type TransformationApiUpdate = z.infer<typeof transformationApiUpdateSchema>;
+export type TransformationApiUpdate = z.infer<
+  typeof transformationApiUpdateSchema
+>;
 
 // Type que le client doit envoyer (entrée de Zod, avant transformation) :
-export type TransformationApiUpdateClient = z.input<typeof transformationApiUpdateSchema>;
+export type TransformationApiUpdateClient = z.input<
+  typeof transformationApiUpdateSchema
+>;
 ```
 
 ## 🔨 Outils de développement
@@ -77,7 +81,6 @@ export type TransformationApiUpdateClient = z.input<typeof transformationApiUpda
 
 ## 🚀 Services externes
 
-- Tracking (avec parcimonie) : [Matomo](https://fr.matomo.org/)
 - Remontée d'erreurs : [Sentry](https://sentry.io/)
 - Hébergement de l'application et de la base de données : [Scalingo](https://scalingo.com/)
 - Stockage objet : [OVH S3](https://www.ovhcloud.com/fr/public-cloud/object-storage/)
