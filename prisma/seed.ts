@@ -67,8 +67,7 @@ const STRUCTURE_LOG_STEP = 200;
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
 
-// Au-delà de 65 535 paramètres Postgres refuse la requête : Prisma découpe alors
-// lui-même, mais construit tous les morceaux d'un coup. On découpe en amont.
+// Au-delà de 65 535 paramètres Postgres refuse la requête : on découpe en amont
 const CREATE_CHUNK_SIZE = 1000;
 
 const chunkElementToSeed = <T>(rows: T[]): T[][] => {
@@ -79,13 +78,14 @@ const chunkElementToSeed = <T>(rows: T[]): T[][] => {
   return chunks;
 };
 
-// SEED_HEAP_LOG=1 pour situer une phase qui accumule.
+// SEED_HEAP_LOG=1 pour log l'usage de la RAM par phase
+// Usage : SEED_HEAP_LOG=1 yarn prasd
 const logHeap = (phase: string): void => {
   if (!process.env.SEED_HEAP_LOG) {
     return;
   }
   const heapMb = Math.round(process.memoryUsage().heapUsed / 1e6);
-  console.log(`   💾 ${phase} : ${heapMb} Mo`);
+  console.log(`   💾 Mémoire utilisée à la phase ${phase} : ${heapMb} Mo`);
 };
 
 async function seed(): Promise<void> {
