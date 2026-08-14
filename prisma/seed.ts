@@ -67,6 +67,15 @@ const STRUCTURE_LOG_STEP = 200;
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
 
+// SEED_HEAP_LOG=1 pour situer une phase qui accumule.
+const logHeap = (phase: string): void => {
+  if (!process.env.SEED_HEAP_LOG) {
+    return;
+  }
+  const heapMb = Math.round(process.memoryUsage().heapUsed / 1e6);
+  console.log(`   💾 ${phase} : ${heapMb} Mo`);
+};
+
 async function seed(): Promise<void> {
   console.log("🗑️ Suppression des données existantes...");
   await wipeTables(prisma);
@@ -173,6 +182,7 @@ async function seed(): Promise<void> {
   console.log("🔢 Génération des codes Bhasile par région...");
   const bhasileCodesMap = generateAllBhasileCodes(seedNumber(5000)); // Not all codes will be used
   console.log("✅ Codes Bhasile générés");
+  logHeap("codes Bhasile");
 
   console.log("🏢 Création des opérateurs et de leurs filiales...");
   const operateurs: {
@@ -310,15 +320,18 @@ async function seed(): Promise<void> {
     }
   }
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
+  logHeap("structures");
 
   await mirrorLegacyPlacesToBaseVersions(prisma);
 
   await createFakeCpoms(prisma);
+  logHeap("CPOM");
 
   console.log("📣 Seed des notifications");
   const notificationsToCreate = createNotificationsList();
   await prisma.notification.createMany({ data: notificationsToCreate });
   console.log(`✅ ${notificationsToCreate.length} notifications créées`);
+  logHeap("notifications");
 
   console.log("🏥 Création et liaison des codes FINESS...");
   const finessList = createFinessList(
@@ -375,6 +388,7 @@ async function seed(): Promise<void> {
     select: { id: true, code: true },
   });
   console.log(`✅ ${dnaList.length} codes DNA créés`);
+  logHeap("codes DNA");
 
   const dnaStructures = createDnaStructures({
     dnas: createdDnas,
@@ -388,6 +402,7 @@ async function seed(): Promise<void> {
     })),
   });
   console.log(`✅ ${dnaStructures.length} liens DnaStructure créés`);
+  logHeap("liens DnaStructure");
 
   console.log("📊 Création des activités...");
   const activites = dnaStructures.flatMap(({ dnaCode }) =>
@@ -395,6 +410,7 @@ async function seed(): Promise<void> {
   );
   await prisma.activite.createMany({ data: activites });
   console.log(`✅ ${activites.length} activités créées`);
+  logHeap("activités");
 
   console.log("📊 Création des événements indésirables graves...");
   const dnaCodesByVersion = new Map<number, string[]>();
@@ -412,6 +428,7 @@ async function seed(): Promise<void> {
   await prisma.evenementIndesirableGrave.createMany({
     data: evenementsIndesirablesGraves,
   });
+  logHeap("EIG");
 
   console.log("📡 Création des antennes...");
   const antennes = createAntenneList(
@@ -421,6 +438,7 @@ async function seed(): Promise<void> {
   );
   await prisma.antenne.createMany({ data: antennes });
   console.log(`✅ ${antennes.length} antennes créées`);
+  logHeap("antennes");
 
   console.log("🔎 Recalcul des anomalies...");
   const structuresCount = await recomputeAllAnomalies();
