@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "@codegouvfr/react-dsfr/Button";
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
@@ -12,11 +12,26 @@ import { useOperateurContext } from "@/contexts/OperateurContext";
 export const OperateurHeader = (): ReactElement | null => {
   const { operateur } = useOperateurContext();
   const pathname = usePathname();
-  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
 
   const isRootPath = pathname === `/operateurs/${operateur?.id}`;
+
+  const params = new URLSearchParams();
+  const page = searchParams.get("page");
+  const search = searchParams.get("search");
+
+  if (page) {
+    params.set("page", page);
+  }
+  if (search) {
+    params.set("search", search);
+  }
+
+  const queryString = params.toString();
+  const backHref = `/operateurs${queryString ? `?${queryString}` : ""}`;
 
   return operateur ? (
     <div
@@ -26,13 +41,13 @@ export const OperateurHeader = (): ReactElement | null => {
       ref={headerRef}
     >
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
-        <Button
+        <Link
           className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
-          title="Retour"
-          onClick={() => router.back()}
+          title="Retour à la liste des opérateurs"
+          href={backHref}
         >
           Retour
-        </Button>
+        </Link>
         <div>
           <h2 className="text-title-blue-france text-xs uppercase mb-0">
             <strong className="pr-3">Opérateur</strong>
