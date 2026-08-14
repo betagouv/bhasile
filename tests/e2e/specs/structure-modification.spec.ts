@@ -1,6 +1,6 @@
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
 import { CURRENT_YEAR, PLACES_VERSIONED_FROM_YEAR } from "@/constants";
-import { minioClient } from "@/lib/minio";
+import { getMinioClient } from "@/lib/minio";
 import { ControleType } from "@/types/controle.type";
 
 import { expect, test } from "../fixtures/test";
@@ -159,7 +159,7 @@ test.describe("Structure modification", () => {
       expect(controle!.fileUploads[0].key).toBeTruthy();
       expect(controle!.date.toISOString()).toContain("2024-03-15");
 
-      const stat = await minioClient.statObject(
+      const stat = await getMinioClient().statObject(
         S3_BUCKET_NAME,
         controle!.fileUploads[0].key
       );
@@ -254,7 +254,7 @@ test.describe("Structure modification", () => {
       expect(autre!.fileUploads[0]?.key).toBeTruthy();
       expect(autre!.name).toBe(autreName);
 
-      const stat = await minioClient.statObject(
+      const stat = await getMinioClient().statObject(
         S3_BUCKET_NAME,
         convention!.fileUploads[0].key
       );
