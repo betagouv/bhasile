@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
+import { SearchParamsNavigationOptions } from "@/app/hooks/useSearchParamsNavigation";
 
 const mockReplace = vi.fn();
 let mockSearchParams = new URLSearchParams();
@@ -74,7 +75,7 @@ const Filter = ({
   options,
 }: {
   values: (string | number)[];
-  options?: { pathname?: string; scroll?: boolean };
+  options?: SearchParamsNavigationOptions;
 }): ReactElement => {
   const navigateWithFilter = useFilterNavigation();
   return (

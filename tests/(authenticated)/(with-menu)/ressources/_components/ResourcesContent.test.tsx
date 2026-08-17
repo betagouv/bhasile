@@ -12,6 +12,10 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParams.value,
 }));
 
+vi.mock("@/contexts/FetchStateContext", () => ({
+  useFetchState: () => ({ setFetchState: vi.fn() }),
+}));
+
 const FILES_BLOCK: FilesBlock = {
   id: "modeles",
   title: "Modèles",

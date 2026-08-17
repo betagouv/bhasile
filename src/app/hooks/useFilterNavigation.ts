@@ -4,7 +4,10 @@ import { useCallback } from "react";
 
 import { setFilterParam } from "@/app/utils/searchParams.util";
 
-import { useSearchParamsNavigation } from "./useSearchParamsNavigation";
+import {
+  SearchParamsNavigationOptions,
+  useSearchParamsNavigation,
+} from "./useSearchParamsNavigation";
 
 export const useFilterNavigation = (): NavigateWithFilter => {
   const navigateWithParams = useSearchParamsNavigation();
@@ -22,5 +25,5 @@ export const useFilterNavigation = (): NavigateWithFilter => {
 type NavigateWithFilter = (
   key: string,
   values: (string | number)[],
-  options?: { pathname?: string; scroll?: boolean }
+  options?: SearchParamsNavigationOptions
 ) => void;

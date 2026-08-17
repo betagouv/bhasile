@@ -3,7 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
+import {
+  SearchParamsNavigationOptions,
+  useSearchParamsNavigation,
+} from "@/app/hooks/useSearchParamsNavigation";
 
 const mockReplace = vi.fn();
 let mockSearchParams = new URLSearchParams();
@@ -78,7 +81,7 @@ const Navigator = ({
   options,
 }: {
   mutate: (params: URLSearchParams) => void;
-  options?: { pathname?: string; scroll?: boolean };
+  options?: SearchParamsNavigationOptions;
 }): ReactElement => {
   const navigateWithParams = useSearchParamsNavigation();
   return (

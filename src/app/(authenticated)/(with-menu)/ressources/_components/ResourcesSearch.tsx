@@ -2,33 +2,28 @@
 
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import Tag from "@codegouvfr/react-dsfr/Tag";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ReactElement, useEffect, useState } from "react";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
+import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
 
 export const ResourcesSearch = ({ suggestions }: Props): ReactElement => {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const navigateWithFilter = useFilterNavigation();
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") ?? ""
   );
 
   const applySearch = (term: string): void => {
-    const params = new URLSearchParams(Array.from(searchParams.entries()));
-
-    if ((params.get("search") ?? "") === term) {
+    if ((searchParams.get("search") ?? "") === term) {
       return;
     }
 
-    if (term.length > 0) {
-      params.set("search", term);
-    } else {
-      params.delete("search");
-    }
-
-    router.replace(`?${params.toString()}`, { scroll: false });
+    navigateWithFilter("search", term.length > 0 ? [term] : [], {
+      scroll: false,
+    });
   };
 
   const updateSearchParam = useDebounceCallback(

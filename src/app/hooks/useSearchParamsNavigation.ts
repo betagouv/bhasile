@@ -28,7 +28,7 @@ type NavigateWithParams = (
   options?: SearchParamsNavigationOptions
 ) => void;
 
-type SearchParamsNavigationOptions = {
+export type SearchParamsNavigationOptions = {
   pathname?: string;
   scroll?: boolean;
 };
