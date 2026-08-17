@@ -222,3 +222,28 @@ export const getControleQualiteDownloadContent = (
     ],
   };
 };
+
+export const getStructureDownloadContent = (
+  structure: StructureApiRead
+): DownloadOptions => {
+  const typePlaces = getTypePlacesDownloadContent(structure);
+  const finances = getFinancesDownloadContent(structure);
+  const controleQualite = getControleQualiteDownloadContent(structure);
+
+  return {
+    fileName: `structure-${structure.codeBhasile}`,
+    sheets: [
+      {
+        sheetName: typePlaces.sheetName,
+        data: typePlaces.data,
+        headersMap: typePlaces.headersMap,
+      },
+      {
+        sheetName: finances.sheetName,
+        data: finances.data,
+        headersMap: finances.headersMap,
+      },
+      ...(controleQualite.sheets || []),
+    ],
+  };
+};
