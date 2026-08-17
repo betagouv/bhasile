@@ -1,14 +1,15 @@
 import { Range } from "@codegouvfr/react-dsfr/Range";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
+import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { useStructureStats } from "@/app/hooks/useStructureStats";
 import { SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
 
 export const FiltersPlacesAutorisees = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const navigateWithFilter = useFilterNavigation();
 
   const { maxPlacesAutorisees, minPlacesAutorisees } = useStructureStats();
 
@@ -38,17 +39,15 @@ export const FiltersPlacesAutorisees = () => {
   };
 
   const handlePlacesAutoriseesUpdate = useDebounceCallback((): void => {
-    const params = new URLSearchParams(Array.from(searchParams.entries()));
-    if (placesAutorisees.length > 0) {
-      params.set("places", placesAutorisees.join(","));
-    } else {
-      params.delete("places");
-    }
-    router.replace(`?${params.toString()}`);
+    navigateWithFilter("places", placesAutorisees);
   }, SEARCH_PARAM_DEBOUNCE_MS);
 
+  const previousPlacesAutorisees = useRef(placesAutorisees);
   useEffect(() => {
-    handlePlacesAutoriseesUpdate();
+    if (previousPlacesAutorisees.current !== placesAutorisees) {
+      handlePlacesAutoriseesUpdate();
+      previousPlacesAutorisees.current = placesAutorisees;
+    }
   }, [placesAutorisees, handlePlacesAutoriseesUpdate]);
 
   return (

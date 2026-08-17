@@ -19,3 +19,16 @@ export const deletePaginationParams = (params: URLSearchParams): void => {
     }
   }
 };
+
+export const setFilterParam = (
+  params: URLSearchParams,
+  key: string,
+  values: (string | number)[]
+): void => {
+  if (values.length > 0) {
+    params.set(key, values.join(","));
+  } else {
+    params.delete(key);
+  }
+  deletePaginationParams(params);
+};

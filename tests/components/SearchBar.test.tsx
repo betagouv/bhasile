@@ -35,9 +35,25 @@ describe("SearchBar", () => {
 
     // THEN
     await vi.waitFor(
-      () => expect(mockRouterReplace).toHaveBeenCalledWith("?search=coquelic"),
+      () => expect(mockRouterReplace).toHaveBeenCalledWith("?search=coquelic", {
+        scroll: true,
+      }),
       { timeout: SEARCH_PARAM_DEBOUNCE_MS * 4 }
     );
+  });
+
+  it("ne navigue pas au montage, ce qui préserve la pagination d'un lien profond", async () => {
+    // GIVEN — un lien vers la page 3 d'une recherche existante
+    mockSearchParams = new URLSearchParams("page=3&search=coquelic");
+
+    // WHEN
+    render(<SearchBar placeholder={PLACEHOLDER} inputId="search" />);
+    await new Promise((resolve) =>
+      setTimeout(resolve, SEARCH_PARAM_DEBOUNCE_MS * 2)
+    );
+
+    // THEN — sans cette garde, la navigation de montage effaçait « page »
+    expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 
   it("réaligne le champ quand l'URL change sans passer par la saisie", () => {

@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ReactElement, useCallback } from "react";
 
-import { useListNavigation } from "@/app/hooks/useListNavigation";
+import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
 import { getSafePage } from "@/app/utils/list.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 
@@ -11,8 +11,7 @@ export const Pagination = ({
   totalElements,
   pageSize = DEFAULT_PAGE_SIZE,
 }: Props): ReactElement | null => {
-  const router = useRouter();
-  const startNavigation = useListNavigation();
+  const navigateWithParams = useSearchParamsNavigation();
 
   const searchParams = useSearchParams();
   const currentPage: number = getSafePage(
@@ -23,11 +22,9 @@ export const Pagination = ({
 
   const setCurrentPage = useCallback(
     (page: number) => {
-      const params = new URLSearchParams(Array.from(searchParams.entries()));
-      params.set("page", String(page));
-      startNavigation(() => router.replace(`?${params.toString()}`));
+      navigateWithParams((params) => params.set("page", String(page)));
     },
-    [searchParams, router, startNavigation]
+    [navigateWithParams]
   );
 
   const totalPages = Math.ceil(totalElements / pageSize);

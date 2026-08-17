@@ -1,16 +1,15 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ReactElement, useEffect, useRef, useState } from "react";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
-import { useListNavigation } from "@/app/hooks/useListNavigation";
+import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { SEARCH_PARAM_DEBOUNCE_MS } from "@/constants";
 
 export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const startNavigation = useListNavigation();
+  const navigateWithFilter = useFilterNavigation();
 
   const urlSearchTerm = searchParams.get("search") ?? "";
   const [searchTerm, setSearchTerm] = useState(urlSearchTerm);
@@ -25,18 +24,11 @@ export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
   }
 
   const handleSearchUpdate = useDebounceCallback((): void => {
-    const params = new URLSearchParams(Array.from(searchParams.entries()));
-
-    params.delete("page");
-
-    if (searchTerm.length > 0) {
-      params.set("search", searchTerm);
-    } else {
-      params.delete("search");
+    if (searchTerm === urlSearchTerm) {
+      return;
     }
-
     pushedSearchTerm.current = searchTerm;
-    startNavigation(() => router.replace(`?${params.toString()}`));
+    navigateWithFilter("search", searchTerm.length > 0 ? [searchTerm] : []);
   }, SEARCH_PARAM_DEBOUNCE_MS);
 
   useEffect(() => {

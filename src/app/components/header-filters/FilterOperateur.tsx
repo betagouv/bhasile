@@ -1,18 +1,18 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import {
   OperateurSuggestion,
   useOperateurSuggestion,
 } from "@/app/hooks/useOperateurSuggestion";
-import { deletePaginationParams } from "@/app/utils/searchParams.util";
 
 export const FilterOperateur = () => {
   const searchParams = useSearchParams();
+  const navigateWithFilter = useFilterNavigation();
   const [allOperateurs, setAllOperateurs] = useState<OperateurSuggestion[]>([]);
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const { getAllOperateurs } = useOperateurSuggestion();
 
@@ -64,25 +64,15 @@ export const FilterOperateur = () => {
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
     const newValue = selectedIds.join(",");
+    const currentValue = searchParams.get("operateurs");
 
-    if (
-      params.get("operateurs") === newValue ||
-      (!params.get("operateurs") && !newValue)
-    ) {
+    if (currentValue === newValue || (!currentValue && !newValue)) {
       return;
     }
 
-    if (selectedIds.length > 0) {
-      params.set("operateurs", newValue);
-    } else {
-      params.delete("operateurs");
-    }
-
-    deletePaginationParams(params);
-    router.replace(`?${params.toString()}`);
-  }, [selectedIds, router, searchParams]);
+    navigateWithFilter("operateurs", selectedIds);
+  }, [selectedIds, searchParams, navigateWithFilter]);
 
   return (
     <div className="p-4 flex flex-col gap-2">

@@ -1,13 +1,14 @@
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { StructureType } from "@/types/structure.type";
 
 import { FiltersTypesCheckbox } from "./FiltersTypesCheckbox";
 
 export const FiltersTypes = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const navigateWithFilter = useFilterNavigation();
 
   const [types, setTypes] = useState(
     searchParams.get("type")?.split(",").filter(Boolean) || []
@@ -42,16 +43,10 @@ export const FiltersTypes = () => {
   const previousType = useRef(types);
   useEffect(() => {
     if (previousType.current !== types) {
-      const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (types.length > 0) {
-        params.set("type", types.join(","));
-      } else {
-        params.delete("type");
-      }
-      router.replace(`?${params.toString()}`);
+      navigateWithFilter("type", types);
       previousType.current = types;
     }
-  }, [types, searchParams, router]);
+  }, [types, navigateWithFilter]);
 
   return (
     <div className="p-6">

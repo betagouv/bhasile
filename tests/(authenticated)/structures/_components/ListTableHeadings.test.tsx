@@ -20,6 +20,10 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams(),
 }));
 
+vi.mock("@/contexts/FetchStateContext", () => ({
+  useFetchState: () => ({ setFetchState: vi.fn() }),
+}));
+
 const COLUMNS: ListColumn[] = [
   {
     label: "Code Bhasile",
@@ -106,7 +110,8 @@ describe("ListTableHeadings", () => {
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith(
-        expect.stringContaining("column=type&direction=asc")
+        expect.stringContaining("column=type&direction=asc"),
+        { scroll: true }
       );
     });
   });
@@ -132,7 +137,8 @@ describe("ListTableHeadings", () => {
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith(
-        expect.stringContaining("column=codeBhasile&direction=desc")
+        expect.stringContaining("column=codeBhasile&direction=desc"),
+        { scroll: true }
       );
     });
   });
@@ -197,7 +203,8 @@ describe("ListTableHeadings", () => {
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith(
-        expect.stringContaining("column=type&direction=asc")
+        expect.stringContaining("column=type&direction=asc"),
+        { scroll: true }
       );
     });
   });

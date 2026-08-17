@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ReactElement, useEffect, useRef, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
+import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
 import { ListColumn } from "@/types/ListColumn";
 
 import { OrderButton } from "./OrderButton";
@@ -13,7 +14,7 @@ export const ListTableHeadings = ({
   columns,
   children,
 }: Props): ReactElement => {
-  const router = useRouter();
+  const navigateWithParams = useSearchParamsNavigation();
 
   const searchParams = useSearchParams();
 
@@ -43,22 +44,22 @@ export const ListTableHeadings = ({
 
   useEffect(() => {
     if (prevColumn.current !== column || prevDirection.current !== direction) {
-      const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (column) {
-        params.set("column", column);
-      } else {
-        params.delete("column");
-      }
-      if (direction) {
-        params.set("direction", direction);
-      } else {
-        params.delete("direction");
-      }
-      router.replace(`?${params.toString()}`);
+      navigateWithParams((params) => {
+        if (column) {
+          params.set("column", column);
+        } else {
+          params.delete("column");
+        }
+        if (direction) {
+          params.set("direction", direction);
+        } else {
+          params.delete("direction");
+        }
+      });
       prevColumn.current = column;
       prevDirection.current = direction;
     }
-  }, [column, direction, searchParams, router]);
+  }, [column, direction, navigateWithParams]);
 
   return (
     <Table

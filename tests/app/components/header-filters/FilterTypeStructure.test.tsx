@@ -12,6 +12,10 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams(),
 }));
 
+vi.mock("@/contexts/FetchStateContext", () => ({
+  useFetchState: () => ({ setFetchState: vi.fn() }),
+}));
+
 describe("FilterTypeStructure", () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -1,18 +1,17 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { deletePaginationParams } from "@/app/utils/searchParams.util";
+import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { REGIONS } from "@/constants";
 import { getDepartementsForRegion } from "@/utils/region.util";
 
 import { FiltersRegion } from "./FiltersRegion";
 
 export const FiltersDepartement = () => {
-  const router = useRouter();
-
   const searchParams = useSearchParams();
+  const navigateWithFilter = useFilterNavigation();
 
   const [departements, setDepartements] = useState<string[]>(
     searchParams.get("departements")?.split(",") || []
@@ -34,17 +33,10 @@ export const FiltersDepartement = () => {
   const prevDepartements = useRef(departements);
   useEffect(() => {
     if (prevDepartements.current !== departements) {
-      const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (departements.length > 0) {
-        params.set("departements", departements.join(","));
-      } else {
-        params.delete("departements");
-      }
-      deletePaginationParams(params);
-      router.replace(`?${params.toString()}`);
+      navigateWithFilter("departements", departements);
       prevDepartements.current = departements;
     }
-  }, [departements, searchParams, router]);
+  }, [departements, navigateWithFilter]);
 
   return (
     <div className="py-4">
