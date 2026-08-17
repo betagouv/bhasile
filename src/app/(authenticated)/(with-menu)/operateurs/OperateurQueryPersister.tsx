@@ -1,10 +1,9 @@
 "use client";
 
 import { usePersistSearchQuery } from "@/app/hooks/usePersistSearchQuery";
+import { OPERATEURS_STORAGE_KEY } from "@/constants";
 
-export const OPERATEURS_STORAGE_KEY = "operateurs-query";
-
-export const OperateursQueryPersister = () => {
+export const OperateursQueryPersister = (): null => {
   usePersistSearchQuery("/operateurs", OPERATEURS_STORAGE_KEY);
   return null;
 };

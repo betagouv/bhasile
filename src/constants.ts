@@ -24,6 +24,8 @@ export const SEARCH_PARAM_DEBOUNCE_MS = 300;
 
 export const LIST_NAVIGATION_KEY = "list-navigation";
 
+export const OPERATEURS_STORAGE_KEY = "operateurs-query";
+
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 

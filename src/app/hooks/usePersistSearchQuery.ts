@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 export function usePersistSearchQuery(
   targetPath: string,
@@ -10,7 +10,6 @@ export function usePersistSearchQuery(
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isFirstMount = useRef(true);
 
   useEffect(() => {
     if (pathname !== targetPath) {
@@ -18,17 +17,19 @@ export function usePersistSearchQuery(
     }
 
     const queryString = searchParams.toString();
+    const stored = sessionStorage.getItem(storageKey) ?? "";
 
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      const stored = sessionStorage.getItem(storageKey) ?? "";
+    if (!queryString) {
+      const referrer = document.referrer;
+      const isComingFromChildPage =
+        referrer && new URL(referrer).pathname.startsWith(`${targetPath}/`);
 
-      if (!queryString && stored) {
+      if (isComingFromChildPage && stored) {
         router.replace(`${targetPath}?${stored}`);
         return;
       }
 
-      sessionStorage.setItem(storageKey, queryString);
+      sessionStorage.removeItem(storageKey);
       return;
     }
 

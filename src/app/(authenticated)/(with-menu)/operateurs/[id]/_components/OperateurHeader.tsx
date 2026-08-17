@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement } from "react";
 
-import { OPERATEURS_STORAGE_KEY } from "@/app/(authenticated)/(with-menu)/operateurs/OperateurQueryPersister";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
+import { useStoredQueryParams } from "@/app/hooks/useStoredQueryParams";
+import { OPERATEURS_STORAGE_KEY } from "@/constants";
 import { useOperateurContext } from "@/contexts/OperateurContext";
 
 export const OperateurHeader = (): ReactElement | null => {
@@ -15,15 +16,10 @@ export const OperateurHeader = (): ReactElement | null => {
   const pathname = usePathname();
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
-
-  const [backHref, setBackHref] = useState("/operateurs");
-
-  useEffect(() => {
-    const storedQuery = sessionStorage.getItem(OPERATEURS_STORAGE_KEY);
-    if (storedQuery) {
-      setBackHref(`/operateurs?${storedQuery}`);
-    }
-  }, []);
+  const { backHref } = useStoredQueryParams(
+    "/operateurs",
+    OPERATEURS_STORAGE_KEY
+  );
 
   const isRootPath = pathname === `/operateurs/${operateur?.id}`;
 
