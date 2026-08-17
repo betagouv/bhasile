@@ -2,7 +2,6 @@ import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-ve
 import { isStructureFinalisedAndOpen } from "@/app/api/structures/structure.util";
 import { compareSortValues, SortKind, SortValue } from "@/app/utils/list.util";
 import { ANOMALIE_DEFINITIONS } from "@/lib/anomalies/anomalie.definition";
-import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { AnomalieCode } from "@/types/anomalie.type";
 import {
   AnomalieGroupBy,
@@ -11,6 +10,7 @@ import {
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
 
+import { isStructureInDashboardScope } from "../dashboard.util";
 import { AnomalieStructure } from "./anomalies.db.type";
 
 export const isAnomalieActive = (anomalie: {
@@ -62,7 +62,7 @@ export const buildDashboardAnomalies = (
         structureCodeBhasile: structure.codeBhasile,
         structureType: structure.type,
         structureCommune: currentVersion?.communeAdministrative ?? null,
-        structureDepartement: structure.departementAdministratif,
+        structureDepartement: currentVersion?.departementAdministratif ?? null,
         operateurName: structure.operateur?.name ?? null,
       });
     }
@@ -117,30 +117,7 @@ const isEligibleStructure = (
     return false;
   }
 
-  const departement = structure.departementAdministratif;
-  if (!departement || !canUpdateDepartement(options.user, departement)) {
-    return false;
-  }
-  if (
-    options.departementList.length > 0 &&
-    !options.departementList.includes(departement)
-  ) {
-    return false;
-  }
-
-  const operateurId = structure.operateur?.id ?? null;
-  if (
-    options.operateurList.length > 0 &&
-    (operateurId === null ||
-      !options.operateurList.includes(String(operateurId)))
-  ) {
-    return false;
-  }
-
-  if (
-    options.typeList.length > 0 &&
-    (structure.type === null || !options.typeList.includes(structure.type))
-  ) {
+  if (!isStructureInDashboardScope(structure, options)) {
     return false;
   }
 

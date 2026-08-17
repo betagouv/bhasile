@@ -7,6 +7,7 @@ import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { DEPARTEMENTS, REGIONS } from "@/constants";
 import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
+import { getDepartementsForRegion } from "@/utils/region.util";
 
 import { DepartementsSelector } from "../DepartementsSelector";
 
@@ -21,7 +22,7 @@ export const LocationSelector = () => {
   const departements = watch("departements") as CpomDepartementApiType[];
 
   const departementsOfRegion = useMemo(
-    () => DEPARTEMENTS.filter((departement) => departement.region === region),
+    () => getDepartementsForRegion(region),
 
     [region]
   );

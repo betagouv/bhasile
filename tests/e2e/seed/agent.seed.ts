@@ -33,7 +33,7 @@ export const seedAgent = async (): Promise<void> => {
     select: { id: true },
   });
 
-  // Le rôle porte le nom d'un rôle réel : `fill-roles` peut l'avoir créé avec
+  // Le rôle porte le nom d'un rôle réel : `role.seed.ts` peut l'avoir créé avec
   // d'autres départements, qu'un simple upsert laisserait en place.
   await prisma.roleDepartement.deleteMany({ where: { roleId: role.id } });
   await prisma.roleDepartement.create({

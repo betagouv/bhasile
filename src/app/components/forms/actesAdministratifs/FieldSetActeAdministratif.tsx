@@ -5,7 +5,9 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { AnomalieMessage } from "@/app/components/forms/AnomalieMessage";
 import { useActeAdministratifRadios } from "@/app/hooks/useActeAdministratifRadios";
+import { ACTE_DATE_FIELDS } from "@/app/utils/anomalie.util";
 import { cn } from "@/app/utils/classname.util";
 import {
   AdditionalFieldsType,
@@ -181,6 +183,12 @@ export default function FieldSetActeAdministratif({
             />
           </div>
         ))}
+      <AnomalieMessage
+        fields={ACTE_DATE_FIELDS}
+        targetIds={actesOfCategory
+          .map((acte) => acte.id)
+          .filter((id): id is number => id !== undefined)}
+      />
     </fieldset>
   );
 }

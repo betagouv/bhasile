@@ -332,7 +332,10 @@ describe("checkCanUpdateDepartements", () => {
     ).toThrow(ApiDomainError);
   });
 
-  it("retient le département de la version plutôt que celui de la structure", () => {
+  // Le scalaire de Structure est immuable et posé par le serveur ; celui de la version
+  // peut venir du client (copyStructureVersion applique `...overrides` en dernier).
+  // Sur une porte d'autorisation, c'est l'immuable qui tranche.
+  it("retient le département de la structure plutôt que celui de la version", () => {
     expect(() =>
       checkCanUpdateDepartements(agentParis, [
         {
@@ -342,7 +345,7 @@ describe("checkCanUpdateDepartements", () => {
           },
         },
       ])
-    ).not.toThrow();
+    ).toThrow("Le département 92 n'est pas dans votre périmètre.");
   });
 
   it("laisse un agent démarrer une création dont le département est encore inconnu", () => {

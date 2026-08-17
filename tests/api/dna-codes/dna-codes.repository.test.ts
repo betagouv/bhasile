@@ -18,7 +18,10 @@ describe("dna-codes.repository findAll db integration", () => {
 
   const createStructure = async () => {
     const structure = await prisma.structure.create({
-      data: { codeBhasile: `BHA-DC-TEST-${Date.now()}-${randomUUID()}` },
+      data: {
+        codeBhasile: `BHA-DC-TEST-${Date.now()}-${randomUUID()}`,
+        departementAdministratif: "50",
+      },
     });
     createdStructureIds.push(structure.id);
     return structure;

@@ -5,6 +5,8 @@ import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { CustomNotice } from "../../common/CustomNotice";
+import { AnomalieMessage } from "../AnomalieMessage";
+import { getBudgetTableLines } from "./budget-tables/getBudgetTableLines";
 import { StructureCpomTable } from "./budget-tables/StructureCpomTable";
 import { StructureTable } from "./budget-tables/StructureTable";
 
@@ -54,6 +56,11 @@ export const BudgetTables = () => {
           </p>
         )}
         <StructureTable />
+        <AnomalieMessage
+          fields={getBudgetTableLines(isAutorisee).flatMap((group) =>
+            group.lines.map((line) => line.name)
+          )}
+        />
       </fieldset>
       {wasInCpom && (
         <fieldset className="flex flex-col gap-6 min-w-0 w-full">

@@ -3,8 +3,13 @@ import { useEffect, useMemo } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
+import { useAnomalies } from "@/app/components/forms/AnomaliesContext";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
+import {
+  ACTE_DATE_FIELDS,
+  getAnomalieMessage,
+} from "@/app/utils/anomalie.util";
 import { AdditionalFieldsType } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
@@ -21,6 +26,12 @@ export const ActeAdministratif = ({
   categoryShortName,
 }: UploadsByCategoryFileProps) => {
   const { control, watch } = useFormContext();
+
+  const dateAnomalies = useAnomalies({
+    fields: ACTE_DATE_FIELDS,
+    targetIds: acte.id === undefined ? [] : [acte.id],
+  });
+  const dateAnomalieMessage = getAnomalieMessage(dateAnomalies);
 
   const { append } = useFieldArray({
     control,
@@ -123,6 +134,7 @@ export const ActeAdministratif = ({
               control={control}
               label={`Début ${categoryShortName}`}
               className="mb-0"
+              anomalieMessage={dateAnomalieMessage}
               type="date"
             />
 
@@ -131,6 +143,7 @@ export const ActeAdministratif = ({
               control={control}
               label={`Fin ${categoryShortName}`}
               className="mb-0"
+              anomalieMessage={dateAnomalieMessage}
               type="date"
             />
           </div>

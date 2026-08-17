@@ -10,6 +10,7 @@ export const dashboardStructureSelect = {
   fermetureDate: true,
   codeBhasile: true,
   type: true,
+  departementAdministratif: true,
   operateur: { select: { id: true, name: true } },
   forms: {
     select: {

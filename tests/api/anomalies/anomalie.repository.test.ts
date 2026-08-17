@@ -24,7 +24,10 @@ describe("anomalie.repository reconcileAnomalies db integration", () => {
 
   beforeEach(async () => {
     const structure = await prisma.structure.create({
-      data: { codeBhasile: `BHA-ANO-TEST-${randomUUID()}` },
+      data: {
+        codeBhasile: `BHA-ANO-TEST-${randomUUID()}`,
+        departementAdministratif: "50",
+      },
     });
     createdStructureIds.push(structure.id);
     structureId = structure.id;

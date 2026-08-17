@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
-import { RappelStructure } from "@/app/api/dashboard/rappels/rappels.db.type";
+import { ActeAdministratifDates } from "@/app/api/actes-administratifs/acte-administratif.util";
+import {
+  RappelCpom,
+  RappelStructure,
+} from "@/app/api/dashboard/rappels/rappels.db.type";
 import { buildRappels } from "@/app/api/dashboard/rappels/rappels.util";
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
@@ -28,11 +32,11 @@ const baseOptions = {
 };
 
 const parentActe = (
-  category: string,
+  category: ActeAdministratifCategory,
   start: string | null,
   end: string | null,
   id = 1
-) => ({
+): RappelStructure["actesAdministratifs"][number] => ({
   id,
   category,
   parentId: null,
@@ -45,10 +49,11 @@ const makeStructure = (
     id: number;
     type: StructureType | null;
     departementAdministratif: string | null;
+    versionDepartement: string | null;
     operateur: { id: number; name: string } | null;
-    actesAdministratifs: ReturnType<typeof parentActe>[];
+    actesAdministratifs: RappelStructure["actesAdministratifs"];
     evaluations: { date: Date | null }[];
-    cpomStructures: unknown[];
+    cpomStructures: RappelStructure["cpomStructures"];
     forms: {
       status: boolean;
       formDefinition: { slug: string };
@@ -68,8 +73,13 @@ const makeStructure = (
     fermetureDate: overrides.fermetureDate ?? null,
     structureVersions: [
       {
+        id: 1,
         effectiveDate: overrides.versionEffectiveDate ?? new Date("2020-01-01"),
         communeAdministrative: "Avranches",
+        departementAdministratif:
+          overrides.versionDepartement === undefined
+            ? "50"
+            : overrides.versionDepartement,
         structureVersionTransformationId:
           versionTransformationType === null ? null : 7,
         structureVersionTransformation:
@@ -93,26 +103,25 @@ const makeStructure = (
     actesAdministratifs: overrides.actesAdministratifs ?? [],
     evaluations: overrides.evaluations ?? [],
     cpomStructures: overrides.cpomStructures ?? [],
-  } as unknown as RappelStructure;
+  };
 };
 
 const makeCpom = (
   overrides: Partial<{
     id: number;
-    actesAdministratifs: ReturnType<typeof parentActe>[];
+    actesAdministratifs: ActeAdministratifDates[];
     departementNumeros: string[];
     operateur: { id: number; name: string };
   }> = {}
-): CpomDbList =>
-  ({
-    id: overrides.id ?? 10,
-    name: "COALLIA",
-    operateur: overrides.operateur ?? { id: 2, name: "Coallia" },
-    departements: (overrides.departementNumeros ?? ["92", "93"]).map(
-      (numero) => ({ departement: { numero } })
-    ),
-    actesAdministratifs: overrides.actesAdministratifs ?? [],
-  }) as unknown as CpomDbList;
+): RappelCpom => ({
+  id: overrides.id ?? 10,
+  name: "COALLIA",
+  operateur: overrides.operateur ?? { id: 2, name: "Coallia" },
+  departements: (overrides.departementNumeros ?? ["92", "93"]).map(
+    (numero) => ({ departement: { numero } })
+  ),
+  actesAdministratifs: overrides.actesAdministratifs ?? [],
+});
 
 const findByTask = (structure: RappelStructure, taskType: string) =>
   buildRappels([structure], [], baseOptions).find(
@@ -224,6 +233,22 @@ describe("buildRappels — scoping & CPOM", () => {
       actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
     });
     expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
+  });
+
+  it("filtre sur le département de la structure mais affiche celui de la version", () => {
+    const structure = makeStructure({
+      departementAdministratif: "50",
+      versionDepartement: null,
+      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+    });
+
+    const rappels = buildRappels([structure], [], {
+      ...baseOptions,
+      departementList: ["50"],
+    });
+
+    expect(rappels).toHaveLength(1);
+    expect(rappels[0].structureDepartement).toBeNull();
   });
 
   it("exclut une structure non finalisée", () => {

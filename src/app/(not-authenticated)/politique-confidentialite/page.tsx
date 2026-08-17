@@ -177,24 +177,7 @@ export default function PolitiqueConfidentialite(): ReactElement {
 
       <section>
         <h2 className="text-title-blue-france">
-          8. Cookies et mesure d’audience
-        </h2>
-        <p>
-          Le service BHASILE utilise l’outil de mesure d’audience{" "}
-          <strong>Matomo</strong>, configuré de manière à respecter la
-          réglementation applicable et les recommandations de la CNIL. Son mode
-          « exempté » permet de ne pas recueillir le consentement des
-          utilisateurs via un bandeau cookies.
-        </p>
-        <p>
-          Les données collectées via Matomo ont pour seule finalité la mesure de
-          l’audience et l’amélioration du service.
-        </p>
-      </section>
-
-      <section>
-        <h2 className="text-title-blue-france">
-          9. Droits des personnes concernées
+          8. Droits des personnes concernées
         </h2>
         <p>
           Conformément au RGPD, les personnes concernées disposent des droits
@@ -238,7 +221,7 @@ export default function PolitiqueConfidentialite(): ReactElement {
       </section>
 
       <section>
-        <h2 className="text-title-blue-france">10. Réclamation</h2>
+        <h2 className="text-title-blue-france">9. Réclamation</h2>
         <p>
           Les personnes concernées peuvent introduire une réclamation auprès de
           la Commission nationale de l’informatique et des libertés (CNIL) si
@@ -249,7 +232,7 @@ export default function PolitiqueConfidentialite(): ReactElement {
 
       <section>
         <h2 className="text-title-blue-france">
-          11. Évolution de la politique de confidentialité
+          10. Évolution de la politique de confidentialité
         </h2>
         <p>
           La présente politique de confidentialité peut être modifiée à tout

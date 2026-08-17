@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Table } from "@/app/components/common/Table";
+import { AnomalieMessage } from "@/app/components/forms/AnomalieMessage";
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
@@ -95,6 +96,9 @@ export const FieldSetTypePlaces = ({
           Toutes les cases doivent être remplies
         </p>
       )}
+      <AnomalieMessage
+        fields={TYPE_PLACE_LINES.map((line) => line.name)}
+      />
     </fieldset>
   );
 };

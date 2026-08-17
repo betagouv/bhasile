@@ -7,7 +7,6 @@ WITH
     SELECT DISTINCT
       ON (sv."structureId") sv."structureId",
       sv."id" AS "structure_version_id",
-      sv."departementAdministratif",
       sv."latitude",
       sv."longitude",
       sv."public"
@@ -58,7 +57,7 @@ SELECT
   s."updatedAt" AS "updated_at",
   s."creationDate" AS "creation_date",
   s."date303" AS "date_303",
-  svc."departementAdministratif" AS "departement_administratif",
+  s."departementAdministratif" AS "departement_administratif",
   svc."latitude" AS "latitude",
   svc."longitude" AS "longitude",
   svc."public" AS "public",
@@ -70,6 +69,6 @@ FROM
   public."Structure" s
   INNER JOIN structure_version_current svc ON svc."structureId" = s."id"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
-  LEFT JOIN public."Departement" dep ON dep."numero" = svc."departementAdministratif"
+  LEFT JOIN public."Departement" dep ON dep."numero" = s."departementAdministratif"
   LEFT JOIN public."Region" r ON r."id" = dep."regionId"
   LEFT JOIN dna_codes_by_version dna ON dna."structureVersionId" = svc."structure_version_id";

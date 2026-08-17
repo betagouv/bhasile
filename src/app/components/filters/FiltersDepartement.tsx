@@ -4,7 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
-import { DEPARTEMENTS, REGIONS } from "@/constants";
+import { REGIONS } from "@/constants";
+import { getDepartementsForRegion } from "@/utils/region.util";
 
 import { FiltersRegion } from "./FiltersRegion";
 
@@ -48,9 +49,7 @@ export const FiltersDepartement = () => {
             setDepartements={setDepartements}
           >
             <>
-              {DEPARTEMENTS.filter(
-                (departement) => departement.region === region.name
-              )
+              {getDepartementsForRegion(region.name)
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((departement) => (
                   <Checkbox

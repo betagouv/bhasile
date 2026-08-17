@@ -24,6 +24,20 @@ yarn dev
 
 Ouvrez [http://localhost:3000](http://localhost:3000) avec votre navigateur pour voir le résultat.
 
+### 🧑 Se connecter avec un rôle
+
+Le seed crée trois agents de test. Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
+
+| Rôle          | Email                                   | Périmètre     |
+| ------------- | --------------------------------------- | ------------- |
+| National      | `national@test.proconnect.gouv.fr`      | Tout          |
+| Régional      | `regional@test.proconnect.gouv.fr`      | Île-de-France |
+| Départemental | `departemental@test.proconnect.gouv.fr` | Paris (75)    |
+
+Sur la page intermédiaire, restez en `eidas1` et cliquez sur "Se connecter"
+
+Pour changer de rôle, déconnectez-vous et reconnectez-vous avec un autre email.
+
 ## 🧪 Tests
 
 Pour lancer les tests, exécutez :

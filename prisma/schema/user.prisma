@@ -78,6 +78,7 @@ enum UserActionCategory {
 enum UserActionDescription {
   STATISTIQUES_TABLE
   STATISTIQUES_CARTOGRAPHIE
+  STRUCTURES_CARTOGRAPHIE
 
   @@schema("public")
 }

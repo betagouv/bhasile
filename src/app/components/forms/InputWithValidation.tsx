@@ -30,6 +30,7 @@ export default function InputWithValidation<
   addon,
   className,
   state,
+  anomalieMessage,
   stateRelatedMessage,
   variant,
   onChange,
@@ -108,55 +109,75 @@ export default function InputWithValidation<
     onChange?.(event);
   };
 
-  return variant === "simple" ? (
-    <InputSimple
-      nativeInputProps={{
-        id,
-        type,
-        onChange: onInputChange,
-        value:
-          type === "date"
-            ? getHtmlDateValue()
-            : field.value !== undefined && field.value !== null
-              ? field.value
-              : "",
-        min,
-        max,
-        onBlur: field.onBlur,
-        disabled: disabled,
-        step: "any",
-      }}
-      {...field}
-      label={label}
-      className={cn(
-        "transition-all",
-        className,
-        disabled && "cursor-not-allowed! bg-disabled-grey border-transparent"
+  const showsAnomalie = anomalieMessage && !fieldState.invalid;
+  const anomalieId = `${id ?? name}-anomalie`;
+  const anomalieClassName = showsAnomalie ? ANOMALIE_INPUT_BORDER : undefined;
+  const describedById = showsAnomalie ? anomalieId : undefined;
+
+  const input =
+    variant === "simple" ? (
+      <InputSimple
+        nativeInputProps={{
+          id,
+          "aria-describedby": describedById,
+          type,
+          onChange: onInputChange,
+          value:
+            type === "date"
+              ? getHtmlDateValue()
+              : field.value !== undefined && field.value !== null
+                ? field.value
+                : "",
+          min,
+          max,
+          onBlur: field.onBlur,
+          disabled: disabled,
+          step: "any",
+        }}
+        {...field}
+        label={label}
+        className={cn(
+          "transition-all",
+          className,
+          anomalieClassName,
+          disabled && "cursor-not-allowed! bg-disabled-grey border-transparent"
+        )}
+        state={state || (fieldState.invalid ? "error" : "default")}
+        stateRelatedMessage={stateRelatedMessage || fieldState.error?.message}
+      />
+    ) : (
+      <Input
+        nativeInputProps={{
+          ...field,
+          "aria-describedby": describedById,
+          type,
+          onChange: onInputChange,
+          value: type === "date" ? getHtmlDateValue() : (field.value ?? ""),
+          onBlur: field.onBlur,
+          min,
+          max,
+          step: "any",
+          id,
+        }}
+        label={label}
+        hintText={hintText}
+        disabled={disabled}
+        addon={addon}
+        className={cn(className, anomalieClassName)}
+        state={state || (fieldState.invalid ? "error" : "default")}
+        stateRelatedMessage={stateRelatedMessage || fieldState.error?.message}
+      />
+    );
+
+  return (
+    <>
+      {input}
+      {showsAnomalie && (
+        <span id={anomalieId} className="sr-only">
+          Anomalie : {anomalieMessage}
+        </span>
       )}
-      state={state || (fieldState.invalid ? "error" : "default")}
-      stateRelatedMessage={stateRelatedMessage || fieldState.error?.message}
-    />
-  ) : (
-    <Input
-      nativeInputProps={{
-        ...field,
-        type,
-        onChange: onInputChange,
-        value: type === "date" ? getHtmlDateValue() : (field.value ?? ""),
-        onBlur: field.onBlur,
-        min,
-        max,
-        step: "any",
-        id,
-      }}
-      label={label}
-      hintText={hintText}
-      disabled={disabled}
-      addon={addon}
-      className={className}
-      state={state || (fieldState.invalid ? "error" : "default")}
-      stateRelatedMessage={stateRelatedMessage || fieldState.error?.message}
-    />
+    </>
   );
 }
 
@@ -174,8 +195,12 @@ type InputWithValidationProps<TFieldValues extends FieldValues = FieldValues> =
     addon?: React.ReactNode;
     className?: string;
     state?: "default" | "error" | "success";
+    anomalieMessage?: string;
     stateRelatedMessage?: string;
     variant?: "simple";
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
     defaultValue?: string | number;
   };
+
+const ANOMALIE_INPUT_BORDER =
+  "[&_input]:border-1 [&_input]:border-solid [&_input]:border-plain-warning [&_input]:shadow-none";

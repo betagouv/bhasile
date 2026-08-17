@@ -16,6 +16,8 @@ import {
 } from "react-hook-form";
 import { z } from "zod";
 
+import { AnomaliesProvider } from "@/app/components/forms/AnomaliesContext";
+import { useAnomaliesState } from "@/app/hooks/useAnomaliesState";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { cn } from "@/app/utils/classname.util";
 import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
@@ -158,6 +160,19 @@ export default function FormWrapper<TSchema extends AnyZodSchema>({
 
   // State for alert
   const [showAlert, setShowAlert] = useState(false);
+  const { anomalies, recomputeAnomalies } = useAnomaliesState(
+    methods.getValues
+  );
+
+  useEffect(() => {
+    const subscription = methods.watch((_, { type }) => {
+      if (type === undefined) {
+        recomputeAnomalies();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [methods, recomputeAnomalies]);
 
   const showSavedAlert = () => setShowAlert(true);
   const hideAlert = () => setShowAlert(false);
@@ -165,108 +180,113 @@ export default function FormWrapper<TSchema extends AnyZodSchema>({
   return (
     <HookFormProvider {...methods}>
       <FormProvider formMethods={methods}>
-        <form
-          ref={formRef}
-          onSubmit={handleSubmit(
-            (data) => (onSubmit || defaultSubmitHandler)(data, methods),
-            handleFormErrors
-          )}
-          className={cn(
-            "bg-white p-6 rounded-lg border-default-grey border flex flex-col gap-8",
-            className
-          )}
-        >
-          {backLink && (
-            <Link
-              href={backLink.href}
-              onNavigate={
-                onBackNavigate
-                  ? (event) => {
-                      event.preventDefault();
-                      onBackNavigate(backLink.href);
-                    }
-                  : undefined
-              }
-              className="flex gap-2 fr-link fr-icon  w-fit text-title-blue-france"
-            >
-              <i className="fr-icon-arrow-left-s-line before:w-4"></i>
-              {backLink.label}
-            </Link>
-          )}
-          {typeof children === "function" ? children(methods) : children}
+        <AnomaliesProvider anomalies={anomalies}>
+          <form
+            ref={formRef}
+            onBlur={recomputeAnomalies}
+            onSubmit={handleSubmit(
+              (data) => (onSubmit || defaultSubmitHandler)(data, methods),
+              handleFormErrors
+            )}
+            className={cn(
+              "bg-white p-6 rounded-lg border-default-grey border flex flex-col gap-8",
+              className
+            )}
+          >
+            {backLink && (
+              <Link
+                href={backLink.href}
+                onNavigate={
+                  onBackNavigate
+                    ? (event) => {
+                        event.preventDefault();
+                        onBackNavigate(backLink.href);
+                      }
+                    : undefined
+                }
+                className="flex gap-2 fr-link fr-icon  w-fit text-title-blue-france"
+              >
+                <i className="fr-icon-arrow-left-s-line before:w-4"></i>
+                {backLink.label}
+              </Link>
+            )}
+            {typeof children === "function" ? children(methods) : children}
 
-          {showSubmitButton && (
-            <>
-              {showAlert && (
-                <Alert
-                  className="mb-4"
-                  severity="success"
-                  title="Enregistré pour plus tard"
-                  description="Votre progression a été enregistrée. Les données sont sauvegardées localement dans votre navigateur."
-                  closable
-                  onClose={hideAlert}
-                />
-              )}
-              <div>
-                <div className="flex items-center gap-4 mt-6 justify-end">
-                  {showAutoSaveMention && (
-                    <div className="flex items-center gap-1 text-mention-grey text-xs">
-                      <span className="fr-icon-save-line fr-icon--xs" />
-                      Votre progression est enregistrée automatiquement
-                    </div>
-                  )}
-                  {availableFooterButtons.includes(FooterButtonType.CANCEL) && (
-                    <Button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleReset();
-                      }}
-                      priority="secondary"
-                    >
-                      Annuler
-                    </Button>
-                  )}
-                  {availableFooterButtons.includes(FooterButtonType.SAVE) && (
-                    <Button
-                      priority="secondary"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        showSavedAlert();
-                      }}
-                    >
-                      Terminer plus tard
-                    </Button>
-                  )}
-                  {availableFooterButtons.includes(FooterButtonType.SUBMIT) && (
-                    <Button type="submit">{submitButtonText}</Button>
-                  )}
-                </div>
-                {submitCount > 0 && Object.keys(errors).length > 0 && (
+            {showSubmitButton && (
+              <>
+                {showAlert && (
                   <Alert
-                    className="mt-4 w-fit ml-auto"
-                    severity="error"
-                    small
-                    description="Certains champs sont manquants ou invalides. Corrigez-les avant de valider."
+                    className="mb-4"
+                    severity="success"
+                    title="Enregistré pour plus tard"
+                    description="Votre progression a été enregistrée. Les données sont sauvegardées localement dans votre navigateur."
+                    closable
+                    onClose={hideAlert}
                   />
                 )}
-                {showContactInfos && (
-                  <p className="cta_message text-mention-grey text-sm mt-2 text-right">
-                    Si vous ne parvenez pas à remplir certains champs,{" "}
-                    <a
-                      href={`mailto:${BHASILE_CONTACT_EMAIL}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      contactez-nous par mail
-                    </a>
-                    ou par téléphone ({BHASILE_PHONE_NUMBERS})
-                  </p>
-                )}
-              </div>
-            </>
-          )}
-        </form>
+                <div>
+                  <div className="flex items-center gap-4 mt-6 justify-end">
+                    {showAutoSaveMention && (
+                      <div className="flex items-center gap-1 text-mention-grey text-xs">
+                        <span className="fr-icon-save-line fr-icon--xs" />
+                        Votre progression est enregistrée automatiquement
+                      </div>
+                    )}
+                    {availableFooterButtons.includes(
+                      FooterButtonType.CANCEL
+                    ) && (
+                      <Button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleReset();
+                        }}
+                        priority="secondary"
+                      >
+                        Annuler
+                      </Button>
+                    )}
+                    {availableFooterButtons.includes(FooterButtonType.SAVE) && (
+                      <Button
+                        priority="secondary"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          showSavedAlert();
+                        }}
+                      >
+                        Terminer plus tard
+                      </Button>
+                    )}
+                    {availableFooterButtons.includes(
+                      FooterButtonType.SUBMIT
+                    ) && <Button type="submit">{submitButtonText}</Button>}
+                  </div>
+                  {submitCount > 0 && Object.keys(errors).length > 0 && (
+                    <Alert
+                      className="mt-4 w-fit ml-auto"
+                      severity="error"
+                      small
+                      description="Certains champs sont manquants ou invalides. Corrigez-les avant de valider."
+                    />
+                  )}
+                  {showContactInfos && (
+                    <p className="cta_message text-mention-grey text-sm mt-2 text-right">
+                      Si vous ne parvenez pas à remplir certains champs,{" "}
+                      <a
+                        href={`mailto:${BHASILE_CONTACT_EMAIL}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        contactez-nous par mail
+                      </a>
+                      ou par téléphone ({BHASILE_PHONE_NUMBERS})
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+          </form>
+        </AnomaliesProvider>
       </FormProvider>
     </HookFormProvider>
   );

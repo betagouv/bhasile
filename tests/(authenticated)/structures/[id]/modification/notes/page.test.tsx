@@ -11,10 +11,13 @@ import {
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+import {
+  mockRouterPush,
+  mockRouterRefresh,
+} from "../../../../../test-utils/structure-page-test.mocks";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush }),
+  useRouter: () => ({ push: mockRouterPush, refresh: mockRouterRefresh }),
   usePathname: () => "/",
 }));
 
@@ -45,5 +48,8 @@ describe("ModificationNotes page integration", () => {
     expect(body.id).toBe(77);
     expect(body.notes).toBe(structure.notes);
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
+    // Invalide le cache routeur : sinon un retour arrière ré-affiche les
+    // anomalies corrigées sur le tableau de bord rendu côté serveur.
+    expect(mockRouterRefresh).toHaveBeenCalled();
   });
 });

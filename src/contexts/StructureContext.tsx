@@ -4,7 +4,7 @@ import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { createMutableEntityContext } from "./createEntityContext";
 
-const { Provider, useValue } =
+const { Provider, useValue, useOptionalValue } =
   createMutableEntityContext<StructureApiRead>("Structure");
 
 export const StructureProvider = Provider;
@@ -14,3 +14,6 @@ export const useStructureContext = () => {
 
   return { structure: entity, setStructure: setEntity };
 };
+
+export const useOptionalStructure = (): StructureApiRead | undefined =>
+  useOptionalValue()?.entity;

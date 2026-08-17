@@ -8,16 +8,12 @@ import { PropsWithChildren, ReactElement, Suspense } from "react";
 import { AppAbilityProvider } from "@/contexts/AbilityProvider";
 import { FetchStateProvider } from "@/contexts/FetchStateContext";
 
-import { Tracking } from "./components/Tracking";
-
 export const Providers = ({ children }: PropsWithChildren): ReactElement => {
   return (
     <SessionProvider>
       <AppAbilityProvider>
         <FetchStateProvider>
-          <Suspense fallback={null}>
-            <Tracking />
-          </Suspense>
+          <Suspense fallback={null}></Suspense>
           {children}
         </FetchStateProvider>
       </AppAbilityProvider>

@@ -1,6 +1,6 @@
 import { getYearRange } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
-import { minioClient } from "@/lib/minio";
+import { getMinioClient } from "@/lib/minio";
 
 import { expect, test } from "../fixtures/test";
 import { CpomModificationPage } from "../pages/cpom-modification.page";
@@ -118,7 +118,7 @@ test.describe("CPOM modification", () => {
       expect(autre!.fileUploads[0]?.key).toBeTruthy();
       expect(autre!.name).toBe(autreName);
 
-      const stat = await minioClient.statObject(
+      const stat = await getMinioClient().statObject(
         S3_BUCKET_NAME,
         convention!.fileUploads[0].key
       );

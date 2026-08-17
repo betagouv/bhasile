@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 
-import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   getDatesConvention,
@@ -17,6 +16,7 @@ import {
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
 
+import { isStructureInDashboardScope } from "../dashboard.util";
 import {
   AUTORISATION_ADVANCE_MONTHS,
   CONVENTION_ADVANCE_MONTHS,
@@ -24,7 +24,7 @@ import {
   EVALUATION_PERIOD_YEARS,
   EVALUATION_PERIODS_COUNT,
 } from "./rappels.constants";
-import { RappelStructure } from "./rappels.db.type";
+import { RappelCpom, RappelStructure } from "./rappels.db.type";
 
 const getCriticiteForDeadline = (
   deadline: Date | null,
@@ -148,46 +148,31 @@ export type BuildRappelsOptions = {
 
 export const buildRappels = (
   structures: RappelStructure[],
-  cpoms: CpomDbList[],
+  cpoms: RappelCpom[],
   options: BuildRappelsOptions
 ): DashboardRappel[] => {
-  const { user, departementList, operateurList, typeList, now } = options;
+  const { user, departementList, operateurList, now } = options;
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
     if (!isStructureFinalisedAndOpen(structure, now)) {
       continue;
     }
-    const departement = structure.departementAdministratif;
-    if (!departement || !canUpdateDepartement(user, departement)) {
-      continue;
-    }
-    if (departementList.length > 0 && !departementList.includes(departement)) {
-      continue;
-    }
-    const operateurId = structure.operateur?.id ?? null;
-    if (
-      operateurList.length > 0 &&
-      (operateurId === null || !operateurList.includes(String(operateurId)))
-    ) {
-      continue;
-    }
-    if (
-      typeList.length > 0 &&
-      (structure.type === null || !typeList.includes(structure.type))
-    ) {
+    if (!isStructureInDashboardScope(structure, options)) {
       continue;
     }
 
     const currentCpom = findCurrentCpom(structure.cpomStructures, now);
+    const currentVersion = resolveCurrentVersion(
+      structure.structureVersions,
+      now
+    );
     const context = {
       structureId: structure.id,
       structureCodeBhasile: structure.codeBhasile,
       structureType: structure.type,
-      structureCommune:
-        resolveCurrentVersion(structure.structureVersions, now)
-          ?.communeAdministrative ?? null,
-      structureDepartement: departement,
+      structureCommune: currentVersion?.communeAdministrative ?? null,
+      structureDepartement: currentVersion?.departementAdministratif ?? null,
       operateurName: structure.operateur?.name ?? null,
       cpomId: currentCpom?.id ?? null,
       cpomLabel: currentCpom?.label ?? null,

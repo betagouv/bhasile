@@ -10,6 +10,7 @@ import { StructureColumn } from "@/types/ListColumn";
 import { createStructureEvent } from "../user-actions/user-action.service";
 import {
   getFullStructures,
+  getStructureMapPoints,
   updateStructureOperateur,
 } from "./structure.service";
 
@@ -33,22 +34,32 @@ export async function GET(request: NextRequest) {
   const isFinalised = request.nextUrl.searchParams.get("finalised") === "true";
   const isClosed = request.nextUrl.searchParams.get("closed") === "true";
 
+  const searchProps = {
+    search,
+    page,
+    type,
+    bati,
+    placesAutorisees,
+    departements,
+    column,
+    direction,
+    operateurs,
+    selection,
+    isFinalised,
+    isClosed,
+  };
+
+  if (map) {
+    const points = await getStructureMapPoints(searchProps);
+
+    return NextResponse.json({
+      structures: points,
+      totalStructures: points.length,
+    });
+  }
+
   const { structures, totalStructures } = await getFullStructures(
-    {
-      search,
-      page,
-      type,
-      bati,
-      placesAutorisees,
-      departements,
-      map,
-      column,
-      direction,
-      operateurs,
-      selection,
-      isFinalised,
-      isClosed,
-    },
+    searchProps,
     session?.user as SessionUser | undefined
   );
 

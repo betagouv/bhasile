@@ -1,7 +1,10 @@
 import { StructureCard } from "@/app/components/StructureCard";
 import { formatDate } from "@/app/utils/date.util";
 import { pluralize } from "@/app/utils/string.util";
-import { getPlacesSource } from "@/app/utils/transformation.util";
+import {
+  getPlacesSource,
+  getStructureVersionDepartement,
+} from "@/app/utils/transformation.util";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
@@ -58,7 +61,8 @@ const buildCardProps = (
   const operateur =
     structureVersion?.structure?.operateur ??
     structureVersionTransformation.operateur;
-  const departementAdministratif = structureVersion?.departementAdministratif;
+  const departementAdministratif =
+    getStructureVersionDepartement(structureVersion);
 
   if (!nom || !structureType || !operateur || !departementAdministratif) {
     return null;

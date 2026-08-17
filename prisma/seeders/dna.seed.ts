@@ -49,28 +49,28 @@ type DnaSeedRefs = {
   departementNumeros: string[];
 };
 
+// dnaCode est porté par la ligne pour faciliter le lien avec activités et EIG
+export type DnaStructureSeed = {
+  dnaId: number;
+  dnaCode: string;
+  structureVersionId: number;
+  description: string;
+};
+
 export const createDnaStructures = ({
-  dnaList,
-  dnaByCode,
+  dnas,
   perVersionCounts,
-}: CreateDnaStructuresOptions) => {
-  const dnaStructures: Array<{
-    dnaId: number;
-    structureVersionId: number;
-    description: string;
-  }> = [];
+}: CreateDnaStructuresOptions): DnaStructureSeed[] => {
+  const dnaStructures: DnaStructureSeed[] = [];
 
   let cursor = 0;
   for (const { structureVersionId, count } of perVersionCounts) {
     for (let i = 0; i < count; i++) {
-      const dna = dnaList[cursor++];
-      const dnaId = dnaByCode.get(dna.code);
-      if (!dnaId) {
-        continue;
-      }
+      const dna = dnas[cursor++];
 
       dnaStructures.push({
-        dnaId,
+        dnaId: dna.id,
+        dnaCode: dna.code,
         structureVersionId,
         description: faker.lorem.words(2),
       });
@@ -80,7 +80,6 @@ export const createDnaStructures = ({
 };
 
 type CreateDnaStructuresOptions = {
-  dnaList: Omit<Dna, "id">[];
-  dnaByCode: Map<string, number>;
+  dnas: { id: number; code: string }[];
   perVersionCounts: { structureVersionId: number; count: number }[];
 };
