@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
 import { InformationCard } from "@/app/components/InformationCard";
+import { getTypePlacesYearRange } from "@/app/utils/date.util";
 import { getMostRecentMillesime } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
@@ -20,6 +22,26 @@ export const TypePlaceBlock = (): ReactElement => {
     structure.structureTypologies
   );
 
+  const typePlacesDownloadContent = {
+    fileName: `type-places-${structure.codeBhasile}`,
+    sheetName: "Type de places",
+    data: structure.structureTypologies
+      .map((structureTypologie) => ({
+        ...structureTypologie,
+        placesAutorisees: structureTypologie.placesAutorisees!,
+      }))
+      .filter((structureTypologie) =>
+        getTypePlacesYearRange().years.includes(structureTypologie.year)
+      ),
+    headersMap: {
+      year: "Année",
+      placesAutorisees: "Places autorisées",
+      pmr: "Places PMR",
+      lgbt: "Places LGBT",
+      fvvTeh: "Places FVV/TEH",
+    },
+  };
+
   return (
     <Block
       title="Type de places"
@@ -29,6 +51,9 @@ export const TypePlaceBlock = (): ReactElement => {
       }}
       entity={structure}
       entityType="Structure"
+      downloadDropdown={
+        <DocumentDownloadDropdown downloadContent={typePlacesDownloadContent} />
+      }
     >
       <div className="flex">
         <div className="pr-4">

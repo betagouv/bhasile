@@ -13,6 +13,7 @@ export const Block = ({
   iconClass,
   titleAside,
   disclaimer,
+  downloadDropdown,
   onEdit,
   multipleEdit,
   children,
@@ -31,43 +32,46 @@ export const Block = ({
           </div>
           {titleAside}
         </div>
-        {disclaimer}
-        <Can I="update" this={subject(entityType, entity)}>
-          {onEdit && (
-            <Button
-              priority="tertiary"
-              iconId="fr-icon-edit-line"
-              onClick={onEdit}
-            >
-              Modifier
-            </Button>
-          )}
-          {multipleEdit && (
-            <div className="relative" ref={panelRef}>
+        <div className="flex items-center gap-2">
+          {disclaimer}
+          {downloadDropdown && <div>{downloadDropdown}</div>}
+          <Can I="update" this={subject(entityType, entity)}>
+            {onEdit && (
               <Button
                 priority="tertiary"
                 iconId="fr-icon-edit-line"
-                onClick={() => setIsPanelOpen(!isPanelOpen)}
+                onClick={onEdit}
               >
                 Modifier
               </Button>
-              {isPanelOpen && (
-                <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
-                  {multipleEdit.map((edit, index) => (
-                    <Button
-                      key={index}
-                      priority="tertiary no outline"
-                      onClick={edit.onClick}
-                      className="whitespace-nowrap"
-                    >
-                      {edit.label}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </Can>
+            )}
+            {multipleEdit && (
+              <div className="relative" ref={panelRef}>
+                <Button
+                  priority="tertiary"
+                  iconId="fr-icon-edit-line"
+                  onClick={() => setIsPanelOpen(!isPanelOpen)}
+                >
+                  Modifier
+                </Button>
+                {isPanelOpen && (
+                  <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
+                    {multipleEdit.map((edit, index) => (
+                      <Button
+                        key={index}
+                        priority="tertiary no outline"
+                        onClick={edit.onClick}
+                        className="whitespace-nowrap"
+                      >
+                        {edit.label}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </Can>
+        </div>
       </div>
       {children}
     </div>
@@ -79,6 +83,7 @@ type Props = PropsWithChildren<{
   iconClass: string;
   titleAside?: ReactElement;
   disclaimer?: ReactElement;
+  downloadDropdown?: ReactElement;
   onEdit?: () => void;
   multipleEdit?: {
     label: ReactElement;
