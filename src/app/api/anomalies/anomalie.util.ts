@@ -86,7 +86,7 @@ const buildStructureContext = (
   const version = dbStructure.structureVersions.at(0);
   const type = dbStructure.type as StructureType | null;
   const isIdf =
-    dbStructure.departement?.regionAdministrative?.code === CODE_REGION_IDF;
+    dbStructure.departement.regionAdministrative?.code === CODE_REGION_IDF;
 
   return {
     type,

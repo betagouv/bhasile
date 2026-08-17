@@ -288,11 +288,8 @@ export const getStructureForOperateur = async (
 
 export const getStructureDepartement = async (
   id: number
-): Promise<string | null> => {
-  const { departementAdministratif } = await findStructureDepartement(
-    id,
-    getNow()
-  );
+): Promise<string> => {
+  const { departementAdministratif } = await findStructureDepartement(id);
   return departementAdministratif;
 };
 

@@ -45,6 +45,7 @@ const makeAnomalie = (
 const makeStructure = (
   overrides: Partial<Omit<AnomalieStructure, "structureVersions">> & {
     versionTransformationType?: StructureVersionTransformationType | null;
+    versionDepartement?: string | null;
   } = {}
 ): AnomalieStructure => {
   const versionTransformationType = overrides.versionTransformationType ?? null;
@@ -64,6 +65,10 @@ const makeStructure = (
         id: 1,
         effectiveDate: new Date("2020-01-01"),
         communeAdministrative: "Avranches",
+        departementAdministratif:
+          overrides.versionDepartement === undefined
+            ? "50"
+            : overrides.versionDepartement,
         structureVersionTransformationId:
           versionTransformationType === null ? null : 7,
         structureVersionTransformation:
@@ -126,6 +131,21 @@ describe("buildDashboardAnomalies", () => {
     const structure = makeStructure({ departementAdministratif: "75" });
 
     expect(buildDashboardAnomalies([structure], baseOptions)).toEqual([]);
+  });
+
+  it("filtre sur le département de la structure mais affiche celui de la version", () => {
+    const structure = makeStructure({
+      departementAdministratif: "50",
+      versionDepartement: null,
+    });
+
+    const anomalies = buildDashboardAnomalies([structure], {
+      ...baseOptions,
+      departementList: ["50"],
+    });
+
+    expect(anomalies).toHaveLength(1);
+    expect(anomalies[0].structureDepartement).toBeNull();
   });
 
   it("applique les filtres département, opérateur et type de l'entête", () => {

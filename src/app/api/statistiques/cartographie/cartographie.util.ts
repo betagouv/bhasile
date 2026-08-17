@@ -37,9 +37,6 @@ export const groupStructureIdsByDepartement = (
   const groups = new Map<string, Set<number>>();
 
   for (const structure of structures) {
-    if (!structure.departementAdministratif) {
-      continue;
-    }
     const structureIds =
       groups.get(structure.departementAdministratif) ?? new Set<number>();
     structureIds.add(structure.id);

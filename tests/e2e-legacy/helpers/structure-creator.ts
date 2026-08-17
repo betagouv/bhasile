@@ -25,7 +25,7 @@ export async function seedStructureForSelection(
     codeBhasile: testData.codeBhasile,
     type,
     operateurId: testData.operateur?.id ?? 1,
-    departementAdministratif: testData.departementAdministratif,
+    departementAdministratif: testData.departementAdministratif ?? "01",
   });
 
   await createMinimalStructureVersion(id, {
@@ -48,7 +48,7 @@ const createMinimalStructure = async (structure: {
   codeBhasile: string;
   type: StructureType;
   operateurId: number;
-  departementAdministratif?: string;
+  departementAdministratif: string;
 }): Promise<{ id: number }> => {
   // Les scalaires versionnés et les liens DNA sont portés par StructureVersion :
   // voir createMinimalStructureVersion.

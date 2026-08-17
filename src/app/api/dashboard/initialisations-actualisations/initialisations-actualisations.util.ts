@@ -9,7 +9,6 @@ import {
   findActualisationForm,
 } from "@/app/utils/actualisationForm.util";
 import { sortRows } from "@/app/utils/list.util";
-import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
   ActualisationStatus,
   DashboardStructureRow,
@@ -17,6 +16,7 @@ import {
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
 
+import { isStructureInDashboardScope } from "../dashboard.util";
 import { DashboardStructure } from "./initialisations-actualisations.db.type";
 
 export const getInitialisationStatus = (
@@ -109,35 +109,7 @@ export const buildDashboardRows = (
       continue;
     }
 
-    const departement = currentVersion.departementAdministratif;
-    if (
-      departement === null ||
-      !options.user ||
-      !canUpdateDepartement(options.user, departement)
-    ) {
-      continue;
-    }
-    if (
-      options.departementList.length > 0 &&
-      !options.departementList.includes(departement)
-    ) {
-      continue;
-    }
-
-    const operateurId = structure.operateur?.id ?? null;
-    if (
-      options.operateurList.length > 0 &&
-      (operateurId === null ||
-        !options.operateurList.includes(String(operateurId)))
-    ) {
-      continue;
-    }
-
-    const type = structure.type;
-    if (
-      options.typeList.length > 0 &&
-      (type === null || !options.typeList.includes(type))
-    ) {
+    if (!isStructureInDashboardScope(structure, options)) {
       continue;
     }
 
@@ -157,10 +129,10 @@ export const buildDashboardRows = (
     rows.push({
       id: structure.id,
       codeBhasile: structure.codeBhasile,
-      type,
+      type: structure.type,
       operateurName: structure.operateur?.name ?? null,
       communeAdministrative: currentVersion.communeAdministrative,
-      departementAdministratif: departement,
+      departementAdministratif: currentVersion.departementAdministratif,
       initialisationStatus,
       actualisationStatus,
       actionUrl: getMostUrgentActionUrl(

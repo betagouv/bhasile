@@ -24,32 +24,57 @@ type SvtInput = {
   formStepStatuses?: StepStatus[];
 };
 
-const makeSvt = (input: SvtInput): StructureVersionTransformationApiRead =>
-  ({
-    id: input.id ?? 1,
-    type: input.type,
-    structureType: input.structureType ?? null,
-    operateur: input.operateur,
-    structureVersion:
-      input.departement ||
-      input.structureOperateur ||
-      input.structureIsFinalised !== undefined
-        ? {
-            departementAdministratif: input.departement,
-            structure:
-              input.structureOperateur ||
-              input.structureIsFinalised !== undefined
-                ? {
-                    operateur: input.structureOperateur,
-                    isFinalised: input.structureIsFinalised ?? true,
-                  }
-                : undefined,
-          }
-        : undefined,
-    form: input.formStepStatuses
-      ? { formSteps: input.formStepStatuses.map((status) => ({ status })) }
-      : undefined,
-  }) as unknown as StructureVersionTransformationApiRead;
+const makeStructure = (
+  input: SvtInput
+): NonNullable<
+  NonNullable<StructureVersionTransformationApiRead["structureVersion"]>["structure"]
+> | undefined => {
+  if (!input.structureOperateur && input.structureIsFinalised === undefined) {
+    return undefined;
+  }
+  return {
+    codeBhasile: "BHA-001",
+    isFinalised: input.structureIsFinalised ?? true,
+    operateur: input.structureOperateur,
+  };
+};
+
+const makeStructureVersion = (
+  input: SvtInput
+): StructureVersionTransformationApiRead["structureVersion"] => {
+  const structure = makeStructure(input);
+  if (!input.departement && !structure) {
+    return undefined;
+  }
+  return { departementAdministratif: input.departement, structure };
+};
+
+const makeForm = (
+  input: SvtInput
+): StructureVersionTransformationApiRead["form"] => {
+  if (!input.formStepStatuses) {
+    return undefined;
+  }
+  return {
+    id: 1,
+    status: false,
+    formDefinition: { id: 1, slug: "transformation", name: "Transfo", version: 1 },
+    formSteps: input.formStepStatuses.map((status, index) => ({
+      id: index + 1,
+      status,
+      stepDefinition: { id: index + 1, slug: `etape-${index + 1}`, label: "Étape" },
+    })),
+  };
+};
+
+const makeSvt = (input: SvtInput): StructureVersionTransformationApiRead => ({
+  id: input.id ?? 1,
+  type: input.type,
+  structureType: input.structureType ?? null,
+  operateur: input.operateur,
+  structureVersion: makeStructureVersion(input),
+  form: makeForm(input),
+});
 
 const makeTransformation = (input: {
   id?: number;
@@ -60,7 +85,7 @@ const makeTransformation = (input: {
     id: input.id ?? 1,
     updatedAt: input.updatedAt ?? "2026-05-04T00:00:00.000Z",
     structureVersionTransformations: input.svts,
-  }) as unknown as TransformationApiRead;
+  });
 
 const noFilters = {
   departementList: [],

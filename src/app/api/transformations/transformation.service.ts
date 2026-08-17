@@ -237,8 +237,7 @@ const enrichStructureVersionTransformationFromSource = async (
 };
 
 const resolveStructureDepartements = async (
-  structureVersionTransformations: StructureVersionTransformationApiUpdate[],
-  now: Date
+  structureVersionTransformations: StructureVersionTransformationApiUpdate[]
 ): Promise<DepartementBearingStructureVersionTransformation[]> => {
   const structureIds = [
     ...new Set(
@@ -253,7 +252,7 @@ const resolveStructureDepartements = async (
 
   return Promise.all(
     structureIds.map(async (structureId) => ({
-      structureVersion: await findStructureDepartement(structureId, now),
+      structureVersion: await findStructureDepartement(structureId),
     }))
   );
 };
@@ -271,10 +270,7 @@ export const updateTransformation = async (
   checkCanUpdateDepartements(user, [
     ...transformation.structureVersionTransformations,
     ...inputStructureVersionTransformations,
-    ...(await resolveStructureDepartements(
-      inputStructureVersionTransformations,
-      getNow()
-    )),
+    ...(await resolveStructureDepartements(inputStructureVersionTransformations)),
   ]);
 
   return updateOne(input);

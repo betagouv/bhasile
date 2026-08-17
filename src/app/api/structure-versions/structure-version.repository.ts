@@ -1,3 +1,4 @@
+import { getStructureVersionDepartement } from "@/app/utils/transformation.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
@@ -140,10 +141,7 @@ const resolveTransformationBaseDepartement = async (
 
   for (const sibling of current.transformation
     .structureVersionTransformations) {
-    const departement =
-      sibling.structureVersion?.departementAdministratif ??
-      sibling.structureVersion?.structure?.departementAdministratif ??
-      null;
+    const departement = getStructureVersionDepartement(sibling.structureVersion);
     if (departement != null) {
       return departement;
     }

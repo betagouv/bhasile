@@ -22,6 +22,7 @@ export const anomalieStructureSelect = {
     select: {
       ...resolvableVersionSelect,
       communeAdministrative: true,
+      departementAdministratif: true,
       structureVersionTransformation: {
         select: { type: true, ...transformationStatusSelect },
       },

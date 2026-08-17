@@ -51,6 +51,7 @@ describe("initialisations-actualisations.repository db integration", () => {
       data: {
         codeBhasile: `BHA-DASH-${randomUUID()}`,
         type: StructureType.CADA,
+        departementAdministratif: "50",
         structureVersions: {
           create: {
             effectiveDate: new Date("2024-01-01"),

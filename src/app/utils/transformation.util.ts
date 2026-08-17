@@ -46,13 +46,19 @@ export const getTransformationTitle = (
   return "Transformer une structure";
 };
 
+export const getStructureVersionDepartement = (
+  structureVersion?: DepartementBearingStructureVersionTransformation["structureVersion"]
+): string | undefined =>
+  structureVersion?.structure?.departementAdministratif ??
+  structureVersion?.departementAdministratif ??
+  undefined;
+
 export const getStructureVersionTransformationDepartement = (
   structureVersionTransformation?: DepartementBearingStructureVersionTransformation
 ): string | undefined =>
-  structureVersionTransformation?.structureVersion?.departementAdministratif ??
-  structureVersionTransformation?.structureVersion?.structure
-    ?.departementAdministratif ??
-  undefined;
+  getStructureVersionDepartement(
+    structureVersionTransformation?.structureVersion
+  );
 
 export const getStructureVersionTransformationOperateur = (
   structureVersionTransformation?: StructureVersionTransformationApiRead

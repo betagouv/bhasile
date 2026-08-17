@@ -48,6 +48,7 @@ describe("transformation.repository db integration", () => {
     const structure = await prisma.structure.create({
       data: {
         codeBhasile: `BHA-TF-TEST-${Date.now()}-${Math.random()}`,
+        departementAdministratif: "50",
         structureVersions: {
           create: {
             effectiveDate: new Date("2020-01-01T12:00:00.000Z"),
@@ -1965,6 +1966,39 @@ describe("transformation.repository db integration", () => {
     codesBhasile.forEach((codeBhasile) =>
       expect(codeBhasile.split("-")).toHaveLength(3)
     );
+  });
+
+  it("interrompt et annule la finalisation quand un bloc CREATION n'a pas de département", async () => {
+    // GIVEN: a CREATION block whose version never received a departement
+    const operateur = await createOperateur();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
+          operateurId: operateur.id,
+          structureVersion: {},
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    // WHEN/THEN: finalisation stops on the guard, before any Bhasile code is burnt
+    await expect(finalizeTransformation(transformationId)).rejects.toThrow(
+      "doit avoir un département"
+    );
+
+    // AND: the transaction rolled back — no structure, form still open
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+      include: { structureVersion: true },
+    });
+    expect(block.structureVersion?.structureId).toBeNull();
+    const form = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    expect(form.status).toBe(false);
   });
 
   it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
