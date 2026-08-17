@@ -154,6 +154,12 @@ export const protectedApiRoutes: ApiRoute[] = [
       POST: "proconnect",
     },
   },
+  {
+    pattern: /^\/api\/user-actions\/structures-cartographie$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
 ];
 
 export const proConnectProtectedPages = [

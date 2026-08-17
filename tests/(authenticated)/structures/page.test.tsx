@@ -13,10 +13,6 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock("@socialgouv/matomo-next", () => ({
-  sendEvent: vi.fn(),
-}));
-
 vi.mock("next/dynamic", () => ({
   default: () => () => <div data-testid="structures-map" />,
 }));

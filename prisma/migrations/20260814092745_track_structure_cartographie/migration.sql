@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "UserActionDescription" ADD VALUE 'STRUCTURES_CARTOGRAPHIE';
