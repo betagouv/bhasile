@@ -3,6 +3,7 @@ import { ReactElement } from "react";
 
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { downloadDocument } from "@/app/utils/spreadsheet-download.util";
+import { DownloadOptions } from "@/types/spreadsheet-download.type";
 
 export const DocumentDownloadDropdown = ({
   downloadContent,
@@ -25,9 +26,12 @@ export const DocumentDownloadDropdown = ({
               downloadDocument(downloadContent);
             }}
             className="whitespace-nowrap"
-            disabled={
-              !downloadContent.data || downloadContent.data.length === 0
-            }
+            // disabled={
+            //   !downloadContent.data ||
+            //   downloadContent.data.length === 0 ||
+            //   !downloadContent.sheets ||
+            //   downloadContent.sheets.length === 0
+            // }
           >
             Exporter le tableau (ODS)
           </Button>
@@ -38,10 +42,5 @@ export const DocumentDownloadDropdown = ({
 };
 
 type Props = {
-  downloadContent: {
-    fileName: string;
-    sheetName: string;
-    data: Record<string, string | number | null>[];
-    headersMap: Record<string, string>;
-  };
+  downloadContent: DownloadOptions;
 };

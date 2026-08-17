@@ -3,9 +3,11 @@ import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
 import { getNow } from "@/app/utils/now.util";
+import { getControleQualiteDownloadContent } from "@/app/utils/spreadsheet-download.util";
 import { getLastPastVisit } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
@@ -46,6 +48,11 @@ export const ControlesBlock = (): ReactElement => {
       }}
       entity={structure}
       entityType="Structure"
+      downloadDropdown={
+        <DocumentDownloadDropdown
+          downloadContent={getControleQualiteDownloadContent(structure)}
+        />
+      }
     >
       <div className="flex">
         <div className="pr-4">

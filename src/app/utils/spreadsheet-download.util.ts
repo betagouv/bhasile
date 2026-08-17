@@ -1,60 +1,71 @@
 "use client";
 
-import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
+import {
+  CombinedFinancialData,
+  DownloadOptions,
+  SheetOption,
+} from "@/types/spreadsheet-download.type";
 
 import { computeResultatNet } from "./budget.util";
-import { getTypePlacesYearRange, getYearRange } from "./date.util";
+import { formatDate, getTypePlacesYearRange, getYearRange } from "./date.util";
 
-type DownloadOptions<
-  TDownloadRecord extends Record<string, string | number | null>,
-> = {
-  data: TDownloadRecord[];
-  fileName: string;
-  sheetName: string;
-  headersMap: Record<string, string>;
-};
-
-export const downloadDocument = async <
-  TDownloadRecord extends Record<string, string | number | null>,
->(
-  options: DownloadOptions<TDownloadRecord>
+export const downloadDocument = async <TRecord extends Record<string, unknown>>(
+  options: DownloadOptions<TRecord>
 ): Promise<void> => {
-  const { data, fileName, sheetName, headersMap } = options;
+  const { fileName } = options;
 
-  if (!data || data.length === 0) {
-    console.warn("Aucune donnée à exporter.");
-    return;
+  let sheetsToProcess: SheetOption<Record<string, unknown>>[] = [];
+
+  if (options.sheets) {
+    sheetsToProcess = options.sheets;
+  } else if (options.data && options.headersMap && options.sheetName) {
+    sheetsToProcess = [
+      {
+        sheetName: options.sheetName,
+        data: options.data,
+        headersMap: options.headersMap,
+        emptyMessage: options.emptyMessage,
+      },
+    ];
   }
 
-  const targetKeys = Object.keys(headersMap) as (keyof TDownloadRecord)[];
-
-  if (targetKeys.length === 0) {
-    console.warn("Aucune colonne à exporter.");
+  if (sheetsToProcess.length === 0) {
+    console.warn("Aucune donnée ni feuille à exporter.");
     return;
   }
-
-  const filteredData = data.map((row) => {
-    const newRow = {} as Record<string, string | number | null>;
-    targetKeys.forEach((key) => {
-      newRow[key as string] = row[key] ?? null;
-    });
-    return newRow;
-  });
-
-  const headerTitles = targetKeys.map((key) => headersMap[key as string]);
 
   const XLSX = await import("xlsx");
-
-  const worksheet = XLSX.utils.json_to_sheet(filteredData, {
-    header: targetKeys as string[],
-  });
-
-  XLSX.utils.sheet_add_aoa(worksheet, [headerTitles], { origin: "A1" });
-
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+  for (const sheetOption of sheetsToProcess) {
+    const { sheetName, data, headersMap, emptyMessage } = sheetOption;
+    const targetKeys = Object.keys(headersMap);
+
+    let worksheet: import("xlsx").WorkSheet;
+
+    if (!data || data.length === 0) {
+      worksheet = XLSX.utils.aoa_to_sheet([[emptyMessage || "Pas de données"]]);
+    } else {
+      const filteredData = data.map((row) => {
+        const newRow: Record<string, unknown> = {};
+        targetKeys.forEach((key) => {
+          newRow[key] = row[key] ?? null;
+        });
+        return newRow;
+      });
+
+      const headerTitles = targetKeys.map((key) => headersMap[key]);
+
+      worksheet = XLSX.utils.json_to_sheet(filteredData, {
+        header: targetKeys,
+      });
+
+      XLSX.utils.sheet_add_aoa(worksheet, [headerTitles], { origin: "A1" });
+    }
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+  }
 
   const cleanFileName = fileName.endsWith(".ods")
     ? fileName
@@ -82,13 +93,6 @@ export const getTypePlacesDownloadContent = (structure: StructureApiRead) => ({
     fvvTeh: "Places FVV/TEH",
   },
 });
-
-type CombinedFinancialData = Partial<IndicateurFinancierApiType> &
-  Partial<BudgetApiType> & {
-    year: number;
-    resultatNet?: number;
-    resultatNetProposeParOperateur?: number;
-  };
 
 export const getFinancesDownloadContent = (structure: StructureApiRead) => {
   const years = getYearRange().years;
@@ -155,5 +159,66 @@ export const getFinancesDownloadContent = (structure: StructureApiRead) => {
       autre: "Autre",
       commentaire: "Commentaire",
     },
+  };
+};
+
+export const getControleQualiteDownloadContent = (
+  structure: StructureApiRead
+): DownloadOptions => {
+  return {
+    fileName: `controle-qualite-${structure.codeBhasile}`,
+    sheets: [
+      {
+        sheetName: "Evenements Indésirables Graves",
+        data:
+          structure.evenementsIndesirablesGraves?.map(
+            (evenementIndesirableGrave) => ({
+              ...evenementIndesirableGrave,
+              evenementDate: formatDate(
+                evenementIndesirableGrave.evenementDate
+              ),
+              declarationDate: formatDate(
+                evenementIndesirableGrave.declarationDate
+              ),
+            })
+          ) || [],
+        headersMap: {
+          numeroDossier: "Numéro de dossier",
+          evenementDate: "Date de l'événement",
+          declarationDate: "Date de la déclaration",
+          type: "Nature des faits",
+        },
+        emptyMessage: "Pas de données pour les EIG",
+      },
+      {
+        sheetName: "Evaluations",
+        data:
+          structure.evaluations?.map((evaluation) => ({
+            ...evaluation,
+            date: formatDate(evaluation.date),
+          })) || [],
+        headersMap: {
+          date: "Date",
+          notePersonne: "Note de la personne",
+          notePro: "Note des professionnels",
+          noteStructure: "Note de la structure",
+          note: "Moyenne",
+        },
+        emptyMessage: "Pas de données pour les évaluations",
+      },
+      {
+        sheetName: "Inspections-contrôles",
+        data:
+          structure.controles?.map((controle) => ({
+            ...controle,
+            date: formatDate(controle.date),
+          })) || [],
+        headersMap: {
+          date: "Date du contrôle",
+          type: "Type du contrôle",
+        },
+        emptyMessage: "Pas de données pour les contrôles",
+      },
+    ],
   };
 };
