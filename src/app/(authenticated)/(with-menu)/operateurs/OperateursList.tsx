@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
@@ -14,17 +11,14 @@ export const OperateurList = ({
   operateurs,
   totalOperateurs,
 }: Props): ReactElement => {
-  const searchParams = useSearchParams();
-  const queryString = searchParams.toString();
-
   return (
     <>
       {operateurs.map((operateur) => (
         <Link
-          title={`Détails de l'operateur ${operateur.name}`}
+          title={`Détails de l'opérateur ${operateur.name}`}
           className={`${OPERATEUR_ROW_CLASSES} block`}
           key={operateur.id}
-          href={`operateurs/${operateur.id}${queryString ? `?${queryString}` : ""}`}
+          href={`/operateurs/${operateur.id}`}
         >
           <OperateurItem {...operateur} />
         </Link>

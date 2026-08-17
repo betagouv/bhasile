@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { ReactElement } from "react";
+import { usePathname } from "next/navigation";
+import { ReactElement, useEffect, useState } from "react";
 
+import { OPERATEURS_STORAGE_KEY } from "@/app/(authenticated)/(with-menu)/operateurs/OperateurQueryPersister";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
@@ -12,26 +13,19 @@ import { useOperateurContext } from "@/contexts/OperateurContext";
 export const OperateurHeader = (): ReactElement | null => {
   const { operateur } = useOperateurContext();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
 
+  const [backHref, setBackHref] = useState("/operateurs");
+
+  useEffect(() => {
+    const storedQuery = sessionStorage.getItem(OPERATEURS_STORAGE_KEY);
+    if (storedQuery) {
+      setBackHref(`/operateurs?${storedQuery}`);
+    }
+  }, []);
+
   const isRootPath = pathname === `/operateurs/${operateur?.id}`;
-
-  const params = new URLSearchParams();
-  const page = searchParams.get("page");
-  const search = searchParams.get("search");
-
-  if (page) {
-    params.set("page", page);
-  }
-  if (search) {
-    params.set("search", search);
-  }
-
-  const queryString = params.toString();
-  const backHref = `/operateurs${queryString ? `?${queryString}` : ""}`;
 
   return operateur ? (
     <div
@@ -60,18 +54,9 @@ export const OperateurHeader = (): ReactElement | null => {
       {isRootPath && (
         <NavigationMenu
           menuElements={[
-            {
-              label: "Description",
-              section: "#description",
-            },
-            {
-              label: "Contacts",
-              section: "#contacts",
-            },
-            {
-              label: "Documents",
-              section: "#documents",
-            },
+            { label: "Description", section: "#description" },
+            { label: "Contacts", section: "#contacts" },
+            { label: "Documents", section: "#documents" },
           ]}
         />
       )}

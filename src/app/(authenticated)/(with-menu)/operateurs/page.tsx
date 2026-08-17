@@ -8,6 +8,7 @@ import {
   SearchParams,
 } from "@/app/utils/searchParams.util";
 
+import { OperateursQueryPersister } from "./OperateurQueryPersister";
 import { OperateursContent } from "./OperateursContent";
 import { OperateursCount } from "./OperateursCount";
 import { OperateursSkeleton } from "./OperateursSkeleton";
@@ -23,6 +24,7 @@ export default async function Operateurs({
 
   return (
     <div className="h-full w-full flex flex-col">
+      <OperateursQueryPersister />
       <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-10">
         <h2
           className="text-title-blue-france fr-h5 mr-4 mb-0"
