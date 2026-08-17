@@ -2,7 +2,9 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
 import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
+import { getFinancesDownloadContent } from "@/app/utils/spreadsheet-download.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { useStructureContext } from "@/contexts/StructureContext";
 
@@ -40,6 +42,11 @@ export const FinancesBlock = (): ReactElement => {
       }}
       entity={structure}
       entityType="Structure"
+      downloadDropdown={
+        <DocumentDownloadDropdown
+          downloadContent={getFinancesDownloadContent(structure)}
+        />
+      }
     >
       <h4 className="text-title-blue-france text-lg">
         Budget exécutoire pour {budgetExecutoireYear}
