@@ -7,14 +7,19 @@ import { ReactElement } from "react";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
+import { useStoredQueryParams } from "@/app/hooks/useStoredQueryParams";
+import { OPERATEURS_STORAGE_KEY } from "@/constants";
 import { useOperateurContext } from "@/contexts/OperateurContext";
 
 export const OperateurHeader = (): ReactElement | null => {
   const { operateur } = useOperateurContext();
   const pathname = usePathname();
-
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
+  const { backHref } = useStoredQueryParams(
+    "/operateurs",
+    OPERATEURS_STORAGE_KEY
+  );
 
   const isRootPath = pathname === `/operateurs/${operateur?.id}`;
 
@@ -28,8 +33,8 @@ export const OperateurHeader = (): ReactElement | null => {
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
         <Link
           className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
-          title="Retour"
-          href="/operateurs"
+          title="Retour à la liste des opérateurs"
+          href={backHref}
         >
           Retour
         </Link>
@@ -45,18 +50,9 @@ export const OperateurHeader = (): ReactElement | null => {
       {isRootPath && (
         <NavigationMenu
           menuElements={[
-            {
-              label: "Description",
-              section: "#description",
-            },
-            {
-              label: "Contacts",
-              section: "#contacts",
-            },
-            {
-              label: "Documents",
-              section: "#documents",
-            },
+            { label: "Description", section: "#description" },
+            { label: "Contacts", section: "#contacts" },
+            { label: "Documents", section: "#documents" },
           ]}
         />
       )}

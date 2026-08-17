@@ -15,10 +15,10 @@ export const OperateurList = ({
     <>
       {operateurs.map((operateur) => (
         <Link
-          title={`Détails de l'operateur ${operateur.name}`}
+          title={`Détails de l'opérateur ${operateur.name}`}
           className={`${OPERATEUR_ROW_CLASSES} block`}
           key={operateur.id}
-          href={`operateurs/${operateur.id}`}
+          href={`/operateurs/${operateur.id}`}
         >
           <OperateurItem {...operateur} />
         </Link>

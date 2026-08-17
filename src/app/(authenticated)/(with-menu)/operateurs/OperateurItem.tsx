@@ -1,4 +1,3 @@
-// import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
@@ -45,21 +44,10 @@ export const OperateurItem = ({
                 </Badge>
               ))}
             </div>
-            {/* TODO : en attente de la migration des données de filiales en prod */}
-            {/* <div className="flex items-center">
-              <span className="pr-4">X filiales</span>
-              <Button
-                priority="tertiary no outline"
-                iconId="fr-icon-eye-line"
-                size="small"
-              >
-                Voir les détails
-              </Button>
-            </div> */}
           </div>
         </div>
         <div className="flex items-center">
-          <div className="border-r border-default-grey pr-4 flex flex-col items-center max-w-[130px]">
+          <div className="border-r border-default-grey pr-4 flex flex-col items-center max-w-32.5">
             <h3 className="text-xl mb-0.5">
               <NumberDisplay value={nbStructures} />
             </h3>
@@ -67,7 +55,7 @@ export const OperateurItem = ({
               {pluralize(nbStructures, "structure")} en France
             </span>
           </div>
-          <div className="border-r border-default-grey px-4 flex flex-col items-center max-w-[140px]">
+          <div className="border-r border-default-grey px-4 flex flex-col items-center max-w-35">
             <h3 className="text-xl mb-0.5">
               <NumberDisplay value={totalPlaces} />
             </h3>
@@ -75,7 +63,7 @@ export const OperateurItem = ({
               places autorisées en France
             </span>
           </div>
-          <div className="pl-4 flex flex-col items-center max-w-[140px]">
+          <div className="pl-4 flex flex-col items-center max-w-35">
             <h3 className="text-xl mb-0.5">
               <NumberDisplay value={pourcentageParc} />%
             </h3>
