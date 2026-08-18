@@ -1,9 +1,6 @@
 "use client";
 
-<<<<<<< HEAD
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
-=======
->>>>>>> 5e59df93 (:sparkles: Add controle qualite export)
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import {
   CombinedFinancialData,
@@ -13,11 +10,8 @@ import {
 
 import { computeResultatNet } from "./budget.util";
 import { formatDate, getTypePlacesYearRange, getYearRange } from "./date.util";
-<<<<<<< HEAD
 import { isYearRealisee } from "./indicateurFinancier.util";
 import { getRealCreationYear } from "./structure.util";
-=======
->>>>>>> 5e59df93 (:sparkles: Add controle qualite export)
 
 export const downloadDocument = async <TRecord extends Record<string, unknown>>(
   options: DownloadOptions<TRecord>
