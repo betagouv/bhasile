@@ -59,6 +59,32 @@ describe("dna-codes.repository findAll db integration", () => {
     });
   });
 
+  it("inclut les codes libres et ceux des versions de la structure quand structureId est fourni", async () => {
+    const structure = await createStructure();
+    const version = await prisma.structureVersion.create({
+      data: { structureId: structure.id },
+    });
+    const ownCode = await createDnaOnVersion(version.id, "OWN");
+
+    const freeDna = await createReferentialDna(
+      `DNA-DC-TEST-FREE-${randomUUID()}`
+    );
+
+    const outsideStructure = await createStructure();
+    const outsideVersion = await prisma.structureVersion.create({
+      data: { structureId: outsideStructure.id },
+    });
+    const codeOutside = await createDnaOnVersion(outsideVersion.id, "OUT");
+
+    const codes = (
+      await findAll({ entityId: { structureId: structure.id } })
+    ).map((dna) => dna.code);
+
+    expect(codes).toContain(ownCode);
+    expect(codes).toContain(freeDna.code);
+    expect(codes).not.toContain(codeOutside);
+  });
+
   it("inclut les codes libres et ceux des structures de la transformation, et exclut les codes détenus hors de la transformation", async () => {
     const structureInTransfo = await createStructure();
     const transformationId = await createOne({
