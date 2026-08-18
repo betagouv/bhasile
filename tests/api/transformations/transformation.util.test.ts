@@ -7,7 +7,7 @@ import {
   checkNoDuplicateStructureIds,
   checkUniqueDepartement,
 } from "@/app/api/transformations/transformation.util";
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
 import {
@@ -169,7 +169,7 @@ describe("checkNoDuplicateStructureIds", () => {
 
     expect(() =>
       checkNoDuplicateStructureIds(structureVersionTransformations)
-    ).toThrow(ApiDomainError);
+    ).toThrow(DomainError);
     expect(() =>
       checkNoDuplicateStructureIds(structureVersionTransformations)
     ).toThrow(
@@ -224,7 +224,7 @@ describe("checkUniqueDepartement", () => {
 
     expect(() =>
       checkUniqueDepartement(structureVersionTransformations)
-    ).toThrow(ApiDomainError);
+    ).toThrow(DomainError);
     expect(() =>
       checkUniqueDepartement(structureVersionTransformations)
     ).toThrow(
@@ -329,7 +329,7 @@ describe("checkCanUpdateDepartements", () => {
       checkCanUpdateDepartements(agentParis, [
         { structureVersion: { structure: { departementAdministratif: "92" } } },
       ])
-    ).toThrow(ApiDomainError);
+    ).toThrow(DomainError);
   });
 
   // Le scalaire de Structure est immuable et posé par le serveur ; celui de la version
@@ -400,7 +400,7 @@ describe("checkEffectiveDatesAreValid", () => {
 
     expect(() =>
       checkEffectiveDatesAreValid(structureVersionTransformations)
-    ).toThrow(ApiDomainError);
+    ).toThrow(DomainError);
     expect(() =>
       checkEffectiveDatesAreValid(structureVersionTransformations)
     ).toThrow(
@@ -423,7 +423,7 @@ describe("checkEffectiveDatesAreValid", () => {
 
     expect(() =>
       checkEffectiveDatesAreValid(structureVersionTransformations)
-    ).toThrow(ApiDomainError);
+    ).toThrow(DomainError);
   });
 
   it("laisse passer une date d'effet au seuil", () => {

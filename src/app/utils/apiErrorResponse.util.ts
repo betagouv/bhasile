@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { ApiDomainError } from "./apiDomainError.util";
+import { DomainError } from "./domainError.util";
 
 export const apiErrorResponse = (error: unknown): NextResponse => {
   if (error instanceof z.ZodError) {
-    return NextResponse.json({ error: z.prettifyError(error) }, { status: 400 });
+    return NextResponse.json(
+      { error: z.prettifyError(error) },
+      { status: 400 }
+    );
   }
-  if (error instanceof ApiDomainError) {
-    return NextResponse.json({ error: error.message }, { status: error.status });
+  if (error instanceof DomainError) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.status }
+    );
   }
   console.error(error);
   return NextResponse.json(

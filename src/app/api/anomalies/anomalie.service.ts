@@ -7,7 +7,7 @@ import {
 } from "@/app/api/anomalies/anomalie.repository";
 import { buildAnomalieContext } from "@/app/api/anomalies/anomalie.util";
 import { findUserIdByEmail } from "@/app/api/users/user.repository";
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import { getNow } from "@/app/utils/now.util";
 import { Prisma } from "@/generated/prisma/client";
 import { computeAnomalies } from "@/lib/anomalies/anomalie.compute";
@@ -75,7 +75,7 @@ export const setAnomalieJustification = async (
   const user = await findUserIdByEmail(email);
 
   if (user === null) {
-    throw new ApiDomainError("Utilisateur introuvable", 401);
+    throw new DomainError("Utilisateur introuvable", 401);
   }
 
   await updateJustificationOrThrowNotFound(input.id, {
@@ -97,7 +97,7 @@ const updateJustificationOrThrowNotFound = async (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      throw new ApiDomainError("Anomalie introuvable", 404);
+      throw new DomainError("Anomalie introuvable", 404);
     }
     throw error;
   }

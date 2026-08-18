@@ -1,9 +1,9 @@
-export class ApiDomainError extends Error {
+export class DomainError extends Error {
   constructor(
     message: string,
     readonly status: number = 400
   ) {
     super(message);
-    this.name = "ApiDomainError";
+    this.name = "DomainError";
   }
 }

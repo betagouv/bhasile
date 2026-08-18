@@ -1,8 +1,8 @@
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import {
   getNextBhasileCode,
   getNormalizedRegionCodeFromDepartement,
 } from "@/app/utils/bhasile.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
@@ -77,7 +77,7 @@ const checkTransformationNotFinalised = async (
   });
 
   if (isTransformationFinalised(transformation)) {
-    throw new ApiDomainError(
+    throw new DomainError(
       "Impossible de modifier une transformation finalisée"
     );
   }
@@ -102,7 +102,7 @@ export const updateOne = async (
             !structureVersionTransformation.structureVersion?.effectiveDate
         )
       ) {
-        throw new ApiDomainError(
+        throw new DomainError(
           "Chaque transformation doit avoir une date d'effet avant la finalisation"
         );
       }
@@ -112,7 +112,7 @@ export const updateOne = async (
         data: { status: true },
       });
       if (finalized.count === 0) {
-        throw new ApiDomainError(
+        throw new DomainError(
           "Impossible de modifier une transformation finalisée"
         );
       }
@@ -341,13 +341,13 @@ const createStructureFromCreationBlock = async (
   }
 
   if (!operateurId) {
-    throw new ApiDomainError(
+    throw new DomainError(
       "Un bloc de création doit avoir un opérateur avant la finalisation."
     );
   }
 
   if (!structureType) {
-    throw new ApiDomainError(
+    throw new DomainError(
       "Un bloc de création doit avoir un type de structure avant la finalisation."
     );
   }
@@ -355,7 +355,7 @@ const createStructureFromCreationBlock = async (
   const { departementAdministratif } = structureVersion;
 
   if (!departementAdministratif) {
-    throw new ApiDomainError(
+    throw new DomainError(
       "Un bloc de création doit avoir un département avant la finalisation."
     );
   }

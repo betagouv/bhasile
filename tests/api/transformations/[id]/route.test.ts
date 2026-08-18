@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PUT } from "@/app/api/transformations/[id]/route";
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import { TransformationType } from "@/types/transformation.type";
 
 const mockGetTransformation = vi.fn();
@@ -27,7 +27,6 @@ vi.mock("next-auth", () => ({
 vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
 }));
-
 
 describe("PUT /api/transformations/[id]", () => {
   const validBody = {
@@ -79,10 +78,7 @@ describe("PUT /api/transformations/[id]", () => {
 
   it("retourne 403 quand le service refuse le département", async () => {
     mockUpdateTransformation.mockRejectedValueOnce(
-      new ApiDomainError(
-        "Le département 92 n'est pas dans votre périmètre.",
-        403
-      )
+      new DomainError("Le département 92 n'est pas dans votre périmètre.", 403)
     );
 
     const response = await PUT(buildRequest(validBody));
@@ -111,7 +107,7 @@ describe("PUT /api/transformations/[id]", () => {
 
   it("expose le message d'erreur dans le corps quand une modification est refusée", async () => {
     mockUpdateTransformation.mockRejectedValueOnce(
-      new ApiDomainError("Impossible de modifier une transformation finalisée")
+      new DomainError("Impossible de modifier une transformation finalisée")
     );
 
     const response = await PUT(buildRequest(validBody));
