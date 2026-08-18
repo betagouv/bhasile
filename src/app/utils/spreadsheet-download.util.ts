@@ -1,5 +1,6 @@
 "use client";
 
+import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import {
   CombinedFinancialData,
@@ -9,6 +10,8 @@ import {
 
 import { computeResultatNet } from "./budget.util";
 import { formatDate, getTypePlacesYearRange, getYearRange } from "./date.util";
+import { isYearRealisee } from "./indicateurFinancier.util";
+import { getRealCreationYear } from "./structure.util";
 
 export const downloadDocument = async <TRecord extends Record<string, unknown>>(
   options: DownloadOptions<TRecord>
@@ -95,14 +98,30 @@ export const getTypePlacesDownloadContent = (structure: StructureApiRead) => ({
 });
 
 export const getFinancesDownloadContent = (structure: StructureApiRead) => {
-  const years = getYearRange().years;
+  const { years } = getYearRange();
+  const startYear = getRealCreationYear(structure);
+  const yearsToDisplay = years.filter((year) => year >= startYear);
 
-  const indicateursFinanciers = (structure.indicateursFinanciers || []).filter(
-    (indicateur) => years.includes(indicateur.year)
-  );
+  const rawIndicateurs = structure.indicateursFinanciers || [];
+
+  const indicateursFinanciers = yearsToDisplay
+    .map((year) => {
+      const targetType = isYearRealisee(rawIndicateurs, year)
+        ? "REALISE"
+        : "PREVISIONNEL";
+
+      return rawIndicateurs.find(
+        (indicateur) =>
+          indicateur.year === year && indicateur.type === targetType
+      );
+    })
+    .filter(
+      (indicateur): indicateur is IndicateurFinancierApiType =>
+        indicateur !== undefined
+    );
 
   const budgets = (structure.budgets || [])
-    .filter((budget) => years.includes(budget.year))
+    .filter((budget) => yearsToDisplay.includes(budget.year))
     .map((budget) => ({
       ...budget,
       resultatNet: computeResultatNet(

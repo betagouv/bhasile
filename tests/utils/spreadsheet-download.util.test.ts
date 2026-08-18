@@ -21,29 +21,27 @@ vi.mock("xlsx", () => ({
   writeFile: vi.fn(),
 }));
 
-vi.mock("./date.util", () => ({
-  formatDate: vi.fn((date: string | null | undefined) =>
-    date ? `formatted-${date}` : ""
-  ),
-  getYearRange: vi.fn(() => ({ years: [2024, 2025] })),
-  getTypePlacesYearRange: vi.fn(() => ({ years: [2024, 2025] })),
-}));
-
-vi.mock("./budget.util", () => ({
-  computeResultatNet: vi.fn(
-    (produits: number | undefined, charges: number | undefined) =>
-      (produits || 0) - (charges || 0)
-  ),
-}));
-
 const mockStructure = {
   codeBhasile: "BHA-TEST-001",
   structureTypologies: [
     { year: 2024, placesAutorisees: 50, pmr: 5, lgbt: 2, fvvTeh: 1 },
-    { year: 2023, placesAutorisees: 40, pmr: 4, lgbt: 1, fvvTeh: 0 }, // Doit être filtré
+    { year: 2023, placesAutorisees: 40, pmr: 4, lgbt: 1, fvvTeh: 0 },
   ],
   indicateursFinanciers: [
-    { year: 2024, ETP: 10, tauxEncadrement: 1.5, coutJournalier: 80 },
+    {
+      year: 2024,
+      type: "REALISE",
+      ETP: 10,
+      tauxEncadrement: 1.5,
+      coutJournalier: 80,
+    },
+    {
+      year: 2024,
+      type: "PREVISIONNEL",
+      ETP: 8,
+      tauxEncadrement: 1.2,
+      coutJournalier: 75,
+    },
   ],
   budgets: [
     {
@@ -194,16 +192,41 @@ describe("download util", () => {
   });
 
   describe("getFinancesDownloadContent", () => {
-    it("regroupe les indicateurs financiers et budgets par année", () => {
+    it("sélectionne en priorité l'indicateur REALISE s'il est présent", () => {
       const content = getFinancesDownloadContent(mockStructure);
 
       expect(content.fileName).toBe("finances-BHA-TEST-001");
       expect(content.data).toHaveLength(1);
       expect(content.data[0]).toMatchObject({
         year: 2024,
+        type: "REALISE",
         ETP: 10,
         resultatNet: 200,
         resultatNetProposeParOperateur: 150,
+      });
+    });
+
+    it("sélectionne l'indicateur PREVISIONNEL si l'année n'est pas réalisée", () => {
+      const structurePrevisionnelle = {
+        ...mockStructure,
+        indicateursFinanciers: [
+          {
+            year: 2024,
+            type: "PREVISIONNEL",
+            ETP: 8,
+            tauxEncadrement: 1.2,
+            coutJournalier: 75,
+          },
+        ],
+      } as unknown as StructureApiRead;
+
+      const content = getFinancesDownloadContent(structurePrevisionnelle);
+
+      expect(content.data).toHaveLength(1);
+      expect(content.data[0]).toMatchObject({
+        year: 2024,
+        type: "PREVISIONNEL",
+        ETP: 8,
       });
     });
   });

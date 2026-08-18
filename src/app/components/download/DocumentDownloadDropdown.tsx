@@ -27,10 +27,7 @@ export const DocumentDownloadDropdown = ({
             }}
             className="whitespace-nowrap"
             disabled={
-              !downloadContent.data &&
-              downloadContent.data!.length === 0 &&
-              !downloadContent.sheets &&
-              downloadContent.sheets!.length === 0
+              !downloadContent.data?.length && !downloadContent.sheets?.length
             }
           >
             Exporter le tableau (ODS)

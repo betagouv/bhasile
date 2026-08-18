@@ -1,8 +1,6 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 
-export type DownloadValue = string | number | boolean | null;
-
 export type SheetOption<
   TRecord extends Record<string, unknown> = Record<string, unknown>,
 > = {

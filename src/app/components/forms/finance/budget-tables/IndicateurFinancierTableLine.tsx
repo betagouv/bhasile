@@ -2,10 +2,8 @@ import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
-import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
-import { INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR } from "@/constants";
+import { getEveryColumn } from "@/app/utils/indicateurFinancier.util";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
-import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 
 import { BudgetTableLineInput } from "./BudgetTableLineInput";
 import { BudgetTableLineLabel } from "./BudgetTableLineLabel";
@@ -30,7 +28,7 @@ export const IndicateurFinancierTableLine = ({
     return null;
   }
 
-  const everyColumns = getEveryColumns(canEdit, indicateursFinanciers, years);
+  const everyColumns = getEveryColumn(canEdit, indicateursFinanciers, years);
 
   return (
     <tr>
@@ -80,23 +78,4 @@ type Props = {
   years: number[];
   canEdit?: boolean;
   isCurrency?: boolean;
-};
-
-const getEveryColumns = (
-  canEdit: boolean,
-  indicateursFinanciers: IndicateurFinancierApiType[],
-  years: number[]
-) => {
-  if (canEdit) {
-    return years.map((year) =>
-      year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR
-        ? (["PREVISIONNEL", "REALISE"] as IndicateurFinancierType[])
-        : (["REALISE"] as IndicateurFinancierType[])
-    );
-  }
-  return years.map((year) => {
-    return [
-      isYearRealisee(indicateursFinanciers, year) ? "REALISE" : "PREVISIONNEL",
-    ] as IndicateurFinancierType[];
-  });
 };

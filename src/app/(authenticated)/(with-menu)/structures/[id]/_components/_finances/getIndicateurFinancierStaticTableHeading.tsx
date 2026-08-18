@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+
 import { Badge } from "@/app/components/common/Badge";
 import { cn } from "@/app/utils/classname.util";
 import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
@@ -6,7 +8,7 @@ import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.sc
 export const getIndicateurFinancierStaticTableHeading = ({
   years,
   indicateursFinanciers,
-}: Props) => {
+}: Props): ReactElement[] => {
   return [
     <td className="bg-white" key="empty" />,
     ...years.map((year) => (
