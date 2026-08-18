@@ -26,12 +26,12 @@ export const DocumentDownloadDropdown = ({
               downloadDocument(downloadContent);
             }}
             className="whitespace-nowrap"
-            // disabled={
-            //   !downloadContent.data ||
-            //   downloadContent.data.length === 0 ||
-            //   !downloadContent.sheets ||
-            //   downloadContent.sheets.length === 0
-            // }
+            disabled={
+              !downloadContent.data &&
+              downloadContent.data!.length === 0 &&
+              !downloadContent.sheets &&
+              downloadContent.sheets!.length === 0
+            }
           >
             Exporter le tableau (ODS)
           </Button>

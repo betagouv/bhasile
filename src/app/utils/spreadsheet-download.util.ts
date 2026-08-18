@@ -144,9 +144,8 @@ export const getFinancesDownloadContent = (structure: StructureApiRead) => {
       coutJournalier: "Coût journalier",
       dotationDemandee: "Dotation demandée",
       dotationAccordee: "Dotation accordée",
-      resultatNet: "Résultat net proposé par l'opérateur",
-      resultatNetProposeParOperateur:
-        "Résultat net proposé par l'autorité tarifaire",
+      resultatNet: "Résultat net proposé par l'autorité tarifaire",
+      resultatNetProposeParOperateur: "Résultat net proposé par l'opérateur",
       repriseEtat: "Reprise Etat",
       affectationReservesFondsDedies: "Affectation",
       reserveInvestissement: "Réserve dédiée à l'investissement",
