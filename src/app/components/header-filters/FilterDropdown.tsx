@@ -1,3 +1,5 @@
+"use client";
+
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useSearchParams } from "next/navigation";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";

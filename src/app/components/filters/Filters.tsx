@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";

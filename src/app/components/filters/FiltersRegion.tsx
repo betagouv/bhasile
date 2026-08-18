@@ -1,3 +1,5 @@
+"use client";
+
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { Dispatch, SetStateAction, useEffect, useMemo, useRef } from "react";

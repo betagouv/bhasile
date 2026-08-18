@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import {
+  buildCpomListItem,
   filterCpomsByDepartement,
   sortValueForCpomColumn,
 } from "@/app/api/cpoms/cpom.util";
@@ -147,5 +148,82 @@ describe("sortValueForCpomColumn", () => {
     expect(
       sortValueForCpomColumn(cpom, "unknown" as CpomColumn)
     ).toEqual({ value: null, kind: "text" });
+  });
+});
+
+describe("buildCpomListItem", () => {
+  const conventionSignee = [
+    {
+      id: 1,
+      category: "CONVENTION_CPOM",
+      parentId: null,
+      startDate: new Date("2024-01-01T00:00:00.000Z"),
+      endDate: new Date("2028-12-31T00:00:00.000Z"),
+      fileUploads: [{ key: "convention.pdf" }],
+    },
+  ];
+
+  it("projette les champs affichés par la liste", () => {
+    const item = buildCpomListItem(
+      makeCpom({
+        id: 7,
+        operateur: { name: "Adoma" },
+        region: { name: "Île-de-France" },
+        granularity: "INTERDEPARTEMENTALE",
+        departements: [
+          { departement: { numero: "75" } },
+          { departement: { numero: "92" } },
+        ],
+        structures: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      })
+    );
+
+    expect(item).toMatchObject({
+      id: 7,
+      operateurName: "Adoma",
+      regionName: "Île-de-France",
+      granularity: "INTERDEPARTEMENTALE",
+      departementNumeros: ["75", "92"],
+      structureCount: 3,
+    });
+  });
+
+  it("considère le CPOM finalisé quand la convention est signée et datée", () => {
+    const item = buildCpomListItem(
+      makeCpom({ actesAdministratifs: conventionSignee })
+    );
+
+    expect(item.isFinalised).toBe(true);
+    expect(item.dateStart).toBe("2024-01-01T00:00:00.000Z");
+    expect(item.dateEnd).toBe("2028-12-31T00:00:00.000Z");
+  });
+
+  it("ne finalise pas un CPOM dont la convention n'a aucune pièce jointe", () => {
+    const item = buildCpomListItem(
+      makeCpom({
+        actesAdministratifs: [{ ...conventionSignee[0], fileUploads: [] }],
+      })
+    );
+
+    expect(item.isFinalised).toBe(false);
+  });
+
+  it("ne finalise pas un CPOM sans convention, même avec un autre acte signé", () => {
+    const item = buildCpomListItem(
+      makeCpom({
+        actesAdministratifs: [
+          { ...conventionSignee[0], category: "ARRETE_AUTORISATION" },
+        ],
+      })
+    );
+
+    expect(item.isFinalised).toBe(false);
+    expect(item.dateStart).toBeUndefined();
+  });
+
+  it("ne renvoie pas de région quand le CPOM n'en porte pas", () => {
+    const item = buildCpomListItem(makeCpom({ region: null }));
+
+    expect(item.regionName).toBeUndefined();
   });
 });

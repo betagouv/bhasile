@@ -1,3 +1,5 @@
+"use client";
+
 import { Range } from "@codegouvfr/react-dsfr/Range";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
