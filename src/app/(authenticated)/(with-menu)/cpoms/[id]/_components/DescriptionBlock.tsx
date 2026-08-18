@@ -44,7 +44,7 @@ export const DescriptionBlock = () => {
             <strong>
               {pluralize(cpom.departements?.length, "Département")}
             </strong>
-            {getDepartementsList(cpom.departements)}
+            {getDepartementsList(cpom.departements?.map((cpomDepartement) => cpomDepartement.departement?.numero ?? ""))}
           </div>
         )}
         <hr className="col-span-2" />

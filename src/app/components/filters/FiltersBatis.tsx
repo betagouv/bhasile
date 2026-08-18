@@ -1,3 +1,5 @@
+"use client";
+
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";

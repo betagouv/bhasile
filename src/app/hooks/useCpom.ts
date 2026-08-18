@@ -1,8 +1,6 @@
-import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 
 import { ApiError, extractApiError } from "../utils/apiError.util";
-import { refreshBestEffort } from "../utils/refresh.util";
 
 const createOrUpdateCpom = async (
   url: string,
@@ -30,12 +28,9 @@ export const useCpom = () => {
 
   const updateCpom = async (
     id: number,
-    data: Partial<CpomFormValues>,
-    setCpom: (cpom: CpomApiRead) => void
+    data: Partial<CpomFormValues>
   ): Promise<number> => {
-    const cpomId = await createOrUpdateCpom(`/api/cpoms/${id}`, "PUT", data);
-    await refreshBestEffort(`/api/cpoms/${cpomId}`, setCpom);
-    return cpomId;
+    return createOrUpdateCpom(`/api/cpoms/${id}`, "PUT", data);
   };
 
   return { addCpom, updateCpom };

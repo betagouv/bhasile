@@ -4,12 +4,12 @@ import { ReactElement } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
-import { CpomApiRead } from "@/schemas/api/cpom.schema";
+import { CpomListItem } from "@/types/cpom.type";
 import { ListColumn } from "@/types/ListColumn";
 
 import { CpomItem } from "./CpomItem";
 
-const COLUMNS: ListColumn[] = [
+export const COLUMNS: ListColumn[] = [
   {
     label: "Opérateur",
     column: "operateur",
@@ -69,7 +69,7 @@ export const CpomsTable = ({
 };
 
 type Props = {
-  cpoms: CpomApiRead[];
+  cpoms: CpomListItem[];
   totalCpoms: number;
   ariaLabelledBy: string;
 };

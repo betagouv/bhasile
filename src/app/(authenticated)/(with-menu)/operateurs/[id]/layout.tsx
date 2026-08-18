@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
 import { getOperateur } from "@/app/api/operateurs/operateur.service";
-import { createOperateurReadEvent } from "@/app/api/user-actions/user-action.service";
+import { createReadEvent } from "@/app/api/user-actions/user-action.service";
 import { parseId } from "@/app/utils/string.util";
 import { OperateurProvider } from "@/contexts/OperateurContext";
 
@@ -28,7 +28,7 @@ export default async function OperateurLayout({
     notFound();
   }
 
-  await createOperateurReadEvent(operateur.id);
+  await createReadEvent({ operateurId: operateur.id });
 
   return (
     <OperateurProvider entity={operateur}>

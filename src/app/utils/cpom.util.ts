@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomApiRead, CpomDepartementApiType } from "@/schemas/api/cpom.schema";
+import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
@@ -101,15 +101,13 @@ export const getGranularityLabel = (
 };
 
 export const getDepartementsList = (
-  departements?: CpomDepartementApiType[],
+  departementNumeros?: string[],
   maxLength?: number
 ): string => {
-  if (!departements) {
+  if (!departementNumeros) {
     return "";
   }
-  const list = departements
-    .map((departement) => departement.departement?.numero)
-    .join(", ");
+  const list = departementNumeros.join(", ");
   if (maxLength && list.length > maxLength) {
     return list.slice(0, maxLength) + "...";
   }

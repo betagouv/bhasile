@@ -1,5 +1,6 @@
 import { type SortKind, type SortValue } from "@/app/utils/list.util";
 import { parseCommaList } from "@/app/utils/string.util";
+import { CpomListItem } from "@/types/cpom.type";
 import { CpomColumn } from "@/types/ListColumn";
 
 import { getDatesOfCurrentActeAdministratif } from "../actes-administratifs/acte-administratif.util";
@@ -71,4 +72,26 @@ export const sortValueForCpomColumn = (
     default:
       return { value: null, kind: "text" };
   }
+};
+
+export const buildCpomListItem = (cpom: CpomDbList): CpomListItem => {
+  const [dateStart, dateEnd] = getDatesConvention(cpom);
+
+  return {
+    id: cpom.id,
+    operateurName: cpom.operateur.name,
+    granularity: cpom.granularity,
+    regionName: cpom.region?.name,
+    departementNumeros: cpom.departements.map(
+      (cpomDepartement) => cpomDepartement.departement.numero
+    ),
+    dateStart: dateStart?.toISOString(),
+    dateEnd: dateEnd?.toISOString(),
+    structureCount: cpom.structures.length,
+    isFinalised: Boolean(
+      cpom.actesAdministratifs?.[0]?.fileUploads?.[0]?.key &&
+        dateStart &&
+        dateEnd
+    ),
+  };
 };

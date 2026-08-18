@@ -2,14 +2,14 @@
 
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 
-import { createMutableEntityContext } from "./createEntityContext";
+import { createEntityContext } from "./createEntityContext";
 
-const { Provider, useValue } = createMutableEntityContext<CpomApiRead>("Cpom");
+const { Provider, useValue } = createEntityContext<CpomApiRead>("Cpom");
 
 export const CpomProvider = Provider;
 
 export const useCpomContext = () => {
-  const { entity, setEntity } = useValue();
+  const { entity } = useValue();
 
-  return { cpom: entity, setCpom: setEntity };
+  return { cpom: entity };
 };

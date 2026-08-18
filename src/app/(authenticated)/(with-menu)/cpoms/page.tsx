@@ -1,17 +1,32 @@
-"use client";
-
 import Link from "next/link";
-import { ReactElement } from "react";
+import { ReactElement, Suspense } from "react";
 
+import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
 import { Filters } from "@/app/components/filters/Filters";
-import { ListLoader } from "@/app/components/lists/ListLoader";
-import { useCpomsSearch } from "@/app/hooks/useCpomsSearch";
-import { formatPlural } from "@/app/utils/string.util";
+import {
+  getFirstParam,
+  getPageParam,
+  SearchParams,
+} from "@/app/utils/searchParams.util";
+import { CpomsQuery } from "@/types/cpom.type";
+import { parseCpomColumn, parseSortDirection } from "@/types/ListColumn";
 
-import { CpomsTable } from "./_components/CpomsTable";
+import { CpomsContent } from "./CpomsContent";
+import { CpomsCount } from "./CpomsCount";
+import { CpomsSkeleton } from "./CpomsSkeleton";
 
-export default function Structures(): ReactElement {
-  const { cpoms, totalCpoms } = useCpomsSearch();
+export default async function Cpoms({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<ReactElement> {
+  const params = await searchParams;
+  const query: CpomsQuery = {
+    page: getPageParam(params, "page"),
+    departements: getFirstParam(params.departements),
+    column: parseCpomColumn(getFirstParam(params.column)),
+    direction: parseSortDirection(getFirstParam(params.direction)),
+  };
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -28,23 +43,24 @@ export default function Structures(): ReactElement {
       </div>
       <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
         <Filters showFilters={false} showLocation={true} />
-        <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-          {formatPlural(totalCpoms, "entrée")}
-        </p>
+        <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
+          <Suspense fallback={<div className="pl-3 min-w-24" />}>
+            <CpomsCount query={query} />
+          </Suspense>
+        </ContentErrorBoundary>
       </div>
-      <ListLoader
-        fetchStateName={"cpoms-search"}
-        itemCount={cpoms?.length}
-        entityName="cpom"
+      <ContentErrorBoundary
+        fallback={
+          <p className="p-16">
+            Erreur lors de la récupération des CPOM. Modifiez vos filtres ou
+            réessayez plus tard.
+          </p>
+        }
       >
-        {cpoms && (
-          <CpomsTable
-            cpoms={cpoms}
-            totalCpoms={totalCpoms}
-            ariaLabelledBy="cpoms-titre"
-          />
-        )}
-      </ListLoader>
+        <Suspense fallback={<CpomsSkeleton />}>
+          <CpomsContent query={query} />
+        </Suspense>
+      </ContentErrorBoundary>
     </div>
   );
 }

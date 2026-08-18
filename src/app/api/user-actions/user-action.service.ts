@@ -31,7 +31,7 @@ export const createOperateurEvent = async (
   await createUserAction({ action: getActionFromMethod(method), operateurId });
 };
 
-export const createOperateurReadEvent = async (operateurId: number) => {
+export const createReadEvent = async (target: ReadEventTarget) => {
   const session = await getServerSession(authOptions);
   const userEmail = session?.user?.email;
   if (!userEmail) {
@@ -41,10 +41,16 @@ export const createOperateurReadEvent = async (operateurId: number) => {
   after(() =>
     createUserAction({
       action: UserActionCategory.READ,
-      operateurId,
+      ...target,
       userEmail,
     })
   );
+};
+
+type ReadEventTarget = {
+  structureId?: number;
+  cpomId?: number;
+  operateurId?: number;
 };
 
 export const createStatistiquesEvent = async (method: string) => {

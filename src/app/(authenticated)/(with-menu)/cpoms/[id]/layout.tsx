@@ -1,30 +1,11 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { getCpomById } from "@/app/api/cpoms/cpom.service";
+import { createReadEvent } from "@/app/api/user-actions/user-action.service";
+import { parseId } from "@/app/utils/string.util";
 import { CpomProvider } from "@/contexts/CpomContext";
-import { CpomApiRead } from "@/schemas/api/cpom.schema";
 
 import { CpomHeader } from "./_components/CpomHeader";
-
-async function getCpom(id: string): Promise<CpomApiRead> {
-  try {
-    const baseUrl = process.env.NEXT_URL || "";
-    const result = await fetch(`${baseUrl}/api/cpoms/${id}`, {
-      cache: "no-store",
-      // Requête côté serveur donc il faut appeler les headers manuellement
-      headers: await headers(),
-    });
-
-    if (!result.ok) {
-      throw new Error(`Impossible de récupérer le cpom : ${result.status}`);
-    }
-
-    return await result.json();
-  } catch (error) {
-    console.error(error);
-    notFound();
-  }
-}
 
 export default async function CpomLayout({
   children,
@@ -34,7 +15,16 @@ export default async function CpomLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const cpom = await getCpom(id);
+  const cpomId = parseId(id);
+  if (cpomId === null) {
+    notFound();
+  }
+
+  const cpom = await getCpomById(cpomId);
+  if (!cpom) {
+    notFound();
+  }
+  await createReadEvent({ cpomId: cpom.id });
 
   return (
     <CpomProvider entity={cpom}>

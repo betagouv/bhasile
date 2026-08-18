@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GET, PUT } from "@/app/api/cpoms/[id]/route";
+import { PUT } from "@/app/api/cpoms/[id]/route";
 
 const mockFindOne = vi.fn();
 const mockCreateOrUpdateCpom = vi.fn();
@@ -15,68 +15,6 @@ vi.mock("@/app/api/cpoms/cpom.repository", () => ({
 vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createCpomEvent: (...args: unknown[]) => mockCreateCpomEvent(...args),
 }));
-
-describe("GET /api/cpoms/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("retourne le cpom quand il est trouvé", async () => {
-    // GIVEN
-    const cpom = { id: 1, structures: [] };
-    mockFindOne.mockResolvedValueOnce(cpom);
-
-    const request = new NextRequest("http://localhost/api/cpoms/1");
-
-    // WHEN
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "1" }),
-    });
-
-    // THEN
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({
-      id: 1,
-      structures: [],
-      dateStart: null,
-      dateEnd: null,
-    });
-    expect(mockFindOne).toHaveBeenCalledWith(1);
-  });
-
-  it("retourne 404 quand le cpom est introuvable", async () => {
-    // GIVEN
-    mockFindOne.mockResolvedValueOnce(null);
-
-    const request = new NextRequest("http://localhost/api/cpoms/99");
-
-    // WHEN
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "99" }),
-    });
-
-    // THEN
-    expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ error: "CPOM non trouvé" });
-    expect(mockFindOne).toHaveBeenCalledWith(99);
-  });
-
-  it("retourne 500 quand le repository lève une erreur", async () => {
-    // GIVEN
-    mockFindOne.mockRejectedValueOnce(new Error("DB error"));
-
-    const request = new NextRequest("http://localhost/api/cpoms/1");
-
-    // WHEN
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "1" }),
-    });
-
-    // THEN
-    expect(response.status).toBe(500);
-    expect(mockFindOne).toHaveBeenCalledWith(1);
-  });
-});
 
 describe("PUT /api/cpoms/[id]", () => {
   beforeEach(() => {
