@@ -6,6 +6,7 @@ import { ReactElement } from "react";
 import { Block } from "@/app/components/common/Block";
 import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
 import { InformationCard } from "@/app/components/InformationCard";
+import { useUserAction } from "@/app/hooks/useUserAction";
 import { getTypePlacesDownloadContent } from "@/app/utils/spreadsheet-download.util";
 import { getMostRecentMillesime } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
@@ -15,8 +16,8 @@ import { TypePlaceHistory } from "./TypePlaceHistory";
 
 export const TypePlaceBlock = (): ReactElement => {
   const { structure } = useStructureContext();
-
   const router = useRouter();
+  const { trackTypePlacesSpreadsheetExport } = useUserAction();
 
   const currentTypologie = getMostRecentMillesime(
     structure.structureTypologies
@@ -34,6 +35,9 @@ export const TypePlaceBlock = (): ReactElement => {
       downloadDropdown={
         <DocumentDownloadDropdown
           downloadContent={getTypePlacesDownloadContent(structure)}
+          onDownload={() => {
+            trackTypePlacesSpreadsheetExport(structure.id);
+          }}
         />
       }
     >

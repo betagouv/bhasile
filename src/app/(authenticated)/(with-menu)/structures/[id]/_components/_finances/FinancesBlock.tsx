@@ -3,6 +3,7 @@ import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
+import { useUserAction } from "@/app/hooks/useUserAction";
 import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
 import { getFinancesDownloadContent } from "@/app/utils/spreadsheet-download.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
@@ -18,8 +19,8 @@ import { StructureStaticTable } from "./StructureStaticTable";
 
 export const FinancesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
-
   const router = useRouter();
+  const { trackFinancesSpreadsheetExport } = useUserAction();
 
   const [shouldShowCpom, setShouldShowCpom] = useState(false);
 
@@ -45,6 +46,7 @@ export const FinancesBlock = (): ReactElement => {
       downloadDropdown={
         <DocumentDownloadDropdown
           downloadContent={getFinancesDownloadContent(structure)}
+          onDownload={() => trackFinancesSpreadsheetExport(structure.id)}
         />
       }
     >

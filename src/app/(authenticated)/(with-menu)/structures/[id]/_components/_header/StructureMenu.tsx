@@ -2,6 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
 
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
+import { useUserAction } from "@/app/hooks/useUserAction";
 import {
   downloadDocument,
   getStructureDownloadContent,
@@ -11,6 +12,7 @@ import { useStructureContext } from "@/contexts/StructureContext";
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
   const { structure } = useStructureContext();
+  const { trackStructureSpreadsheetExport } = useUserAction();
 
   return (
     <div className="relative shrink-0" ref={panelRef}>
@@ -35,6 +37,7 @@ export const StructureMenu = ({ structureId }: Props) => {
             priority="tertiary no outline"
             onClick={() => {
               downloadDocument(getStructureDownloadContent(structure));
+              trackStructureSpreadsheetExport(structure.id);
             }}
             className="whitespace-nowrap"
           >

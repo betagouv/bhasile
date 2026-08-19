@@ -7,6 +7,7 @@ import { DownloadOptions } from "@/types/spreadsheet-download.type";
 
 export const DocumentDownloadDropdown = ({
   downloadContent,
+  onDownload,
 }: Props): ReactElement => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
 
@@ -24,6 +25,7 @@ export const DocumentDownloadDropdown = ({
             priority="tertiary no outline"
             onClick={() => {
               downloadDocument(downloadContent);
+              onDownload?.();
             }}
             className="whitespace-nowrap"
             disabled={
@@ -40,4 +42,5 @@ export const DocumentDownloadDropdown = ({
 
 type Props = {
   downloadContent: DownloadOptions;
+  onDownload?: () => void;
 };

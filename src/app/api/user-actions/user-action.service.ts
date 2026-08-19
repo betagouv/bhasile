@@ -73,3 +73,47 @@ export const createStructuresCartographieEvent = async (method: string) => {
     description: UserActionDescription.STRUCTURES_CARTOGRAPHIE,
   });
 };
+
+export const createTypePlacesSpreadsheetExportEvent = async (
+  method: string,
+  structureId: number
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    structureId,
+    description: UserActionDescription.TYPE_PLACES_SPREADSHEET_EXPORT,
+  });
+};
+
+export const createFinancesSpreadsheetExportEvent = async (
+  method: string,
+  structureId: number
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    structureId,
+    description: UserActionDescription.FINANCES_SPREADSHEET_EXPORT,
+  });
+};
+
+export const createControleQualiteSpreadsheetExportEvent = async (
+  method: string,
+  structureId: number
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    structureId,
+    description: UserActionDescription.CONTROLE_QUALITE_SPREADSHEET_EXPORT,
+  });
+};
+
+export const createStructureSpreadsheetExportEvent = async (
+  method: string,
+  structureId: number
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    structureId,
+    description: UserActionDescription.STRUCTURE_SPREADSHEET_EXPORT,
+  });
+};
