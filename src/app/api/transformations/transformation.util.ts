@@ -1,4 +1,4 @@
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import {
   getStructureVersionTransformationDepartement,
   isEffectiveDateValid,
@@ -30,7 +30,7 @@ export const checkNoDuplicateStructureIds = (
     )
     .filter((structureId): structureId is number => structureId != null);
   if (new Set(structureIds).size !== structureIds.length) {
-    throw new ApiDomainError(
+    throw new DomainError(
       "Une structure ne peut pas à la fois céder et recevoir des places dans une même transformation."
     );
   }
@@ -47,7 +47,7 @@ export const checkUniqueDepartement = (
     )
     .filter((departement): departement is string => Boolean(departement));
   if (new Set(departements).size > 1) {
-    throw new ApiDomainError(
+    throw new DomainError(
       "Toutes les structures d'une transformation doivent appartenir au même département."
     );
   }
@@ -69,14 +69,14 @@ export const checkCanUpdateDepartements = (
   }
 
   if (!defineAbilityFor(user).can("update", "Structure")) {
-    throw new ApiDomainError("Droits insuffisants", 403);
+    throw new DomainError("Droits insuffisants", 403);
   }
 
   const refusedDepartement = collectDepartements(
     structureVersionTransformations
   ).find((departement) => !canUpdateDepartement(user, departement));
   if (refusedDepartement) {
-    throw new ApiDomainError(
+    throw new DomainError(
       `Le département ${refusedDepartement} n'est pas dans votre périmètre.`,
       403
     );
@@ -94,7 +94,7 @@ export const checkEffectiveDatesAreValid = (
     }
   );
   if (hasInvalidEffectiveDate) {
-    throw new ApiDomainError(
+    throw new DomainError(
       `Il n'est pas possible de déclarer une date d'effet antérieure à ${PLACES_VERSIONED_FROM_YEAR} sur Bhasile`
     );
   }

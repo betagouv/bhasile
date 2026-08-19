@@ -11,7 +11,7 @@ import {
   getStructureForOperateur,
   type SearchProps,
 } from "@/app/api/structures/structure.service";
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import prisma from "@/lib/prisma";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { Repartition } from "@/types/adresse.type";
@@ -202,7 +202,7 @@ describe("structure.repository db integration", () => {
       return structure;
     };
 
-    it("rejette avec une ApiDomainError le changement de département de la version courante", async () => {
+    it("rejette avec une DomainError le changement de département de la version courante", async () => {
       // GIVEN: a structure whose invariant departement is set (OFII-born)
       const premier = await prisma.departement.findFirstOrThrow();
       const second = await prisma.departement.findFirstOrThrow({
@@ -211,16 +211,18 @@ describe("structure.repository db integration", () => {
       const structure = await createStructureWithDepartement(premier.numero);
 
       // WHEN/THEN: moving the current version to another departement is refused,
-      // and the ApiDomainError propagates unwrapped so the route maps it to a 400.
+      // and the DomainError propagates unwrapped so the route maps it to a 400.
       await expect(
         updateOne({ id: structure.id, departementAdministratif: second.numero })
-      ).rejects.toThrow(ApiDomainError);
+      ).rejects.toThrow(DomainError);
     });
 
     it("laisse changer d'adresse tant que le département reste identique", async () => {
       // GIVEN: a structure with its invariant departement set
       const departement = await prisma.departement.findFirstOrThrow();
-      const structure = await createStructureWithDepartement(departement.numero);
+      const structure = await createStructureWithDepartement(
+        departement.numero
+      );
 
       // WHEN: the admin address changes but the departement stays the same
       await updateOne({
@@ -239,7 +241,9 @@ describe("structure.repository db integration", () => {
     it("laisse passer une mise à jour qui ne touche pas au département", async () => {
       // GIVEN: a structure with its invariant departement set
       const departement = await prisma.departement.findFirstOrThrow();
-      const structure = await createStructureWithDepartement(departement.numero);
+      const structure = await createStructureWithDepartement(
+        departement.numero
+      );
 
       // WHEN: an update carries no departement field
       await updateOne({ id: structure.id, nom: "Sans toucher au département" });

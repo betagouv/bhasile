@@ -1,4 +1,4 @@
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import { getNow } from "@/app/utils/now.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
@@ -270,7 +270,9 @@ export const updateTransformation = async (
   checkCanUpdateDepartements(user, [
     ...transformation.structureVersionTransformations,
     ...inputStructureVersionTransformations,
-    ...(await resolveStructureDepartements(inputStructureVersionTransformations)),
+    ...(await resolveStructureDepartements(
+      inputStructureVersionTransformations
+    )),
   ]);
 
   return updateOne(input);
@@ -279,10 +281,10 @@ export const updateTransformation = async (
 export const deleteTransformation = async (id: number): Promise<void> => {
   const transformation = await findOne(id);
   if (!transformation) {
-    throw new ApiDomainError("Transformation non trouvée", 404);
+    throw new DomainError("Transformation non trouvée", 404);
   }
   if (isTransformationFinalised(transformation)) {
-    throw new ApiDomainError(
+    throw new DomainError(
       "Impossible de supprimer une transformation finalisée"
     );
   }

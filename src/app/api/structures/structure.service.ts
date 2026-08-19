@@ -1,5 +1,5 @@
 import { recomputeAnomaliesSafely } from "@/app/api/anomalies/anomalie.service";
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import {
@@ -116,7 +116,7 @@ export const updateActualisation = async (
     getActualisationFormSlug(year)
   );
   if (alreadyValidated) {
-    throw new ApiDomainError(
+    throw new DomainError(
       `Structure ${structure.id} déjà actualisée pour ${year}`,
       409
     );
@@ -286,9 +286,7 @@ export const getStructureForOperateur = async (
   id: number
 ): Promise<StructureDbOperateur> => findOneOperateur(id);
 
-export const getStructureDepartement = async (
-  id: number
-): Promise<string> => {
+export const getStructureDepartement = async (id: number): Promise<string> => {
   const { departementAdministratif } = await findStructureDepartement(id);
   return departementAdministratif;
 };

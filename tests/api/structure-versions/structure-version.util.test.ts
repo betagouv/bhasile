@@ -7,7 +7,7 @@ import {
   resolveCurrentVersion,
   resolvePredecessor,
 } from "@/app/api/structure-versions/structure-version.util";
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 
 const baseVersion = {
   id: 1,
@@ -44,27 +44,32 @@ describe("isVersionValid", () => {
       })
     ).toBe(false);
   });
-
 });
 
 describe("resolveCurrentVersion", () => {
   const socle = { ...baseVersion, id: 20, effectiveDate: null };
 
   it("retient le socle (effectiveDate null) en l'absence de version datée effective", () => {
-    expect(
-      resolveCurrentVersion([socle], new Date("2026-06-01"))?.id
-    ).toBe(20);
+    expect(resolveCurrentVersion([socle], new Date("2026-06-01"))?.id).toBe(20);
   });
 
   it("supplante le socle par une version datée déjà effective", () => {
-    const datee = { ...baseVersion, id: 10, effectiveDate: new Date("2025-01-01") };
+    const datee = {
+      ...baseVersion,
+      id: 10,
+      effectiveDate: new Date("2025-01-01"),
+    };
     expect(
       resolveCurrentVersion([socle, datee], new Date("2026-06-01"))?.id
     ).toBe(10);
   });
 
   it("retombe sur le socle quand les versions datées sont dans le futur", () => {
-    const future = { ...baseVersion, id: 10, effectiveDate: new Date("2028-01-01") };
+    const future = {
+      ...baseVersion,
+      id: 10,
+      effectiveDate: new Date("2028-01-01"),
+    };
     expect(
       resolveCurrentVersion([socle, future], new Date("2026-06-01"))?.id
     ).toBe(20);
@@ -100,9 +105,9 @@ describe("resolvePredecessor", () => {
       id: 10,
       effectiveDate: new Date("2026-06-01"),
     };
-    expect(
-      resolvePredecessor([socle, pivot], new Date("2026-06-01"))?.id
-    ).toBe(20);
+    expect(resolvePredecessor([socle, pivot], new Date("2026-06-01"))?.id).toBe(
+      20
+    );
   });
 
   it("ignore les versions datées postérieures à la date pivot", () => {
@@ -160,7 +165,9 @@ describe("resolvePredecessor", () => {
       id: 10,
       effectiveDate: new Date("2028-01-01"),
     };
-    expect(resolvePredecessor([future], new Date("2026-06-01"))).toBeUndefined();
+    expect(
+      resolvePredecessor([future], new Date("2026-06-01"))
+    ).toBeUndefined();
   });
 });
 
@@ -189,7 +196,7 @@ describe("checkNoDepartementAdministratifChange", () => {
 
   it("rejette quand la version change de département", () => {
     expect(() => checkNoDepartementAdministratifChange("75", "69")).toThrow(
-      ApiDomainError
+      DomainError
     );
   });
 });
@@ -197,19 +204,15 @@ describe("checkNoDepartementAdministratifChange", () => {
 describe("checkCreatedStructureDepartement", () => {
   it("rejette une structure créée hors du département des structures d'origine", () => {
     expect(() => checkCreatedStructureDepartement("75", "92")).toThrow(
-      ApiDomainError
+      DomainError
     );
   });
 
   it("laisse créer une structure ex-nihilo quand il n'y a pas d'ancre", () => {
-    expect(() =>
-      checkCreatedStructureDepartement(null, "92")
-    ).not.toThrow();
+    expect(() => checkCreatedStructureDepartement(null, "92")).not.toThrow();
   });
 
   it("laisse passer une structure créée dans le même département que les sources", () => {
-    expect(() =>
-      checkCreatedStructureDepartement("75", "75")
-    ).not.toThrow();
+    expect(() => checkCreatedStructureDepartement("75", "75")).not.toThrow();
   });
 });

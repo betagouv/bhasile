@@ -1,4 +1,4 @@
-import { ApiDomainError } from "@/app/utils/apiDomainError.util";
+import { DomainError } from "@/app/utils/domainError.util";
 import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { FormApiType } from "@/schemas/api/form.schema";
@@ -159,7 +159,7 @@ const createOrUpdateCompleteFormWithSteps = async (
       select: { status: true },
     });
     if (!areAllFormStepsValidated(persistedSteps)) {
-      throw new ApiDomainError(
+      throw new DomainError(
         `Toutes les étapes doivent être validées avant de valider le formulaire ${form.formDefinition.slug}`,
         409
       );
