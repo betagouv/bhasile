@@ -23,15 +23,10 @@ type ActualisationData = Pick<
 
 export const useActualisationFormHandling = ({ year, currentStep }: Props) => {
   const router = useRouter();
-  const { structure, setStructure } = useStructureContext();
+  const { structure } = useStructureContext();
   const { updateActualisation } = useStructures();
-  const { mutate } = useSaveMutation(
-    ACTUALISATION_SAVE_KEY,
-    (payload: unknown) =>
-      updateActualisation(structure.id, payload, setStructure),
-    // shouldRefresh: false tant que cette entité passe par refreshBestEffort —
-    // à retirer avec sa migration en RSC.
-    { shouldRefresh: false }
+  const { mutate } = useSaveMutation(ACTUALISATION_SAVE_KEY, (payload: unknown) =>
+    updateActualisation(structure.id, payload)
   );
 
   const slug = getActualisationFormSlug(year);

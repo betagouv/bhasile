@@ -1,43 +1,40 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { ReactNode } from "react";
 
 import { getActualisationYear } from "@/app/api/structures/actualisation.util";
+import { getFullStructure } from "@/app/api/structures/structure.service";
+import { createReadEvent } from "@/app/api/user-actions/user-action.service";
+import { parseId } from "@/app/utils/string.util";
 import { StructureProvider } from "@/contexts/StructureContext";
-import { StructureApiRead } from "@/schemas/api/structure.schema";
+import { authOptions } from "@/lib/next-auth/auth";
+import { SessionUser } from "@/types/global";
 
 import { StructureHeader } from "./_components/_header/StructureHeader";
-
-async function getStructure(id: string): Promise<StructureApiRead> {
-  try {
-    const baseUrl = process.env.NEXT_URL || "";
-    const result = await fetch(`${baseUrl}/api/structures/${id}`, {
-      cache: "no-store",
-      // Requête côté serveur donc il faut appeler les headers manuellement
-      headers: await headers(),
-    });
-
-    if (!result.ok) {
-      throw new Error(
-        `Impossible de récupérer la structure : ${result.status}`
-      );
-    }
-
-    return await result.json();
-  } catch (error) {
-    console.error(error);
-    notFound();
-  }
-}
 
 export default async function StructureLayout({
   children,
   params,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const structure = await getStructure(id);
+  const structureId = parseId(id);
+  if (structureId === null) {
+    notFound();
+  }
+
+  const session = await getServerSession(authOptions);
+  const structure = await getFullStructure(
+    structureId,
+    session?.user as SessionUser | undefined
+  );
+  if (!structure) {
+    notFound();
+  }
+  await createReadEvent({ structureId: structure.id });
+
   const actualisationYear = getActualisationYear();
 
   return (

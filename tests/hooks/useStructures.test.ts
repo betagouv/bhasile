@@ -167,56 +167,37 @@ describe("useStructures integration", () => {
     });
   });
 
-  describe("updateAndRefreshStructure", () => {
-    it("met à jour puis recharge la structure et appelle setStructure", async () => {
+
+  describe("updateStructure", () => {
+    it("envoie la mise à jour en PUT sur la structure ciblée", async () => {
       // GIVEN
       const structureId = 12;
       const partialUpdate = { nom: "Structure mise à jour" };
-      const updatedStructure = {
-        id: structureId,
-        nom: "Structure mise à jour",
-      };
-      const setStructure = vi.fn();
-
-      mockFetch
-        .mockResolvedValueOnce(toJsonResponse(200, {}))
-        .mockResolvedValueOnce(toJsonResponse(200, updatedStructure));
+      mockFetch.mockResolvedValueOnce(toJsonResponse(200, {}));
 
       // WHEN
       const { result } = renderHook(() => useStructures());
 
       await act(async () => {
-        await result.current.updateAndRefreshStructure(
-          structureId,
-          partialUpdate,
-          setStructure
-        );
+        await result.current.updateStructure({
+          ...partialUpdate,
+          id: structureId,
+        });
       });
 
       // THEN
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        1,
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith(
         `/api/structures/${structureId}`,
         {
           method: "PUT",
-          body: JSON.stringify({
-            ...partialUpdate,
-            id: structureId,
-          }),
+          body: JSON.stringify({ ...partialUpdate, id: structureId }),
         }
       );
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        2,
-        `/api/structures/${structureId}`
-      );
-      expect(setStructure).toHaveBeenCalledWith(updatedStructure);
     });
 
-    it("ne recharge pas la structure quand la mise à jour échoue", async () => {
+    it("remonte l'erreur de l'API sans recharger la structure", async () => {
       // GIVEN
-      const structureId = 99;
-      const setStructure = vi.fn();
       mockFetch.mockResolvedValueOnce(
         toJsonResponse(400, { error: "Update failed" })
       );
@@ -227,15 +208,10 @@ describe("useStructures integration", () => {
       // THEN
       await act(async () => {
         await expect(
-          result.current.updateAndRefreshStructure(
-            structureId,
-            { nom: "ko" },
-            setStructure
-          )
+          result.current.updateStructure({ nom: "ko", id: 99 })
         ).rejects.toThrow("Update failed");
       });
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(setStructure).not.toHaveBeenCalled();
     });
   });
 });

@@ -11,7 +11,7 @@ import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 
 const mockRouterPush = vi.fn();
-const mockSetStructure = vi.fn();
+const mockRouterRefresh = vi.fn();
 const mockSetFetchState = vi.fn();
 const mockUpdateActualisation = vi.fn();
 
@@ -30,14 +30,13 @@ const actualisationForm = {
 };
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
+  useRouter: () => ({ push: mockRouterPush, refresh: mockRouterRefresh }),
 }));
 vi.mock(
   "@/contexts/StructureContext",
   () => ({
     useStructureContext: () => ({
       structure: { id: 1, forms: [actualisationForm] },
-      setStructure: mockSetStructure,
     }),
   })
 );
@@ -71,15 +70,24 @@ describe("useActualisationFormHandling", () => {
 
     await result.current.handleAutoSave({}, z.string(), "valide");
 
-    const [structureId, payload, setStructure] =
-      mockUpdateActualisation.mock.calls[0];
+    const [structureId, payload] = mockUpdateActualisation.mock.calls[0];
     expect(structureId).toBe(1);
-    expect(setStructure).toBe(mockSetStructure);
     expect(stepStatus(payload, "01-places")).toBe(StepStatus.VALIDE);
     // Les autres étapes ne sont pas touchées.
     expect(stepStatus(payload, "02-documents-financiers")).toBe(
       StepStatus.NON_COMMENCE
     );
+  });
+
+  it("rafraîchit le rendu serveur après une auto-sauvegarde", async () => {
+    // buildForms reconstruit tout le tableau forms depuis le contexte : sans ce
+    // rafraîchissement, l'étape validée juste avant serait renvoyée périmée et
+    // sa validation écrasée.
+    const { result } = renderActualisation("01-places");
+
+    await result.current.handleAutoSave({}, z.string(), "valide");
+
+    expect(mockRouterRefresh).toHaveBeenCalledTimes(1);
   });
 
   it("auto-sauvegarde en posant NON_COMMENCE quand le schéma strict échoue", async () => {

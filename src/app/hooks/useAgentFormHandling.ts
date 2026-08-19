@@ -21,17 +21,14 @@ export const useAgentFormHandling = ({
 }: Props = {}) => {
   const router = useRouter();
 
-  const { structure, setStructure } = useStructureContext();
+  const { structure } = useStructureContext();
 
-  const { updateAndRefreshStructure } = useStructures();
+  const { updateStructure } = useStructures();
 
   const { mutate: saveStructure } = useSaveMutation(
     "structure-save",
     (data: StructureAgentUpdateApiClient) =>
-      updateAndRefreshStructure(structure.id, data, setStructure),
-    // shouldRefresh: false tant que cette entité passe par refreshBestEffort —
-    // à retirer avec sa migration en RSC.
-    { shouldRefresh: false }
+      updateStructure({ ...data, id: structure.id })
   );
 
   const handleAutoSave = async (data: StructureAgentUpdateApiClient) => {
@@ -111,8 +108,6 @@ export const useAgentFormHandling = ({
     if (result === null) {
       return;
     }
-
-    router.refresh();
 
     if (nextRoute) {
       router.push(nextRoute);

@@ -3,10 +3,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
-import {
-  StructureApiRead,
-  StructureApiWriteClient,
-} from "@/schemas/api/structure.schema";
+import { StructureApiWriteClient } from "@/schemas/api/structure.schema";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
 import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
@@ -15,7 +12,6 @@ import { DeepPartial } from "@/types/global";
 
 import { ApiError, extractApiError } from "../utils/apiError.util";
 import { parseFrenchNumber } from "../utils/number.util";
-import { refreshBestEffort } from "../utils/refresh.util";
 
 dayjs.extend(customParseFormat);
 
@@ -44,8 +40,7 @@ export const useStructures = (): UseStructureResult => {
 
   const updateActualisation = async (
     structureId: number,
-    structure: unknown,
-    setStructure: (structure: StructureApiRead) => void
+    structure: unknown
   ): Promise<void> => {
     const response = await fetch(
       `/api/structures/${structureId}/actualisation`,
@@ -57,22 +52,11 @@ export const useStructures = (): UseStructureResult => {
     if (!response.ok) {
       throw new ApiError(await extractApiError(response), response.status);
     }
-    await refreshBestEffort(`/api/structures/${structureId}`, setStructure);
-  };
-
-  const updateAndRefreshStructure = async (
-    structureId: number,
-    structure: unknown,
-    setStructure: (structure: StructureApiRead) => void
-  ): Promise<void> => {
-    await updateStructure({ ...(structure as object), id: structureId });
-    await refreshBestEffort(`/api/structures/${structureId}`, setStructure);
   };
 
   return {
     addStructure,
     updateStructure,
-    updateAndRefreshStructure,
     updateActualisation,
   };
 };
@@ -80,15 +64,9 @@ export const useStructures = (): UseStructureResult => {
 type UseStructureResult = {
   addStructure: (values: AjoutFormValues) => Promise<void>;
   updateStructure: (values: unknown) => Promise<void>;
-  updateAndRefreshStructure: (
-    structureId: number,
-    values: unknown,
-    setStructure: (structure: StructureApiRead) => void
-  ) => Promise<void>;
   updateActualisation: (
     structureId: number,
-    values: unknown,
-    setStructure: (structure: StructureApiRead) => void
+    values: unknown
   ) => Promise<void>;
 };
 
