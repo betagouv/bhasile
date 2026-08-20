@@ -7,10 +7,14 @@ import { ReactElement, useState } from "react";
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
 import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
-import { ListColumn } from "@/types/ListColumn";
 import { StructureListItem } from "@/types/structure-list.type";
 
 import { StructureItem } from "./StructureItem";
+import {
+  ACTIVE_TRAILING_COLUMNS,
+  CLOSED_TRAILING_COLUMNS,
+  SHARED_COLUMNS,
+} from "./structuresColumns";
 
 const finalisationModal = createModal({
   id: "finalisation-modal",
@@ -21,65 +25,6 @@ const noPermissionsModal = createModal({
   id: "no-permissions-modal",
   isOpenedByDefault: false,
 });
-
-export const SHARED_COLUMNS: ListColumn[] = [
-  {
-    label: "Code",
-    column: "codeBhasile",
-    orderBy: true,
-  },
-  {
-    label: "Type",
-    column: "type",
-    orderBy: true,
-  },
-  {
-    label: "Opérateur",
-    column: "operateur",
-    orderBy: true,
-  },
-  {
-    label: "Dépt.",
-    column: "departementAdministratif",
-    orderBy: true,
-  },
-  {
-    label: "Communes",
-    column: "communes",
-    orderBy: false,
-  },
-  {
-    label: "Bâti",
-    column: "bati",
-    orderBy: true,
-  },
-];
-
-export const ACTIVE_TRAILING_COLUMNS: ListColumn[] = [
-  {
-    label: "Places aut.",
-    column: "placesAutorisees",
-    orderBy: true,
-  },
-  {
-    label: "Fin convention",
-    column: "finConvention",
-    orderBy: true,
-  },
-];
-
-const CLOSED_TRAILING_COLUMNS: ListColumn[] = [
-  {
-    label: "Archivé le",
-    column: "effectiveDate",
-    orderBy: false,
-  },
-  {
-    label: "Motif",
-    column: "motif",
-    orderBy: false,
-  },
-];
 
 export const StructuresTable = ({
   structures,
