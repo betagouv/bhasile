@@ -1,6 +1,7 @@
 import { INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR } from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierFormValues } from "@/schemas/forms/base/indicateurFinancier.schema";
+import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 
 import { isNullOrUndefined } from "./common.util";
 import { getYearRange } from "./date.util";
@@ -87,3 +88,22 @@ export const isYearPrevisionnelle = (
   indicateursFinanciers: IndicateurFinancierApiType[],
   year: number
 ) => isYearTypeFilled(indicateursFinanciers, year, "PREVISIONNEL");
+
+export const getEveryColumn = (
+  canEdit: boolean,
+  indicateursFinanciers: IndicateurFinancierApiType[],
+  years: number[]
+) => {
+  if (canEdit) {
+    return years.map((year) =>
+      year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR
+        ? (["PREVISIONNEL", "REALISE"] as IndicateurFinancierType[])
+        : (["REALISE"] as IndicateurFinancierType[])
+    );
+  }
+  return years.map((year) => {
+    return [
+      isYearRealisee(indicateursFinanciers, year) ? "REALISE" : "PREVISIONNEL",
+    ] as IndicateurFinancierType[];
+  });
+};

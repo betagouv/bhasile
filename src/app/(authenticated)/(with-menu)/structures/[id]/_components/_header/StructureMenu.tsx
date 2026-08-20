@@ -2,9 +2,15 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
 
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
+import {
+  downloadDocument,
+  getStructureDownloadContent,
+} from "@/app/utils/spreadsheet-download.util";
+import { useStructureContext } from "@/contexts/StructureContext";
 
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
+  const { structure } = useStructureContext();
 
   return (
     <div className="relative shrink-0" ref={panelRef}>
@@ -24,6 +30,16 @@ export const StructureMenu = ({ structureId }: Props) => {
           >
             Extension, contraction ou fermeture
           </Link>
+          <hr className="w-full" />
+          <Button
+            priority="tertiary no outline"
+            onClick={() => {
+              downloadDocument(getStructureDownloadContent(structure));
+            }}
+            className="whitespace-nowrap"
+          >
+            Exporter tous les tableaux (ODS)
+          </Button>
         </div>
       )}
     </div>
