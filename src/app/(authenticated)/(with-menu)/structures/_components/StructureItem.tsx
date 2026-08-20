@@ -6,10 +6,9 @@ import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
 import {
-  getFermetureEvent,
-  getPlacesByCommunes,
-} from "@/app/utils/structure.util";
-import { StructureApiRead } from "@/schemas/api/structure.schema";
+  StructureCommune,
+  StructureListItem,
+} from "@/types/structure-list.type";
 
 import { TypeBatiBadge } from "./TypeBatiBadge";
 
@@ -19,36 +18,39 @@ export const StructureItem = ({
   handleOpenModal,
   isClosed,
 }: Props) => {
-  const isStructureFinalisee = structure.isFinalised;
-  const fermetureEvent = isClosed ? getFermetureEvent(structure) : undefined;
-
   return (
     <tr
       id={`table-row-key-${index}`}
       data-row-key={index}
-      className={`border-t border-default-grey ${getBackgroundColor(isStructureFinalisee, isClosed)}`}
+      className={`border-t border-default-grey ${getBackgroundColor(structure.isFinalised, isClosed)}`}
     >
       <td className="text-left! whitespace-nowrap">{structure.codeBhasile}</td>
       <td className="text-left! whitespace-nowrap">{structure.type}</td>
       <td className="text-left!">{structure.operateurLabel}</td>
       <td className="text-left!">{structure.departementAdministratif}</td>
       <td className="text-left! whitespace-nowrap">
-        {getCommuneLabel(structure)}
+        {getCommuneLabel(structure.communes)}
       </td>
       <td className="text-left! whitespace-nowrap">
-        <TypeBatiBadge typeBati={structure.typeBati} />
+        <TypeBatiBadge typeBati={structure.bati} />
       </td>
       {isClosed ? (
         <>
           <td className="text-left!">
-            {fermetureEvent ? formatDate(fermetureEvent.date) : <EmptyCell />}
+            {structure.fermetureDate ? (
+              formatDate(structure.fermetureDate)
+            ) : (
+              <EmptyCell />
+            )}
           </td>
-          <td className="text-left!">{fermetureEvent?.motif ?? <EmptyCell />}</td>
+          <td className="text-left!">
+            {structure.fermetureMotif ?? <EmptyCell />}
+          </td>
         </>
       ) : (
         <>
           <td className="text-left!">
-            {structure.currentPlaces.placesAutorisees || <EmptyCell />}
+            {structure.placesAutorisees || <EmptyCell />}
           </td>
           <td className="text-left!">
             {structure.finConvention ? (
@@ -60,7 +62,7 @@ export const StructureItem = ({
         </>
       )}
       <td>
-        {isClosed || isStructureFinalisee ? (
+        {isClosed || structure.isFinalised ? (
           <Link
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
             title={`Détails de la structure ${structure.codeBhasile}`}
@@ -94,23 +96,19 @@ const getBackgroundColor = (
   return "bg-transparent";
 };
 
-const getCommuneLabel = (structure: StructureApiRead) => {
-  const placesByCommune = getPlacesByCommunes(structure.adresses || []);
-  const mainCommune = Object.keys(placesByCommune)[0];
-  const formattedMainCommune = formatCityName(mainCommune);
-  const communesWithoutMainCommune = Object.keys(placesByCommune).filter(
-    (commune) => commune !== mainCommune
-  );
-  const formattedCommunesWithoutMainCommune = communesWithoutMainCommune.map(
-    (commune) => formatCityName(commune)
-  );
+const getCommuneLabel = (communes: StructureCommune[]) => {
+  const [mainCommune, ...otherCommunes] = communes;
   return (
     <>
-      <span>{formattedMainCommune} </span>
-      {mainCommune && communesWithoutMainCommune.length > 0 && (
+      <span>{formatCityName(mainCommune?.name)} </span>
+      {mainCommune && otherCommunes.length > 0 && (
         <span className="underline text-mention-grey inline-flex ms-1">
-          <Tooltip title={formattedCommunesWithoutMainCommune.join(", ")}>
-            + {communesWithoutMainCommune.length}
+          <Tooltip
+            title={otherCommunes
+              .map((commune) => formatCityName(commune.name))
+              .join(", ")}
+          >
+            + {otherCommunes.length}
           </Tooltip>
         </span>
       )}
@@ -119,8 +117,8 @@ const getCommuneLabel = (structure: StructureApiRead) => {
 };
 
 type Props = {
-  structure: StructureApiRead;
+  structure: StructureListItem;
   index: number;
-  handleOpenModal: (structure: StructureApiRead) => void;
+  handleOpenModal: (structure: StructureListItem) => void;
   isClosed: boolean;
 };

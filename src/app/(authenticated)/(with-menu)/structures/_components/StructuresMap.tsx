@@ -4,25 +4,24 @@ import { ReactElement } from "react";
 
 import { Map } from "@/app/components/map/Map";
 import { StructureMarker } from "@/app/components/map/StructureMarker";
-import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
+import { StructureMapPoint } from "@/types/structure-list.type";
 
-const StructuresMap = (): ReactElement => {
-  const { structures } = useStructuresSearch({ map: true });
-
+const StructuresMap = ({ points }: Props): ReactElement => {
   return (
     <Map>
-      {structures?.map((structure) => (
+      {points.map((point) => (
         <StructureMarker
-          id={structure.id}
-          coordinates={[
-            Number(structure.latitude || 0),
-            Number(structure.longitude || 0),
-          ]}
-          key={structure.id}
+          id={point.id}
+          coordinates={[Number(point.latitude), Number(point.longitude)]}
+          key={point.id}
         />
       ))}
     </Map>
   );
+};
+
+type Props = {
+  points: StructureMapPoint[];
 };
 
 export default StructuresMap;

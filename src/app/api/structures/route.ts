@@ -5,12 +5,14 @@ import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
-import { StructureColumn } from "@/types/ListColumn";
+import {
+  parseSortDirection,
+  parseStructureColumn,
+} from "@/types/ListColumn";
 
 import { createStructureEvent } from "../user-actions/user-action.service";
 import {
   getFullStructures,
-  getStructureMapPoints,
   updateStructureOperateur,
 } from "./structure.service";
 
@@ -24,12 +26,12 @@ export async function GET(request: NextRequest) {
   const placesAutorisees = request.nextUrl.searchParams.get("places");
   const departements = request.nextUrl.searchParams.get("departements");
   const operateurs = request.nextUrl.searchParams.get("operateurs");
-  const column = request.nextUrl.searchParams.get(
-    "column"
-  ) as StructureColumn | null;
-  const direction = request.nextUrl.searchParams.get("direction") as
-    "asc" | "desc" | null;
-  const map = request.nextUrl.searchParams.get("map") === "true";
+  const column = parseStructureColumn(
+    request.nextUrl.searchParams.get("column")
+  );
+  const direction = parseSortDirection(
+    request.nextUrl.searchParams.get("direction")
+  );
   const selection = request.nextUrl.searchParams.get("selection") === "true";
   const isFinalised = request.nextUrl.searchParams.get("finalised") === "true";
   const isClosed = request.nextUrl.searchParams.get("closed") === "true";
@@ -48,15 +50,6 @@ export async function GET(request: NextRequest) {
     isFinalised,
     isClosed,
   };
-
-  if (map) {
-    const points = await getStructureMapPoints(searchProps);
-
-    return NextResponse.json({
-      structures: points,
-      totalStructures: points.length,
-    });
-  }
 
   const { structures, totalStructures } = await getFullStructures(
     searchProps,

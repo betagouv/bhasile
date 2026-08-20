@@ -12,7 +12,10 @@ import {
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
-import { getMostRecentMillesime } from "@/app/utils/structure.util";
+import {
+  getMostRecentMillesime,
+  getPlacesByCommunes,
+} from "@/app/utils/structure.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
@@ -34,6 +37,11 @@ import {
   HistoryEvent,
   StructureRef,
 } from "@/types/structure-history.type";
+import {
+  type SearchProps,
+  StructureCommune,
+  StructureListItem,
+} from "@/types/structure-list.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
@@ -50,7 +58,6 @@ import {
   StructureListLight,
   StructureListLightVersion,
 } from "./structure.db.type";
-import type { SearchProps } from "./structure.service";
 
 const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
@@ -92,19 +99,25 @@ export const convertToPublicType = (
   return typesPublic[typePublic.trim().toLowerCase()];
 };
 
-export const getOperateurLabel = (
-  structure: StructureDbDetails | StructureDbList
+export const formatOperateurLabel = (
+  operateur: {
+    name: string;
+    parentId: number | null;
+    parent?: { name: string } | null;
+  } | null
 ): string => {
-  const { operateur } = structure;
   if (!operateur) {
     return "";
   }
-  if (operateur.parentId) {
-    const parentName = operateur.parent!.name;
-    return `${operateur.name} (${parentName})`;
+  if (operateur.parentId && operateur.parent) {
+    return `${operateur.name} (${operateur.parent.name})`;
   }
   return operateur.name;
 };
+
+export const getOperateurLabel = (
+  structure: StructureDbDetails | StructureDbList
+): string => formatOperateurLabel(structure.operateur);
 
 export const getAdresseAdministrativeCoordinates = async (
   structure: StructureAgentUpdateApiType
@@ -288,6 +301,7 @@ export type StructureListComputedRow = {
   isFinalised: boolean;
   type: StructureType | null;
   operateurName: string | null;
+  operateurLabel: string;
   departementAdministratif: string | null;
   communeAdministrative: string | null;
   bati: Repartition | undefined;
@@ -313,6 +327,7 @@ export const computeStructureListRow = (
 
   const bornFromCreation = isBornFromCreation(structure.structureVersions, now);
   const operateurName = structure.operateur?.name ?? null;
+  const operateurLabel = formatOperateurLabel(structure.operateur);
 
   const searchValues = [
     structure.codeBhasile,
@@ -331,8 +346,7 @@ export const computeStructureListRow = (
 
   const currentTransformation = currentVersion.structureVersionTransformation;
   const fermetureTransformation =
-    currentTransformation?.type ===
-    StructureVersionTransformationType.FERMETURE
+    currentTransformation?.type === StructureVersionTransformationType.FERMETURE
       ? currentTransformation
       : null;
   const isClosed = isStructureClosed(structure, now);
@@ -349,6 +363,7 @@ export const computeStructureListRow = (
     isFinalised: isStructureFinalised(structure, now),
     type: structure.type,
     operateurName,
+    operateurLabel,
     departementAdministratif: currentVersion.departementAdministratif,
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
@@ -766,3 +781,29 @@ export const buildUpcomingTransformations = (
     }))
     .sort((first, second) => first.date.localeCompare(second.date));
 };
+
+export const buildStructureListItem = (
+  row: StructureListComputedRow,
+  adresses: { commune: string | null; placesAutorisees: number | null }[]
+): StructureListItem => ({
+  id: row.id,
+  codeBhasile: row.codeBhasile ?? undefined,
+  type: row.type ?? undefined,
+  operateurLabel: row.operateurLabel,
+  departementAdministratif: row.departementAdministratif ?? undefined,
+  bati: row.bati,
+  placesAutorisees: row.placesAutorisees ?? undefined,
+  finConvention: row.finConvention?.toISOString(),
+  isFinalised: row.isFinalised,
+  isClosed: row.isClosed,
+  fermetureDate: row.fermetureDate?.toISOString(),
+  fermetureMotif: row.fermetureMotif ?? undefined,
+  communes: buildStructureCommunes(adresses),
+});
+
+const buildStructureCommunes = (
+  adresses: { commune: string | null; placesAutorisees: number | null }[]
+): StructureCommune[] =>
+  Object.entries(getPlacesByCommunes(adresses)).map(
+    ([name, placesAutorisees]) => ({ name, placesAutorisees })
+  );

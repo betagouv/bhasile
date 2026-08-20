@@ -1,15 +1,14 @@
 "use client";
 
-import { subject } from "@casl/ability";
-import { useAbility } from "@casl/react";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
-import { StructureApiRead } from "@/schemas/api/structure.schema";
+import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
 import { ListColumn } from "@/types/ListColumn";
+import { StructureListItem } from "@/types/structure-list.type";
 
 import { StructureItem } from "./StructureItem";
 
@@ -23,7 +22,7 @@ const noPermissionsModal = createModal({
   isOpenedByDefault: false,
 });
 
-const SHARED_COLUMNS: ListColumn[] = [
+export const SHARED_COLUMNS: ListColumn[] = [
   {
     label: "Code",
     column: "codeBhasile",
@@ -56,7 +55,7 @@ const SHARED_COLUMNS: ListColumn[] = [
   },
 ];
 
-const ACTIVE_TRAILING_COLUMNS: ListColumn[] = [
+export const ACTIVE_TRAILING_COLUMNS: ListColumn[] = [
   {
     label: "Places aut.",
     column: "placesAutorisees",
@@ -89,7 +88,7 @@ export const StructuresTable = ({
   isClosed,
 }: Props): ReactElement => {
   const router = useRouter();
-  const ability = useAbility();
+  const canUpdateDepartement = useCanUpdateDepartement();
 
   const columns = [
     ...SHARED_COLUMNS,
@@ -97,10 +96,10 @@ export const StructuresTable = ({
   ];
 
   const [selectedStructure, setSelectedStructure] =
-    useState<StructureApiRead | null>(null);
-  const handleOpenModal = (structure: StructureApiRead) => {
+    useState<StructureListItem | null>(null);
+  const handleOpenModal = (structure: StructureListItem) => {
     setSelectedStructure(structure);
-    if (ability.can("update", subject("Structure", structure))) {
+    if (canUpdateDepartement(structure.departementAdministratif)) {
       finalisationModal.open();
     } else {
       noPermissionsModal.open();
@@ -171,7 +170,7 @@ export const StructuresTable = ({
 };
 
 type Props = {
-  structures: StructureApiRead[];
+  structures: StructureListItem[];
   totalStructures: number;
   ariaLabelledBy: string;
   isClosed: boolean;

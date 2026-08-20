@@ -1,14 +1,22 @@
-export type StructureColumn =
-  | "codeBhasile"
-  | "type"
-  | "operateur"
-  | "departementAdministratif"
-  | "bati"
-  | "communes"
-  | "placesAutorisees"
-  | "finConvention"
-  | "effectiveDate"
-  | "motif";
+export const STRUCTURE_COLUMNS = [
+  "codeBhasile",
+  "type",
+  "operateur",
+  "departementAdministratif",
+  "bati",
+  "communes",
+  "placesAutorisees",
+  "finConvention",
+  "effectiveDate",
+  "motif",
+] as const;
+
+export type StructureColumn = (typeof STRUCTURE_COLUMNS)[number];
+
+export const parseStructureColumn = (
+  value: string | null
+): StructureColumn | null =>
+  STRUCTURE_COLUMNS.find((column) => column === value) ?? null;
 
 export const CPOM_COLUMNS = [
   "operateur",

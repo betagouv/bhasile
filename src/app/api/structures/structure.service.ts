@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { recomputeAnomaliesSafely } from "@/app/api/anomalies/anomalie.service";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
@@ -14,8 +16,12 @@ import {
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
-import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
+import {
+  type SearchProps,
+  StructureListItem,
+  StructureMapPoint,
+} from "@/types/structure-list.type";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { processActivitesForStructure } from "../activites/activite.util";
@@ -44,6 +50,7 @@ import {
   findAllStructures,
   findOne,
   findOneOperateur,
+  findStructureCommunesByIds,
   findStructureDepartement,
   findStructuresByIds,
   findValidatedActualisationForm,
@@ -51,6 +58,7 @@ import {
 } from "./structure.repository";
 import {
   buildStructureHistory,
+  buildStructureListItem,
   buildUpcomingTransformations,
   computeStructureListRow,
   filterStructureRows,
@@ -73,26 +81,6 @@ import {
   sortStructureRows,
   StructureListComputedRow,
 } from "./structure.util";
-
-type StructureMapPoint = Pick<
-  StructureApiRead,
-  "id" | "latitude" | "longitude"
->;
-
-export type SearchProps = {
-  search: string | null;
-  page: number | null;
-  type: string | null;
-  bati: string | null;
-  placesAutorisees: string | null;
-  departements: string | null;
-  operateurs: string | null;
-  column?: StructureColumn | null;
-  direction?: "asc" | "desc" | null;
-  selection?: boolean;
-  isFinalised?: boolean;
-  isClosed?: boolean;
-};
 
 export const updateStructureAgent = async (
   structure: StructureAgentUpdateApiType
@@ -149,48 +137,86 @@ const updateStructureAndRecomputeAnomalies = async (
   return updated;
 };
 
-const computeAllStructureRows = async (
-  now: Date
-): Promise<StructureListComputedRow[]> => {
-  const structures = await findAllStructures();
-  return structures
-    .map((structure) =>
-      computeStructureListRow(
-        structure,
-        resolveCurrentVersion(structure.structureVersions, now),
-        now
+const getRequestNow = cache((): Date => getNow());
+
+const computeAllStructureRows = cache(
+  async (): Promise<StructureListComputedRow[]> => {
+    const now = getRequestNow();
+    const structures = await findAllStructures();
+    return structures
+      .map((structure) =>
+        computeStructureListRow(
+          structure,
+          resolveCurrentVersion(structure.structureVersions, now),
+          now
+        )
       )
-    )
-    .filter((row): row is StructureListComputedRow => row !== null);
-};
+      .filter((row): row is StructureListComputedRow => row !== null);
+  }
+);
 
-const getSortedStructureRows = async (
-  props: SearchProps,
-  now: Date
-): Promise<StructureListComputedRow[]> => {
-  const rows = await computeAllStructureRows(now);
+// Mémoïsé sur la référence de props : la page construit une seule query et la
+// passe à chaque Suspense, donc compteur, tableau et carte partagent le cache
+const getSortedStructureRows = cache(
+  async (props: SearchProps): Promise<StructureListComputedRow[]> => {
+    const rows = await computeAllStructureRows();
 
-  const filtered = filterStructureRows(rows, props, {
-    includeNonVisible: Boolean(props.selection),
-  });
+    const filtered = filterStructureRows(rows, props, {
+      includeNonVisible: Boolean(props.selection),
+    });
 
-  return sortStructureRows(
-    filtered,
-    props.column ?? "departementAdministratif",
-    props.direction ?? "asc"
-  );
-};
+    return sortStructureRows(
+      filtered,
+      props.column ?? "departementAdministratif",
+      props.direction ?? "asc"
+    );
+  }
+);
 
-export const getStructureMapPoints = async (
+export const getStructuresTotal = async (props: SearchProps): Promise<number> =>
+  (await getSortedStructureRows(props)).length;
+
+export const getStructureMapPoints = cache(
+  async (props: SearchProps): Promise<StructureMapPoint[]> => {
+    const sorted = await getSortedStructureRows(props);
+
+    return sorted.flatMap((row) =>
+      row.latitude === null || row.longitude === null
+        ? []
+        : [
+            {
+              id: row.id,
+              latitude: row.latitude.toString(),
+              longitude: row.longitude.toString(),
+            },
+          ]
+    );
+  }
+);
+
+export const getStructureListItems = async (
   props: SearchProps
-): Promise<StructureMapPoint[]> => {
-  const sorted = await getSortedStructureRows(props, getNow());
+): Promise<{ structures: StructureListItem[]; totalStructures: number }> => {
+  const sorted = await getSortedStructureRows(props);
+  const { total: totalStructures, rows: pageRows } = paginateWithTotal(
+    sorted,
+    props.page,
+    DEFAULT_PAGE_SIZE
+  );
 
-  return sorted.map((row) => ({
-    id: row.id,
-    latitude: row.latitude?.toString(),
-    longitude: row.longitude?.toString(),
-  }));
+  const versions = await findStructureCommunesByIds(
+    pageRows.map((row) => row.currentVersionId)
+  );
+  const adressesByStructureId = new Map(
+    versions.map((version) => [version.structureId, version.adresses])
+  );
+
+  return {
+    structures: pageRows.map((row) =>
+      buildStructureListItem(row, adressesByStructureId.get(row.id) ?? [])
+    ),
+    totalStructures,
+  };
 };
 
 export const getFullStructures = async (
@@ -200,8 +226,8 @@ export const getFullStructures = async (
   structures: StructureApiRead[];
   totalStructures: number;
 }> => {
-  const now = getNow();
-  const sorted = await getSortedStructureRows(props, now);
+  const now = getRequestNow();
+  const sorted = await getSortedStructureRows(props);
 
   const { total: totalStructures, rows: pageRows } = props.selection
     ? { total: sorted.length, rows: sorted }
@@ -286,9 +312,7 @@ export const getStructureForOperateur = async (
   id: number
 ): Promise<StructureDbOperateur> => findOneOperateur(id);
 
-export const getStructureDepartement = async (
-  id: number
-): Promise<string> => {
+export const getStructureDepartement = async (id: number): Promise<string> => {
   const { departementAdministratif } = await findStructureDepartement(id);
   return departementAdministratif;
 };
@@ -446,10 +470,11 @@ const dbStructureToApiRead = (
   }) as StructureApiRead;
 };
 
-export const getBoundsPlacesAutorisees = async (
-  now: Date
-): Promise<{ min: number; max: number }> => {
-  const rows = await computeAllStructureRows(now);
+export const getBoundsPlacesAutorisees = async (): Promise<{
+  min: number;
+  max: number;
+}> => {
+  const rows = await computeAllStructureRows();
   const places = rows
     .map((row) => row.latestNonNullPlacesAutorisees)
     .filter(

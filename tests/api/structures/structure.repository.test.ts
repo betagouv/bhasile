@@ -9,7 +9,6 @@ import {
   getFullStructures,
   getStructureDepartement,
   getStructureForOperateur,
-  type SearchProps,
 } from "@/app/api/structures/structure.service";
 import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import prisma from "@/lib/prisma";
@@ -18,6 +17,7 @@ import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
 import { StepStatus } from "@/types/form.type";
 import { PublicType, StructureType } from "@/types/structure.type";
+import { SearchProps } from "@/types/structure-list.type";
 
 import { createReferentialDna } from "../../test-utils/referential-dna";
 
