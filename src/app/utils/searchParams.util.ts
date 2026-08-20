@@ -1,3 +1,10 @@
+import {
+  CPOM_COLUMNS,
+  CpomColumn,
+  STRUCTURE_COLUMNS,
+  StructureColumn,
+} from "@/types/ListColumn";
+
 export type SearchParams = { [key: string]: string | string[] | undefined };
 
 export const getFirstParam = (
@@ -31,4 +38,21 @@ export const setFilterParam = (
     params.delete(key);
   }
   deletePaginationParams(params);
+};
+
+export const parseStructureColumn = (
+  value: string | null
+): StructureColumn | null =>
+  STRUCTURE_COLUMNS.find((column) => column === value) ?? null;
+
+export const parseCpomColumn = (value: string | null): CpomColumn | null =>
+  CPOM_COLUMNS.find((column) => column === value) ?? null;
+
+export const parseSortDirection = (
+  value: string | null
+): "asc" | "desc" | null => {
+  if (value === "asc" || value === "desc") {
+    return value;
+  }
+  return null;
 };

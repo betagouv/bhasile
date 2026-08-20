@@ -7,10 +7,11 @@ import Loader from "@/app/components/ui/Loader";
 import {
   getFirstParam,
   getPageParam,
+  parseSortDirection,
+  parseStructureColumn,
   SearchParams,
 } from "@/app/utils/searchParams.util";
 import { STRUCTURES_STORAGE_KEY } from "@/constants";
-import { parseSortDirection, parseStructureColumn } from "@/types/ListColumn";
 import { StructuresQuery } from "@/types/structure-list.type";
 
 import { Toolbar } from "./_components/Toolbar";
@@ -43,7 +44,15 @@ export default async function Structures({
         storageKey={STRUCTURES_STORAGE_KEY}
       />
       <div className="flex justify-between items-center px-6 border-b border-b-border-default-grey min-h-[4.35rem] sticky top-0 bg-lifted-grey z-10">
-        <VisualizationTabs vue={query.vue} />
+        <div className="flex items-center">
+          <h2
+            className="text-title-blue-france fr-h5 mb-0 pr-4"
+            id="structures-titre"
+          >
+            Structures d’hébergement
+          </h2>
+          <VisualizationTabs vue={query.vue} />
+        </div>
         <div className="flex items-center gap-4">
           <Link
             className="fr-btn fr-btn--secondary flex gap-2"

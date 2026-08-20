@@ -1,8 +1,8 @@
 "use client";
 
+import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { ReactElement } from "react";
 
-import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
 import { useUserAction } from "@/app/hooks/useUserAction";
 import { Visualization } from "@/types/structure-list.type";
@@ -20,39 +20,34 @@ export const VisualizationTabs = ({ vue }: Props): ReactElement => {
 
   return (
     <SegmentedControl
-      key={vue}
-      name="Visualisation"
-      options={OPTIONS.map((option) => ({
-        ...option,
-        isChecked: option.value === vue,
-      }))}
-      onChange={(event) => handleChange(event as Visualization)}
-    >
-      <h2
-        className="text-title-blue-france fr-h5 mr-4 mb-0"
-        id="structures-titre"
-      >
-        Structures d’hébergement
-      </h2>
-    </SegmentedControl>
+      small
+      legend=""
+      inlineLegend
+      className="[&_div]:ml-0"
+      segments={[
+        {
+          iconId: "fr-icon-survey-line",
+          label: "Tableau",
+          nativeInputProps: {
+            value: "tableau",
+            checked: vue === "tableau",
+            onChange: () => handleChange("tableau"),
+          },
+        },
+        {
+          iconId: "fr-icon-road-map-line",
+          label: "Carte",
+          nativeInputProps: {
+            value: "carte",
+            checked: vue === "carte",
+            onChange: () => handleChange("carte"),
+          },
+        },
+      ]}
+    />
   );
 };
 
 type Props = {
   vue: Visualization;
 };
-
-const OPTIONS = [
-  {
-    id: "tableau",
-    label: "Tableau",
-    value: "tableau",
-    icon: "fr-icon-survey-line",
-  },
-  {
-    id: "carte",
-    label: "Carte",
-    value: "carte",
-    icon: "fr-icon-road-map-line",
-  },
-];

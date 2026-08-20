@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
-import { authOptions } from "@/lib/next-auth/auth";
-import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
-import { SessionUser } from "@/types/global";
 import {
   parseSortDirection,
   parseStructureColumn,
-} from "@/types/ListColumn";
+} from "@/app/utils/searchParams.util";
+import { authOptions } from "@/lib/next-auth/auth";
+import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
+import { SessionUser } from "@/types/global";
 
 import { createStructureEvent } from "../user-actions/user-action.service";
 import {
