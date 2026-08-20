@@ -158,6 +158,30 @@ export const protectedApiRoutes: ApiRoute[] = [
       POST: "proconnect",
     },
   },
+  {
+    pattern: /^\/api\/user-actions\/controle-qualite-spreadsheet-export$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/user-actions\/finances-spreadsheet-export$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/user-actions\/type-places-spreadsheet-export$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/user-actions\/structure-spreadsheet-export$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
 ];
 
 export const proConnectProtectedPages = [

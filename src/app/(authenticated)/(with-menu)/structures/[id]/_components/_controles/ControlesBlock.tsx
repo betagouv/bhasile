@@ -6,6 +6,7 @@ import { Block } from "@/app/components/common/Block";
 import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
+import { useUserAction } from "@/app/hooks/useUserAction";
 import { getNow } from "@/app/utils/now.util";
 import { getControleQualiteDownloadContent } from "@/app/utils/spreadsheet-download.util";
 import { getLastPastVisit } from "@/app/utils/structure.util";
@@ -19,8 +20,8 @@ import { LastVisitCard } from "./LastVisitCard";
 
 export const ControlesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
-
   const router = useRouter();
+  const { trackControleQualiteSpreadsheetExport } = useUserAction();
 
   const evaluations = structure.evaluations || [];
   const controles = structure.controles || [];
@@ -51,6 +52,9 @@ export const ControlesBlock = (): ReactElement => {
       downloadDropdown={
         <DocumentDownloadDropdown
           downloadContent={getControleQualiteDownloadContent(structure)}
+          onDownload={() => {
+            trackControleQualiteSpreadsheetExport(structure.id);
+          }}
         />
       }
     >
