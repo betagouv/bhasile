@@ -5,6 +5,8 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { ReactElement, useMemo, useState } from "react";
 
+import { usePdfExport } from "@/app/hooks/usePdfExport";
+import { computeStartMonth, toYearMonth } from "@/app/utils/pdf-export.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 export const pdfExportModal = createModal({
@@ -12,14 +14,11 @@ export const pdfExportModal = createModal({
   isOpenedByDefault: false,
 });
 
-const toYearMonth = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
-};
-
 export const PdfExportModal = (): ReactElement => {
   const { structure } = useStructureContext();
+  const { triggerExport, PrintableContainer } = usePdfExport(
+    structure.codeBhasile
+  );
 
   const typePlacesLastYear = structure.structureTypologies?.[0]?.year || 0;
   const financeLastYear = structure.budgets?.[0]?.year || 0;
@@ -45,16 +44,13 @@ export const PdfExportModal = (): ReactElement => {
   );
 
   const startYear = endYear - 4;
+  const startMonth = useMemo(() => computeStartMonth(endMonth), [endMonth]);
 
-  const startMonth = useMemo(() => {
-    if (!endMonth) {
-      return "";
-    }
-    const [year, month] = endMonth.split("-").map(Number);
-    const date = new Date(year, month - 1, 1);
-    date.setMonth(date.getMonth() - 6);
-    return toYearMonth(date);
-  }, [endMonth]);
+  const exportPayload = {
+    exportAddresses: exportAddresses === "oui",
+    typePlacesFinances: { startYear, endYear },
+    ofii: { startMonth, endMonth },
+  };
 
   return (
     <>
@@ -71,20 +67,7 @@ export const PdfExportModal = (): ReactElement => {
             doClosesModal: true,
             children: "Exporter en PDF",
             type: "button",
-            onClick: () => {
-              const exportPayload = {
-                exportAddresses: exportAddresses === "oui",
-                typePlacesFinances: {
-                  startYear,
-                  endYear,
-                },
-                ofii: {
-                  startMonth,
-                  endMonth,
-                },
-              };
-              console.log("Données à exporter :", exportPayload);
-            },
+            onClick: () => triggerExport(),
           },
         ]}
       >
@@ -117,7 +100,6 @@ export const PdfExportModal = (): ReactElement => {
           />
         </div>
         <hr />
-
         <p>
           Concernant <strong>les données “Types de places” et “Finance”</strong>
           , sur quelle période de <strong>5 ans</strong> souhaitez-vous exporter
@@ -148,7 +130,7 @@ export const PdfExportModal = (): ReactElement => {
             />
           </div>
         </div>
-        <hr className="my-8" />
+        <hr className="my-6" />
         <p>
           Concernant <strong>les données “Activités” (OFII)</strong>, sur quelle
           période de <strong>6 mois</strong> souhaitez-vous exporter
@@ -158,7 +140,7 @@ export const PdfExportModal = (): ReactElement => {
           <div className="flex-1 w-full">
             <Input
               label="Mois de début"
-              hintText="MM/AAAA"
+              hintText="Obligatoire"
               iconId="fr-icon-lock-line"
               disabled
               nativeInputProps={{
@@ -170,16 +152,18 @@ export const PdfExportModal = (): ReactElement => {
           <div className="flex-1 w-full">
             <Input
               label="Mois de fin"
-              hintText="MM/AAAA"
+              hintText="Obligatoire"
               nativeInputProps={{
                 value: endMonth,
-                onChange: (e) => setEndMonth(e.target.value),
+                onChange: (event) => setEndMonth(event.target.value),
                 type: "month",
               }}
             />
           </div>
         </div>
       </pdfExportModal.Component>
+
+      <PrintableContainer data={exportPayload} />
     </>
   );
 };
