@@ -2,7 +2,6 @@ import dayjs from "dayjs";
 
 import { getNow } from "@/app/utils/now.util";
 import { CURRENT_YEAR } from "@/constants";
-import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import {
   CpomStructureApiRead,
@@ -28,7 +27,7 @@ export const getFermetureEvent = (
   );
 
 export const getPlacesByCommunes = (
-  adresses: AdresseApiType[]
+  adresses: { commune?: string | null; placesAutorisees?: number | null }[]
 ): Record<string, number> => {
   const placesByCommune: Record<string, number> = {};
   for (const adresse of adresses) {

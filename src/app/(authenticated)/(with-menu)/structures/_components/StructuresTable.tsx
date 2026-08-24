@@ -1,17 +1,20 @@
 "use client";
 
-import { subject } from "@casl/ability";
-import { useAbility } from "@casl/react";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
-import { StructureApiRead } from "@/schemas/api/structure.schema";
-import { ListColumn } from "@/types/ListColumn";
+import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
+import { StructureListItem } from "@/types/structure-list.type";
 
 import { StructureItem } from "./StructureItem";
+import {
+  ACTIVE_TRAILING_COLUMNS,
+  CLOSED_TRAILING_COLUMNS,
+  SHARED_COLUMNS,
+} from "./structuresColumns";
 
 const finalisationModal = createModal({
   id: "finalisation-modal",
@@ -23,65 +26,6 @@ const noPermissionsModal = createModal({
   isOpenedByDefault: false,
 });
 
-const SHARED_COLUMNS: ListColumn[] = [
-  {
-    label: "Code",
-    column: "codeBhasile",
-    orderBy: true,
-  },
-  {
-    label: "Type",
-    column: "type",
-    orderBy: true,
-  },
-  {
-    label: "Opérateur",
-    column: "operateur",
-    orderBy: true,
-  },
-  {
-    label: "Dépt.",
-    column: "departementAdministratif",
-    orderBy: true,
-  },
-  {
-    label: "Communes",
-    column: "communes",
-    orderBy: false,
-  },
-  {
-    label: "Bâti",
-    column: "bati",
-    orderBy: true,
-  },
-];
-
-const ACTIVE_TRAILING_COLUMNS: ListColumn[] = [
-  {
-    label: "Places aut.",
-    column: "placesAutorisees",
-    orderBy: true,
-  },
-  {
-    label: "Fin convention",
-    column: "finConvention",
-    orderBy: true,
-  },
-];
-
-const CLOSED_TRAILING_COLUMNS: ListColumn[] = [
-  {
-    label: "Archivé le",
-    column: "effectiveDate",
-    orderBy: false,
-  },
-  {
-    label: "Motif",
-    column: "motif",
-    orderBy: false,
-  },
-];
-
 export const StructuresTable = ({
   structures,
   totalStructures,
@@ -89,7 +33,7 @@ export const StructuresTable = ({
   isClosed,
 }: Props): ReactElement => {
   const router = useRouter();
-  const ability = useAbility();
+  const canUpdateDepartement = useCanUpdateDepartement();
 
   const columns = [
     ...SHARED_COLUMNS,
@@ -97,10 +41,10 @@ export const StructuresTable = ({
   ];
 
   const [selectedStructure, setSelectedStructure] =
-    useState<StructureApiRead | null>(null);
-  const handleOpenModal = (structure: StructureApiRead) => {
+    useState<StructureListItem | null>(null);
+  const handleOpenModal = (structure: StructureListItem) => {
     setSelectedStructure(structure);
-    if (ability.can("update", subject("Structure", structure))) {
+    if (canUpdateDepartement(structure.departementAdministratif)) {
       finalisationModal.open();
     } else {
       noPermissionsModal.open();
@@ -171,7 +115,7 @@ export const StructuresTable = ({
 };
 
 type Props = {
-  structures: StructureApiRead[];
+  structures: StructureListItem[];
   totalStructures: number;
   ariaLabelledBy: string;
   isClosed: boolean;

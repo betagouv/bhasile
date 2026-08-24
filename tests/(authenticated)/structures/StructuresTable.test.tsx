@@ -2,12 +2,11 @@ import { render, screen, within } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
 
 import { AppAbilityProvider } from "@/contexts/AbilityProvider";
-import { StructureApiRead } from "@/schemas/api/structure.schema";
+import { StructureType } from "@/generated/prisma/client";
+import { Repartition } from "@/types/adresse.type";
+import { StructureListItem } from "@/types/structure-list.type";
 
 import { StructuresTable } from "../../../src/app/(authenticated)/(with-menu)/structures/_components/StructuresTable";
-import { createAdresse } from "../../test-utils/factories/adresse.factory";
-import { createStructureTypologie } from "../../test-utils/factories/structure-typologie.factory";
-import { createStructure } from "../../test-utils/structure.factory";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -40,28 +39,7 @@ vi.mock("next-auth/react", async (importOriginal) => {
 describe("StructuresTable", () => {
   it("affiche les en-têtes de colonnes et le contenu des lignes au rendu", () => {
     // GIVEN
-    const adresse1 = createAdresse({});
-    const adresse2 = createAdresse({});
-    const adresse3 = createAdresse({});
-    const structureTypologies1 = [createStructureTypologie()];
-    const structureTypologies2 = [createStructureTypologie()];
-    const structureTypologies3 = [createStructureTypologie()];
-    const structure1 = createStructure({
-      id: 1,
-      structureTypologies: structureTypologies1,
-    });
-    const structure2 = createStructure({
-      id: 2,
-      structureTypologies: structureTypologies2,
-    });
-    const structure3 = createStructure({
-      id: 3,
-      structureTypologies: structureTypologies3,
-    });
-    structure1.adresses = [adresse1];
-    structure2.adresses = [adresse2];
-    structure3.adresses = [adresse3];
-    const structures: StructureApiRead[] = [structure1, structure2, structure3];
+    const structures = [1, 2, 3].map((id) => buildListItem(id));
     const ariaLabelledBy = "";
 
     // WHEN
@@ -150,4 +128,18 @@ describe("StructuresTable", () => {
     expect(pages[3]).toHaveAccessibleName("Page suivante");
     expect(pages[4]).toHaveAccessibleName("Dernière page");
   });
+});
+
+const buildListItem = (id: number): StructureListItem => ({
+  id,
+  codeBhasile: `BHA-${id}`,
+  type: StructureType.CADA,
+  operateurLabel: "Adoma",
+  departementAdministratif: "75",
+  bati: Repartition.DIFFUS,
+  placesAutorisees: 10,
+  finConvention: "2027-01-02T12:00:00.000Z",
+  isFinalised: false,
+  isClosed: false,
+  communes: [{ name: "Paris", placesAutorisees: 10 }],
 });

@@ -1,118 +1,58 @@
-"use client";
-
-import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactElement, Suspense } from "react";
 
-import { SegmentedControl } from "@/app/components/common/SegmentedControl";
-import { ListLoader } from "@/app/components/lists/ListLoader";
+import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
+import { QueryPersister } from "@/app/components/QueryPersister";
 import Loader from "@/app/components/ui/Loader";
-import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
-import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
-import { useUserAction } from "@/app/hooks/useUserAction";
+import {
+  getFirstParam,
+  getPageParam,
+  parseSortDirection,
+  parseStructureColumn,
+  SearchParams,
+} from "@/app/utils/searchParams.util";
+import { STRUCTURES_STORAGE_KEY } from "@/constants";
+import { StructuresQuery } from "@/types/structure-list.type";
 
-import { StructuresTable } from "./_components/StructuresTable";
 import { Toolbar } from "./_components/Toolbar";
+import { VisualizationTabs } from "./_components/VisualizationTabs";
+import { StructuresContent } from "./StructuresContent";
+import { StructuresCount } from "./StructuresCount";
+import { StructuresMapContent } from "./StructuresMapContent";
+import { StructuresSkeleton } from "./StructuresSkeleton";
 
-type Visualization = "tableau" | "carte";
+export default async function Structures({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<ReactElement> {
+  const params = await searchParams;
+  const query = buildStructuresQuery(params);
 
-export default function Structures(): ReactElement {
-  const { trackStructuresCartographie } = useUserAction();
-
-  const [selectedVisualization, setSelectedVisualization] =
-    useState<Visualization>(() => {
-      if (typeof window === "undefined") {
-        return "tableau";
-      }
-      const anchor = window.location.hash.replace("#", "");
-      return anchor === "carte" ? "carte" : "tableau";
-    });
-
-  usePersistStructuresSearchQuery();
-
-  const searchParams = useSearchParams();
-  const statut =
-    searchParams.get("statut") === "fermees" ? "fermees" : "actives";
-  const isClosed = statut === "fermees";
-
-  const { structures, totalStructures } = useStructuresSearch({ map: false });
-
-  const StructuresMap = useMemo(
-    () =>
-      dynamic(() => import("./_components/StructuresMap"), {
-        loading: () => (
-          <div className="flex items-center justify-center h-full w-full">
-            <Loader />
-          </div>
-        ),
-        ssr: false,
-      }),
-    []
+  const count = (
+    <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
+      <Suspense fallback={<div className="pl-3 min-w-24" />}>
+        <StructuresCount query={query} />
+      </Suspense>
+    </ContentErrorBoundary>
   );
-
-  const setVisualization = useCallback(
-    (next: "tableau" | "carte") => {
-      setSelectedVisualization(next);
-      if (next === "carte") {
-        trackStructuresCartographie();
-      }
-      window.location.hash = next;
-    },
-    [trackStructuresCartographie]
-  );
-
-  const options = useMemo(
-    () => [
-      {
-        id: "tableau",
-        isChecked: selectedVisualization === "tableau",
-        label: "Tableau",
-        value: "tableau",
-        icon: "fr-icon-survey-line",
-      },
-      {
-        id: "carte",
-        isChecked: selectedVisualization === "carte",
-        label: "Carte",
-        value: "carte",
-        icon: "fr-icon-road-map-line",
-      },
-    ],
-    [selectedVisualization]
-  );
-
-  useEffect(() => {
-    const applyAnchor = () => {
-      const anchor = window.location.hash.replace("#", "");
-      if (anchor === "carte" || anchor === "tableau") {
-        setSelectedVisualization(anchor as Visualization);
-      }
-    };
-
-    applyAnchor();
-    window.addEventListener("hashchange", applyAnchor);
-    return () => window.removeEventListener("hashchange", applyAnchor);
-  }, []);
 
   return (
     <div className="h-full w-full flex flex-col">
+      <QueryPersister
+        targetPath="/structures"
+        storageKey={STRUCTURES_STORAGE_KEY}
+      />
       <div className="flex justify-between items-center px-6 border-b border-b-border-default-grey min-h-[4.35rem] sticky top-0 bg-lifted-grey z-10">
-        <SegmentedControl
-          key={selectedVisualization}
-          name="Visualisation"
-          options={options}
-          onChange={(event) => {
-            setVisualization(event as Visualization);
-          }}
-        >
+        <div className="flex items-center">
           <h2
-            className="text-title-blue-france fr-h5 mr-4 mb-0"
+            className="text-title-blue-france fr-h5 mb-0 pr-4"
             id="structures-titre"
           >
             Structures d’hébergement
           </h2>
-        </SegmentedControl>
+          <VisualizationTabs vue={query.vue} />
+        </div>
         <div className="flex items-center gap-4">
           <Link
             className="fr-btn fr-btn--secondary flex gap-2"
@@ -131,39 +71,64 @@ export default function Structures(): ReactElement {
         </div>
       </div>
 
-      {selectedVisualization === "tableau" && (
+      {query.vue === "tableau" ? (
         <>
-          <Toolbar variant="tableau" totalStructures={totalStructures} />
+          <Toolbar variant="tableau" count={count} />
           <div id="tableau">
-            <ListLoader
-              fetchStateName={"structure-search"}
-              itemCount={structures?.length}
-              entityName="structure"
+            <ContentErrorBoundary
+              fallback={
+                <p className="p-16">
+                  Erreur lors de la récupération des structures. Modifiez vos
+                  filtres ou réessayez plus tard.
+                </p>
+              }
             >
-              {structures && (
-                <StructuresTable
-                  key={statut}
-                  structures={structures}
-                  totalStructures={totalStructures}
-                  ariaLabelledBy="structures-titre"
-                  isClosed={isClosed}
-                />
-              )}
-            </ListLoader>
+              <Suspense fallback={<StructuresSkeleton />}>
+                <StructuresContent query={query} />
+              </Suspense>
+            </ContentErrorBoundary>
           </div>
         </>
-      )}
-
-      {selectedVisualization === "carte" && (
+      ) : (
         <div id="carte" className="relative flex-1 min-h-0">
           <div className="absolute inset-0">
-            <StructuresMap />
+            <ContentErrorBoundary
+              fallback={
+                <p className="p-16">
+                  Erreur lors de la récupération des structures.
+                </p>
+              }
+            >
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center h-full w-full">
+                    <Loader />
+                  </div>
+                }
+              >
+                <StructuresMapContent query={query} />
+              </Suspense>
+            </ContentErrorBoundary>
           </div>
           <div className="relative z-10">
-            <Toolbar variant="carte" totalStructures={totalStructures} />
+            <Toolbar variant="carte" count={count} />
           </div>
         </div>
       )}
     </div>
   );
 }
+
+const buildStructuresQuery = (params: SearchParams): StructuresQuery => ({
+  vue: getFirstParam(params.vue) === "carte" ? "carte" : "tableau",
+  search: getFirstParam(params.search),
+  page: getPageParam(params, "page"),
+  type: getFirstParam(params.type),
+  bati: getFirstParam(params.bati),
+  placesAutorisees: getFirstParam(params.places),
+  departements: getFirstParam(params.departements),
+  operateurs: getFirstParam(params.operateurs),
+  column: parseStructureColumn(getFirstParam(params.column)),
+  direction: parseSortDirection(getFirstParam(params.direction)),
+  isClosed: getFirstParam(params.statut) === "fermees",
+});

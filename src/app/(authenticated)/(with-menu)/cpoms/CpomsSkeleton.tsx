@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import { COLUMNS } from "./_components/CpomsTable";
+import { CPOMS_COLUMN_COUNT } from "./_components/cpomsColumns";
 
 export const CpomsSkeleton = (): ReactElement => (
   <div
@@ -14,7 +14,7 @@ export const CpomsSkeleton = (): ReactElement => (
         key={index}
         className="border-t border-default-grey h-12 flex items-center gap-4"
       >
-        {[...Array(COLUMN_COUNT).keys()].map((column) => (
+        {[...Array(CPOMS_COLUMN_COUNT).keys()].map((column) => (
           <div key={column} className="h-4 flex-1 rounded bg-contrast-grey" />
         ))}
       </div>
@@ -23,5 +23,3 @@ export const CpomsSkeleton = (): ReactElement => (
 );
 
 const VISIBLE_ROW_COUNT = 12;
-
-const COLUMN_COUNT = COLUMNS.length + 1;

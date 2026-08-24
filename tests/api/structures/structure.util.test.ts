@@ -7,7 +7,6 @@ import {
   StructureListLight,
   StructureListLightVersion,
 } from "@/app/api/structures/structure.db.type";
-import { SearchProps } from "@/app/api/structures/structure.service";
 import {
   computeStructureListRow,
   filterStructureRows,
@@ -27,6 +26,7 @@ import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
+import { SearchProps } from "@/types/structure-list.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 type ActeAdministratifStub = {
@@ -517,6 +517,7 @@ const buildRow = (
   id: 1,
   codeBhasile: "A-001",
   currentVersionId: 10,
+  operateurLabel: "Opérateur",
   bornFromCreation: false,
   hasForm: true,
   isFinalised: false,

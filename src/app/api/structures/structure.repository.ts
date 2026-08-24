@@ -31,10 +31,22 @@ import {
   StructureListLight,
   structureListLightSelect,
   structureListVersionInclude,
+  StructureVersionCommunes,
 } from "./structure.db.type";
 
 export const findAllStructures = (): Promise<StructureListLight[]> =>
   prisma.structure.findMany({ select: structureListLightSelect });
+
+export const findStructureCommunesByIds = (
+  versionIds: number[]
+): Promise<StructureVersionCommunes[]> =>
+  prisma.structureVersion.findMany({
+    where: { id: { in: versionIds } },
+    select: {
+      structureId: true,
+      adresses: { select: { commune: true, placesAutorisees: true } },
+    },
+  });
 
 export const findStructuresByIds = (
   structureIds: number[],

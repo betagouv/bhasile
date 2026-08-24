@@ -31,7 +31,9 @@ export const structureListLightSelect = {
   type: true,
   fermetureDate: true,
   operateurId: true,
-  operateur: { select: { name: true } },
+  operateur: {
+    select: { name: true, parentId: true, parent: { select: { name: true } } },
+  },
   forms: {
     select: { status: true, formDefinition: { select: { slug: true } } },
   },
@@ -207,4 +209,9 @@ export type StructureDbOperateur = {
   type: StructureType | null;
   codeBhasile: string;
   forms: Form[];
+};
+
+export type StructureVersionCommunes = {
+  structureId: number | null;
+  adresses: { commune: string | null; placesAutorisees: number | null }[];
 };

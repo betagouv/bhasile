@@ -6,10 +6,11 @@ import { Filters } from "@/app/components/filters/Filters";
 import {
   getFirstParam,
   getPageParam,
+  parseCpomColumn,
+  parseSortDirection,
   SearchParams,
 } from "@/app/utils/searchParams.util";
 import { CpomsQuery } from "@/types/cpom.type";
-import { parseCpomColumn, parseSortDirection } from "@/types/ListColumn";
 
 import { CpomsContent } from "./CpomsContent";
 import { CpomsCount } from "./CpomsCount";
