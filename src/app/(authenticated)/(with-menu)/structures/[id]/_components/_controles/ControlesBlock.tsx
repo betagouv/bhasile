@@ -89,7 +89,7 @@ export const ControlesBlock = (): ReactElement => {
           />
         </div>
       </div>
-      <div className="pt-12">
+      <div className="pt-12 border-t border-t-border-default-grey">
         {structure.isAutorisee && (
           <>
             {evaluations.length > 0 ? (
