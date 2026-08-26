@@ -67,15 +67,15 @@ export const DotationChart = ({
   };
 
   return (
-    <div className="grid grid-cols-3 gap-10">
-      <div className="col-span-2">
+    <div className="grid grid-cols-3 gap-10 print:flex print:flex-col print:gap-8">
+      <div className="col-span-2 print:w-full print:flex print:justify-center">
         <BarChart
           data={getChartData()}
           options={options}
           axisYLabel="Montant (€)"
         />
       </div>
-      <div>
+      <div className="print:w-full">
         <h5 className="text-title-blue-france text-sm font-medium mb-2">
           {getDotationLabel()}
         </h5>

@@ -32,7 +32,7 @@ export const ActivitePlaces = ({
           colors={["var(--grey-925-125)", "", "var(--yellow-moutarde-850-200)"]}
           isDonut={true}
         >
-          <div className="absolute w-22 top-13 left-26 text-sm text-center">
+          <div className="absolute w-22 top-15 left-12 text-sm text-center">
             <strong>
               <NumberDisplay value={placesAutorisees} />
             </strong>{" "}

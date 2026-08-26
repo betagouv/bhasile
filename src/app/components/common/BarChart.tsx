@@ -21,18 +21,22 @@ export default function BarChart({
   colors = defaultColors,
   axisYLabel,
 }: Props) {
-  const chartRef = useRef(null);
+  const chartRef = useRef<HTMLDivElement>(null);
   const id = useId();
   const chartClass = `barchart-${id.replace(/:/g, "-")}`;
 
   useEffect(() => {
-    let chart = null;
+    let chart: Chartist.BarChart | null = null;
+
     if (chartRef.current) {
-      chart = new Chartist.BarChart(
-        chartRef.current,
-        data,
-        withCompactAxisY(options)
-      );
+      const chartOptions: Chartist.BarChartOptions = {
+        height: "340px",
+        width: "615px",
+        ...withCompactAxisY(options),
+      };
+
+      chart = new Chartist.BarChart(chartRef.current, data, chartOptions);
+
       const extraSpace = 10;
 
       chart.on("draw", function (ctx) {
@@ -44,6 +48,7 @@ export default function BarChart({
         }
       });
     }
+
     return () => {
       if (chart) {
         chart.detach();
@@ -52,9 +57,13 @@ export default function BarChart({
   }, [data, options]);
 
   return (
-    <div className={chartClass}>
+    <div className={`${chartClass} w-full`}>
       <ChartAxisLabels startLabel={axisYLabel} />
-      <div ref={chartRef} style={{ height: 340 }} />
+      <div
+        ref={chartRef}
+        style={{ height: 340, width: 615 }}
+        className="w-full"
+      />
       <style>
         {`
           .${chartClass} .ct-series-a .ct-bar { stroke: ${colors[0]} !important; }
