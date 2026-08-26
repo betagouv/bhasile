@@ -1,27 +1,30 @@
 import { ReactElement } from "react";
 
+import { ActiviteHistoriqueTable } from "@/app/components/activites/ActiviteHistoriqueTable";
 import { ActiviteMotifsIndisponibilite } from "@/app/components/activites/ActiviteMotifsIndisponibilite";
 import { ActivitePlaces } from "@/app/components/activites/ActivitePlaces";
+import { Block } from "@/app/components/common/Block";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureType } from "@/types/structure.type";
 
-import { ActiviteHistorique } from "./ActiviteHistorique";
-import { OfiiDisclaimer } from "./OfiiDisclaimer";
+import { OfiiDisclaimer } from "../_activite/OfiiDisclaimer";
 
-export const ActiviteBlock = (): ReactElement => {
+export const ExportActiviteBlock = ({
+  startDate,
+  endDate,
+}: Props): ReactElement => {
   const { structure } = useStructureContext();
   const hasActivites = (structure.activites?.length ?? 0) > 0;
   const showOfiiData = structure.type !== StructureType.CAES && hasActivites;
 
   return (
-    <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
-      <div className="flex justify-between items-start">
-        <div className="flex">
-          <span className={`text-title-blue-france mr-3 fr-icon-team-line`} />
-          <h3 className="text-title-blue-france fr-h6 mb-12">Activité</h3>
-        </div>
-        <OfiiDisclaimer showOfiiData={showOfiiData} />
-      </div>
+    <Block
+      title="Activité"
+      iconClass="fr-icon-team-line"
+      entity={structure}
+      entityType="Structure"
+      disclaimer={<OfiiDisclaimer showOfiiData={showOfiiData} />}
+    >
       {showOfiiData && (
         <>
           <h4
@@ -45,9 +48,16 @@ export const ActiviteBlock = (): ReactElement => {
             </div>
           </div>
           <hr className="pb-10!" />
-          <ActiviteHistorique />
+          {startDate}
+          {endDate}
+          <ActiviteHistoriqueTable activites={structure.activites || []} />
         </>
       )}
-    </div>
+    </Block>
   );
+};
+
+type Props = {
+  startDate: string;
+  endDate: string;
 };

@@ -89,18 +89,18 @@ export const FinancesBlock = (): ReactElement => {
       <div className="pb-12">
         {shouldShowCpom ? <CpomStaticTable /> : <StructureStaticTable />}
       </div>
-      <hr className="mb-10" />
-      <h4 className="text-title-blue-france pb-0.5 text-lg mb-0">
+      <hr className="mb-10 print:hidden" />
+      <h4 className="text-title-blue-france pb-0.5 text-lg mb-0 print:hidden">
         Documents financiers
       </h4>
       {isSubventionnee && (
-        <h5 className="text-sm text-gray-500 font-normal italic mb-0">
+        <h5 className="text-sm text-gray-500 font-normal italic mb-0 print:hidden">
           Retrouvez les Plans Pluriannuels d’Investissements (PPI) dans la
           section “Actes administratifs” s’ils existent et qu’ils ont été
           importés.
         </h5>
       )}
-      <div className="pt-6">
+      <div className="pt-6 print:hidden">
         <DocumentsFinanciers />
       </div>
     </Block>

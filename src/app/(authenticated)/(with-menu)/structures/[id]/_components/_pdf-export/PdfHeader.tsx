@@ -10,7 +10,7 @@ export const PdfHeader = (): ReactElement => {
   const { structure } = useStructureContext();
 
   return (
-    <div className="flex justify-between items-center pb-4">
+    <div className="flex justify-between items-center py-4">
       <HeaderMainContent />
       {structure.isClosed && structure.fermetureDate && (
         <FermetureBadge fermetureDate={structure.fermetureDate} />
@@ -25,8 +25,6 @@ export const PdfHeader = (): ReactElement => {
           ))}
         </div>
       </div>
-      {/* TODO : mettre les vrais numéros de page */}
-      <div>1/6</div>
     </div>
   );
 };

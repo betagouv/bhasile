@@ -34,13 +34,16 @@ export const Block = ({
         </div>
         <div className="flex items-center gap-2">
           {disclaimer}
-          {downloadDropdown && <div>{downloadDropdown}</div>}
+          {downloadDropdown && (
+            <div className="print:hidden">{downloadDropdown}</div>
+          )}
           <Can I="update" this={subject(entityType, entity)}>
             {onEdit && (
               <Button
                 priority="tertiary"
                 iconId="fr-icon-edit-line"
                 onClick={onEdit}
+                className="print:hidden"
               >
                 Modifier
               </Button>
@@ -51,6 +54,7 @@ export const Block = ({
                   priority="tertiary"
                   iconId="fr-icon-edit-line"
                   onClick={() => setIsPanelOpen(!isPanelOpen)}
+                  className="print:hidden"
                 >
                   Modifier
                 </Button>
