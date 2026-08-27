@@ -4,7 +4,7 @@ import { ReactElement, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useReactToPrint } from "react-to-print";
 
-import { ExportContext } from "@/contexts/PrintContext";
+import { ExportContext } from "@/contexts/ExportContext";
 
 import {
   PdfExportDocument,
@@ -23,7 +23,7 @@ export const usePdfExport = (codeBhasile: string | undefined) => {
         flushSync(() => {
           setIsExporting(true);
         });
-        setTimeout(resolve, 100);
+        setTimeout(resolve, 250);
       });
     },
     onAfterPrint: () => {
@@ -36,7 +36,14 @@ export const usePdfExport = (codeBhasile: string | undefined) => {
   }: {
     data: PdfExportPayload;
   }): ReactElement => (
-    <div className="hidden print:block">
+    <div
+      className={
+        isExporting
+          ? "fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-1]"
+          : "hidden"
+      }
+      aria-hidden="true"
+    >
       <ExportContext.Provider value={isExporting}>
         <div ref={printRef}>
           <PdfExportDocument data={data} />

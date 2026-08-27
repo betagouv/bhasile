@@ -8,6 +8,7 @@ import { Table } from "@/app/components/common/Table";
 import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { getTypePlaceHistoryHeadings } from "./getTypePlaceHistoryHeadings";
@@ -27,6 +28,7 @@ export const TypePlaceHistory = ({
           (firstYear, secondYear) => firstYear - secondYear
         );
   const markers = getTransformationMarkers(structure.history, years);
+  const isExporting = useExportContext();
 
   const structureTypologies = structure.structureTypologies ?? [];
 
@@ -88,7 +90,9 @@ export const TypePlaceHistory = ({
             {years.map((year) => (
               <td
                 key={year}
-                className="min-w-25 print:min-w-0 print:px-1 whitespace-nowrap"
+                className={`whitespace-nowrap ${
+                  isExporting ? "min-w-0 px-1" : "min-w-25"
+                }`}
               >
                 {row.getValue(year) ?? <EmptyCell />}
               </td>

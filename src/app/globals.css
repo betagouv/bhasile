@@ -154,8 +154,13 @@ map-chart .FR-20R, .FR-2A, .FR-2B, .map_info {
 @media print {
   [class^="fr-icon-"], 
   [class*=" fr-icon-"],
-  [class^="ri-"] {
-    transform: translateZ(0) !important;
+  [class^="ri-"],
+  /* stylelint-disable selector-class-pattern */
+  .fr-accordion__btn,
+  .fr-badge,
+  a,
+  [class*="--icon-"] {
     filter: drop-shadow(0 0 0 transparent) !important;
+    transform: translateZ(0) !important;
   }
 }

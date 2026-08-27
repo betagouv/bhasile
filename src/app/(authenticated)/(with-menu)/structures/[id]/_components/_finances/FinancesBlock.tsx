@@ -7,7 +7,7 @@ import { useUserAction } from "@/app/hooks/useUserAction";
 import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
 import { getFinancesDownloadContent } from "@/app/utils/spreadsheet-download.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
-import { useExportContext } from "@/contexts/PrintContext";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { BudgetExecutoire } from "./BudgetExecutoire";
@@ -81,7 +81,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
           className="text-title-blue-france text-lg pr-6"
           id="gestionBudgetaireTitle"
         >
-          Gestion budgétaire {isExporting && <>de la structure</>}
+          Gestion budgétaire{isExporting && <> de la structure</>}
         </h4>
         {wasInCpom && !isExporting && (
           <StructureCpomSwitch

@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { cn } from "@/app/utils/classname.util";
+import { useExportContext } from "@/contexts/ExportContext";
 
 const DEFAULT_FIRST_COLUMN_WIDTH = "15rem";
 const VALUE_COLUMN_WIDTH = "8.25rem";
@@ -30,6 +31,7 @@ export const Table = ({
   defaultScrollRight,
   overlay,
 }: Props) => {
+  const isExporting = useExportContext();
   const valueColumnsCount = Math.max(headings.length - 1, 1);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -78,6 +80,7 @@ export const Table = ({
           "[&_tr]:border-b [&_tbody_tr:last-child]:border-b-0 [&_th]:border-default-grey [&_tr]:border-default-grey [&_td]:border-default-grey",
         hasErrors && "border-action-high-error",
         className,
+        isExporting && "border-none! bg-transparent! p-0!",
         "print:border-none print:bg-transparent print:p-0"
       )}
     >
@@ -100,6 +103,7 @@ export const Table = ({
           }
           className={cn(
             "custom-pdf-table",
+            isExporting && "pdf-export-active",
             !stickFirstColumn && "min-w-full",
             stickFirstColumn && [
               "table-fixed",
@@ -165,36 +169,32 @@ export const Table = ({
       </div>
 
       <style>{`
-        @media print {
-          div[ref] {
-            contain: none !important;
-          }
-          
-          .custom-pdf-table {
+        @media print, screen {
+          .pdf-export-active {
             width: 100% !important;
             max-width: 100% !important;
             table-layout: auto !important;
           }
 
-          .custom-pdf-table tr > *:first-child {
+          .pdf-export-active tr > *:first-child {
             position: static !important;
             width: auto !important;
             background: transparent !important;
           }
 
-          .custom-pdf-table tr > *:first-child::before,
-          .custom-pdf-table tr > *:first-child::after {
+          .pdf-export-active tr > *:first-child::before,
+          .pdf-export-active tr > *:first-child::after {
             display: none !important;
             content: none !important;
           }
 
-          .custom-pdf-table th,
-          .custom-pdf-table td {
+          .pdf-export-active th,
+          .pdf-export-active td {
             padding: 4px 6px !important;
             font-size: 0.75rem !important;
           }
 
-          .custom-pdf-table tr > td:first-child {
+          .pdf-export-active tr > td:first-child {
             text-align: left !important;
             width: 32% !important;
           }

@@ -10,7 +10,7 @@ import { getTransformationMarkers } from "@/app/components/transformation-marker
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
 import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
-import { useExportContext } from "@/contexts/PrintContext";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ButtonAffectations } from "../ButtonAffectations";
