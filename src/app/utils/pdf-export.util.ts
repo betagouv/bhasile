@@ -10,6 +10,6 @@ export const computeStartMonth = (endMonth: string): string => {
   }
   const [year, month] = endMonth.split("-").map(Number);
   const date = new Date(year, month - 1, 1);
-  date.setMonth(date.getMonth() - 6);
+  date.setMonth(date.getMonth() - 5);
   return toYearMonth(date);
 };

@@ -61,7 +61,7 @@ export const Table = ({
       setScrollReachedEnd(hasReachedEnd);
     };
 
-    handleScroll(); // état initial
+    handleScroll();
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, []);
@@ -73,18 +73,19 @@ export const Table = ({
         "bg-lifted-grey",
         "rounded-lg border border-default-grey",
         "[&_th]:uppercase [&_th_small]:block [&_th_tr]:text-mention-grey [&_th]:py-2 [&_th]:px-4 [&_th]:text-center [&_th]:text-xs",
-        "[&_td]:py-2 [&_td]:px-4 [&_td]:text-center [&_td]:text-sm ",
+        "[&_td]:py-2 [&_td]:px-4 [&_td]:text-center [&_td]:text-sm",
         enableBorders &&
           "[&_tr]:border-b [&_tbody_tr:last-child]:border-b-0 [&_th]:border-default-grey [&_tr]:border-default-grey [&_td]:border-default-grey",
         hasErrors && "border-action-high-error",
-        className
+        className,
+        "print:border-none print:bg-transparent print:p-0"
       )}
     >
       <div
         ref={scrollableAreaRef}
         className={cn(
           "relative w-full max-w-full min-w-0 overflow-x-auto",
-          stickFirstColumn && "pb-3"
+          stickFirstColumn && "pb-3 print:pb-0"
         )}
         style={stickFirstColumn ? { contain: "inline-size" } : undefined}
       >
@@ -98,6 +99,7 @@ export const Table = ({
               : undefined
           }
           className={cn(
+            "custom-pdf-table",
             !stickFirstColumn && "min-w-full",
             stickFirstColumn && [
               "table-fixed",
@@ -113,7 +115,7 @@ export const Table = ({
           )}
         >
           {stickFirstColumn && (
-            <colgroup>
+            <colgroup className="print:hidden">
               <col style={{ width: firstColumnWidth }} />
               {Array.from({ length: valueColumnsCount }, (_, index) => (
                 <col
@@ -161,6 +163,43 @@ export const Table = ({
         </table>
         {overlay}
       </div>
+
+      <style>{`
+        @media print {
+          div[ref] {
+            contain: none !important;
+          }
+          
+          .custom-pdf-table {
+            width: 100% !important;
+            max-width: 100% !important;
+            table-layout: auto !important;
+          }
+
+          .custom-pdf-table tr > *:first-child {
+            position: static !important;
+            width: auto !important;
+            background: transparent !important;
+          }
+
+          .custom-pdf-table tr > *:first-child::before,
+          .custom-pdf-table tr > *:first-child::after {
+            display: none !important;
+            content: none !important;
+          }
+
+          .custom-pdf-table th,
+          .custom-pdf-table td {
+            padding: 4px 6px !important;
+            font-size: 0.75rem !important;
+          }
+
+          .custom-pdf-table tr > td:first-child {
+            text-align: left !important;
+            width: 32% !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

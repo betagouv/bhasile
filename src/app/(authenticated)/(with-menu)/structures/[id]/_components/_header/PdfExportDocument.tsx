@@ -44,7 +44,7 @@ export const PdfExportDocument = ({ data }: Props): ReactElement => {
         <ControlesBlock />
       </div>
       <PdfHeader />
-      <div className="pb-4">
+      <div className="pb-4 break-after-page">
         <ExportActiviteBlock
           startDate={data.ofii.startMonth}
           endDate={data.ofii.endMonth}

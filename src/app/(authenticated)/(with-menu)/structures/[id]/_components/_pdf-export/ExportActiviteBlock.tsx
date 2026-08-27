@@ -1,4 +1,6 @@
-import { ReactElement } from "react";
+"use client";
+
+import { ReactElement, useMemo } from "react";
 
 import { ActiviteHistoriqueTable } from "@/app/components/activites/ActiviteHistoriqueTable";
 import { ActiviteMotifsIndisponibilite } from "@/app/components/activites/ActiviteMotifsIndisponibilite";
@@ -14,7 +16,27 @@ export const ExportActiviteBlock = ({
   endDate,
 }: Props): ReactElement => {
   const { structure } = useStructureContext();
-  const hasActivites = (structure.activites?.length ?? 0) > 0;
+
+  const filteredActivites = useMemo(() => {
+    if (!structure.activites) {
+      return [];
+    }
+
+    return structure.activites.filter((activite) => {
+      if (!activite.date) {
+        return false;
+      }
+
+      const month =
+        typeof activite.date === "string"
+          ? activite.date.slice(0, 7)
+          : new Date(activite.date).toISOString().slice(0, 7);
+
+      return month >= startDate && month <= endDate;
+    });
+  }, [structure.activites, startDate, endDate]);
+
+  const hasActivites = filteredActivites.length > 0;
   const showOfiiData = structure.type !== StructureType.CAES && hasActivites;
 
   return (
@@ -35,22 +57,20 @@ export const ExportActiviteBlock = ({
           </h4>
           <div className="flex pt-10 pb-10">
             <ActivitePlaces
-              placesAutorisees={structure.activites?.[0].placesEnregistreesDna}
-              placesIndisponibles={structure.activites?.[0].placesIndisponibles}
+              placesAutorisees={filteredActivites[0]?.placesEnregistreesDna}
+              placesIndisponibles={filteredActivites[0]?.placesIndisponibles}
             />
             <div className="pl-20 w-100">
               <ActiviteMotifsIndisponibilite
-                desinsectisation={structure.activites?.[0].desinsectisation}
-                remiseEnEtat={structure.activites?.[0].remiseEnEtat}
-                sousOccupation={structure.activites?.[0].sousOccupation}
-                travaux={structure.activites?.[0].travaux}
+                desinsectisation={filteredActivites[0]?.desinsectisation}
+                remiseEnEtat={filteredActivites[0]?.remiseEnEtat}
+                sousOccupation={filteredActivites[0]?.sousOccupation}
+                travaux={filteredActivites[0]?.travaux}
               />
             </div>
           </div>
           <hr className="pb-10!" />
-          {startDate}
-          {endDate}
-          <ActiviteHistoriqueTable activites={structure.activites || []} />
+          <ActiviteHistoriqueTable activites={filteredActivites} />
         </>
       )}
     </Block>

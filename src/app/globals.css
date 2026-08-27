@@ -150,3 +150,12 @@ map-chart .FR-20R, .FR-2A, .FR-2B, .map_info {
 .fr-icon-book-shelf-line::after {
   mask-image: url("/book-shelf-line.svg");
 }
+
+@media print {
+  [class^="fr-icon-"], 
+  [class*=" fr-icon-"],
+  [class^="ri-"] {
+    transform: translateZ(0) !important;
+    filter: drop-shadow(0 0 0 transparent) !important;
+  }
+}

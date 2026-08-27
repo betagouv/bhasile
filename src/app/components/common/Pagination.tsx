@@ -38,8 +38,8 @@ export const Pagination = ({
             href={currentPage === 0 ? undefined : ""}
             aria-disabled={currentPage === 0}
             role="link"
-            onClick={(e) => {
-              e.preventDefault();
+            onClick={(event) => {
+              event.preventDefault();
               setCurrentPage(0);
             }}
           >
@@ -52,8 +52,8 @@ export const Pagination = ({
             href={currentPage - 1 < 0 ? undefined : ""}
             aria-disabled={currentPage - 1 < 0}
             role="link"
-            onClick={(e) => {
-              e.preventDefault();
+            onClick={(event) => {
+              event.preventDefault();
               if (currentPage - 1 >= 0) {
                 setCurrentPage(currentPage - 1);
               }
@@ -78,8 +78,8 @@ export const Pagination = ({
             role="link"
             href={currentPage + 1 >= totalPages ? undefined : ""}
             aria-disabled={currentPage + 1 >= totalPages}
-            onClick={(e) => {
-              e.preventDefault();
+            onClick={(event) => {
+              event.preventDefault();
               if (currentPage + 1 < totalPages) {
                 setCurrentPage(currentPage + 1);
               }
@@ -94,8 +94,8 @@ export const Pagination = ({
             role="link"
             href={currentPage + 1 >= totalPages ? undefined : ""}
             aria-disabled={currentPage + 1 >= totalPages}
-            onClick={(e) => {
-              e.preventDefault();
+            onClick={(event) => {
+              event.preventDefault();
               setCurrentPage(totalPages - 1);
             }}
           >
