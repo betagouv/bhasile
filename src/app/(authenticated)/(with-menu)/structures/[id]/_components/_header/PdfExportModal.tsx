@@ -48,8 +48,10 @@ export const PdfExportModal = (): ReactElement => {
 
   const exportPayload = {
     exportAddresses: exportAddresses === "oui",
-    typePlacesFinances: { startYear, endYear },
-    ofii: { startMonth, endMonth },
+    typePlacesFinancesStartYear: startYear,
+    typePlacesFinancesEndYear: endYear,
+    activiteStartMonth: startMonth,
+    activiteEndMonth: endMonth,
   };
 
   return (

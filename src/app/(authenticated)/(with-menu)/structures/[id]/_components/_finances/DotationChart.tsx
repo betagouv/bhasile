@@ -9,8 +9,16 @@ export const DotationChart = ({
   budgets,
   isAutorisee,
   hideStructureTypeLabels = false,
+  startYear,
+  endYear,
 }: Props): ReactElement => {
-  const { years } = getYearRange();
+  const { years } =
+    startYear && endYear
+      ? getYearRange({
+          startYear,
+          endYear,
+        })
+      : getYearRange();
 
   const yearsWithBudget = years
     .map((year) => {
@@ -107,4 +115,6 @@ type Props = {
   budgets: BudgetApiType[] | undefined;
   isAutorisee: boolean;
   hideStructureTypeLabels?: boolean;
+  startYear?: number;
+  endYear?: number;
 };

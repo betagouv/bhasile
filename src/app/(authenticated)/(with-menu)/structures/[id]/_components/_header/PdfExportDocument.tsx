@@ -11,19 +11,15 @@ import { TypePlaceBlock } from "../_type-places/TypePlaceBlock";
 
 export type PdfExportPayload = {
   exportAddresses: boolean;
-  typePlacesFinances: {
-    startYear: number;
-    endYear: number;
-  };
-  ofii: {
-    startMonth: string;
-    endMonth: string;
-  };
+  typePlacesFinancesStartYear: number;
+  typePlacesFinancesEndYear: number;
+  activiteStartMonth: string;
+  activiteEndMonth: string;
 };
 
 export const PdfExportDocument = ({ data }: Props): ReactElement => {
   return (
-    <div className="p-8">
+    <div className="p-4">
       <PdfHeader />
       <div className="pb-4 break-after-page">
         <ExportDescriptionBlock />
@@ -33,11 +29,17 @@ export const PdfExportDocument = ({ data }: Props): ReactElement => {
         <CalendrierBlock />
       </div>
       <div className="pb-4 break-after-page">
-        <TypePlaceBlock />
+        <TypePlaceBlock
+          startYear={data.typePlacesFinancesStartYear}
+          endYear={data.typePlacesFinancesEndYear}
+        />
       </div>
       <PdfHeader />
       <div className="pb-4 break-after-page">
-        <FinancesBlock />
+        <FinancesBlock
+          startYear={data.typePlacesFinancesStartYear}
+          endYear={data.typePlacesFinancesEndYear}
+        />
       </div>
       <PdfHeader />
       <div className="pb-4 break-after-page">
@@ -46,8 +48,8 @@ export const PdfExportDocument = ({ data }: Props): ReactElement => {
       <PdfHeader />
       <div className="pb-4 break-after-page">
         <ExportActiviteBlock
-          startDate={data.ofii.startMonth}
-          endDate={data.ofii.endMonth}
+          startDate={data.activiteStartMonth}
+          endDate={data.activiteEndMonth}
         />
       </div>
       {data.exportAddresses && (

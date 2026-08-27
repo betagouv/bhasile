@@ -7,16 +7,25 @@ import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { Table } from "@/app/components/common/Table";
 import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
-import { getTypePlacesYearRange } from "@/app/utils/date.util";
+import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { getTypePlaceHistoryHeadings } from "./getTypePlaceHistoryHeadings";
 
-export const TypePlaceHistory = (): ReactElement => {
+export const TypePlaceHistory = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { structure } = useStructureContext();
-  const years = [...getTypePlacesYearRange().years].sort(
-    (firstYear, secondYear) => firstYear - secondYear
-  );
+  const years =
+    startYear && endYear
+      ? getYearRange({
+          startYear,
+          endYear,
+        }).years.reverse()
+      : [...getTypePlacesYearRange().years].sort(
+          (firstYear, secondYear) => firstYear - secondYear
+        );
   const markers = getTransformationMarkers(structure.history, years);
 
   const structureTypologies = structure.structureTypologies ?? [];
@@ -99,4 +108,9 @@ type PlaceRow = {
   label: string;
   subLabel?: string;
   getValue: (year: number) => number | undefined;
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };
