@@ -8,17 +8,30 @@ import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/B
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ButtonAffectations } from "../ButtonAffectations";
 import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
 
-export const CpomStaticTable = (): ReactElement => {
+export const CpomStaticTable = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { structure } = useStructureContext();
+  const isExporting = useExportContext();
 
-  const { years } = getYearRange({ order: "desc" });
+  const years =
+    startYear && endYear
+      ? getYearRange({
+          startYear,
+          endYear,
+        }).years.reverse()
+      : getYearRange({ order: "desc" }).years;
 
   const [isAffectationOpen, setIsAffectationOpen] = useState(false);
+
+  const effectiveIsAffectationOpen = isAffectationOpen || isExporting;
 
   const isAutorisee = structure?.isAutorisee ?? false;
   const isSubventionnee = structure?.isSubventionnee ?? false;
@@ -65,14 +78,14 @@ export const CpomStaticTable = (): ReactElement => {
           years={years}
           lines={getBudgetStaticTableLines(
             isAutorisee,
-            isAffectationOpen,
+            effectiveIsAffectationOpen,
             true
           )}
           cpomStructures={enhancedCpomStructures}
           canEdit={false}
           type={structure?.type}
         />
-        {(isAffectationOpen || isSubventionnee) && (
+        {(effectiveIsAffectationOpen || isSubventionnee) && (
           <BudgetTableCommentLine
             years={years}
             label="Commentaire"
@@ -84,11 +97,18 @@ export const CpomStaticTable = (): ReactElement => {
         )}
       </Table>
       {isAutorisee && (
-        <ButtonAffectations
-          isAffectationOpen={isAffectationOpen}
-          setIsAffectationOpen={setIsAffectationOpen}
-        />
+        <div className="print:hidden">
+          <ButtonAffectations
+            isAffectationOpen={isAffectationOpen}
+            setIsAffectationOpen={setIsAffectationOpen}
+          />
+        </div>
       )}
     </>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

@@ -14,7 +14,7 @@ import { useStructureContext } from "@/contexts/StructureContext";
 import { TypePlaceCharts } from "./TypePlaceCharts";
 import { TypePlaceHistory } from "./TypePlaceHistory";
 
-export const TypePlaceBlock = (): ReactElement => {
+export const TypePlaceBlock = ({ startYear, endYear }: Props): ReactElement => {
   const { structure } = useStructureContext();
   const router = useRouter();
   const { trackTypePlacesSpreadsheetExport } = useUserAction();
@@ -60,8 +60,13 @@ export const TypePlaceBlock = (): ReactElement => {
         />
       </div>
       <div className="pt-6">
-        <TypePlaceHistory />
+        <TypePlaceHistory startYear={startYear} endYear={endYear} />
       </div>
     </Block>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

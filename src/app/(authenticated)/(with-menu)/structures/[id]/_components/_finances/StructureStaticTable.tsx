@@ -10,22 +10,35 @@ import { getTransformationMarkers } from "@/app/components/transformation-marker
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
 import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ButtonAffectations } from "../ButtonAffectations";
 import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
 
-export const StructureStaticTable = (): ReactElement => {
+export const StructureStaticTable = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { structure } = useStructureContext();
+  const isExporting = useExportContext();
 
   const isAutorisee = structure?.isAutorisee ?? false;
   const isSubventionnee = structure?.isSubventionnee ?? false;
 
-  const { years } = getYearRange({ order: "desc" });
+  const years =
+    startYear && endYear
+      ? getYearRange({
+          startYear,
+          endYear,
+        }).years.reverse()
+      : getYearRange({ order: "desc" }).years;
 
   const markers = getTransformationMarkers(structure?.history, years);
 
   const [isAffectationOpen, setIsAffectationOpen] = useState(false);
+
+  const effectiveIsAffectationOpen = isAffectationOpen || isExporting;
 
   const enhancedBudgets = structure?.budgets?.map((budget) => {
     return {
@@ -71,11 +84,14 @@ export const StructureStaticTable = (): ReactElement => {
       >
         <BudgetTableLines
           years={years}
-          lines={getBudgetStaticTableLines(isAutorisee, isAffectationOpen)}
+          lines={getBudgetStaticTableLines(
+            isAutorisee,
+            effectiveIsAffectationOpen
+          )}
           budgets={enhancedBudgets}
           canEdit={false}
         />
-        {(isAffectationOpen || isSubventionnee) && (
+        {(effectiveIsAffectationOpen || isSubventionnee) && (
           <BudgetTableCommentLine
             years={years}
             label="Commentaire"
@@ -86,11 +102,18 @@ export const StructureStaticTable = (): ReactElement => {
         )}
       </Table>
       {isAutorisee && (
-        <ButtonAffectations
-          isAffectationOpen={isAffectationOpen}
-          setIsAffectationOpen={setIsAffectationOpen}
-        />
+        <div className="print:hidden">
+          <ButtonAffectations
+            isAffectationOpen={isAffectationOpen}
+            setIsAffectationOpen={setIsAffectationOpen}
+          />
+        </div>
       )}
     </>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

@@ -1,10 +1,12 @@
 import { screen } from "@testing-library/react";
+import { SessionProvider } from "next-auth/react";
 import { createActualisationForm } from "tests/test-utils/factories/actualisation-form.factory";
 import { createStructure } from "tests/test-utils/structure.factory";
 import { renderWithStructurePageProviders } from "tests/test-utils/structure-page-test.helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StructureHeader } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_header/StructureHeader";
+import { AppAbilityProvider } from "@/contexts/AbilityProvider";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 vi.mock("next/navigation", () => ({
@@ -61,7 +63,11 @@ describe("StructureHeader", () => {
     // WHEN
     renderWithStructurePageProviders(
       structure,
-      <StructureHeader actualisationYear={null} />
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader actualisationYear={null} />
+        </AppAbilityProvider>
+      </SessionProvider>
     );
 
     // THEN
@@ -80,13 +86,15 @@ describe("StructureHeader", () => {
     // WHEN
     renderWithStructurePageProviders(
       structure,
-      <StructureHeader actualisationYear={ACTUALISATION_YEAR} />
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader actualisationYear={ACTUALISATION_YEAR} />
+        </AppAbilityProvider>
+      </SessionProvider>
     );
 
     // THEN
-    expect(
-      screen.getByText(/campagne d’actualisation/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/campagne d’actualisation/)).toBeInTheDocument();
   });
 
   it("masque l’actualisation pour une structure fermée dont la campagne est en cours", () => {

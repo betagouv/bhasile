@@ -80,6 +80,7 @@
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.85.0",
     "react-number-format": "^5.4.5",
+    "react-to-print": "^3.3.0",
     "read-excel-file": "^9.3.10",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",

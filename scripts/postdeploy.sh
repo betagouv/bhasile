@@ -7,7 +7,7 @@ set -euo pipefail
 echo "Début du post-déploiement..."
 
 if [ "${SKIP_POSTDEPLOY:-}" = "1" ] && [ "${IS_PRODUCTION:-}" != "true" ]; then
-  echo "Postd-déploiement ignoré (via variable d'environnement)"
+  echo "Post-déploiement ignoré (via variable d'environnement)"
   exit 0
 fi
 

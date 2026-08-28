@@ -8,12 +8,21 @@ import { useStructureContext } from "@/contexts/StructureContext";
 
 import { getIndicateurFinancierStaticTableHeading } from "./getIndicateurFinancierStaticTableHeading";
 
-export const HistoriqueIndicateursGeneraux = () => {
+export const HistoriqueIndicateursGeneraux = ({
+  customStartYear,
+  customEndYear,
+}: Props) => {
   const { structure } = useStructureContext();
 
   const indicateursFinanciers = structure.indicateursFinanciers;
 
-  const { years } = getYearRange({ order: "desc" });
+  const years =
+    customStartYear && customEndYear
+      ? getYearRange({
+          startYear: customStartYear,
+          endYear: customEndYear,
+        }).years.reverse()
+      : getYearRange({ order: "desc" }).years;
   const startYear = getRealCreationYear(structure);
   const yearsToDisplay = years.filter((year) => year >= startYear);
 
@@ -47,4 +56,9 @@ export const HistoriqueIndicateursGeneraux = () => {
       </Table>
     </CustomAccordion>
   );
+};
+
+type Props = {
+  customStartYear?: number;
+  customEndYear?: number;
 };

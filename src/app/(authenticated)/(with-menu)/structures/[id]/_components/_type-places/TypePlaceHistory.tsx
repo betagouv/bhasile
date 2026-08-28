@@ -7,17 +7,28 @@ import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { Table } from "@/app/components/common/Table";
 import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
-import { getTypePlacesYearRange } from "@/app/utils/date.util";
+import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { getTypePlaceHistoryHeadings } from "./getTypePlaceHistoryHeadings";
 
-export const TypePlaceHistory = (): ReactElement => {
+export const TypePlaceHistory = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { structure } = useStructureContext();
-  const years = [...getTypePlacesYearRange().years].sort(
-    (firstYear, secondYear) => firstYear - secondYear
-  );
+  const years =
+    startYear && endYear
+      ? getYearRange({
+          startYear,
+          endYear,
+        }).years.reverse()
+      : [...getTypePlacesYearRange().years].sort(
+          (firstYear, secondYear) => firstYear - secondYear
+        );
   const markers = getTransformationMarkers(structure.history, years);
+  const isExporting = useExportContext();
 
   const structureTypologies = structure.structureTypologies ?? [];
 
@@ -77,7 +88,12 @@ export const TypePlaceHistory = (): ReactElement => {
               )}
             </td>
             {years.map((year) => (
-              <td key={year} className="min-w-25 whitespace-nowrap">
+              <td
+                key={year}
+                className={`whitespace-nowrap ${
+                  isExporting ? "min-w-0 px-1" : "min-w-25"
+                }`}
+              >
                 {row.getValue(year) ?? <EmptyCell />}
               </td>
             ))}
@@ -96,4 +112,9 @@ type PlaceRow = {
   label: string;
   subLabel?: string;
   getValue: (year: number) => number | undefined;
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

@@ -19,7 +19,7 @@ export const BudgetTableCommentLine = ({
     return null;
   }
   return (
-    <tr>
+    <tr className="print:hidden">
       <td className="text-left!">
         <strong className="whitespace-nowrap">{label}</strong>
       </td>

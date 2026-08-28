@@ -45,7 +45,7 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
   };
 
   return (
-    <>
+    <div className="evaluation-table-container">
       <Table
         bordered={true}
         className="full-width-table"
@@ -65,7 +65,15 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
         Seules les évaluations menées à partir de {EVALUATION_NOTES_START_YEAR}{" "}
         prennent en compte des notes et un plan d’action optionnel.
       </span>
-    </>
+      <style>{`
+        @media print {
+          .evaluation-table-container th:nth-last-child(-n+2),
+          .evaluation-table-container td:nth-last-child(-n+2) {
+            display: none !important;
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 

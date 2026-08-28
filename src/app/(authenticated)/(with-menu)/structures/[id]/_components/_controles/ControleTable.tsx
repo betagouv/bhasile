@@ -21,12 +21,22 @@ export const ControleTable = (): ReactElement => {
   };
 
   return (
-    <Table
-      bordered={true}
-      className="full-width-table"
-      caption=""
-      data={getControles() || []}
-      headers={["DATE", "TYPE", "RAPPORT"]}
-    />
+    <div className="controle-table-container">
+      <Table
+        bordered={true}
+        className="full-width-table"
+        caption=""
+        data={getControles() || []}
+        headers={["DATE", "TYPE", "RAPPORT"]}
+      />
+      <style>{`
+        @media print {
+          .controle-table-container th:nth-last-child(-n+1),
+          .controle-table-container td:nth-last-child(-n+1) {
+            display: none !important;
+          }
+        }
+      `}</style>
+    </div>
   );
 };

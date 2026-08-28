@@ -1,13 +1,12 @@
-import Image from "next/image";
 import { ReactElement } from "react";
 
 import { ActiviteMotifsIndisponibilite } from "@/app/components/activites/ActiviteMotifsIndisponibilite";
 import { ActivitePlaces } from "@/app/components/activites/ActivitePlaces";
-import { formatDate } from "@/app/utils/date.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureType } from "@/types/structure.type";
 
 import { ActiviteHistorique } from "./ActiviteHistorique";
+import { OfiiDisclaimer } from "./OfiiDisclaimer";
 
 export const ActiviteBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -21,30 +20,7 @@ export const ActiviteBlock = (): ReactElement => {
           <span className={`text-title-blue-france mr-3 fr-icon-team-line`} />
           <h3 className="text-title-blue-france fr-h6 mb-12">Activité</h3>
         </div>
-        <div className="flex items-center text-right">
-          {!showOfiiData ? (
-            <span className="text-title-blue-france text-xs">
-              Pas de données OFII disponibles
-            </span>
-          ) : (
-            <span className="text-title-blue-france text-xs ">
-              Données mensuelles de l’OFII
-              <span className="italic block">
-                mises à jour le {formatDate(structure.activites![0].date)}
-              </span>
-            </span>
-          )}
-
-          <div className="relative h-[38] w-[68]">
-            <Image
-              src="/ofii.webp"
-              alt="Logo de l'OFII"
-              fill
-              sizes="(min-width: 91px)"
-              loading="lazy"
-            />
-          </div>
-        </div>
+        <OfiiDisclaimer showOfiiData={showOfiiData} />
       </div>
       {showOfiiData && (
         <>

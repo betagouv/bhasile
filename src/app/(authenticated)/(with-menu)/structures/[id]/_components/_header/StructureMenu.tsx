@@ -9,6 +9,8 @@ import {
 } from "@/app/utils/spreadsheet-download.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
+import { PdfExportModal, pdfExportModal } from "./PdfExportModal";
+
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
   const { structure } = useStructureContext();
@@ -35,6 +37,13 @@ export const StructureMenu = ({ structureId }: Props) => {
           <hr className="w-full" />
           <Button
             priority="tertiary no outline"
+            onClick={() => pdfExportModal.open()}
+            className="whitespace-nowrap"
+          >
+            Exporter la fiche (PDF)
+          </Button>
+          <Button
+            priority="tertiary no outline"
             onClick={() => {
               downloadDocument(getStructureDownloadContent(structure));
               trackStructureSpreadsheetExport(structure.id);
@@ -45,6 +54,7 @@ export const StructureMenu = ({ structureId }: Props) => {
           </Button>
         </div>
       )}
+      <PdfExportModal />
     </div>
   );
 };

@@ -17,21 +17,31 @@ export default function PieChart({
   ],
   isDonut = false,
 }: Props) {
-  const chartRef = useRef(null);
+  const chartRef = useRef<HTMLDivElement>(null);
   const id = useId();
   const chartClass = `piechart-${id.replace(/:/g, "-")}`;
 
   useEffect(() => {
-    let chart = null;
+    let chart: Chartist.PieChart | null = null;
+
     if (chartRef.current) {
-      chart = new Chartist.PieChart(chartRef.current, data, options);
+      const chartOptions: Chartist.PieChartOptions = {
+        width: `${size}px`,
+        height: `${size}px`,
+        donut: isDonut,
+        donutWidth: isDonut ? Math.round(size / 4) : undefined,
+        ...options,
+      };
+
+      chart = new Chartist.PieChart(chartRef.current, data, chartOptions);
     }
+
     return () => {
       if (chart) {
         chart.detach();
       }
     };
-  }, [data, options]);
+  }, [data, options, isDonut, size]);
 
   const getPieColors = () => {
     let css = `.${chartClass} .ct-series-a .ct-slice-pie { fill: ${colors[0]} !important; }`;
@@ -65,8 +75,14 @@ export default function PieChart({
   };
 
   return (
-    <div className={`${chartClass} relative`}>
-      <div ref={chartRef} style={{ height: size }} />
+    <div
+      className={`${chartClass} relative block mx-auto`}
+      style={{
+        width: size,
+        height: size,
+      }}
+    >
+      <div ref={chartRef} style={{ width: size, height: size }} />
       {children}
       <style>{isDonut ? getDonutColors() : getPieColors()}</style>
     </div>
@@ -75,7 +91,7 @@ export default function PieChart({
 
 type Props = PropsWithChildren<{
   data: Chartist.PieChartData;
-  options: Chartist.PieChartOptions;
+  options?: Chartist.PieChartOptions;
   size?: number;
   colors?: string[];
   isDonut?: boolean;
