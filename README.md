@@ -138,7 +138,7 @@ npx patch-package @codegouvfr/react-dsfr
 
 Les routes `/ajout-structure` et `/ajout-adresses` sont protégées par mot de passe. Les pages de dashboard sont protégées par un accès ProConnect.
 
-Pour définir un ou plusieurs mots de passe, il suffit d'ajouter la variable `OPERATEUR_PASSWORDS` dans le fichier `.env`. Les mots de passe devront être séparées par des virgules.
+Pour définir un ou plusieurs mots de passe, il suffit d'ajouter la variable `OPERATEUR_PASSWORDS` dans le fichier `.env`. Les mots de passe devront être séparés par des virgules.
 `PAGE_PASSWORD` est une variable d'environnement legacy et sera bientôt supprimée.
 
 Les pages sont accessibles via :
@@ -154,10 +154,6 @@ Pour mettre l'applcation en production, placez vous sur la branche `main` et ex�
 git pull --rebase origin dev
 git push --force-with-lease
 ```
-
-### 🧑‍🔧 Ajout des opérateurs
-
-Pour ajouter des opérateurs sur un environnement (dev ou prod), faites un `POST` sur `/api/operateurs` avec un tableau des opérateurs. Un JSON à jour est sur le Notion de l'équipe.
 
 ### 🏃 Exécution de scripts
 
