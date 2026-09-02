@@ -7,7 +7,7 @@ import { Block } from "@/app/components/common/Block";
 import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
 import { InformationCard } from "@/app/components/InformationCard";
 import { useUserAction } from "@/app/hooks/useUserAction";
-import { getTypePlacesDownloadContent } from "@/app/utils/spreadsheet-download.util";
+import { getTypePlacesDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { getMostRecentMillesime } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 

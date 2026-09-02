@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as XLSX from "xlsx";
 
+import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import {
-  downloadDocument,
   getControleQualiteDownloadContent,
   getFinancesDownloadContent,
   getStructureDownloadContent,
   getTypePlacesDownloadContent,
-} from "@/app/utils/spreadsheet-download.util";
+} from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 vi.mock("xlsx", () => ({

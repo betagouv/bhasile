@@ -10,6 +10,7 @@ import {
   PdfExportDocument,
   PdfExportPayload,
 } from "../(authenticated)/(with-menu)/structures/[id]/_components/_header/PdfExportDocument";
+import { formatDate } from "../utils/date.util";
 
 export const usePdfExport = (codeBhasile: string | undefined) => {
   const printRef = useRef<HTMLDivElement>(null);
@@ -17,7 +18,7 @@ export const usePdfExport = (codeBhasile: string | undefined) => {
 
   const triggerExport = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `Fiche de la structure ${codeBhasile}`,
+    documentTitle: `Structure ${codeBhasile} ${formatDate(new Date()).replaceAll("_", "-")}`,
     onBeforePrint: () => {
       return new Promise((resolve) => {
         flushSync(() => {
@@ -46,6 +47,13 @@ export const usePdfExport = (codeBhasile: string | undefined) => {
     >
       <ExportContext.Provider value={isExporting}>
         <div ref={printRef}>
+          <style>{`
+            @media print {
+              body {
+                zoom: 80%;
+              }
+            }
+          `}</style>
           <PdfExportDocument data={data} />
         </div>
       </ExportContext.Provider>

@@ -19,12 +19,14 @@ export type PdfExportPayload = {
 
 export const PdfExportDocument = ({ data }: Props): ReactElement => {
   return (
-    <div className="p-4">
+    <div className="p-14">
       <PdfHeader />
       <div className="pb-4 break-after-page">
         <ExportDescriptionBlock />
       </div>
-      <PdfHeader />
+      <div className="pt-14">
+        <PdfHeader />
+      </div>
       <div className="pb-4">
         <CalendrierBlock />
       </div>
@@ -34,18 +36,24 @@ export const PdfExportDocument = ({ data }: Props): ReactElement => {
           endYear={data.typePlacesFinancesEndYear}
         />
       </div>
-      <PdfHeader />
+      <div className="pt-14">
+        <PdfHeader />
+      </div>
       <div className="pb-4 break-after-page">
         <FinancesBlock
           startYear={data.typePlacesFinancesStartYear}
           endYear={data.typePlacesFinancesEndYear}
         />
       </div>
-      <PdfHeader />
+      <div className="pt-14">
+        <PdfHeader />
+      </div>
       <div className="pb-4 break-after-page">
         <ControlesBlock />
       </div>
-      <PdfHeader />
+      <div className="pt-14">
+        <PdfHeader />
+      </div>
       <div className="pb-4 break-after-page">
         <ExportActiviteBlock
           startDate={data.activiteStartMonth}
@@ -54,7 +62,9 @@ export const PdfExportDocument = ({ data }: Props): ReactElement => {
       </div>
       {data.exportAddresses && (
         <>
-          <PdfHeader />
+          <div className="pt-14">
+            <PdfHeader />
+          </div>
           <div className="pb-4">
             <ExportAdressesBlock />
           </div>

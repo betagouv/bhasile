@@ -2,7 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement } from "react";
 
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
-import { downloadDocument } from "@/app/utils/spreadsheet-download.util";
+import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { DownloadOptions } from "@/types/spreadsheet-download.type";
 
 export const DocumentDownloadDropdown = ({

@@ -5,7 +5,7 @@ import { Block } from "@/app/components/common/Block";
 import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
 import { useUserAction } from "@/app/hooks/useUserAction";
 import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
-import { getFinancesDownloadContent } from "@/app/utils/spreadsheet-download.util";
+import { getFinancesDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
@@ -76,7 +76,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
         />
       </div>
       <hr className="mb-10" />
-      <div className="flex">
+      <div className="flex break-inside-avoid">
         <h4
           className="text-title-blue-france text-lg pr-6"
           id="gestionBudgetaireTitle"
@@ -94,7 +94,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
         )}
       </div>
       {isExporting ? (
-        <div>
+        <div className="break-inside-avoid">
           <div className="pb-4">
             <StructureStaticTable startYear={startYear} endYear={endYear} />
           </div>
@@ -108,7 +108,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
           )}
         </div>
       ) : (
-        <div className="pb-12">
+        <div className="pb-12 break-inside-avoid">
           {shouldShowCpom ? (
             <CpomStaticTable startYear={startYear} endYear={endYear} />
           ) : (

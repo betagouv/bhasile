@@ -8,7 +8,7 @@ import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
 import { useUserAction } from "@/app/hooks/useUserAction";
 import { getNow } from "@/app/utils/now.util";
-import { getControleQualiteDownloadContent } from "@/app/utils/spreadsheet-download.util";
+import { getControleQualiteDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { getLastPastVisit } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
@@ -89,7 +89,7 @@ export const ControlesBlock = (): ReactElement => {
           />
         </div>
       </div>
-      <div className="pt-12 border-t border-t-border-default-grey">
+      <div className="pt-12">
         {structure.isAutorisee && (
           <>
             {evaluations.length > 0 ? (
