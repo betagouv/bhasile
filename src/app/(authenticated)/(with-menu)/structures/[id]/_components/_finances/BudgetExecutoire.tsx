@@ -23,7 +23,7 @@ export const BudgetExecutoire = ({ year }: Props): ReactElement => {
   );
 
   return (
-    <div className="flex">
+    <div className="grid grid-cols-4 gap-4 print:gap-2 w-full">
       <div className="pr-4">
         <InformationCard
           primaryInformation={formatCurrency(budget?.dotationAccordee)}

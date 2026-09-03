@@ -1,17 +1,24 @@
 "use client";
 
+import Button from "@codegouvfr/react-dsfr/Button";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { HeaderFilters } from "@/app/components/header-filters/HeaderFilters";
+import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
+import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
+import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const StatistiquesHeader = (): ReactElement | null => {
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
+  const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
+  const { statistiques } = useStatistiquesContext();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -80,6 +87,34 @@ export const StatistiquesHeader = (): ReactElement | null => {
                 },
               ]}
             />
+          </div>
+          <div className="relative shrink-0" ref={panelRef}>
+            <Button
+              priority="tertiary no outline"
+              iconId="ri-more-2-fill"
+              title="Menu statistiques"
+              onClick={() => {
+                setIsPanelOpen(!isPanelOpen);
+              }}
+            />
+            {isPanelOpen && (
+              <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
+                <Button
+                  priority="tertiary no outline"
+                  onClick={() => {
+                    downloadDocument(
+                      getStatistiquesDownloadContent(
+                        statistiques,
+                        searchParams.size !== 0
+                      )
+                    );
+                  }}
+                  className="whitespace-nowrap"
+                >
+                  Exporter tous les tableaux (ODS)
+                </Button>
+              </div>
+            )}
           </div>
           <HeaderFilters />
         </div>

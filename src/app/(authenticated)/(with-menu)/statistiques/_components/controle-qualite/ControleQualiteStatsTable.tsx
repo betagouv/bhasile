@@ -78,7 +78,7 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
         format: (value) => <EvaluationNote value={value} />,
       },
       {
-        label: "Moyenne “La structure",
+        label: "Moyenne “La structure“",
         key: "noteStructure",
         format: (value) => <EvaluationNote value={value} />,
       },

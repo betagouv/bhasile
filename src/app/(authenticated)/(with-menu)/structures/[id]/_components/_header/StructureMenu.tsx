@@ -3,10 +3,8 @@ import Link from "next/link";
 
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { useUserAction } from "@/app/hooks/useUserAction";
-import {
-  downloadDocument,
-  getStructureDownloadContent,
-} from "@/app/utils/spreadsheet-download.util";
+import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
+import { getStructureDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { PdfExportModal, pdfExportModal } from "./PdfExportModal";

@@ -7,6 +7,7 @@ import { ReactElement, useMemo, useState } from "react";
 
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 import { computeStartMonth, toYearMonth } from "@/app/utils/pdf-export.util";
+import { CURRENT_YEAR, EIG_START_YEAR, START_YEAR } from "@/constants";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 export const pdfExportModal = createModal({
@@ -128,6 +129,8 @@ export const PdfExportModal = (): ReactElement => {
                 value: endYear,
                 onChange: (event) => setEndYear(Number(event.target.value)),
                 type: "number",
+                max: CURRENT_YEAR + 1,
+                min: START_YEAR + 4,
               }}
             />
           </div>
@@ -142,7 +145,6 @@ export const PdfExportModal = (): ReactElement => {
           <div className="flex-1 w-full">
             <Input
               label="Mois de début"
-              hintText="Obligatoire"
               iconId="fr-icon-lock-line"
               disabled
               nativeInputProps={{
@@ -154,11 +156,12 @@ export const PdfExportModal = (): ReactElement => {
           <div className="flex-1 w-full">
             <Input
               label="Mois de fin"
-              hintText="Obligatoire"
               nativeInputProps={{
                 value: endMonth,
                 onChange: (event) => setEndMonth(event.target.value),
                 type: "month",
+                max: new Date().toISOString().slice(0, 7),
+                min: new Date(EIG_START_YEAR, 1, 1).toISOString().slice(0, 7),
               }}
             />
           </div>

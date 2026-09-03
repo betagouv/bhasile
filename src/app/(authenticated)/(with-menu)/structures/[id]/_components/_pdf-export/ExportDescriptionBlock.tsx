@@ -20,19 +20,21 @@ export const ExportDescriptionBlock = (): ReactElement => {
       <h3 className="text-title-blue-france text-lg mb-3 text-left font-bold">
         Général
       </h3>
-      <div className="pb-8">
+      <div className="pb-8 break-inside-avoid">
         <General />
       </div>
-      <div className="pb-8">
+      <div className="pb-8 break-inside-avoid">
         <AntennesAndContacts />
       </div>
-      <div className="pb-8">
+      <div className="pb-8 break-inside-avoid">
         <Codes />
       </div>
       <h3 className="text-title-blue-france text-lg mb-3 text-left font-bold">
         Historique
       </h3>
-      <Historique />
+      <div className="break-inside-avoid">
+        <Historique />
+      </div>
     </Block>
   );
 };
