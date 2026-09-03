@@ -1,7 +1,7 @@
 import { act, render, renderHook, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { PdfExportPayload } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_header/PdfExportDocument";
+import { StructurePdfExportPayload } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_header/StructurePdfExportDocument";
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 
 vi.mock("react-to-print", () => ({
@@ -20,7 +20,7 @@ vi.mock("react-to-print", () => ({
 vi.mock(
   "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_header/PdfExportDocument",
   () => ({
-    PdfExportDocument: ({ data }: { data: PdfExportPayload }) => (
+    PdfExportDocument: ({ data }: { data: StructurePdfExportPayload }) => (
       <div data-testid="pdf-document">TEST {data.exportAddresses}</div>
     ),
   })
@@ -39,7 +39,7 @@ describe("usePdfExport", () => {
     structure: {
       nom: "Structure Test",
     },
-  } as unknown as PdfExportPayload;
+  } as unknown as StructurePdfExportPayload;
 
   it("retourne triggerExport et PrintableContainer", () => {
     const { result } = renderHook(() => usePdfExport("BH-1234"));
