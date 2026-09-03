@@ -1,4 +1,3 @@
-import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import {
   CombinedFinancialData,
@@ -7,11 +6,10 @@ import {
 
 import { computeResultatNet } from "../budget.util";
 import { formatDate, getTypePlacesYearRange, getYearRange } from "../date.util";
-import { isYearRealisee } from "../indicateurFinancier.util";
 import { getRealCreationYear } from "../structure.util";
 
 export const getTypePlacesDownloadContent = (structure: StructureApiRead) => ({
-  fileName: `type-places-${structure.codeBhasile}`,
+  fileName: `Type places ${structure.codeBhasile} ${formatDate(new Date())}`,
   sheetName: "Type de places",
   data: structure.structureTypologies
     .map((structureTypologie) => ({
@@ -37,23 +35,32 @@ export const getFinancesDownloadContent = (structure: StructureApiRead) => {
 
   const rawIndicateurs = structure.indicateursFinanciers || [];
 
-  // TODO : ajouter une colonne Prévisionnel et une colonne Réalisé pour chaque indicateur financier
+  const indicateursByYear = new Map();
 
-  const indicateursFinanciers = yearsToDisplay
-    .map((year) => {
-      const targetType = isYearRealisee(rawIndicateurs, year)
-        ? "REALISE"
-        : "PREVISIONNEL";
-
-      return rawIndicateurs.find(
-        (indicateur) =>
-          indicateur.year === year && indicateur.type === targetType
-      );
-    })
-    .filter(
-      (indicateur): indicateur is IndicateurFinancierApiType =>
-        indicateur !== undefined
+  for (const year of yearsToDisplay) {
+    const previsionnel = rawIndicateurs.find(
+      (indicateurFinancier) =>
+        indicateurFinancier.year === year &&
+        indicateurFinancier.type === "PREVISIONNEL"
     );
+    const realise = rawIndicateurs.find(
+      (indicateurFinancier) =>
+        indicateurFinancier.year === year &&
+        indicateurFinancier.type === "REALISE"
+    );
+
+    if (previsionnel || realise) {
+      indicateursByYear.set(year, {
+        year,
+        ETPPrevisionnel: previsionnel?.ETP,
+        ETPRealise: realise?.ETP,
+        tauxEncadrementPrevisionnel: previsionnel?.tauxEncadrement,
+        tauxEncadrementRealise: realise?.tauxEncadrement,
+        coutJournalierPrevisionnel: previsionnel?.coutJournalier,
+        coutJournalierRealise: realise?.coutJournalier,
+      });
+    }
+  }
 
   const budgets = (structure.budgets || [])
     .filter((budget) => yearsToDisplay.includes(budget.year))
@@ -71,10 +78,10 @@ export const getFinancesDownloadContent = (structure: StructureApiRead) => {
 
   const mergedByYear = new Map<number, CombinedFinancialData>();
 
-  for (const indicateurFinancier of indicateursFinanciers) {
-    mergedByYear.set(indicateurFinancier.year, {
-      ...mergedByYear.get(indicateurFinancier.year),
-      ...indicateurFinancier,
+  for (const [year, indicateurData] of indicateursByYear.entries()) {
+    mergedByYear.set(year, {
+      ...mergedByYear.get(year),
+      ...indicateurData,
     });
   }
 
@@ -88,14 +95,17 @@ export const getFinancesDownloadContent = (structure: StructureApiRead) => {
   const data: CombinedFinancialData[] = Array.from(mergedByYear.values());
 
   return {
-    fileName: `finances-${structure.codeBhasile}`,
+    fileName: `Finances ${structure.codeBhasile} ${formatDate(new Date())}`,
     sheetName: "Finances",
     data,
     headersMap: {
       year: "Année",
-      ETP: "ETP",
-      tauxEncadrement: "Taux d'encadrement",
-      coutJournalier: "Coût journalier",
+      ETPPrevisionnel: "ETP (Prévisionnel)",
+      ETPRealise: "ETP (Réalisé)",
+      tauxEncadrementPrevisionnel: "Taux d'encadrement (Prévisionnel)",
+      tauxEncadrementRealise: "Taux d'encadrement (Réalisé)",
+      coutJournalierPrevisionnel: "Coût journalier (Prévisionnel)",
+      coutJournalierRealise: "Coût journalier (Réalisé)",
       dotationDemandee: "Dotation demandée",
       dotationAccordee: "Dotation accordée",
       resultatNet: "Résultat net proposé par l'autorité tarifaire",
@@ -119,7 +129,7 @@ export const getControleQualiteDownloadContent = (
   structure: StructureApiRead
 ): DownloadOptions => {
   return {
-    fileName: `controle-qualite-${structure.codeBhasile}`,
+    fileName: `Contrôle qualité ${structure.codeBhasile} ${formatDate(new Date())}`,
     sheets: [
       {
         sheetName: "Evenements Indésirables Graves",
@@ -184,7 +194,7 @@ export const getStructureDownloadContent = (
   const controleQualite = getControleQualiteDownloadContent(structure);
 
   return {
-    fileName: `Structure ${structure.codeBhasile} ${formatDate(new Date()).replaceAll("_", "-")}`,
+    fileName: `Structure ${structure.codeBhasile} ${formatDate(new Date())}`,
     sheets: [
       {
         sheetName: typePlaces.sheetName,
