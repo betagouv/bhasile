@@ -6,6 +6,7 @@ import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
 import { StatistiquesHeader } from "./_components/StatistiquesHeader";
+import { StatistiquesPdfExportModal } from "./_components/StatistiquesPdfExportModal";
 
 type GetStatistiquesArgs = {
   departements?: string;
@@ -13,7 +14,7 @@ type GetStatistiquesArgs = {
   types?: string;
 };
 
-async function getStatistiques({
+export async function getStatistiques({
   departements,
   operateurs,
   types,
@@ -77,6 +78,7 @@ export default async function StatistiquesPage({
       <div className="flex flex-col h-full">
         <StatistiquesHeader />
         <StatistiquesContent />
+        <StatistiquesPdfExportModal />
       </div>
     </StatistiquesProvider>
   );

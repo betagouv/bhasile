@@ -1,24 +1,18 @@
 "use client";
 
-import { ReactElement, useRef, useState } from "react";
+import { PropsWithChildren, ReactElement, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useReactToPrint } from "react-to-print";
 
 import { ExportContext } from "@/contexts/ExportContext";
 
-import {
-  PdfExportDocument,
-  PdfExportPayload,
-} from "../(authenticated)/(with-menu)/structures/[id]/_components/_header/PdfExportDocument";
-import { formatDate } from "../utils/date.util";
-
-export const usePdfExport = (codeBhasile: string | undefined) => {
+export const usePdfExport = (documentTitle: string | undefined) => {
   const printRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   const triggerExport = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `Structure ${codeBhasile} ${formatDate(new Date()).replaceAll("_", "-")}`,
+    documentTitle,
     onBeforePrint: () => {
       return new Promise((resolve) => {
         flushSync(() => {
@@ -33,10 +27,8 @@ export const usePdfExport = (codeBhasile: string | undefined) => {
   });
 
   const PrintableContainer = ({
-    data,
-  }: {
-    data: PdfExportPayload;
-  }): ReactElement => (
+    children,
+  }: PropsWithChildren): ReactElement => (
     <div
       className={
         isExporting
@@ -54,7 +46,7 @@ export const usePdfExport = (codeBhasile: string | undefined) => {
               }
             }
           `}</style>
-          <PdfExportDocument data={data} />
+          {children}
         </div>
       </ExportContext.Provider>
     </div>

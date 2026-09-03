@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { SearchParams } from "@/app/utils/searchParams.util";
 import { DEFAULT_CARTOGRAPHIE_ANNEE } from "@/constants";
 import { StatistiquesCartographieProvider } from "@/contexts/StatistiquesCartographieContext";
+import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
 import {
   CartographieApiRead,
   DEFAULT_CARTOGRAPHIE_GRANULARITE,
@@ -11,6 +12,8 @@ import {
 
 import { StatistiquesCartographie } from "../_components/StatistiquesCartographie";
 import { StatistiquesHeader } from "../_components/StatistiquesHeader";
+import { StatistiquesPdfExportModal } from "../_components/StatistiquesPdfExportModal";
+import { getStatistiques } from "../page";
 
 type GetStatistiquesCartographieArgs = {
   departements?: string;
@@ -97,21 +100,31 @@ export default async function CartographiePage({
       ? awaitedSearchParams.annee
       : String(DEFAULT_CARTOGRAPHIE_ANNEE);
 
-  const statistiques = await getStatistiquesCartographie({
-    departements,
-    operateurs,
-    types,
-    granularite,
-    indicateur,
-    annee,
-  });
+  const [statistiquesCartographie, statistiques] = await Promise.all([
+    getStatistiquesCartographie({
+      departements,
+      operateurs,
+      types,
+      granularite,
+      indicateur,
+      annee,
+    }),
+    getStatistiques({
+      departements,
+      operateurs,
+      types,
+    }),
+  ]);
 
   return (
-    <StatistiquesCartographieProvider entity={statistiques}>
-      <div className="flex flex-col h-full">
-        <StatistiquesHeader />
-        <StatistiquesCartographie />
-      </div>
-    </StatistiquesCartographieProvider>
+    <StatistiquesProvider entity={statistiques}>
+      <StatistiquesCartographieProvider entity={statistiquesCartographie}>
+        <div className="flex flex-col h-full">
+          <StatistiquesHeader />
+          <StatistiquesCartographie />
+          <StatistiquesPdfExportModal />
+        </div>
+      </StatistiquesCartographieProvider>
+    </StatistiquesProvider>
   );
 }

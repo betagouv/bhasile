@@ -9,7 +9,7 @@ import { ExportDescriptionBlock } from "../_pdf-export/ExportDescriptionBlock";
 import { PdfHeader } from "../_pdf-export/PdfHeader";
 import { TypePlaceBlock } from "../_type-places/TypePlaceBlock";
 
-export type PdfExportPayload = {
+export type StructurePdfExportPayload = {
   exportAddresses: boolean;
   typePlacesFinancesStartYear: number;
   typePlacesFinancesEndYear: number;
@@ -17,7 +17,7 @@ export type PdfExportPayload = {
   activiteEndMonth: string;
 };
 
-export const PdfExportDocument = ({ data }: Props): ReactElement => {
+export const StructurePdfExportDocument = ({ data }: Props): ReactElement => {
   return (
     <div className="p-14">
       <PdfHeader />
@@ -75,5 +75,5 @@ export const PdfExportDocument = ({ data }: Props): ReactElement => {
 };
 
 type Props = {
-  data: PdfExportPayload;
+  data: StructurePdfExportPayload;
 };
