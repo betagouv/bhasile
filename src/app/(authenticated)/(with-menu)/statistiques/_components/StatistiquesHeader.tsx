@@ -14,6 +14,8 @@ import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-d
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
+import { statistiquesPdfExportModal } from "./StatistiquesPdfExportModal";
+
 export const StatistiquesHeader = (): ReactElement | null => {
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
@@ -99,6 +101,13 @@ export const StatistiquesHeader = (): ReactElement | null => {
             />
             {isPanelOpen && (
               <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
+                <Button
+                  priority="tertiary no outline"
+                  onClick={() => statistiquesPdfExportModal.open()}
+                  className="whitespace-nowrap"
+                >
+                  Exporter la fiche (PDF)
+                </Button>
                 <Button
                   priority="tertiary no outline"
                   onClick={() => {

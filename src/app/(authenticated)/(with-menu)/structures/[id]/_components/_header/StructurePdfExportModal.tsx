@@ -6,19 +6,22 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { ReactElement, useMemo, useState } from "react";
 
 import { usePdfExport } from "@/app/hooks/usePdfExport";
+import { formatDate } from "@/app/utils/date.util";
 import { computeStartMonth, toYearMonth } from "@/app/utils/pdf-export.util";
 import { CURRENT_YEAR, EIG_START_YEAR, START_YEAR } from "@/constants";
 import { useStructureContext } from "@/contexts/StructureContext";
 
-export const pdfExportModal = createModal({
-  id: "pdf-export-modal",
+import { StructurePdfExportDocument } from "./StructurePdfExportDocument";
+
+export const structurePdfExportModal = createModal({
+  id: "structure-pdf-export-modal",
   isOpenedByDefault: false,
 });
 
-export const PdfExportModal = (): ReactElement => {
+export const StructurePdfExportModal = (): ReactElement => {
   const { structure } = useStructureContext();
   const { triggerExport, PrintableContainer } = usePdfExport(
-    structure.codeBhasile
+    `Structure ${structure.codeBhasile} ${formatDate(new Date()).replaceAll("_", "-")}`
   );
 
   const typePlacesLastYear = structure.structureTypologies?.[0]?.year || 0;
@@ -57,7 +60,7 @@ export const PdfExportModal = (): ReactElement => {
 
   return (
     <>
-      <pdfExportModal.Component
+      <structurePdfExportModal.Component
         title="Exporter la fiche (PDF)"
         iconId="fr-icon-file-download-line"
         buttons={[
@@ -166,9 +169,11 @@ export const PdfExportModal = (): ReactElement => {
             />
           </div>
         </div>
-      </pdfExportModal.Component>
+      </structurePdfExportModal.Component>
 
-      <PrintableContainer data={exportPayload} />
+      <PrintableContainer>
+        <StructurePdfExportDocument data={exportPayload} />
+      </PrintableContainer>
     </>
   );
 };
