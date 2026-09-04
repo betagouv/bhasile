@@ -10,7 +10,7 @@ import { BalanceChart } from "./BalanceChart";
 import { FinanceCards } from "./FinanceCards";
 import { FinancesStatsTable } from "./FinancesStatsTable";
 
-export const FinancesBlock = (): ReactElement => {
+export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
   return (
@@ -38,12 +38,19 @@ export const FinancesBlock = (): ReactElement => {
           }))}
           isAutorisee={false}
           hideStructureTypeLabels={true}
+          startYear={startYear}
+          endYear={endYear}
         />
       </div>
       <div className="pb-12">
-        <BalanceChart />
+        <BalanceChart startYear={startYear} endYear={endYear} />
       </div>
-      <FinancesStatsTable />
+      <FinancesStatsTable startYear={startYear} endYear={endYear} />
     </div>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

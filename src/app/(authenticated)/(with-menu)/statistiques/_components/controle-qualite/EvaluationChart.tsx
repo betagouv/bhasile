@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactElement, useMemo, useState } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
@@ -10,14 +12,30 @@ import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
 import { EVALUATION_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-export const EvaluationChart = (): ReactElement => {
+export const EvaluationChart = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const sortedEvaluationPeriodData = getLastDisplayedPeriods(
+    const rawEvaluationPeriodData = getLastDisplayedPeriods(
       statistiques.controleQualite[timePeriod] || [],
       EVALUATION_START_YEAR
+    );
+
+    const sortedEvaluationPeriodData = rawEvaluationPeriodData.filter(
+      (item) => {
+        const year = new Date(item.date).getFullYear();
+        if (startYear !== undefined && year < startYear) {
+          return false;
+        }
+        if (endYear !== undefined && year > endYear) {
+          return false;
+        }
+        return true;
+      }
     );
 
     const labels = sortedEvaluationPeriodData.map((item) => {
@@ -53,7 +71,7 @@ export const EvaluationChart = (): ReactElement => {
       barsSeries: [moyenneGenerale],
       lineSeries: nbStructuresEvaluees,
     };
-  }, [statistiques, timePeriod]);
+  }, [statistiques, timePeriod, startYear, endYear]);
 
   const colors = useMemo(
     () => ({
@@ -100,4 +118,9 @@ export const EvaluationChart = (): ReactElement => {
       </span>
     </>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };
