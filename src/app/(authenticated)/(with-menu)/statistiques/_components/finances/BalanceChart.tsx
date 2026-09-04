@@ -6,10 +6,16 @@ import { getYearRange } from "@/app/utils/date.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 
-export const BalanceChart = (): ReactElement => {
+export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
-  const { years } = getYearRange();
+  const { years } =
+    startYear && endYear
+      ? getYearRange({
+          startYear,
+          endYear,
+        })
+      : getYearRange({ order: "desc" });
 
   const yearsWithBudget = years
     .map((year) => {
@@ -89,4 +95,9 @@ export const BalanceChart = (): ReactElement => {
       </div>
     </>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

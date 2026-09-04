@@ -86,14 +86,26 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
   },
 ];
 
-export const ControleQualiteStatsTable = (): ReactElement => {
+export const ControleQualiteStatsTable = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const controleQualitePeriods = filterDisplayedPeriods(
     statistiques?.controleQualite?.[timePeriod] ?? [],
     Math.min(...sectionsConfig.map((section) => section.startYear))
-  );
+  ).filter((periodItem) => {
+    const year = getYearFromDate(periodItem.date);
+    if (startYear !== undefined && year < startYear) {
+      return false;
+    }
+    if (endYear !== undefined && year > endYear) {
+      return false;
+    }
+    return true;
+  });
 
   const renderPeriodHeader = (period: ControleQualitePeriodStat) => {
     const periodDate = new Date(period.date);
@@ -224,4 +236,9 @@ type ControleQualiteSectionConfig = {
   title: string;
   startYear: number;
   rows: ControleQualiteRowConfig[];
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };
