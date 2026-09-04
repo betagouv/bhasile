@@ -1,7 +1,6 @@
 import { act, render, renderHook, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { StructurePdfExportPayload } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_header/StructurePdfExportDocument";
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 
 vi.mock("react-to-print", () => ({
@@ -17,15 +16,6 @@ vi.mock("react-to-print", () => ({
   }),
 }));
 
-vi.mock(
-  "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_header/PdfExportDocument",
-  () => ({
-    PdfExportDocument: ({ data }: { data: StructurePdfExportPayload }) => (
-      <div data-testid="pdf-document">TEST {data.exportAddresses}</div>
-    ),
-  })
-);
-
 vi.mock("@/contexts/ExportContext", () => ({
   ExportContext: {
     Provider: ({ children }: { children: React.ReactNode }) => (
@@ -35,11 +25,9 @@ vi.mock("@/contexts/ExportContext", () => ({
 }));
 
 describe("usePdfExport", () => {
-  const mockPayload = {
-    structure: {
-      nom: "Structure Test",
-    },
-  } as unknown as StructurePdfExportPayload;
+  const renderChildren = () => (
+    <div data-testid="pdf-document">TEST CONTENT</div>
+  );
 
   it("retourne triggerExport et PrintableContainer", () => {
     const { result } = renderHook(() => usePdfExport("BH-1234"));
@@ -48,11 +36,13 @@ describe("usePdfExport", () => {
     expect(result.current.PrintableContainer).toBeTypeOf("function");
   });
 
-  it("affiche le composant masqué par défaut", () => {
+  it("affiche le composant masqué par défaut avec ses enfants", () => {
     const { result } = renderHook(() => usePdfExport("BH-1234"));
     const PrintableContainer = result.current.PrintableContainer;
 
-    const { container } = render(<PrintableContainer data={mockPayload} />);
+    const { container } = render(
+      <PrintableContainer>{renderChildren()}</PrintableContainer>
+    );
 
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper).toHaveClass("hidden");
@@ -60,14 +50,14 @@ describe("usePdfExport", () => {
     expect(screen.getByTestId("pdf-document")).toBeInTheDocument();
   });
 
-  it("bascule le style de masquage lors de l'export PDF", async () => {
+  it("bascule le style de masquage pendant puis après l'export PDF", async () => {
     vi.useFakeTimers();
 
     const { result } = renderHook(() => usePdfExport("BH-1234"));
     const PrintableContainer = result.current.PrintableContainer;
 
     const { container, rerender } = render(
-      <PrintableContainer data={mockPayload} />
+      <PrintableContainer>{renderChildren()}</PrintableContainer>
     );
 
     let exportPromise: Promise<void> | void;
@@ -76,7 +66,7 @@ describe("usePdfExport", () => {
       exportPromise = result.current.triggerExport();
     });
 
-    rerender(<PrintableContainer data={mockPayload} />);
+    rerender(<PrintableContainer>{renderChildren()}</PrintableContainer>);
 
     const wrapper = container.firstChild as HTMLElement;
 
@@ -85,7 +75,7 @@ describe("usePdfExport", () => {
       await exportPromise;
     });
 
-    rerender(<PrintableContainer data={mockPayload} />);
+    rerender(<PrintableContainer>{renderChildren()}</PrintableContainer>);
 
     expect(wrapper).toHaveClass("hidden");
 

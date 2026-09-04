@@ -9,11 +9,27 @@ import { ActiviteByMonthStat } from "@/schemas/api/statistique.schema";
 import { typesActivite } from "../../(authenticated)/(with-menu)/structures/[id]/_components/_activite/activite.constants";
 import { NumberDisplay } from "../common/NumberDisplay";
 
-export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
-  const sortedActivites = [...(activites ?? [])].sort(
-    (activiteA, activiteB) =>
-      dayjs(activiteA.date).valueOf() - dayjs(activiteB.date).valueOf()
-  );
+export const ActiviteHistoriqueTable = ({
+  activites,
+  startMonth,
+  endMonth,
+}: Props): ReactElement => {
+  const sortedActivites = [...(activites ?? [])]
+    .filter((activite) => {
+      const currentMonth = dayjs(activite.date).format("YYYY-MM");
+      if (startMonth && currentMonth < startMonth) {
+        return false;
+      }
+      if (endMonth && currentMonth > endMonth) {
+        return false;
+      }
+      return true;
+    })
+    .sort(
+      (firstActivite, secondActivite) =>
+        dayjs(firstActivite.date).valueOf() -
+        dayjs(secondActivite.date).valueOf()
+    );
 
   const getActiviteFor = (
     key: keyof ActiviteApiType | keyof ActiviteByMonthStat
@@ -161,4 +177,6 @@ type ActiviteType = {
 
 type Props = {
   activites: ActiviteApiType[] | ActiviteByMonthStat[];
+  startMonth?: string;
+  endMonth?: string;
 };

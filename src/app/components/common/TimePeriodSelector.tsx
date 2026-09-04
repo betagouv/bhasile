@@ -10,7 +10,7 @@ export const TimePeriodSelector = ({
       small
       legend=""
       inlineLegend
-      className="[&_div]:ml-0 pb-6"
+      className="[&_div]:ml-0 pb-6 print:hidden"
       segments={[
         {
           label: "Mois",

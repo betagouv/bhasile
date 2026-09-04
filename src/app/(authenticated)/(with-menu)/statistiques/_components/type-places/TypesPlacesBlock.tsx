@@ -10,7 +10,10 @@ import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-plac
 import { AnnualDataNote } from "../AnnualDataNote";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";
 
-export const TypesPlacesBlock = (): ReactElement => {
+export const TypesPlacesBlock = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
   return (
@@ -50,8 +53,13 @@ export const TypesPlacesBlock = (): ReactElement => {
           placesLogementsSociaux={statistiques.places.logementsSociaux}
         />
       </div>
-      <TypesPlacesStatsTable />
+      <TypesPlacesStatsTable startYear={startYear} endYear={endYear} />
       <AnnualDataNote />
     </div>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

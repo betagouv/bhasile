@@ -11,7 +11,10 @@ import { ControleQualiteStatsTable } from "./ControleQualiteStatsTable";
 import { EIGChart } from "./EIGChart";
 import { EvaluationChart } from "./EvaluationChart";
 
-export const ControleQualiteBlock = (): ReactElement => {
+export const ControleQualiteBlock = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
   const tauxEigComportementViolent = formatPercentage(
@@ -83,12 +86,17 @@ export const ControleQualiteBlock = (): ReactElement => {
         </div>
       </div>
       <div className="pb-16">
-        <EIGChart />
+        <EIGChart startYear={startYear} endYear={endYear} />
       </div>
       <div className="pb-16">
-        <EvaluationChart />
+        <EvaluationChart startYear={startYear} endYear={endYear} />
       </div>
-      <ControleQualiteStatsTable />
+      <ControleQualiteStatsTable startYear={startYear} endYear={endYear} />
     </div>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

@@ -23,6 +23,7 @@ export const MultiInformationCard = ({
             priority="tertiary no outline"
             title="Afficher/cacher les détails"
             size="small"
+            className="print:hidden"
           />
         </div>
       )}
