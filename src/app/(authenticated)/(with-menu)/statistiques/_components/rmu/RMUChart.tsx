@@ -1,5 +1,6 @@
 "use client";
 
+import dayjs from "dayjs";
 import { ReactElement, useMemo, useState } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
@@ -9,21 +10,54 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-export const RMUChart = (): ReactElement => {
+export const RMUChart = ({ startMonth, endMonth }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const isExporting = useExportContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
+  const effectiveTimePeriod: TimePeriod = isExporting ? "byMonth" : timePeriod;
+
   const chartData = useMemo(() => {
-    const sortedRmuPeriodData = getLastDisplayedPeriods(
-      statistiques.rmu?.[timePeriod] || []
+    const rawRmuPeriodData = getLastDisplayedPeriods(
+      statistiques.rmu?.[effectiveTimePeriod] || []
     );
+
+    const sortedRmuPeriodData = rawRmuPeriodData.filter((periodStat) => {
+      const date = dayjs(periodStat.date);
+      const currentMonth = date.format("YYYY-MM");
+
+      if (effectiveTimePeriod === "byYear") {
+        const currentYear = date.year();
+        const startYear = startMonth
+          ? Number(startMonth.split("-")[0])
+          : undefined;
+        const endYear = endMonth ? Number(endMonth.split("-")[0]) : undefined;
+
+        if (startYear !== undefined && currentYear < startYear) {
+          return false;
+        }
+        if (endYear !== undefined && currentYear > endYear) {
+          return false;
+        }
+        return true;
+      }
+
+      if (startMonth && currentMonth < startMonth) {
+        return false;
+      }
+      if (endMonth && currentMonth > endMonth) {
+        return false;
+      }
+      return true;
+    });
 
     const labels = sortedRmuPeriodData.map((periodStat) => {
       const date = new Date(periodStat.date);
 
-      if (timePeriod === "byMonth") {
+      if (effectiveTimePeriod === "byMonth") {
         return date
           .toLocaleDateString("fr-FR", {
             month: "short",
@@ -32,7 +66,7 @@ export const RMUChart = (): ReactElement => {
           .toLocaleUpperCase();
       }
 
-      if (timePeriod === "byTrimester") {
+      if (effectiveTimePeriod === "byTrimester") {
         const quarter = Math.floor(date.getMonth() / 3) + 1;
         return `T${quarter} ${date.getFullYear()}`;
       }
@@ -51,7 +85,7 @@ export const RMUChart = (): ReactElement => {
       labels,
       series: [referesEngagesTotal, referesExecutesTotal],
     };
-  }, [statistiques, timePeriod]);
+  }, [statistiques, effectiveTimePeriod, startMonth, endMonth]);
 
   const colors = useMemo(() => ["#BD987A", "#EAC7AD"], []);
   const options = useMemo(
@@ -79,7 +113,7 @@ export const RMUChart = (): ReactElement => {
         </div>
         <div>
           <TimePeriodSelector
-            timePeriod={timePeriod}
+            timePeriod={effectiveTimePeriod}
             setTimePeriod={setTimePeriod}
           />
           <ChartLegend
@@ -94,4 +128,9 @@ export const RMUChart = (): ReactElement => {
       </div>
     </>
   );
+};
+
+type Props = {
+  startMonth?: string;
+  endMonth?: string;
 };

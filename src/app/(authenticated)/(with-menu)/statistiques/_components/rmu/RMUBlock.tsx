@@ -1,7 +1,7 @@
 import { RMUChart } from "./RMUChart";
 import { RMUStatsTable } from "./RMUStatsTable";
 
-export const RMUBlock = () => {
+export const RMUBlock = ({ startMonth, endMonth }: Props) => {
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
@@ -13,9 +13,14 @@ export const RMUBlock = () => {
         </div>
       </div>
       <div className="pb-16">
-        <RMUChart />
+        <RMUChart startMonth={startMonth} endMonth={endMonth} />
       </div>
-      <RMUStatsTable />
+      <RMUStatsTable startMonth={startMonth} endMonth={endMonth} />
     </div>
   );
+};
+
+type Props = {
+  startMonth?: string;
+  endMonth?: string;
 };

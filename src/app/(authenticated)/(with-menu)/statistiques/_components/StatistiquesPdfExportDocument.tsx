@@ -22,7 +22,6 @@ export const StatistiquesPdfExportDocument = ({
   operateurs,
   types,
 }: Props): ReactElement => {
-  console.log(">>>>>>>>>>>", data);
   const zonesCount = departements?.split(",").length || 0;
   const operateursCount = operateurs?.split(",").length || 0;
   const typesCount = types?.split(",").length || 0;
@@ -45,7 +44,10 @@ export const StatistiquesPdfExportDocument = ({
         />
       </div>
       <div className="pb-4 break-after-page">
-        <TypesPlacesBlock />
+        <TypesPlacesBlock
+          startYear={data.typePlacesFinancesStartYear}
+          endYear={data.typePlacesFinancesEndYear}
+        />
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
@@ -55,7 +57,10 @@ export const StatistiquesPdfExportDocument = ({
         />
       </div>
       <div className="pb-4 break-after-page">
-        <FinancesBlock />
+        <FinancesBlock
+          startYear={data.typePlacesFinancesStartYear}
+          endYear={data.typePlacesFinancesEndYear}
+        />
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
@@ -65,7 +70,10 @@ export const StatistiquesPdfExportDocument = ({
         />
       </div>
       <div className="pb-4 break-after-page">
-        <ControleQualiteBlock />
+        <ControleQualiteBlock
+          startYear={data.typePlacesFinancesStartYear}
+          endYear={data.typePlacesFinancesEndYear}
+        />
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
@@ -75,7 +83,10 @@ export const StatistiquesPdfExportDocument = ({
         />
       </div>
       <div className="pb-4 break-after-page">
-        <ActiviteBlock />
+        <ActiviteBlock
+          startMonth={data.activiteStartMonth}
+          endMonth={data.activiteEndMonth}
+        />
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
@@ -84,8 +95,11 @@ export const StatistiquesPdfExportDocument = ({
           typesCount={typesCount}
         />
       </div>
-      <div className="pb-4 break-after-page">
-        <RMUBlock />
+      <div className="pb-4">
+        <RMUBlock
+          startMonth={data.activiteStartMonth}
+          endMonth={data.activiteEndMonth}
+        />
       </div>
       <FiltersNotice
         departements={departements}

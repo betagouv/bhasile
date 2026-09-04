@@ -1,5 +1,6 @@
 "use client";
 
+import dayjs from "dayjs";
 import { ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
@@ -10,6 +11,7 @@ import {
 import { formatDate } from "@/app/utils/date.util";
 import { formatPercentage } from "@/app/utils/number.util";
 import { filterDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { RmuPeriodStat } from "@/schemas/api/statistique.schema";
 
@@ -29,23 +31,56 @@ const rmuLines: RMULine[] = [
   },
 ];
 
-export const RMUStatsTable = (): ReactElement => {
+export const RMUStatsTable = ({
+  startMonth,
+  endMonth,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const isExporting = useExportContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
+  const effectiveTimePeriod: TimePeriod = isExporting ? "byMonth" : timePeriod;
+
   const RMUPeriods = filterDisplayedPeriods(
-    statistiques?.rmu?.[timePeriod] ?? []
-  );
+    statistiques?.rmu?.[effectiveTimePeriod] ?? []
+  ).filter((periodItem) => {
+    const date = dayjs(periodItem.date);
+    const currentMonth = date.format("YYYY-MM");
+
+    if (effectiveTimePeriod === "byYear") {
+      const currentYear = date.year();
+      const startYear = startMonth
+        ? Number(startMonth.split("-")[0])
+        : undefined;
+      const endYear = endMonth ? Number(endMonth.split("-")[0]) : undefined;
+
+      if (startYear !== undefined && currentYear < startYear) {
+        return false;
+      }
+      if (endYear !== undefined && currentYear > endYear) {
+        return false;
+      }
+      return true;
+    }
+
+    if (startMonth && currentMonth < startMonth) {
+      return false;
+    }
+    if (endMonth && currentMonth > endMonth) {
+      return false;
+    }
+    return true;
+  });
 
   const renderPeriodHeader = (period: RmuPeriodStat) => {
     const periodDate = new Date(period.date);
-    if (timePeriod === "byMonth") {
+    if (effectiveTimePeriod === "byMonth") {
       return formatDate(periodDate, {
         month: "short",
         year: "numeric",
       });
     }
-    if (timePeriod === "byTrimester") {
+    if (effectiveTimePeriod === "byTrimester") {
       const trimester = Math.floor(periodDate.getMonth() / 3) + 1;
       return `T${trimester} ${periodDate.getFullYear()}`;
     }
@@ -92,7 +127,7 @@ export const RMUStatsTable = (): ReactElement => {
           Tableau de données
         </h4>
         <TimePeriodSelector
-          timePeriod={timePeriod}
+          timePeriod={effectiveTimePeriod}
           setTimePeriod={setTimePeriod}
         />
       </div>
@@ -132,4 +167,9 @@ type RMULine = {
     value: string | number | Date,
     periodItem: RmuPeriodStat
   ) => ReactElement | string;
+};
+
+type Props = {
+  startMonth?: string;
+  endMonth?: string;
 };

@@ -83,7 +83,7 @@ export const DotationChart = ({
           axisYLabel="Montant (€)"
         />
       </div>
-      <div className="print:w-full">
+      <div className="print:w-full break-inside-avoid">
         <h5 className="text-title-blue-france text-sm font-medium mb-2">
           {getDotationLabel()}
         </h5>

@@ -68,7 +68,7 @@ export const StructuresStatsTable = (): ReactElement => {
   ];
 
   return (
-    <div>
+    <div className="break-inside-avoid">
       <h4 className="text-title-blue-france text-lg" id="structure-stats-table">
         Tableau de données
       </h4>

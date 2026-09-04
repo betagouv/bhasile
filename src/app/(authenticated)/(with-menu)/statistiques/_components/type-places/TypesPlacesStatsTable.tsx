@@ -7,10 +7,23 @@ import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { PlacesByYearStat } from "@/schemas/api/statistique.schema";
 
-export const TypesPlacesStatsTable = (): ReactElement => {
+export const TypesPlacesStatsTable = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
-  const placeYears = filterDisplayedYears(statistiques.places.byYear);
+  const placeYears = filterDisplayedYears(statistiques.places.byYear).filter(
+    (yearItem) => {
+      if (startYear !== undefined && yearItem.year < startYear) {
+        return false;
+      }
+      if (endYear !== undefined && yearItem.year > endYear) {
+        return false;
+      }
+      return true;
+    }
+  );
 
   const topLevelStats: StructureStat[] = [
     {
@@ -142,4 +155,9 @@ const getHeadings = (placeYears: PlacesByYearStat[]) => {
 type StructureStat = {
   label: string;
   value?: ReactNode[];
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };
