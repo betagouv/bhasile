@@ -15,7 +15,7 @@ export const InformationCard = ({
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="relative px-6 py-3 print:px-2 print:py-2 rounded-xl bg-alt-blue-france flex-col min-w-55 max-w-60 print:min-w-0 print:max-w-none w-full h-full flex justify-center items-center">
+    <div className="relative px-6 py-3 rounded-xl bg-alt-blue-france flex-col min-w-55 max-w-60 w-full h-full flex justify-center items-center">
       {tertiaryInformation && (
         <div className="absolute top-1 right-1 z-10">
           <Button
@@ -41,7 +41,7 @@ export const InformationCard = ({
         <div className="text-center">{secondaryInformation}</div>
       </div>
       {showDetails && (
-        <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm break-words overflow-y-auto">
+        <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm wrap-break-word overflow-y-auto">
           {tertiaryInformation}
         </div>
       )}

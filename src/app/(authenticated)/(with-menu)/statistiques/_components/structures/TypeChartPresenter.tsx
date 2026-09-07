@@ -2,6 +2,7 @@
 
 import { ReactElement } from "react";
 
+import { ChartLegend } from "@/app/components/ChartLegend";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
@@ -73,26 +74,32 @@ export const TypeChartPresenter = ({
         />
       </div>
       <div>
-        {statistiques.structures[typeAccessor].map((statItem, index) => (
-          <div className="pt-2" key={`${typeAccessor}-${index}`}>
-            <div className="flex items-center text-sm pb-2">
-              <div
-                className="w-3.75 h-3.75 mr-2 shrink-0 grow-0"
-                style={{ backgroundColor: colors[index] }}
-              />
-              <span className="whitespace-nowrap">
-                <strong>
-                  <NumberDisplay value={statItem[typeStructureAccessor]} />
-                </strong>{" "}
-                {getIntermediateLabel()}
-                {getStatItemLabel(statItem)}{" "}
-                <span className="text-mention-grey">
-                  ({getPercentage(statItem[typeStructureAccessor], ratioTotal)})
-                </span>
+        {statistiques.structures[typeAccessor].map((statItem, index) => {
+          const itemValue = statItem[typeStructureAccessor];
+
+          const legendLabel = (
+            <span className="text-sm">
+              <strong>
+                <NumberDisplay value={itemValue} />
+              </strong>{" "}
+              {getIntermediateLabel()}
+              {getStatItemLabel(statItem)}{" "}
+              <span className="text-mention-grey">
+                ({getPercentage(itemValue, ratioTotal)})
               </span>
+            </span>
+          );
+
+          return (
+            <div className="pt-2" key={`${typeAccessor}-${index}`}>
+              <ChartLegend
+                color={colors[index]}
+                label={legendLabel}
+                type="square"
+              />
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
