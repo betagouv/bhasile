@@ -25,7 +25,7 @@ export const ChartLegend = ({
 };
 
 type Props = {
-  label: string;
+  label: ReactElement | string;
   color: string;
   type?: "square" | "line";
 };

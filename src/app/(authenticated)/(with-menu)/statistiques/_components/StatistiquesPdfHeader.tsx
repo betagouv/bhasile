@@ -1,5 +1,7 @@
 import { ReactElement } from "react";
 
+import { pluralize } from "@/app/utils/string.util";
+
 export const StatistiquesPdfHeader = ({
   zonesCount,
   operateursCount,
@@ -13,13 +15,18 @@ export const StatistiquesPdfHeader = ({
     if (zonesCount === 0 && operateursCount === 0 && typesCount === 0) {
       return [allZonesLabel, allOperateursLabel, allTypesLabel].join(", ");
     }
-    const zoneLabel = zonesCount === 0 ? allZonesLabel : `${zonesCount} zones`;
+    const zoneLabel =
+      zonesCount === 0
+        ? allZonesLabel
+        : `${zonesCount} ${pluralize(zonesCount, "zone")}`;
     const operateurLabel =
       operateursCount === 0
         ? allOperateursLabel
-        : `${operateursCount} opérateurs`;
+        : `${operateursCount} ${pluralize(operateursCount, "opérateur")}`;
     const typeLabel =
-      typesCount === 0 ? allTypesLabel : `${typesCount} types de structure`;
+      typesCount === 0
+        ? allTypesLabel
+        : `${typesCount} ${pluralize(typesCount, "type")} de structure`;
     const filtersLabel = [zoneLabel, operateurLabel, typeLabel].join(", ");
     return `Sélection personnalisée (${filtersLabel}) *`;
   };

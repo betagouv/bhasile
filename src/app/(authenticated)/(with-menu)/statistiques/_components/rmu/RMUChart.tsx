@@ -102,8 +102,8 @@ export const RMUChart = ({ startMonth, endMonth }: Props): ReactElement => {
       <h4 className="text-title-blue-france text-lg">
         RMU engagés et exécutés
       </h4>
-      <div className="grid grid-cols-3 gap-10">
-        <div className="col-span-2">
+      <div className="grid grid-cols-3 gap-10 print:flex">
+        <div className="col-span-2 print:w-full">
           <BarChart
             data={chartData}
             options={options}
@@ -111,7 +111,7 @@ export const RMUChart = ({ startMonth, endMonth }: Props): ReactElement => {
             axisYLabel="Nb RMU"
           />
         </div>
-        <div>
+        <div className="print:w-full">
           <TimePeriodSelector
             timePeriod={effectiveTimePeriod}
             setTimePeriod={setTimePeriod}

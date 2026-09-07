@@ -2,7 +2,7 @@
 
 import { ReactElement, useState } from "react";
 
-import { useExportContext } from "@/contexts/ExportContext"; // Ajustez selon le chemin de votre contexte
+import { useExportContext } from "@/contexts/ExportContext";
 
 import { FinancesTablePresenter } from "./FinancesTablePresenter";
 import { FinanceTypeSelector } from "./FinanceTypeSelector";

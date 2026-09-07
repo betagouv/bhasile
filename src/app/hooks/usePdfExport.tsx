@@ -41,6 +41,9 @@ export const usePdfExport = (documentTitle: string | undefined) => {
         <div ref={printRef}>
           <style>{`
             @media print {
+              @page {
+                size: portrait;
+              }
               body {
                 zoom: 80%;
               }

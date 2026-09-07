@@ -15,7 +15,7 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
           startYear,
           endYear,
         })
-      : getYearRange({ order: "desc" });
+      : getYearRange();
 
   const yearsWithBudget = years
     .map((year) => {

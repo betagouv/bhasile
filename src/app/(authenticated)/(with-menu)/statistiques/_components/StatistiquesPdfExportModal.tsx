@@ -38,8 +38,12 @@ export const StatistiquesPdfExportModal = (): ReactElement => {
       ? searchParams.get("types")
       : undefined;
 
-  const typePlacesLastYear = statistiques.places.byYear?.[0]?.year || 0;
-  const financeLastYear = statistiques.finance.byYear?.[0]?.year || 0;
+  const typePlacesLastYear =
+    statistiques.places.byYear?.[statistiques.places.byYear.length - 1]?.year ||
+    0;
+  const financeLastYear =
+    statistiques.finance.byYear?.[statistiques.finance.byYear.length - 1]
+      ?.year || 0;
   const typePlacesFinancesLastYear = Math.max(
     typePlacesLastYear,
     financeLastYear

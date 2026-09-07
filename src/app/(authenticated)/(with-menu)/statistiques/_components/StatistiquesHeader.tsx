@@ -90,42 +90,44 @@ export const StatistiquesHeader = (): ReactElement | null => {
               ]}
             />
           </div>
-          <div className="relative shrink-0" ref={panelRef}>
-            <Button
-              priority="tertiary no outline"
-              iconId="ri-more-2-fill"
-              title="Menu statistiques"
-              onClick={() => {
-                setIsPanelOpen(!isPanelOpen);
-              }}
-            />
-            {isPanelOpen && (
-              <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
-                <Button
-                  priority="tertiary no outline"
-                  onClick={() => statistiquesPdfExportModal.open()}
-                  className="whitespace-nowrap"
-                >
-                  Exporter la fiche (PDF)
-                </Button>
-                <Button
-                  priority="tertiary no outline"
-                  onClick={() => {
-                    downloadDocument(
-                      getStatistiquesDownloadContent(
-                        statistiques,
-                        searchParams.size !== 0
-                      )
-                    );
-                  }}
-                  className="whitespace-nowrap"
-                >
-                  Exporter tous les tableaux (ODS)
-                </Button>
-              </div>
-            )}
+          <div className="flex items-center gap-2">
+            <div className="relative shrink-0" ref={panelRef}>
+              <Button
+                priority="tertiary no outline"
+                iconId="ri-more-2-fill"
+                title="Menu statistiques"
+                onClick={() => {
+                  setIsPanelOpen(!isPanelOpen);
+                }}
+              />
+              {isPanelOpen && (
+                <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
+                  <Button
+                    priority="tertiary no outline"
+                    onClick={() => statistiquesPdfExportModal.open()}
+                    className="whitespace-nowrap"
+                  >
+                    Exporter la fiche (PDF)
+                  </Button>
+                  <Button
+                    priority="tertiary no outline"
+                    onClick={() => {
+                      downloadDocument(
+                        getStatistiquesDownloadContent(
+                          statistiques,
+                          searchParams.size !== 0
+                        )
+                      );
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    Exporter tous les tableaux (ODS)
+                  </Button>
+                </div>
+              )}
+            </div>
+            <HeaderFilters />
           </div>
-          <HeaderFilters />
         </div>
       </div>
       {visualization === "tableaux" && (

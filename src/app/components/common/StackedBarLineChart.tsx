@@ -77,7 +77,7 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
   return (
     <div className={chartClass}>
       <ChartAxisLabels startLabel={axisYLabel} />
-      <div style={{ position: "relative", height: 340 }}>
+      <div style={{ position: "relative", height: 340, width: 615 }}>
         <div
           ref={barChartRef}
           style={{
