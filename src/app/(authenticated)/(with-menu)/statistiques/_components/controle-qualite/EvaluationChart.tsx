@@ -20,22 +20,12 @@ export const EvaluationChart = ({
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const rawEvaluationPeriodData = getLastDisplayedPeriods(
-      statistiques.controleQualite[timePeriod] || [],
-      EVALUATION_START_YEAR
-    );
-
-    const sortedEvaluationPeriodData = rawEvaluationPeriodData.filter(
-      (item) => {
-        const year = new Date(item.date).getFullYear();
-        if (startYear !== undefined && year < startYear) {
-          return false;
-        }
-        if (endYear !== undefined && year > endYear) {
-          return false;
-        }
-        return true;
-      }
+    const sortedEvaluationPeriodData = getLastDisplayedPeriods(
+      statistiques.controleQualite?.[timePeriod] || [],
+      EVALUATION_START_YEAR,
+      startYear?.toString(),
+      endYear?.toString(),
+      timePeriod
     );
 
     const labels = sortedEvaluationPeriodData.map((item) => {
