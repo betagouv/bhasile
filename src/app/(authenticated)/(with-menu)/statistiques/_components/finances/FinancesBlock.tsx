@@ -27,7 +27,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
       <div className="flex pb-16">
         <FinanceCards />
       </div>
-      <div className="pb-12 break-inside-avoid">
+      <div className="break-inside-avoid">
         <h4 className="text-title-blue-france text-lg">
           Dotations et équilibres économiques
         </h4>
@@ -42,7 +42,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
           endYear={endYear}
         />
       </div>
-      <div className="pb-12 break-inside-avoid">
+      <div className="py-12 break-inside-avoid">
         <BalanceChart startYear={startYear} endYear={endYear} />
       </div>
       <FinancesStatsTable startYear={startYear} endYear={endYear} />

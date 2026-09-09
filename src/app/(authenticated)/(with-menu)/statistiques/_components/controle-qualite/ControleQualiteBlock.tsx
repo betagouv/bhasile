@@ -35,7 +35,7 @@ export const ControleQualiteBlock = ({
           </h3>
         </div>
       </div>
-      <div className="flex pb-16">
+      <div className="flex">
         <div>
           <InformationCard
             primaryInformation={`${formatNumber(statistiques.controleQualite.eig.nbEig)} EIG`}
@@ -85,13 +85,15 @@ export const ControleQualiteBlock = ({
           />
         </div>
       </div>
-      <div className="pb-16">
+      <div className="pt-16">
         <EIGChart startYear={startYear} endYear={endYear} />
       </div>
-      <div className="pb-16">
+      <div className="pt-16">
         <EvaluationChart startYear={startYear} endYear={endYear} />
       </div>
-      <ControleQualiteStatsTable startYear={startYear} endYear={endYear} />
+      <div className="pt-16">
+        <ControleQualiteStatsTable startYear={startYear} endYear={endYear} />
+      </div>
     </div>
   );
 };

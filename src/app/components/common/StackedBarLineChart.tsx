@@ -37,6 +37,7 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
     return {
       high: maxValue + padding,
       low: minValue - padding,
+      width: "100%",
     };
   }, [data.barsSeries, data.lineSeries]);
 
@@ -75,9 +76,9 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
   });
 
   return (
-    <div className={chartClass}>
+    <div className={`${chartClass} w-full`}>
       <ChartAxisLabels startLabel={axisYLabel} />
-      <div style={{ position: "relative", height: 340, width: 615 }}>
+      <div style={{ position: "relative", height: 340 }} className="w-full">
         <div
           ref={barChartRef}
           style={{

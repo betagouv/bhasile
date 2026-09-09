@@ -69,16 +69,14 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
       <h4 className="text-title-blue-france text-lg">
         Dotation et équilibre économique
       </h4>
-      <div className="pb-12">
-        <DotationChart
-          budgets={structure.budgets}
-          isAutorisee={structure.isAutorisee}
-          startYear={startYear}
-          endYear={endYear}
-        />
-      </div>
-      <hr className="mb-10" />
-      <div className="flex break-inside-avoid">
+      <DotationChart
+        budgets={structure.budgets}
+        isAutorisee={structure.isAutorisee}
+        startYear={startYear}
+        endYear={endYear}
+      />
+      <hr className="mb-10 print:hidden" />
+      <div className="flex pt-12 break-inside-avoid">
         <h4
           className="text-title-blue-france text-lg pr-6"
           id="gestionBudgetaireTitle"

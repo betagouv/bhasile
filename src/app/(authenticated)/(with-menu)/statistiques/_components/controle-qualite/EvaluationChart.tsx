@@ -82,7 +82,7 @@ export const EvaluationChart = ({
   );
 
   return (
-    <>
+    <div className="break-inside-avoid">
       <h4 className="text-title-blue-france text-lg" id="structure-stats-table">
         Évaluations
       </h4>
@@ -116,7 +116,7 @@ export const EvaluationChart = ({
         évaluations. Seuls les EIG déclarés via démarches numériques sont
         affichés.
       </span>
-    </>
+    </div>
   );
 };
 

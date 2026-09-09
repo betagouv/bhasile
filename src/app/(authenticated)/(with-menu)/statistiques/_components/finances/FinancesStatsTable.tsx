@@ -29,7 +29,7 @@ export const FinancesStatsTable = ({
     return (
       <div className="space-y-8">
         {PRINT_SECTIONS.map((section) => (
-          <div key={section.key} className="space-y-3">
+          <div key={section.key} className="pt-12">
             <h3 className="text-md font-bold text-title-blue-france">
               Tableau de données ({section.title})
             </h3>
