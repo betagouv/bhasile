@@ -1,6 +1,5 @@
 "use client";
 
-import dayjs from "dayjs";
 import { ReactElement, useMemo, useState } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
@@ -10,6 +9,7 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { START_YEAR } from "@/constants";
 import { useExportContext } from "@/contexts/ExportContext";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
@@ -21,38 +21,13 @@ export const RMUChart = ({ startMonth, endMonth }: Props): ReactElement => {
   const effectiveTimePeriod: TimePeriod = isExporting ? "byMonth" : timePeriod;
 
   const chartData = useMemo(() => {
-    const rawRmuPeriodData = getLastDisplayedPeriods(
-      statistiques.rmu?.[effectiveTimePeriod] || []
+    const sortedRmuPeriodData = getLastDisplayedPeriods(
+      statistiques.rmu?.[effectiveTimePeriod] || [],
+      START_YEAR,
+      startMonth,
+      endMonth,
+      effectiveTimePeriod
     );
-
-    const sortedRmuPeriodData = rawRmuPeriodData.filter((periodStat) => {
-      const date = dayjs(periodStat.date);
-      const currentMonth = date.format("YYYY-MM");
-
-      if (effectiveTimePeriod === "byYear") {
-        const currentYear = date.year();
-        const startYear = startMonth
-          ? Number(startMonth.split("-")[0])
-          : undefined;
-        const endYear = endMonth ? Number(endMonth.split("-")[0]) : undefined;
-
-        if (startYear !== undefined && currentYear < startYear) {
-          return false;
-        }
-        if (endYear !== undefined && currentYear > endYear) {
-          return false;
-        }
-        return true;
-      }
-
-      if (startMonth && currentMonth < startMonth) {
-        return false;
-      }
-      if (endMonth && currentMonth > endMonth) {
-        return false;
-      }
-      return true;
-    });
 
     const labels = sortedRmuPeriodData.map((periodStat) => {
       const date = new Date(periodStat.date);
