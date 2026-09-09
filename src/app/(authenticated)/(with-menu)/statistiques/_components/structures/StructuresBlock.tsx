@@ -43,13 +43,15 @@ export const StructuresBlock = (): ReactElement => {
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 pb-16">
+      <div className="grid grid-cols-2">
         <div className="border-r border-default-grey mr-10">
           <TypesStructures />
         </div>
         <TypesBatis />
       </div>
-      <StructuresStatsTable />
+      <div className="pt-16">
+        <StructuresStatsTable />
+      </div>
       <AnnualDataNote />
     </div>
   );

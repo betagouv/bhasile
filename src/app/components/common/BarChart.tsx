@@ -31,7 +31,7 @@ export default function BarChart({
     if (chartRef.current) {
       const chartOptions: Chartist.BarChartOptions = {
         height: "340px",
-        width: "615px",
+        width: "100%",
         ...withCompactAxisY(options),
       };
 
@@ -59,11 +59,7 @@ export default function BarChart({
   return (
     <div className={`${chartClass} w-full`}>
       <ChartAxisLabels startLabel={axisYLabel} />
-      <div
-        ref={chartRef}
-        style={{ height: 340, width: 615 }}
-        className="w-full"
-      />
+      <div ref={chartRef} style={{ height: 340 }} className="w-full" />
       <style>
         {`
           .${chartClass} .ct-series-a .ct-bar { stroke: ${colors[0]} !important; }
