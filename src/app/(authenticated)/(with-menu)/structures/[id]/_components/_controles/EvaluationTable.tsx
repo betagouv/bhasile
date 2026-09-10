@@ -4,12 +4,19 @@ import { ReactElement } from "react";
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { SeeFileButton } from "@/app/components/common/SeeFileButton";
 import { formatDate } from "@/app/utils/date.util";
-import { EVALUATION_NOTES_START_YEAR } from "@/constants";
+import { EVALUATION_NOTES_START_YEAR, MAX_EXPORT_ITEMS } from "@/constants";
+import { useExportContext } from "@/contexts/ExportContext";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 
 export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
+  const isExporting = useExportContext();
+
   const getEvaluations = () => {
-    return evaluations.map((evaluation) => [
+    const filteredEvaluations = isExporting
+      ? evaluations.slice(0, MAX_EXPORT_ITEMS)
+      : evaluations;
+
+    return filteredEvaluations.map((evaluation) => [
       <span className="inline-block text-center w-full" key={evaluation.id}>
         {formatDate(evaluation.date)}
       </span>,

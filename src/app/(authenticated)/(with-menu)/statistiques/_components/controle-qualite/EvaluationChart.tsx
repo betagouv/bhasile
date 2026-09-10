@@ -19,14 +19,23 @@ export const EvaluationChart = ({
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
+  const startMonth = `${startYear?.toString()}-01`;
+  const endMonth = `${endYear?.toString()}-01`;
+
   const chartData = useMemo(() => {
-    const sortedEvaluationPeriodData = getLastDisplayedPeriods(
-      statistiques.controleQualite?.[timePeriod] || [],
-      EVALUATION_START_YEAR,
-      `${startYear?.toString()}-01`,
-      `${endYear?.toString()}-01`,
-      timePeriod
-    );
+    const sortedEvaluationPeriodData =
+      startYear && endYear
+        ? getLastDisplayedPeriods(
+            statistiques.controleQualite?.[timePeriod] || [],
+            EVALUATION_START_YEAR,
+            startMonth,
+            endMonth,
+            timePeriod
+          )
+        : getLastDisplayedPeriods(
+            statistiques.controleQualite?.[timePeriod] || [],
+            EVALUATION_START_YEAR
+          );
 
     const labels = sortedEvaluationPeriodData.map((item) => {
       const date = new Date(item.date);
@@ -61,7 +70,14 @@ export const EvaluationChart = ({
       barsSeries: [moyenneGenerale],
       lineSeries: nbStructuresEvaluees,
     };
-  }, [statistiques, timePeriod, startYear, endYear]);
+  }, [
+    startYear,
+    endYear,
+    statistiques.controleQualite,
+    timePeriod,
+    startMonth,
+    endMonth,
+  ]);
 
   const colors = useMemo(
     () => ({

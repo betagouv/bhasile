@@ -1,3 +1,4 @@
+// src/app/components/StructureMenu.tsx
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
@@ -8,7 +9,7 @@ import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 import { useUserAction } from "@/app/hooks/useUserAction";
 import { formatDate } from "@/app/utils/date.util";
-import { computeStartMonth, toYearMonth } from "@/app/utils/pdf-export.util";
+import { getPdfExportPayload } from "@/app/utils/pdf-export.util";
 import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { getStructureDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { useStructureContext } from "@/contexts/StructureContext";
@@ -28,15 +29,13 @@ export const StructureMenu = ({ structureId }: Props) => {
     `Structure ${structure.codeBhasile} ${formatDate(new Date()).replaceAll("_", "-")}`
   );
 
-  const endYear = new Date().getFullYear();
-  const endMonth = toYearMonth(new Date());
-
-  const exportPayload = {
-    typePlacesFinancesStartYear: endYear - 4,
-    typePlacesFinancesEndYear: endYear,
-    activiteStartMonth: computeStartMonth(endMonth),
-    activiteEndMonth: endMonth,
-  };
+  const exportPayload = getPdfExportPayload({
+    typePlacesYears: structure?.structureTypologies?.map(
+      (structureTypologie) => structureTypologie.year
+    ),
+    financeYears: structure?.budgets?.map((budget) => budget.year),
+    activiteDates: structure?.activites?.map((activite) => activite.date),
+  });
 
   return (
     <div className="relative shrink-0" ref={panelRef}>

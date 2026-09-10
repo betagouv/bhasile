@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { computeStartMonth, toYearMonth } from "@/app/utils/pdf-export.util";
+import {
+  computeStartMonth,
+  getPdfExportPayload,
+  toYearMonth,
+} from "@/app/utils/pdf-export.util";
 
-describe("date util", () => {
+describe("pdf-export util", () => {
   describe("toYearMonth", () => {
     it("formate correctement une date au format YYYY-MM", () => {
       expect(toYearMonth(new Date(2023, 0, 15))).toBe("2023-01");
@@ -36,6 +40,86 @@ describe("date util", () => {
       expect(computeStartMonth("")).toBe("");
       expect(computeStartMonth(null as unknown as string)).toBe("");
       expect(computeStartMonth(undefined as unknown as string)).toBe("");
+    });
+  });
+
+  describe("getPdfExportPayload", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2024, 5, 15));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("se rabat sur la date actuelle lorsque aucun paramètre n'est fourni", () => {
+      const payload = getPdfExportPayload();
+
+      expect(payload).toEqual({
+        typePlacesFinancesStartYear: 2020,
+        typePlacesFinancesEndYear: 2024,
+        activiteStartMonth: "2024-01",
+        activiteEndMonth: "2024-06",
+      });
+    });
+
+    it("se rabat sur la date actuelle lorsque les tableaux transmis sont vides", () => {
+      const payload = getPdfExportPayload({
+        typePlacesYears: [],
+        financeYears: [],
+        activiteDates: [],
+      });
+
+      expect(payload).toEqual({
+        typePlacesFinancesStartYear: 2020,
+        typePlacesFinancesEndYear: 2024,
+        activiteStartMonth: "2024-01",
+        activiteEndMonth: "2024-06",
+      });
+    });
+
+    it("utilise la plus récente des années entre typePlacesYears et financeYears", () => {
+      const payload = getPdfExportPayload({
+        typePlacesYears: [2018, 2019, 2021],
+        financeYears: [2019, 2022, 2020],
+      });
+
+      expect(payload.typePlacesFinancesEndYear).toBe(2022);
+      expect(payload.typePlacesFinancesStartYear).toBe(2018);
+    });
+
+    it("calcule correctement l'année si une seule des deux sources d'années est renseignée", () => {
+      const payload = getPdfExportPayload({
+        typePlacesYears: [2021, 2023],
+      });
+
+      expect(payload.typePlacesFinancesEndYear).toBe(2023);
+      expect(payload.typePlacesFinancesStartYear).toBe(2019);
+    });
+
+    it("détermine correctement les mois d'activité à partir d'un tableau d'objets Date ou strings ISO", () => {
+      const payload = getPdfExportPayload({
+        activiteDates: ["2023-10-01", "2023-11-01", "2023-12-01"],
+      });
+
+      expect(payload.activiteEndMonth).toBe("2023-12");
+      expect(payload.activiteStartMonth).toBe("2023-07");
+    });
+
+    it("combine correctement les données réelles les plus récentes de l'année et du mois", () => {
+      const payload = getPdfExportPayload({
+        typePlacesYears: [2020, 2021, 2022],
+        financeYears: [2021, 2023],
+        activiteDates: [new Date(2024, 2, 1), new Date(2024, 3, 15)],
+      });
+
+      expect(payload).toEqual({
+        typePlacesFinancesStartYear: 2019,
+        typePlacesFinancesEndYear: 2023,
+        activiteStartMonth: "2023-11",
+        activiteEndMonth: "2024-04",
+      });
     });
   });
 });

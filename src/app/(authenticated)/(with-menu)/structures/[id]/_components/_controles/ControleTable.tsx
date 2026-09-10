@@ -3,14 +3,21 @@ import { ReactElement } from "react";
 
 import { SeeFileButton } from "@/app/components/common/SeeFileButton";
 import { formatDate } from "@/app/utils/date.util";
+import { MAX_EXPORT_ITEMS } from "@/constants";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { ControleType } from "@/types/controle.type";
 
 export const ControleTable = (): ReactElement => {
+  const isExporting = useExportContext();
   const { structure } = useStructureContext();
 
   const getControles = () => {
-    return structure?.controles?.map((controle) => [
+    const filteredControles = isExporting
+      ? structure.controles?.slice(0, MAX_EXPORT_ITEMS)
+      : structure.controles;
+
+    return filteredControles?.map((controle) => [
       formatDate(controle.date),
       ControleType[controle.type as unknown as keyof typeof ControleType],
       <SeeFileButton

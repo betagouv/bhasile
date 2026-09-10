@@ -18,13 +18,22 @@ export const EIGChart = ({ startYear, endYear }: Props): ReactElement => {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const sortedEigPeriodData = getLastDisplayedPeriods(
-      statistiques.controleQualite?.[timePeriod] || [],
-      EIG_START_YEAR,
-      `${startYear?.toString()}-01`,
-      `${endYear?.toString()}-01`,
-      timePeriod
-    );
+    const startMonth = `${startYear?.toString()}-01`;
+    const endMonth = `${endYear?.toString()}-01`;
+
+    const sortedEigPeriodData =
+      startYear && endYear
+        ? getLastDisplayedPeriods(
+            statistiques.controleQualite?.[timePeriod] || [],
+            EIG_START_YEAR,
+            startMonth,
+            endMonth,
+            timePeriod
+          )
+        : getLastDisplayedPeriods(
+            statistiques.controleQualite?.[timePeriod] || [],
+            EIG_START_YEAR
+          );
 
     const labels = sortedEigPeriodData.map((periodStat) => {
       const date = new Date(periodStat.date);

@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 import { formatDate } from "@/app/utils/date.util";
-import { computeStartMonth, toYearMonth } from "@/app/utils/pdf-export.util";
+import { getPdfExportPayload } from "@/app/utils/pdf-export.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const useStatistiquesPdfExport = () => {
@@ -28,36 +28,13 @@ export const useStatistiquesPdfExport = () => {
       ? searchParams.get("types")
       : undefined;
 
-  const typePlacesLastYear =
-    statistiques.places.byYear?.[statistiques.places.byYear.length - 1]?.year ||
-    0;
-  const financeLastYear =
-    statistiques.finance.byYear?.[statistiques.finance.byYear.length - 1]
-      ?.year || 0;
-  const latestDataYear = Math.max(typePlacesLastYear, financeLastYear);
-
-  const endYear = latestDataYear || new Date().getFullYear();
-  const startYear = endYear - 4;
-
-  const latestActivityDate = statistiques.activite.byMonth?.length
-    ? new Date(
-        Math.max(
-          ...statistiques.activite.byMonth.map((activite) =>
-            new Date(activite.date).getTime()
-          )
-        )
-      )
-    : new Date();
-
-  const endMonth = toYearMonth(latestActivityDate);
-  const startMonth = computeStartMonth(endMonth);
-
-  const exportPayload = {
-    typePlacesFinancesStartYear: startYear,
-    typePlacesFinancesEndYear: endYear,
-    activiteStartMonth: startMonth,
-    activiteEndMonth: endMonth,
-  };
+  const exportPayload = getPdfExportPayload({
+    typePlacesYears: statistiques?.places?.byYear?.map((place) => place.year),
+    financeYears: statistiques?.finance?.byYear?.map((finance) => finance.year),
+    activiteDates: statistiques?.activite?.byMonth?.map(
+      (activite) => activite.date
+    ),
+  });
 
   return {
     triggerExport,
