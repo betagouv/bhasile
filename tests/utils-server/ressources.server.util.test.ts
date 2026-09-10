@@ -3,11 +3,7 @@ import path from "path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { filterBlocks } from "@/app/utils/ressources.util";
-import {
-  FaqBlock,
-  FilesBlock,
-  MeasureFile,
-} from "@/types/ressources.type";
+import { FilesBlock, MeasureFile } from "@/types/ressources.type";
 import {
   measurePublicFile,
   parseBlock,
@@ -27,13 +23,6 @@ icone: fr-icon-file-text-line
 ---
 `;
 
-const FAQ_FRONTMATTER = `---
-type: faq
-titre: FAQ
-icone: fr-icon-question-answer-line
----
-`;
-
 describe("ressources server util", () => {
   describe("parseBlock", () => {
     it("place les liens écrits directement sous un ## dans une section sans titre", () => {
@@ -45,7 +34,11 @@ describe("ressources server util", () => {
 `;
 
       // WHEN
-      const block = parseBlock(source, "modeles", measureFileStub) as FilesBlock;
+      const block = parseBlock(
+        source,
+        "modeles",
+        measureFileStub
+      ) as FilesBlock;
 
       // THEN
       expect(block.tabs).toHaveLength(1);
@@ -67,7 +60,11 @@ describe("ressources server util", () => {
 `;
 
       // WHEN
-      const block = parseBlock(source, "modeles", measureFileStub) as FilesBlock;
+      const block = parseBlock(
+        source,
+        "modeles",
+        measureFileStub
+      ) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections[0].links[0]).toMatchObject({
@@ -86,7 +83,11 @@ describe("ressources server util", () => {
 `;
 
       // WHEN
-      const block = parseBlock(source, "modeles", measureFileStub) as FilesBlock;
+      const block = parseBlock(
+        source,
+        "modeles",
+        measureFileStub
+      ) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections[0].links).toMatchObject([
@@ -110,7 +111,11 @@ describe("ressources server util", () => {
 `;
 
       // WHEN
-      const block = parseBlock(source, "modeles", measureFileStub) as FilesBlock;
+      const block = parseBlock(
+        source,
+        "modeles",
+        measureFileStub
+      ) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections.map((section) => section.title)).toEqual([
@@ -134,7 +139,11 @@ Du texte sans aucun lien.
 `;
 
       // WHEN
-      const block = parseBlock(source, "modeles", measureFileStub) as FilesBlock;
+      const block = parseBlock(
+        source,
+        "modeles",
+        measureFileStub
+      ) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections.map((section) => section.title)).toEqual([
@@ -153,53 +162,16 @@ Du texte sans aucun lien.
 `;
 
       // WHEN
-      const block = parseBlock(source, "modeles", measureFileStub) as FilesBlock;
+      const block = parseBlock(
+        source,
+        "modeles",
+        measureFileStub
+      ) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections[0].links[0].searchText).toBe(
         "modeles actes administratifs structures autorisees arrete d autorisation"
       );
-    });
-
-    it("rend une réponse FAQ multi-paragraphes en HTML et indexe son texte", () => {
-      // GIVEN
-      const source = `${FAQ_FRONTMATTER}
-## Catégorie
-
-### Une question ?
-
-Premier paragraphe avec du **gras**.
-
-Second paragraphe.
-`;
-
-      // WHEN
-      const block = parseBlock(source, "faq", measureFileStub) as FaqBlock;
-
-      // THEN
-      const question = block.tabs[0].questions[0];
-      expect(question.title).toBe("Une question ?");
-      expect(question.answerHtml).toContain("<strong>gras</strong>");
-      expect(question.answerHtml).toContain("<p>Second paragraphe.</p>");
-      expect(question.searchText).toContain("second paragraphe");
-      expect(question.searchText).not.toContain("strong");
-    });
-
-    it("échappe le HTML brut écrit dans une réponse", () => {
-      // GIVEN
-      const source = `${FAQ_FRONTMATTER}
-## Catégorie
-
-### Une question ?
-
-<script>alert(1)</script>
-`;
-
-      // WHEN
-      const block = parseBlock(source, "faq", measureFileStub) as FaqBlock;
-
-      // THEN
-      expect(block.tabs[0].questions[0].answerHtml).not.toContain("<script>");
     });
 
     it("laisse un lien externe sans fichier et ne tente pas de le mesurer", () => {
@@ -226,24 +198,6 @@ Second paragraphe.
         href: "https://webinaire.gouv.fr/xyz",
         file: null,
       });
-    });
-
-    it("sépare les mots d’un retour à la ligne souple dans le searchText", () => {
-      // GIVEN
-      const source = `${FAQ_FRONTMATTER}
-## Catégorie
-
-### Une question ?
-
-fin de ligne
-debut de ligne
-`;
-
-      // WHEN
-      const block = parseBlock(source, "faq", measureFileStub) as FaqBlock;
-
-      // THEN
-      expect(block.tabs[0].questions[0].searchText).toContain("ligne debut");
     });
 
     it("rejette un fichier sans frontmatter", () => {
@@ -398,26 +352,6 @@ Une introduction orpheline.
       ).not.toThrow();
     });
 
-    it("rejette deux questions formulées à l’identique dans un onglet", () => {
-      // GIVEN
-      const source = `${FAQ_FRONTMATTER}
-## Catégorie
-
-### Une question ?
-
-Première réponse.
-
-### Une question ?
-
-Seconde réponse.
-`;
-
-      // WHEN / THEN
-      expect(() => parseBlock(source, "faq", measureFileStub)).toThrow(
-        /deux questions sont formulées à l'identique/
-      );
-    });
-
     it("propage l’erreur de mesure quand un lien pointe vers un fichier absent", () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
@@ -482,7 +416,9 @@ Seconde réponse.
 
     it("produit des identifiants d’onglets uniques", () => {
       // WHEN
-      const ids = readBlocks().flatMap((block) => block.tabs.map((tab) => tab.id));
+      const ids = readBlocks().flatMap((block) =>
+        block.tabs.map((tab) => tab.id)
+      );
 
       // THEN
       expect(new Set(ids).size).toBe(ids.length);

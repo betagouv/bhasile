@@ -1,36 +1,46 @@
 import { ReactElement } from "react";
 
-import { Block } from "@/types/ressources.type";
+import { getFaqItems } from "@/app/api/faq/faq.service";
+import { Block, FaqBlock } from "@/types/ressources.type";
 
-import { ResourceBlock } from "./ResourceBlock";
+import { ResourcesContent } from "./ResourcesContent";
 
-export const ResourcesBlockList = ({
+export const ResourcesBlockList = async ({
   blocks,
-  search = "",
-}: Props): ReactElement => {
-  return (
-    <div className="flex flex-col gap-3 max-w-7xl w-full mx-auto px-3 py-6">
-      {blocks.map((block) => (
-        <ResourceBlock key={block.id} block={block} />
-      ))}
+  suggestions,
+}: Props): Promise<ReactElement> => {
+  const { faqItems } = await getFaqItems();
+  const validFaqItems = Array.isArray(faqItems) ? faqItems : [];
 
-      {blocks.length === 0 && (
-        <p className="text-mention-grey text-center py-12 mb-0">
-          {buildEmptyMessage(search)}
-        </p>
-      )}
-    </div>
+  const uniqueCategories = Array.from(
+    new Set(validFaqItems.map((faqItem) => faqItem.category))
   );
-};
 
-const buildEmptyMessage = (search: string): string => {
-  if (search.trim().length === 0) {
-    return "Aucun contenu publié pour le moment.";
-  }
-  return `Aucun résultat pour « ${search} ».`;
+  const dynamicTabs = uniqueCategories.map((categoryName, categoryIndex) => ({
+    id: `faq-tab-${categoryIndex}`,
+    title: categoryName,
+  }));
+
+  const faqBlock: FaqBlock = {
+    type: "faq",
+    id: "faq",
+    title: "FAQ",
+    icon: "fr-icon-question-answer-line",
+    tabs: dynamicTabs,
+  };
+
+  return (
+    <ResourcesContent
+      blocks={blocks}
+      suggestions={suggestions}
+      faqBlock={faqBlock}
+      faqItems={validFaqItems}
+      hasFaqTabs={dynamicTabs.length > 0}
+    />
+  );
 };
 
 type Props = {
   blocks: Block[];
-  search?: string;
+  suggestions: string[];
 };
