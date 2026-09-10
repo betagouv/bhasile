@@ -12,8 +12,7 @@ import {
 
 import { StatistiquesCartographie } from "../_components/StatistiquesCartographie";
 import { StatistiquesHeader } from "../_components/StatistiquesHeader";
-import { StatistiquesPdfExportModal } from "../_components/StatistiquesPdfExportModal";
-import { getStatistiques } from "../page";
+import { getStatistiques } from "../getStatistiques";
 
 type GetStatistiquesCartographieArgs = {
   departements?: string;
@@ -122,7 +121,6 @@ export default async function CartographiePage({
         <div className="flex flex-col h-full">
           <StatistiquesHeader />
           <StatistiquesCartographie />
-          <StatistiquesPdfExportModal />
         </div>
       </StatistiquesCartographieProvider>
     </StatistiquesProvider>

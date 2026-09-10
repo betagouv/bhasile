@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDownloadDropdown";
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
@@ -12,6 +13,7 @@ import { useUserAction } from "@/app/hooks/useUserAction";
 import { getNow } from "@/app/utils/now.util";
 import { getControleQualiteDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { getLastPastVisit } from "@/app/utils/structure.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { ControleAccordion } from "./ControleAccordion";
@@ -24,6 +26,7 @@ export const ControlesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
   const router = useRouter();
   const { trackControleQualiteSpreadsheetExport } = useUserAction();
+  const isExporting = useExportContext();
 
   const evaluations = structure.evaluations || [];
   const controles = structure.controles || [];
@@ -92,6 +95,13 @@ export const ControlesBlock = (): ReactElement => {
         </div>
       </div>
       <div className="pt-12">
+        {isExporting && (
+          <CustomNotice
+            severity="warning"
+            description="Seuls les 10 éléments les plus récents (évaluations, inspections-contrôles et EIG) sont intégrés dans les exports."
+            className="rounded-lg bg-contrast-yellow-tournesol text-action-high-yellow-tournesol"
+          />
+        )}
         {structure.isAutorisee && (
           <>
             {evaluations.length > 0 ? (
