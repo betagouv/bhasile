@@ -4,13 +4,11 @@ import { CalendrierBlock } from "../_calendrier/CalendrierBlock";
 import { ControlesBlock } from "../_controles/ControlesBlock";
 import { FinancesBlock } from "../_finances/FinancesBlock";
 import { ExportActiviteBlock } from "../_pdf-export/ExportActiviteBlock";
-import { ExportAdressesBlock } from "../_pdf-export/ExportAdressesBlock";
 import { ExportDescriptionBlock } from "../_pdf-export/ExportDescriptionBlock";
 import { PdfHeader } from "../_pdf-export/PdfHeader";
 import { TypePlaceBlock } from "../_type-places/TypePlaceBlock";
 
 export type StructurePdfExportPayload = {
-  exportAddresses: boolean;
   typePlacesFinancesStartYear: number;
   typePlacesFinancesEndYear: number;
   activiteStartMonth: string;
@@ -60,16 +58,6 @@ export const StructurePdfExportDocument = ({ data }: Props): ReactElement => {
           endDate={data.activiteEndMonth}
         />
       </div>
-      {data.exportAddresses && (
-        <>
-          <div className="pt-14">
-            <PdfHeader />
-          </div>
-          <div className="pb-4">
-            <ExportAdressesBlock />
-          </div>
-        </>
-      )}
     </div>
   );
 };

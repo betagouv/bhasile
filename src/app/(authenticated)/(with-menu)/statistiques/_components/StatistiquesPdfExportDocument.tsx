@@ -22,14 +22,14 @@ export const StatistiquesPdfExportDocument = ({
   operateurs,
   types,
 }: Props): ReactElement => {
-  const zonesCount = departements?.split(",").length || 0;
+  const departementsCount = departements?.split(",").length || 0;
   const operateursCount = operateurs?.split(",").length || 0;
   const typesCount = types?.split(",").length || 0;
 
   return (
     <div className="p-14">
       <StatistiquesPdfHeader
-        zonesCount={zonesCount}
+        departementsCount={departementsCount}
         operateursCount={operateursCount}
         typesCount={typesCount}
       />
@@ -38,7 +38,7 @@ export const StatistiquesPdfExportDocument = ({
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
-          zonesCount={zonesCount}
+          departementsCount={departementsCount}
           operateursCount={operateursCount}
           typesCount={typesCount}
         />
@@ -51,7 +51,7 @@ export const StatistiquesPdfExportDocument = ({
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
-          zonesCount={zonesCount}
+          departementsCount={departementsCount}
           operateursCount={operateursCount}
           typesCount={typesCount}
         />
@@ -64,7 +64,7 @@ export const StatistiquesPdfExportDocument = ({
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
-          zonesCount={zonesCount}
+          departementsCount={departementsCount}
           operateursCount={operateursCount}
           typesCount={typesCount}
         />
@@ -77,7 +77,7 @@ export const StatistiquesPdfExportDocument = ({
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
-          zonesCount={zonesCount}
+          departementsCount={departementsCount}
           operateursCount={operateursCount}
           typesCount={typesCount}
         />
@@ -90,7 +90,7 @@ export const StatistiquesPdfExportDocument = ({
       </div>
       <div className="pt-14">
         <StatistiquesPdfHeader
-          zonesCount={zonesCount}
+          departementsCount={departementsCount}
           operateursCount={operateursCount}
           typesCount={typesCount}
         />

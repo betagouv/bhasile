@@ -61,7 +61,7 @@ export const FiltersNotice = ({
 
   return (
     <span>
-      <strong>* Zones : </strong>
+      <strong>* Départements : </strong>
       {getDepartementsLabel()} — <strong>Opérateurs : </strong>
       {getOperateursLabel()} — <strong>Types de structures : </strong>
       {getTypesLabel()}

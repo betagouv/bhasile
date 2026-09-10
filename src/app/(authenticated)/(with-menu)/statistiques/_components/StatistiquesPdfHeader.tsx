@@ -3,22 +3,24 @@ import { ReactElement } from "react";
 import { pluralize } from "@/app/utils/string.util";
 
 export const StatistiquesPdfHeader = ({
-  zonesCount,
+  departementsCount,
   operateursCount,
   typesCount,
 }: Props): ReactElement => {
   const getSubtitle = (): string => {
-    const allZonesLabel = "Toute la France";
+    const allDepartementsLabel = "Toute la France";
     const allOperateursLabel = "tous les opérateurs";
     const allTypesLabel = "tous les types de structure";
 
-    if (zonesCount === 0 && operateursCount === 0 && typesCount === 0) {
-      return [allZonesLabel, allOperateursLabel, allTypesLabel].join(", ");
+    if (departementsCount === 0 && operateursCount === 0 && typesCount === 0) {
+      return [allDepartementsLabel, allOperateursLabel, allTypesLabel].join(
+        ", "
+      );
     }
-    const zoneLabel =
-      zonesCount === 0
-        ? allZonesLabel
-        : `${zonesCount} ${pluralize(zonesCount, "zone")}`;
+    const departementLabel =
+      departementsCount === 0
+        ? allDepartementsLabel
+        : `${departementsCount} ${pluralize(departementsCount, "département")}`;
     const operateurLabel =
       operateursCount === 0
         ? allOperateursLabel
@@ -27,7 +29,9 @@ export const StatistiquesPdfHeader = ({
       typesCount === 0
         ? allTypesLabel
         : `${typesCount} ${pluralize(typesCount, "type")} de structure`;
-    const filtersLabel = [zoneLabel, operateurLabel, typeLabel].join(", ");
+    const filtersLabel = [departementLabel, operateurLabel, typeLabel].join(
+      ", "
+    );
     return `Sélection personnalisée (${filtersLabel}) *`;
   };
 
@@ -42,7 +46,7 @@ export const StatistiquesPdfHeader = ({
 };
 
 type Props = {
-  zonesCount: number;
+  departementsCount: number;
   operateursCount: number;
   typesCount: number;
 };

@@ -7,14 +7,16 @@ import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { HeaderFilters } from "@/app/components/header-filters/HeaderFilters";
+import { PrintableContainer } from "@/app/components/PrintableContainer";
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
+import { useStatistiquesPdfExport } from "@/app/hooks/usePdfStatistiquesExport";
 import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { statistiquesPdfExportModal } from "./StatistiquesPdfExportModal";
+import { StatistiquesPdfExportDocument } from "./StatistiquesPdfExportDocument";
 
 export const StatistiquesHeader = (): ReactElement | null => {
   const { headerRef } = useHeaderHeight();
@@ -25,6 +27,16 @@ export const StatistiquesHeader = (): ReactElement | null => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const {
+    triggerExport,
+    isExporting,
+    printRef,
+    exportPayload,
+    departements,
+    operateurs,
+    types,
+  } = useStatistiquesPdfExport();
 
   const isCartographie = pathname.includes("cartographie");
   const visualization = isCartographie ? "cartographie" : "tableaux";
@@ -96,15 +108,16 @@ export const StatistiquesHeader = (): ReactElement | null => {
                 priority="tertiary no outline"
                 iconId="ri-more-2-fill"
                 title="Menu statistiques"
-                onClick={() => {
-                  setIsPanelOpen(!isPanelOpen);
-                }}
+                onClick={() => setIsPanelOpen(!isPanelOpen)}
               />
               {isPanelOpen && (
                 <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
                   <Button
                     priority="tertiary no outline"
-                    onClick={() => statistiquesPdfExportModal.open()}
+                    onClick={() => {
+                      triggerExport();
+                      setIsPanelOpen(false);
+                    }}
                     className="whitespace-nowrap"
                   >
                     Exporter la fiche (PDF)
@@ -118,6 +131,7 @@ export const StatistiquesHeader = (): ReactElement | null => {
                           searchParams.size !== 0
                         )
                       );
+                      setIsPanelOpen(false);
                     }}
                     className="whitespace-nowrap"
                   >
@@ -142,6 +156,15 @@ export const StatistiquesHeader = (): ReactElement | null => {
           ]}
         />
       )}
+
+      <PrintableContainer isExporting={isExporting} printRef={printRef}>
+        <StatistiquesPdfExportDocument
+          data={exportPayload}
+          departements={departements}
+          operateurs={operateurs}
+          types={types}
+        />
+      </PrintableContainer>
     </div>
   );
 };

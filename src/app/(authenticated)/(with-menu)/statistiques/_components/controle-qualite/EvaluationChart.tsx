@@ -23,8 +23,8 @@ export const EvaluationChart = ({
     const sortedEvaluationPeriodData = getLastDisplayedPeriods(
       statistiques.controleQualite?.[timePeriod] || [],
       EVALUATION_START_YEAR,
-      startYear?.toString(),
-      endYear?.toString(),
+      `${startYear?.toString()}-01`,
+      `${endYear?.toString()}-01`,
       timePeriod
     );
 

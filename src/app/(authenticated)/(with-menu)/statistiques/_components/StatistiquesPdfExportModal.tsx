@@ -5,6 +5,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useSearchParams } from "next/navigation";
 import { ReactElement, useMemo, useState } from "react";
 
+import { PrintableContainer } from "@/app/components/PrintableContainer";
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 import { formatDate } from "@/app/utils/date.util";
 import { computeStartMonth, toYearMonth } from "@/app/utils/pdf-export.util";
@@ -20,7 +21,7 @@ export const statistiquesPdfExportModal = createModal({
 
 export const StatistiquesPdfExportModal = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
-  const { triggerExport, PrintableContainer } = usePdfExport(
+  const { triggerExport, isExporting, printRef } = usePdfExport(
     `Statistiques ${formatDate(new Date())}`
   );
   const searchParams = useSearchParams();
@@ -161,7 +162,7 @@ export const StatistiquesPdfExportModal = (): ReactElement => {
         </div>
       </statistiquesPdfExportModal.Component>
 
-      <PrintableContainer>
+      <PrintableContainer isExporting={isExporting} printRef={printRef}>
         <StatistiquesPdfExportDocument
           data={exportPayload}
           departements={departements}

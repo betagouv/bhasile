@@ -1,10 +1,8 @@
 "use client";
 
-import { PropsWithChildren, ReactElement, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useReactToPrint } from "react-to-print";
-
-import { ExportContext } from "@/contexts/ExportContext";
 
 export const usePdfExport = (documentTitle: string | undefined) => {
   const printRef = useRef<HTMLDivElement>(null);
@@ -26,37 +24,9 @@ export const usePdfExport = (documentTitle: string | undefined) => {
     },
   });
 
-  const PrintableContainer = ({
-    children,
-  }: PropsWithChildren): ReactElement => (
-    <div
-      className={
-        isExporting
-          ? "fixed top-0 left-0 w-[210mm] opacity-0 pointer-events-none z-[-1]"
-          : "hidden"
-      }
-      aria-hidden="true"
-    >
-      <ExportContext.Provider value={isExporting}>
-        <div ref={printRef}>
-          <style>{`
-            @media print {
-              @page {
-                size: portrait;
-              }
-              body {
-                zoom: 80%;
-              }
-            }
-          `}</style>
-          {children}
-        </div>
-      </ExportContext.Provider>
-    </div>
-  );
-
   return {
     triggerExport,
-    PrintableContainer,
+    isExporting,
+    printRef,
   };
 };
