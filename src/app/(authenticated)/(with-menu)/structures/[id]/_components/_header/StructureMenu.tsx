@@ -1,21 +1,42 @@
+"use client";
+
 import Button from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
 
+import { PrintableContainer } from "@/app/components/PrintableContainer";
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
+import { usePdfExport } from "@/app/hooks/usePdfExport";
 import { useUserAction } from "@/app/hooks/useUserAction";
+import { formatDate } from "@/app/utils/date.util";
+import { computeStartMonth, toYearMonth } from "@/app/utils/pdf-export.util";
 import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { getStructureDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
-import {
-  StructurePdfExportModal,
-  structurePdfExportModal,
-} from "./StructurePdfExportModal";
+import { StructurePdfExportDocument } from "./StructurePdfExportDocument";
+
+type Props = {
+  structureId: number;
+};
 
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
   const { structure } = useStructureContext();
   const { trackStructureSpreadsheetExport } = useUserAction();
+
+  const { triggerExport, isExporting, printRef } = usePdfExport(
+    `Structure ${structure.codeBhasile} ${formatDate(new Date()).replaceAll("_", "-")}`
+  );
+
+  const endYear = new Date().getFullYear();
+  const endMonth = toYearMonth(new Date());
+
+  const exportPayload = {
+    typePlacesFinancesStartYear: endYear - 4,
+    typePlacesFinancesEndYear: endYear,
+    activiteStartMonth: computeStartMonth(endMonth),
+    activiteEndMonth: endMonth,
+  };
 
   return (
     <div className="relative shrink-0" ref={panelRef}>
@@ -38,7 +59,10 @@ export const StructureMenu = ({ structureId }: Props) => {
           <hr className="w-full" />
           <Button
             priority="tertiary no outline"
-            onClick={() => structurePdfExportModal.open()}
+            onClick={() => {
+              triggerExport();
+              setIsPanelOpen(false);
+            }}
             className="whitespace-nowrap"
           >
             Exporter la fiche (PDF)
@@ -48,6 +72,7 @@ export const StructureMenu = ({ structureId }: Props) => {
             onClick={() => {
               downloadDocument(getStructureDownloadContent(structure));
               trackStructureSpreadsheetExport(structure.id);
+              setIsPanelOpen(false);
             }}
             className="whitespace-nowrap"
           >
@@ -55,11 +80,10 @@ export const StructureMenu = ({ structureId }: Props) => {
           </Button>
         </div>
       )}
-      <StructurePdfExportModal />
+
+      <PrintableContainer isExporting={isExporting} printRef={printRef}>
+        <StructurePdfExportDocument data={exportPayload} />
+      </PrintableContainer>
     </div>
   );
-};
-
-type Props = {
-  structureId: number;
 };

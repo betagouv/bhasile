@@ -1,6 +1,7 @@
 import { act, render, renderHook, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { PrintableContainer } from "@/app/components/PrintableContainer";
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 
 vi.mock("react-to-print", () => ({
@@ -24,24 +25,27 @@ vi.mock("@/contexts/ExportContext", () => ({
   },
 }));
 
-describe("usePdfExport", () => {
-  const renderChildren = () => (
-    <div data-testid="pdf-document">TEST CONTENT</div>
-  );
+const renderChildren = () => <div data-testid="pdf-document">TEST CONTENT</div>;
 
-  it("retourne triggerExport et PrintableContainer", () => {
+describe("usePdfExport + PrintableContainer", () => {
+  it("expose triggerExport, isExporting et printRef", () => {
     const { result } = renderHook(() => usePdfExport("BH-1234"));
 
     expect(result.current.triggerExport).toBeTypeOf("function");
-    expect(result.current.PrintableContainer).toBeTypeOf("function");
+    expect(result.current.isExporting).toBeTypeOf("boolean");
+    expect(result.current.printRef).toEqual({ current: null });
   });
 
   it("affiche le composant masqué par défaut avec ses enfants", () => {
     const { result } = renderHook(() => usePdfExport("BH-1234"));
-    const PrintableContainer = result.current.PrintableContainer;
 
     const { container } = render(
-      <PrintableContainer>{renderChildren()}</PrintableContainer>
+      <PrintableContainer
+        isExporting={result.current.isExporting}
+        printRef={result.current.printRef}
+      >
+        {renderChildren()}
+      </PrintableContainer>
     );
 
     const wrapper = container.firstChild as HTMLElement;
@@ -54,28 +58,50 @@ describe("usePdfExport", () => {
     vi.useFakeTimers();
 
     const { result } = renderHook(() => usePdfExport("BH-1234"));
-    const PrintableContainer = result.current.PrintableContainer;
 
     const { container, rerender } = render(
-      <PrintableContainer>{renderChildren()}</PrintableContainer>
+      <PrintableContainer
+        isExporting={result.current.isExporting}
+        printRef={result.current.printRef}
+      >
+        {renderChildren()}
+      </PrintableContainer>
     );
 
-    let exportPromise: Promise<void> | void;
+    let exportPromise!: ReturnType<typeof result.current.triggerExport>;
 
     act(() => {
       exportPromise = result.current.triggerExport();
     });
-
-    rerender(<PrintableContainer>{renderChildren()}</PrintableContainer>);
+    rerender(
+      <PrintableContainer
+        isExporting={result.current.isExporting}
+        printRef={result.current.printRef}
+      >
+        {renderChildren()}
+      </PrintableContainer>
+    );
 
     const wrapper = container.firstChild as HTMLElement;
+
+    expect(wrapper).not.toHaveClass("hidden");
+    expect(wrapper).toHaveClass("opacity-0");
+    expect(wrapper).toHaveClass("pointer-events-none");
+    expect(screen.getByTestId("pdf-document")).toBeInTheDocument();
 
     await act(async () => {
       vi.advanceTimersByTime(250);
       await exportPromise;
     });
 
-    rerender(<PrintableContainer>{renderChildren()}</PrintableContainer>);
+    rerender(
+      <PrintableContainer
+        isExporting={result.current.isExporting}
+        printRef={result.current.printRef}
+      >
+        {renderChildren()}
+      </PrintableContainer>
+    );
 
     expect(wrapper).toHaveClass("hidden");
 

@@ -21,8 +21,8 @@ export const EIGChart = ({ startYear, endYear }: Props): ReactElement => {
     const sortedEigPeriodData = getLastDisplayedPeriods(
       statistiques.controleQualite?.[timePeriod] || [],
       EIG_START_YEAR,
-      startYear?.toString(),
-      endYear?.toString(),
+      `${startYear?.toString()}-01`,
+      `${endYear?.toString()}-01`,
       timePeriod
     );
 
