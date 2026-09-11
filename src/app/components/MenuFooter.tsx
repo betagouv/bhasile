@@ -20,7 +20,7 @@ const secondaryMenuItems = [
     url: "/mentions-legales",
   },
   {
-    label: "Accessibilité : partiellement conforme",
+    label: "Accessibilité : non conforme",
     url: "/accessibilite",
   },
 ];

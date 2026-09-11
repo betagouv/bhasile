@@ -68,7 +68,7 @@ export const Footer = (): ReactElement => {
           <ul className="fr-footer__bottom-list">
             <li className="fr-footer__bottom-item">
               <a className="fr-footer__bottom-link" href="/accessibilite">
-                Accessibilité : partiellement conforme
+                Accessibilité : non conforme
               </a>
             </li>
             <li className="fr-footer__bottom-item">

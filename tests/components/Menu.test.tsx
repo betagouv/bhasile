@@ -55,7 +55,7 @@ describe("Menu", () => {
     });
     expect(mentionsLegales).toHaveAttribute("href", "/mentions-legales");
     const accessibilite = screen.getByRole("link", {
-      name: "Accessibilité : partiellement conforme",
+      name: "Accessibilité : non conforme",
     });
     expect(accessibilite).toHaveAttribute("href", "/accessibilite");
     const codeSource = screen.getByRole("link", { name: "Code source" });
