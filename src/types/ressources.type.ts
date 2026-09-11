@@ -19,7 +19,7 @@ export type FilesTab = {
 export type FaqTab = {
   id: string;
   title: string;
-  questions: Question[];
+  // questions: Question[];
 };
 
 export type Section = {
@@ -40,12 +40,12 @@ export type FileMetadata = {
   bytes: number;
 };
 
-export type Question = {
-  id: string;
-  title: string;
-  answerHtml: string;
-  searchText: string;
-};
+// export type Question = {
+//   id: string;
+//   title: string;
+//   answerHtml: string;
+//   searchText: string;
+// };
 
 export type MeasureFile = (href: string) => FileMetadata;
 

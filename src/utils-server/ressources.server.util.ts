@@ -6,11 +6,10 @@ import { z } from "zod";
 import { normalizeWords } from "@/app/utils/string.util";
 import {
   Block,
-  FaqTab,
+  FilesBlock,
   FilesTab,
   Link,
   MeasureFile,
-  Question,
   Section,
 } from "@/types/ressources.type";
 
@@ -31,7 +30,7 @@ const BLOCK_ICONS = [
 ] as const;
 
 const FrontmatterSchema = z.object({
-  type: z.enum(["fichiers", "faq"]),
+  type: z.literal("fichiers"),
   titre: z.string().min(1),
   icone: z.enum(BLOCK_ICONS),
 });
@@ -40,32 +39,18 @@ export const parseBlock = (
   source: string,
   blockId: string,
   measureFile: MeasureFile
-): Block => {
+): FilesBlock => {
   const { frontmatter, body } = splitFrontmatter(source);
   const meta = FrontmatterSchema.parse(frontmatter);
   const groups = groupByTab(markdown.parse(body, {}));
   const base = { id: blockId, title: meta.titre, icon: meta.icone };
 
-  if (meta.type === "fichiers") {
-    const tabs = groups
-      .map((group) => buildFilesTab(group, blockId, meta.titre, measureFile))
-      .filter((tab) => tab.sections.length > 0);
-    checkTabs(tabs, meta.titre);
+  const tabs = groups
+    .map((group) => buildFilesTab(group, blockId, meta.titre, measureFile))
+    .filter((tab) => tab.sections.length > 0);
+  checkTabs(tabs, meta.titre);
 
-    return { ...base, type: "fichiers", tabs };
-  }
-
-  if (meta.type === "faq") {
-    const tabs = groups
-      .map((group) => buildFaqTab(group, blockId, meta.titre))
-      .filter((tab) => tab.questions.length > 0);
-    checkTabs(tabs, meta.titre);
-
-    return { ...base, type: "faq", tabs };
-  }
-
-  const unreachable: never = meta.type;
-  throw new Error(`Type de bloc inconnu : ${JSON.stringify(unreachable)}`);
+  return { ...base, type: "fichiers", tabs };
 };
 
 export const readBlocks = (): Block[] => {
@@ -269,39 +254,6 @@ const buildFilesTab = (
   return { id: tabId, title: group.title, sections };
 };
 
-const buildFaqTab = (
-  group: TabGroup,
-  blockId: string,
-  blockTitle: string
-): FaqTab => {
-  const tabId = `${blockId}--${slugify(group.title)}`;
-
-  const questions: Question[] = group.subSections.map((subSection) => ({
-    id: `${tabId}--${slugify(subSection.title)}`,
-    title: subSection.title,
-    answerHtml: markdown.renderer.render(
-      subSection.tokens,
-      markdown.options,
-      {}
-    ),
-    searchText: buildSearchText([
-      blockTitle,
-      group.title,
-      subSection.title,
-      extractText(subSection.tokens),
-    ]),
-  }));
-
-  const duplicateId = findDuplicateId(questions.map((question) => question.id));
-  if (duplicateId) {
-    throw new Error(
-      `Onglet « ${group.title} » : deux questions sont formulées à l'identique (« ${duplicateId} »). Reformulez l'une des deux.`
-    );
-  }
-
-  return { id: tabId, title: group.title, questions };
-};
-
 const buildLink = (
   link: { label: string; href: string },
   measureFile: MeasureFile,
@@ -315,7 +267,7 @@ const buildLink = (
 const checkTabs = (tabs: { id: string }[], blockTitle: string): void => {
   if (tabs.length === 0) {
     throw new Error(
-      `Bloc « ${blockTitle} » : aucun onglet exploitable. Chaque ## doit contenir au moins un lien ou une question.`
+      `Bloc « ${blockTitle} » : aucun onglet exploitable. Chaque ## doit contenir au moins un lien.`
     );
   }
 
@@ -364,19 +316,6 @@ const extractLinks = (tokens: Token[]): { label: string; href: string }[] => {
 
   return links;
 };
-
-const extractText = (tokens: Token[]): string =>
-  tokens
-    .filter((token) => token.type === "inline")
-    .map((token) =>
-      (token.children ?? [])
-        .filter(
-          (child) => child.type === "text" || child.type === "code_inline"
-        )
-        .map((child) => child.content)
-        .join(" ")
-    )
-    .join(" ");
 
 const buildSearchText = (fragments: string[]): string =>
   normalizeWords(fragments.filter(Boolean).join(" "));

@@ -58,14 +58,14 @@ const FAQ_BLOCK: FaqBlock = {
     {
       id: "faq--cpom",
       title: "CPOM",
-      questions: [
-        {
-          id: "faq--cpom--duree",
-          title: "Quelle est la durée d’un CPOM ?",
-          answerHtml: "<p>Cinq ans.</p>",
-          searchText: "faq cpom quelle est la duree d un cpom cinq ans",
-        },
-      ],
+      // questions: [
+      //   {
+      //     id: "faq--cpom--duree",
+      //     title: "Quelle est la durée d’un CPOM ?",
+      //     answerHtml: "<p>Cinq ans.</p>",
+      //     searchText: "faq cpom quelle est la duree d un cpom cinq ans",
+      //   },
+      // ],
     },
   ],
 };
