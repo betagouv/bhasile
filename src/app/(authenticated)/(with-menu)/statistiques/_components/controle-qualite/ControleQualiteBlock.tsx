@@ -11,7 +11,10 @@ import { ControleQualiteStatsTable } from "./ControleQualiteStatsTable";
 import { EIGChart } from "./EIGChart";
 import { EvaluationChart } from "./EvaluationChart";
 
-export const ControleQualiteBlock = (): ReactElement => {
+export const ControleQualiteBlock = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
   const tauxEigComportementViolent = formatPercentage(
@@ -32,7 +35,7 @@ export const ControleQualiteBlock = (): ReactElement => {
           </h3>
         </div>
       </div>
-      <div className="flex pb-16">
+      <div className="flex">
         <div>
           <InformationCard
             primaryInformation={`${formatNumber(statistiques.controleQualite.eig.nbEig)} EIG`}
@@ -82,13 +85,20 @@ export const ControleQualiteBlock = (): ReactElement => {
           />
         </div>
       </div>
-      <div className="pb-16">
-        <EIGChart />
+      <div className="pt-16">
+        <EIGChart startYear={startYear} endYear={endYear} />
       </div>
-      <div className="pb-16">
-        <EvaluationChart />
+      <div className="pt-16">
+        <EvaluationChart startYear={startYear} endYear={endYear} />
       </div>
-      <ControleQualiteStatsTable />
+      <div className="pt-16">
+        <ControleQualiteStatsTable startYear={startYear} endYear={endYear} />
+      </div>
     </div>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

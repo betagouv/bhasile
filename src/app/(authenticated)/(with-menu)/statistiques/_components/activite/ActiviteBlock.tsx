@@ -8,7 +8,7 @@ import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { ActiviteStatsChart } from "./ActiviteStatsChart";
 
-export const ActiviteBlock = () => {
+export const ActiviteBlock = ({ startMonth, endMonth }: Props) => {
   const { statistiques } = useStatistiquesContext();
 
   return (
@@ -76,7 +76,16 @@ export const ActiviteBlock = () => {
         <ActiviteStatsChart />
       </div>
       <h4 className="text-lg text-title-blue-france">Tableau de données</h4>
-      <ActiviteHistoriqueTable activites={statistiques.activite.byMonth} />
+      <ActiviteHistoriqueTable
+        activites={statistiques.activite.byMonth}
+        startMonth={startMonth}
+        endMonth={endMonth}
+      />
     </div>
   );
+};
+
+type Props = {
+  startMonth?: string;
+  endMonth?: string;
 };

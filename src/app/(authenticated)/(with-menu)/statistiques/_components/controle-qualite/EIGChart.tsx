@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactElement, useMemo, useState } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
@@ -11,15 +13,27 @@ import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
 import { EIG_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-export const EIGChart = (): ReactElement => {
+export const EIGChart = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
   const chartData = useMemo(() => {
-    const sortedEigPeriodData = getLastDisplayedPeriods(
-      statistiques.controleQualite[timePeriod] || [],
-      EIG_START_YEAR
-    );
+    const startMonth = `${startYear?.toString()}-01`;
+    const endMonth = `${endYear?.toString()}-01`;
+
+    const sortedEigPeriodData =
+      startYear && endYear
+        ? getLastDisplayedPeriods(
+            statistiques.controleQualite?.[timePeriod] || [],
+            EIG_START_YEAR,
+            startMonth,
+            endMonth,
+            timePeriod
+          )
+        : getLastDisplayedPeriods(
+            statistiques.controleQualite?.[timePeriod] || [],
+            EIG_START_YEAR
+          );
 
     const labels = sortedEigPeriodData.map((periodStat) => {
       const date = new Date(periodStat.date);
@@ -54,7 +68,7 @@ export const EIGChart = (): ReactElement => {
       labels,
       series: [nbEigComportementViolent, nbEigSansComportementViolent],
     };
-  }, [statistiques, timePeriod]);
+  }, [statistiques, timePeriod, startYear, endYear]);
 
   const colors = useMemo(() => ["#4F9D91", "#73E0CF"], []);
 
@@ -88,4 +102,9 @@ export const EIGChart = (): ReactElement => {
       </div>
     </>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

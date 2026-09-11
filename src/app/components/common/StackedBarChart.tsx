@@ -23,6 +23,8 @@ export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
       };
 
       const barOptions: Chartist.BarChartOptions = {
+        height: "340px",
+        width: "100%",
         stackBars: true,
         axisX: {
           showGrid: false,
@@ -57,7 +59,7 @@ export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
   }, [data, colors]);
 
   return (
-    <div className={chartClass}>
+    <div className={`${chartClass} w-full`}>
       <ChartAxisLabels startLabel={axisYLabel} />
       <div
         ref={barChartRef}

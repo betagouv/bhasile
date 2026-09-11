@@ -9,21 +9,30 @@ import {
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
 import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
+import { START_YEAR } from "@/constants";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-export const RMUChart = (): ReactElement => {
+export const RMUChart = ({ startMonth, endMonth }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const isExporting = useExportContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
+
+  const effectiveTimePeriod: TimePeriod = isExporting ? "byMonth" : timePeriod;
 
   const chartData = useMemo(() => {
     const sortedRmuPeriodData = getLastDisplayedPeriods(
-      statistiques.rmu?.[timePeriod] || []
+      statistiques.rmu?.[effectiveTimePeriod] || [],
+      START_YEAR,
+      startMonth,
+      endMonth,
+      effectiveTimePeriod
     );
 
     const labels = sortedRmuPeriodData.map((periodStat) => {
       const date = new Date(periodStat.date);
 
-      if (timePeriod === "byMonth") {
+      if (effectiveTimePeriod === "byMonth") {
         return date
           .toLocaleDateString("fr-FR", {
             month: "short",
@@ -32,7 +41,7 @@ export const RMUChart = (): ReactElement => {
           .toLocaleUpperCase();
       }
 
-      if (timePeriod === "byTrimester") {
+      if (effectiveTimePeriod === "byTrimester") {
         const quarter = Math.floor(date.getMonth() / 3) + 1;
         return `T${quarter} ${date.getFullYear()}`;
       }
@@ -51,7 +60,7 @@ export const RMUChart = (): ReactElement => {
       labels,
       series: [referesEngagesTotal, referesExecutesTotal],
     };
-  }, [statistiques, timePeriod]);
+  }, [statistiques, effectiveTimePeriod, startMonth, endMonth]);
 
   const colors = useMemo(() => ["#BD987A", "#EAC7AD"], []);
   const options = useMemo(
@@ -68,8 +77,8 @@ export const RMUChart = (): ReactElement => {
       <h4 className="text-title-blue-france text-lg">
         RMU engagés et exécutés
       </h4>
-      <div className="grid grid-cols-3 gap-10">
-        <div className="col-span-2">
+      <div className="grid grid-cols-3 gap-10 print:flex">
+        <div className="col-span-2 print:w-full">
           <BarChart
             data={chartData}
             options={options}
@@ -77,9 +86,9 @@ export const RMUChart = (): ReactElement => {
             axisYLabel="Nb RMU"
           />
         </div>
-        <div>
+        <div className="print:w-full">
           <TimePeriodSelector
-            timePeriod={timePeriod}
+            timePeriod={effectiveTimePeriod}
             setTimePeriod={setTimePeriod}
           />
           <ChartLegend
@@ -94,4 +103,9 @@ export const RMUChart = (): ReactElement => {
       </div>
     </>
   );
+};
+
+type Props = {
+  startMonth?: string;
+  endMonth?: string;
 };

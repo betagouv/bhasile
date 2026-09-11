@@ -38,6 +38,8 @@ export const DoubleYAxisBarLineChart = ({
   const barOptions = useMemo<Chartist.BarChartOptions>(() => {
     const yAxisOffset = 50;
     return {
+      height: "340px",
+      width: "100%",
       stackBars: false,
       axisX: { showGrid: false },
       axisY: {
@@ -53,6 +55,8 @@ export const DoubleYAxisBarLineChart = ({
   const lineOptions = useMemo<Chartist.LineChartOptions>(() => {
     const yAxisOffset = 50;
     return {
+      height: "340px",
+      width: "100%",
       fullWidth: false,
       lineSmooth: false,
       showGridBackground: false,
@@ -77,9 +81,9 @@ export const DoubleYAxisBarLineChart = ({
   });
 
   return (
-    <div className={chartClass} style={{ width: "100%" }}>
+    <div className={`${chartClass} w-full`}>
       <ChartAxisLabels startLabel={leftAxisLabel} endLabel={rightAxisLabel} />
-      <div style={{ position: "relative", height: 340, width: "100%" }}>
+      <div style={{ position: "relative", height: 340 }} className="w-full">
         <div
           ref={barChartRef}
           style={{

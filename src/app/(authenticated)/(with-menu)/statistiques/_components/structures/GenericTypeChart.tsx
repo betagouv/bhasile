@@ -3,52 +3,53 @@
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { ReactElement, useState } from "react";
 
-import { NumberDisplay } from "@/app/components/common/NumberDisplay";
-import PieChart from "@/app/components/common/PieChart";
-import { getPercentage } from "@/app/utils/common.util";
-import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { BatiStat, TypeStructureStat } from "@/schemas/api/statistique.schema";
-import { RepartitionLabel } from "@/types/adresse.type";
+import { useExportContext } from "@/contexts/ExportContext";
+
+import { TypeChartPresenter } from "./TypeChartPresenter";
+
+type Props = {
+  title: string;
+  colors: string[];
+  typeAccessor: "structureTypes" | "structureBatis";
+};
 
 export const GenericTypeChart = ({
   title,
   colors,
   typeAccessor,
 }: Props): ReactElement => {
-  const { statistiques } = useStatistiquesContext();
-  const [visualization, setVisualization] = useState("structures");
-  const typeStructureAccessor =
-    visualization === "structures" ? "structures" : "places";
+  const isExporting = useExportContext();
+  const [visualization, setVisualization] = useState<"structures" | "places">(
+    "structures"
+  );
 
-  // Dénominateur iso au camembert affiché
-  const placesTotal =
-    typeAccessor === "structureTypes"
-      ? statistiques.structures.totalPlaces
-      : statistiques.structures.totalPlacesAdresse;
-  const ratioTotal =
-    visualization === "structures"
-      ? statistiques.structures.totalStructures
-      : placesTotal;
-
-  const getStatItemLabel = (statItem: TypeStructureStat | BatiStat): string => {
-    const labelAccessor = typeAccessor === "structureTypes" ? "type" : "bati";
-    if (labelAccessor === "type" && "type" in statItem) {
-      return statItem.type;
-    }
-    if (labelAccessor === "bati" && "bati" in statItem) {
-      return RepartitionLabel[statItem.bati];
-    }
-    return "";
-  };
-
-  const getIntermediateLabel = () => {
-    if (typeAccessor === "structureTypes") {
-      return visualization === "structures" ? " " : "places en ";
-    }
-    return visualization === "structures"
-      ? "structures en bâti "
-      : "places en bâti ";
-  };
+  if (isExporting) {
+    return (
+      <div className="space-y-6">
+        <h4 className="text-title-blue-france text-lg">{title}</h4>
+        <div>
+          <h5 className="font-semibold text-sm mb-2 text-mention-grey">
+            Par structures
+          </h5>
+          <TypeChartPresenter
+            colors={colors}
+            typeAccessor={typeAccessor}
+            visualization="structures"
+          />
+        </div>
+        <div>
+          <h5 className="font-semibold text-sm mb-2 text-mention-grey">
+            Par places
+          </h5>
+          <TypeChartPresenter
+            colors={colors}
+            typeAccessor={typeAccessor}
+            visualization="places"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -79,51 +80,11 @@ export const GenericTypeChart = ({
           },
         ]}
       />
-      <div className="flex">
-        <PieChart
-          data={{
-            labels: statistiques.structures[typeAccessor].map((statItem) =>
-              getStatItemLabel(statItem)
-            ),
-            series: statistiques.structures[typeAccessor].map(
-              (statItem) => statItem[typeStructureAccessor]
-            ),
-          }}
-          options={{ showLabel: false }}
-          size={154}
-          colors={colors}
-        ></PieChart>
-        <div>
-          {statistiques.structures[typeAccessor].map((statItem, index) => (
-            <div className="pt-2" key={`${typeAccessor}-${index}`}>
-              <div className="pb-2 flex items-center text-sm">
-                <div
-                  className="w-3.75 h-3.75 mr-2 shrink-0 grow-0"
-                  style={{ backgroundColor: colors[index] }}
-                />
-                <span className="whitespace-nowrap">
-                  <strong>
-                    <NumberDisplay value={statItem[typeStructureAccessor]} />
-                  </strong>{" "}
-                  {getIntermediateLabel()}
-                  {getStatItemLabel(statItem)}{" "}
-                  <span className="text-mention-grey">
-                    (
-                    {getPercentage(statItem[typeStructureAccessor], ratioTotal)}
-                    )
-                  </span>
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <TypeChartPresenter
+        colors={colors}
+        typeAccessor={typeAccessor}
+        visualization={visualization}
+      />
     </div>
   );
-};
-
-type Props = {
-  title: string;
-  colors: string[];
-  typeAccessor: "structureTypes" | "structureBatis";
 };
