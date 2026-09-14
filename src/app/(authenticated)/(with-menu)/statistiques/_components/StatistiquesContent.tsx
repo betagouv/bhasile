@@ -25,8 +25,8 @@ export const StatistiquesContent = (): ReactElement => {
     <div className="flex flex-col gap-3 px-3 pt-3">
       <CustomNotice
         severity="warning"
-        description="Les structures non finalisées ne sont pas comptabilisés ici ; les PRAHDA et Nuits Hôtelières ne sont pas référencés sur l'outil."
-        className="rounded-lg bg-contrast-yellow-tournesol text-action-high-yellow-tournesol"
+        description="Les structures non finalisées ne sont pas comptabilisées ici ; les PRAHDA et Nuits Hôtelières ne sont pas référencés sur l'outil."
+        className="rounded-lg bg-contrast-yellow-tournesol text-action-high-yellow-tournesol [&_.fr-container]:max-w-none"
       />
       <Section id="structures">
         <StructuresBlock />
