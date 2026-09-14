@@ -84,10 +84,10 @@ describe("proxy", () => {
   });
 });
 
-function listAuthenticatedPages(
+const listAuthenticatedPages = (
   directory = "src/app/(authenticated)"
-): string[] {
-  return readdirSync(directory, { withFileTypes: true })
+): string[] =>
+  readdirSync(directory, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && !entry.name.startsWith("_"))
     .flatMap((entry) => {
       const subDirectory = path.join(directory, entry.name);
@@ -99,14 +99,12 @@ function listAuthenticatedPages(
         ...listAuthenticatedPages(subDirectory),
       ];
     });
-}
 
-function listApiRoutes(directory = "src/app/api"): string[] {
-  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
+const listApiRoutes = (directory = "src/app/api"): string[] =>
+  readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
     entry.isDirectory()
       ? listApiRoutes(path.join(directory, entry.name))
       : entry.name === "route.ts"
         ? [directory.replace("src/app", "").replace(/\[.+?\]/g, "1")]
         : []
   );
-}
