@@ -18,6 +18,7 @@ export const DocumentDownloadDropdown = ({
         iconId="fr-icon-download-line"
         onClick={() => setIsPanelOpen(!isPanelOpen)}
         title="Menu de téléchargement"
+        className="before:w-[16] before:h-[16] before:ml-1"
       />
       {isPanelOpen && (
         <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">

@@ -14,7 +14,7 @@ export const DeleteButton = ({
       priority="tertiary no outline"
       className={cn(
         "rounded-full",
-        backgroundColor === "grey" ? "!bg-gray-100" : "!bg-white",
+        backgroundColor === "grey" ? "bg-gray-100!" : "bg-white!",
         className
       )}
       title="Supprimer"

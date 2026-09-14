@@ -150,7 +150,7 @@ export const isStructureSubventionnee = (
   return type === StructureType.HUDA || type === StructureType.CAES;
 };
 
-/** Suivi activité — indisponibilités : toutes structures sauf CAES. */
+/** Suivi activité — indisponibilité : toutes structures sauf CAES. */
 export const isStructureEligibleForActiviteIndisponibilite = (
   type: StructureType | string | undefined | null
 ): boolean => type != null && type !== StructureType.CAES;
