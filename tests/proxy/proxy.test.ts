@@ -1,9 +1,10 @@
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
+import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { config } from "@/proxy";
+import { config, proxy } from "@/proxy";
 import {
   noProtectionPage,
   passwordProtectedPages,
@@ -11,14 +12,36 @@ import {
   protectedApiRoutes,
 } from "@/proxy/auth-config";
 
-vi.mock("@/lib/next-auth/auth", () => ({
-  authOptions: {},
-}));
+vi.stubEnv("NEXTAUTH_SECRET", "secret-de-test");
+
+vi.mock("next-auth", () => ({ getServerSession: () => null }));
+vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
 
 const httpMethods = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
 const unprotectedAuthenticatedPages = ["/deconnexion"];
 
-describe("config du proxy", () => {
+describe("proxy", () => {
+  it("redirige vers la connexion chaque page authentifiée", async () => {
+    const pages = listAuthenticatedPages().filter(
+      (page) => !unprotectedAuthenticatedPages.includes(page)
+    );
+
+    const redirections = await Promise.all(
+      pages.map(async (page) => {
+        const response = await proxy(
+          new NextRequest(`http://localhost${page}`)
+        );
+        return `${page} → ${response.headers.get("location")?.replace("http://localhost", "")}`;
+      })
+    );
+
+    expect(redirections).toEqual(
+      pages.map(
+        (page) => `${page} → /connexion?callbackUrl=${encodeURIComponent(page)}`
+      )
+    );
+  });
+
   it("intercepte chaque page déclarée comme protégée", () => {
     const pages = [
       ...proConnectProtectedPages,
@@ -36,15 +59,13 @@ describe("config du proxy", () => {
     expect(ignored).toEqual([]);
   });
 
-  it("déclare comme protégée chaque page authentifiée", () => {
-    const declared = [
-      ...proConnectProtectedPages,
-      ...unprotectedAuthenticatedPages,
-    ];
+  it("couvre chaque route d'API", () => {
+    const uncovered = listApiRoutes().filter(
+      (pathname) =>
+        !protectedApiRoutes.some((route) => route.pattern.test(pathname))
+    );
 
-    expect(
-      listAuthenticatedPages().filter((page) => !declared.includes(page))
-    ).toEqual([]);
+    expect(uncovered).toEqual([]);
   });
 
   it("associe une seule protection à chaque route d'API", () => {
