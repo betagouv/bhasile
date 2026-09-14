@@ -31,14 +31,14 @@ export const EIGTable = (): ReactElement => {
         formatDate(evenementIndesirableGrave.declarationDate),
         evenementIndesirableGrave.type,
       ])
-      .filter((_, index) => {
+      .filter((_, rowIndex) => {
         if (isExporting) {
           return true;
         }
 
         return (
-          index >= SHORT_PAGE_SIZE * currentPage &&
-          index < SHORT_PAGE_SIZE * currentPage + SHORT_PAGE_SIZE
+          rowIndex >= SHORT_PAGE_SIZE * currentPage &&
+          rowIndex < SHORT_PAGE_SIZE * currentPage + SHORT_PAGE_SIZE
         );
       });
   };

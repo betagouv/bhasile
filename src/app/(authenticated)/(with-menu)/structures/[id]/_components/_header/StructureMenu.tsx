@@ -1,4 +1,3 @@
-// src/app/components/StructureMenu.tsx
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";

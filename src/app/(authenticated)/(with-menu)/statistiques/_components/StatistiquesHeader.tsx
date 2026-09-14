@@ -11,7 +11,7 @@ import { PrintableContainer } from "@/app/components/PrintableContainer";
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
-import { useStatistiquesPdfExport } from "@/app/hooks/usePdfStatistiquesExport";
+import { useStatistiquesPdfExport } from "@/app/hooks/useStatistiquesPdfExport";
 import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";

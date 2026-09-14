@@ -101,6 +101,13 @@ export const StatistiquesPdfExportDocument = ({
           endMonth={data.activiteEndMonth}
         />
       </div>
+      <div className="italic pb-6">
+        Pour les données mensuelles, seuls les 6 derniers mois sont intégrés
+        dans les exports.
+        <br />
+        Pour les données annuelles, seules les 5 dernières années sont intégrées
+        dans les exports.
+      </div>
       <FiltersNotice
         departements={departements}
         operateurs={operateurs}

@@ -52,11 +52,21 @@ export const StructurePdfExportDocument = ({ data }: Props): ReactElement => {
       <div className="pt-14">
         <PdfHeader />
       </div>
-      <div className="pb-4 break-after-page">
+      <div className="pb-4">
         <ExportActiviteBlock
           startDate={data.activiteStartMonth}
           endDate={data.activiteEndMonth}
         />
+      </div>
+      <div className="italic">
+        Dans les tableaux évaluations, inspections-contrôles et EIG, seuls les
+        10 éléments les plus récents sont intégrés dans les exports.
+        <br />
+        Pour les données mensuelles, seuls les 6 derniers mois sont intégrés
+        dans les exports.
+        <br />
+        Pour les données annuelles, seules les 5 dernières années sont intégrées
+        dans les exports.
       </div>
     </div>
   );
