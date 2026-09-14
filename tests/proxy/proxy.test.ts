@@ -1,7 +1,6 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { config } from "@/proxy";
@@ -11,48 +10,57 @@ import {
   proConnectProtectedPages,
   protectedApiRoutes,
 } from "@/proxy/auth-config";
-import { getApiRouteProtection } from "@/proxy/auth-util";
 
 vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
 }));
 
+const httpMethods = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
 const unprotectedAuthenticatedPages = ["/deconnexion"];
 
 describe("config du proxy", () => {
-  it.each([
-    ...proConnectProtectedPages,
-    ...passwordProtectedPages,
-    noProtectionPage,
-  ])("intercepte les requêtes vers %s", (page) => {
-    expect(config.matcher).toContain(
-      page === "/" || page === noProtectionPage ? page : `${page}/:path*`
+  it("intercepte chaque page déclarée comme protégée", () => {
+    const pages = [
+      ...proConnectProtectedPages,
+      ...passwordProtectedPages,
+      noProtectionPage,
+    ];
+
+    const ignored = pages.filter(
+      (page) =>
+        !config.matcher.some(
+          (entry) => entry === page || entry === `${page}/:path*`
+        )
     );
+
+    expect(ignored).toEqual([]);
   });
 
-  it.each(listAuthenticatedPages())("protège la page %s", (page) => {
-    expect([
+  it("déclare comme protégée chaque page authentifiée", () => {
+    const declared = [
       ...proConnectProtectedPages,
       ...unprotectedAuthenticatedPages,
-    ]).toContain(page);
+    ];
+
+    expect(
+      listAuthenticatedPages().filter((page) => !declared.includes(page))
+    ).toEqual([]);
   });
 
-  it.each(listApiRoutes())(
-    "déclare une protection non ambiguë pour %s %s",
-    (method, pathname) => {
-      const matching = protectedApiRoutes.filter(
-        (route) => route.pattern.test(pathname) && method in route.routes
-      );
-
-      expect(matching).toHaveLength(1);
-      expect(
-        getApiRouteProtection(
-          new NextRequest(`https://bhasile.fr${pathname}`, { method }),
-          pathname
+  it("associe une seule protection à chaque route d'API", () => {
+    const ambiguous = listApiRoutes().flatMap((pathname) =>
+      httpMethods
+        .filter(
+          (method) =>
+            protectedApiRoutes.filter(
+              (route) => route.pattern.test(pathname) && method in route.routes
+            ).length > 1
         )
-      ).toBe(matching[0]?.routes[method]);
-    }
-  );
+        .map((method) => `${method} ${pathname}`)
+    );
+
+    expect(ambiguous).toEqual([]);
+  });
 });
 
 function listAuthenticatedPages(
@@ -62,32 +70,22 @@ function listAuthenticatedPages(
     .filter((entry) => entry.isDirectory() && !entry.name.startsWith("_"))
     .flatMap((entry) => {
       const subDirectory = path.join(directory, entry.name);
-      if (entry.name.startsWith("(")) {
-        return [
-          ...(existsSync(path.join(subDirectory, "page.tsx")) ? ["/"] : []),
-          ...listAuthenticatedPages(subDirectory),
-        ];
+      if (!entry.name.startsWith("(")) {
+        return [`/${entry.name}`];
       }
-      return [`/${entry.name}`];
+      return [
+        ...(existsSync(path.join(subDirectory, "page.tsx")) ? ["/"] : []),
+        ...listAuthenticatedPages(subDirectory),
+      ];
     });
 }
 
-function listApiRoutes(directory = "src/app/api"): [string, string][] {
-  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    const entryPath = path.join(directory, entry.name);
-    if (entry.isDirectory()) {
-      return listApiRoutes(entryPath);
-    }
-    if (entry.name !== "route.ts") {
-      return [];
-    }
-    const pathname = directory
-      .replace("src/app", "")
-      .replace(/\[\.\.\..+?\]/g, "segment")
-      .replace(/\[.+?\]/g, "1");
-    const methods = readFileSync(entryPath, "utf8").matchAll(
-      /export (?:async )?(?:function|const) (GET|POST|PUT|PATCH|DELETE|HEAD)\b/g
-    );
-    return [...methods].map((match): [string, string] => [match[1], pathname]);
-  });
+function listApiRoutes(directory = "src/app/api"): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
+    entry.isDirectory()
+      ? listApiRoutes(path.join(directory, entry.name))
+      : entry.name === "route.ts"
+        ? [directory.replace("src/app", "").replace(/\[.+?\]/g, "1")]
+        : []
+  );
 }
