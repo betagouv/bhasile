@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactElement, useMemo, useState } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
@@ -10,15 +12,30 @@ import { getLastDisplayedPeriods } from "@/app/utils/statistiques-period.util";
 import { EVALUATION_START_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-export const EvaluationChart = (): ReactElement => {
+export const EvaluationChart = ({
+  startYear,
+  endYear,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
+  const startMonth = `${startYear?.toString()}-01`;
+  const endMonth = `${endYear?.toString()}-01`;
+
   const chartData = useMemo(() => {
-    const sortedEvaluationPeriodData = getLastDisplayedPeriods(
-      statistiques.controleQualite[timePeriod] || [],
-      EVALUATION_START_YEAR
-    );
+    const sortedEvaluationPeriodData =
+      startYear && endYear
+        ? getLastDisplayedPeriods(
+            statistiques.controleQualite?.[timePeriod] || [],
+            EVALUATION_START_YEAR,
+            startMonth,
+            endMonth,
+            timePeriod
+          )
+        : getLastDisplayedPeriods(
+            statistiques.controleQualite?.[timePeriod] || [],
+            EVALUATION_START_YEAR
+          );
 
     const labels = sortedEvaluationPeriodData.map((item) => {
       const date = new Date(item.date);
@@ -53,7 +70,14 @@ export const EvaluationChart = (): ReactElement => {
       barsSeries: [moyenneGenerale],
       lineSeries: nbStructuresEvaluees,
     };
-  }, [statistiques, timePeriod]);
+  }, [
+    startYear,
+    endYear,
+    statistiques.controleQualite,
+    timePeriod,
+    startMonth,
+    endMonth,
+  ]);
 
   const colors = useMemo(
     () => ({
@@ -64,7 +88,7 @@ export const EvaluationChart = (): ReactElement => {
   );
 
   return (
-    <>
+    <div className="break-inside-avoid">
       <h4 className="text-title-blue-france text-lg" id="structure-stats-table">
         Évaluations
       </h4>
@@ -98,6 +122,11 @@ export const EvaluationChart = (): ReactElement => {
         évaluations. Seuls les EIG déclarés via démarches numériques sont
         affichés.
       </span>
-    </>
+    </div>
   );
+};
+
+type Props = {
+  startYear?: number;
+  endYear?: number;
 };

@@ -348,9 +348,20 @@ const dbStructureToApiRead = (
 
   const aggregatedEIGs = simple
     ? []
-    : (dbStructure as ResolvedStructureDetails).dnaStructures.flatMap(
-        (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
-      );
+    : (dbStructure as ResolvedStructureDetails).dnaStructures
+        .flatMap(
+          (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
+        )
+        .sort((firstEvenement, secondEvenement) => {
+          const firstTimestamp = new Date(
+            firstEvenement.evenementDate
+          ).getTime();
+          const secondTimestamp = new Date(
+            secondEvenement.evenementDate
+          ).getTime();
+
+          return secondTimestamp - firstTimestamp;
+        });
 
   const antennes = getAntennesApiRead(
     (dbStructure as ResolvedStructureDetails).antennes

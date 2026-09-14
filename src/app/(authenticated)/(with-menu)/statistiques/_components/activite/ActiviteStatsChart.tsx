@@ -68,7 +68,7 @@ export const ActiviteStatsChart = (): ReactElement => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full print:hidden">
       <div className="flex pb-6">
         <ActiviteTypes
           typeActivite={typeActivite}
@@ -103,11 +103,11 @@ export const ActiviteStatsChart = (): ReactElement => {
         </div>
         <div className="pl-5">
           <div className="pb-2 flex items-center text-sm">
-            <div className="w-[40px] border-b-2 border-b-background-flat-blue-france mr-2 shrink-0 grow-0" />
+            <div className="w-10 border-b-2 border-b-background-flat-blue-france mr-2 shrink-0 grow-0" />
             {typesActivite[typeActivite]?.label}
           </div>
           <div className="pb-2 flex items-center text-sm">
-            <div className="w-[40px] border-b-2 border-default-blue-france border-dashed mr-2 shrink-0 grow-0" />
+            <div className="w-10 border-b-2 border-default-blue-france border-dashed mr-2 shrink-0 grow-0" />
             Seuil cahier des charges
           </div>
         </div>
