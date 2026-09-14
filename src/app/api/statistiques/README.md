@@ -70,6 +70,38 @@ Les deux sont construits **une seule fois** dans `buildStatistiquesContext` via 
 
 **Avec typologie** (≥1 `StructureTypologie`) : requis pour agrégats places, répartitions type/bâti, contrôle qualité. `structures.totalStructures` = structures actives (avec ou sans typologie).
 
+## Complétude des millésimes
+
+Chaque entrée `byYear` des blocs `structures`, `places` et `finance` porte un objet `completude` :
+
+| Champ           | Contenu                                                                           |
+| --------------- | --------------------------------------------------------------------------------- |
+| `isComplete`    | Toutes les structures attendues ont validé une campagne couvrant l'année          |
+| `reason`        | `SAISIE_EN_COURS`, `SAISIE_INCOMPLETE`, ou `null` si complet                      |
+| `nbAttendues`   | Structures initialisées (`finalisation-v1` validé) et encore ouvertes fin d'année |
+| `nbRenseignees` | Parmi elles, celles à jour sur l'année                                            |
+
+**Driver unique : le formulaire d'actualisation.** Valider la campagne `actualisation-M`
+atteste les données de **toutes les années jusqu'à M incluse** : une structure est donc à jour
+sur l'année N dès que sa dernière campagne validée vérifie `M >= N`. Voir `completude.util.ts`.
+
+**Dénominateur.** Structures initialisées et **encore ouvertes à la fin de l'année** : une
+structure fermée en cours d'année n'a plus à être actualisée sur cette année-là, ni sur les
+suivantes.
+
+**Années historiques.** La frontière est posée une fois par la première campagne jamais
+déclarée : la phase d'initialisation a attesté les années qui la précèdent, et cette première
+campagne reprend en plus l'année juste avant elle (les agents ont tout revérifié d'un coup en
+sortie d'initialisation). En dessous, la complétude vaut `true` avec des compteurs à zéro. Les
+campagnes suivantes ne déplacent pas cette frontière.
+
+**Raison.** `SAISIE_EN_COURS` tant qu'une campagne postérieure ou égale à l'année est ouverte
+(`FormDefinition.deadline`), `SAISIE_INCOMPLETE` ensuite — dans le second cas la donnée ne
+sera plus complétée.
+
+> Pas de complétude sur `activite`, `rmu` et `controleQualite` : ces données arrivent par
+> import de bloc ou par API (DNA, EIG), pas par une saisie attendue structure par structure.
+
 ## `aggregation`
 
 | Valeur    | Effet                |

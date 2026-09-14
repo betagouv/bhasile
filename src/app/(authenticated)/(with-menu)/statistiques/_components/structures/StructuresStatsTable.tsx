@@ -139,7 +139,13 @@ const getHeadings = (structureYears: StructuresByYearStat[]) => {
   const dates =
     structureYears.map((yearItem) => {
       return (
-        <th scope="col" key={yearItem.year}>
+        <th
+          scope="col"
+          key={yearItem.year}
+          className={
+            yearItem.completude.isComplete ? undefined : "text-default-warning"
+          }
+        >
           {yearItem.year}
         </th>
       );

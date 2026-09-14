@@ -24,6 +24,31 @@ export type StatistiquesFilters = z.infer<typeof statistiquesFiltersSchema>;
 
 // Types de lecture pure (pas d'input à valider) : pas de schéma zod, juste des types.
 
+export const CompletudeReason = {
+  /** La donnée peut encore arriver : campagne ouverte ou période non close. */
+  SAISIE_EN_COURS: "SAISIE_EN_COURS",
+  /** La fenêtre de saisie est passée et il manque des déclarations. */
+  SAISIE_INCOMPLETE: "SAISIE_INCOMPLETE",
+  /** La période n'est pas terminée : partielle par construction, rien de manquant. */
+  PERIODE_EN_COURS: "PERIODE_EN_COURS",
+} as const;
+
+export type CompletudeReason =
+  (typeof CompletudeReason)[keyof typeof CompletudeReason];
+
+/**
+ * Complétude d'une période : les déclarations attendues sur le bloc ont-elles
+ * été renseignées ? `isComplete` vaut `true` hors fenêtre de saisie (années
+ * antérieures aux tableaux par année des formulaires, ou postérieures à ce que
+ * le formulaire exige), auquel cas les compteurs sont à zéro.
+ */
+export type CompletudeStat = {
+  isComplete: boolean;
+  reason: CompletudeReason | null;
+  nbAttendues: number;
+  nbRenseignees: number;
+};
+
 export type TypeStructureStat = {
   type: StructureType;
   structures: number;
@@ -38,6 +63,7 @@ export type BatiStat = {
 
 export type StructuresByYearStat = {
   year: number;
+  completude: CompletudeStat;
   totalStructures: number;
   totalCpoms: number;
   structuresAvecCpom: number;
@@ -67,6 +93,7 @@ export type PlacesByYearStat = Omit<
   "qpv" | "logementsSociaux"
 > & {
   year: number;
+  completude: CompletudeStat;
 };
 
 export type FinanceByYearScopeStat = {
@@ -84,6 +111,7 @@ export type FinanceByYearScopeStat = {
 
 export type FinanceByYearStat = {
   year: number;
+  completude: CompletudeStat;
   total: FinanceByYearScopeStat;
   autorisees: FinanceByYearScopeStat;
   subventionnees: FinanceByYearScopeStat;

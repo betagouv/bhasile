@@ -204,7 +204,13 @@ export const FinancesStatsTable = (): ReactElement => {
 
 const getHeadings = (financeYears: FinanceByYearStat[]) => {
   const dates = financeYears.map((yearItem) => (
-    <th scope="col" key={yearItem.year} className="text-center font-bold">
+    <th
+      scope="col"
+      key={yearItem.year}
+      className={`text-center font-bold${
+        yearItem.completude.isComplete ? "" : " text-default-warning"
+      }`}
+    >
       {yearItem.year}
     </th>
   ));

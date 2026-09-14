@@ -30,6 +30,20 @@ export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
 
 export type StatistiqueDbTypologieValues = Omit<StatistiqueDbTypologie, "id">;
 
+export type StatistiqueDbFormDefinition = Prisma.FormDefinitionGetPayload<{
+  select: {
+    slug: true;
+    deadline: true;
+  };
+}>;
+
+export type StatistiqueDbValidatedActualisation = Prisma.FormGetPayload<{
+  select: {
+    structureId: true;
+    formDefinition: { select: { slug: true; deadline: true } };
+  };
+}>;
+
 /** `structureId` / `structureVersionId` : garantis non nuls par le scope de la requête (`findStructureAdresses`). */
 export type StatistiqueDbAdresse = Omit<
   Prisma.AdresseGetPayload<{
@@ -199,6 +213,14 @@ export type StatistiquesContext = {
   activeStructureIdsNow: Set<number>;
   /** Index des structures actives par période (séries temporelles). */
   activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod;
+  /** IDs des structures dont l'initialisation est validée : dénominateur de la complétude. */
+  finalisedStructureIds: Set<number>;
+  /** Campagnes d'actualisation déclarées : calendrier de la complétude. */
+  actualisationFormDefinitions: StatistiqueDbFormDefinition[];
+  /** Dernière campagne d'actualisation validée par structure : driver unique de la complétude. */
+  lastValidatedCampagneYearByStructureId: Map<number, number>;
+  /** Date de fermeture par structure : exclut du dénominateur de complétude l'année de fermeture et les suivantes. */
+  closureDateByStructureId: Map<number, Date | null>;
   eigs: StatistiqueDbEig[];
   evaluations: StatistiqueDbEvaluation[];
   typologies: StatistiqueDbTypologie[];
@@ -223,9 +245,22 @@ export type StatistiquesTypologieYearContext = Pick<
   "allStructures" | "activeStructureIdsByPeriod" | "typologies"
 >;
 
+/** Slice porteur du dénominateur, du calendrier et de l'avancement des campagnes. */
+export type StatistiquesCompletudeContext = Pick<
+  StatistiquesContext,
+  | "finalisedStructureIds"
+  | "actualisationFormDefinitions"
+  | "lastValidatedCampagneYearByStructureId"
+  | "closureDateByStructureId"
+>;
+
 /** Adds CPOM links, for indicators counting structures covered by an active CPOM per year. */
 export type StatistiquesCpomYearContext = StatistiquesTypologieYearContext &
   Pick<StatistiquesContext, "cpomLinks">;
+
+/** `StatistiquesCpomYearContext` + complétude : contexte du bloc structures par année. */
+export type StatistiquesStructuresYearContext = StatistiquesCpomYearContext &
+  StatistiquesCompletudeContext;
 
 /** Structures actives + adresses, pour le snapshot QPV / logement social. */
 export type StatistiquesAdresseSnapshotContext = Pick<

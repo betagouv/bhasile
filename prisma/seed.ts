@@ -3,10 +3,6 @@ import "dotenv/config";
 import { fakerFR as faker } from "@faker-js/faker";
 
 import { recomputeAllAnomalies } from "@/app/api/anomalies/anomalie.service";
-import {
-  ACTUALISATION_FORM_STEP_SLUGS,
-  getActualisationFormSlug,
-} from "@/app/api/forms/form.constants";
 import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { StructureType } from "@/types/structure.type";
 import { getRegionFromDepartement } from "@/utils/region.util";
@@ -20,7 +16,10 @@ import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
 import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
+  ACTUALISATION_SEED_YEAR,
+  createFakeActualisationFormStepDefinition,
   createFakeFinalisationFormStepDefinition,
+  createFakeFormActualisation,
   createFakeFormFinalisation,
   createFakeFormStructureVersionTransformationContraction,
   createFakeFormStructureVersionTransformationCreation,
@@ -66,6 +65,9 @@ const STRUCTURE_LOG_STEP = 200;
 
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
+
+// Part des structures initialisées ayant validé leur actualisation, calé sur l'observé en prod.
+const ACTUALISATION_VALIDATED_RATIO = 0.2;
 
 // Au-delà de 65 535 paramètres Postgres refuse la requête : on découpe en amont
 const CREATE_CHUNK_SIZE = 1000;
@@ -160,20 +162,25 @@ async function seed(): Promise<void> {
     `✅ ${formFinalisationStepDefinitions.count} FormStepDefinitions créées pour le formulaire finalisation`
   );
 
+  // Campagne d'actualisation en cours sur la dernière année seedée.
   const actualisationFormDefinition = await prisma.formDefinition.create({
-    data: {
-      name: "Actualisation 2026",
-      slug: getActualisationFormSlug(2026),
-      version: 1,
-    },
+    data: createFakeFormActualisation(ACTUALISATION_SEED_YEAR),
   });
   await prisma.formStepDefinition.createMany({
-    data: ACTUALISATION_FORM_STEP_SLUGS.map((slug) => ({
-      formDefinitionId: actualisationFormDefinition.id,
-      label: slug,
-      slug,
-    })),
+    data: createFakeActualisationFormStepDefinition(
+      actualisationFormDefinition.id
+    ),
   });
+  const actualisationStepDefinitions = await prisma.formStepDefinition.findMany(
+    {
+      where: { formDefinitionId: actualisationFormDefinition.id },
+      orderBy: { slug: "asc" },
+      select: { id: true, slug: true },
+    }
+  );
+  console.log(
+    `📅 Campagne actualisation ${ACTUALISATION_SEED_YEAR} ouverte jusqu'au 31/12`
+  );
 
   const formDefinitions = await prisma.formDefinition.findMany({
     include: { stepsDefinition: { select: { id: true } } },
@@ -292,6 +299,12 @@ async function seed(): Promise<void> {
         formDefs,
         finalisationFormDefId: formFinalisationDefinition.id,
         finalisationStepDefinitions: stepDefinitions,
+        actualisationFormDefId: actualisationFormDefinition.id,
+        actualisationStepDefinitions,
+        // Campagne en cours : une minorité de structures a validé son actualisation.
+        hasValidatedActualisation: faker.datatype.boolean({
+          probability: ACTUALISATION_VALIDATED_RATIO,
+        }),
         coordinates: colocated ? COLOCATED_COORDINATES : undefined,
       });
     }

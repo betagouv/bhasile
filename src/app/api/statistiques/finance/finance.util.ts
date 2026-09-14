@@ -14,6 +14,10 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
+import {
+  computeYearCompletude,
+  resolveExpectedStructureIds,
+} from "../completude.util";
 import type {
   StatistiqueDbBudget,
   StatistiqueDbIndicateurFinancier,
@@ -24,9 +28,11 @@ import {
   collectDistinctYears,
   filterByActiveStructureId,
   lookupActiveStructureIds,
+  structuresActiveInPeriod,
 } from "../statistiques.util";
 
-type FinanceScope = keyof Omit<FinanceByYearStat, "year">;
+type FinanceScope = keyof Omit<FinanceByYearStat, "year" | "completude">;
+
 
 const getStructureIdsByFinanceScope = (
   structures: StatistiqueDbStructure[]
@@ -222,6 +228,20 @@ export const computeFinanceStatistiques = (
   return {
     byYear: years.map((year, index) => ({
       year,
+      completude: computeYearCompletude(
+        context,
+        year,
+        resolveExpectedStructureIds(
+          context,
+          structuresActiveInPeriod(
+            context.allStructures,
+            context.activeStructureIdsByPeriod,
+            "year",
+            String(year)
+          ),
+          year
+        )
+      ),
       total: total[index],
       autorisees: autorisees[index],
       subventionnees: subventionnees[index],

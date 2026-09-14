@@ -6,6 +6,10 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
+import {
+  computeYearCompletude,
+  resolveExpectedStructureIds,
+} from "../completude.util";
 import type {
   StatistiqueDbAdresse,
   StatistiqueDbDepartement,
@@ -176,12 +180,25 @@ export const computePlacesStatistiques = (
       allStructures,
       activeStructureIdsByPeriod,
       typologies,
-      (year, structuresForYear) =>
-        computePlacesTypologieIndicators(
-          structuresForYear,
-          getTypologieMapForExactYear(typologies, year),
-          departements
-        )
+      (year, structuresForYear) => {
+        const typologieMapForYear = getTypologieMapForExactYear(
+          typologies,
+          year
+        );
+
+        return {
+          completude: computeYearCompletude(
+            context,
+            year,
+            resolveExpectedStructureIds(context, structuresForYear, year)
+          ),
+          ...computePlacesTypologieIndicators(
+            structuresForYear,
+            typologieMapForYear,
+            departements
+          ),
+        };
+      }
     ),
   };
 };

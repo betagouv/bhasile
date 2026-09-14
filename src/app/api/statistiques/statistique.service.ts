@@ -5,6 +5,7 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import { computeActiviteStatistiques } from "./activite/activite.util";
+import { buildLastValidatedCampagneYearByStructureId } from "./completude.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
 import { computeFinanceStatistiques } from "./finance/finance.util";
 import { computePlacesStatistiques } from "./places/places.util";
@@ -12,12 +13,14 @@ import { computeRmuStatistiques } from "./rmu/rmu.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findActivites,
+  findActualisationFormDefinitions,
   findBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinks,
   findEigs,
   findEvaluations,
+  findFinalisedStructureIds,
   findIndicateursFinanciers,
   findOperateurFiliales,
   findPerimeterStructures,
@@ -26,6 +29,7 @@ import {
   findStructureAdresses,
   findStructureTypologies,
   findStructureVersionTimeline,
+  findValidatedActualisationForms,
 } from "./statistiques.repository";
 import {
   applyVersionedPlacesToTypologies,
@@ -81,14 +85,25 @@ export const buildStatistiquesContext = async (
     structureActivityDates
   );
 
-  const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
-    await Promise.all([
-      findStructureTypologies(allStructureIds),
-      findStructureAdresses(allStructureIds),
-      findCpomStructures(allStructureIds),
-      findDnaLinks(allStructureIds),
-      findStructureVersionTimeline(allStructureIds),
-    ]);
+  const [
+    typologies,
+    adresses,
+    cpomLinks,
+    dnaLinks,
+    structureVersionTimeline,
+    finalisedStructureIds,
+    actualisationFormDefinitions,
+    validatedActualisations,
+  ] = await Promise.all([
+    findStructureTypologies(allStructureIds),
+    findStructureAdresses(allStructureIds),
+    findCpomStructures(allStructureIds),
+    findDnaLinks(allStructureIds),
+    findStructureVersionTimeline(allStructureIds),
+    findFinalisedStructureIds(allStructureIds),
+    findActualisationFormDefinitions(),
+    findValidatedActualisationForms(allStructureIds),
+  ]);
 
   const resolvedTypologies = applyVersionedPlacesToTypologies(
     typologies.filter((typologie) => typologie.year <= referenceYear),
@@ -149,6 +164,11 @@ export const buildStatistiquesContext = async (
     allStructures,
     activeStructureIdsNow,
     activeStructureIdsByPeriod,
+    finalisedStructureIds: new Set(finalisedStructureIds),
+    actualisationFormDefinitions,
+    lastValidatedCampagneYearByStructureId:
+      buildLastValidatedCampagneYearByStructureId(validatedActualisations),
+    closureDateByStructureId: activityContext.closureDateByStructureId,
     eigs,
     evaluations,
     typologies: resolvedTypologies,

@@ -24,6 +24,13 @@ Millésime exact `StructureTypologie` : structures **avec** typologie sur l'ann�
 >
 > Pistes étudiées : (1) compter les structures actives et réserver le millésime aux places, (2) reporter le dernier millésime ≤ année, comme déjà fait pour les adresses via `filterByEffectiveVersionAtDate` (cf. [places/README.md](../places/README.md)), (3) arrêter les séries à la dernière année complète.
 
+## Complétude
+
+`byYear[].completude` : cf. [README racine](../README.md#complétude-des-millésimes). Le driver
+est le formulaire d'actualisation, indépendant du comptage `totalStructures` ci-dessus — une
+année peut être flaguée incomplète alors que des millésimes existent (transformations,
+pré-remplissage), et c'est voulu : seul le formulaire validé atteste la saisie.
+
 ## Sources
 
 `Structure`, `StructureTypologie`, `Adresse`, `CpomStructure`, `ActeAdministratif`.

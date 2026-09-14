@@ -2,6 +2,10 @@ import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
 import prisma from "@/lib/prisma";
 
+import {
+  ACTUALISATION_FORM_SLUG_PREFIX,
+  FINALISATION_FORM_SLUG,
+} from "../forms/form.constants";
 import { finalizedVersionWhere } from "../structure-versions/structure-version.db.type";
 import type {
   StatistiqueDbActivite,
@@ -12,12 +16,14 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
+  StatistiqueDbFormDefinition,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbRmu,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
+  StatistiqueDbValidatedActualisation,
 } from "./statistiques.db.type";
 import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 
@@ -83,6 +89,58 @@ export const findStructureActivityDates = async (
     },
   });
 };
+
+/** Structures dont le formulaire d'initialisation est validé : seules celles-là sont attendues sur une campagne. */
+export const findFinalisedStructureIds = async (
+  structureIds: number[]
+): Promise<number[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+
+  const rows = await prisma.form.findMany({
+    where: {
+      structureId: { in: structureIds },
+      status: true,
+      formDefinition: { slug: FINALISATION_FORM_SLUG },
+    },
+    select: { structureId: true },
+  });
+
+  return rows
+    .map((row) => row.structureId)
+    .filter((structureId): structureId is number => structureId !== null);
+};
+
+/** Campagnes d'actualisation validées par structure (`Form.status`), avec le slug de la campagne. */
+export const findValidatedActualisationForms = async (
+  structureIds: number[]
+): Promise<StatistiqueDbValidatedActualisation[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+
+  return prisma.form.findMany({
+    where: {
+      structureId: { in: structureIds },
+      status: true,
+      formDefinition: { slug: { startsWith: ACTUALISATION_FORM_SLUG_PREFIX } },
+    },
+    select: {
+      structureId: true,
+      formDefinition: { select: { slug: true, deadline: true } },
+    },
+  });
+};
+
+/** Définitions des campagnes d'actualisation (`actualisation-<année>`) et leur échéance. */
+export const findActualisationFormDefinitions = async (): Promise<
+  StatistiqueDbFormDefinition[]
+> =>
+  prisma.formDefinition.findMany({
+    where: { slug: { startsWith: ACTUALISATION_FORM_SLUG_PREFIX } },
+    select: { slug: true, deadline: true },
+  });
 
 const structureVersionScope = (structureIds: number[]) => ({
   structureVersion: { structureId: { in: structureIds } },
