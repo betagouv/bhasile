@@ -12,6 +12,7 @@ import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { useStatistiquesPdfExport } from "@/app/hooks/useStatistiquesPdfExport";
+import { useUserAction } from "@/app/hooks/useUserAction";
 import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
@@ -23,6 +24,8 @@ export const StatistiquesHeader = (): ReactElement | null => {
   const { isHidden } = useHideOnScroll();
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
   const { statistiques } = useStatistiquesContext();
+  const { trackStatistiquesSpreadsheetExport, trackStatistiquesPdfExport } =
+    useUserAction();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -116,6 +119,7 @@ export const StatistiquesHeader = (): ReactElement | null => {
                     priority="tertiary no outline"
                     onClick={() => {
                       triggerExport();
+                      trackStatistiquesPdfExport(searchParams.toString());
                       setIsPanelOpen(false);
                     }}
                     className="whitespace-nowrap"
@@ -130,6 +134,9 @@ export const StatistiquesHeader = (): ReactElement | null => {
                           statistiques,
                           searchParams.size !== 0
                         )
+                      );
+                      trackStatistiquesSpreadsheetExport(
+                        searchParams.toString()
                       );
                       setIsPanelOpen(false);
                     }}
