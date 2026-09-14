@@ -3,6 +3,7 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Fragment, ReactElement } from "react";
 
+import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
@@ -12,13 +13,17 @@ import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
 type VisualizationType = "total" | "autorisees" | "subventionnees";
 
 const formatNumberCell = (value?: number | null): ReactElement | string =>
-  value !== null && value !== undefined ? <NumberDisplay value={value} /> : "•";
+  value !== null && value !== undefined ? (
+    <NumberDisplay value={value} />
+  ) : (
+    <EmptyCell />
+  );
 
 const formatAmountCell = (value?: number | null): ReactElement | string =>
   value !== null && value !== undefined ? (
     <NumberDisplay value={value} type="currency" maximumFractionDigits={0} />
   ) : (
-    "•"
+    <EmptyCell />
   );
 
 const sectionsConfig: FinanceSectionConfig[] = [
@@ -42,7 +47,7 @@ const sectionsConfig: FinanceSectionConfig[] = [
           value !== null && value !== undefined ? (
             <NumberDisplay value={value} type="currency" />
           ) : (
-            "•"
+            <EmptyCell />
           ),
       },
     ],
@@ -151,7 +156,7 @@ export const FinancesTablePresenter = ({
               className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
               colSpan={totalColumns}
             >
-              <span className="sticky left-4 inline-block h-8 leading-8">
+              <span className="sticky left-4 inline-block h-5 leading-6">
                 {section.title}
               </span>
             </td>

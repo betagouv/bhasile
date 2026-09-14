@@ -2,6 +2,7 @@
 
 import { Fragment, ReactElement, useState } from "react";
 
+import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import {
@@ -194,7 +195,7 @@ export const ControleQualiteStatsTable = ({
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
                 colSpan={totalColumns}
               >
-                <span className="sticky left-4 inline-block h-8 leading-8">
+                <span className="sticky left-4 inline-block h-5 leading-6">
                   {section.title}
                 </span>
               </td>
@@ -210,7 +211,7 @@ export const ControleQualiteStatsTable = ({
                     className="whitespace-nowrap align-middle"
                   >
                     <span className="text-sm">
-                      {(cellValue as string) ?? "•"}
+                      {(cellValue as string) ?? <EmptyCell />}
                     </span>
                   </td>
                 ))}
