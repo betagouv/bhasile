@@ -1,10 +1,7 @@
 import { after } from "next/server";
 import { getServerSession } from "next-auth";
 
-import {
-  UserActionCategory,
-  UserActionDescription,
-} from "@/generated/prisma/enums";
+import { UserActionCategory, UserActionType } from "@/generated/prisma/enums";
 import { authOptions } from "@/lib/next-auth/auth";
 
 import { createUserAction } from "./user-action.repository";
@@ -56,21 +53,21 @@ type ReadEventTarget = {
 export const createStatistiquesEvent = async (method: string) => {
   await createUserAction({
     action: getActionFromMethod(method),
-    description: UserActionDescription.STATISTIQUES_TABLE,
+    type: UserActionType.STATISTIQUES_TABLE,
   });
 };
 
 export const createStatistiquesCartographieEvent = async (method: string) => {
   await createUserAction({
     action: getActionFromMethod(method),
-    description: UserActionDescription.STATISTIQUES_CARTOGRAPHIE,
+    type: UserActionType.STATISTIQUES_CARTOGRAPHIE,
   });
 };
 
 export const createStructuresCartographieEvent = async (method: string) => {
   await createUserAction({
     action: getActionFromMethod(method),
-    description: UserActionDescription.STRUCTURES_CARTOGRAPHIE,
+    type: UserActionType.STRUCTURES_CARTOGRAPHIE,
   });
 };
 
@@ -81,7 +78,7 @@ export const createTypePlacesSpreadsheetExportEvent = async (
   await createUserAction({
     action: getActionFromMethod(method),
     structureId,
-    description: UserActionDescription.TYPE_PLACES_SPREADSHEET_EXPORT,
+    type: UserActionType.TYPE_PLACES_SPREADSHEET_EXPORT,
   });
 };
 
@@ -92,7 +89,7 @@ export const createFinancesSpreadsheetExportEvent = async (
   await createUserAction({
     action: getActionFromMethod(method),
     structureId,
-    description: UserActionDescription.FINANCES_SPREADSHEET_EXPORT,
+    type: UserActionType.FINANCES_SPREADSHEET_EXPORT,
   });
 };
 
@@ -103,7 +100,7 @@ export const createControleQualiteSpreadsheetExportEvent = async (
   await createUserAction({
     action: getActionFromMethod(method),
     structureId,
-    description: UserActionDescription.CONTROLE_QUALITE_SPREADSHEET_EXPORT,
+    type: UserActionType.CONTROLE_QUALITE_SPREADSHEET_EXPORT,
   });
 };
 
@@ -114,6 +111,39 @@ export const createStructureSpreadsheetExportEvent = async (
   await createUserAction({
     action: getActionFromMethod(method),
     structureId,
-    description: UserActionDescription.STRUCTURE_SPREADSHEET_EXPORT,
+    type: UserActionType.STRUCTURE_SPREADSHEET_EXPORT,
+  });
+};
+
+export const createStructurePdfExportEvent = async (
+  method: string,
+  structureId: number
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    structureId,
+    type: UserActionType.STRUCTURE_PDF_EXPORT,
+  });
+};
+
+export const createStatistiquesSpreadsheetExportEvent = async (
+  method: string,
+  details: string
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    type: UserActionType.STATISTIQUES_SPREADSHEET_EXPORT,
+    details,
+  });
+};
+
+export const createStatistiquesPdfExportEvent = async (
+  method: string,
+  details: string
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    type: UserActionType.STATISTIQUES_PDF_EXPORT,
+    details,
   });
 };
