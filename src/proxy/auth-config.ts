@@ -16,7 +16,7 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/structures\/[^/]+$/,
+    pattern: /^\/api\/structures\/\d+$/,
     routes: {
       GET: "either",
       PUT: "either",
