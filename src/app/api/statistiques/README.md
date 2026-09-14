@@ -74,21 +74,26 @@ Les deux sont construits **une seule fois** dans `buildStatistiquesContext` via 
 
 Chaque entrée `byYear` des blocs `structures`, `places` et `finance` porte un objet `completude` :
 
-| Champ           | Contenu                                                                       |
-| --------------- | ----------------------------------------------------------------------------- |
-| `isComplete`    | Toutes les structures attendues ont validé une campagne couvrant l'année      |
-| `reason`        | `SAISIE_EN_COURS`, `SAISIE_INCOMPLETE`, ou `null` si complet                  |
-| `nbAttendues`   | Structures actives sur l'année **et** initialisées (`finalisation-v1` validé) |
-| `nbRenseignees` | Parmi elles, celles à jour sur l'année                                        |
+| Champ           | Contenu                                                                           |
+| --------------- | --------------------------------------------------------------------------------- |
+| `isComplete`    | Toutes les structures attendues ont validé une campagne couvrant l'année          |
+| `reason`        | `SAISIE_EN_COURS`, `SAISIE_INCOMPLETE`, ou `null` si complet                      |
+| `nbAttendues`   | Structures initialisées (`finalisation-v1` validé) et encore ouvertes fin d'année |
+| `nbRenseignees` | Parmi elles, celles à jour sur l'année                                            |
 
-**Driver unique : le formulaire d'actualisation.** Une structure est à jour sur l'année N dès
-qu'elle a validé une campagne `actualisation-M` avec `M >= N` : le tableau par année du
-formulaire couvre l'année de campagne et les années précédentes, donc valider M renseigne
-aussi N. Voir `completude.util.ts`.
+**Driver unique : le formulaire d'actualisation.** Valider la campagne `actualisation-M`
+atteste les données de **toutes les années jusqu'à M incluse** : une structure est donc à jour
+sur l'année N dès que sa dernière campagne validée vérifie `M >= N`. Voir `completude.util.ts`.
 
-**Années historiques.** En dessous de la première année sous responsabilité d'une campagne
-(la plus ancienne campagne déclarée, moins un an), la complétude vaut `true` avec des
-compteurs à zéro : la donnée est antérieure à l'outil, il n'y a rien à réclamer.
+**Dénominateur.** Structures initialisées et **encore ouvertes à la fin de l'année** : une
+structure fermée en cours d'année n'a plus à être actualisée sur cette année-là, ni sur les
+suivantes.
+
+**Années historiques.** La frontière est posée une fois par la première campagne jamais
+déclarée : la phase d'initialisation a attesté les années qui la précèdent, et cette première
+campagne reprend en plus l'année juste avant elle (les agents ont tout revérifié d'un coup en
+sortie d'initialisation). En dessous, la complétude vaut `true` avec des compteurs à zéro. Les
+campagnes suivantes ne déplacent pas cette frontière.
 
 **Raison.** `SAISIE_EN_COURS` tant qu'une campagne postérieure ou égale à l'année est ouverte
 (`FormDefinition.deadline`), `SAISIE_INCOMPLETE` ensuite — dans le second cas la donnée ne

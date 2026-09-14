@@ -168,6 +168,7 @@ export const buildStatistiquesContext = async (
     actualisationFormDefinitions,
     lastValidatedCampagneYearByStructureId:
       buildLastValidatedCampagneYearByStructureId(validatedActualisations),
+    closureDateByStructureId: activityContext.closureDateByStructureId,
     eigs,
     evaluations,
     typologies: resolvedTypologies,

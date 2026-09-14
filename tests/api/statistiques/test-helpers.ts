@@ -182,6 +182,7 @@ export const buildTestStatistiquesContext = (
         | "finalisedStructureIds"
         | "actualisationFormDefinitions"
         | "lastValidatedCampagneYearByStructureId"
+        | "closureDateByStructureId"
       >
     >
 ): StatistiquesContext => {
@@ -237,5 +238,6 @@ export const buildTestStatistiquesContext = (
     actualisationFormDefinitions: partial.actualisationFormDefinitions ?? [],
     lastValidatedCampagneYearByStructureId:
       partial.lastValidatedCampagneYearByStructureId ?? new Map(),
+    closureDateByStructureId: partial.closureDateByStructureId ?? new Map(),
   };
 };

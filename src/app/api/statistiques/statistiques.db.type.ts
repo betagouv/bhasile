@@ -219,6 +219,8 @@ export type StatistiquesContext = {
   actualisationFormDefinitions: StatistiqueDbFormDefinition[];
   /** Dernière campagne d'actualisation validée par structure : driver unique de la complétude. */
   lastValidatedCampagneYearByStructureId: Map<number, number>;
+  /** Date de fermeture par structure : exclut du dénominateur de complétude l'année de fermeture et les suivantes. */
+  closureDateByStructureId: Map<number, Date | null>;
   eigs: StatistiqueDbEig[];
   evaluations: StatistiqueDbEvaluation[];
   typologies: StatistiqueDbTypologie[];
@@ -249,6 +251,7 @@ export type StatistiquesCompletudeContext = Pick<
   | "finalisedStructureIds"
   | "actualisationFormDefinitions"
   | "lastValidatedCampagneYearByStructureId"
+  | "closureDateByStructureId"
 >;
 
 /** Adds CPOM links, for indicators counting structures covered by an active CPOM per year. */

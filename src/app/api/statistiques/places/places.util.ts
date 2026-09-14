@@ -190,7 +190,7 @@ export const computePlacesStatistiques = (
           completude: computeYearCompletude(
             context,
             year,
-            resolveExpectedStructureIds(context, structuresForYear)
+            resolveExpectedStructureIds(context, structuresForYear, year)
           ),
           ...computePlacesTypologieIndicators(
             structuresForYear,

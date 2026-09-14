@@ -323,7 +323,7 @@ const computeByYearStats = (
         completude: computeYearCompletude(
           context,
           year,
-          resolveExpectedStructureIds(context, structuresForYear)
+          resolveExpectedStructureIds(context, structuresForYear, year)
         ),
         totalStructures: structuresWithTypologie.length,
         totalCpoms: countActiveCpoms(

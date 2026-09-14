@@ -33,10 +33,12 @@ const buildContext = ({
   finalisedStructureIds = [1, 2],
   campagnes = [{ year: 2026, deadline: new Date("2026-09-30T00:00:00.000Z") }],
   validated = [] as StatistiqueDbValidatedActualisation[],
+  closureDates = [] as [number, Date][],
 }: {
   finalisedStructureIds?: number[];
   campagnes?: { year: number; deadline: Date | null }[];
   validated?: StatistiqueDbValidatedActualisation[];
+  closureDates?: [number, Date][];
 } = {}): StatistiquesCompletudeContext => ({
   finalisedStructureIds: new Set(finalisedStructureIds),
   actualisationFormDefinitions: campagnes.map((campagne) => ({
@@ -45,6 +47,7 @@ const buildContext = ({
   })),
   lastValidatedCampagneYearByStructureId:
     buildLastValidatedCampagneYearByStructureId(validated),
+  closureDateByStructureId: new Map<number, Date | null>(closureDates),
 });
 
 describe("resolveExpectedStructureIds", () => {
@@ -52,8 +55,54 @@ describe("resolveExpectedStructureIds", () => {
     const context = buildContext({ finalisedStructureIds: [1] });
 
     expect(
-      resolveExpectedStructureIds(context, [testStructure(1), testStructure(2)])
+      resolveExpectedStructureIds(
+        context,
+        [testStructure(1), testStructure(2)],
+        2026
+      )
     ).toEqual(new Set([1]));
+  });
+
+  it("exclut une structure fermée dans l'année concernée", () => {
+    const context = buildContext({
+      closureDates: [[2, new Date("2026-06-30T00:00:00.000Z")]],
+    });
+
+    expect(
+      resolveExpectedStructureIds(
+        context,
+        [testStructure(1), testStructure(2)],
+        2026
+      )
+    ).toEqual(new Set([1]));
+  });
+
+  it("exclut des années suivantes une structure fermée l'année précédente", () => {
+    const context = buildContext({
+      closureDates: [[2, new Date("2026-06-30T00:00:00.000Z")]],
+    });
+
+    expect(
+      resolveExpectedStructureIds(
+        context,
+        [testStructure(1), testStructure(2)],
+        2027
+      )
+    ).toEqual(new Set([1]));
+  });
+
+  it("garde une structure fermée après l'année concernée", () => {
+    const context = buildContext({
+      closureDates: [[2, new Date("2027-03-01T00:00:00.000Z")]],
+    });
+
+    expect(
+      resolveExpectedStructureIds(
+        context,
+        [testStructure(1), testStructure(2)],
+        2026
+      )
+    ).toEqual(new Set([1, 2]));
   });
 });
 
@@ -110,7 +159,7 @@ describe("computeYearCompletude", () => {
     });
   });
 
-  it("reporte la validation d'une campagne sur les années antérieures", () => {
+  it("atteste toutes les années jusqu'à la campagne validée incluse", () => {
     const context = buildContext({
       validated: [
         testValidatedActualisation(1, 2026),

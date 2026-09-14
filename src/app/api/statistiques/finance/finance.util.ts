@@ -238,7 +238,8 @@ export const computeFinanceStatistiques = (
             context.activeStructureIdsByPeriod,
             "year",
             String(year)
-          )
+          ),
+          year
         )
       ),
       total: total[index],

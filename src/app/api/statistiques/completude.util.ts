@@ -33,8 +33,11 @@ const getCampagneYears = (
     .sort((yearA, yearB) => yearA - yearB);
 
 /**
- * Première année sous responsabilité d'une campagne : la campagne N couvre N et
- * l'année précédente. En dessous, la donnée est historique et considérée complète.
+ * Frontière entre l'historique et les campagnes, posée une fois par la première
+ * campagne jamais déclarée : la phase d'initialisation a attesté les années qui
+ * la précèdent, et cette première campagne reprend en plus l'année juste avant
+ * elle, les agents ayant tout revérifié d'un coup en sortie d'initialisation.
+ * Les campagnes suivantes ne déplacent pas cette frontière.
  */
 const getFirstCampagneYear = (
   definitions: StatistiqueDbFormDefinition[]
@@ -43,11 +46,7 @@ const getFirstCampagneYear = (
   return campagneYears.length > 0 ? campagneYears[0] - 1 : null;
 };
 
-/**
- * Valider une campagne écrit la donnée de toutes les années de son tableau :
- * une année reste donc saisissable tant qu'une campagne postérieure ou égale
- * est ouverte.
- */
+/** Une année reste saisissable tant qu'une campagne postérieure ou égale est ouverte. */
 const isCampagneOpenForYear = (
   definitions: StatistiqueDbFormDefinition[],
   year: number,
@@ -89,26 +88,36 @@ export const buildLastValidatedCampagneYearByStructureId = (
   return lastValidatedYearByStructureId;
 };
 
-/** Structures attendues sur une année : actives sur l'année et initialisées. */
+/**
+ * Structures attendues sur une année : initialisées, et encore ouvertes à la fin
+ * de l'année. Une structure fermée en cours d'année n'a plus à être actualisée
+ * sur cette année-là, ni sur les suivantes.
+ */
 export const resolveExpectedStructureIds = (
   context: StatistiquesCompletudeContext,
-  structuresForYear: StatistiqueDbStructure[]
+  structuresForYear: StatistiqueDbStructure[],
+  year: number
 ): Set<number> => {
   const expectedStructureIds = new Set<number>();
 
   for (const structure of structuresForYear) {
-    if (context.finalisedStructureIds.has(structure.id)) {
-      expectedStructureIds.add(structure.id);
+    if (!context.finalisedStructureIds.has(structure.id)) {
+      continue;
     }
+    const closureDate = context.closureDateByStructureId.get(structure.id);
+    if (closureDate != null && closureDate.getUTCFullYear() <= year) {
+      continue;
+    }
+    expectedStructureIds.add(structure.id);
   }
 
   return expectedStructureIds;
 };
 
 /**
- * Complétude d'un millésime : une structure est à jour sur l'année dès qu'elle a
- * validé une campagne d'actualisation postérieure ou égale, le formulaire
- * couvrant l'année de campagne et les années précédentes.
+ * Complétude d'un millésime : valider la campagne N atteste les données de
+ * toutes les années jusqu'à N incluse, donc une structure est à jour sur une
+ * année dès que sa dernière campagne validée lui est postérieure ou égale.
  */
 export const computeYearCompletude = (
   context: StatistiquesCompletudeContext,

@@ -62,6 +62,7 @@ const buildContext = (
     ),
     actualisationFormDefinitions: [],
     lastValidatedCampagneYearByStructureId: new Map(),
+    closureDateByStructureId: new Map(),
     eigs: [],
     evaluations: [],
     typologies: structures.map((structure) => ({
