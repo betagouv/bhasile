@@ -100,6 +100,7 @@ export const config = {
     "/",
     "/structures/:path*",
     "/operateurs/:path*",
+    "/cpoms/:path*",
     "/statistiques/:path*",
     "/ressources/:path*",
     "/ajout-structure/:path*",

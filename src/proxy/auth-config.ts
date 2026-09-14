@@ -9,7 +9,13 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/structures\/[^/]+$/,
+    pattern: /^\/api\/structures\/stats$/,
+    routes: {
+      GET: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/structures\/\d+$/,
     routes: {
       GET: "either",
       PUT: "either",
@@ -25,12 +31,6 @@ export const protectedApiRoutes: ApiRoute[] = [
     pattern: /^\/api\/structures\/[^/]+\/adresses$/,
     routes: {
       HEAD: "password",
-    },
-  },
-  {
-    pattern: /^\/api\/structures\/dna\/[^/]+$/,
-    routes: {
-      GET: "password",
     },
   },
   {
@@ -77,13 +77,6 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/structures\/stats$/,
-    routes: {
-      GET: "proconnect",
-      POST: "proconnect",
-    },
-  },
-  {
     pattern: /^\/api\/activites\/stats$/,
     routes: {
       GET: "proconnect",
@@ -117,7 +110,6 @@ export const protectedApiRoutes: ApiRoute[] = [
   {
     pattern: /^\/api\/transformations$/,
     routes: {
-      GET: "proconnect",
       POST: "proconnect",
     },
   },
@@ -188,6 +180,7 @@ export const proConnectProtectedPages = [
   "/",
   "/structures",
   "/operateurs",
+  "/cpoms",
   "/statistiques",
   "/ressources",
 ];
