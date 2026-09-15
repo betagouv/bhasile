@@ -10,12 +10,8 @@ export type FileUploadResponse = {
   fileSize: number;
 };
 
-export type FileUploadWithLink = FileUploadResponse & {
-  fileUrl: string;
-};
-
 export const useFileUpload = () => {
-  const uploadFile = async (file: File): Promise<FileUploadWithLink> => {
+  const uploadFile = async (file: File): Promise<FileUploadResponse> => {
     const formData = new FormData();
     formData.append("file", file);
     const response = await fetch("/api/files", {
@@ -25,31 +21,29 @@ export const useFileUpload = () => {
     if (!response.ok) {
       throw new ApiError(await extractApiError(response), response.status);
     }
-    const result = await response.json();
-    return {
-      ...result,
-      fileUrl: await getDownloadLink(result.key),
-    };
+    return await response.json();
   };
 
   const getDownloadLink = useCallback(async (key: string): Promise<string> => {
     const encodedKey = encodeURIComponent(key);
     const response = await fetch(`/api/files/${encodedKey}?getLink=true`);
+    if (!response.ok) {
+      throw new ApiError(await extractApiError(response), response.status);
+    }
     const result = await response.json();
     return result.url;
   }, []);
 
   const getFile = useCallback(
-    async (key: string): Promise<FileUploadWithLink> => {
+    async (key: string): Promise<FileUploadResponse> => {
       const encodedKey = encodeURIComponent(key);
       const response = await fetch(`/api/files/${encodedKey}`);
-      const result = await response.json();
-      return {
-        ...result,
-        fileUrl: await getDownloadLink(result.key),
-      };
+      if (!response.ok) {
+        throw new ApiError(await extractApiError(response), response.status);
+      }
+      return await response.json();
     },
-    [getDownloadLink]
+    []
   );
 
   const deleteFile = useCallback(async (key: string): Promise<void> => {
