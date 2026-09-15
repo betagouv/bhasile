@@ -53,7 +53,7 @@ export const ExportActiviteBlock = ({
             className="text-lg text-title-blue-france"
             id="indisponibilite-title"
           >
-            Indisponibilités
+            Indisponibilité
           </h4>
           <div className="flex pt-10 pb-10">
             <ActivitePlaces

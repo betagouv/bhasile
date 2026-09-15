@@ -3,6 +3,7 @@
 import dayjs from "dayjs";
 import { ReactElement, useState } from "react";
 
+import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { Table } from "@/app/components/common/Table";
 import {
   TimePeriod,
@@ -150,7 +151,9 @@ export const RMUStatsTable = ({
                 key={`${line.label}-${colIndex}`}
                 className="whitespace-nowrap align-middle"
               >
-                <span className="text-sm">{(cellValue as string) ?? "•"}</span>
+                <span className="text-sm">
+                  {(cellValue as string) ?? <EmptyCell />}
+                </span>
               </td>
             ))}
           </tr>

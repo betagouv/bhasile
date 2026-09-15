@@ -21,16 +21,44 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
         {formatDate(evaluation.date)}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.notePersonne ?? <EmptyCell />}
+        {evaluation.notePersonne ? (
+          <>
+            <span>{evaluation.notePersonne}</span>
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ) : (
+          <EmptyCell />
+        )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.notePro ?? <EmptyCell />}
+        {evaluation.notePro ? (
+          <>
+            <span>{evaluation.notePro}</span>
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ) : (
+          <EmptyCell />
+        )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.noteStructure ?? <EmptyCell />}
+        {evaluation.noteStructure ? (
+          <>
+            <span>{evaluation.noteStructure}</span>
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ) : (
+          <EmptyCell />
+        )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.note ?? <EmptyCell />}
+        {evaluation.note ? (
+          <>
+            <span>{evaluation.note}</span>
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ) : (
+          <EmptyCell />
+        )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
         <SeeFileButton
