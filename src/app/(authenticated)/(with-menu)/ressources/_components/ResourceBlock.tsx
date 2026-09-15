@@ -37,7 +37,9 @@ export const ResourceBlock = ({ block }: Props): ReactElement | null => {
           label: (
             <span className="flex items-center gap-2">
               {tabView.title}
-              <CountCircle count={tabView.count} />
+              {tabView.count !== undefined && (
+                <CountCircle count={tabView.count} />
+              )}
             </span>
           ),
         }))}
@@ -63,7 +65,6 @@ const buildTabViews = (block: Block): TabView[] => {
     return block.tabs.map((tab) => ({
       id: tab.id,
       title: tab.title,
-      count: tab.questions.length,
       panel: <FaqTabPanel tab={tab} />,
     }));
   }
@@ -75,7 +76,7 @@ const buildTabViews = (block: Block): TabView[] => {
 type TabView = {
   id: string;
   title: string;
-  count: number;
+  count?: number;
   panel: ReactNode;
 };
 

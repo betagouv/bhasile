@@ -18,6 +18,7 @@ import { createFakeCpoms } from "./seeders/cpom.seed";
 import { seedRegionsAndDepartements } from "./seeders/departements.seed";
 import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
 import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
+import { createFakeFaqItem } from "./seeders/faq.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
   createFakeFinalisationFormStepDefinition,
@@ -344,6 +345,12 @@ async function seed(): Promise<void> {
   await prisma.notification.createMany({ data: notificationsToCreate });
   console.log(`✅ ${notificationsToCreate.length} notifications créées`);
   logHeap("notifications");
+
+  console.log("❓ Seed des questions de FAQ...");
+  const faqItems = Array.from({ length: 10 }, () => createFakeFaqItem());
+  await prisma.faq.createMany({ data: faqItems });
+  console.log(`✅ ${faqItems.length} questions de FAQ créées`);
+  logHeap("FAQ");
 
   console.log("🏥 Création et liaison des codes FINESS...");
   const finessList = createFinessList(
