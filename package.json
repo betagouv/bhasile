@@ -13,6 +13,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx @tailwindcss/cli -i ./src/app/globals.css -o build.css --minify && next build && npx tsx copy-assets.ts",
+    "scalingo-cleanup": "rm -rf .next/cache",
     "start": "node .next/standalone/server.js",
     "check:ts": "npx tsc --noEmit",
     "lint": "yarn lint:css && yarn lint:ts",
@@ -86,6 +87,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.13",
     "uuid": "^14.0.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.5.4"
   },
   "devDependencies": {
@@ -117,7 +119,6 @@
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "typescript": "^6",
-    "vitest": "^4.1.11",
-    "xlsx": "^0.18.5"
+    "vitest": "^4.1.11"
   }
 }
