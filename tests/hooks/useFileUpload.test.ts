@@ -1,11 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  FileUploadResponse,
-  FileUploadWithLink,
-  useFileUpload,
-} from "@/app/hooks/useFileUpload";
+import { FileUploadResponse, useFileUpload } from "@/app/hooks/useFileUpload";
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -55,21 +51,15 @@ describe("useFileUpload", () => {
         fileSize: 12,
       };
 
-      const mockDownloadUrl = "https://example.com/files/file-123";
-
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockUploadResponse),
-        })
-        .mockResolvedValueOnce({
-          json: () => Promise.resolve({ url: mockDownloadUrl }),
-        });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockUploadResponse),
+      });
 
       // WHEN
       const { result } = renderHook(() => useFileUpload());
 
-      let uploadResult: FileUploadWithLink | undefined;
+      let uploadResult: FileUploadResponse | undefined;
       await act(async () => {
         uploadResult = await result.current.uploadFile(mockFile);
       });
@@ -82,19 +72,12 @@ describe("useFileUpload", () => {
       );
 
       // Verify fetch calls
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch).toHaveBeenNthCalledWith(1, "/api/files", {
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith("/api/files", {
         method: "POST",
         body: mockFormDataInstance,
       });
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        2,
-        "/api/files/file-123?getLink=true"
-      );
-      expect(uploadResult).toEqual({
-        ...mockUploadResponse,
-        fileUrl: mockDownloadUrl,
-      });
+      expect(uploadResult).toEqual(mockUploadResponse);
     });
 
     it("lève une erreur quand le téléversement échoue", async () => {
@@ -133,38 +116,42 @@ describe("useFileUpload", () => {
         fileSize: 12,
       };
 
-      const mockDownloadUrl = "https://example.com/files/file-123";
-
-      mockFetch
-        .mockResolvedValueOnce({
-          json: () => Promise.resolve(mockFileResponse),
-        })
-        .mockResolvedValueOnce({
-          json: () => Promise.resolve({ url: mockDownloadUrl }),
-        });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockFileResponse),
+      });
 
       // WHEN
       const { result } = renderHook(() => useFileUpload());
 
-      let fileResult: FileUploadWithLink | undefined;
+      let fileResult: FileUploadResponse | undefined;
       await act(async () => {
         fileResult = await result.current.getFile(fileKey);
       });
 
       // THEN
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        1,
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith(
         `/api/files/${encodeURIComponent(fileKey)}`
       );
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        2,
-        `/api/files/${encodeURIComponent(fileKey)}?getLink=true`
-      );
-      expect(fileResult).toEqual({
-        ...mockFileResponse,
-        fileUrl: mockDownloadUrl,
+      expect(fileResult).toEqual(mockFileResponse);
+    });
+
+    it("lève une ApiError quand la réponse n'est pas du JSON", async () => {
+      // GIVEN
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: () => Promise.reject(new SyntaxError("Unexpected token <")),
       });
+
+      // WHEN
+      const { result } = renderHook(() => useFileUpload());
+
+      // THEN
+      await expect(result.current.getFile("file-123")).rejects.toThrow(
+        "Erreur serveur (503)"
+      );
     });
   });
 
@@ -175,6 +162,7 @@ describe("useFileUpload", () => {
       const mockDownloadUrl = "https://example.com/files/file-123";
 
       mockFetch.mockResolvedValueOnce({
+        ok: true,
         json: () => Promise.resolve({ url: mockDownloadUrl }),
       });
 
@@ -192,6 +180,23 @@ describe("useFileUpload", () => {
         `/api/files/${encodeURIComponent(fileName)}?getLink=true`
       );
       expect(downloadUrl).toEqual(mockDownloadUrl);
+    });
+
+    it("lève une ApiError quand la réponse n'est pas du JSON", async () => {
+      // GIVEN
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: () => Promise.reject(new SyntaxError("Unexpected token <")),
+      });
+
+      // WHEN
+      const { result } = renderHook(() => useFileUpload());
+
+      // THEN
+      await expect(result.current.getDownloadLink("file-123")).rejects.toThrow(
+        "Erreur serveur (503)"
+      );
     });
   });
 
