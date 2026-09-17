@@ -2,6 +2,7 @@ import { Table } from "@codegouvfr/react-dsfr/Table";
 import { ReactElement } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { SeeFileButton } from "@/app/components/common/SeeFileButton";
 import { formatDate } from "@/app/utils/date.util";
 import { EVALUATION_NOTES_START_YEAR, MAX_EXPORT_ITEMS } from "@/constants";
@@ -23,7 +24,7 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
       <span className="inline-block text-center w-full" key={evaluation.id}>
         {evaluation.notePersonne ? (
           <>
-            <span>{evaluation.notePersonne}</span>
+            <NumberDisplay value={evaluation.notePersonne} />
             <span className="text-disabled-grey">&nbsp;/4</span>
           </>
         ) : (
@@ -33,7 +34,7 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
       <span className="inline-block text-center w-full" key={evaluation.id}>
         {evaluation.notePro ? (
           <>
-            <span>{evaluation.notePro}</span>
+            <NumberDisplay value={evaluation.notePro} />
             <span className="text-disabled-grey">&nbsp;/4</span>
           </>
         ) : (
@@ -43,7 +44,7 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
       <span className="inline-block text-center w-full" key={evaluation.id}>
         {evaluation.noteStructure ? (
           <>
-            <span>{evaluation.noteStructure}</span>
+            <NumberDisplay value={evaluation.noteStructure} />
             <span className="text-disabled-grey">&nbsp;/4</span>
           </>
         ) : (
@@ -53,7 +54,7 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
       <span className="inline-block text-center w-full" key={evaluation.id}>
         {evaluation.note ? (
           <>
-            <span>{evaluation.note}</span>
+            <NumberDisplay value={evaluation.note} />
             <span className="text-disabled-grey">&nbsp;/4</span>
           </>
         ) : (

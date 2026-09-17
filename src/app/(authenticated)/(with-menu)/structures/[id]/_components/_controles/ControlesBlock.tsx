@@ -70,7 +70,7 @@ export const ControlesBlock = (): ReactElement => {
               primaryInformation={
                 hasLastNote ? (
                   <>
-                    {lastNote} <span className="text-xl">/&nbsp;4</span>
+                    {lastNote}&nbsp;<span className="text-xl">/4</span>
                   </>
                 ) : (
                   "Sans note"
