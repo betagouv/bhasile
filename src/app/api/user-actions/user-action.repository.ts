@@ -25,7 +25,7 @@ export const createUserAction = async ({
         email,
       },
     });
-    console.log(">>>>>>>>>>>>>", user);
+
     if (!user) {
       console.error("Pas d'utilisateur enregistré avec cet email");
       return;
