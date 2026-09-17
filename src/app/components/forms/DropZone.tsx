@@ -36,7 +36,7 @@ export const DropZone = ({ className, onChange, children }: Props) => {
       setCurrentState("success");
       setCurrentErrorMessage("");
 
-      onChange?.({ key: fileData.key });
+      onChange?.(fileData);
     } catch {
       setCurrentState("error");
       setCurrentErrorMessage("Erreur lors de l'upload du fichier");
@@ -53,7 +53,7 @@ export const DropZone = ({ className, onChange, children }: Props) => {
         setFileData(null);
         setCurrentErrorMessage("");
         setCurrentState("idle");
-        onChange?.({ key: undefined });
+        onChange?.(undefined);
       }
     } catch {
       setCurrentState("error");
@@ -177,7 +177,7 @@ const wrapperClassName =
 
 type Props = {
   className?: string;
-  onChange: (data: { key?: string }) => void;
+  onChange: (fileUpload?: FileUploadResponse) => void;
   children: React.ReactNode;
 };
 
