@@ -1,4 +1,4 @@
-// Pousse les agents de la table User dans la liste Brevo "Utilisateurs Bhasile"
+// Pousse les utilisateurs dans la liste Brevo
 // Usage: yarn script brevo-push-users
 
 import "dotenv/config";
