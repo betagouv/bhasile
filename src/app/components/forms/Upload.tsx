@@ -137,8 +137,8 @@ const Upload = ({
     try {
       const link = await getDownloadLink(valueState);
       window.open(link, "_blank", "noopener,noreferrer");
-    } catch {
-      console.error("Erreur lors de la récupération du fichier");
+    } catch (error) {
+      console.error("Erreur lors de la récupération du fichier", error);
     }
   };
 
