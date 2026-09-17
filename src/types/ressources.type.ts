@@ -1,3 +1,5 @@
+import { FaqApiType } from "@/schemas/api/faq.schema";
+
 export type Block = FilesBlock | FaqBlock;
 
 export type FilesBlock = BlockBase & {
@@ -19,7 +21,7 @@ export type FilesTab = {
 export type FaqTab = {
   id: string;
   title: string;
-  // questions: Question[];
+  items: FaqApiType[];
 };
 
 export type Section = {
@@ -40,14 +42,7 @@ export type FileMetadata = {
   bytes: number;
 };
 
-// export type Question = {
-//   id: string;
-//   title: string;
-//   answerHtml: string;
-//   searchText: string;
-// };
-
-export type MeasureFile = (href: string) => FileMetadata;
+export type MeasureFile = (href: string) => Promise<FileMetadata>;
 
 type BlockBase = {
   id: string;

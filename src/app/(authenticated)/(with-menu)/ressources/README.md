@@ -1,11 +1,10 @@
 # Contenu de la page « Modèles et ressources »
 
-Cette page est alimentée uniquement par les fichiers de ce dossier. Aucune base de données,
-aucun écran d'administration : on modifie un `.md`, on ouvre une pull request, et la page suit.
+Cette page est alimentée par le S3 placedasile-docs, et la table FAQ dans la DB.
 
 ## Ajouter ou modifier du contenu
 
-Un fichier `NN-nom.md` = un bloc de la page. Le numéro donne l'ordre d'affichage.
+Un fichier `NN-nom.md` = un bloc de la page (sauf pour la FAQ). Le numéro donne l'ordre d'affichage.
 Les fichiers qui ne commencent pas par un numéro (`README.md`, `_suggestions.md`) ne sont pas des blocs.
 
 Chaque bloc commence par un en-tête :
@@ -39,9 +38,6 @@ Exemple pour un bloc `fichiers` :
 
 - [Arrêté d'autorisation](/arrete-autorisation.odt)
 ```
-
-Exemple pour un bloc `faq` : le texte sous la question est la réponse. Le **gras**, les liens
-et les listes à puces fonctionnent.
 
 ## Ajouter un fichier à télécharger
 
