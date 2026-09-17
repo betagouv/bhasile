@@ -114,7 +114,8 @@ const FUSION_PATTERN = /fusion/i;
 export const isAmbiguousFusion = (raw: string): boolean =>
   FUSION_PATTERN.test(raw);
 
-/* Deux libellés coexistent pour chaque branche : on matche sur le préfixe */
+/* Deux libellés coexistent pour chaque branche : on matche sur le préfixe.
+ * La démarche ne décrit que des HUDA qui ferment : les cas de contraction sont saisis à la main. */
 export const parseTransformationType = (
   raw: string
 ): TransformationType | null => {
@@ -122,10 +123,10 @@ export const parseTransformationType = (
     return null;
   }
   if (raw.startsWith("Extension d'un CADA")) {
-    return TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR;
+    return TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT;
   }
   if (raw.startsWith("Création d'un nouveau CADA")) {
-    return TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR;
+    return TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU;
   }
   return null;
 };

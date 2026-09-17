@@ -14,6 +14,7 @@ import {
   getTransformationOriginRoute,
   sortStructureVersionTransformationsByType,
 } from "@/app/utils/transformation.util";
+import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { useTransformationContext } from "@/contexts/TransformationContext";
 import {
@@ -22,8 +23,8 @@ import {
 } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import {
+  HudaCadaDestination,
   StructureVersionTransformationType,
-  TransformationType,
 } from "@/types/transformation.type";
 
 import { StructureVersionTransformationGroup } from "./_components/StructureVersionTransformationGroup";
@@ -55,6 +56,11 @@ export default function TransformationVerificationPage() {
   const groups = groupStructureVersionTransformationsByType(
     transformation.structureVersionTransformations
   );
+
+  const isRemiseEnConcurrence = transformation.type
+    ? TRANSFORMATION_TYPE_SPECS[transformation.type].hudaCadaDestination ===
+      HudaCadaDestination.REMISE_EN_CONCURRENCE
+    : false;
 
   const allChildFormsAreValidated =
     transformation.structureVersionTransformations.every(
@@ -155,8 +161,7 @@ export default function TransformationVerificationPage() {
         >
           Vous pouvez dès maintenant consulter les changements sur les pages des
           structures concernées.
-          {transformation.type ===
-            TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES &&
+          {isRemiseEnConcurrence &&
             " Aussi, si la ou les structures issues de la remise en concurrence des places ont déjà été définies, vous pouvez les déclarer en cliquant sur « Créer une structure » dans l’onglet structure."}
         </confirmationModal.Component>
       </div>

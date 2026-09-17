@@ -120,7 +120,7 @@ test.describe("Transformations — flux finalisés", () => {
 
     const transformation = await fetchTransformationGraph(transformationId);
     expect(transformation.type).toBe(
-      TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
+      TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT
     );
     expect(transformation.form?.status).toBe(true);
 
@@ -205,7 +205,7 @@ test.describe("Transformations — flux finalisés", () => {
 
       const transformation = await fetchTransformationGraph(transformationId);
       expect(transformation.type).toBe(
-        TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
+        TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU
       );
       expect(transformation.form?.status).toBe(true);
 

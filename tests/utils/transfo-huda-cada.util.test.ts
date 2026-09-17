@@ -255,13 +255,13 @@ describe("transfo huda cada util", () => {
   describe("parseTransformationType", () => {
     it("reconnaît les deux formulations de l'extension", () => {
       expect(parseTransformationType("Extension d'un CADA")).toBe(
-        "TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR"
+        "TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT"
       );
       expect(
         parseTransformationType(
           "Extension d'un CADA (il est possible d'aller au-delà de 100% de la capacité existante)"
         )
-      ).toBe("TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR");
+      ).toBe("TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT");
     });
 
     it("reconnaît les deux formulations de la création", () => {
@@ -269,7 +269,7 @@ describe("transfo huda cada util", () => {
         parseTransformationType(
           "Création d'un nouveau CADA (transformation d'un ou plusieurs HUDA en un nouveau CADA)"
         )
-      ).toBe("TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR");
+      ).toBe("TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU");
     });
 
     it("rejette la variante qui mêle création et fusion d'un CADA existant", () => {
@@ -289,6 +289,19 @@ describe("transfo huda cada util", () => {
     it("rejette un libellé inconnu", () => {
       expect(parseTransformationType("")).toBeNull();
       expect(parseTransformationType("Remise en concurrence")).toBeNull();
+    });
+
+    it("ne produit jamais un type de la branche contraction", () => {
+      const parsedTypes = [
+        "Extension d'un CADA",
+        "Création d'un nouveau CADA (transformation d'un ou plusieurs HUDA en un nouveau CADA)",
+      ].map(parseTransformationType);
+
+      expect(
+        parsedTypes.every(
+          (parsedType) => parsedType?.includes("CONTRACTION") === false
+        )
+      ).toBe(true);
     });
   });
 });

@@ -464,7 +464,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
     ) => {
       const transformation = await prisma.transformation.create({
         data: {
-          type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+          type: TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
           numeroDossier,
           structureVersionTransformations: {
             create: structureIds.map((structureId) => ({

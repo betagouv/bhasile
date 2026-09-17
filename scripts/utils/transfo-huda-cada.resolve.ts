@@ -3,9 +3,11 @@ import { isStructureClosed } from "@/app/api/structures/structure.util";
 import {
   PrismaClient,
   StructureType as DbStructureType,
+  TransformationType as DbTransformationType,
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 import {
+  LegacyHudaTransformationType,
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
@@ -16,10 +18,19 @@ type StructureWithDnaCodes = Awaited<
   ReturnType<typeof findStructuresByCurrentDnaCodes>
 >[number];
 
-const HUDA_CADA_TRANSFORMATION_TYPES: TransformationType[] = [
-  TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-  TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
-  TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
+const HUDA_CADA_TRANSFORMATION_TYPES: DbTransformationType[] = [
+  TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
+  TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
+  TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE,
+  TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_EXISTANT,
+  TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+  TransformationType.TRANSFO_HUDA_CONTRACTION_REMISE_EN_CONCURRENCE,
+
+  /* Des transfos en cours portent encore ces types : les omettre ferait créer au cron
+   * une seconde transformation sur un HUDA déjà engagé. À retirer avec l'enum. */
+  LegacyHudaTransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+  LegacyHudaTransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
+  LegacyHudaTransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
 ];
 
 export type StructureCandidate = {
@@ -182,7 +193,11 @@ export const resolveHudas = async (
         failure: { reason: `code Bhasile ${codeBhasile} inconnu en base` },
       };
     }
-    const failureReason = checkStructure(structure, StructureType.HUDA, effectiveDate);
+    const failureReason = checkStructure(
+      structure,
+      StructureType.HUDA,
+      effectiveDate
+    );
     if (failureReason) {
       return { ok: false, failure: { reason: failureReason } };
     }
@@ -204,7 +219,11 @@ export const resolveHudas = async (
   }
 
   for (const structure of byDnaCodes.value) {
-    const failureReason = checkStructure(structure, StructureType.HUDA, effectiveDate);
+    const failureReason = checkStructure(
+      structure,
+      StructureType.HUDA,
+      effectiveDate
+    );
     if (failureReason) {
       return {
         ok: false,
@@ -239,7 +258,8 @@ type TargetCadaInput = {
   departement: string | null;
 };
 
-// TODO : reprendre plus tard lorsque l'app gèrera 2+ structures destinatrices
+/* L'app accepte plusieurs CADA destinataires, pas l'import : un dossier qui en désigne
+ * plusieurs part en anomalie plutôt que d'en choisir un au hasard. */
 export const resolveTargetCada = async (
   prisma: PrismaClient,
   { rawBhasileCode, rawDnaCodes, departement }: TargetCadaInput,
@@ -268,7 +288,11 @@ export const resolveTargetCada = async (
         failure: { reason: `${codeBhasile} inconnu en base` },
       };
     }
-    const failureReason = checkStructure(structure, StructureType.CADA, effectiveDate);
+    const failureReason = checkStructure(
+      structure,
+      StructureType.CADA,
+      effectiveDate
+    );
     if (failureReason) {
       return { ok: false, failure: { reason: failureReason } };
     }
@@ -308,7 +332,11 @@ export const resolveTargetCada = async (
   }
 
   const [structure] = structures;
-  const failureReason = checkStructure(structure, StructureType.CADA, effectiveDate);
+  const failureReason = checkStructure(
+    structure,
+    StructureType.CADA,
+    effectiveDate
+  );
   if (failureReason) {
     return {
       ok: false,

@@ -205,7 +205,7 @@ const buildCadaBrique = async (
   const effectiveDateIso = effectiveDate.toISOString();
 
   if (
-    type === TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
+    type === TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU
   ) {
     /* « Même opérateur » : le nouveau CADA reprend celui des HUDA fermés, plus fiable
      * qu'un rapprochement sur le SIRET. Des opérateurs divergents contredisent le cas de figure. */

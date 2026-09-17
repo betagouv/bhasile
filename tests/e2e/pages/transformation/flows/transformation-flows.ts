@@ -21,6 +21,7 @@ import {
 import {
   pickStructures,
   selectFirstOption,
+  selectHudaDepartureKind,
   selectSources,
   selectTransformationType,
   submitSelection,
@@ -155,9 +156,10 @@ export const runHudaToNewCada = async (
 ): Promise<number> => {
   const context = creationContext([params.dnaCode]);
   await enterViaHudaCta(page);
+  await selectHudaDepartureKind(page, "fermeture");
   await selectTransformationType(
     page,
-    TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
+    TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU
   );
   await selectSources(page, { structureIds: params.hudaSourceIds });
   await submitSelection(page);
@@ -176,9 +178,10 @@ export const runHudaToExistingCada = async (
   params: { hudaSourceIds: number[]; cadaTargetId: number }
 ): Promise<number> => {
   await enterViaHudaCta(page);
+  await selectHudaDepartureKind(page, "fermeture");
   await selectTransformationType(
     page,
-    TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
+    TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT
   );
   await selectSources(page, { structureIds: params.hudaSourceIds });
   await pickStructures(page, [params.cadaTargetId]);
