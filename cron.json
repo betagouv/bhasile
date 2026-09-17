@@ -11,6 +11,10 @@
     {
       "command": "0 6 1 * * yarn cronify fill-monthly-reporting",
       "size": "S"
+    },
+    {
+      "command": "0 4 * * * yarn cronify brevo-push-users",
+      "size": "S"
     }
   ]
 }
