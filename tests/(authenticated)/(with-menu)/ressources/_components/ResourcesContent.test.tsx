@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ResourcesContent } from "@/app/(authenticated)/(with-menu)/ressources/_components/ResourcesContent";
+import { useFaq } from "@/app/hooks/useFaq";
 import { Block, FaqBlock, FilesBlock } from "@/types/ressources.type";
 
 const searchParams = { value: new URLSearchParams() };
@@ -14,6 +15,10 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ setFetchState: vi.fn() }),
+}));
+
+vi.mock("@/app/hooks/useFaq", () => ({
+  useFaq: vi.fn(),
 }));
 
 const FILES_BLOCK: FilesBlock = {
@@ -58,28 +63,48 @@ const FAQ_BLOCK: FaqBlock = {
     {
       id: "faq--cpom",
       title: "CPOM",
-      // questions: [
-      //   {
-      //     id: "faq--cpom--duree",
-      //     title: "Quelle est la durée d’un CPOM ?",
-      //     answerHtml: "<p>Cinq ans.</p>",
-      //     searchText: "faq cpom quelle est la duree d un cpom cinq ans",
-      //   },
-      // ],
+      items: [
+        {
+          id: 1,
+          question: "Quelle est la durée d’un CPOM ?",
+          contentMarkdown: "Cinq ans.",
+          category: "CPOM",
+        },
+      ],
     },
   ],
 };
 
 const BLOCKS: Block[] = [FILES_BLOCK, FAQ_BLOCK];
 
-const renderWithSearch = (search: string) => {
-  searchParams.value = new URLSearchParams(search ? { search } : {});
+const renderWithSearch = (
+  searchQuery: string,
+  customBlocks: Block[] = BLOCKS
+) => {
+  searchParams.value = new URLSearchParams(
+    searchQuery ? { search: searchQuery } : {}
+  );
   return render(
-    <ResourcesContent blocks={BLOCKS} suggestions={["CPOM", "OFII"]} />
+    <ResourcesContent blocks={customBlocks} suggestions={["CPOM", "OFII"]} />
   );
 };
 
 describe("ResourcesContent", () => {
+  beforeEach(() => {
+    const mockFaqItems = [
+      {
+        id: 1,
+        question: "Quelle est la durée d’un CPOM ?",
+        contentMarkdown: "Cinq ans.",
+        category: "CPOM",
+      },
+    ] as unknown as ReturnType<typeof useFaq>["faqItems"];
+
+    vi.mocked(useFaq).mockReturnValue({
+      faqItems: mockFaqItems,
+    });
+  });
+
   it("affiche tous les blocs quand aucune recherche n’est active", () => {
     // WHEN
     renderWithSearch("");
@@ -163,12 +188,14 @@ describe("ResourcesContent", () => {
     ).toBeInTheDocument();
   });
 
-  it("affiche un message dédié quand aucun contenu n’est publié", () => {
+  it("affiche le message d’absence de contenu lorsqu’aucun bloc ni FAQ n’est disponible", () => {
     // GIVEN
-    searchParams.value = new URLSearchParams();
+    vi.mocked(useFaq).mockReturnValue({
+      faqItems: undefined,
+    });
 
-    // WHEN
-    render(<ResourcesContent blocks={[]} suggestions={[]} />);
+    // WHEN - On fournit un tableau de blocks vide
+    renderWithSearch("", []);
 
     // THEN
     expect(

@@ -1,9 +1,9 @@
-import { readdirSync, readFileSync, Stats, statSync } from "fs";
 import MarkdownIt, { type Token } from "markdown-it";
 import path from "path";
 import { z } from "zod";
 
 import { normalizeWords } from "@/app/utils/string.util";
+import { listS3Objects, readS3File, statS3Object } from "@/lib/minio";
 import {
   Block,
   FilesBlock,
@@ -13,8 +13,7 @@ import {
   Section,
 } from "@/types/ressources.type";
 
-const CONTENT_DIR = "content/ressources";
-const PUBLIC_DIR = "public";
+const DOCS_BUCKET_NAME = process.env.DOCS_BUCKET_NAME ?? "";
 const SUGGESTIONS_FILE = "_suggestions.md";
 const BLOCK_FILE_PATTERN = /^\d+-.+\.md$/;
 const ABSOLUTE_URL_PATTERN = /^[a-z][a-z0-9+.-]*:/i;
@@ -35,39 +34,49 @@ const FrontmatterSchema = z.object({
   icone: z.enum(BLOCK_ICONS),
 });
 
-export const parseBlock = (
+export const parseBlock = async (
   source: string,
   blockId: string,
   measureFile: MeasureFile
-): FilesBlock => {
+): Promise<FilesBlock> => {
   const { frontmatter, body } = splitFrontmatter(source);
   const meta = FrontmatterSchema.parse(frontmatter);
   const groups = groupByTab(markdown.parse(body, {}));
   const base = { id: blockId, title: meta.titre, icon: meta.icone };
 
-  const tabs = groups
-    .map((group) => buildFilesTab(group, blockId, meta.titre, measureFile))
-    .filter((tab) => tab.sections.length > 0);
+  const tabsArray = await Promise.all(
+    groups.map((group) =>
+      buildFilesTab(group, blockId, meta.titre, measureFile)
+    )
+  );
+
+  const tabs = tabsArray.filter((tab) => tab.sections.length > 0);
   checkTabs(tabs, meta.titre);
 
   return { ...base, type: "fichiers", tabs };
 };
 
-export const readBlocks = (): Block[] => {
-  const directory = path.join(process.cwd(), CONTENT_DIR);
+export const readBlocks = async (): Promise<Block[]> => {
+  const objectKeys = await listS3Objects(DOCS_BUCKET_NAME);
 
-  const blocks = readdirSync(directory)
-    .filter((fileName) => BLOCK_FILE_PATTERN.test(fileName))
-    .sort((fileName, otherFileName) =>
-      fileName.localeCompare(otherFileName, "fr", { numeric: true })
-    )
-    .map((fileName) =>
-      parseBlock(
-        readFileSync(path.join(directory, fileName), "utf8"),
-        slugify(fileName.replace(/^\d+-/, "").replace(/\.md$/, "")),
-        measurePublicFile
-      )
+  const matchingKeys = objectKeys
+    .filter((objectKey) => BLOCK_FILE_PATTERN.test(path.basename(objectKey)))
+    .sort((firstKey, secondKey) =>
+      path.basename(firstKey).localeCompare(path.basename(secondKey), "fr", {
+        numeric: true,
+      })
     );
+
+  const blocks = await Promise.all(
+    matchingKeys.map(async (objectKey) => {
+      const fileName = path.basename(objectKey);
+      const content = await readS3File(objectKey, DOCS_BUCKET_NAME);
+      const blockId = slugify(
+        fileName.replace(/^\d+-/, "").replace(/\.md$/, "")
+      );
+      return parseBlock(content, blockId, measureS3File);
+    })
+  );
 
   const duplicateId = findDuplicateId(blocks.map((block) => block.id));
   if (duplicateId) {
@@ -79,35 +88,33 @@ export const readBlocks = (): Block[] => {
   return blocks;
 };
 
-export const readSuggestions = (): string[] =>
-  readFileSync(path.join(process.cwd(), CONTENT_DIR, SUGGESTIONS_FILE), "utf8")
+export const readSuggestions = async (): Promise<string[]> => {
+  const suggestionsKey = SUGGESTIONS_FILE;
+  const content = await readS3File(suggestionsKey, DOCS_BUCKET_NAME);
+
+  return content
     .split("\n")
     .filter((line) => line.startsWith("- "))
     .map((line) => line.slice(2).trim());
+};
 
-export const measurePublicFile: MeasureFile = (href) => {
-  const publicRoot = path.resolve(process.cwd(), PUBLIC_DIR);
-  const absolutePath = path.resolve(publicRoot, decodeHref(href));
+export const measureS3File = async (
+  href: string
+): Promise<{ extension: string; bytes: number }> => {
+  const objectKey = decodeHref(href);
 
-  if (
-    absolutePath !== publicRoot &&
-    !absolutePath.startsWith(publicRoot + path.sep)
-  ) {
+  try {
+    const stats = await statS3Object(objectKey, DOCS_BUCKET_NAME);
+
+    return {
+      extension: path.extname(objectKey).slice(1).toUpperCase(),
+      bytes: stats.size,
+    };
+  } catch {
     throw new Error(
-      `Lien invalide : « ${href} » sort du dossier ${PUBLIC_DIR}/, il ne serait pas servi en ligne.`
+      `Lien mort : « ${href} » ne correspond à aucun fichier dans le bucket ${DOCS_BUCKET_NAME}.`
     );
   }
-
-  const stats = readFileStats(absolutePath, href);
-
-  if (!stats.isFile()) {
-    throw new Error(`Lien invalide : « ${href} » ne désigne pas un fichier.`);
-  }
-
-  return {
-    extension: path.extname(absolutePath).slice(1).toUpperCase(),
-    bytes: stats.size,
-  };
 };
 
 const decodeHref = (href: string): string => {
@@ -116,16 +123,6 @@ const decodeHref = (href: string): string => {
   } catch {
     throw new Error(
       `Lien invalide : « ${href} » contient une séquence d'échappement mal formée.`
-    );
-  }
-};
-
-const readFileStats = (absolutePath: string, href: string): Stats => {
-  try {
-    return statSync(absolutePath);
-  } catch {
-    throw new Error(
-      `Lien mort : « ${href} » ne correspond à aucun fichier dans ${PUBLIC_DIR}/.`
     );
   }
 };
@@ -204,30 +201,37 @@ const splitOnHeading = (tokens: Token[], tag: "h2" | "h3"): HeadingSplit => {
   return { before, sections };
 };
 
-const buildFilesTab = (
+const buildFilesTab = async (
   group: TabGroup,
   blockId: string,
   blockTitle: string,
   measureFile: MeasureFile
-): FilesTab => {
+): Promise<FilesTab> => {
   const tabId = `${blockId}--${slugify(group.title)}`;
 
-  const buildSection = (title: string | null, tokens: Token[]): Section => ({
+  const buildSection = async (
+    title: string | null,
+    tokens: Token[]
+  ): Promise<Section> => ({
     id: `${tabId}--${slugify(title ?? "sans-titre")}`,
     title,
-    links: extractLinks(tokens).map((link) =>
-      buildLink(link, measureFile, [
-        blockTitle,
-        group.title,
-        title ?? "",
-        link.label,
-      ])
+    links: await Promise.all(
+      extractLinks(tokens).map((link) =>
+        buildLink(link, measureFile, [
+          blockTitle,
+          group.title,
+          title ?? "",
+          link.label,
+        ])
+      )
     ),
   });
 
-  const rootSection = buildSection(null, group.tokens);
-  const titledSections = group.subSections.map((subSection) =>
-    buildSection(subSection.title, subSection.tokens)
+  const rootSection = await buildSection(null, group.tokens);
+  const titledSections = await Promise.all(
+    group.subSections.map((subSection) =>
+      buildSection(subSection.title, subSection.tokens)
+    )
   );
   const sections = [rootSection, ...titledSections].filter(
     (section) => section.links.length > 0
@@ -254,13 +258,15 @@ const buildFilesTab = (
   return { id: tabId, title: group.title, sections };
 };
 
-const buildLink = (
+const buildLink = async (
   link: { label: string; href: string },
   measureFile: MeasureFile,
   ancestors: string[]
-): Link => ({
+): Promise<Link> => ({
   ...link,
-  file: ABSOLUTE_URL_PATTERN.test(link.href) ? null : measureFile(link.href),
+  file: ABSOLUTE_URL_PATTERN.test(link.href)
+    ? null
+    : await measureFile(link.href),
   searchText: buildSearchText(ancestors),
 });
 
