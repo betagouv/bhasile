@@ -1,17 +1,23 @@
-import { rmSync, writeFileSync } from "fs";
-import path from "path";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { type BucketItemStat } from "minio";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { filterBlocks } from "@/app/utils/ressources.util";
+import { listS3Objects, readS3File, statS3Object } from "@/lib/minio";
 import { FilesBlock, MeasureFile } from "@/types/ressources.type";
 import {
-  measurePublicFile,
+  measureS3File,
   parseBlock,
   readBlocks,
   readSuggestions,
 } from "@/utils-server/ressources.server.util";
 
-const measureFileStub: MeasureFile = (href) => ({
+vi.mock("@/lib/minio", () => ({
+  listS3Objects: vi.fn(),
+  readS3File: vi.fn(),
+  statS3Object: vi.fn(),
+}));
+
+const measureFileStub: MeasureFile = async (href) => ({
   extension: href.split(".").pop()?.toUpperCase() ?? "",
   bytes: 1024,
 });
@@ -25,7 +31,7 @@ icone: fr-icon-file-text-line
 
 describe("ressources server util", () => {
   describe("parseBlock", () => {
-    it("place les liens écrits directement sous un ## dans une section sans titre", () => {
+    it("place les liens écrits directement sous un ## dans une section sans titre", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -34,11 +40,11 @@ describe("ressources server util", () => {
 `;
 
       // WHEN
-      const block = parseBlock(
+      const block = (await parseBlock(
         source,
         "modeles",
         measureFileStub
-      ) as FilesBlock;
+      )) as FilesBlock;
 
       // THEN
       expect(block.tabs).toHaveLength(1);
@@ -51,7 +57,7 @@ describe("ressources server util", () => {
       });
     });
 
-    it("recompose le libellé d’un lien qui contient du balisage inline", () => {
+    it("recompose le libellé d’un lien qui contient du balisage inline", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -60,11 +66,11 @@ describe("ressources server util", () => {
 `;
 
       // WHEN
-      const block = parseBlock(
+      const block = (await parseBlock(
         source,
         "modeles",
         measureFileStub
-      ) as FilesBlock;
+      )) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections[0].links[0]).toMatchObject({
@@ -74,7 +80,7 @@ describe("ressources server util", () => {
       });
     });
 
-    it("extrait chacun des liens écrits sur une même ligne", () => {
+    it("extrait chacun des liens écrits sur une même ligne", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -83,11 +89,11 @@ describe("ressources server util", () => {
 `;
 
       // WHEN
-      const block = parseBlock(
+      const block = (await parseBlock(
         source,
         "modeles",
         measureFileStub
-      ) as FilesBlock;
+      )) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections[0].links).toMatchObject([
@@ -96,7 +102,7 @@ describe("ressources server util", () => {
       ]);
     });
 
-    it("crée une section titrée par ### et conserve l’ordre d’écriture", () => {
+    it("crée une section titrée par ### et conserve l’ordre d’écriture", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -111,11 +117,11 @@ describe("ressources server util", () => {
 `;
 
       // WHEN
-      const block = parseBlock(
+      const block = (await parseBlock(
         source,
         "modeles",
         measureFileStub
-      ) as FilesBlock;
+      )) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections.map((section) => section.title)).toEqual([
@@ -124,7 +130,7 @@ describe("ressources server util", () => {
       ]);
     });
 
-    it("écarte une section qui ne contient aucun lien", () => {
+    it("écarte une section qui ne contient aucun lien", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -139,11 +145,11 @@ Du texte sans aucun lien.
 `;
 
       // WHEN
-      const block = parseBlock(
+      const block = (await parseBlock(
         source,
         "modeles",
         measureFileStub
-      ) as FilesBlock;
+      )) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections.map((section) => section.title)).toEqual([
@@ -151,7 +157,7 @@ Du texte sans aucun lien.
       ]);
     });
 
-    it("recopie les titres du bloc, de l’onglet et de la section dans le searchText du lien", () => {
+    it("recopie les titres du bloc, de l’onglet et de la section dans le searchText du lien", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -162,11 +168,11 @@ Du texte sans aucun lien.
 `;
 
       // WHEN
-      const block = parseBlock(
+      const block = (await parseBlock(
         source,
         "modeles",
         measureFileStub
-      ) as FilesBlock;
+      )) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections[0].links[0].searchText).toBe(
@@ -174,23 +180,23 @@ Du texte sans aucun lien.
       );
     });
 
-    it("laisse un lien externe sans fichier et ne tente pas de le mesurer", () => {
+    it("laisse un lien externe sans fichier et ne tente pas de le mesurer", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Webinaires
 
 - [Webinaire du 12 mars](https://webinaire.gouv.fr/xyz)
 `;
-      const measureForbidden: MeasureFile = () => {
+      const measureForbidden: MeasureFile = async () => {
         throw new Error("measureFile ne doit pas être appelé");
       };
 
       // WHEN
-      const block = parseBlock(
+      const block = (await parseBlock(
         source,
         "ressources",
         measureForbidden
-      ) as FilesBlock;
+      )) as FilesBlock;
 
       // THEN
       expect(block.tabs[0].sections[0].links[0]).toMatchObject({
@@ -200,17 +206,17 @@ Du texte sans aucun lien.
       });
     });
 
-    it("rejette un fichier sans frontmatter", () => {
+    it("rejette un fichier sans frontmatter", async () => {
       // GIVEN
       const source = `## Actes administratifs\n\n- [Arrêté](/arrete.odt)\n`;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /Frontmatter absent/
-      );
+      await expect(
+        parseBlock(source, "modeles", measureFileStub)
+      ).rejects.toThrow(/Frontmatter absent/);
     });
 
-    it("rejette un type de bloc inconnu", () => {
+    it("rejette un type de bloc inconnu", async () => {
       // GIVEN
       const source = `---
 type: video
@@ -222,20 +228,22 @@ icone: fr-icon-play-line
 `;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "videos", measureFileStub)).toThrow();
+      await expect(
+        parseBlock(source, "videos", measureFileStub)
+      ).rejects.toThrow();
     });
 
-    it("rejette un bloc sans aucun onglet", () => {
+    it("rejette un bloc sans aucun onglet", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}`;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /aucun onglet/
-      );
+      await expect(
+        parseBlock(source, "modeles", measureFileStub)
+      ).rejects.toThrow(/aucun onglet/);
     });
 
-    it("rejette un bloc dont tous les onglets sont vides", () => {
+    it("rejette un bloc dont tous les onglets sont vides", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Onglet sans lien
@@ -244,12 +252,12 @@ Du texte, mais aucun lien à télécharger.
 `;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /aucun onglet exploitable/
-      );
+      await expect(
+        parseBlock(source, "modeles", measureFileStub)
+      ).rejects.toThrow(/aucun onglet exploitable/);
     });
 
-    it("rejette du contenu placé avant le premier onglet", () => {
+    it("rejette du contenu placé avant le premier onglet", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 Une introduction orpheline.
@@ -260,12 +268,12 @@ Une introduction orpheline.
 `;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /avant le premier onglet/
-      );
+      await expect(
+        parseBlock(source, "modeles", measureFileStub)
+      ).rejects.toThrow(/avant le premier onglet/);
     });
 
-    it("rejette un sous-titre placé avant tout onglet", () => {
+    it("rejette un sous-titre placé avant tout onglet", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ### Sous-titre orphelin
@@ -274,12 +282,12 @@ Une introduction orpheline.
 `;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /avant le premier onglet/
-      );
+      await expect(
+        parseBlock(source, "modeles", measureFileStub)
+      ).rejects.toThrow(/avant le premier onglet/);
     });
 
-    it("rejette deux onglets portant le même titre dans un bloc", () => {
+    it("rejette deux onglets portant le même titre dans un bloc", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -292,12 +300,12 @@ Une introduction orpheline.
 `;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /deux onglets portent le même titre/
-      );
+      await expect(
+        parseBlock(source, "modeles", measureFileStub)
+      ).rejects.toThrow(/deux onglets portent le même titre/);
     });
 
-    it("rejette deux sous-titres identiques dans un onglet", () => {
+    it("rejette deux sous-titres identiques dans un onglet", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -312,12 +320,12 @@ Une introduction orpheline.
 `;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /deux sous-titres identiques/
-      );
+      await expect(
+        parseBlock(source, "modeles", measureFileStub)
+      ).rejects.toThrow(/deux sous-titres identiques/);
     });
 
-    it("rejette deux liens pointant vers le même fichier dans une section", () => {
+    it("rejette deux liens pointant vers le même fichier dans une section", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -327,12 +335,12 @@ Une introduction orpheline.
 `;
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFileStub)).toThrow(
-        /est listé deux fois dans la même section/
-      );
+      await expect(
+        parseBlock(source, "modeles", measureFileStub)
+      ).rejects.toThrow(/est listé deux fois dans la même section/);
     });
 
-    it("accepte le même fichier référencé dans deux sections distinctes", () => {
+    it("accepte le même fichier référencé dans deux sections distinctes", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
@@ -347,86 +355,112 @@ Une introduction orpheline.
 `;
 
       // WHEN / THEN
-      expect(() =>
+      await expect(
         parseBlock(source, "modeles", measureFileStub)
-      ).not.toThrow();
+      ).resolves.not.toThrow();
     });
 
-    it("propage l’erreur de mesure quand un lien pointe vers un fichier absent", () => {
+    it("propage l’erreur de mesure quand un lien pointe vers un fichier absent", async () => {
       // GIVEN
       const source = `${FILES_FRONTMATTER}
 ## Actes administratifs
 
 - [Arrêté](/absent.odt)
 `;
-      const measureFailing: MeasureFile = () => {
+      const measureFailing: MeasureFile = async () => {
         throw new Error("Lien mort : « /absent.odt »");
       };
 
       // WHEN / THEN
-      expect(() => parseBlock(source, "modeles", measureFailing)).toThrow(
+      await expect(
+        parseBlock(source, "modeles", measureFailing)
+      ).rejects.toThrow(/Lien mort/);
+    });
+  });
+
+  describe("measureS3File", () => {
+    const FIXTURE_NAME = "test-fixture mesure fichier.pdf";
+
+    it("mesure un fichier du bucket S3 dont le nom contient des espaces encodées", async () => {
+      // GIVEN
+      vi.mocked(statS3Object).mockResolvedValueOnce({
+        size: 2048,
+      } as BucketItemStat);
+
+      // WHEN
+      const file = await measureS3File(`/${encodeURIComponent(FIXTURE_NAME)}`);
+
+      // THEN
+      expect(file).toEqual({ extension: "PDF", bytes: 2048 });
+      expect(statS3Object).toHaveBeenCalledWith(
+        FIXTURE_NAME,
+        expect.any(String)
+      );
+    });
+
+    it("rejette une séquence d’échappement mal formée", async () => {
+      // WHEN / THEN
+      await expect(measureS3File("/rapport%zz.pdf")).rejects.toThrow(
+        /mal formée/
+      );
+    });
+
+    it("rejette un fichier absent du bucket", async () => {
+      // GIVEN
+      vi.mocked(statS3Object).mockRejectedValueOnce(
+        new Error("File not found")
+      );
+
+      // WHEN / THEN
+      await expect(measureS3File("/introuvable.odt")).rejects.toThrow(
         /Lien mort/
       );
     });
   });
 
-  describe("measurePublicFile", () => {
-    const FIXTURE_NAME = "test-fixture mesure fichier.pdf";
-    const fixturePath = path.join(process.cwd(), "public", FIXTURE_NAME);
+  describe("contenu distant S3", () => {
+    const MOCK_FILES: Record<string, string> = {
+      "01-modeles.md": `${FILES_FRONTMATTER}
+## Actes administratifs — HUDA / CADA
 
-    beforeAll(() => writeFileSync(fixturePath, "x".repeat(2048)));
-    afterAll(() => rmSync(fixturePath, { force: true }));
+### Structures autorisées
 
-    it("mesure un fichier de public/ dont le nom contient des espaces encodées", () => {
+- [Arrêté d’autorisation](/07-Fiche_de_parametrage_OFII-transformation_parc.xlsx)
+`,
+      "_suggestions.md": `- huda cada\n`,
+    };
+
+    beforeAll(() => {
+      vi.mocked(listS3Objects).mockResolvedValue(Object.keys(MOCK_FILES));
+      vi.mocked(statS3Object).mockResolvedValue({
+        size: 1024,
+      } as BucketItemStat);
+      vi.mocked(readS3File).mockImplementation(async (objectKey) => {
+        const content = MOCK_FILES[objectKey];
+        if (!content) {
+          throw new Error(`Fichier introuvable sur S3 : ${objectKey}`);
+        }
+        return content;
+      });
+    });
+
+    it("parse tous les blocs depuis S3 sans erreur", async () => {
+      // WHEN / THEN
+      await expect(readBlocks()).resolves.not.toThrow();
+    });
+
+    it("produit des identifiants d’onglets uniques", async () => {
       // WHEN
-      const file = measurePublicFile(`/${encodeURIComponent(FIXTURE_NAME)}`);
+      const blocks = await readBlocks();
+      const tabIds = blocks.flatMap((block) => block.tabs.map((tab) => tab.id));
 
       // THEN
-      expect(file).toEqual({ extension: "PDF", bytes: 2048 });
+      expect(new Set(tabIds).size).toBe(tabIds.length);
     });
 
-    it("rejette un chemin qui sort du dossier public", () => {
-      // WHEN / THEN
-      expect(() => measurePublicFile("/../package.json")).toThrow(
-        /sort du dossier/
-      );
-    });
-
-    it("rejette un chemin qui ne désigne pas un fichier", () => {
-      // WHEN / THEN
-      expect(() => measurePublicFile("/")).toThrow(/ne désigne pas un fichier/);
-    });
-
-    it("rejette une séquence d’échappement mal formée", () => {
-      // WHEN / THEN
-      expect(() => measurePublicFile("/rapport%zz.pdf")).toThrow(/mal formée/);
-    });
-
-    it("rejette un fichier absent de public/", () => {
-      // WHEN / THEN
-      expect(() => measurePublicFile("/introuvable.odt")).toThrow(/Lien mort/);
-    });
-  });
-
-  describe("contenu réel du dépôt", () => {
-    it("parse tous les blocs de content/ressources sans lien mort", () => {
-      // WHEN / THEN
-      expect(() => readBlocks()).not.toThrow();
-    });
-
-    it("produit des identifiants d’onglets uniques", () => {
-      // WHEN
-      const ids = readBlocks().flatMap((block) =>
-        block.tabs.map((tab) => tab.id)
-      );
-
-      // THEN
-      expect(new Set(ids).size).toBe(ids.length);
-    });
-
-    it("retrouve un onglet ponctué d’un tiret cadratin quand on tape les mots sans ponctuation", () => {
+    it("retrouve un onglet ponctué d’un tiret cadratin quand on tape les mots sans ponctuation", async () => {
       // GIVEN
-      const blocks = readBlocks();
+      const blocks = await readBlocks();
 
       // WHEN
       const result = filterBlocks(blocks, "huda cada");
@@ -435,12 +469,13 @@ Une introduction orpheline.
       expect(result.length).toBeGreaterThan(0);
     });
 
-    it("propose des recherches suggérées qui remontent au moins un résultat", () => {
+    it("propose des recherches suggérées qui remontent au moins un résultat", async () => {
       // GIVEN
-      const blocks = readBlocks();
+      const blocks = await readBlocks();
+      const suggestions = await readSuggestions();
 
       // WHEN
-      const suggestionsWithoutResult = readSuggestions().filter(
+      const suggestionsWithoutResult = suggestions.filter(
         (suggestion) => filterBlocks(blocks, suggestion).length === 0
       );
 

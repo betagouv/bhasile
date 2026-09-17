@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { ReactElement } from "react";
 
 import { getFaqItems } from "@/app/api/faq/faq.service";
+import { FaqApiType } from "@/schemas/api/faq.schema";
 import { Block, FaqBlock } from "@/types/ressources.type";
 
 import { ResourcesContent } from "./ResourcesContent";
@@ -15,12 +16,15 @@ export const ResourcesBlockList = async ({
   const validFaqItems = Array.isArray(faqItems) ? faqItems : [];
 
   const uniqueCategories = Array.from(
-    new Set(validFaqItems.map((faqItem) => faqItem.category))
+    new Set(validFaqItems.map((faqItem: FaqApiType) => faqItem.category))
   );
 
   const dynamicTabs = uniqueCategories.map((categoryName, categoryIndex) => ({
     id: `faq-tab-${categoryIndex}`,
     title: categoryName,
+    items: validFaqItems.filter(
+      (faqItem: FaqApiType) => faqItem.category === categoryName
+    ),
   }));
 
   const faqBlock: FaqBlock = {
