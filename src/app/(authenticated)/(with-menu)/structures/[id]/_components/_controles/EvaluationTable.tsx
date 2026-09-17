@@ -2,6 +2,7 @@ import { Table } from "@codegouvfr/react-dsfr/Table";
 import { ReactElement } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { SeeFileButton } from "@/app/components/common/SeeFileButton";
 import { formatDate } from "@/app/utils/date.util";
 import { EVALUATION_NOTES_START_YEAR, MAX_EXPORT_ITEMS } from "@/constants";
@@ -21,16 +22,44 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
         {formatDate(evaluation.date)}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.notePersonne ?? <EmptyCell />}
+        {evaluation.notePersonne ? (
+          <>
+            <NumberDisplay value={evaluation.notePersonne} />
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ) : (
+          <EmptyCell />
+        )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.notePro ?? <EmptyCell />}
+        {evaluation.notePro ? (
+          <>
+            <NumberDisplay value={evaluation.notePro} />
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ) : (
+          <EmptyCell />
+        )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.noteStructure ?? <EmptyCell />}
+        {evaluation.noteStructure ? (
+          <>
+            <NumberDisplay value={evaluation.noteStructure} />
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ) : (
+          <EmptyCell />
+        )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.note ?? <EmptyCell />}
+        {evaluation.note ? (
+          <>
+            <NumberDisplay value={evaluation.note} />
+            <span className="text-disabled-grey">&nbsp;/4</span>
+          </>
+        ) : (
+          <EmptyCell />
+        )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
         <SeeFileButton

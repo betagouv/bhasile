@@ -26,7 +26,7 @@ export const HeaderMainContent = (): ReactElement => {
           {nom ? (
             <>
               –
-              <span className="mb-0 text-title-grey text-lg italic font-normal">
+              <span className="mb-0 text-title-grey text-lg italic font-normal text-ellipsis whitespace-nowrap overflow-hidden">
                 {nom}
               </span>
             </>

@@ -21,11 +21,11 @@ Somme des activités **effectivement déclarées** pour chaque mois.
 
 ## Scopes type
 
-| Indicateur                                     | Structures              |
-| ---------------------------------------------- | ----------------------- |
-| `placesEnregistreesDna`                        | Toutes                  |
-| Indisponibilités + motifs, `placesDisponibles` | Toutes sauf CAES        |
-| Présences indues                               | Toutes sauf CAES et CPH |
+| Indicateur                                    | Structures              |
+| --------------------------------------------- | ----------------------- |
+| `placesEnregistreesDna`                       | Toutes                  |
+| Indisponibilité + motifs, `placesDisponibles` | Toutes sauf CAES        |
+| Présences indues                              | Toutes sauf CAES et CPH |
 
 Taux = ratio 0-1, `null` si dénominateur nul.
 

@@ -103,7 +103,7 @@ export const TypesPlacesStatsTable = ({
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
                 colSpan={placeYears.length + 1}
               >
-                <span className="sticky left-4 inline-block h-8 leading-8">
+                <span className="sticky left-4 inline-block h-5 leading-6">
                   {section.title}
                 </span>
               </td>
