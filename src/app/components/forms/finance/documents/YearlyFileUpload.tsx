@@ -114,8 +114,8 @@ export const YearlyFileUpload = ({
     ]
   );
 
-  const handleFileChange = useCallback((fileUpload?: FileUploadResponse) => {
-    setFileUpload(fileUpload);
+  const handleFileChange = useCallback((newFileUpload?: FileUploadResponse) => {
+    setFileUpload(newFileUpload);
   }, []);
 
   return (

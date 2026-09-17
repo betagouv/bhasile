@@ -59,8 +59,8 @@ export const DocumentsFinanciersItem = ({
     try {
       const link = await getDownloadLink(fileUpload.key);
       window.open(link, "_blank", "noopener,noreferrer");
-    } catch {
-      console.error("Erreur lors de la récupération du fichier");
+    } catch (error) {
+      console.error("Erreur lors de la récupération du fichier", error);
     }
   };
 
