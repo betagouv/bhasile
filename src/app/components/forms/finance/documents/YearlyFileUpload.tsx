@@ -10,6 +10,7 @@ import {
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
+import { FileUploadResponse } from "@/app/hooks/useFileUpload";
 import {
   DocumentFinancierFlexibleFormValues,
   DocumentsFinanciersFlexibleFormValues,
@@ -45,14 +46,14 @@ export const YearlyFileUpload = ({
   //  key is used to reset the drop zone when a document is added
   const [dropZoneKey, setDropZoneKey] = useState<string>(uuidv4());
 
-  const [key, setKey] = useState<string | undefined>();
+  const [fileUpload, setFileUpload] = useState<FileUploadResponse | undefined>();
   const [category, setCategory] = useState<
     DocumentFinancierCategory | undefined
   >();
   const [name, setName] = useState<string | undefined>();
 
   useEffect(() => {
-    if (key) {
+    if (fileUpload) {
       setShouldDisplayCategorySelect(true);
       setShouldDisplayAddButton(true);
     } else {
@@ -61,15 +62,15 @@ export const YearlyFileUpload = ({
       setCategory(undefined);
       setName(undefined);
     }
-  }, [key]);
+  }, [fileUpload]);
 
   useEffect(() => {
-    setShouldDisplayNameInput(!!key && category === "AUTRE_FINANCIER");
-  }, [key, category]);
+    setShouldDisplayNameInput(!!fileUpload && category === "AUTRE_FINANCIER");
+  }, [fileUpload, category]);
 
   useEffect(() => {
-    setShouldEnableAddButton(!!key && !!category);
-  }, [key, category]);
+    setShouldEnableAddButton(!!fileUpload && !!category);
+  }, [fileUpload, category]);
 
   const handleAddDocument = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -89,27 +90,33 @@ export const YearlyFileUpload = ({
       }
 
       append({
-        fileUploads: key ? [{ key }] : undefined,
+        fileUploads: fileUpload ? [fileUpload] : undefined,
         category,
         structureType,
         name,
         year,
       });
 
-      setKey(undefined);
+      setFileUpload(undefined);
       setCategory(undefined);
       setName(undefined);
       setDropZoneKey(uuidv4());
     },
-    [append, key, category, name, year, documentsFinanciers, remove, structureType]
+    [
+      append,
+      fileUpload,
+      category,
+      name,
+      year,
+      documentsFinanciers,
+      remove,
+      structureType,
+    ]
   );
 
-  const handleFileChange = useCallback(
-    ({ key }: { key?: string }) => {
-      setKey(key);
-    },
-    [setKey]
-  );
+  const handleFileChange = useCallback((fileUpload?: FileUploadResponse) => {
+    setFileUpload(fileUpload);
+  }, []);
 
   return (
     <div className="flex flex-col items-center gap-2">

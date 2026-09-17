@@ -55,8 +55,13 @@ export const DocumentsFinanciersItem = ({
     if (!fileUpload?.key) {
       return;
     }
-    const link = await getDownloadLink(fileUpload.key);
-    window.open(link, "_blank", "noopener,noreferrer");
+
+    try {
+      const link = await getDownloadLink(fileUpload.key);
+      window.open(link, "_blank", "noopener,noreferrer");
+    } catch {
+      console.error("Erreur lors de la récupération du fichier");
+    }
   };
 
   return (
