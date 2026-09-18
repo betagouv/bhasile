@@ -21,6 +21,11 @@ export const findActualisationForm = <
     (form) => form.formDefinition.slug === getActualisationFormSlug(year)
   );
 
+export const isInActualisationCampaign = (
+  forms: { formDefinition: { slug: string } }[] | undefined,
+  year: number | null
+): boolean => year !== null && !!findActualisationForm(forms, year);
+
 export const hasOpenActualisation = (
   forms: ActualisationStatusForm[] | undefined,
   year: number

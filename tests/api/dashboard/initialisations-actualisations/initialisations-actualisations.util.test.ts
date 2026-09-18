@@ -127,15 +127,53 @@ describe("getActualisationStatus", () => {
 
 describe("isOpen", () => {
   it("renvoie false quand les deux axes sont finalisés", () => {
-    expect(isOpen("FINALISEE", "FINALISEE")).toBe(false);
+    expect(
+      isOpen({
+        initialisationStatus: "FINALISEE",
+        actualisationStatus: "FINALISEE",
+        isInCampaign: true,
+      })
+    ).toBe(false);
   });
 
   it("renvoie true quand l'initialisation reste ouverte", () => {
-    expect(isOpen("A_FINALISER", "FINALISEE")).toBe(true);
+    expect(
+      isOpen({
+        initialisationStatus: "A_FINALISER",
+        actualisationStatus: "FINALISEE",
+        isInCampaign: true,
+      })
+    ).toBe(true);
   });
 
   it("renvoie true quand l'actualisation reste ouverte", () => {
-    expect(isOpen("FINALISEE", "EN_COURS")).toBe(true);
+    expect(
+      isOpen({
+        initialisationStatus: "FINALISEE",
+        actualisationStatus: "EN_COURS",
+        isInCampaign: true,
+      })
+    ).toBe(true);
+  });
+
+  it("garde une structure non finalisée absente de la campagne", () => {
+    expect(
+      isOpen({
+        initialisationStatus: "A_INITIALISER",
+        actualisationStatus: "A_DEBUTER",
+        isInCampaign: false,
+      })
+    ).toBe(true);
+  });
+
+  it("masque une structure finalisée absente de la campagne", () => {
+    expect(
+      isOpen({
+        initialisationStatus: "FINALISEE",
+        actualisationStatus: "A_DEBUTER",
+        isInCampaign: false,
+      })
+    ).toBe(false);
   });
 });
 
@@ -339,7 +377,9 @@ describe("buildDashboardRows", () => {
   });
 
   it("garde une structure finalisée dont l'actualisation reste à débuter", () => {
-    const structure = makeStructure({ forms: [finalisationForm(true)] });
+    const structure = makeStructure({
+      forms: [finalisationForm(true), actualisationForm(false)],
+    });
 
     const rows = buildDashboardRows([structure], baseOptions);
 
@@ -349,6 +389,31 @@ describe("buildDashboardRows", () => {
     expect(rows[0].actionUrl).toBe(
       "/structures/1/actualisation/2026/01-places"
     );
+  });
+
+  it("masque une structure finalisée absente de la campagne", () => {
+    const structure = makeStructure({ forms: [finalisationForm(true)] });
+
+    expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
+  });
+
+  it("masque une structure née d'une création absente de la campagne", () => {
+    const structure = makeStructure({
+      structureVersions: [
+        makeVersion({
+          structureVersionTransformationId: 9,
+          ...creationVersion(),
+        }),
+      ],
+    });
+
+    expect(buildDashboardRows([structure], baseOptions)).toHaveLength(0);
+    expect(
+      buildDashboardRows(
+        [{ ...structure, forms: [actualisationForm(false)] }],
+        baseOptions
+      )
+    ).toHaveLength(1);
   });
 
   it("trie les lignes par codeBhasile croissant", () => {

@@ -7,6 +7,7 @@ import {
 import {
   ActualisationStatusForm,
   findActualisationForm,
+  isInActualisationCampaign,
 } from "@/app/utils/actualisationForm.util";
 import { sortRows } from "@/app/utils/list.util";
 import {
@@ -57,11 +58,19 @@ export const getActualisationStatus = (
   return hasStartedStep ? "EN_COURS" : "A_DEBUTER";
 };
 
-export const isOpen = (
-  initialisationStatus: InitialisationStatus,
-  actualisationStatus: ActualisationStatus
-): boolean =>
-  initialisationStatus !== "FINALISEE" || actualisationStatus !== "FINALISEE";
+type RowState = {
+  initialisationStatus: InitialisationStatus;
+  actualisationStatus: ActualisationStatus;
+  isInCampaign: boolean;
+};
+
+export const isOpen = ({
+  initialisationStatus,
+  actualisationStatus,
+  isInCampaign,
+}: RowState): boolean =>
+  initialisationStatus !== "FINALISEE" ||
+  (isInCampaign && actualisationStatus !== "FINALISEE");
 
 export const getMostUrgentActionUrl = (
   structureId: number,
@@ -122,7 +131,13 @@ export const buildDashboardRows = (
       options.year
     );
 
-    if (!isOpen(initialisationStatus, actualisationStatus)) {
+    if (
+      !isOpen({
+        initialisationStatus,
+        actualisationStatus,
+        isInCampaign: isInActualisationCampaign(structure.forms, options.year),
+      })
+    ) {
       continue;
     }
 
