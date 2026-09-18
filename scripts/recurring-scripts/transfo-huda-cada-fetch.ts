@@ -444,8 +444,8 @@ const UNTOUCHED_STEP_STATUSES: DbStepStatus[] = [
 /* L'import ne pose jamais que PRE_REMPLI : tout autre statut vient d'un agent. */
 const isUntouchedDraft = (transformation: ImportedTransformation): boolean =>
   transformation.structureVersionTransformations.every(
-    (brique) =>
-      brique.form?.formSteps.every((formStep) =>
+    (structureVersionTransformation) =>
+      structureVersionTransformation.form?.formSteps.every((formStep) =>
         UNTOUCHED_STEP_STATUSES.includes(formStep.status)
       ) ?? true
   );
@@ -471,9 +471,11 @@ const reviewImportedTransformation = async (
   }
 
   const hudas = transformation.structureVersionTransformations
-    .map((brique) => ({
-      structureId: brique.structureVersion?.structureId,
-      codeBhasile: brique.structureVersion?.structure?.codeBhasile ?? "",
+    .map((structureVersionTransformation) => ({
+      structureId: structureVersionTransformation.structureVersion?.structureId,
+      codeBhasile:
+        structureVersionTransformation.structureVersion?.structure
+          ?.codeBhasile ?? "",
     }))
     .filter(
       (huda): huda is { structureId: number; codeBhasile: string } =>

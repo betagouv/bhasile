@@ -45,7 +45,7 @@ async function main() {
       SET "type" = ${to}::"public"."TransformationType"
       WHERE "type" = ${from}::"public"."TransformationType"
     `;
-    console.log(`  ${from} → ${to} : ${renamed} ligne(s).`);
+    console.log(`${from} → ${to} : ${renamed} ligne(s).`);
   }
 
   const residual = await prisma.transformation.count({

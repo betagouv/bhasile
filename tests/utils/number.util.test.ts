@@ -283,7 +283,7 @@ describe("number util", () => {
 });
 
 describe("parseStrictInt", () => {
-  it("lit un entier nu, espaces autour compris", () => {
+  it("lit un entier naturel, espaces autour compris", () => {
     expect(parseStrictInt("42")).toBe(42);
     expect(parseStrictInt("  42 ")).toBe(42);
     expect(parseStrictInt("0")).toBe(0);
