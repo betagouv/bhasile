@@ -1,14 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  countLinks,
-  filterBlocks,
-} from "@/app/utils/ressources.util";
-import {
-  Block,
-  FaqBlock,
-  FilesBlock,
-} from "@/types/ressources.type";
+import { countLinks, filterBlocks } from "@/app/utils/ressources.util";
+import { Block, FaqBlock, FilesBlock } from "@/types/ressources.type";
 
 const buildLink = (label: string, searchText: string) => ({
   label,
@@ -74,18 +67,8 @@ const FAQ_BLOCK: FaqBlock = {
   icon: "fr-icon-question-answer-line",
   type: "faq",
   tabs: [
-    {
-      id: "faq--cpom",
-      title: "CPOM",
-      questions: [
-        {
-          id: "faq--cpom--duree",
-          title: "Quelle est la durée d’un CPOM ?",
-          answerHtml: "<p>Cinq ans.</p>",
-          searchText: "faq cpom quelle est la duree d un cpom cinq ans",
-        },
-      ],
-    },
+    { id: "1", title: "Section 1" },
+    { id: "2", title: "Section 2" },
   ],
 };
 
@@ -101,22 +84,25 @@ describe("ressources filter", () => {
       expect(result).toEqual(BLOCKS);
     });
 
-    it("ne conserve que les liens dont le searchText contient le terme", () => {
+    it("ne conserve que les liens dont le searchText contient le terme et conserve le bloc FAQ", () => {
       // WHEN
-      const result = filterBlocks(BLOCKS, "budget") as FilesBlock[];
+      const result = filterBlocks(BLOCKS, "budget");
 
       // THEN
-      expect(result).toHaveLength(1);
-      expect(result[0].tabs).toHaveLength(1);
-      expect(result[0].tabs[0].title).toBe("Documents financiers");
+      expect(result).toHaveLength(2);
+      const filesBlock = result[0] as FilesBlock;
+      expect(filesBlock.tabs).toHaveLength(1);
+      expect(filesBlock.tabs[0].title).toBe("Documents financiers");
+      expect(result[1]).toEqual(FAQ_BLOCK);
     });
 
     it("conserve tout le contenu d’un onglet quand le terme correspond à son titre", () => {
       // WHEN
-      const result = filterBlocks(BLOCKS, "actes administratifs") as FilesBlock[];
+      const result = filterBlocks(BLOCKS, "actes administratifs");
 
       // THEN
-      expect(countLinks(result[0].tabs[0])).toBe(2);
+      const filesBlock = result[0] as FilesBlock;
+      expect(countLinks(filesBlock.tabs[0])).toBe(2);
     });
 
     it("ignore les accents et la casse", () => {
@@ -124,8 +110,8 @@ describe("ressources filter", () => {
       const result = filterBlocks(BLOCKS, "AUTORISEES");
 
       // THEN
-      expect(result).toHaveLength(1);
-      expect((result[0] as FilesBlock).tabs[0].sections[0].title).toBe(
+      const filesBlock = result[0] as FilesBlock;
+      expect(filesBlock.tabs[0].sections[0].title).toBe(
         "Structures autorisées"
       );
     });
@@ -135,7 +121,8 @@ describe("ressources filter", () => {
       const result = filterBlocks(BLOCKS, "administratifs actes");
 
       // THEN
-      expect(countLinks((result[0] as FilesBlock).tabs[0])).toBe(2);
+      const filesBlock = result[0] as FilesBlock;
+      expect(countLinks(filesBlock.tabs[0])).toBe(2);
     });
 
     it("exige que tous les mots de la recherche soient présents", () => {
@@ -143,10 +130,10 @@ describe("ressources filter", () => {
       const result = filterBlocks(BLOCKS, "actes budget");
 
       // THEN
-      expect(result).toEqual([]);
+      expect(result).toEqual([FAQ_BLOCK]);
     });
 
-    it("retire les sections, onglets et blocs devenus vides", () => {
+    it("retire les sections, onglets et blocs de fichiers devenus vides", () => {
       // WHEN
       const result = filterBlocks(BLOCKS, "cpom");
 
@@ -155,35 +142,28 @@ describe("ressources filter", () => {
       const filesBlock = result[0] as FilesBlock;
       expect(filesBlock.tabs).toHaveLength(1);
       expect(filesBlock.tabs[0].sections).toHaveLength(1);
-      expect(filesBlock.tabs[0].sections[0].title).toBe("Toutes les structures");
+      expect(filesBlock.tabs[0].sections[0].title).toBe(
+        "Toutes les structures"
+      );
     });
 
-    it("filtre les questions d’une FAQ sur le texte de leur réponse", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "cinq ans") as FaqBlock[];
-
-      // THEN
-      expect(result).toHaveLength(1);
-      expect(result[0].tabs[0].questions).toHaveLength(1);
-    });
-
-    it("renvoie une liste vide quand rien ne correspond", () => {
+    it("renvoie uniquement la FAQ quand aucun fichier ne correspond", () => {
       // WHEN
       const result = filterBlocks(BLOCKS, "introuvable");
 
       // THEN
-      expect(result).toEqual([]);
+      expect(result).toEqual([FAQ_BLOCK]);
     });
 
     it("ne modifie pas les blocs d’origine", () => {
       // GIVEN
-      const before = JSON.stringify(BLOCKS);
+      const initialBlocks = JSON.stringify(BLOCKS);
 
       // WHEN
       filterBlocks(BLOCKS, "cpom");
 
       // THEN
-      expect(JSON.stringify(BLOCKS)).toBe(before);
+      expect(JSON.stringify(BLOCKS)).toBe(initialBlocks);
     });
   });
 });

@@ -38,7 +38,7 @@ export const ResourcesSearch = ({ suggestions }: Props): ReactElement => {
   return (
     <div className="bg-alt-grey mt-20 mb-10">
       <h2 className="max-w-lg mx-auto text-5xl text-title-blue-france text-center leading-14 mb-8">
-        Sur quel sujet peut‑on vous aider&nbsp;?
+        Sur quel sujet peut-on vous aider&nbsp;?
       </h2>
 
       <div className="max-w-2xl mx-auto">
