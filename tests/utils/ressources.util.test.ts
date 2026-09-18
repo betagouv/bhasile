@@ -67,8 +67,18 @@ const FAQ_BLOCK: FaqBlock = {
   icon: "fr-icon-question-answer-line",
   type: "faq",
   tabs: [
-    { id: "1", title: "Section 1" },
-    { id: "2", title: "Section 2" },
+    {
+      id: "faq--cpom",
+      title: "CPOM",
+      items: [
+        {
+          id: 1,
+          question: "Quelle est la durée d’un CPOM ?",
+          contentMarkdown: "Cinq ans.",
+          category: "CPOM",
+        },
+      ],
+    },
   ],
 };
 

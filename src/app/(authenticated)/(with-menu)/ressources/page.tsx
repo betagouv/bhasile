@@ -8,9 +8,9 @@ import {
 import { ResourcesBlockList } from "./_components/ResourcesBlockList";
 import { ResourcesContent } from "./_components/ResourcesContent";
 
-export default function Ressources(): ReactElement {
-  const blocks = readBlocks();
-  const suggestions = readSuggestions();
+export default async function Ressources(): Promise<ReactElement> {
+  const blocks = await readBlocks();
+  const suggestions = await readSuggestions();
 
   return (
     <div className="h-full w-full flex flex-col">
