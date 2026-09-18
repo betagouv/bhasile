@@ -1,5 +1,10 @@
 import { TRANSFORMATION_START_YEAR } from "@/constants";
-import { TransformationType } from "@/types/transformation.type";
+import {
+  HudaCadaDepartureType,
+  HudaCadaDestination,
+  StructureVersionTransformationType,
+  TransformationType,
+} from "@/types/transformation.type";
 
 const BHASILE_CODE_PATTERN = /BHA[\s-]*([A-Z]{3})[\s-]*([0-9O]{3})(?![0-9O])/g;
 
@@ -114,19 +119,77 @@ const FUSION_PATTERN = /fusion/i;
 export const isAmbiguousFusion = (raw: string): boolean =>
   FUSION_PATTERN.test(raw);
 
-/* Deux libellés coexistent pour chaque branche : on matche sur le préfixe.
- * La démarche ne décrit que des HUDA qui ferment : les cas de contraction sont saisis à la main. */
-export const parseTransformationType = (
+/* Deux libellés coexistent pour chaque branche : on matche sur le préfixe. Le libellé ne
+ * dit que la destination ; le sort des HUDA se déduit des places (resolveHudaDepartureType). */
+export const parseHudaCadaDestination = (
   raw: string
-): TransformationType | null => {
+): HudaCadaDestination | null => {
   if (isAmbiguousFusion(raw)) {
     return null;
   }
   if (raw.startsWith("Extension d'un CADA")) {
-    return TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT;
+    return HudaCadaDestination.CADA_EXISTANT;
   }
   if (raw.startsWith("Création d'un nouveau CADA")) {
-    return TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU;
+    return HudaCadaDestination.CADA_NOUVEAU;
   }
   return null;
 };
+
+export type HudaDepartureResolution = {
+  departureType: HudaCadaDepartureType;
+  reason?: "multi-huda" | "places-illisibles" | "transfert-superieur-au-total";
+};
+
+export const resolveHudaDepartureType = ({
+  totalPlaces,
+  transferredPlaces,
+  hudaCount,
+}: {
+  totalPlaces: number | null;
+  transferredPlaces: number | null;
+  hudaCount: number;
+}): HudaDepartureResolution => {
+  const fermeture = StructureVersionTransformationType.FERMETURE;
+
+  if (hudaCount > 1) {
+    return { departureType: fermeture, reason: "multi-huda" };
+  }
+  if (totalPlaces === null || transferredPlaces === null) {
+    return { departureType: fermeture, reason: "places-illisibles" };
+  }
+  if (transferredPlaces > totalPlaces) {
+    return { departureType: fermeture, reason: "transfert-superieur-au-total" };
+  }
+  if (transferredPlaces === 0 || transferredPlaces === totalPlaces) {
+    return { departureType: fermeture };
+  }
+  return { departureType: StructureVersionTransformationType.CONTRACTION };
+};
+
+const HUDA_CADA_TRANSFORMATION_TYPE: Record<
+  HudaCadaDepartureType,
+  Record<HudaCadaDestination, TransformationType | null>
+> = {
+  [StructureVersionTransformationType.FERMETURE]: {
+    [HudaCadaDestination.CADA_EXISTANT]:
+      TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
+    [HudaCadaDestination.CADA_NOUVEAU]:
+      TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
+    [HudaCadaDestination.REMISE_EN_CONCURRENCE]: null,
+  },
+  [StructureVersionTransformationType.CONTRACTION]: {
+    [HudaCadaDestination.CADA_EXISTANT]:
+      TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_EXISTANT,
+    [HudaCadaDestination.CADA_NOUVEAU]:
+      TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+    [HudaCadaDestination.REMISE_EN_CONCURRENCE]: null,
+  },
+};
+
+/* La remise en concurrence n'a pas de libellé dans la démarche : elle reste agent-only. */
+export const resolveHudaCadaTransformationType = (
+  departureType: HudaCadaDepartureType,
+  destination: HudaCadaDestination
+): TransformationType | null =>
+  HUDA_CADA_TRANSFORMATION_TYPE[departureType][destination];

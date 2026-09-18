@@ -486,7 +486,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
 
       expect(existing.id).toBe(transformation.id);
       expect(existing.numeroDossier).toBeNull();
-      expect(existing.fermetureStructureIds).toEqual([huda.id]);
+      expect(existing.departureStructureIds).toEqual([huda.id]);
     });
 
     it("ne remonte rien quand aucune transformation ne porte sur les structures", async () => {

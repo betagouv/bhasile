@@ -43,6 +43,12 @@ export const LegacyHudaTransformationType = {
 export type LegacyHudaTransformationType =
   (typeof LegacyHudaTransformationType)[keyof typeof LegacyHudaTransformationType];
 
+/* Les deux axes d'un parcours HUDA vers CADA : ce qu'il advient des HUDA au départ,
+ * et où partent leurs places. */
+export type HudaCadaDepartureType =
+  | typeof StructureVersionTransformationType.FERMETURE
+  | typeof StructureVersionTransformationType.CONTRACTION;
+
 export const HudaCadaDestination = {
   CADA_EXISTANT: "CADA_EXISTANT",
   CADA_NOUVEAU: "CADA_NOUVEAU",

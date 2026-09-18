@@ -360,10 +360,12 @@ export const resolveTargetCada = async (
 export type ExistingHudaCadaTransformation = {
   id: number;
   numeroDossier: string | null;
-  fermetureStructureIds: number[];
+  departureStructureIds: number[];
 };
 
-/* Un code Bhasile ne peut porter qu'une transfo HUDA>CADA à la fois */
+/* Un code Bhasile ne peut porter qu'une transfo HUDA>CADA à la fois. L'enveloppe est
+ * l'ensemble des HUDA au départ, quel que soit leur sort : un dossier doit se rattacher
+ * à la démarche d'un agent même si l'un dit fermeture et l'autre contraction. */
 export const findHudaCadaTransformations = async (
   prisma: PrismaClient,
   structureIds: number[]
@@ -379,7 +381,14 @@ export const findHudaCadaTransformations = async (
       id: true,
       numeroDossier: true,
       structureVersionTransformations: {
-        where: { type: StructureVersionTransformationType.FERMETURE },
+        where: {
+          type: {
+            in: [
+              StructureVersionTransformationType.FERMETURE,
+              StructureVersionTransformationType.CONTRACTION,
+            ],
+          },
+        },
         select: { structureVersion: { select: { structureId: true } } },
       },
     },
@@ -389,7 +398,7 @@ export const findHudaCadaTransformations = async (
     ({ id, numeroDossier, structureVersionTransformations }) => ({
       id,
       numeroDossier,
-      fermetureStructureIds: structureVersionTransformations
+      departureStructureIds: structureVersionTransformations
         .map(({ structureVersion }) => structureVersion?.structureId)
         .filter(
           (structureId) => structureId !== null && structureId !== undefined
@@ -403,7 +412,7 @@ export const matchesEnvelope = (
   transformation: ExistingHudaCadaTransformation,
   structureIds: number[]
 ): boolean =>
-  transformation.fermetureStructureIds.length === structureIds.length &&
+  transformation.departureStructureIds.length === structureIds.length &&
   structureIds.every((structureId) =>
-    transformation.fermetureStructureIds.includes(structureId)
+    transformation.departureStructureIds.includes(structureId)
   );
