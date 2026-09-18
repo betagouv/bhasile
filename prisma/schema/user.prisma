@@ -88,6 +88,5 @@ enum UserActionType {
   STATISTIQUES_SPREADSHEET_EXPORT
   STATISTIQUES_PDF_EXPORT
 
-  @@map("UserActionType")
   @@schema("public")
 }
