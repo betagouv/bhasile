@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { ResourcesContent } from "@/app/(authenticated)/(with-menu)/ressources/_components/ResourcesContent";
+import { FaqApiType } from "@/schemas/api/faq.schema";
 import { Block, FaqBlock, FilesBlock } from "@/types/ressources.type";
 
 const searchParams = { value: new URLSearchParams() };
@@ -58,24 +59,31 @@ const FAQ_BLOCK: FaqBlock = {
     {
       id: "faq--cpom",
       title: "CPOM",
-      // questions: [
-      //   {
-      //     id: "faq--cpom--duree",
-      //     title: "Quelle est la durée d’un CPOM ?",
-      //     answerHtml: "<p>Cinq ans.</p>",
-      //     searchText: "faq cpom quelle est la duree d un cpom cinq ans",
-      //   },
-      // ],
     },
   ],
 };
 
-const BLOCKS: Block[] = [FILES_BLOCK, FAQ_BLOCK];
+const FAQ_ITEMS: FaqApiType[] = [
+  {
+    id: 1,
+    question: "Qu'est-ce qu'un CPOM ?",
+    contentMarkdown: "Un contrat pluriannuel d'objectifs et de moyens.",
+    category: "CPOM",
+  },
+];
+
+const BLOCKS: Block[] = [FILES_BLOCK];
 
 const renderWithSearch = (search: string) => {
   searchParams.value = new URLSearchParams(search ? { search } : {});
   return render(
-    <ResourcesContent blocks={BLOCKS} suggestions={["CPOM", "OFII"]} />
+    <ResourcesContent
+      blocks={BLOCKS}
+      suggestions={["CPOM", "OFII"]}
+      faqBlock={FAQ_BLOCK}
+      faqItems={FAQ_ITEMS}
+      hasFaqTabs={true}
+    />
   );
 };
 
@@ -155,7 +163,16 @@ describe("ResourcesContent", () => {
 
   it("affiche un message d’absence de résultat avec le terme cherché", () => {
     // WHEN
-    renderWithSearch("introuvable");
+    searchParams.value = new URLSearchParams({ search: "introuvable" });
+    render(
+      <ResourcesContent
+        blocks={[]}
+        suggestions={[]}
+        faqBlock={FAQ_BLOCK}
+        faqItems={[]}
+        hasFaqTabs={false}
+      />
+    );
 
     // THEN
     expect(
@@ -168,7 +185,15 @@ describe("ResourcesContent", () => {
     searchParams.value = new URLSearchParams();
 
     // WHEN
-    render(<ResourcesContent blocks={[]} suggestions={[]} />);
+    render(
+      <ResourcesContent
+        blocks={[]}
+        suggestions={[]}
+        faqBlock={FAQ_BLOCK}
+        faqItems={[]}
+        hasFaqTabs={false}
+      />
+    );
 
     // THEN
     expect(
