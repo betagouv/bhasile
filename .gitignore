@@ -62,3 +62,5 @@ next-env.d.ts
 
 # Private tests
 /tmp/
+# Copiés depuis node_modules par yarn copy:maplibre-worker (predev/prebuild)
+public/maplibre/

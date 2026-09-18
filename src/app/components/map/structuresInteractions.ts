@@ -1,7 +1,7 @@
 "use client";
 
 import Spiderfy from "@nazka/map-gl-js-spiderfy";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import { RefObject } from "react";
 import { Root } from "react-dom/client";
 

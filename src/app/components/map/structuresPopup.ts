@@ -1,6 +1,6 @@
 "use client";
 
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import { createRoot, Root } from "react-dom/client";
 
 export function getOrCreatePopup({
