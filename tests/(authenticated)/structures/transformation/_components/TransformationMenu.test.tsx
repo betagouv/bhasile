@@ -107,7 +107,7 @@ describe("TransformationMenu", () => {
       mockUseOptionalTransformationContext.mockReturnValue({
         transformation: {
           id: 42,
-          type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+          type: TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
           structureVersionTransformations: [],
         },
       });
@@ -251,7 +251,7 @@ describe("TransformationMenu", () => {
       mockUseOptionalTransformationContext.mockReturnValue({
         transformation: {
           id: 42,
-          type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+          type: TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
           structureVersionTransformations: [
             {
               id: 1,

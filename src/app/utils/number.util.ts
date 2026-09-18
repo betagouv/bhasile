@@ -95,6 +95,7 @@ export const formatPerMille = (
  * @param value - The formatted string to parse
  * @returns The parsed number or null if invalid
  */
+
 export const parseFrenchNumber = (
   value: string | number | null | undefined
 ): number | null => {
@@ -113,4 +114,9 @@ export const parseFrenchNumber = (
 
   const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? null : parsed;
+};
+
+export const parseStrictInt = (value: string): number | null => {
+  const trimmed = value.trim();
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : null;
 };

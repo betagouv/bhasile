@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
+import {
+  HudaCadaDestination,
+  StructureVersionTransformationType,
+  TransformationType,
+} from "@/types/transformation.type";
+
 import {
   isAmbiguousFusion,
   isDnaCodeInDepartement,
@@ -9,7 +16,9 @@ import {
   padDnaCode,
   parseDepartement,
   parseDnaCodes,
-  parseTransformationType,
+  parseHudaCadaDestination,
+  resolveHudaCadaTransformationType,
+  resolveHudaDepartureType,
 } from "../../scripts/utils/transfo-huda-cada.util";
 
 describe("transfo huda cada util", () => {
@@ -252,43 +261,126 @@ describe("transfo huda cada util", () => {
     });
   });
 
-  describe("parseTransformationType", () => {
+  describe("parseHudaCadaDestination", () => {
     it("reconnaît les deux formulations de l'extension", () => {
-      expect(parseTransformationType("Extension d'un CADA")).toBe(
-        "TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR"
+      expect(parseHudaCadaDestination("Extension d'un CADA")).toBe(
+        HudaCadaDestination.CADA_EXISTANT
       );
       expect(
-        parseTransformationType(
+        parseHudaCadaDestination(
           "Extension d'un CADA (il est possible d'aller au-delà de 100% de la capacité existante)"
         )
-      ).toBe("TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR");
+      ).toBe(HudaCadaDestination.CADA_EXISTANT);
     });
 
-    it("reconnaît les deux formulations de la création", () => {
+    it("reconnaît la formulation de la création", () => {
       expect(
-        parseTransformationType(
+        parseHudaCadaDestination(
           "Création d'un nouveau CADA (transformation d'un ou plusieurs HUDA en un nouveau CADA)"
         )
-      ).toBe("TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR");
+      ).toBe(HudaCadaDestination.CADA_NOUVEAU);
     });
 
     it("rejette la variante qui mêle création et fusion d'un CADA existant", () => {
-      expect(parseTransformationType(FUSION_LABEL)).toBeNull();
+      expect(parseHudaCadaDestination(FUSION_LABEL)).toBeNull();
       expect(isAmbiguousFusion(FUSION_LABEL)).toBe(true);
     });
 
-    it("ne prend pas la formulation de création simple pour une fusion", () => {
-      expect(
-        isAmbiguousFusion(
-          "Création d'un nouveau CADA (transformation d'un ou plusieurs HUDA en un nouveau CADA)"
-        )
-      ).toBe(false);
-      expect(isAmbiguousFusion("Extension d'un CADA")).toBe(false);
+    it("rejette un libellé inconnu", () => {
+      expect(parseHudaCadaDestination("")).toBeNull();
+      expect(parseHudaCadaDestination("Remise en concurrence")).toBeNull();
+    });
+  });
+
+  describe("resolveHudaDepartureType", () => {
+    const resolve = (
+      totalPlaces: number | null,
+      transferredPlaces: number | null,
+      hudaCount = 1
+    ) =>
+      resolveHudaDepartureType({ totalPlaces, transferredPlaces, hudaCount });
+
+    it("conclut à une contraction quand une partie des places seulement est transférée", () => {
+      expect(resolve(100, 58)).toEqual({
+        departureType: StructureVersionTransformationType.CONTRACTION,
+      });
     });
 
-    it("rejette un libellé inconnu", () => {
-      expect(parseTransformationType("")).toBeNull();
-      expect(parseTransformationType("Remise en concurrence")).toBeNull();
+    it("conclut à une fermeture quand toutes les places sont transférées", () => {
+      expect(resolve(95, 95)).toEqual({
+        departureType: StructureVersionTransformationType.FERMETURE,
+      });
+    });
+
+    it("refuse d'interpréter les places dès qu'un second HUDA est déclaré", () => {
+      expect(resolve(75, 60, 2)).toEqual({
+        departureType: StructureVersionTransformationType.FERMETURE,
+        reason: "multi-huda",
+      });
+    });
+
+    it("retombe sur la fermeture quand une des deux valeurs manque", () => {
+      expect(resolve(null, 58).reason).toBe("places-illisibles");
+      expect(resolve(100, null).reason).toBe("places-illisibles");
+    });
+
+    it("signale un transfert supérieur au total au lieu de l'interpréter", () => {
+      expect(resolve(75, 160)).toEqual({
+        departureType: StructureVersionTransformationType.FERMETURE,
+        reason: "transfert-superieur-au-total",
+      });
+    });
+
+    it("traite un transfert nul comme une fermeture sans anomalie", () => {
+      expect(resolve(100, 0)).toEqual({
+        departureType: StructureVersionTransformationType.FERMETURE,
+      });
+    });
+  });
+
+  describe("resolveHudaCadaTransformationType", () => {
+    it("croise le sort des HUDA et la destination", () => {
+      expect(
+        resolveHudaCadaTransformationType(
+          StructureVersionTransformationType.FERMETURE,
+          HudaCadaDestination.CADA_EXISTANT
+        )
+      ).toBe(TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT);
+      expect(
+        resolveHudaCadaTransformationType(
+          StructureVersionTransformationType.CONTRACTION,
+          HudaCadaDestination.CADA_NOUVEAU
+        )
+      ).toBe(TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU);
+    });
+
+    it("s'accorde avec les specs sur les quatre combinaisons produites par l'import", () => {
+      for (const departureType of [
+        StructureVersionTransformationType.FERMETURE,
+        StructureVersionTransformationType.CONTRACTION,
+      ] as const) {
+        for (const destination of [
+          HudaCadaDestination.CADA_EXISTANT,
+          HudaCadaDestination.CADA_NOUVEAU,
+        ] as const) {
+          const type = resolveHudaCadaTransformationType(
+            departureType,
+            destination
+          );
+          const spec = TRANSFORMATION_TYPE_SPECS[type!];
+          expect(spec.hudaCadaDestination).toBe(destination);
+          expect(spec.blocks[0].type).toBe(departureType);
+        }
+      }
+    });
+
+    it("ne produit aucun type pour la remise en concurrence, absente de la démarche", () => {
+      expect(
+        resolveHudaCadaTransformationType(
+          StructureVersionTransformationType.FERMETURE,
+          HudaCadaDestination.REMISE_EN_CONCURRENCE
+        )
+      ).toBeNull();
     });
   });
 });

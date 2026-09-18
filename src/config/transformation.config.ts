@@ -7,8 +7,11 @@ import { StructureVersionTransformationApiCreate } from "@/schemas/api/transform
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { StructureType } from "@/types/structure.type";
 import {
+  HudaCadaDestination,
+  LegacyHudaTransformationType,
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
+  TransformationFormType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -40,6 +43,8 @@ export type TransformationTypeSpec = {
   ) => StructureVersionTransformationApiCreate[];
   primaryStructureVersionTransformationType?: StructureVersionTransformationType;
   prefill?: PrefillRule[];
+  formType?: TransformationFormType;
+  hudaCadaDestination?: HudaCadaDestination;
 };
 
 export const STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER: Record<
@@ -54,12 +59,13 @@ export const STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER: Record<
 
 export const VERIFICATION_STEP_NAME = "verification";
 
-export const TRANSFORMATION_TYPE_SPECS: Record<
+const CURRENT_TRANSFORMATION_TYPE_SPECS: Record<
   TransformationType,
   TransformationTypeSpec
 > = {
   [TransformationType.OUVERTURE_EX_NIHILO]: {
     title: "Nouvelle structure",
+    formType: TransformationFormType.CREATION,
     blocks: [],
     buildAutoTransformations: () => [
       { type: StructureVersionTransformationType.CREATION },
@@ -67,6 +73,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
   },
   [TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES]: {
     title: "Nouvelle structure",
+    formType: TransformationFormType.CREATION,
     blocks: [
       {
         id: "main",
@@ -239,8 +246,10 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     primaryStructureVersionTransformationType:
       StructureVersionTransformationType.FERMETURE,
   },
-  [TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]: {
+  [TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT]: {
     title: "Transformer HUDA en CADA",
+    formType: TransformationFormType.HUDA,
+    hudaCadaDestination: HudaCadaDestination.CADA_EXISTANT,
     blocks: [
       {
         id: "huda",
@@ -251,12 +260,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       },
       {
         id: "cada",
-        multiple: false,
+        multiple: true,
         type: StructureVersionTransformationType.EXTENSION,
         fixedType: StructureType.CADA,
         inheritOperateurFrom: "huda",
         inheritDepartementFrom: "huda",
-        label: "Veuillez sélectionner le CADA qui fait l'objet d'une extension",
+        label:
+          "Veuillez sélectionner le ou les CADA qui font l'objet d'une extension",
       },
     ],
     buildAutoTransformations: () => [],
@@ -268,8 +278,10 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       },
     ],
   },
-  [TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR]: {
+  [TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU]: {
     title: "Transformer HUDA en CADA",
+    formType: TransformationFormType.HUDA,
+    hudaCadaDestination: HudaCadaDestination.CADA_NOUVEAU,
     blocks: [
       {
         id: "huda",
@@ -293,8 +305,10 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       },
     ],
   },
-  [TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES]: {
+  [TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE]: {
     title: "Transformer HUDA en CADA",
+    formType: TransformationFormType.HUDA,
+    hudaCadaDestination: HudaCadaDestination.REMISE_EN_CONCURRENCE,
     blocks: [
       {
         id: "huda",
@@ -306,6 +320,105 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     ],
     buildAutoTransformations: () => [],
   },
+  [TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_EXISTANT]: {
+    title: "Transformer HUDA en CADA",
+    formType: TransformationFormType.HUDA,
+    hudaCadaDestination: HudaCadaDestination.CADA_EXISTANT,
+    blocks: [
+      {
+        id: "huda",
+        multiple: true,
+        type: StructureVersionTransformationType.CONTRACTION,
+        fixedType: StructureType.HUDA,
+        label:
+          "Veuillez sélectionner le ou les HUDA qui font l'objet d'une contraction",
+      },
+      {
+        id: "cada",
+        multiple: true,
+        type: StructureVersionTransformationType.EXTENSION,
+        fixedType: StructureType.CADA,
+        inheritOperateurFrom: "huda",
+        inheritDepartementFrom: "huda",
+        label:
+          "Veuillez sélectionner le ou les CADA qui font l'objet d'une extension",
+      },
+    ],
+    buildAutoTransformations: () => [],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.CONTRACTION,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
+    ],
+  },
+  [TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU]: {
+    title: "Transformer HUDA en CADA",
+    formType: TransformationFormType.HUDA,
+    hudaCadaDestination: HudaCadaDestination.CADA_NOUVEAU,
+    blocks: [
+      {
+        id: "huda",
+        multiple: true,
+        type: StructureVersionTransformationType.CONTRACTION,
+        fixedType: StructureType.HUDA,
+        label:
+          "Veuillez sélectionner le ou les HUDA qui font l'objet d'une contraction",
+      },
+    ],
+    buildAutoTransformations: () => [
+      {
+        type: StructureVersionTransformationType.CREATION,
+        structureType: StructureType.CADA,
+      },
+    ],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.CONTRACTION,
+        to: StructureVersionTransformationType.CREATION,
+        fields: ["contacts", "antennes", "adresses", "operateur"],
+      },
+    ],
+  },
+  [TransformationType.TRANSFO_HUDA_CONTRACTION_REMISE_EN_CONCURRENCE]: {
+    title: "Transformer HUDA en CADA",
+    formType: TransformationFormType.HUDA,
+    hudaCadaDestination: HudaCadaDestination.REMISE_EN_CONCURRENCE,
+    blocks: [
+      {
+        id: "huda",
+        multiple: true,
+        type: StructureVersionTransformationType.CONTRACTION,
+        fixedType: StructureType.HUDA,
+        label:
+          "Veuillez sélectionner le ou les HUDA qui font l'objet d'une contraction",
+      },
+    ],
+    buildAutoTransformations: () => [],
+  },
+};
+
+/* Les transformations créées avant le renommage portent encore ces types : la lecture
+ * doit les résoudre. Bloc à supprimer avec les valeurs d'enum, une fois le one-off
+ * 20260917-rename-huda-transformation-types rejoué partout. */
+export const TRANSFORMATION_TYPE_SPECS: Record<
+  TransformationType | LegacyHudaTransformationType,
+  TransformationTypeSpec
+> = {
+  ...CURRENT_TRANSFORMATION_TYPE_SPECS,
+  [LegacyHudaTransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]:
+    CURRENT_TRANSFORMATION_TYPE_SPECS[
+      TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT
+    ],
+  [LegacyHudaTransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR]:
+    CURRENT_TRANSFORMATION_TYPE_SPECS[
+      TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU
+    ],
+  [LegacyHudaTransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES]:
+    CURRENT_TRANSFORMATION_TYPE_SPECS[
+      TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE
+    ],
 };
 
 const CONVENTION_RULE: CategoryDisplayRule = {
@@ -346,6 +459,13 @@ const AUTRE_RULE: CategoryDisplayRule = {
   addFileButtonLabel: "Ajouter un document",
 };
 
+const getHudaCadaDestination = (
+  transformationType: TransformationType | undefined
+): HudaCadaDestination | undefined =>
+  transformationType
+    ? TRANSFORMATION_TYPE_SPECS[transformationType]?.hudaCadaDestination
+    : undefined;
+
 const getCreationActesAdministratifsCategoryToDisplay = (
   transformationType: TransformationType | undefined
 ): CategoryDisplayRules => ({
@@ -353,8 +473,8 @@ const getCreationActesAdministratifsCategoryToDisplay = (
     categoryShortName: "arrêté",
     title:
       transformationType === TransformationType.OUVERTURE_EX_NIHILO ||
-      transformationType ===
-        TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
+      getHudaCadaDestination(transformationType) ===
+        HudaCadaDestination.CADA_NOUVEAU
         ? "Arrêté d'autorisation"
         : "Arrêté d'autorisation ou arrêté de fusion des structures",
     canAddFile: false,
@@ -366,8 +486,8 @@ const getCreationActesAdministratifsCategoryToDisplay = (
     addFileButtonLabel: "Ajouter un arrêté d'autorisation",
     alternativeCategories:
       transformationType === TransformationType.OUVERTURE_EX_NIHILO ||
-      transformationType ===
-        TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
+      getHudaCadaDestination(transformationType) ===
+        HudaCadaDestination.CADA_NOUVEAU
         ? undefined
         : ["ARRETE_FUSION"],
   },
@@ -438,8 +558,8 @@ const getExtensionActesAdministratifsCategoryToDisplay = (
   transformationType: TransformationType | undefined
 ): CategoryDisplayRules => {
   if (
-    transformationType ===
-    TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
+    getHudaCadaDestination(transformationType) ===
+    HudaCadaDestination.CADA_EXISTANT
   ) {
     return {
       ...extensionActesAdministratifsCategoryToDisplay,

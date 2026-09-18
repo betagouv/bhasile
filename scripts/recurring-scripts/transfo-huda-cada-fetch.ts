@@ -4,14 +4,20 @@
 import "dotenv/config";
 
 import { getActeAdministratifPeriods } from "@/app/api/actes-administratifs/acte-administratif.util";
+import { resolvePredecessor } from "@/app/api/structure-versions/structure-version.util";
 import { createTransformation } from "@/app/api/transformations/transformation.service";
 import { isCurrentlyInEffect } from "@/app/utils/date.util";
+import { parseStrictInt } from "@/app/utils/number.util";
+import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { TRANSFORMATION_START_YEAR } from "@/constants";
+import { StepStatus as DbStepStatus } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
 import { StructureType } from "@/types/structure.type";
 import {
+  HudaCadaDepartureType,
+  LegacyHudaTransformationType,
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
@@ -37,7 +43,9 @@ import {
   isAmbiguousFusion,
   isEffectiveDateInScope,
   parseDepartement,
-  parseTransformationType,
+  parseHudaCadaDestination,
+  resolveHudaCadaTransformationType,
+  resolveHudaDepartureType,
 } from "../utils/transfo-huda-cada.util";
 
 const prisma = createPrismaClient();
@@ -77,6 +85,24 @@ const CADA_ETENDU_CAPACITE = {
   id: "Q2hhbXAtNTYzODgzOA==",
   label: "Nouvelle capacité de l'établissement étendu",
 };
+const HUDA_CAPACITE_AVANT = {
+  id: "Q2hhbXAtNTYzNzcyMA==",
+  label:
+    "Capacité totale de l'HUDA prévue dans la convention existante (avant transformation)",
+};
+/* Le champ a été remplacé début avril 2026 : les dossiers déposés entre le 31/03 et le
+ * 01/04 portent l'ancien, supprimé depuis. Le premier renseigné l'emporte. */
+const HUDA_PLACES_TRANSFEREES = [
+  {
+    id: "Q2hhbXAtNjM0MzY3Nw==",
+    label: "Nombre total de places HUDA transformées",
+  },
+  {
+    id: "Q2hhbXAtNjM0MTQxNQ==",
+    label:
+      "Nombre total de places HUDA transformées (champ retiré en avril 2026)",
+  },
+];
 
 /* Un dossier ne renseigne qu'une branche du formulaire (extension ou création) :
  * les champs des deux branches cohabitent ici, seuls les remplis ressortent. */
@@ -141,9 +167,10 @@ const resolveEffectiveDate = (dossier: HudaCadaDossierNode): Date | null =>
   cleanDate(champValue(dossier, DATE_EFFECTIVE)) ??
   cleanDate(champValue(dossier, DATE_PREVISIONNELLE));
 
+/* Une capacité nulle vaut une capacité absente : rien à pré-remplir. */
 const parsePositiveInt = (raw: string): number | null => {
-  const value = Number.parseInt(raw.trim(), 10);
-  return Number.isFinite(value) && value > 0 ? value : null;
+  const value = parseStrictInt(raw);
+  return value !== null && value > 0 ? value : null;
 };
 
 const resolveNewCadaCapacity = (
@@ -192,6 +219,89 @@ const findConventionEndDate = async (
   return period?.[1] ?? null;
 };
 
+/* Les places qui font foi pour la contraction sont celles de Bhasile, pas celles déclarées
+ * dans le dossier : c'est contre elles que le formulaire valide la saisie de l'agent. */
+const findHudaPlacesAutorisees = async (
+  structureId: number,
+  effectiveDate: Date
+): Promise<number | null> => {
+  const structureVersions = await prisma.structureVersion.findMany({
+    where: { structureId },
+    select: {
+      id: true,
+      effectiveDate: true,
+      placesAutorisees: true,
+      structureVersionTransformationId: true,
+      structureVersionTransformation: {
+        select: {
+          transformation: { select: { form: { select: { status: true } } } },
+        },
+      },
+    },
+  });
+  return (
+    resolvePredecessor(structureVersions, effectiveDate)?.placesAutorisees ??
+    null
+  );
+};
+
+/* Le décompte doit être identique à l'import et à la relecture : s'il diverge, un dossier
+ * jugé multi-HUDA à la création et mono-HUDA à la relecture serait supprimé et recréé
+ * à chaque exécution. Les sections déclarées priment sur les structures résolues, qui
+ * dédoublonnent (un même HUDA cité dans les deux sections ne compte qu'une fois). */
+const countHudaSections = (
+  dossier: HudaCadaDossierNode,
+  resolvedCount: number
+): number =>
+  Math.max(
+    resolvedCount,
+    champValues(dossier, HUDA_BHASILE).length,
+    champValues(dossier, HUDA_DNA).length
+  );
+
+type HudaDeparture = {
+  departureType: HudaCadaDepartureType;
+  remainingPlaces?: number;
+  downgradeReason?: string;
+};
+
+/* Le dossier décide de contracter, Bhasile chiffre : le formulaire valide les places
+ * restantes contre la version en vigueur, pas contre la capacité déclarée en DN. */
+const resolveHudaDeparture = async (
+  hudas: { structureId: number; codeBhasile: string }[],
+  departureType: HudaCadaDepartureType,
+  transferredPlaces: number | null,
+  effectiveDate: Date
+): Promise<HudaDeparture> => {
+  if (
+    departureType !== StructureVersionTransformationType.CONTRACTION ||
+    transferredPlaces === null
+  ) {
+    return { departureType };
+  }
+
+  const [huda] = hudas;
+  const placesBhasile = await findHudaPlacesAutorisees(
+    huda.structureId,
+    effectiveDate
+  );
+  if (placesBhasile === null) {
+    return {
+      departureType: StructureVersionTransformationType.FERMETURE,
+      downgradeReason: `${huda.codeBhasile} sans places connues en base à la date d'effet`,
+    };
+  }
+
+  const remainingPlaces = placesBhasile - transferredPlaces;
+  if (remainingPlaces <= 0) {
+    return {
+      departureType: StructureVersionTransformationType.FERMETURE,
+      downgradeReason: `${huda.codeBhasile} : ${transferredPlaces} places transférées pour ${placesBhasile} en base`,
+    };
+  }
+  return { departureType, remainingPlaces };
+};
+
 const buildCadaBrique = async (
   dossier: HudaCadaDossierNode,
   type: TransformationType,
@@ -204,9 +314,7 @@ const buildCadaBrique = async (
 > => {
   const effectiveDateIso = effectiveDate.toISOString();
 
-  if (
-    type === TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
-  ) {
+  if (type === TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU) {
     /* « Même opérateur » : le nouveau CADA reprend celui des HUDA fermés, plus fiable
      * qu'un rapprochement sur le SIRET. Des opérateurs divergents contredisent le cas de figure. */
     const operateurIds = [...new Set(hudas.map((huda) => huda.operateurId))];
@@ -284,8 +392,9 @@ const buildCadaBrique = async (
 /* Étapes alimentées par le script :
  * - identification (toutes briques) : structure, date d'effet, opérateur ;
  * - places-hébergement : capacité (recopiée depuis Bhasile pour l'extension,
- *   issue du dossier DN pour la création). La brique fermeture n'a pas cette
- *   étape, l'updateMany ne la touche donc pas. */
+ *   issue du dossier DN pour la création). La brique fermeture n'a pas cette étape,
+ *   l'updateMany ne la touche donc pas ; la brique contraction l'a, et l'import y écrit
+ *   les places restantes — sans quoi l'étape serait annoncée prête et vide. */
 const PREFILLED_STEP_SLUGS = ["01-identification", "02-places-hebergement"];
 
 const markStepsPrefilled = async (
@@ -309,6 +418,113 @@ const linked: string[] = [];
 const skipped: DossierReport[] = [];
 const failed: DossierReport[] = [];
 const inferred: string[] = [];
+const contracted: string[] = [];
+const notContracted: string[] = [];
+const contradicted: string[] = [];
+
+type ImportedTransformation = {
+  id: number;
+  /* Une ligne en base peut encore porter un ancien nom tant que le one-off n'a pas tourné. */
+  type: TransformationType | LegacyHudaTransformationType;
+  form: { status: boolean } | null;
+  structureVersionTransformations: {
+    form: { formSteps: { status: DbStepStatus }[] } | null;
+    structureVersion: {
+      structureId: number | null;
+      structure: { codeBhasile: string } | null;
+    } | null;
+  }[];
+};
+
+const UNTOUCHED_STEP_STATUSES: DbStepStatus[] = [
+  StepStatus.NON_COMMENCE,
+  StepStatus.PRE_REMPLI,
+];
+
+/* L'import ne pose jamais que PRE_REMPLI : tout autre statut vient d'un agent. */
+const isUntouchedDraft = (transformation: ImportedTransformation): boolean =>
+  transformation.structureVersionTransformations.every(
+    (structureVersionTransformation) =>
+      structureVersionTransformation.form?.formSteps.every((formStep) =>
+        UNTOUCHED_STEP_STATUSES.includes(formStep.status)
+      ) ?? true
+  );
+
+/* Une transfo déjà importée n'est jamais retypée en place : le formDefinition d'une brique
+ * dépend de son type. Un brouillon intact se supprime — le flux normal le recrée dans la
+ * foulée, avec l'inférence. Dès qu'un agent y a touché, on se contente de le signaler. */
+const reviewImportedTransformation = async (
+  dossier: HudaCadaDossierNode,
+  transformation: ImportedTransformation
+): Promise<void> => {
+  const effectiveDate = resolveEffectiveDate(dossier);
+  const existingDeparture =
+    TRANSFORMATION_TYPE_SPECS[transformation.type].blocks[0]?.type;
+  /* Une transfo finalisée ne peut plus être corrigée : la signaler chaque jour ouvré
+   * n'apporterait qu'un rappel que personne ne peut traiter. */
+  if (
+    !effectiveDate ||
+    !existingDeparture ||
+    transformation.form?.status !== false
+  ) {
+    return;
+  }
+
+  const hudas = transformation.structureVersionTransformations
+    .map((structureVersionTransformation) => ({
+      structureId: structureVersionTransformation.structureVersion?.structureId,
+      codeBhasile:
+        structureVersionTransformation.structureVersion?.structure
+          ?.codeBhasile ?? "",
+    }))
+    .filter(
+      (huda): huda is { structureId: number; codeBhasile: string } =>
+        huda.structureId != null
+    );
+  if (hudas.length === 0) {
+    return;
+  }
+
+  const transferredPlaces = parseStrictInt(
+    champValues(dossier, HUDA_PLACES_TRANSFEREES)[0] ?? ""
+  );
+  const declared = resolveHudaDepartureType({
+    totalPlaces: parseStrictInt(champValue(dossier, HUDA_CAPACITE_AVANT)),
+    transferredPlaces,
+    hudaCount: countHudaSections(dossier, hudas.length),
+  });
+  /* On compare au départ définitif, pas au déclaré : sinon un dossier que Bhasile
+   * rétrograde en fermeture serait supprimé et recréé à chaque exécution. */
+  const { departureType } = await resolveHudaDeparture(
+    hudas,
+    declared.departureType,
+    transferredPlaces,
+    effectiveDate
+  );
+
+  if (departureType === existingDeparture) {
+    return;
+  }
+
+  if (!isUntouchedDraft(transformation)) {
+    contradicted.push(
+      `#${dossier.number} → transfo #${transformation.id} typée ${existingDeparture}, le dossier indique ${departureType}`
+    );
+    return;
+  }
+
+  /* La ré-importation peut échouer sur un état de base qui a changé depuis (HUDA fermé
+   * entre-temps, par exemple) : le brouillon aurait alors disparu sans remplaçant. */
+  const importedBefore = imported.length;
+  await prisma.transformation.delete({ where: { id: transformation.id } });
+  await importDossier(dossier);
+  if (imported.length === importedBefore) {
+    failed.push({
+      numero: dossier.number,
+      reason: `transfo #${transformation.id} supprimée pour retypage mais non recréée — à ressaisir`,
+    });
+  }
+};
 
 /* Un dossier hors cadre ou en erreur ne doit jamais empêcher les suivants d'être importés :
  * on collecte tout et on rend compte à la fin. */
@@ -318,9 +534,33 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
 
   const existing = await prisma.transformation.findUnique({
     where: { numeroDossier: String(dossier.number) },
-    select: { id: true },
+    select: {
+      id: true,
+      type: true,
+      form: { select: { status: true } },
+      structureVersionTransformations: {
+        where: {
+          type: {
+            in: [
+              StructureVersionTransformationType.FERMETURE,
+              StructureVersionTransformationType.CONTRACTION,
+            ],
+          },
+        },
+        select: {
+          form: { select: { formSteps: { select: { status: true } } } },
+          structureVersion: {
+            select: {
+              structureId: true,
+              structure: { select: { codeBhasile: true } },
+            },
+          },
+        },
+      },
+    },
   });
   if (existing) {
+    await reviewImportedTransformation(dossier, existing);
     return;
   }
 
@@ -331,8 +571,8 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     );
     return;
   }
-  const type = parseTransformationType(rawType);
-  if (!type) {
+  const destination = parseHudaCadaDestination(rawType);
+  if (!destination) {
     skip(`type de transformation non reconnu : "${rawType.slice(0, 40)}"`);
     return;
   }
@@ -365,6 +605,30 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     return;
   }
   const hudas = resolution.value;
+
+  const transferredPlaces = parseStrictInt(
+    champValues(dossier, HUDA_PLACES_TRANSFEREES)[0] ?? ""
+  );
+  const declared = resolveHudaDepartureType({
+    totalPlaces: parseStrictInt(champValue(dossier, HUDA_CAPACITE_AVANT)),
+    transferredPlaces,
+    hudaCount: countHudaSections(dossier, hudas.length),
+  });
+  const departure = await resolveHudaDeparture(
+    hudas,
+    declared.departureType,
+    transferredPlaces,
+    effectiveDate
+  );
+
+  const type = resolveHudaCadaTransformationType(
+    departure.departureType,
+    destination
+  );
+  if (!type) {
+    skip(`destination ${destination} sans type de transformation`);
+    return;
+  }
 
   const structureIds = hudas.map((huda) => huda.structureId);
   const existingTransformations = await findHudaCadaTransformations(
@@ -409,15 +673,37 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
     return;
   }
 
+  if (
+    departure.departureType === StructureVersionTransformationType.CONTRACTION
+  ) {
+    contracted.push(
+      `#${dossier.number} → ${hudas[0].codeBhasile} garde ${departure.remainingPlaces} place(s)`
+    );
+  }
+  const notContractedReason = departure.downgradeReason ?? declared.reason;
+  if (
+    departure.departureType === StructureVersionTransformationType.FERMETURE &&
+    notContractedReason
+  ) {
+    notContracted.push(`#${dossier.number} : ${notContractedReason}`);
+  }
+
+  const { structureTypologies, placesAutorisees } = buildCapacityFields(
+    departure.remainingPlaces ?? null,
+    effectiveDate
+  );
+
   const id = await createTransformation(
     {
       type,
       structureVersionTransformations: [
         ...hudas.map((huda) => ({
-          type: StructureVersionTransformationType.FERMETURE,
+          type: departure.departureType,
+          structureTypologies,
           structureVersion: {
             structureId: huda.structureId,
             effectiveDate: effectiveDate.toISOString(),
+            placesAutorisees,
           },
         })),
         cadaBrique.brique,
@@ -461,6 +747,25 @@ if (linked.length) {
     `📎 ${linked.length} dossier(s) rattaché(s) à une transformation déjà saisie dans Bhasile`
   );
   linked.forEach((line) => console.log(`   ${line}`));
+}
+
+if (contracted.length) {
+  console.log(`📉 ${contracted.length} HUDA en contraction (places restantes)`);
+  contracted.forEach((line) => console.log(`   ${line}`));
+}
+
+if (notContracted.length) {
+  console.log(
+    `📌 ${notContracted.length} dossier(s) laissés en fermeture faute de places exploitables`
+  );
+  notContracted.forEach((line) => console.log(`   ${line}`));
+}
+
+if (contradicted.length) {
+  console.log(
+    `⚠️ ${contradicted.length} transfo(s) commencée(s) par un agent que le dossier contredit`
+  );
+  contradicted.forEach((line) => console.log(`   ${line}`));
 }
 
 if (inferred.length) {

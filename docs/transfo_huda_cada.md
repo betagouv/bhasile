@@ -20,7 +20,7 @@
 
 ## Enveloppe HUDA
 
-- **Union sans priorité** : codes Bhasile et codes DNA s'additionnent, l'ensemble des structures est le périmètre à fermer. Une brique `FERMETURE` par structure.
+- **Union sans priorité** : codes Bhasile et codes DNA s'additionnent, l'ensemble des structures est le périmètre au départ. Une brique par structure, `FERMETURE` ou `CONTRACTION` selon les places (voir ci-dessous).
 - Libellés balayés par motif (`HUDA 2`, apostrophe droite ou typographique), pas par égalité.
 - **Tout ou rien sur les codes DNA** : après tentatives de rattrapage (séparateurs, lettre isolée recollée, majuscules, padding du zéro), un seul code encore illisible, inconnu en base ou hors département fait skipper le dossier entier. Le message distingue les trois causes.
 - **Le code Bhasile ne bloque que s'il est lisible** : le champ sert de texte libre (`Multi DNA`, `sous CPOM`, `en cours de saisie dans Bhasile`, voire un code DNA). Une valeur qui ne se lit pas comme un code est ignorée sans bloquer, les codes DNA prennent le relais et désignent leurs structures détentrices à date. En revanche un code bien formé mais inconnu en base, fermé ou non-HUDA skippe le dossier, comme un code DNA.
@@ -52,7 +52,20 @@
 | Création  | `Nombre de places de l'établissement transformé`, sinon `Capacité du nouveau CADA créé dans le cadre de la transformation` |
 
 - Écrite aux deux emplacements du formulaire : `structureTypologies[0].placesAutorisees` et `structureVersion.placesAutorisees`.
-- Transfert partiel (places transformées < capacité HUDA) -> fermeture **totale**, les places non transférées sont fermées.
+
+## Fermeture ou contraction des HUDA
+
+Le libellé du dossier ne donne que la **destination** (CADA existant ou nouveau CADA) ; le sort des HUDA se déduit des places.
+
+| Condition                                     | Brique        |
+| --------------------------------------------- | ------------- |
+| `0 < transférées < total` et **un seul** HUDA | `CONTRACTION` |
+| tout le reste                                 | `FERMETURE`   |
+
+- Les deux champs : `Capacité totale de l'HUDA prévue dans la convention existante` (un seul id, stable sur les 25 révisions) et `Nombre total de places HUDA transformées` (**deux** ids successifs, le champ ayant été remplacé début avril 2026 — le premier renseigné l'emporte).
+- **Jamais d'inférence dès qu'un second HUDA est déclaré** : le champ « total » vaut tantôt la somme des deux HUDA, tantôt le premier seul, selon le déclarant. L'unité est indéterminée, aucun calcul ne la retrouve.
+- Les places restantes écrites sur la brique viennent de **Bhasile** (version en vigueur à la date d'effet), pas du total déclaré en DN : c'est contre Bhasile que le formulaire valide la saisie. Un restant nul ou négatif retombe en fermeture.
+- La remise en concurrence n'a pas de libellé dans la démarche : elle reste saisie à la main.
 
 ## Autres pré-remplissages
 
@@ -82,6 +95,6 @@ Sortie en code 0 même avec des erreurs.
 ## Limites assumées
 
 - Union sans somme de contrôle : un code DNA erroné ajoute une fermeture définitive, sans signal.
-- Libellés dupliqués dans un dossier (sections HUDA puis CADA) : `getValueByLabel` renvoie le premier.
+- Libellés dupliqués dans un dossier (sections HUDA puis CADA) : le rattachement se fait par `champDescriptorId`, pas par libellé.
 - Après la PR 1534, un HUDA fermé conserve ses codes DNA sur sa version courante - chaque transfo finalisée crée un doublon de code pour les runs suivants.
 - Tests `*.repository.test.ts` hors CI, à lancer via `yarn test:db`.

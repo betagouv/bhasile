@@ -13,6 +13,26 @@ export const TransformationType = {
   FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES:
     "FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES",
   FERMETURE_SANS_TRANSFERT: "FERMETURE_SANS_TRANSFERT",
+  TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT:
+    "TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT",
+  TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU:
+    "TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU",
+  TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE:
+    "TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE",
+  TRANSFO_HUDA_CONTRACTION_VERS_CADA_EXISTANT:
+    "TRANSFO_HUDA_CONTRACTION_VERS_CADA_EXISTANT",
+  TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU:
+    "TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU",
+  TRANSFO_HUDA_CONTRACTION_REMISE_EN_CONCURRENCE:
+    "TRANSFO_HUDA_CONTRACTION_REMISE_EN_CONCURRENCE",
+} as const;
+export type TransformationType =
+  (typeof TransformationType)[keyof typeof TransformationType];
+
+/* Anciens noms des trois parcours HUDA, encore portés par des lignes en base tant que
+ * le one-off 20260917-rename-huda-transformation-types n'a pas été rejoué. Volontairement
+ * hors de TransformationType : l'écriture les refuse, seule la lecture doit les résoudre. */
+export const LegacyHudaTransformationType = {
   TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR:
     "TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR",
   TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR:
@@ -20,8 +40,22 @@ export const TransformationType = {
   TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES:
     "TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES",
 } as const;
-export type TransformationType =
-  (typeof TransformationType)[keyof typeof TransformationType];
+export type LegacyHudaTransformationType =
+  (typeof LegacyHudaTransformationType)[keyof typeof LegacyHudaTransformationType];
+
+/* Les deux axes d'un parcours HUDA vers CADA : ce qu'il advient des HUDA au départ,
+ * et où partent leurs places. */
+export type HudaCadaDepartureType =
+  | typeof StructureVersionTransformationType.FERMETURE
+  | typeof StructureVersionTransformationType.CONTRACTION;
+
+export const HudaCadaDestination = {
+  CADA_EXISTANT: "CADA_EXISTANT",
+  CADA_NOUVEAU: "CADA_NOUVEAU",
+  REMISE_EN_CONCURRENCE: "REMISE_EN_CONCURRENCE",
+} as const;
+export type HudaCadaDestination =
+  (typeof HudaCadaDestination)[keyof typeof HudaCadaDestination];
 
 export type DepartementBearingStructureVersionTransformation = {
   structureVersion?: {
