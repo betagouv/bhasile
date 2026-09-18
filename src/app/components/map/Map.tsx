@@ -4,7 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "carte-facile/carte-facile.css";
 
 import { addOverlay, mapStyles, Overlay } from "carte-facile";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import {
   PropsWithChildren,
   ReactElement,
