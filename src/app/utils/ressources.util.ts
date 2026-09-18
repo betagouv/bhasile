@@ -39,16 +39,7 @@ const filterBlock = (block: Block, words: string[]): Block => {
   }
 
   if (block.type === "faq") {
-    const tabs = block.tabs
-      .map((tab) => ({
-        ...tab,
-        questions: tab.questions.filter((question) =>
-          hasAllWords(question.searchText, words)
-        ),
-      }))
-      .filter((tab) => tab.questions.length > 0);
-
-    return { ...block, tabs };
+    return block;
   }
 
   const unreachable: never = block;
