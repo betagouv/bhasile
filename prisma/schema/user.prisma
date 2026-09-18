@@ -18,17 +18,18 @@ model User {
 }
 
 model UserAction {
-  id          Int                    @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   userId      Int
-  user        User                   @relation(fields: [userId], references: [id])
+  user        User               @relation(fields: [userId], references: [id])
   action      UserActionCategory
-  structure   Structure?             @relation(fields: [structureId], references: [id])
+  structure   Structure?         @relation(fields: [structureId], references: [id])
   structureId Int?
-  cpom        Cpom?                  @relation(fields: [cpomId], references: [id])
+  cpom        Cpom?              @relation(fields: [cpomId], references: [id])
   cpomId      Int?
-  operateur   Operateur?             @relation(fields: [operateurId], references: [id])
+  operateur   Operateur?         @relation(fields: [operateurId], references: [id])
   operateurId Int?
-  description UserActionDescription?
+  type        UserActionType?
+  details     String?
 
   createdAt DateTime @default(now())
 
@@ -75,7 +76,7 @@ enum UserActionCategory {
   @@schema("public")
 }
 
-enum UserActionDescription {
+enum UserActionType {
   STATISTIQUES_TABLE
   STATISTIQUES_CARTOGRAPHIE
   STRUCTURES_CARTOGRAPHIE
@@ -83,6 +84,9 @@ enum UserActionDescription {
   FINANCES_SPREADSHEET_EXPORT
   CONTROLE_QUALITE_SPREADSHEET_EXPORT
   STRUCTURE_SPREADSHEET_EXPORT
+  STRUCTURE_PDF_EXPORT
+  STATISTIQUES_SPREADSHEET_EXPORT
+  STATISTIQUES_PDF_EXPORT
 
   @@schema("public")
 }

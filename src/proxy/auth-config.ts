@@ -174,6 +174,24 @@ export const protectedApiRoutes: ApiRoute[] = [
       POST: "proconnect",
     },
   },
+  {
+    pattern: /^\/api\/user-actions\/structure-pdf-export$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/user-actions\/statistiques-spreadsheet-export$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/user-actions\/statistiques-pdf-export$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
 ];
 
 export const proConnectProtectedPages = [
