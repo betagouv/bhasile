@@ -125,6 +125,11 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
       return;
     }
 
+    // maplibre v6 charge son worker depuis un fichier voisin, dont il déduit l'URL de sa
+    // propre import.meta.url. Sous Turbopack cette URL pointe sur la page : sans ce réglage
+    // le worker reçoit la 404 HTML de Next et la carte reste vide, sans aucune erreur.
+    maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+
     const createdMap = new maplibregl.Map({
       container: containerRef.current,
       style: mapStyles.desaturated,
