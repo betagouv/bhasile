@@ -213,15 +213,15 @@ const Upload = ({
           <div className="upload-success grid grid-cols-[auto_1fr_auto_auto] items-center justify-center gap-2 w-full">
             <i className="fr-icon-file-text-fill text-action-high-blue-france" />
             <span className="truncate block w-full max-w-full">
-              <a
-                href="#"
+              <button
+                type="button"
                 onClick={handleView}
-                className="truncate block max-w-full"
+                className="truncate block max-w-full text-left"
               >
                 <Tooltip kind="hover" title={file?.originalName}>
                   {file?.originalName}
                 </Tooltip>
-              </a>
+              </button>
               <span className="text-xs text-default-grey tabular-nums">
                 {formatBytes(file?.fileSize)}
               </span>
