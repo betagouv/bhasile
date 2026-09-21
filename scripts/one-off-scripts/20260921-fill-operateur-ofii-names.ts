@@ -1,6 +1,4 @@
 // One-off : bascule du mapping opérateurs OFII du JSON S3 vers Operateur.ofiiNames.
-// Le JSON associe un libellé brut du fichier OFII au nom normalisé de l'opérateur en base ;
-// chaque clé devient une entrée de ofiiNames sur l'opérateur correspondant.
 //
 // Usage: yarn one-off 20260921-fill-operateur-ofii-names [cle_s3_du_json]
 
