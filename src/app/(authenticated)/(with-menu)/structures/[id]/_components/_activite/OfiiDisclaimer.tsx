@@ -24,7 +24,7 @@ export const OfiiDisclaimer = ({ showOfiiData }: Props): ReactElement => {
 
       <div className="relative h-[38] w-[68]">
         <Image
-          src="/ofii.webp"
+          src="/ofii.avif"
           alt="Logo de l'OFII"
           fill
           sizes="(min-width: 91px)"
