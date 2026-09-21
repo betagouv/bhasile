@@ -32,7 +32,7 @@ export const ActiviteBlock = ({ startMonth, endMonth }: Props) => {
           </span>
           <div className="relative h-9.5 w-17">
             <Image
-              src="/ofii.webp"
+              src="/ofii.avif"
               alt="Logo de l'OFII"
               fill
               sizes="(min-width: 91px)"
