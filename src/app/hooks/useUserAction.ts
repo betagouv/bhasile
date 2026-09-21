@@ -64,14 +64,16 @@ export const useUserAction = () => {
   };
 
   const trackStatistiquesSpreadsheetExport = async (
-    details: string
+    details: Record<string, string>
   ): Promise<void> => {
     postUserAction("/api/user-actions/statistiques-spreadsheet-export", {
       details,
     });
   };
 
-  const trackStatistiquesPdfExport = async (details: string): Promise<void> => {
+  const trackStatistiquesPdfExport = async (
+    details: Record<string, string>
+  ): Promise<void> => {
     postUserAction("/api/user-actions/statistiques-pdf-export", {
       details,
     });

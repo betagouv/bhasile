@@ -128,8 +128,11 @@ export const createStructurePdfExportEvent = async (
 
 export const createStatistiquesSpreadsheetExportEvent = async (
   method: string,
-  details: string
+  details?: Record<string, string>
 ) => {
+  if (!details) {
+    return;
+  }
   await createUserAction({
     action: getActionFromMethod(method),
     type: UserActionType.STATISTIQUES_SPREADSHEET_EXPORT,
@@ -139,8 +142,11 @@ export const createStatistiquesSpreadsheetExportEvent = async (
 
 export const createStatistiquesPdfExportEvent = async (
   method: string,
-  details: string
+  details?: Record<string, string>
 ) => {
+  if (!details) {
+    return;
+  }
   await createUserAction({
     action: getActionFromMethod(method),
     type: UserActionType.STATISTIQUES_PDF_EXPORT,

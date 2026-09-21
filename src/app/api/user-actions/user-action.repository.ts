@@ -57,5 +57,5 @@ type CreateUserActionArgs = {
   operateurId?: number;
   userEmail?: string;
   type?: UserActionType;
-  details?: string;
+  details?: Record<string, string>;
 };

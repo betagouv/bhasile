@@ -29,7 +29,7 @@ model UserAction {
   operateur   Operateur?         @relation(fields: [operateurId], references: [id])
   operateurId Int?
   type        UserActionType?
-  details     String?
+  details     Json?
 
   createdAt DateTime @default(now())
 

@@ -1,8 +1,20 @@
 import z from "zod";
 
-export const userActionApiSchema = z.object({
+export const userActionStructureApiSchema = z.object({
   structureId: z.number().optional(),
-  details: z.string().optional(),
 });
 
-export type UserActionApiType = z.infer<typeof userActionApiSchema>;
+export const userActionDetailsApiSchema = z.object({
+  details: z.record(z.string(), z.string()).optional(),
+});
+
+export type UserActionStructureApiType = z.infer<
+  typeof userActionStructureApiSchema
+>;
+
+export type UserActionDetailsApiType = z.infer<
+  typeof userActionDetailsApiSchema
+>;
+
+export type UserActionApiType =
+  UserActionStructureApiType | UserActionDetailsApiType;

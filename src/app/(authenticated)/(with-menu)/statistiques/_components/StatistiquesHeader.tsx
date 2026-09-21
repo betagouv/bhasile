@@ -65,8 +65,8 @@ export const StatistiquesHeader = (): ReactElement | null => {
     router.push(`${path}${suffix}`);
   };
 
-  const jsonSearchParams = JSON.stringify(
-    Object.fromEntries(new URLSearchParams(searchParams))
+  const jsonSearchParams = Object.fromEntries(
+    new URLSearchParams(searchParams)
   );
 
   return (
