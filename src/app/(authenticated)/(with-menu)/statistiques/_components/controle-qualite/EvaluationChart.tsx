@@ -23,7 +23,7 @@ export const EvaluationChart = ({
   const endMonth = `${endYear?.toString()}-01`;
 
   const chartData = useMemo(() => {
-    const sortedEvaluationPeriodData =
+    const rawEvaluationPeriodData =
       startYear && endYear
         ? getLastDisplayedPeriods(
             statistiques.controleQualite?.[timePeriod] || [],
@@ -37,8 +37,30 @@ export const EvaluationChart = ({
             EVALUATION_START_YEAR
           );
 
-    const labels = sortedEvaluationPeriodData.map((item) => {
-      const date = new Date(item.date);
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+
+    const filteredEvaluationPeriodData = rawEvaluationPeriodData.filter(
+      (periodItem) => {
+        if (timePeriod === "byMonth") {
+          const periodDate = new Date(periodItem.date);
+          const periodYear = periodDate.getFullYear();
+          const periodMonth = periodDate.getMonth();
+
+          if (
+            periodYear > currentYear ||
+            (periodYear === currentYear && periodMonth > currentMonth)
+          ) {
+            return false;
+          }
+        }
+        return true;
+      }
+    );
+
+    const labels = filteredEvaluationPeriodData.map((periodItem) => {
+      const date = new Date(periodItem.date);
 
       if (timePeriod === "byMonth") {
         return date
@@ -57,12 +79,12 @@ export const EvaluationChart = ({
       return date.getFullYear().toString();
     });
 
-    const nbStructuresEvaluees = sortedEvaluationPeriodData.map(
-      (item) => Number(item.nbStructuresEvaluees) || 0
+    const nbStructuresEvaluees = filteredEvaluationPeriodData.map(
+      (periodItem) => Number(periodItem.nbStructuresEvaluees) || 0
     );
 
-    const moyenneGenerale = sortedEvaluationPeriodData.map((item) =>
-      item.noteGenerale === null ? null : Number(item.noteGenerale)
+    const moyenneGenerale = filteredEvaluationPeriodData.map((periodItem) =>
+      periodItem.noteGenerale === null ? null : Number(periodItem.noteGenerale)
     );
 
     return {

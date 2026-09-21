@@ -46,7 +46,7 @@ export const FinanceCards = (): ReactElement => {
         ]}
       />
       <MultiInformationCard
-        detailLabel="ensemble des employés de la structure"
+        detailLabel="ensemble des employés des structures sélectionnées"
         informations={[
           {
             primaryInformation: (
@@ -69,7 +69,7 @@ export const FinanceCards = (): ReactElement => {
         ]}
       />
       <MultiInformationCard
-        detailLabel="nombre de places gérées par un ETP"
+        detailLabel="nombre de places autorisées des structures sélectionnées divisé par le nombre total d'ETP"
         informations={[
           {
             primaryInformation: (
@@ -94,7 +94,7 @@ export const FinanceCards = (): ReactElement => {
         ]}
       />
       <MultiInformationCard
-        detailLabel="coût de la structure pour une journée et pour une place"
+        detailLabel="coût moyen d'une structure pour une journée et pour une place"
         informations={[
           {
             primaryInformation: (

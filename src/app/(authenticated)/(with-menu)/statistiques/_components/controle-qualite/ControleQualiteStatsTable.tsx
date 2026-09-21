@@ -94,17 +94,36 @@ export const ControleQualiteStatsTable = ({
   const { statistiques } = useStatistiquesContext();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("byYear");
 
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+
   const controleQualitePeriods = filterDisplayedPeriods(
     statistiques?.controleQualite?.[timePeriod] ?? [],
     Math.min(...sectionsConfig.map((section) => section.startYear))
   ).filter((periodItem) => {
+    const periodDate = new Date(periodItem.date);
     const year = getYearFromDate(periodItem.date);
+
     if (startYear !== undefined && year < startYear) {
       return false;
     }
     if (endYear !== undefined && year > endYear) {
       return false;
     }
+
+    if (timePeriod === "byMonth") {
+      const periodYear = periodDate.getFullYear();
+      const periodMonth = periodDate.getMonth();
+
+      if (
+        periodYear > currentYear ||
+        (periodYear === currentYear && periodMonth > currentMonth)
+      ) {
+        return false;
+      }
+    }
+
     return true;
   });
 

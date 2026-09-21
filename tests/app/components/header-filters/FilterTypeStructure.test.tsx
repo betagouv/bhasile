@@ -3,17 +3,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FilterTypeStructure } from "@/app/components/header-filters/FilterTypeStructure";
 
-const mockReplace = vi.fn();
+const mockNavigateWithFilter = vi.fn();
 const mockUseSearchParams = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockReplace }),
   usePathname: () => "/",
   useSearchParams: () => mockUseSearchParams(),
 }));
 
-vi.mock("@/contexts/FetchStateContext", () => ({
-  useFetchState: () => ({ setFetchState: vi.fn() }),
+vi.mock("@/app/hooks/useFilterNavigation", () => ({
+  useFilterNavigation: () => mockNavigateWithFilter,
 }));
 
 describe("FilterTypeStructure", () => {
@@ -22,19 +21,41 @@ describe("FilterTypeStructure", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
   });
 
-  it("coche toutes les cases quand aucun type n'est présent dans l'URL", () => {
+  it("ne coche aucune case quand aucun type n'est présent dans l'URL", () => {
     render(<FilterTypeStructure />);
 
-    expect(screen.getByLabelText<HTMLInputElement>("CADA").checked).toBe(true);
-    expect(screen.getByLabelText<HTMLInputElement>("HUDA").checked).toBe(true);
+    const elementCheckboxAll =
+      screen.getByLabelText<HTMLInputElement>("Tous les types");
+    const elementCheckboxCada = screen.getByLabelText<HTMLInputElement>("CADA");
+    const elementCheckboxHuda = screen.getByLabelText<HTMLInputElement>("HUDA");
+
+    expect(elementCheckboxAll.checked).toBe(false);
+    expect(elementCheckboxCada.checked).toBe(false);
+    expect(elementCheckboxHuda.checked).toBe(false);
   });
 
-  it("lit la sélection depuis le paramètre types", () => {
+  it("lit la sélection depuis le paramètre types dans l'URL", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams("types=CADA"));
 
     render(<FilterTypeStructure />);
 
-    expect(screen.getByLabelText<HTMLInputElement>("CADA").checked).toBe(true);
-    expect(screen.getByLabelText<HTMLInputElement>("CAES").checked).toBe(false);
+    const elementCheckboxCada = screen.getByLabelText<HTMLInputElement>("CADA");
+    const elementCheckboxCaes = screen.getByLabelText<HTMLInputElement>("CAES");
+
+    expect(elementCheckboxCada.checked).toBe(true);
+    expect(elementCheckboxCaes.checked).toBe(false);
+  });
+
+  it("coche la case 'Tous les types' lorsque tous les types acceptés sont dans l'URL", () => {
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams("types=CADA,HUDA,CAES,CPH")
+    );
+
+    render(<FilterTypeStructure />);
+
+    const elementCheckboxAll =
+      screen.getByLabelText<HTMLInputElement>("Tous les types");
+
+    expect(elementCheckboxAll.checked).toBe(true);
   });
 });
