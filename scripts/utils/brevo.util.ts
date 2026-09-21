@@ -1,6 +1,5 @@
-import dayjs from "dayjs";
-
 import { getUserRole } from "@/app/api/users/user.util";
+import { toDayKey } from "@/app/utils/date.util";
 
 const BREVO_IMPORT_URL = "https://api.brevo.com/v3/contacts/import";
 const BATCH_SIZE = 500;
@@ -34,8 +33,8 @@ export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
       DEPARTEMENT: formatDepartements(role),
       STATUT: AGENT_STATUT,
       PERIMETRE: role?.name ?? "",
-      LAST_LOGIN: formatDate(user.lastConnection),
-      CREATION_COMPTE: formatDate(user.createdAt),
+      LAST_LOGIN: toDayKey(user.lastConnection),
+      CREATION_COMPTE: toDayKey(user.createdAt),
     },
   };
 };
@@ -94,5 +93,3 @@ const formatDepartements = (role: BrevoAgentRole | null): string =>
     .map((roleDepartement) => roleDepartement.departementNumero)
     .sort()
     .join(", ");
-
-const formatDate = (date: Date): string => dayjs(date).format("YYYY-MM-DD");

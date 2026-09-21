@@ -24,6 +24,18 @@ export const formatDate = (
   return dateObject.toLocaleDateString("fr-FR", options);
 };
 
+export const toDayKey = (date: Date): string => date.toISOString().slice(0, 10);
+
+export const toMonthKey = (date: Date): string =>
+  date.toISOString().slice(0, 7);
+
+export const toYearKey = (date: Date): string => date.toISOString().slice(0, 4);
+
+export const toTrimesterKey = (date: Date): string => {
+  const month = Number(toMonthKey(date).slice(5, 7));
+  return `${toYearKey(date)}-Q${Math.ceil(month / 3)}`;
+};
+
 /** Dernier jour du mois à midi UTC (depuis date ou mois/année). */
 export const endOfMonthUtcFromMonth = (year: number, month: number): Date =>
   new Date(Date.UTC(year, month, 0, 12, 0, 0, 0));
