@@ -5,14 +5,7 @@ Ce référentiel est alimenté à partir du fichier Excel mensuel fourni par l�
 ## 1. Pré‑requis
 
 - **Accès S3** : le fichier XLSX doit être présent dans le bucket `DOCS_BUCKET_NAME` (voir `.env`).
-- **Mapping opérateurs** : un JSON de mapping brut → nom normalisé doit exister dans `DOCS_BUCKET_NAME`, clé `OFII_OPERATEUR_MAPPING_KEY` (par défaut : `operateurs_to_match.json`). Il permet d'harmoniser les noms et d'éviter de se retrouver avec des typos.
-  - Exemple :
-
-```json
-{
-  "FRANCE TERRE D ASILE": "FRANCE TERRE D'ASILE"
-}
-```
+- **Mapping opérateurs** : les libellés bruts du fichier OFII qui ne correspondent pas au nom de l'opérateur en base (typos, variantes de saisie) sont listés dans `Operateur.ofiiNames`. Un opérateur dont le libellé OFII est déjà son nom en base n'a rien à y déclarer.
 
 ## 2. Commande principale
 
@@ -39,8 +32,8 @@ Ce script permet de prendre en compte un certain nombre de formats de fichier :
   - le script résout le **numéro** (ex. `"03"`) à partir de la table `Departement`,
   - ce numéro est stocké dans `Structure.departementAdministratif`.
 - **Opérateur** :
-  - les noms bruts sont normalisés via le JSON de mapping,
-  - les opérateurs sont créés / retrouvés via `ensureOperateursExist`,
+  - le libellé brut est mis en majuscules puis rapproché d'un opérateur par son `name` ou l'un de ses `ofiiNames`,
+  - aucun opérateur n'est créé par le script : un libellé non rattaché fait échouer la ligne,
   - `Structure.operateurId` est renseigné pour les structures créées.
 - **Structures absentes du fichier** :
   - toute structure encore active côté OFII (`inactiveInOfiiFileSince = null`) mais absente du fichier courant est marquée comme inactive (`inactiveInOfiiFileSince` renseigné à la date du script).
@@ -48,9 +41,11 @@ Ce script permet de prendre en compte un certain nombre de formats de fichier :
 ## 4. Cas d’erreur fréquents
 
 - **Opérateur inconnu** :
-  - si un opérateur présent dans le fichier OFII n’est pas dans le mapping / pas gérable par `ensureOperateursExist`, le script échoue avec un message du type :  
-    `❌ Des opérateurs présents dans le fichier OFII sont inconnus en base.`
-  - Ajouter l’entrée manquante dans le JSON de mapping, ou créer l’opérateur attendu.
+  - si un libellé présent dans le fichier OFII ne correspond à aucun `name` ni `ofiiNames`, la ligne est rejetée avec un message du type :  
+    `opérateur inconnu en base : <libellé> (l'ajouter dans Operateur.ofiiNames)`
+  - Ajouter le libellé aux `ofiiNames` de l'opérateur concerné, ou créer l'opérateur attendu.
+- **Libellé OFII rattaché à deux opérateurs** :
+  - le script refuse de démarrer si un même libellé apparaît dans le `name` ou les `ofiiNames` de deux opérateurs. Retirer le doublon en base.
 - **Département invalide** :
   - si la colonne "Département" contient un nom qui ne correspond à aucun enregistrement de la table `Departement`, la ligne est ignorée et un message du type est loggé :  
     `département invalide (nom attendu) : <valeur>`

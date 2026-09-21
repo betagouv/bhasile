@@ -7,12 +7,12 @@ import "dotenv/config";
 import { normalizeRegionCode } from "@/app/utils/bhasile.util";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
-import { checkBucket, getObject } from "@/lib/minio";
 
 import { normalizeDepartementName } from "./departement-name";
 import { type OfiiReferentialRow } from "./ofii-xlsx";
 
-type OperateurMapping = Record<string, string>;
+type OperateurRecord = { id: number; name: string; ofiiNames: string[] };
+type OperateurLookup = Map<string, { id: number; name: string }>;
 type DepartementRecord = {
   numero: string;
   name: string;
@@ -128,31 +128,27 @@ function getCleanName(
   return collapseSpaces(fullName);
 }
 
-function resolveOperateurName(
-  operateurRaw: string | null | undefined,
-  operateurMapping: OperateurMapping | null
-): string | null {
-  if (!operateurRaw) {
-    return null;
-  }
-  return operateurMapping?.[operateurRaw] ?? operateurRaw;
-}
+export function buildOperateurLookup(operateurs: OperateurRecord[]): OperateurLookup {
+  const lookup: OperateurLookup = new Map();
 
-async function loadOperateurMappingFromS3(
-  bucketName: string,
-  objectName: string
-): Promise<OperateurMapping> {
-  console.log(
-    `- Chargement du mapping opérateurs depuis S3: bucket=${bucketName}, key=${objectName}`
-  );
-  await checkBucket(bucketName);
-  const stream = await getObject(bucketName, objectName);
-  const chunks: Buffer[] = [];
-  for await (const chunk of stream) {
-    chunks.push(chunk as Buffer);
+  for (const operateur of operateurs) {
+    const entry = { id: operateur.id, name: operateur.name };
+    const labels = [operateur.name, ...operateur.ofiiNames]
+      .map(stripAndUpper)
+      .filter(Boolean);
+
+    for (const label of labels) {
+      const existing = lookup.get(label);
+      if (existing && existing.id !== operateur.id) {
+        throw new Error(
+          `Le libellé OFII "${label}" est rattaché à deux opérateurs : ${existing.name} et ${operateur.name}. Corriger les ofiiNames en base.`
+        );
+      }
+      lookup.set(label, entry);
+    }
   }
-  const json = Buffer.concat(chunks).toString("utf-8");
-  return JSON.parse(json) as OperateurMapping;
+
+  return lookup;
 }
 
 /**
@@ -182,26 +178,11 @@ export const fillOfiiStructureFromRows = async (
     const { nameToNumero, numeroToRegionCode } =
       buildDepartementMaps(departements);
 
-    const bucketName = process.env.DOCS_BUCKET_NAME;
-
-    if (!bucketName) {
-      throw new Error(
-        "DOCS_BUCKET_NAME doit être défini pour charger le mapping opérateurs depuis S3."
-      );
-    }
-
-    const operateurMapping = await loadOperateurMappingFromS3(
-      bucketName,
-      process.env.OFII_OPERATEUR_MAPPING_KEY ?? "operateurs_to_match.json"
-    );
-
     const existingOperateurs = await prisma.operateur.findMany({
-      select: { id: true, name: true },
+      select: { id: true, name: true, ofiiNames: true },
     });
 
-    const operateurMap = new Map(
-      existingOperateurs.map((op) => [op.name, op.id])
-    );
+    const operateurLookup = buildOperateurLookup(existingOperateurs);
 
     console.log("- Validation des données...");
 
@@ -235,17 +216,12 @@ export const fillOfiiStructureFromRows = async (
         issues.push(`type de structure invalide : ${row.type}`);
       }
 
-      const operateurResolved = resolveOperateurName(
-        row.operateur,
-        operateurMapping
-      );
+      const operateur = operateurLookup.get(row.operateur);
       if (!row.operateur) {
         issues.push("opérateur manquant");
-      } else if (!operateurResolved) {
-        issues.push(`opérateur invalide : ${row.operateur}`);
-      } else if (!operateurMap.has(operateurResolved)) {
+      } else if (!operateur) {
         issues.push(
-          `opérateur inconnu en base (mapping/fallback) : ${operateurResolved}`
+          `opérateur inconnu en base : ${row.operateur} (l'ajouter dans Operateur.ofiiNames)`
         );
       }
 
@@ -260,7 +236,7 @@ export const fillOfiiStructureFromRows = async (
       if (issues.length > 0) {
         errors.push({ dnaCode: row.dnaCode, issues });
       } else {
-        row.operateur = operateurResolved ?? row.operateur;
+        row.operateur = operateur?.name ?? row.operateur;
         validRecords.push(row);
       }
     }
@@ -295,7 +271,9 @@ export const fillOfiiStructureFromRows = async (
           nameToNumero
         );
 
-        const operateurId = operateurMap.get(row.operateur);
+        const operateurId = operateurLookup.get(
+          stripAndUpper(row.operateur)
+        )?.id;
 
         // Garanti par la validation ci-dessus ; garde défensif pour respecter le NOT NULL en base.
         if (
