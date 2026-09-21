@@ -1,5 +1,6 @@
 import { normalizeWords } from "@/app/utils/string.util";
-import { Block, FilesTab } from "@/types/ressources.type";
+import { FaqApiType } from "@/schemas/api/faq.schema";
+import { Block, FaqBlock, FilesTab } from "@/types/ressources.type";
 
 export const filterBlocks = (blocks: Block[], search: string): Block[] => {
   const words = normalizeWords(search).split(" ").filter(Boolean);
@@ -9,8 +10,45 @@ export const filterBlocks = (blocks: Block[], search: string): Block[] => {
   }
 
   return blocks
-    .map((block) => filterBlock(block, words))
-    .filter((block) => block.tabs.length > 0);
+    .map((blockItem) => filterBlock(blockItem, words))
+    .filter((blockItem) => blockItem.tabs.length > 0);
+};
+
+export const filterFaqItems = (
+  faqItems: FaqApiType[],
+  search: string
+): FaqApiType[] => {
+  const words = normalizeWords(search).split(" ").filter(Boolean);
+
+  if (words.length === 0) {
+    return faqItems;
+  }
+
+  return faqItems.filter((faqItem) => {
+    const normalizedQuestion = normalizeWords(faqItem.question);
+    const normalizedContent = normalizeWords(faqItem.contentMarkdown);
+    const fullNormalizedText = `${normalizedQuestion} ${normalizedContent}`;
+
+    return hasAllWords(fullNormalizedText, words);
+  });
+};
+
+export const filterFaqBlock = (
+  faqBlock: FaqBlock,
+  filteredFaqItems: FaqApiType[]
+): FaqBlock => {
+  const availableCategories = new Set(
+    filteredFaqItems.map((faqItem) => faqItem.category)
+  );
+
+  const filteredTabs = faqBlock.tabs.filter((tabItem) =>
+    availableCategories.has(tabItem.title)
+  );
+
+  return {
+    ...faqBlock,
+    tabs: filteredTabs,
+  };
 };
 
 export const countLinks = (tab: FilesTab): number =>

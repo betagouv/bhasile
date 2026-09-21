@@ -3,7 +3,11 @@
 import { useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
-import { filterBlocks } from "@/app/utils/ressources.util";
+import {
+  filterBlocks,
+  filterFaqBlock,
+  filterFaqItems,
+} from "@/app/utils/ressources.util";
 import { FaqApiType } from "@/schemas/api/faq.schema";
 import { Block, FaqBlock } from "@/types/ressources.type";
 
@@ -21,6 +25,11 @@ export const ResourcesContent = ({
   const searchQuery = searchParams.get("search") ?? "";
 
   const filteredBlocks = filterBlocks(blocks, searchQuery);
+  const filteredFaqItems = filterFaqItems(faqItems, searchQuery);
+  const filteredFaqBlock = filterFaqBlock(faqBlock, filteredFaqItems);
+
+  const displayFaq = hasFaqTabs && filteredFaqBlock.tabs.length > 0;
+  const hasNoResults = filteredBlocks.length === 0 && !displayFaq;
 
   return (
     <>
@@ -31,9 +40,11 @@ export const ResourcesContent = ({
           <ResourceBlock key={blockItem.id} block={blockItem} />
         ))}
 
-        {hasFaqTabs && <ResourceBlock block={faqBlock} faqItems={faqItems} />}
+        {displayFaq && (
+          <ResourceBlock block={filteredFaqBlock} faqItems={filteredFaqItems} />
+        )}
 
-        {filteredBlocks.length === 0 && !hasFaqTabs && (
+        {hasNoResults && (
           <p className="text-mention-grey text-center py-12 mb-0">
             {buildEmptyMessage(searchQuery)}
           </p>

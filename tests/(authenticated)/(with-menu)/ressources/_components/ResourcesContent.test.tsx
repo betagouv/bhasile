@@ -6,11 +6,11 @@ import { ResourcesContent } from "@/app/(authenticated)/(with-menu)/ressources/_
 import { FaqApiType } from "@/schemas/api/faq.schema";
 import { Block, FaqBlock, FilesBlock } from "@/types/ressources.type";
 
-const searchParams = { value: new URLSearchParams() };
+const mockedSearchParams = { searchParamsValue: new URLSearchParams() };
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), prefetch: vi.fn() }),
-  useSearchParams: () => searchParams.value,
+  useSearchParams: () => mockedSearchParams.searchParamsValue,
 }));
 
 vi.mock("@/contexts/FetchStateContext", () => ({
@@ -74,15 +74,20 @@ const FAQ_ITEMS: FaqApiType[] = [
 
 const BLOCKS: Block[] = [FILES_BLOCK];
 
-const renderWithSearch = (search: string) => {
-  searchParams.value = new URLSearchParams(search ? { search } : {});
+const renderResourcesContentWithSearch = (
+  searchQueryText: string,
+  hasFaqTabsFlag = true
+) => {
+  mockedSearchParams.searchParamsValue = new URLSearchParams(
+    searchQueryText ? { search: searchQueryText } : {}
+  );
   return render(
     <ResourcesContent
       blocks={BLOCKS}
       suggestions={["CPOM", "OFII"]}
       faqBlock={FAQ_BLOCK}
       faqItems={FAQ_ITEMS}
-      hasFaqTabs={true}
+      hasFaqTabs={hasFaqTabsFlag}
     />
   );
 };
@@ -90,7 +95,7 @@ const renderWithSearch = (search: string) => {
 describe("ResourcesContent", () => {
   it("affiche tous les blocs quand aucune recherche n’est active", () => {
     // WHEN
-    renderWithSearch("");
+    renderResourcesContentWithSearch("");
 
     // THEN
     expect(screen.getByText("Modèles")).toBeInTheDocument();
@@ -99,7 +104,7 @@ describe("ResourcesContent", () => {
 
   it("affiche le poids et le format d’un fichier téléchargeable", () => {
     // WHEN
-    renderWithSearch("");
+    renderResourcesContentWithSearch("");
 
     // THEN
     expect(screen.getByText(/ODT/)).toBeInTheDocument();
@@ -108,7 +113,7 @@ describe("ResourcesContent", () => {
 
   it("n’affiche ni poids ni format pour un lien externe", () => {
     // WHEN
-    renderWithSearch("");
+    renderResourcesContentWithSearch("");
 
     // THEN
     const externalLink = screen.getByRole("link", {
@@ -120,7 +125,7 @@ describe("ResourcesContent", () => {
 
   it("compte les liens de l’onglet dans la pastille", () => {
     // WHEN
-    renderWithSearch("");
+    renderResourcesContentWithSearch("");
 
     // THEN
     expect(
@@ -130,7 +135,7 @@ describe("ResourcesContent", () => {
 
   it("garde le bouton Rechercher visible pendant la saisie", async () => {
     // GIVEN
-    renderWithSearch("");
+    renderResourcesContentWithSearch("");
 
     // WHEN
     await userEvent.type(screen.getByRole("searchbox"), "cpom");
@@ -143,7 +148,7 @@ describe("ResourcesContent", () => {
 
   it("remplit la recherche quand on clique sur une suggestion", async () => {
     // GIVEN
-    renderWithSearch("");
+    renderResourcesContentWithSearch("");
 
     // WHEN
     await userEvent.click(screen.getByRole("button", { name: "CPOM" }));
@@ -152,18 +157,31 @@ describe("ResourcesContent", () => {
     expect(screen.getByRole("searchbox")).toHaveValue("CPOM");
   });
 
-  it("ne garde que les blocs correspondant à la recherche", () => {
+  it("ne garde que la FAQ quand la recherche correspond au contenu de la FAQ uniquement", () => {
     // WHEN
-    renderWithSearch("cinq ans");
+    renderResourcesContentWithSearch("pluriannuel");
 
     // THEN
     expect(screen.getByText("FAQ")).toBeInTheDocument();
     expect(screen.queryByText("Modèles")).not.toBeInTheDocument();
   });
 
-  it("affiche un message d’absence de résultat avec le terme cherché", () => {
+  it("masque le bloc FAQ si aFaqTabs vaut false même si les items existent", () => {
     // WHEN
-    searchParams.value = new URLSearchParams({ search: "introuvable" });
+    renderResourcesContentWithSearch("", false);
+
+    // THEN
+    expect(screen.getByText("Modèles")).toBeInTheDocument();
+    expect(screen.queryByText("FAQ")).not.toBeInTheDocument();
+  });
+
+  it("affiche un message d’absence de résultat avec le terme cherché", () => {
+    // GIVEN
+    mockedSearchParams.searchParamsValue = new URLSearchParams({
+      search: "introuvable",
+    });
+
+    // WHEN
     render(
       <ResourcesContent
         blocks={[]}
@@ -182,7 +200,7 @@ describe("ResourcesContent", () => {
 
   it("affiche un message dédié quand aucun contenu n’est publié", () => {
     // GIVEN
-    searchParams.value = new URLSearchParams();
+    mockedSearchParams.searchParamsValue = new URLSearchParams();
 
     // WHEN
     render(
@@ -203,7 +221,7 @@ describe("ResourcesContent", () => {
 
   it("propose les recherches suggérées", () => {
     // WHEN
-    renderWithSearch("");
+    renderResourcesContentWithSearch("");
 
     // THEN
     expect(screen.getByRole("button", { name: "CPOM" })).toBeInTheDocument();

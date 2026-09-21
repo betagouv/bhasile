@@ -1,13 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { countLinks, filterBlocks } from "@/app/utils/ressources.util";
-import { Block, FaqBlock, FilesBlock } from "@/types/ressources.type";
+import {
+  countLinks,
+  filterBlocks,
+  filterFaqBlock,
+  filterFaqItems,
+} from "@/app/utils/ressources.util";
+import { FaqApiType } from "@/schemas/api/faq.schema";
+import { Block, FaqBlock, FilesBlock, FilesTab } from "@/types/ressources.type";
 
-const buildLink = (label: string, searchText: string) => ({
-  label,
-  href: `/${label}.odt`,
+const buildLink = (labelName: string, searchNormalizedText: string) => ({
+  label: labelName,
+  href: `/${labelName}.odt`,
   file: { extension: "ODT", bytes: 1024 },
-  searchText,
+  searchText: searchNormalizedText,
 });
 
 const FILES_BLOCK: FilesBlock = {
@@ -67,79 +73,89 @@ const FAQ_BLOCK: FaqBlock = {
   icon: "fr-icon-question-answer-line",
   type: "faq",
   tabs: [
-    { id: "1", title: "Section 1" },
-    { id: "2", title: "Section 2" },
+    { id: "1", title: "Général" },
+    { id: "2", title: "Finances" },
   ],
 };
 
-const BLOCKS: Block[] = [FILES_BLOCK, FAQ_BLOCK];
+const FAQ_ITEMS: FaqApiType[] = [
+  {
+    id: 1,
+    question: "Comment effectuer une demande ?",
+    contentMarkdown: "Il faut remplir le formulaire A1.",
+    category: "Général",
+  },
+  {
+    id: 2,
+    question: "Quel est le budget maximum ?",
+    contentMarkdown: "Le plafond est fixé à 10 000 euros.",
+    category: "Finances",
+  },
+];
 
-describe("ressources filter", () => {
+const RESOURCE_BLOCKS: Block[] = [FILES_BLOCK, FAQ_BLOCK];
+
+describe("ressources.util", () => {
   describe("filterBlocks", () => {
     it("renvoie tous les blocs quand la recherche est vide", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "   ");
+      const searchResult = filterBlocks(RESOURCE_BLOCKS, "   ");
 
-      // THEN
-      expect(result).toEqual(BLOCKS);
+      expect(searchResult).toEqual(RESOURCE_BLOCKS);
     });
 
     it("ne conserve que les liens dont le searchText contient le terme et conserve le bloc FAQ", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "budget");
+      const searchResult = filterBlocks(RESOURCE_BLOCKS, "budget");
 
-      // THEN
-      expect(result).toHaveLength(2);
-      const filesBlock = result[0] as FilesBlock;
+      expect(searchResult).toHaveLength(2);
+      const filesBlock = searchResult[0] as FilesBlock;
       expect(filesBlock.tabs).toHaveLength(1);
       expect(filesBlock.tabs[0].title).toBe("Documents financiers");
-      expect(result[1]).toEqual(FAQ_BLOCK);
+      expect(searchResult[1]).toEqual(FAQ_BLOCK);
     });
 
     it("conserve tout le contenu d’un onglet quand le terme correspond à son titre", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "actes administratifs");
+      const searchResult = filterBlocks(
+        RESOURCE_BLOCKS,
+        "actes administratifs"
+      );
 
-      // THEN
-      const filesBlock = result[0] as FilesBlock;
+      const filesBlock = searchResult[0] as FilesBlock;
       expect(countLinks(filesBlock.tabs[0])).toBe(2);
     });
 
     it("ignore les accents et la casse", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "AUTORISEES");
+      const searchResult = filterBlocks(RESOURCE_BLOCKS, "AUTORISEES");
 
-      // THEN
-      const filesBlock = result[0] as FilesBlock;
+      const filesBlock = searchResult[0] as FilesBlock;
       expect(filesBlock.tabs[0].sections[0].title).toBe(
         "Structures autorisées"
       );
     });
 
     it("trouve un contenu quand les mots sont donnés dans le désordre", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "administratifs actes");
+      const searchResult = filterBlocks(
+        RESOURCE_BLOCKS,
+        "administratifs actes"
+      );
 
-      // THEN
-      const filesBlock = result[0] as FilesBlock;
+      const filesBlock = searchResult[0] as FilesBlock;
       expect(countLinks(filesBlock.tabs[0])).toBe(2);
     });
 
     it("exige que tous les mots de la recherche soient présents", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "actes budget");
+      const searchResult = filterBlocks(RESOURCE_BLOCKS, "actes budget");
 
-      // THEN
-      expect(result).toEqual([FAQ_BLOCK]);
+      expect(searchResult).toEqual([FAQ_BLOCK]);
     });
 
     it("retire les sections, onglets et blocs de fichiers devenus vides", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "cpom");
+      const searchResult = filterBlocks(RESOURCE_BLOCKS, "cpom");
 
-      // THEN
-      expect(result.map((block) => block.id)).toEqual(["modeles", "faq"]);
-      const filesBlock = result[0] as FilesBlock;
+      expect(searchResult.map((blockItem) => blockItem.id)).toEqual([
+        "modeles",
+        "faq",
+      ]);
+      const filesBlock = searchResult[0] as FilesBlock;
       expect(filesBlock.tabs).toHaveLength(1);
       expect(filesBlock.tabs[0].sections).toHaveLength(1);
       expect(filesBlock.tabs[0].sections[0].title).toBe(
@@ -148,22 +164,92 @@ describe("ressources filter", () => {
     });
 
     it("renvoie uniquement la FAQ quand aucun fichier ne correspond", () => {
-      // WHEN
-      const result = filterBlocks(BLOCKS, "introuvable");
+      const searchResult = filterBlocks(RESOURCE_BLOCKS, "introuvable");
 
-      // THEN
-      expect(result).toEqual([FAQ_BLOCK]);
+      expect(searchResult).toEqual([FAQ_BLOCK]);
     });
 
     it("ne modifie pas les blocs d’origine", () => {
-      // GIVEN
-      const initialBlocks = JSON.stringify(BLOCKS);
+      const initialBlocksState = JSON.stringify(RESOURCE_BLOCKS);
 
-      // WHEN
-      filterBlocks(BLOCKS, "cpom");
+      filterBlocks(RESOURCE_BLOCKS, "cpom");
 
-      // THEN
-      expect(JSON.stringify(BLOCKS)).toBe(initialBlocks);
+      expect(JSON.stringify(RESOURCE_BLOCKS)).toBe(initialBlocksState);
+    });
+
+    it("lève une erreur si le type de bloc est inconnu", () => {
+      const unknownBlock = {
+        id: "inconnu",
+        title: "Inconnu",
+        type: "unknown-type",
+        tabs: [],
+      } as unknown as Block;
+
+      expect(() => filterBlocks([unknownBlock], "test")).toThrowError(
+        'Type de bloc inconnu : {"id":"inconnu","title":"Inconnu","type":"unknown-type","tabs":[]}'
+      );
+    });
+  });
+
+  describe("filterFaqItems", () => {
+    it("renvoie toutes les FAQ quand la recherche est vide", () => {
+      const searchResult = filterFaqItems(FAQ_ITEMS, "");
+
+      expect(searchResult).toEqual(FAQ_ITEMS);
+    });
+
+    it("filtre les questions FAQ par mot-clé dans le titre ou le contenu", () => {
+      const searchResult = filterFaqItems(FAQ_ITEMS, "formulaire");
+
+      expect(searchResult).toHaveLength(1);
+      expect(searchResult[0].id).toBe(1);
+    });
+
+    it("gère l'insensibilité à la casse et aux accents dans les FAQ", () => {
+      const searchResult = filterFaqItems(FAQ_ITEMS, "effectuer demande");
+
+      expect(searchResult).toHaveLength(1);
+      expect(searchResult[0].id).toBe(1);
+    });
+
+    it("vérifie que tous les mots sont présents à la fois dans le titre et/ou le contenu", () => {
+      const searchResult = filterFaqItems(FAQ_ITEMS, "demande A1");
+
+      expect(searchResult).toHaveLength(1);
+      expect(searchResult[0].id).toBe(1);
+    });
+
+    it("renvoie une liste vide si aucun élément ne correspond", () => {
+      const searchResult = filterFaqItems(FAQ_ITEMS, "mot-inexistant");
+
+      expect(searchResult).toHaveLength(0);
+    });
+  });
+
+  describe("filterFaqBlock", () => {
+    it("filtre les onglets du bloc FAQ selon les catégories disponibles dans les items filtrés", () => {
+      const filteredItems: FaqApiType[] = [FAQ_ITEMS[1]]; // Catégorie "Finances" uniquement
+
+      const resultFaqBlock = filterFaqBlock(FAQ_BLOCK, filteredItems);
+
+      expect(resultFaqBlock.tabs).toHaveLength(1);
+      expect(resultFaqBlock.tabs[0].title).toBe("Finances");
+    });
+
+    it("renvoie un tableau d'onglets vide si aucun item ne correspond aux catégories", () => {
+      const resultFaqBlock = filterFaqBlock(FAQ_BLOCK, []);
+
+      expect(resultFaqBlock.tabs).toHaveLength(0);
+    });
+  });
+
+  describe("countLinks", () => {
+    it("calcule correctement le nombre total de liens d'un onglet", () => {
+      const sampleFilesTab: FilesTab = FILES_BLOCK.tabs[0];
+
+      const totalLinksCount = countLinks(sampleFilesTab);
+
+      expect(totalLinksCount).toBe(2);
     });
   });
 });
