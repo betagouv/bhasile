@@ -23,8 +23,8 @@ const Upload = ({
   errorMessage,
   ...props
 }: UploadProps) => {
-  const { register, setValue } = useFormContext();
-  const { uploadFile, getFile, deleteFile } = useFileUpload();
+  const { register, setValue, getValues } = useFormContext();
+  const { uploadFile, getFile, deleteFile, getDownloadLink } = useFileUpload();
 
   const [currentState, setCurrentState] = useState<UploadState>(
     state || "idle"
@@ -32,28 +32,39 @@ const Upload = ({
   const [currentErrorMessage, setCurrentErrorMessage] = useState<string>(
     errorMessage || ""
   );
-  const [file, setFile] = useState<FileDataType | undefined>(undefined);
+  const [file, setFile] = useState<FileUploadResponse | undefined>(undefined);
   const [valueState, setValueState] = useState<string>("");
 
   useEffect(() => {
     const initialValue = value;
 
-    if (initialValue) {
-      async function syncFileData() {
-        setCurrentState("loading");
-        try {
-          const fileData = await getFile(initialValue as string);
-          setFile(fileData as FileDataType);
-          setCurrentState("success");
-        } catch {
-          setCurrentState("error");
-          setCurrentErrorMessage("Erreur lors de la récupération du fichier");
-        }
-      }
-      syncFileData();
-
-      setValueState(String(initialValue));
+    if (!initialValue) {
+      return;
     }
+    setValueState(String(initialValue));
+
+    const fieldName = props.name?.replace(/\.key$/, "");
+    const formFile = fieldName
+      ? (getValues(fieldName) as FileUploadResponse | undefined)
+      : undefined;
+
+    if (formFile?.originalName) {
+      setFile(formFile);
+      setCurrentState("success");
+      return;
+    }
+
+    async function syncFileData() {
+      setCurrentState("loading");
+      try {
+        setFile(await getFile(initialValue as string));
+        setCurrentState("success");
+      } catch {
+        setCurrentState("error");
+        setCurrentErrorMessage("Erreur lors de la récupération du fichier");
+      }
+    }
+    syncFileData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -77,10 +88,9 @@ const Upload = ({
     }
     const file = event.target.files[0];
     try {
-      const result = await uploadFile(file);
-      const fileData = await getFile(result.key);
+      const fileData = await uploadFile(file);
 
-      const stringKey = String(result.key);
+      const stringKey = String(fileData.key);
       setValueState(stringKey);
       setFile(fileData);
       setCurrentState("success");
@@ -116,6 +126,20 @@ const Upload = ({
   const handleBrowse = (e: React.MouseEvent) => {
     e.preventDefault();
     fileInputRef.current?.click();
+  };
+
+  const handleView = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!valueState) {
+      return;
+    }
+
+    try {
+      const link = await getDownloadLink(valueState);
+      window.open(link, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Erreur lors de la récupération du fichier", error);
+    }
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -189,16 +213,15 @@ const Upload = ({
           <div className="upload-success grid grid-cols-[auto_1fr_auto_auto] items-center justify-center gap-2 w-full">
             <i className="fr-icon-file-text-fill text-action-high-blue-france" />
             <span className="truncate block w-full max-w-full">
-              <a
-                href={file?.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="truncate block max-w-full"
+              <button
+                type="button"
+                onClick={handleView}
+                className="truncate block max-w-full text-left"
               >
                 <Tooltip kind="hover" title={file?.originalName}>
                   {file?.originalName}
                 </Tooltip>
-              </a>
+              </button>
               <span className="text-xs text-default-grey tabular-nums">
                 {formatBytes(file?.fileSize)}
               </span>
@@ -209,9 +232,7 @@ const Upload = ({
               size="small"
               className="rounded-full! bg-white!"
               title="Télécharger le fichier"
-              onClick={() =>
-                window.open(file?.fileUrl, "_blank", "noopener,noreferrer")
-              }
+              onClick={handleView}
             />
             <DeleteButton
               onClick={handleDelete}
@@ -282,12 +303,8 @@ type UploadState =
   "idle" | "loading" | "success" | "error" | "uploaded" | "deleting";
 
 type UploadProps = Omit<InputHTMLAttributes<HTMLInputElement>, "multiple"> & {
-  fileData?: FileDataType;
+  fileData?: FileUploadResponse;
   errorMessage?: string;
   state?: UploadState;
   id?: string;
-};
-
-type FileDataType = FileUploadResponse & {
-  fileUrl: string;
 };

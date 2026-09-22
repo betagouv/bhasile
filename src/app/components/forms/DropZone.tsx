@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import { FileUploadWithLink, useFileUpload } from "@/app/hooks/useFileUpload";
+import { FileUploadResponse, useFileUpload } from "@/app/hooks/useFileUpload";
 import { cn } from "@/app/utils/classname.util";
 import { getShortDisplayedName } from "@/app/utils/file-upload.util";
 import { formatBytes } from "@/app/utils/number.util";
@@ -9,11 +9,11 @@ import { DeleteButton } from "../common/DeleteButton";
 import Loader from "../ui/Loader";
 
 export const DropZone = ({ className, onChange, children }: Props) => {
-  const { uploadFile, getFile, deleteFile } = useFileUpload();
+  const { uploadFile, deleteFile } = useFileUpload();
 
   const [currentState, setCurrentState] = useState<State>("idle");
   const [currentErrorMessage, setCurrentErrorMessage] = useState<string>("");
-  const [fileData, setFileData] = useState<FileUploadWithLink | null>(null);
+  const [fileData, setFileData] = useState<FileUploadResponse | null>(null);
   const [key, setKey] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,15 +29,14 @@ export const DropZone = ({ className, onChange, children }: Props) => {
     setCurrentState("loading");
 
     try {
-      const result = await uploadFile(file);
-      const fileData = await getFile(result.key);
+      const fileData = await uploadFile(file);
 
-      setKey(result.key);
+      setKey(fileData.key);
       setFileData(fileData);
       setCurrentState("success");
       setCurrentErrorMessage("");
 
-      onChange?.({ key: result.key });
+      onChange?.(fileData);
     } catch {
       setCurrentState("error");
       setCurrentErrorMessage("Erreur lors de l'upload du fichier");
@@ -54,7 +53,7 @@ export const DropZone = ({ className, onChange, children }: Props) => {
         setFileData(null);
         setCurrentErrorMessage("");
         setCurrentState("idle");
-        onChange?.({ key: undefined });
+        onChange?.(undefined);
       }
     } catch {
       setCurrentState("error");
@@ -178,7 +177,7 @@ const wrapperClassName =
 
 type Props = {
   className?: string;
-  onChange: (data: { key?: string }) => void;
+  onChange: (fileUpload?: FileUploadResponse) => void;
   children: React.ReactNode;
 };
 
