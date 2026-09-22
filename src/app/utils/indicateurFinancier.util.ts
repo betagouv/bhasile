@@ -1,10 +1,25 @@
-import { INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR } from "@/constants";
+import {
+  CURRENT_YEAR,
+  INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR,
+} from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierFormValues } from "@/schemas/forms/base/indicateurFinancier.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 
 import { isNullOrUndefined } from "./common.util";
 import { getYearRange } from "./date.util";
+
+export const getIndicateurFinancierTypes = (
+  year: number
+): IndicateurFinancierType[] => {
+  if (year >= CURRENT_YEAR) {
+    return ["PREVISIONNEL"];
+  }
+  if (year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR) {
+    return ["PREVISIONNEL", "REALISE"];
+  }
+  return ["REALISE"];
+};
 
 export const getIndicateursFinanciersDefaultValues = (
   structureIndicateursFinanciers: IndicateurFinancierApiType[],
@@ -15,27 +30,9 @@ export const getIndicateursFinanciersDefaultValues = (
     ? years.filter((year) => year >= structureCreationYear)
     : years;
 
-  const columns = yearsToDisplay.flatMap((year) => {
-    if (year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR) {
-      return [
-        {
-          year,
-          type: "PREVISIONNEL",
-        },
-        {
-          year,
-          type: "REALISE",
-        },
-      ];
-    }
-
-    return [
-      {
-        year,
-        type: "REALISE",
-      },
-    ];
-  });
+  const columns = yearsToDisplay.flatMap((year) =>
+    getIndicateurFinancierTypes(year).map((type) => ({ year, type }))
+  );
 
   const indicateursFinanciers = columns.map((emptyIndicateurFinancier) => {
     const indicateurFinancier = structureIndicateursFinanciers.find(
@@ -82,7 +79,9 @@ const isYearTypeFilled = (
 export const isYearRealisee = (
   indicateursFinanciers: IndicateurFinancierApiType[],
   year: number
-) => isYearTypeFilled(indicateursFinanciers, year, "REALISE");
+) =>
+  year < CURRENT_YEAR &&
+  isYearTypeFilled(indicateursFinanciers, year, "REALISE");
 
 export const isYearPrevisionnelle = (
   indicateursFinanciers: IndicateurFinancierApiType[],
@@ -93,17 +92,12 @@ export const getEveryColumn = (
   canEdit: boolean,
   indicateursFinanciers: IndicateurFinancierApiType[],
   years: number[]
-) => {
-  if (canEdit) {
-    return years.map((year) =>
-      year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR
-        ? (["PREVISIONNEL", "REALISE"] as IndicateurFinancierType[])
-        : (["REALISE"] as IndicateurFinancierType[])
-    );
-  }
-  return years.map((year) => {
+): IndicateurFinancierType[][] =>
+  years.map((year) => {
+    if (canEdit || year >= CURRENT_YEAR) {
+      return getIndicateurFinancierTypes(year);
+    }
     return [
       isYearRealisee(indicateursFinanciers, year) ? "REALISE" : "PREVISIONNEL",
-    ] as IndicateurFinancierType[];
+    ];
   });
-};

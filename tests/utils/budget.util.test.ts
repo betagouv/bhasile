@@ -59,10 +59,6 @@ describe("budget util", () => {
   });
 
   describe("isInputDisabled", () => {
-    it("grise le réalisé de l'année en cours pour les indicateurs financiers", () => {
-      expect(isInputDisabled(CURRENT_YEAR, "REALISE")).toBe(true);
-    });
-
     it("laisse le prévisionnel de l'année en cours remplissable", () => {
       expect(isInputDisabled(CURRENT_YEAR, "PREVISIONNEL")).toBe(false);
     });
