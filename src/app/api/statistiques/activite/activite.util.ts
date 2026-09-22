@@ -1,3 +1,4 @@
+import { toMonthKey } from "@/app/utils/date.util";
 import {
   aggregateValues,
   NumericAggregation,
@@ -28,7 +29,6 @@ import {
   lookupActiveStructureIds,
   monthKeyToDate,
   resolveDnaEventStructureIds,
-  toMonthKey,
 } from "../statistiques.util";
 
 type ActiviteTotals = {

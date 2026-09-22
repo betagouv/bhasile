@@ -1,3 +1,8 @@
+import {
+  toMonthKey,
+  toTrimesterKey,
+  toYearKey,
+} from "@/app/utils/date.util";
 import { ratio } from "@/app/utils/math.util";
 import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
@@ -12,9 +17,6 @@ import type {
 import {
   groupByPeriodKey,
   monthKeyToDate,
-  toMonthKey,
-  toTrimesterKey,
-  toYearKey,
   trimesterKeyToDate,
   yearKeyToDate,
 } from "../statistiques.util";
