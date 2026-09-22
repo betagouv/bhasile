@@ -8,7 +8,6 @@ import {
 import { StructureType } from "@/types/structure.type";
 import {
   HudaCadaDestination,
-  LegacyHudaTransformationType,
   StructureVersionTransformationType,
   TransformationFormType,
   TransformationType,
@@ -249,38 +248,5 @@ describe("TRANSFORMATION_TYPE_SPECS — grille HUDA vers CADA", () => {
     expect(spec.blocks).toHaveLength(1);
     expect(spec.buildAutoTransformations()).toEqual([]);
     expect(spec.prefill).toBeUndefined();
-  });
-
-  it("résout les anciens noms vers leur équivalent de la branche fermeture", () => {
-    expect(
-      TRANSFORMATION_TYPE_SPECS[
-        LegacyHudaTransformationType
-          .TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
-      ]
-    ).toBe(
-      TRANSFORMATION_TYPE_SPECS[
-        TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT
-      ]
-    );
-    expect(
-      TRANSFORMATION_TYPE_SPECS[
-        LegacyHudaTransformationType
-          .TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
-      ]
-    ).toBe(
-      TRANSFORMATION_TYPE_SPECS[
-        TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU
-      ]
-    );
-    expect(
-      TRANSFORMATION_TYPE_SPECS[
-        LegacyHudaTransformationType
-          .TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES
-      ]
-    ).toBe(
-      TRANSFORMATION_TYPE_SPECS[
-        TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE
-      ]
-    );
   });
 });

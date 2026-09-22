@@ -52,12 +52,6 @@ enum TransformationType {
   TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU
   TRANSFO_HUDA_CONTRACTION_REMISE_EN_CONCURRENCE
 
-  // Remplacées par les six valeurs ci-dessus, supprimées une fois le one-off
-  // 20260917-rename-huda-transformation-types rejoué sur chaque environnement.
-  TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
-  TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
-  TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES
-
   @@schema("public")
 }
 

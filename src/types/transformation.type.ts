@@ -29,20 +29,6 @@ export const TransformationType = {
 export type TransformationType =
   (typeof TransformationType)[keyof typeof TransformationType];
 
-/* Anciens noms des trois parcours HUDA, encore portés par des lignes en base tant que
- * le one-off 20260917-rename-huda-transformation-types n'a pas été rejoué. Volontairement
- * hors de TransformationType : l'écriture les refuse, seule la lecture doit les résoudre. */
-export const LegacyHudaTransformationType = {
-  TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR:
-    "TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR",
-  TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR:
-    "TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR",
-  TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES:
-    "TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES",
-} as const;
-export type LegacyHudaTransformationType =
-  (typeof LegacyHudaTransformationType)[keyof typeof LegacyHudaTransformationType];
-
 /* Les deux axes d'un parcours HUDA vers CADA : ce qu'il advient des HUDA au départ,
  * et où partent leurs places. */
 export type HudaCadaDepartureType =

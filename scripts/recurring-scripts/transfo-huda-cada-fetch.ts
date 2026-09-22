@@ -18,7 +18,6 @@ import { StructureType } from "@/types/structure.type";
 import {
   HudaCadaDepartureType,
   HudaCadaDestination,
-  LegacyHudaTransformationType,
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
@@ -430,8 +429,7 @@ const contradicted: string[] = [];
 
 type ImportedTransformation = {
   id: number;
-  /* Une ligne en base peut encore porter un ancien nom tant que le one-off n'a pas tourné. */
-  type: TransformationType | LegacyHudaTransformationType;
+  type: TransformationType;
   form: { status: boolean } | null;
   structureVersionTransformations: {
     type: StructureVersionTransformationType;

@@ -7,7 +7,6 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 import {
-  LegacyHudaTransformationType,
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
@@ -25,12 +24,6 @@ const HUDA_CADA_TRANSFORMATION_TYPES: DbTransformationType[] = [
   TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_EXISTANT,
   TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
   TransformationType.TRANSFO_HUDA_CONTRACTION_REMISE_EN_CONCURRENCE,
-
-  /* Des transfos en cours portent encore ces types : les omettre ferait créer au cron
-   * une seconde transformation sur un HUDA déjà engagé. À retirer avec l'enum. */
-  LegacyHudaTransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-  LegacyHudaTransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
-  LegacyHudaTransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
 ];
 
 export type StructureCandidate = {

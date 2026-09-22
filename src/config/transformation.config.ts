@@ -8,7 +8,6 @@ import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { StructureType } from "@/types/structure.type";
 import {
   HudaCadaDestination,
-  LegacyHudaTransformationType,
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
   TransformationFormType,
@@ -59,7 +58,7 @@ export const STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER: Record<
 
 export const VERIFICATION_STEP_NAME = "verification";
 
-const CURRENT_TRANSFORMATION_TYPE_SPECS: Record<
+export const TRANSFORMATION_TYPE_SPECS: Record<
   TransformationType,
   TransformationTypeSpec
 > = {
@@ -397,28 +396,6 @@ const CURRENT_TRANSFORMATION_TYPE_SPECS: Record<
     ],
     buildAutoTransformations: () => [],
   },
-};
-
-/* Les transformations créées avant le renommage portent encore ces types : la lecture
- * doit les résoudre. Bloc à supprimer avec les valeurs d'enum, une fois le one-off
- * 20260917-rename-huda-transformation-types rejoué partout. */
-export const TRANSFORMATION_TYPE_SPECS: Record<
-  TransformationType | LegacyHudaTransformationType,
-  TransformationTypeSpec
-> = {
-  ...CURRENT_TRANSFORMATION_TYPE_SPECS,
-  [LegacyHudaTransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]:
-    CURRENT_TRANSFORMATION_TYPE_SPECS[
-      TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT
-    ],
-  [LegacyHudaTransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR]:
-    CURRENT_TRANSFORMATION_TYPE_SPECS[
-      TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU
-    ],
-  [LegacyHudaTransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES]:
-    CURRENT_TRANSFORMATION_TYPE_SPECS[
-      TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE
-    ],
 };
 
 const CONVENTION_RULE: CategoryDisplayRule = {
