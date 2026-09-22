@@ -50,7 +50,7 @@ export const getStructureActesAdministratifsCategoryToDisplay = (
     additionalFieldsType: AdditionalFieldsType.NAME,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un document",
-    notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissements)`,
+    notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissement)`,
   },
 });
 
@@ -107,7 +107,7 @@ export const getActualisationActesAdministratifsCategoryToDisplay = (
         additionalFieldsType: AdditionalFieldsType.NAME,
         documentLabel: "Document",
         addFileButtonLabel: "Ajouter un document",
-        notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissements)`,
+        notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissement)`,
       },
     };
   }
