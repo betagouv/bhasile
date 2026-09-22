@@ -78,7 +78,7 @@ describe("CreationFlow", () => {
         FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
       ],
       [
-        TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
+        TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
         FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
       ],
     ])(

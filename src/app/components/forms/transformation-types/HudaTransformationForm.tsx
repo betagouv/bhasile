@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import RadioCardGroup from "@/app/components/forms/RadioCardGroup";
 import { TransformationType } from "@/types/transformation.type";
 
@@ -7,36 +9,87 @@ export const HudaTransformationForm = ({
   transformationType,
   setTransformationType,
 }: Props) => {
+  const [departureKind, setDepartureKind] = useState<
+    HudaDepartureKind | undefined
+  >(undefined);
+
   return (
-    <RadioCardGroup
-      name="type"
-      options={[
-        {
-          value:
-            TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-          label:
-            "Un ou plusieurs HUDA ferment et transfèrent leurs places à un CADA existant du même opérateur",
-        },
-        {
-          value:
-            TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
-          label:
-            "Un ou plusieurs HUDA ferment et transfèrent leurs places à un nouveau CADA du même opérateur",
-        },
-        {
-          value:
-            TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
-          label:
-            "Un ou plusieurs HUDA ferment et leurs places sont remises en concurrence",
-        },
-      ]}
-      value={transformationType}
-      onChange={(value) => setTransformationType(value as TransformationType)}
-    />
+    <div className="flex flex-col gap-2">
+      <RadioCardGroup
+        name="departureKind"
+        options={[
+          { value: "fermeture", label: "Un ou plusieurs HUDA ferment" },
+          {
+            value: "contraction",
+            label:
+              "Un ou plusieurs HUDA font l’objet d’une contraction de leur nombre de places",
+          },
+        ]}
+        value={departureKind}
+        onChange={(value) => {
+          setDepartureKind(value as HudaDepartureKind | undefined);
+          setTransformationType(undefined);
+        }}
+      />
+      {departureKind && (
+        <RadioCardGroup
+          name="type"
+          options={optionsByDepartureKind[departureKind]}
+          value={transformationType}
+          onChange={(value) =>
+            setTransformationType(value as TransformationType | undefined)
+          }
+        />
+      )}
+    </div>
   );
 };
 
+type HudaDepartureKind = "fermeture" | "contraction";
+
 type Props = {
   transformationType?: TransformationType;
-  setTransformationType: (transformationType: TransformationType) => void;
+  setTransformationType: (
+    transformationType: TransformationType | undefined
+  ) => void;
+};
+
+const CADA_EXISTANT_LABEL =
+  "Leurs places sont transférées à un ou plusieurs CADA existants du même opérateur";
+const CADA_NOUVEAU_LABEL =
+  "Leurs places sont transférées à un nouveau CADA du même opérateur";
+const REMISE_EN_CONCURRENCE_LABEL = "Leurs places sont remises en concurrence";
+
+const optionsByDepartureKind: Record<
+  HudaDepartureKind,
+  { value: TransformationType; label: string }[]
+> = {
+  fermeture: [
+    {
+      value: TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
+      label: CADA_EXISTANT_LABEL,
+    },
+    {
+      value: TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
+      label: CADA_NOUVEAU_LABEL,
+    },
+    {
+      value: TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE,
+      label: REMISE_EN_CONCURRENCE_LABEL,
+    },
+  ],
+  contraction: [
+    {
+      value: TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_EXISTANT,
+      label: CADA_EXISTANT_LABEL,
+    },
+    {
+      value: TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+      label: CADA_NOUVEAU_LABEL,
+    },
+    {
+      value: TransformationType.TRANSFO_HUDA_CONTRACTION_REMISE_EN_CONCURRENCE,
+      label: REMISE_EN_CONCURRENCE_LABEL,
+    },
+  ],
 };

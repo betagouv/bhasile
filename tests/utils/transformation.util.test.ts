@@ -396,7 +396,7 @@ describe("transformation util", () => {
       // GIVEN
       const transformation: TransformationApiRead = {
         id: 5,
-        type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+        type: TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
         structureVersionTransformations: [],
       };
 
@@ -688,7 +688,7 @@ describe("transformation util", () => {
 
     it.each([
       TransformationType.OUVERTURE_EX_NIHILO,
-      TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
+      TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE,
     ])("renvoie /structures pour %s (pas de type principal)", (transformationType) => {
       // GIVEN
       const transformation = createTransformation({
