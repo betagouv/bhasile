@@ -389,7 +389,7 @@ const getCreationActesAdministratifsCategoryToDisplay = (
     : {}),
   AUTRE: {
     ...AUTRE_RULE,
-    notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissements)`,
+    notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissement)`,
   },
 });
 

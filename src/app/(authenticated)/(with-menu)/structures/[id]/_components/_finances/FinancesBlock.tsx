@@ -123,7 +123,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
       </h4>
       {isSubventionnee && (
         <h5 className="text-sm text-gray-500 font-normal italic mb-0 print:hidden">
-          Retrouvez les Plans Pluriannuels d’Investissements (PPI) dans la
+          Retrouvez les Plans Pluriannuels d’Investissement (PPI) dans la
           section “Actes administratifs” s’ils existent et qu’ils ont été
           importés.
         </h5>
