@@ -21,6 +21,7 @@ import {
   updateOne,
 } from "./operateur.repository";
 import {
+  buildFilialesByParentId,
   buildOperateurListItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
@@ -44,6 +45,7 @@ export const getOperateurs = cache(
     ]);
 
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
+    const filialesByParentId = buildFilialesByParentId(operateurs);
     const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
       structures,
       topLevelByOperateurId,
@@ -57,7 +59,14 @@ export const getOperateurs = cache(
         if (!stats) {
           return [];
         }
-        return [buildOperateurListItem(operateur, stats, globalPlaces)];
+        return [
+          buildOperateurListItem(
+            operateur,
+            stats,
+            globalPlaces,
+            filialesByParentId.get(operateur.id) ?? []
+          ),
+        ];
       });
 
     const filtered = filterOperateursBySearch(items, search);
@@ -101,12 +110,15 @@ export const getOperateur = async (
     return null;
   }
 
+  const { filiales, ...operateurFields } = operateur;
+
   return {
     ...(recursivelySerializeForClient({
-      ...operateur,
+      ...operateurFields,
       actesAdministratifs: operateur.actesAdministratifs,
       contacts: getContactsApiRead(operateur.contacts),
     }) as OperateurApiRead),
+    filiales: filiales.map(({ name }) => name),
     logoUrl: await resolveLogoUrl(operateur.logo?.key ?? null),
   };
 };

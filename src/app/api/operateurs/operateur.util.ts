@@ -28,6 +28,27 @@ export const buildTopLevelOperateurMap = (
     ])
   );
 
+export const buildFilialesByParentId = (
+  operateurs: OperateurListRow[]
+): Map<number, string[]> => {
+  const filialesByParentId = new Map<number, string[]>();
+
+  operateurs.forEach((operateur) => {
+    if (operateur.parentId === null) {
+      return;
+    }
+    const filiales = filialesByParentId.get(operateur.parentId) ?? [];
+    filiales.push(operateur.name);
+    filialesByParentId.set(operateur.parentId, filiales);
+  });
+
+  filialesByParentId.forEach((filiales) =>
+    filiales.sort((first, second) => first.localeCompare(second, "fr"))
+  );
+
+  return filialesByParentId;
+};
+
 export const groupStructureStatsByOperateur = (
   structures: StructureListLight[],
   topLevelByOperateurId: Map<number, number>,
@@ -71,7 +92,8 @@ export const groupStructureStatsByOperateur = (
 export const buildOperateurListItem = (
   operateur: OperateurListRow,
   stats: OperateurStats,
-  globalPlaces: number
+  globalPlaces: number,
+  filiales: string[]
 ): OperateurListItem => ({
   id: operateur.id,
   name: operateur.name,
@@ -82,6 +104,7 @@ export const buildOperateurListItem = (
       ? roundTo((stats.totalPlaces / globalPlaces) * 100, 2)
       : 0,
   structureTypes: [...stats.structureTypes].sort(),
+  filiales,
   logo: { key: operateur.logo?.key ?? null },
   logoUrl: null,
 });

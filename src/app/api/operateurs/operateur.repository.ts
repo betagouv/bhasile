@@ -44,6 +44,7 @@ export const findOne = async (
         include: { fileUploads: true },
       },
       logo: true,
+      filiales: { select: { name: true }, orderBy: { name: "asc" } },
     },
   });
 };
