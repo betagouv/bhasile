@@ -155,7 +155,12 @@ export const resolveHudaDepartureType = ({
   if (hudaCount > 1) {
     return { departureType: fermeture, reason: "multi-huda" };
   }
-  if (totalPlaces === null || transferredPlaces === null) {
+  if (
+    totalPlaces === null ||
+    transferredPlaces === null ||
+    totalPlaces < 0 ||
+    transferredPlaces < 0
+  ) {
     return { departureType: fermeture, reason: "places-illisibles" };
   }
   if (transferredPlaces > totalPlaces) {

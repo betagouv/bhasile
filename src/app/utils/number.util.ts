@@ -116,7 +116,10 @@ export const parseFrenchNumber = (
   return isNaN(parsed) ? null : parsed;
 };
 
-export const parseStrictInt = (value: string): number | null => {
-  const trimmed = value.trim();
-  return /^\d+$/.test(trimmed) ? Number(trimmed) : null;
+/* Les saisies humaines écrivent « 1 200 », « 10,0 » ou « 13 places » : parseFrenchNumber
+ * les ramène à un nombre, on ne garde que les entiers. Préférer cette fonction à parseInt,
+ * qui s'arrête au premier caractère non numérique et lit « 1 200 » comme 1. */
+export const parseInteger = (value: string): number | null => {
+  const parsed = parseFrenchNumber(value);
+  return parsed !== null && Number.isInteger(parsed) ? parsed : null;
 };

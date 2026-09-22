@@ -7,7 +7,7 @@ import { getActeAdministratifPeriods } from "@/app/api/actes-administratifs/acte
 import { resolvePredecessor } from "@/app/api/structure-versions/structure-version.util";
 import { createTransformation } from "@/app/api/transformations/transformation.service";
 import { isCurrentlyInEffect } from "@/app/utils/date.util";
-import { parseStrictInt } from "@/app/utils/number.util";
+import { parseInteger } from "@/app/utils/number.util";
 import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { TRANSFORMATION_START_YEAR } from "@/constants";
 import { StepStatus as DbStepStatus } from "@/generated/prisma/client";
@@ -17,6 +17,7 @@ import { StepStatus } from "@/types/form.type";
 import { StructureType } from "@/types/structure.type";
 import {
   HudaCadaDepartureType,
+  HudaCadaDestination,
   LegacyHudaTransformationType,
   StructureVersionTransformationType,
   TransformationType,
@@ -169,7 +170,7 @@ const resolveEffectiveDate = (dossier: HudaCadaDossierNode): Date | null =>
 
 /* Une capacité nulle vaut une capacité absente : rien à pré-remplir. */
 const parsePositiveInt = (raw: string): number | null => {
-  const value = parseStrictInt(raw);
+  const value = parseInteger(raw);
   return value !== null && value > 0 ? value : null;
 };
 
@@ -314,8 +315,13 @@ const buildCadaBrique = async (
 > => {
   const effectiveDateIso = effectiveDate.toISOString();
 
-  if (type === TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU) {
-    /* « Même opérateur » : le nouveau CADA reprend celui des HUDA fermés, plus fiable
+  /* Sur la destination, pas sur le type : fermeture et contraction mènent toutes deux
+   * à un nouveau CADA, et n'en tester qu'une ferait partir l'autre en branche extension. */
+  if (
+    TRANSFORMATION_TYPE_SPECS[type].hudaCadaDestination ===
+    HudaCadaDestination.CADA_NOUVEAU
+  ) {
+    /* « Même opérateur » : le nouveau CADA reprend celui des HUDA de départ, plus fiable
      * qu'un rapprochement sur le SIRET. Des opérateurs divergents contredisent le cas de figure. */
     const operateurIds = [...new Set(hudas.map((huda) => huda.operateurId))];
     if (operateurIds.length > 1) {
@@ -428,6 +434,7 @@ type ImportedTransformation = {
   type: TransformationType | LegacyHudaTransformationType;
   form: { status: boolean } | null;
   structureVersionTransformations: {
+    type: StructureVersionTransformationType;
     form: { formSteps: { status: DbStepStatus }[] } | null;
     structureVersion: {
       structureId: number | null;
@@ -436,19 +443,31 @@ type ImportedTransformation = {
   }[];
 };
 
+const HUDA_DEPARTURE_TYPES: StructureVersionTransformationType[] = [
+  StructureVersionTransformationType.FERMETURE,
+  StructureVersionTransformationType.CONTRACTION,
+];
+
 const UNTOUCHED_STEP_STATUSES: DbStepStatus[] = [
   StepStatus.NON_COMMENCE,
   StepStatus.PRE_REMPLI,
 ];
 
-/* L'import ne pose jamais que PRE_REMPLI : tout autre statut vient d'un agent. */
-const isUntouchedDraft = (transformation: ImportedTransformation): boolean =>
-  transformation.structureVersionTransformations.every(
+/* Deux conditions, et la seconde compte autant : aucune étape au-delà de PRE_REMPLI,
+ * mais aussi au moins une étape en PRE_REMPLI. NON_COMMENCE est le défaut Prisma, donc
+ * une transfo saisie à la main puis rattachée au dossier n'a que des NON_COMMENCE — la
+ * supprimer effacerait le cas de figure que l'agent a délibérément choisi. */
+const isUntouchedDraft = (transformation: ImportedTransformation): boolean => {
+  const formSteps = transformation.structureVersionTransformations.flatMap(
     (structureVersionTransformation) =>
-      structureVersionTransformation.form?.formSteps.every((formStep) =>
-        UNTOUCHED_STEP_STATUSES.includes(formStep.status)
-      ) ?? true
+      structureVersionTransformation.form?.formSteps ?? []
   );
+  return (
+    formSteps.every((formStep) =>
+      UNTOUCHED_STEP_STATUSES.includes(formStep.status)
+    ) && formSteps.some((formStep) => formStep.status === StepStatus.PRE_REMPLI)
+  );
+};
 
 /* Une transfo déjà importée n'est jamais retypée en place : le formDefinition d'une brique
  * dépend de son type. Un brouillon intact se supprime — le flux normal le recrée dans la
@@ -471,6 +490,9 @@ const reviewImportedTransformation = async (
   }
 
   const hudas = transformation.structureVersionTransformations
+    .filter((structureVersionTransformation) =>
+      HUDA_DEPARTURE_TYPES.includes(structureVersionTransformation.type)
+    )
     .map((structureVersionTransformation) => ({
       structureId: structureVersionTransformation.structureVersion?.structureId,
       codeBhasile:
@@ -485,11 +507,11 @@ const reviewImportedTransformation = async (
     return;
   }
 
-  const transferredPlaces = parseStrictInt(
+  const transferredPlaces = parseInteger(
     champValues(dossier, HUDA_PLACES_TRANSFEREES)[0] ?? ""
   );
   const declared = resolveHudaDepartureType({
-    totalPlaces: parseStrictInt(champValue(dossier, HUDA_CAPACITE_AVANT)),
+    totalPlaces: parseInteger(champValue(dossier, HUDA_CAPACITE_AVANT)),
     transferredPlaces,
     hudaCount: countHudaSections(dossier, hudas.length),
   });
@@ -538,16 +560,11 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
       id: true,
       type: true,
       form: { select: { status: true } },
+      /* Toutes les briques, CADA compris : juger l'intactitude sur les seules briques
+       * HUDA supprimerait un brouillon dont l'agent a rempli la section CADA. */
       structureVersionTransformations: {
-        where: {
-          type: {
-            in: [
-              StructureVersionTransformationType.FERMETURE,
-              StructureVersionTransformationType.CONTRACTION,
-            ],
-          },
-        },
         select: {
+          type: true,
           form: { select: { formSteps: { select: { status: true } } } },
           structureVersion: {
             select: {
@@ -606,11 +623,11 @@ const importDossier = async (dossier: HudaCadaDossierNode): Promise<void> => {
   }
   const hudas = resolution.value;
 
-  const transferredPlaces = parseStrictInt(
+  const transferredPlaces = parseInteger(
     champValues(dossier, HUDA_PLACES_TRANSFEREES)[0] ?? ""
   );
   const declared = resolveHudaDepartureType({
-    totalPlaces: parseStrictInt(champValue(dossier, HUDA_CAPACITE_AVANT)),
+    totalPlaces: parseInteger(champValue(dossier, HUDA_CAPACITE_AVANT)),
     transferredPlaces,
     hudaCount: countHudaSections(dossier, hudas.length),
   });

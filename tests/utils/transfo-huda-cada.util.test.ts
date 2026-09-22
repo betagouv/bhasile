@@ -324,6 +324,11 @@ describe("transfo huda cada util", () => {
       expect(resolve(100, null).reason).toBe("places-illisibles");
     });
 
+    it("refuse un nombre de places négatif au lieu d'en déduire un restant gonflé", () => {
+      expect(resolve(100, -5).reason).toBe("places-illisibles");
+      expect(resolve(-1, 58).reason).toBe("places-illisibles");
+    });
+
     it("signale un transfert supérieur au total au lieu de l'interpréter", () => {
       expect(resolve(75, 160)).toEqual({
         departureType: StructureVersionTransformationType.FERMETURE,
