@@ -1,4 +1,3 @@
-import { CURRENT_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
@@ -82,9 +81,6 @@ export const isInputDisabled = (
   enabledYears?: number[],
   cpomStructures?: CpomStructureApiWrite[]
 ): boolean => {
-  if (type === "REALISE" && year >= CURRENT_YEAR) {
-    return true;
-  }
   if (cpomStructures) {
     const { cpomStructureIndex, budgetIndex } =
       getCpomStructureIndexAndBudgetIndexForAYearAndAType(
