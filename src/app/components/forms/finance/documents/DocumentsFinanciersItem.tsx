@@ -1,9 +1,9 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { DeleteButton } from "@/app/components/common/DeleteButton";
-import { FileUploadWithLink, useFileUpload } from "@/app/hooks/useFileUpload";
+import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getShortDisplayedName } from "@/app/utils/file-upload.util";
 import { formatBytes } from "@/app/utils/number.util";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
@@ -13,19 +13,9 @@ export const DocumentsFinanciersItem = ({
 }: Props): ReactElement => {
   const { watch, setValue } = useFormContext();
 
-  const { getFile, deleteFile } = useFileUpload();
+  const { getDownloadLink, deleteFile } = useFileUpload();
 
-  const [fileData, setFileData] = useState<FileUploadWithLink | null>(null);
-  useEffect(() => {
-    const getFileData = async () => {
-      if (documentFinancier.fileUploads?.[0]?.key) {
-        const fileData = await getFile(documentFinancier.fileUploads?.[0]?.key);
-        setFileData(fileData);
-      }
-    };
-
-    getFileData();
-  }, [documentFinancier, getFile]);
+  const fileUpload = documentFinancier.fileUploads?.[0];
 
   const handleDelete = async () => {
     const confirm = window.confirm(
@@ -62,8 +52,15 @@ export const DocumentsFinanciersItem = ({
 
   const handleView = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (fileData?.fileUrl) {
-      window.open(fileData.fileUrl, "_blank", "noopener,noreferrer");
+    if (!fileUpload?.key) {
+      return;
+    }
+
+    try {
+      const link = await getDownloadLink(fileUpload.key);
+      window.open(link, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Erreur lors de la récupération du fichier", error);
     }
   };
 
@@ -72,9 +69,9 @@ export const DocumentsFinanciersItem = ({
       <span className="fr-icon-file-text-fill text-title-blue-france fr-icon--sm" />
       <span>
         {documentFinancier.name ||
-          getShortDisplayedName(fileData?.originalName)}
+          getShortDisplayedName(fileUpload?.originalName)}
       </span>
-      <span>({formatBytes(fileData?.fileSize)})</span>
+      <span>({formatBytes(fileUpload?.fileSize)})</span>
       <Button
         iconId="fr-icon-eye-line"
         priority="tertiary no outline"

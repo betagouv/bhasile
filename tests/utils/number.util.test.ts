@@ -7,6 +7,7 @@ import {
   formatNumber,
   formatPerMille,
   parseFrenchNumber,
+  parseInteger,
 } from "@/app/utils/number.util";
 
 describe("number util", () => {
@@ -278,5 +279,25 @@ describe("number util", () => {
         expect(parsed).toBeCloseTo(value, 2);
       });
     });
+  });
+});
+
+describe("parseInteger", () => {
+  it("lit un entier, espaces autour compris", () => {
+    expect(parseInteger("42")).toBe(42);
+    expect(parseInteger("  42 ")).toBe(42);
+    expect(parseInteger("0")).toBe(0);
+  });
+
+  it("accepte les entiers tels que les agents les écrivent", () => {
+    expect(parseInteger("1 200")).toBe(1200);
+    expect(parseInteger("10,0")).toBe(10);
+    expect(parseInteger("13 places")).toBe(13);
+  });
+
+  it("refuse ce qui n'est pas un entier", () => {
+    expect(parseInteger("12.5")).toBeNull();
+    expect(parseInteger("")).toBeNull();
+    expect(parseInteger("aucune")).toBeNull();
   });
 });

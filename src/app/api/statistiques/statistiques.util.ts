@@ -2,6 +2,10 @@ import {
   endOfYearUtc,
   startOfNextUtcDay,
   startOfUtcDay,
+  toDayKey,
+  toMonthKey,
+  toTrimesterKey,
+  toYearKey,
 } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
@@ -122,19 +126,6 @@ const isStructureActiveInPeriod = (
   }
 
   return true;
-};
-
-const toDayKey = (date: Date): string => date.toISOString().slice(0, 10);
-
-export const toMonthKey = (date: Date): string =>
-  date.toISOString().slice(0, 7);
-
-export const toYearKey = (date: Date): string => date.toISOString().slice(0, 4);
-
-export const toTrimesterKey = (date: Date): string => {
-  const month = Number(date.toISOString().slice(5, 7));
-  const year = date.toISOString().slice(0, 4);
-  return `${year}-Q${Math.ceil(month / 3)}`;
 };
 
 export const parseTrimesterKey = (

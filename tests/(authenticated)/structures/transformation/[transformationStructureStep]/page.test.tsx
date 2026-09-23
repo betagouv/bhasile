@@ -118,7 +118,7 @@ describe("TransformationStructureStepPage", () => {
   it.each([
     TransformationType.OUVERTURE_EX_NIHILO,
     TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
-    TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
+    TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
   ])(
     "affiche CreationFlow quand le type est CREATION et que transformation.type vaut %s",
     (transformationType) => {

@@ -16,10 +16,7 @@ import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { useTransformationContext } from "@/contexts/TransformationContext";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
-import {
-  TransformationFormType,
-  TransformationType,
-} from "@/types/transformation.type";
+import { TransformationType } from "@/types/transformation.type";
 
 import {
   ReinitialiserSelectionModal,
@@ -51,7 +48,9 @@ export default function TransformationSelectionsPage() {
     structureVersionTransformations: StructureVersionTransformationApiCreate[];
   } | null>(null);
 
-  const formType = getFormByType(transformation.type);
+  const formType = transformation.type
+    ? TRANSFORMATION_TYPE_SPECS[transformation.type].formType
+    : undefined;
 
   const primaryStructureVersionTransformationType = transformation.type
     ? TRANSFORMATION_TYPE_SPECS[transformation.type]
@@ -138,26 +137,3 @@ export default function TransformationSelectionsPage() {
     </>
   );
 }
-
-const getFormByType = (
-  type?: TransformationType
-): TransformationFormType | undefined => {
-  switch (type) {
-    case TransformationType.OUVERTURE_EX_NIHILO:
-    case TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES:
-      return TransformationFormType.CREATION;
-    case TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR:
-    case TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR:
-    case TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES:
-      return TransformationFormType.HUDA;
-    case TransformationType.EXTENSION_EX_NIHILO:
-    case TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT:
-    case TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT:
-    case TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE:
-    case TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES:
-    case TransformationType.FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES:
-    case TransformationType.FERMETURE_SANS_TRANSFERT:
-    default:
-      return undefined;
-  }
-};

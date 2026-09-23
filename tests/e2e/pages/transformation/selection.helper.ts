@@ -5,6 +5,8 @@ import { fillAutocomplete } from "../shared/autocomplete.helper";
 
 export type FirstSelectedOption = "extension" | "contraction" | "fermeture";
 
+export type HudaDepartureKind = "fermeture" | "contraction";
+
 const VALIDATE_BUTTON = "Je valide";
 
 const FILTER_DEPARTEMENT_SEARCH = "75";
@@ -25,6 +27,13 @@ export const selectFirstOption = async (
   option: FirstSelectedOption
 ): Promise<void> => {
   await selectRadioCard(page, `firstSelectedOption-${option}`);
+};
+
+export const selectHudaDepartureKind = async (
+  page: Page,
+  departureKind: HudaDepartureKind
+): Promise<void> => {
+  await selectRadioCard(page, `departureKind-${departureKind}`);
 };
 
 export const pickStructureById = async (

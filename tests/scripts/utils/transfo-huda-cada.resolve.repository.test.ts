@@ -464,7 +464,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
     ) => {
       const transformation = await prisma.transformation.create({
         data: {
-          type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+          type: TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
           numeroDossier,
           structureVersionTransformations: {
             create: structureIds.map((structureId) => ({
@@ -486,7 +486,7 @@ describe("transfo-huda-cada.resolve db integration", () => {
 
       expect(existing.id).toBe(transformation.id);
       expect(existing.numeroDossier).toBeNull();
-      expect(existing.fermetureStructureIds).toEqual([huda.id]);
+      expect(existing.departureStructureIds).toEqual([huda.id]);
     });
 
     it("ne remonte rien quand aucune transformation ne porte sur les structures", async () => {

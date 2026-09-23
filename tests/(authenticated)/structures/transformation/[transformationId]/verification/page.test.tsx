@@ -305,7 +305,7 @@ describe("TransformationVerificationPage", () => {
     mockContext(
       buildTransformation({
         form: buildForm(false),
-        type: TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
+        type: TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE,
         structureVersionTransformations: [
           buildStructureVersionTransformation(true),
         ],

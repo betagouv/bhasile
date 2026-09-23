@@ -1,3 +1,8 @@
+import {
+  toMonthKey,
+  toTrimesterKey,
+  toYearKey,
+} from "@/app/utils/date.util";
 import { NumericAggregation } from "@/app/utils/math.util";
 import {
   ControleQualitePeriodStat,
@@ -16,9 +21,6 @@ import {
   groupByPeriodKey,
   lookupActiveStructureIds,
   monthKeyToDate,
-  toMonthKey,
-  toTrimesterKey,
-  toYearKey,
   trimesterKeyToDate,
   yearKeyToDate,
 } from "../statistiques.util";

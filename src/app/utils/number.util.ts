@@ -95,6 +95,7 @@ export const formatPerMille = (
  * @param value - The formatted string to parse
  * @returns The parsed number or null if invalid
  */
+
 export const parseFrenchNumber = (
   value: string | number | null | undefined
 ): number | null => {
@@ -113,4 +114,12 @@ export const parseFrenchNumber = (
 
   const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? null : parsed;
+};
+
+/* Les saisies humaines écrivent « 1 200 », « 10,0 » ou « 13 places » : parseFrenchNumber
+ * les ramène à un nombre, on ne garde que les entiers. Préférer cette fonction à parseInt,
+ * qui s'arrête au premier caractère non numérique et lit « 1 200 » comme 1. */
+export const parseInteger = (value: string): number | null => {
+  const parsed = parseFrenchNumber(value);
+  return parsed !== null && Number.isInteger(parsed) ? parsed : null;
 };

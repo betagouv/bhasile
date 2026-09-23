@@ -3,6 +3,7 @@ import { Session, User } from "next-auth";
 import { getEmailPatterns } from "@/app/api/email-patterns/email-pattern.repository";
 import { getAnonymousRole } from "@/app/api/roles/role.repository";
 import { getUserByEmail } from "@/app/api/users/user.repository";
+import { getUserRole } from "@/app/api/users/user.util";
 import { Prisma } from "@/generated/prisma/client";
 
 export type ProConnectUser = User & {
@@ -33,29 +34,17 @@ export const getRoleFromSession = async (
 ): Promise<RoleWithDepartements> => {
   const userEmail = session.user?.email;
   const databaseUser = await getUserByEmail({ email: userEmail });
-  const anonymousRole = await getAnonymousRole();
-  const anonymousRoleWithDepartements = {
-    ...anonymousRole,
-    allowedDepartements: [],
+  const role = databaseUser ? getUserRole(databaseUser) : null;
+
+  if (!userEmail || !role) {
+    const anonymousRole = await getAnonymousRole();
+    return { ...anonymousRole, allowedDepartements: [] };
+  }
+
+  return {
+    ...role,
+    allowedDepartements: role.roleDepartements.map(
+      (roleDepartement) => roleDepartement.departement.numero
+    ),
   };
-  if (!userEmail || !databaseUser) {
-    return anonymousRoleWithDepartements;
-  }
-  if (databaseUser.role) {
-    return {
-      ...databaseUser.role,
-      allowedDepartements: databaseUser.role?.roleDepartements.map(
-        (roleDepartement) => roleDepartement.departement.numero
-      ),
-    };
-  } else if (databaseUser.emailPattern?.roleId) {
-    return {
-      ...databaseUser.emailPattern.role,
-      allowedDepartements: databaseUser.emailPattern.role?.roleDepartements.map(
-        (roleDepartement) => roleDepartement.departement.numero
-      ),
-    };
-  } else {
-    return anonymousRoleWithDepartements;
-  }
 };

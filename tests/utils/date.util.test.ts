@@ -11,6 +11,10 @@ import {
   getLastMonths,
   getMonthsBetween,
   getYearFromDate,
+  toDayKey,
+  toMonthKey,
+  toTrimesterKey,
+  toYearKey,
 } from "@/app/utils/date.util";
 
 dayjs.locale("fr");
@@ -545,4 +549,43 @@ describe("date util", () => {
     });
   });
 
+  describe("clés de période", () => {
+    it("découpe un instant en jour, mois et année", () => {
+      // GIVEN
+      const date = new Date("2026-09-15T08:30:00.000Z");
+
+      // WHEN / THEN
+      expect(toDayKey(date)).toBe("2026-09-15");
+      expect(toMonthKey(date)).toBe("2026-09");
+      expect(toYearKey(date)).toBe("2026");
+      expect(toTrimesterKey(date)).toBe("2026-Q3");
+    });
+
+    it("rattache chaque mois à son trimestre", () => {
+      // GIVEN / WHEN / THEN
+      expect(toTrimesterKey(new Date("2026-01-01T00:00:00.000Z"))).toBe(
+        "2026-Q1"
+      );
+      expect(toTrimesterKey(new Date("2026-03-31T00:00:00.000Z"))).toBe(
+        "2026-Q1"
+      );
+      expect(toTrimesterKey(new Date("2026-04-01T00:00:00.000Z"))).toBe(
+        "2026-Q2"
+      );
+      expect(toTrimesterKey(new Date("2026-10-01T00:00:00.000Z"))).toBe(
+        "2026-Q4"
+      );
+    });
+
+    it("reste en UTC quel que soit le fuseau du process", () => {
+      // GIVEN
+      const date = new Date("2026-12-31T23:30:00.000Z");
+
+      // WHEN / THEN
+      expect(toDayKey(date)).toBe("2026-12-31");
+      expect(toMonthKey(date)).toBe("2026-12");
+      expect(toYearKey(date)).toBe("2026");
+      expect(toTrimesterKey(date)).toBe("2026-Q4");
+    });
+  });
 });
