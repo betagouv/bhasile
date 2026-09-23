@@ -94,7 +94,7 @@ export const getEveryColumn = (
   years: number[]
 ): IndicateurFinancierType[][] =>
   years.map((year) => {
-    if (canEdit || year >= CURRENT_YEAR) {
+    if (canEdit) {
       return getIndicateurFinancierTypes(year);
     }
     return [
