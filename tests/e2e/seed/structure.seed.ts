@@ -1,4 +1,5 @@
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
+import { getIndicateurFinancierTypes } from "@/app/utils/indicateurFinancier.util";
 
 import {
   buildStructureSeed,
@@ -132,13 +133,15 @@ export const seedValidIndicateursFinanciers = async (
   structureId: number
 ): Promise<void> => {
   await prisma.indicateurFinancier.createMany({
-    data: FINANCE_YEARS.map((year) => ({
-      structureId,
-      year,
-      type: "REALISE" as const,
-      ETP: 10,
-      tauxEncadrement: 1,
-      coutJournalier: 50,
-    })),
+    data: FINANCE_YEARS.flatMap((year) =>
+      getIndicateurFinancierTypes(year).map((type) => ({
+        structureId,
+        year,
+        type,
+        ETP: 10,
+        tauxEncadrement: 1,
+        coutJournalier: 50,
+      }))
+    ),
   });
 };
