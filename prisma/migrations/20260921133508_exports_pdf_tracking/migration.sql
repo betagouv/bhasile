@@ -1,0 +1,10 @@
+-- AlterEnum
+ALTER TYPE "UserActionDescription" RENAME TO "UserActionType";
+
+ALTER TYPE "UserActionType" ADD VALUE 'STRUCTURE_PDF_EXPORT';
+ALTER TYPE "UserActionType" ADD VALUE 'STATISTIQUES_SPREADSHEET_EXPORT';
+ALTER TYPE "UserActionType" ADD VALUE 'STATISTIQUES_PDF_EXPORT';
+
+-- AlterTable
+ALTER TABLE "UserAction" RENAME COLUMN "description" TO "type";
+ALTER TABLE "UserAction" ADD COLUMN "details" JSONB;
