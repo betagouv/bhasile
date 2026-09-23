@@ -2,12 +2,11 @@
 
 import Spiderfy from "@nazka/map-gl-js-spiderfy";
 import maplibregl from "maplibre-gl";
-import { RefObject } from "react";
+import { ReactNode, RefObject } from "react";
 import { Root } from "react-dom/client";
 
 import { MAX_MAP_ZOOM } from "@/constants";
 
-import { MapRegisteredPoint } from "./MapContext";
 import { getOrCreatePopup } from "./structuresPopup";
 import {
   STRUCTURE_MARKER_LAYOUT,
@@ -39,23 +38,18 @@ const getCoordinates = (feature: { geometry: unknown }): LngLatTuple | null => {
 
 export const bindStructuresInteractions = ({
   map,
-  pointsRef,
+  renderPopup,
   popupRef,
   popupRootRef,
 }: {
   map: maplibregl.Map;
-  pointsRef: RefObject<Map<string, MapRegisteredPoint>>;
-  popupRef: React.RefObject<maplibregl.Popup | null>;
-  popupRootRef: React.RefObject<Root | null>;
+  renderPopup: (id: string) => ReactNode;
+  popupRef: RefObject<maplibregl.Popup | null>;
+  popupRootRef: RefObject<Root | null>;
 }): (() => void) => {
   const openPopup = (id: string, coords: LngLatTuple) => {
-    const registered = pointsRef.current?.get(id);
-    if (!registered) {
-      return;
-    }
-
     const { popup, root } = getOrCreatePopup({ popupRef, popupRootRef });
-    root.render(registered.renderPopup());
+    root.render(renderPopup(id));
     popup.setLngLat(coords).addTo(map);
   };
 
