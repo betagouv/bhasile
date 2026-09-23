@@ -34,7 +34,10 @@ const addSingleMarkerImage = async (map: maplibregl.Map): Promise<void> => {
       reject(new Error("Échec du chargement de l'icône du marqueur."));
   });
 
-  map.addImage(SINGLE_MARKER_IMAGE_ID, img);
+  // Deux montages de la couche peuvent attendre la même image : le premier arrivé l'enregistre.
+  if (!map.hasImage(SINGLE_MARKER_IMAGE_ID)) {
+    map.addImage(SINGLE_MARKER_IMAGE_ID, img);
+  }
 };
 
 const addClusterCircleImage = (
@@ -138,4 +141,19 @@ export const addStructuresLayers = (map: maplibregl.Map): void => {
     filter: ["!", STRUCTURES_CLUSTER_FILTER],
     layout: STRUCTURE_MARKER_LAYOUT,
   });
+};
+
+// Les images restent enregistrées : `addStructuresImages` les réutilise au prochain montage.
+export const removeStructuresLayers = (map: maplibregl.Map): void => {
+  for (const layerId of [
+    STRUCTURES_LAYER_UNCLUSTERED_ID,
+    STRUCTURES_LAYER_CLUSTERS_ID,
+  ]) {
+    if (map.getLayer(layerId)) {
+      map.removeLayer(layerId);
+    }
+  }
+  if (map.getSource(STRUCTURES_SOURCE_ID)) {
+    map.removeSource(STRUCTURES_SOURCE_ID);
+  }
 };

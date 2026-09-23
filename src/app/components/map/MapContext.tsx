@@ -1,45 +1,9 @@
 "use client";
 
 import maplibregl from "maplibre-gl";
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, useContext } from "react";
 
-export type MapRegisteredPoint = {
-  id: string;
-  lngLat: [number, number];
-  renderPopup: () => ReactNode;
-};
+// null tant que la carte n'a pas fini de charger son style.
+export const MapContext = createContext<maplibregl.Map | null>(null);
 
-export type RegisterMapPoint = (point: MapRegisteredPoint) => () => void;
-
-type MapLibreContextValue = {
-  map: maplibregl.Map | null;
-  registerPoint: RegisterMapPoint;
-};
-
-const MapLibreContext = createContext<MapLibreContextValue | null>(null);
-
-export function MapLibreProvider({
-  map,
-  registerPoint,
-  children,
-}: {
-  map: maplibregl.Map | null;
-  registerPoint: RegisterMapPoint;
-  children: ReactNode;
-}) {
-  return (
-    <MapLibreContext.Provider value={{ map, registerPoint }}>
-      {children}
-    </MapLibreContext.Provider>
-  );
-}
-
-export function useRegisterMapPoint(): RegisterMapPoint {
-  const context = useContext(MapLibreContext);
-  if (!context) {
-    throw new Error(
-      "useRegisterMapPoint doit être utilisé avec un contexte MapLibreProvider"
-    );
-  }
-  return context.registerPoint;
-}
+export const useMap = (): maplibregl.Map | null => useContext(MapContext);
