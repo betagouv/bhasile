@@ -4,6 +4,71 @@ import { Adresse, Repartition } from "@/generated/prisma/client";
 
 // Écart places à l'adrresse x places autorisées : au-delà de 10 % -> anomalie
 const PLACES_GAP_RATIO = 0.2;
+// Quelques adresses non localisées alimentent l'anomalie ADRESSE_NON_LOCALISEE
+const NON_LOCALISEE_RATIO = 0.05;
+
+// Points `municipality` renvoyés par la BAN, identiques à ce que produirait le géocodage à l'enregistrement
+const LOCALISATIONS: Pick<
+  Adresse,
+  | "codePostal"
+  | "commune"
+  | "communeNom"
+  | "communeLatitude"
+  | "communeLongitude"
+>[] = [
+  // Ville à plusieurs codes postaux : un seul centre
+  {
+    codePostal: "75011",
+    commune: "Paris",
+    communeNom: "Paris",
+    communeLatitude: 48.859,
+    communeLongitude: 2.347,
+  },
+  {
+    codePostal: "69003",
+    commune: "Lyon",
+    communeNom: "Lyon",
+    communeLatitude: 45.758,
+    communeLongitude: 4.835,
+  },
+  // Code postal partagé par deux communes, et variante d'écriture de la même commune
+  {
+    codePostal: "50000",
+    commune: "Saint-Lô",
+    communeNom: "Saint-Lô",
+    communeLatitude: 49.113843,
+    communeLongitude: -1.080182,
+  },
+  {
+    codePostal: "50000",
+    commune: "ST LO",
+    communeNom: "Saint-Lô",
+    communeLatitude: 49.113843,
+    communeLongitude: -1.080182,
+  },
+  {
+    codePostal: "50000",
+    commune: "Baudre",
+    communeNom: "Baudre",
+    communeLatitude: 49.089822,
+    communeLongitude: -1.06874,
+  },
+  // Ancien nom d'une commune fusionnée
+  {
+    codePostal: "50100",
+    commune: "Cherbourg-en-Cotentin",
+    communeNom: "Cherbourg-en-Cotentin",
+    communeLatitude: 49.628684,
+    communeLongitude: -1.63324,
+  },
+  {
+    codePostal: "50130",
+    commune: "Cherbourg-Octeville",
+    communeNom: "Cherbourg-en-Cotentin",
+    communeLatitude: 49.628684,
+    communeLongitude: -1.63324,
+  },
+];
 
 export const createFakeAdresses = ({
   placesAutorisees,
@@ -64,8 +129,15 @@ const createFakeAdresse = ({
   "id" | "structureDnaCode" | "structureId" | "structureVersionTransformationId"
 > => ({
   adresse: faker.location.streetAddress(),
-  codePostal: faker.location.zipCode(),
-  commune: faker.location.city(),
+  ...(faker.datatype.boolean({ probability: NON_LOCALISEE_RATIO })
+    ? {
+        codePostal: faker.location.zipCode(),
+        commune: faker.location.city(),
+        communeNom: null,
+        communeLatitude: null,
+        communeLongitude: null,
+      }
+    : faker.helpers.arrayElement(LOCALISATIONS)),
   repartition,
   placesAutorisees,
   isQpv: faker.datatype.boolean(),

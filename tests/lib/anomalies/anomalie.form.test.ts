@@ -7,6 +7,7 @@ import {
   DISPLAYED_ANOMALIE_CODES,
 } from "@/lib/anomalies/anomalie.definition";
 import { buildFormAnomalieContext } from "@/lib/anomalies/anomalie.form";
+import { SERVER_ONLY_SLICES } from "@/lib/anomalies/anomalie.type";
 import { ANOMALIE_RULES } from "@/lib/anomalies/rules";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
@@ -65,13 +66,15 @@ describe("buildFormAnomalieContext", () => {
     const requises = DISPLAYED_ANOMALIE_CODES.flatMap(
       (code) =>
         ANOMALIE_RULES.find((rule) => rule.code === code)?.requires ?? []
-    );
+    ).filter((slice) => !SERVER_ONLY_SLICES.includes(slice));
 
     expect(requises.filter((slice) => !produites.includes(slice))).toEqual([]);
   });
 
   it("ne produit pas les tranches dont aucun code affiché n'a besoin", () => {
     const produites = Object.keys(buildFormAnomalieContext(makeStructure()));
+
+    expect(produites).not.toContain("adressesNonLocalisees");
 
     expect(produites).not.toContain("cpoms");
     expect(produites).not.toContain("activites");

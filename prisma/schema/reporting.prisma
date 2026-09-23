@@ -106,6 +106,7 @@ model MonthlyStructuresGlobalQualityCount {
   has_issue_dept_code                                            Int?
   has_issue_multi_dna                                            Int?
   has_issue_cpom_mono_structure                                  Int?
+  has_issue_adresse_non_localisee                                Int?
   has_issue_taux_encadrement_max_gt_threshold                    Int?
   has_issue_taux_encadrement_min_lt_2                            Int?
   has_issue_cout_journalier_max_gt_tarif_cible                   Int?
@@ -206,6 +207,7 @@ view StructuresGlobalQuality {
   has_issue_dept_code                                            Boolean?
   has_issue_multi_dna                                            Boolean?
   has_issue_cpom_mono_structure                                  Boolean?
+  has_issue_adresse_non_localisee                                Boolean?
   has_issue_taux_encadrement_max_gt_threshold                    Boolean?
   has_issue_taux_encadrement_min_lt_2                            Boolean?
   has_issue_cout_journalier_max_gt_tarif_cible                   Boolean?
