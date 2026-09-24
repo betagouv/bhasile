@@ -11,3 +11,10 @@ export type OperateurListItem = {
   logo: { key: string | null };
   logoUrl: string | null;
 };
+
+export type OperateurSuggestionItem = {
+  id: number;
+  name: string;
+  isFiliale: boolean;
+  hasFiliales: boolean;
+};

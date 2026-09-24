@@ -8,7 +8,10 @@ import {
   OperateurApiRead,
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
-import type { OperateurListItem } from "@/types/operateur.type";
+import type {
+  OperateurListItem,
+  OperateurSuggestionItem,
+} from "@/types/operateur.type";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { getContactsApiRead } from "../contacts/contact.util";
@@ -23,6 +26,7 @@ import {
 import {
   buildFilialesByParentId,
   buildOperateurListItem,
+  buildOperateurSuggestionItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
   groupStructureStatsByOperateur,
@@ -131,11 +135,11 @@ export const updateOperateur = async (
 
 export const getOperateursSuggestions = async (
   search: string | null
-): Promise<Operateur[]> => {
+): Promise<OperateurSuggestionItem[]> => {
   const operateurs = await findBySearchTerm(search);
 
   return sortRows(
-    operateurs,
+    operateurs.map(buildOperateurSuggestionItem),
     (operateur) => ({ value: operateur.name, kind: "text" }),
     (operateur) => ({ value: operateur.id, kind: "number" }),
     "asc"

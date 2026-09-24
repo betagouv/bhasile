@@ -1,11 +1,17 @@
 import { roundTo } from "@/app/utils/math.util";
 import { normalizeAccents } from "@/app/utils/string.util";
 import { StructureType } from "@/generated/prisma/client";
-import type { OperateurListItem } from "@/types/operateur.type";
+import type {
+  OperateurListItem,
+  OperateurSuggestionItem,
+} from "@/types/operateur.type";
 
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { StructureListLight } from "../structures/structure.db.type";
-import { OperateurListRow } from "./operateur.db.type";
+import {
+  OperateurListRow,
+  OperateurSuggestionRow,
+} from "./operateur.db.type";
 
 type OperateurStats = {
   nbStructures: number;
@@ -107,6 +113,15 @@ export const buildOperateurListItem = (
   filiales,
   logo: { key: operateur.logo?.key ?? null },
   logoUrl: null,
+});
+
+export const buildOperateurSuggestionItem = (
+  operateur: OperateurSuggestionRow
+): OperateurSuggestionItem => ({
+  id: operateur.id,
+  name: operateur.name,
+  isFiliale: operateur.parentId !== null,
+  hasFiliales: operateur.filiales.length > 0,
 });
 
 export const filterOperateursBySearch = (
