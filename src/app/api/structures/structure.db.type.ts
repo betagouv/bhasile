@@ -218,7 +218,15 @@ export type StructureDbOperateur = {
   forms: Form[];
 };
 
-export type StructureVersionCommunes = {
-  structureId: number | null;
-  adresses: { commune: string | null; placesAutorisees: number | null }[];
+export type StructureListAdresse = {
+  commune: string | null;
+  placesAutorisees: number | null;
+  communeLatitude: number | null;
+  communeLongitude: number | null;
+  communeNom: string | null;
+};
+
+export type StructureVersionAdresses = {
+  id: number;
+  adresses: StructureListAdresse[];
 };

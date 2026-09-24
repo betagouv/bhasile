@@ -28,6 +28,7 @@ vi.mock("@/app/api/anomalies/anomalie.service", () => ({
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
+  findStructureVersionAdresses: vi.fn().mockResolvedValue([]),
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),
   findAllStructures: (...args: unknown[]) => mockfindAllStructures(...args),
   findStructuresByIds: (...args: unknown[]) => mockFindStructuresByIds(...args),

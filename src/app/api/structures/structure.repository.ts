@@ -32,7 +32,7 @@ import {
   StructureListLight,
   structureListLightSelect,
   structureListVersionInclude,
-  StructureVersionCommunes,
+  StructureVersionAdresses,
 } from "./structure.db.type";
 
 export const findAllStructures = (): Promise<StructureListLight[]> =>
@@ -41,14 +41,22 @@ export const findAllStructures = (): Promise<StructureListLight[]> =>
     select: structureListLightSelect,
   });
 
-export const findStructureCommunesByIds = (
+export const findStructureVersionAdresses = (
   versionIds: number[]
-): Promise<StructureVersionCommunes[]> =>
+): Promise<StructureVersionAdresses[]> =>
   prisma.structureVersion.findMany({
     where: { id: { in: versionIds } },
     select: {
-      structureId: true,
-      adresses: { select: { commune: true, placesAutorisees: true } },
+      id: true,
+      adresses: {
+        select: {
+          commune: true,
+          placesAutorisees: true,
+          communeLatitude: true,
+          communeLongitude: true,
+          communeNom: true,
+        },
+      },
     },
   });
 
@@ -131,7 +139,10 @@ const writeToCurrentVersion = async (
       structureId: structure.id,
       ...currentVersionWhere(getNow()),
     },
-    orderBy: [{ effectiveDate: { sort: "desc", nulls: "last" } }, { id: "desc" }],
+    orderBy: [
+      { effectiveDate: { sort: "desc", nulls: "last" } },
+      { id: "desc" },
+    ],
     select: { id: true, effectiveDate: true },
   });
 
