@@ -53,6 +53,7 @@ export const createFakeOperateur = (
 ): Omit<OperateurWithRelations, "id"> => {
   return {
     name: `Opérateur ${index + 1}`,
+    ofiiNames: [],
     directionGenerale: faker.lorem.words(2),
     siret: faker.number.int(10000000000000).toString(),
     siegeSocial: faker.lorem.words(2),
@@ -74,6 +75,7 @@ export const createFakeFiliale = (
   const createdAt = faker.date.past();
   return {
     name: `${parentOperateurName} - Filiale`,
+    ofiiNames: [],
     directionGenerale: faker.lorem.words(2),
     siret: faker.number.int(10000000000000).toString(),
     siegeSocial: faker.lorem.words(2),
