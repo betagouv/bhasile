@@ -7,6 +7,7 @@ import Loader from "@/app/components/ui/Loader";
 import {
   getFirstParam,
   getPageParam,
+  parseMapMode,
   parseSortDirection,
   parseStructureColumn,
   SearchParams,
@@ -16,6 +17,7 @@ import { StructuresQuery } from "@/types/structure-list.type";
 
 import { Toolbar } from "./_components/Toolbar";
 import { VisualizationTabs } from "./_components/VisualizationTabs";
+import { PlacesMapNotice } from "./PlacesMapNotice";
 import { StructuresContent } from "./StructuresContent";
 import { StructuresCount } from "./StructuresCount";
 import { StructuresMapContent } from "./StructuresMapContent";
@@ -112,6 +114,13 @@ export default async function Structures({
           </div>
           <div className="relative z-10">
             <Toolbar variant="carte" count={count} />
+            {query.mode === "places" && (
+              <ContentErrorBoundary fallback={null}>
+                <Suspense fallback={null}>
+                  <PlacesMapNotice query={query} />
+                </Suspense>
+              </ContentErrorBoundary>
+            )}
           </div>
         </div>
       )}
@@ -119,16 +128,20 @@ export default async function Structures({
   );
 }
 
-const buildStructuresQuery = (params: SearchParams): StructuresQuery => ({
-  vue: getFirstParam(params.vue) === "carte" ? "carte" : "tableau",
-  search: getFirstParam(params.search),
-  page: getPageParam(params, "page"),
-  type: getFirstParam(params.type),
-  bati: getFirstParam(params.bati),
-  placesAutorisees: getFirstParam(params.places),
-  departements: getFirstParam(params.departements),
-  operateurs: getFirstParam(params.operateurs),
-  column: parseStructureColumn(getFirstParam(params.column)),
-  direction: parseSortDirection(getFirstParam(params.direction)),
-  isClosed: getFirstParam(params.statut) === "fermees",
-});
+const buildStructuresQuery = (params: SearchParams): StructuresQuery => {
+  const isClosed = getFirstParam(params.statut) === "fermees";
+  return {
+    vue: getFirstParam(params.vue) === "carte" ? "carte" : "tableau",
+    mode: parseMapMode(getFirstParam(params.mode), isClosed),
+    search: getFirstParam(params.search),
+    page: getPageParam(params, "page"),
+    type: getFirstParam(params.type),
+    bati: getFirstParam(params.bati),
+    placesAutorisees: getFirstParam(params.places),
+    departements: getFirstParam(params.departements),
+    operateurs: getFirstParam(params.operateurs),
+    column: parseStructureColumn(getFirstParam(params.column)),
+    direction: parseSortDirection(getFirstParam(params.direction)),
+    isClosed,
+  };
+};

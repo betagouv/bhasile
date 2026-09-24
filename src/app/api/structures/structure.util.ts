@@ -38,6 +38,8 @@ import {
   StructureRef,
 } from "@/types/structure-history.type";
 import {
+  CommuneMapPoint,
+  CommunePoints,
   type SearchProps,
   StructureCommune,
   StructureListItem,
@@ -55,6 +57,7 @@ import {
 import {
   StructureDbDetails,
   StructureDbList,
+  StructureListAdresse,
   StructureListLight,
   StructureListLightVersion,
 } from "./structure.db.type";
@@ -311,6 +314,8 @@ export type StructureListComputedRow = {
   latitude: StructureListLightVersion["latitude"];
   longitude: StructureListLightVersion["longitude"];
   searchValues: string[];
+  nom: string | null;
+  adresses: StructureListAdresse[];
   isClosed: boolean;
   fermetureDate: Date | null;
   fermetureMotif: string | null;
@@ -319,7 +324,8 @@ export type StructureListComputedRow = {
 export const computeStructureListRow = (
   structure: StructureListLight,
   currentVersion: StructureListLightVersion | undefined,
-  now: Date
+  now: Date,
+  adresses: StructureListAdresse[] = []
 ): StructureListComputedRow | null => {
   if (!currentVersion) {
     return null;
@@ -342,6 +348,7 @@ export const computeStructureListRow = (
     ...currentVersion.structureFinesses.map(
       (structureFiness) => structureFiness.finess.code
     ),
+    ...adresses.map((adresse) => adresse.commune),
   ].filter((value): value is string => Boolean(value));
 
   const currentTransformation = currentVersion.structureVersionTransformation;
@@ -381,6 +388,8 @@ export const computeStructureListRow = (
     latitude: currentVersion.latitude,
     longitude: currentVersion.longitude,
     searchValues,
+    nom: currentVersion.nom,
+    adresses,
   };
 };
 
@@ -783,8 +792,7 @@ export const buildUpcomingTransformations = (
 };
 
 export const buildStructureListItem = (
-  row: StructureListComputedRow,
-  adresses: { commune: string | null; placesAutorisees: number | null }[]
+  row: StructureListComputedRow
 ): StructureListItem => ({
   id: row.id,
   codeBhasile: row.codeBhasile ?? undefined,
@@ -798,12 +806,89 @@ export const buildStructureListItem = (
   isClosed: row.isClosed,
   fermetureDate: row.fermetureDate?.toISOString(),
   fermetureMotif: row.fermetureMotif ?? undefined,
-  communes: buildStructureCommunes(adresses),
+  communes: buildStructureCommunes(row.adresses),
 });
 
 const buildStructureCommunes = (
-  adresses: { commune: string | null; placesAutorisees: number | null }[]
+  adresses: StructureListAdresse[]
 ): StructureCommune[] =>
   Object.entries(getPlacesByCommunes(adresses)).map(
     ([name, placesAutorisees]) => ({ name, placesAutorisees })
   );
+
+// Les places d'une structure sont rattachées au centre de commune BAN de chaque adresse.
+// Une structure sans aucune place localisée n'apparaît pas sur la carte : elle est comptée à part.
+export const buildCommunePoints = (
+  rows: StructureListComputedRow[]
+): CommunePoints => {
+  const communesByKey = new Map<string, CommuneMapPoint>();
+  let nonLocalisedPlaces = 0;
+  let nonRepresentedStructuresCount = 0;
+
+  for (const row of rows) {
+    const placesByKey = new Map<
+      string,
+      { latitude: number; longitude: number; nom: string; places: number }
+    >();
+    for (const adresse of row.adresses) {
+      const places = adresse.placesAutorisees ?? 0;
+      if (places <= 0) {
+        continue;
+      }
+      if (
+        adresse.communeLatitude === null ||
+        adresse.communeLongitude === null
+      ) {
+        nonLocalisedPlaces += places;
+        continue;
+      }
+      const key = `${adresse.communeLatitude}|${adresse.communeLongitude}`;
+      const existing = placesByKey.get(key);
+      placesByKey.set(key, {
+        latitude: adresse.communeLatitude,
+        longitude: adresse.communeLongitude,
+        nom: existing?.nom ?? adresse.communeNom ?? adresse.commune ?? "",
+        places: (existing?.places ?? 0) + places,
+      });
+    }
+
+    if (placesByKey.size === 0) {
+      nonRepresentedStructuresCount++;
+      continue;
+    }
+
+    for (const [key, localisation] of placesByKey) {
+      const commune = communesByKey.get(key) ?? {
+        key,
+        latitude: localisation.latitude,
+        longitude: localisation.longitude,
+        nom: localisation.nom,
+        places: 0,
+        structures: [],
+      };
+      commune.places += localisation.places;
+      commune.structures.push({
+        id: row.id,
+        nom: row.nom,
+        codeBhasile: row.codeBhasile,
+        type: row.type,
+        operateurLabel: row.operateurLabel,
+        places: localisation.places,
+        isFinalised: row.isFinalised,
+      });
+      communesByKey.set(key, commune);
+    }
+  }
+
+  const communes = [...communesByKey.values()];
+  for (const commune of communes) {
+    commune.structures.sort((first, second) => second.places - first.places);
+  }
+
+  return {
+    communes,
+    totalPlaces: communes.reduce((total, commune) => total + commune.places, 0),
+    nonLocalisedPlaces,
+    nonRepresentedStructuresCount,
+  };
+};

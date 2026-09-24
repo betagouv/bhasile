@@ -2,20 +2,26 @@
 
 import { ReactElement } from "react";
 
+import { CommunesLayer } from "@/app/components/map/CommunesLayer";
 import { Map } from "@/app/components/map/Map";
 import { StructuresLayer } from "@/app/components/map/StructuresLayer";
-import { StructureMapPoint } from "@/types/structure-list.type";
+import {
+  CommuneMapPoint,
+  StructureMapPoint,
+} from "@/types/structure-list.type";
 
-const StructuresMap = ({ points }: Props): ReactElement => {
+const StructuresMap = (props: Props): ReactElement => {
   return (
     <Map>
-      <StructuresLayer points={points} />
+      {"communes" in props ? (
+        <CommunesLayer communes={props.communes} />
+      ) : (
+        <StructuresLayer points={props.points} />
+      )}
     </Map>
   );
 };
 
-type Props = {
-  points: StructureMapPoint[];
-};
+type Props = { points: StructureMapPoint[] } | { communes: CommuneMapPoint[] };
 
 export default StructuresMap;

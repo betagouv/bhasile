@@ -18,6 +18,7 @@ import {
 import { SessionUser } from "@/types/global";
 import { PublicType } from "@/types/structure.type";
 import {
+  CommunePoints,
   type SearchProps,
   StructureListItem,
   StructureMapPoint,
@@ -51,13 +52,14 @@ import {
   findAllStructures,
   findOne,
   findOneOperateur,
-  findStructureCommunesByIds,
   findStructureDepartement,
   findStructuresByIds,
+  findStructureVersionAdresses,
   findValidatedActualisationForm,
   updateOne,
 } from "./structure.repository";
 import {
+  buildCommunePoints,
   buildStructureHistory,
   buildStructureListItem,
   buildUpcomingTransformations,
@@ -152,12 +154,23 @@ const computeAllStructureRows = cache(
   async (): Promise<StructureListComputedRow[]> => {
     const now = getRequestNow();
     const structures = await findAllStructures();
+    const currentVersions = structures.map((structure) =>
+      resolveCurrentVersion(structure.structureVersions, now)
+    );
+    const versionsAdresses = await findStructureVersionAdresses(
+      currentVersions.flatMap((version) => (version ? [version.id] : []))
+    );
+    const adressesByVersionId = new Map(
+      versionsAdresses.map((version) => [version.id, version.adresses])
+    );
+
     return structures
-      .map((structure) =>
+      .map((structure, index) =>
         computeStructureListRow(
           structure,
-          resolveCurrentVersion(structure.structureVersions, now),
-          now
+          currentVersions[index],
+          now,
+          adressesByVersionId.get(currentVersions[index]?.id ?? 0) ?? []
         )
       )
       .filter((row): row is StructureListComputedRow => row !== null);
@@ -203,6 +216,11 @@ export const getStructureMapPoints = cache(
   }
 );
 
+export const getCommunePoints = cache(
+  async (props: SearchProps): Promise<CommunePoints> =>
+    buildCommunePoints(await getSortedStructureRows(props))
+);
+
 export const getStructureListItems = async (
   props: SearchProps
 ): Promise<{ structures: StructureListItem[]; totalStructures: number }> => {
@@ -213,17 +231,8 @@ export const getStructureListItems = async (
     DEFAULT_PAGE_SIZE
   );
 
-  const versions = await findStructureCommunesByIds(
-    pageRows.map((row) => row.currentVersionId)
-  );
-  const adressesByStructureId = new Map(
-    versions.map((version) => [version.structureId, version.adresses])
-  );
-
   return {
-    structures: pageRows.map((row) =>
-      buildStructureListItem(row, adressesByStructureId.get(row.id) ?? [])
-    ),
+    structures: pageRows.map(buildStructureListItem),
     totalStructures,
   };
 };

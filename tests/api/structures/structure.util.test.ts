@@ -8,6 +8,7 @@ import {
   StructureListLightVersion,
 } from "@/app/api/structures/structure.db.type";
 import {
+  buildCommunePoints,
   computeStructureListRow,
   filterStructureRows,
   getDatesConvention,
@@ -159,6 +160,30 @@ describe("computeStructureListRow", () => {
     expect(row?.searchValues).toEqual(
       expect.arrayContaining(["A-001", "Operateur Alpha", "DNA-1", "FIN-1"])
     );
+  });
+
+  it("rend cherchables les communes des adresses d'hébergement et garde nom et adresses sur la ligne", () => {
+    const version = buildVersion();
+    const adresses = [
+      {
+        commune: "Saint-Lô",
+        placesAutorisees: 4,
+        communeLatitude: 49.1138,
+        communeLongitude: -1.0801,
+        communeNom: "Saint-Lô",
+      },
+    ];
+
+    const row = computeStructureListRow(
+      buildLightStructure({}, version),
+      version,
+      now,
+      adresses
+    );
+
+    expect(row?.searchValues).toContain("Saint-Lô");
+    expect(row?.nom).toBe("Centre");
+    expect(row?.adresses).toEqual(adresses);
   });
 
   it("considère les adresses stockées en MIXTE (ou tout mélange) comme bâti MIXTE", () => {
@@ -420,7 +445,9 @@ describe("isStructureFinalised", () => {
     expect(
       isStructureFinalised(
         {
-          forms: [{ status: true, formDefinition: { slug: "actualisation-2026" } }],
+          forms: [
+            { status: true, formDefinition: { slug: "actualisation-2026" } },
+          ],
           structureVersions: [],
         },
         now
@@ -480,7 +507,9 @@ describe("isStructureFinalisedAndOpen", () => {
   });
 
   it("est vrai pour une structure finalisée et non fermée", () => {
-    expect(isStructureFinalisedAndOpen(finalisedStructure(null), now)).toBe(true);
+    expect(isStructureFinalisedAndOpen(finalisedStructure(null), now)).toBe(
+      true
+    );
   });
 
   it("est faux pour une structure finalisée dont la fermeture a pris effet", () => {
@@ -535,6 +564,8 @@ const buildRow = (
   isClosed: false,
   fermetureDate: null,
   fermetureMotif: null,
+  nom: "Centre",
+  adresses: [],
   ...overrides,
 });
 
@@ -849,5 +880,85 @@ describe("getReadableAdresses", () => {
         adresseComplete: "69001",
       },
     ]);
+  });
+});
+
+describe("buildCommunePoints", () => {
+  const saintLo = (placesAutorisees: number | null, commune = "Saint-Lô") => ({
+    commune,
+    placesAutorisees,
+    communeLatitude: 49.1138,
+    communeLongitude: -1.0801,
+    communeNom: "Saint-Lô",
+  });
+  const granville = (placesAutorisees: number) => ({
+    commune: "Granville",
+    placesAutorisees,
+    communeLatitude: 48.8307,
+    communeLongitude: -1.574,
+    communeNom: "Granville",
+  });
+
+  it("additionne les places par commune, quelle que soit l'écriture saisie, et trie ses structures par places", () => {
+    const { communes, totalPlaces } = buildCommunePoints([
+      buildRow({ id: 1, nom: "Les Tulipes", adresses: [saintLo(1)] }),
+      buildRow({
+        id: 2,
+        nom: "Les Mimosas",
+        adresses: [saintLo(1), saintLo(1, "ST LO")],
+      }),
+    ]);
+
+    expect(communes).toHaveLength(1);
+    expect(communes[0]).toMatchObject({
+      nom: "Saint-Lô",
+      latitude: 49.1138,
+      longitude: -1.0801,
+      places: 3,
+    });
+    expect(
+      communes[0].structures.map(({ id, places }) => ({ id, places }))
+    ).toEqual([
+      { id: 2, places: 2 },
+      { id: 1, places: 1 },
+    ]);
+    expect(totalPlaces).toBe(3);
+  });
+
+  it("place une même structure dans chaque commune où elle a des places", () => {
+    const { communes } = buildCommunePoints([
+      buildRow({ id: 1, adresses: [saintLo(2), granville(5)] }),
+    ]);
+
+    expect(
+      communes
+        .map(({ nom, places }) => ({ nom, places }))
+        .sort((first, second) => first.nom.localeCompare(second.nom))
+    ).toEqual([
+      { nom: "Granville", places: 5 },
+      { nom: "Saint-Lô", places: 2 },
+    ]);
+  });
+
+  it("ignore les adresses sans places ou non localisées, et compte structures non représentées et places non localisées", () => {
+    const nonLocalisee = {
+      ...saintLo(3),
+      communeLatitude: null,
+      communeLongitude: null,
+    };
+
+    const { communes, nonLocalisedPlaces, nonRepresentedStructuresCount } =
+      buildCommunePoints([
+        buildRow({ id: 1, adresses: [saintLo(null), saintLo(0)] }),
+        buildRow({ id: 2, adresses: [nonLocalisee] }),
+        buildRow({ id: 3, adresses: [] }),
+        buildRow({ id: 4, adresses: [nonLocalisee, granville(2)] }),
+      ]);
+
+    expect(communes.map(({ nom, places }) => ({ nom, places }))).toEqual([
+      { nom: "Granville", places: 2 },
+    ]);
+    expect(nonRepresentedStructuresCount).toBe(3);
+    expect(nonLocalisedPlaces).toBe(6);
   });
 });

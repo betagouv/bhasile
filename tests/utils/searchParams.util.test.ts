@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   deletePaginationParams,
+  parseMapMode,
   setFilterParam,
 } from "@/app/utils/searchParams.util";
 
@@ -59,5 +60,20 @@ describe("setFilterParam", () => {
     const params = new URLSearchParams();
     setFilterParam(params, "places", [10, 200]);
     expect(params.get("places")).toBe("10,200");
+  });
+});
+
+describe("parseMapMode", () => {
+  it("passe en mode places sur les structures actives", () => {
+    expect(parseMapMode("places", false)).toBe("places");
+  });
+
+  it("reste en mode structures sur l'onglet Fermées, même si l'URL demande places", () => {
+    expect(parseMapMode("places", true)).toBe("structures");
+  });
+
+  it("retombe sur le mode structures pour une valeur absente ou inconnue", () => {
+    expect(parseMapMode(null, false)).toBe("structures");
+    expect(parseMapMode("n'importe quoi", false)).toBe("structures");
   });
 });

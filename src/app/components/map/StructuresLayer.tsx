@@ -7,6 +7,8 @@ import { Root } from "react-dom/client";
 import { StructureMapPoint } from "@/types/structure-list.type";
 
 import { useMap } from "./MapContext";
+import { closePopup } from "./mapPopup";
+import { findGeoJsonSource } from "./mapSource";
 import { StructureMarkerContent } from "./StructureMarkerContent";
 import { bindStructuresInteractions } from "./structuresInteractions";
 import {
@@ -76,7 +78,7 @@ export const StructuresLayer = ({ points }: Props): ReactElement | null => {
   }, [map]);
 
   useEffect(() => {
-    const source = findStructuresSource(map);
+    const source = findGeoJsonSource(map, STRUCTURES_SOURCE_ID);
     source?.setData({
       type: "FeatureCollection",
       features: points.map((point) => ({
@@ -95,35 +97,4 @@ export const StructuresLayer = ({ points }: Props): ReactElement | null => {
 
 type Props = {
   points: StructureMapPoint[];
-};
-
-// maplibre lève une exception si le style n'est pas chargé ou si la carte est détruite.
-const findStructuresSource = (
-  map: maplibregl.Map | null
-): maplibregl.GeoJSONSource | undefined => {
-  try {
-    return map?.getSource(STRUCTURES_SOURCE_ID) as
-      maplibregl.GeoJSONSource | undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-const closePopup = (
-  popupRef: React.RefObject<maplibregl.Popup | null>,
-  popupRootRef: React.RefObject<Root | null>
-): void => {
-  popupRef.current?.remove();
-  popupRef.current = null;
-
-  const root = popupRootRef.current;
-  popupRootRef.current = null;
-  if (root) {
-    queueMicrotask(() => {
-      // necessary to avoid React error
-      try {
-        root.unmount();
-      } catch {}
-    });
-  }
 };

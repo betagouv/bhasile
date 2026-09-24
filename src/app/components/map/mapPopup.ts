@@ -29,3 +29,22 @@ export function getOrCreatePopup({
 
   return { popup: popupRef.current, root: popupRootRef.current };
 }
+
+export const closePopup = (
+  popupRef: React.RefObject<maplibregl.Popup | null>,
+  popupRootRef: React.RefObject<Root | null>
+): void => {
+  popupRef.current?.remove();
+  popupRef.current = null;
+
+  const root = popupRootRef.current;
+  popupRootRef.current = null;
+  if (root) {
+    queueMicrotask(() => {
+      // necessary to avoid React error
+      try {
+        root.unmount();
+      } catch {}
+    });
+  }
+};
