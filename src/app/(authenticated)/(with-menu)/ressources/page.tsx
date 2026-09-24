@@ -1,11 +1,14 @@
-import { ReactElement } from "react";
+import { ReactElement, Suspense } from "react";
 
 import {
   readBlocks,
   readSuggestions,
 } from "@/utils-server/ressources.server.util";
 
-import { ResourcesContent } from "./_components/ResourcesContent";
+import { ResourcesBlockList } from "./_components/ResourcesBlockList";
+import { RessourcesSkeleton } from "./_components/RessourcesSkeleton";
+
+export const dynamic = "force-dynamic";
 
 export default function Ressources(): ReactElement {
   const blocks = readBlocks();
@@ -18,7 +21,9 @@ export default function Ressources(): ReactElement {
           Modèles et ressources
         </h2>
       </div>
-      <ResourcesContent blocks={blocks} suggestions={suggestions} />
+      <Suspense fallback={<RessourcesSkeleton />}>
+        <ResourcesBlockList blocks={blocks} suggestions={suggestions} />
+      </Suspense>
     </div>
   );
 }

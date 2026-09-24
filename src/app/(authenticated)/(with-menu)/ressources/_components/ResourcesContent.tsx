@@ -8,31 +8,28 @@ import {
   filterFaqBlock,
   filterFaqItems,
 } from "@/app/utils/ressources.util";
-import { useFaqItems } from "@/hooks/useFaqItems";
 import { FaqApiType } from "@/schemas/api/faq.schema";
 import { Block, FaqBlock } from "@/types/ressources.type";
 
-import { BlockSkeleton } from "../../_components/BlockSkeleton";
 import { ResourceBlock } from "./ResourceBlock";
 import { ResourcesSearch } from "./ResourcesSearch";
 
 export const ResourcesContent = ({
   blocks,
   suggestions,
+  faqBlock,
+  faqItems,
+  hasFaqTabs,
 }: Props): ReactElement => {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") ?? "";
-  const { faqItems } = useFaqItems();
-  const isFaqLoading = faqItems === undefined;
 
   const filteredBlocks = filterBlocks(blocks, searchQuery);
-  const faqBlock = buildFaqBlock(faqItems ?? []);
-  const filteredFaqItems = filterFaqItems(faqItems ?? [], searchQuery);
+  const filteredFaqItems = filterFaqItems(faqItems, searchQuery);
   const filteredFaqBlock = filterFaqBlock(faqBlock, filteredFaqItems);
 
-  const displayFaq = faqBlock.tabs.length > 0 && filteredFaqBlock.tabs.length > 0;
-  const hasNoResults =
-    !isFaqLoading && filteredBlocks.length === 0 && !displayFaq;
+  const displayFaq = hasFaqTabs && filteredFaqBlock.tabs.length > 0;
+  const hasNoResults = filteredBlocks.length === 0 && !displayFaq;
 
   return (
     <>
@@ -43,12 +40,8 @@ export const ResourcesContent = ({
           <ResourceBlock key={blockItem.id} block={blockItem} />
         ))}
 
-        {isFaqLoading ? (
-          <BlockSkeleton title="FAQ" icon="fr-icon-question-answer-line" />
-        ) : (
-          displayFaq && (
-            <ResourceBlock block={filteredFaqBlock} faqItems={filteredFaqItems} />
-          )
+        {displayFaq && (
+          <ResourceBlock block={filteredFaqBlock} faqItems={filteredFaqItems} />
         )}
 
         {hasNoResults && (
@@ -61,23 +54,6 @@ export const ResourcesContent = ({
   );
 };
 
-const buildFaqBlock = (faqItems: FaqApiType[]): FaqBlock => {
-  const uniqueCategories = Array.from(
-    new Set(faqItems.map((faqItem) => faqItem.category))
-  );
-
-  return {
-    type: "faq",
-    id: "faq",
-    title: "FAQ",
-    icon: "fr-icon-question-answer-line",
-    tabs: uniqueCategories.map((categoryName, categoryIndex) => ({
-      id: `faq-tab-${categoryIndex}`,
-      title: categoryName,
-    })),
-  };
-};
-
 const buildEmptyMessage = (searchQuery: string): string => {
   if (searchQuery.trim().length === 0) {
     return "Aucun contenu publié pour le moment.";
@@ -88,4 +64,7 @@ const buildEmptyMessage = (searchQuery: string): string => {
 type Props = {
   blocks: Block[];
   suggestions: string[];
+  faqBlock: FaqBlock;
+  faqItems: FaqApiType[];
+  hasFaqTabs: boolean;
 };

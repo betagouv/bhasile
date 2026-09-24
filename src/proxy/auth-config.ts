@@ -95,12 +95,6 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/faq$/,
-    routes: {
-      GET: "proconnect",
-    },
-  },
-  {
     pattern: /^\/api\/auth(?:\/.*)?$/,
     routes: {
       GET: "none",
