@@ -113,7 +113,16 @@ export const FilterOperateur = () => {
           key={operateur.id}
           options={[
             {
-              label: operateur.label,
+              label: (
+                <>
+                  {operateur.label}
+                  {getRelationLabel(operateur) && (
+                    <span className="text-mention-grey italic">
+                      &nbsp;–&nbsp;{getRelationLabel(operateur)}
+                    </span>
+                  )}
+                </>
+              ),
               nativeInputProps: {
                 name: `operateur-${operateur.id}`,
                 value: String(operateur.id),
@@ -134,4 +143,11 @@ export const FilterOperateur = () => {
       )}
     </div>
   );
+};
+
+const getRelationLabel = (operateur: OperateurSuggestion): string | null => {
+  if (operateur.isFiliale) {
+    return "Filiale";
+  }
+  return operateur.hasFiliales ? "Groupe" : null;
 };

@@ -7,6 +7,7 @@ export type OperateurDbDetail = Prisma.OperateurGetPayload<{
       include: { fileUploads: true };
     };
     logo: true;
+    filiales: { select: { name: true } };
   };
 }>;
 
@@ -19,4 +20,15 @@ export const operateurListSelect = {
 
 export type OperateurListRow = Prisma.OperateurGetPayload<{
   select: typeof operateurListSelect;
+}>;
+
+export const operateurSuggestionSelect = {
+  id: true,
+  name: true,
+  parentId: true,
+  filiales: { select: { id: true } },
+} satisfies Prisma.OperateurSelect;
+
+export type OperateurSuggestionRow = Prisma.OperateurGetPayload<{
+  select: typeof operateurSuggestionSelect;
 }>;

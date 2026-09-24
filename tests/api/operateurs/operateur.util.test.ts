@@ -171,18 +171,21 @@ describe("buildOperateurListItem", () => {
         totalPlaces: 1,
         structureTypes: new Set([StructureType.CADA]),
       },
-      3
+      3,
+      ["MaFiliale"]
     );
     expect(item.pourcentageParc).toBe(33.33);
     expect(item.logo).toEqual({ key: "logo-a" });
     expect(item.structureTypes).toEqual([StructureType.CADA]);
+    expect(item.filiales).toEqual(["MaFiliale"]);
   });
 
   it("renvoie 0 % quand le parc global est vide", () => {
     const item = buildOperateurListItem(
       makeOperateur(1, "Alpha", null),
       { nbStructures: 1, totalPlaces: 0, structureTypes: new Set() },
-      0
+      0,
+      []
     );
     expect(item.pourcentageParc).toBe(0);
     expect(item.logo).toEqual({ key: null });
@@ -198,6 +201,7 @@ describe("filterOperateursBySearch", () => {
       totalPlaces: 1,
       pourcentageParc: 1,
       structureTypes: [],
+      filiales: [],
       logo: { key: null },
       logoUrl: null,
     },
@@ -208,6 +212,7 @@ describe("filterOperateursBySearch", () => {
       totalPlaces: 1,
       pourcentageParc: 1,
       structureTypes: [],
+      filiales: [],
       logo: { key: null },
       logoUrl: null,
     },
@@ -220,7 +225,9 @@ describe("filterOperateursBySearch", () => {
 
   it("matche sans tenir compte de la casse ni des accents", () => {
     expect(
-      filterOperateursBySearch(items, "refugies").map((operateur) => operateur.id)
+      filterOperateursBySearch(items, "refugies").map(
+        (operateur) => operateur.id
+      )
     ).toEqual([1]);
     expect(
       filterOperateursBySearch(items, "ADOMA").map((operateur) => operateur.id)

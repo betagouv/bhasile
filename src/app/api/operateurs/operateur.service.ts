@@ -8,7 +8,10 @@ import {
   OperateurApiRead,
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
-import type { OperateurListItem } from "@/types/operateur.type";
+import type {
+  OperateurListItem,
+  OperateurSuggestionItem,
+} from "@/types/operateur.type";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { getContactsApiRead } from "../contacts/contact.util";
@@ -21,7 +24,9 @@ import {
   updateOne,
 } from "./operateur.repository";
 import {
+  buildFilialesByParentId,
   buildOperateurListItem,
+  buildOperateurSuggestionItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
   groupStructureStatsByOperateur,
@@ -44,6 +49,7 @@ export const getOperateurs = cache(
     ]);
 
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
+    const filialesByParentId = buildFilialesByParentId(operateurs);
     const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
       structures,
       topLevelByOperateurId,
@@ -57,7 +63,14 @@ export const getOperateurs = cache(
         if (!stats) {
           return [];
         }
-        return [buildOperateurListItem(operateur, stats, globalPlaces)];
+        return [
+          buildOperateurListItem(
+            operateur,
+            stats,
+            globalPlaces,
+            filialesByParentId.get(operateur.id) ?? []
+          ),
+        ];
       });
 
     const filtered = filterOperateursBySearch(items, search);
@@ -101,12 +114,15 @@ export const getOperateur = async (
     return null;
   }
 
+  const { filiales, ...operateurFields } = operateur;
+
   return {
     ...(recursivelySerializeForClient({
-      ...operateur,
+      ...operateurFields,
       actesAdministratifs: operateur.actesAdministratifs,
       contacts: getContactsApiRead(operateur.contacts),
     }) as OperateurApiRead),
+    filiales: filiales.map(({ name }) => name),
     logoUrl: await resolveLogoUrl(operateur.logo?.key ?? null),
   };
 };
@@ -119,11 +135,11 @@ export const updateOperateur = async (
 
 export const getOperateursSuggestions = async (
   search: string | null
-): Promise<Operateur[]> => {
+): Promise<OperateurSuggestionItem[]> => {
   const operateurs = await findBySearchTerm(search);
 
   return sortRows(
-    operateurs,
+    operateurs.map(buildOperateurSuggestionItem),
     (operateur) => ({ value: operateur.name, kind: "text" }),
     (operateur) => ({ value: operateur.id, kind: "number" }),
     "asc"

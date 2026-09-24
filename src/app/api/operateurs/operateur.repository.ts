@@ -9,11 +9,13 @@ import {
   OperateurDbDetail,
   OperateurListRow,
   operateurListSelect,
+  OperateurSuggestionRow,
+  operateurSuggestionSelect,
 } from "./operateur.db.type";
 
 export const findBySearchTerm = async (
   searchTerm: string | null
-): Promise<Operateur[]> => {
+): Promise<OperateurSuggestionRow[]> => {
   const operateurs = await prisma.operateur.findMany({
     where: {
       OR: [
@@ -21,6 +23,7 @@ export const findBySearchTerm = async (
         { filiales: { some: { structures: { some: {} } } } },
       ],
     },
+    select: operateurSuggestionSelect,
   });
   if (!searchTerm) {
     return operateurs;
@@ -44,6 +47,7 @@ export const findOne = async (
         include: { fileUploads: true },
       },
       logo: true,
+      filiales: { select: { name: true }, orderBy: { name: "asc" } },
     },
   });
 };
