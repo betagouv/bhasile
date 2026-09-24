@@ -25,7 +25,19 @@ export const StatistiquesContent = (): ReactElement => {
     <div className="flex flex-col gap-3 px-3 pt-3">
       <CustomNotice
         severity="warning"
-        description="Les structures non finalisées ne sont pas comptabilisées ici ; les PRAHDA et Nuits Hôtelières ne sont pas référencés sur l'outil."
+        description={
+          <span>
+            <b>
+              Ces statistiques ne prennent en compte que les informations dont
+              nous disposons.
+            </b>{" "}
+            De façon générale, les PRAHDA et les nuits hôtelières ne sont pas
+            intégrés à Bhasile. Les structures qui n’ont pas encore été
+            initialisées sur l’outil ne sont pas comptabilisées. Enfin, selon
+            les années, les structures qui n’ont pas fait leur actualisation ne
+            sont pas prises en compte.
+          </span>
+        }
         className="rounded-lg bg-contrast-yellow-tournesol text-action-high-yellow-tournesol [&_.fr-container]:max-w-none"
       />
       <Section id="structures">
