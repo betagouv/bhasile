@@ -1,12 +1,11 @@
-import { ReactElement, Suspense } from "react";
+import { ReactElement } from "react";
 
 import {
   readBlocks,
   readSuggestions,
 } from "@/utils-server/ressources.server.util";
 
-import { ResourcesBlockList } from "./_components/ResourcesBlockList";
-import { RessourcesSkeleton } from "./_components/RessourcesSkeleton";
+import { ResourcesContent } from "./_components/ResourcesContent";
 
 export default function Ressources(): ReactElement {
   const blocks = readBlocks();
@@ -19,9 +18,7 @@ export default function Ressources(): ReactElement {
           Modèles et ressources
         </h2>
       </div>
-      <Suspense fallback={<RessourcesSkeleton />}>
-        <ResourcesBlockList blocks={blocks} suggestions={suggestions} />
-      </Suspense>
+      <ResourcesContent blocks={blocks} suggestions={suggestions} />
     </div>
   );
 }

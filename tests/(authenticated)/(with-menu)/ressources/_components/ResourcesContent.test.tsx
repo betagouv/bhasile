@@ -4,9 +4,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ResourcesContent } from "@/app/(authenticated)/(with-menu)/ressources/_components/ResourcesContent";
 import { FaqApiType } from "@/schemas/api/faq.schema";
-import { Block, FaqBlock, FilesBlock } from "@/types/ressources.type";
+import { Block, FilesBlock } from "@/types/ressources.type";
 
 const mockedSearchParams = { searchParamsValue: new URLSearchParams() };
+const mockedFaqItems: { value: FaqApiType[] | undefined } = { value: [] };
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), prefetch: vi.fn() }),
@@ -15,6 +16,10 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ setFetchState: vi.fn() }),
+}));
+
+vi.mock("@/hooks/useFaqItems", () => ({
+  useFaqItems: () => ({ faqItems: mockedFaqItems.value }),
 }));
 
 const FILES_BLOCK: FilesBlock = {
@@ -50,19 +55,6 @@ const FILES_BLOCK: FilesBlock = {
   ],
 };
 
-const FAQ_BLOCK: FaqBlock = {
-  id: "faq",
-  title: "FAQ",
-  icon: "fr-icon-question-answer-line",
-  type: "faq",
-  tabs: [
-    {
-      id: "faq--cpom",
-      title: "CPOM",
-    },
-  ],
-};
-
 const FAQ_ITEMS: FaqApiType[] = [
   {
     id: 1,
@@ -76,19 +68,14 @@ const BLOCKS: Block[] = [FILES_BLOCK];
 
 const renderResourcesContentWithSearch = (
   searchQueryText: string,
-  hasFaqTabsFlag = true
+  faqItems: FaqApiType[] | undefined = FAQ_ITEMS
 ) => {
   mockedSearchParams.searchParamsValue = new URLSearchParams(
     searchQueryText ? { search: searchQueryText } : {}
   );
+  mockedFaqItems.value = faqItems;
   return render(
-    <ResourcesContent
-      blocks={BLOCKS}
-      suggestions={["CPOM", "OFII"]}
-      faqBlock={FAQ_BLOCK}
-      faqItems={FAQ_ITEMS}
-      hasFaqTabs={hasFaqTabsFlag}
-    />
+    <ResourcesContent blocks={BLOCKS} suggestions={["CPOM", "OFII"]} />
   );
 };
 
@@ -166,9 +153,22 @@ describe("ResourcesContent", () => {
     expect(screen.queryByText("Modèles")).not.toBeInTheDocument();
   });
 
-  it("masque le bloc FAQ si aFaqTabs vaut false même si les items existent", () => {
+  it("affiche un chargement de la FAQ tant que les items ne sont pas récupérés", () => {
+    // GIVEN
+    mockedSearchParams.searchParamsValue = new URLSearchParams();
+    mockedFaqItems.value = undefined;
+
     // WHEN
-    renderResourcesContentWithSearch("", false);
+    render(<ResourcesContent blocks={BLOCKS} suggestions={["CPOM", "OFII"]} />);
+
+    // THEN
+    expect(screen.getByText("Modèles")).toBeInTheDocument();
+    expect(screen.getByText("Chargement...")).toBeInTheDocument();
+  });
+
+  it("masque le bloc FAQ si aucun item n’existe", () => {
+    // WHEN
+    renderResourcesContentWithSearch("", []);
 
     // THEN
     expect(screen.getByText("Modèles")).toBeInTheDocument();
@@ -180,17 +180,10 @@ describe("ResourcesContent", () => {
     mockedSearchParams.searchParamsValue = new URLSearchParams({
       search: "introuvable",
     });
+    mockedFaqItems.value = [];
 
     // WHEN
-    render(
-      <ResourcesContent
-        blocks={[]}
-        suggestions={[]}
-        faqBlock={FAQ_BLOCK}
-        faqItems={[]}
-        hasFaqTabs={false}
-      />
-    );
+    render(<ResourcesContent blocks={[]} suggestions={[]} />);
 
     // THEN
     expect(
@@ -201,17 +194,10 @@ describe("ResourcesContent", () => {
   it("affiche un message dédié quand aucun contenu n’est publié", () => {
     // GIVEN
     mockedSearchParams.searchParamsValue = new URLSearchParams();
+    mockedFaqItems.value = [];
 
     // WHEN
-    render(
-      <ResourcesContent
-        blocks={[]}
-        suggestions={[]}
-        faqBlock={FAQ_BLOCK}
-        faqItems={[]}
-        hasFaqTabs={false}
-      />
-    );
+    render(<ResourcesContent blocks={[]} suggestions={[]} />);
 
     // THEN
     expect(
