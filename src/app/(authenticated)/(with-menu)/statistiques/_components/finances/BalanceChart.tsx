@@ -3,6 +3,7 @@ import { ReactElement, useMemo } from "react";
 import { ChartLegend } from "@/app/components/ChartLegend";
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
+import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 
@@ -18,6 +19,7 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
       : getYearRange();
 
   const yearsWithBudget = years
+    .filter((year) => year < CURRENT_YEAR)
     .map((year) => {
       return {
         year,
