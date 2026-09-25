@@ -5,9 +5,10 @@ import {
   checkCanUpdateDepartements,
   checkEffectiveDatesAreValid,
   checkNoDuplicateStructureIds,
-  checkUniqueDepartement,
+  isTransformationVisible,
 } from "@/app/api/transformations/transformation.util";
 import { DomainError } from "@/app/utils/domainError.util";
+import { defineAbilityFor } from "@/lib/casl/abilities";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
 import {
@@ -208,82 +209,6 @@ describe("checkNoDuplicateStructureIds", () => {
   });
 });
 
-describe("checkUniqueDepartement", () => {
-  it("rejette une sélection mêlant deux départements", () => {
-    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
-      [
-        {
-          type: StructureVersionTransformationType.CONTRACTION,
-          structureVersion: { departementAdministratif: "75" },
-        },
-        {
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: { departementAdministratif: "92" },
-        },
-      ];
-
-    expect(() =>
-      checkUniqueDepartement(structureVersionTransformations)
-    ).toThrow(DomainError);
-    expect(() =>
-      checkUniqueDepartement(structureVersionTransformations)
-    ).toThrow(
-      "Toutes les structures d'une transformation doivent appartenir au même département."
-    );
-  });
-
-  it("laisse passer des structures du même département", () => {
-    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
-      [
-        {
-          type: StructureVersionTransformationType.CONTRACTION,
-          structureVersion: { departementAdministratif: "75" },
-        },
-        {
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: { departementAdministratif: "75" },
-        },
-      ];
-
-    expect(() =>
-      checkUniqueDepartement(structureVersionTransformations)
-    ).not.toThrow();
-  });
-
-  it("ignore les blocs de création sans département", () => {
-    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
-      [
-        {
-          type: StructureVersionTransformationType.FERMETURE,
-          structureVersion: { departementAdministratif: "75" },
-        },
-        { type: StructureVersionTransformationType.CREATION },
-      ];
-
-    expect(() =>
-      checkUniqueDepartement(structureVersionTransformations)
-    ).not.toThrow();
-  });
-
-  it("traite une chaîne vide comme une absence de département", () => {
-    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
-      [
-        {
-          type: StructureVersionTransformationType.FERMETURE,
-          structureVersion: { departementAdministratif: "75" },
-        },
-        {
-          type: StructureVersionTransformationType.CREATION,
-          structureVersion: { departementAdministratif: "" },
-        },
-      ];
-
-    expect(() =>
-      checkUniqueDepartement(structureVersionTransformations)
-    ).not.toThrow();
-  });
-});
-
 describe("checkCanUpdateDepartements", () => {
   const agentParis = {
     role: "DEPARTEMENT_PARIS",
@@ -385,6 +310,39 @@ describe("checkCanUpdateDepartements", () => {
         buildStructureVersionTransformation("92"),
       ])
     ).not.toThrow();
+  });
+});
+
+describe("isTransformationVisible", () => {
+  const agentParisAbility = defineAbilityFor({
+    role: "DEPARTEMENT_PARIS",
+    allowedDepartements: ["75"],
+  } as unknown as SessionUser);
+
+  const buildStructureVersionTransformation = (
+    departementAdministratif: string
+  ) => ({ structureVersion: { departementAdministratif } });
+
+  it("montre une transformation dont un seul bloc est dans le périmètre", () => {
+    expect(
+      isTransformationVisible(agentParisAbility, [
+        buildStructureVersionTransformation("75"),
+        buildStructureVersionTransformation("92"),
+      ])
+    ).toBe(true);
+  });
+
+  it("masque une transformation dont aucun bloc n'est dans le périmètre", () => {
+    expect(
+      isTransformationVisible(agentParisAbility, [
+        buildStructureVersionTransformation("92"),
+        buildStructureVersionTransformation("93"),
+      ])
+    ).toBe(false);
+  });
+
+  it("montre une transformation dont aucun département n'est encore connu", () => {
+    expect(isTransformationVisible(agentParisAbility, [{}])).toBe(true);
   });
 });
 

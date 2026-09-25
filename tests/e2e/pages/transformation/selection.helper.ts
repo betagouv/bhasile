@@ -65,15 +65,18 @@ export const pickStructures = async (
 
 export const selectSources = async (
   page: Page,
-  params: { structureIds: number[]; fixedDepartement?: boolean }
+  params: { blockId: string; structureIds: number[] }
 ): Promise<void> => {
-  await fillAutocomplete(page, "#operateur", OPERATEUR_SEARCH);
-  // Certaines transfos figent le département sur celui de la structure de
-  // départ (ex. extension depuis contractions) : le filtre n'est alors pas
-  // rendu.
-  if (!params.fixedDepartement) {
-    await fillAutocomplete(page, "#departement", FILTER_DEPARTEMENT_SEARCH);
-  }
+  await fillAutocomplete(
+    page,
+    `#${params.blockId}-operateur`,
+    OPERATEUR_SEARCH
+  );
+  await fillAutocomplete(
+    page,
+    `#${params.blockId}-departement`,
+    FILTER_DEPARTEMENT_SEARCH
+  );
   await pickStructures(page, params.structureIds);
 };
 

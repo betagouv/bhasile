@@ -72,16 +72,19 @@ export const canUpdateStructure = (
   return ability.can("update", subject("Structure", structure as Structure));
 };
 
-export const canUpdateDepartement = (
-  user: SessionUser,
+export const canAbilityUpdateDepartement = (
+  ability: AppAbility,
   departementAdministratif?: string | null
-) => {
-  const ability = defineAbilityFor(user);
-  return ability.can(
+) =>
+  ability.can(
     "update",
     subject("Structure", { departementAdministratif } as Structure)
   );
-};
+
+export const canUpdateDepartement = (
+  user: SessionUser,
+  departementAdministratif?: string | null
+) => canAbilityUpdateDepartement(defineAbilityFor(user), departementAdministratif);
 
 export const canDeleteFile = (
   user: SessionUser,

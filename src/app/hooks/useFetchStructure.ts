@@ -6,6 +6,7 @@ export const useFetchStructure = (id?: number) => {
   const [structure, setStructure] = useState<StructureApiRead | undefined>(
     undefined
   );
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(id));
 
   const getStructure = async (
     id: number
@@ -27,9 +28,11 @@ export const useFetchStructure = (id?: number) => {
 
   useEffect(() => {
     const fetchStructure = async (id: number) => {
+      setIsLoading(true);
       setStructure(undefined);
       const structure = await getStructure(id);
       setStructure(structure);
+      setIsLoading(false);
     };
 
     if (id) {
@@ -39,5 +42,6 @@ export const useFetchStructure = (id?: number) => {
 
   return {
     structure,
+    isLoading,
   };
 };

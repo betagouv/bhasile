@@ -25,7 +25,8 @@ export const TransformationTypeForms = ({
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
 
-  const { structure: departureStructure } = useFetchStructure(structureId);
+  const { structure: departureStructure, isLoading: isDepartureLoading } =
+    useFetchStructure(structureId);
 
   const [transformationType, setTransformationType] = useState<
     TransformationType | undefined
@@ -81,12 +82,17 @@ export const TransformationTypeForms = ({
           />
         ) : null}
       </div>
-      {transformationType ? (
+      {transformationType && !isDepartureLoading ? (
         <StructureSelections
           transformationType={transformationType}
           structureId={structureId}
-          departureType={departureStructure?.type}
-          departureDepartement={departureStructure?.departementAdministratif}
+          defaultFilters={
+            departureStructure && {
+              structureType: departureStructure.type,
+              operateurName: departureStructure.operateur?.name,
+              departementNumero: departureStructure.departementAdministratif,
+            }
+          }
           onChange={setSelectionsState}
         />
       ) : null}
