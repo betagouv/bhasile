@@ -8,7 +8,11 @@ import {
   TRANSFORMATION_TYPE_SPECS,
 } from "@/config/transformation.config";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
-import { canUpdateDepartement, defineAbilityFor } from "@/lib/casl/abilities";
+import {
+  AppAbility,
+  canAbilityUpdateDepartement,
+  defineAbilityFor,
+} from "@/lib/casl/abilities";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import {
   StructureVersionTransformationApiCreate,
@@ -36,29 +40,40 @@ export const checkNoDuplicateStructureIds = (
   }
 };
 
-export const checkUniqueDepartement = (
-  structureVersionTransformations: StructureVersionTransformationApiCreate[]
-): void => {
-  const departements = structureVersionTransformations
-    .map(
-      (structureVersionTransformation) =>
-        structureVersionTransformation.structureVersion
-          ?.departementAdministratif
-    )
-    .filter((departement): departement is string => Boolean(departement));
-  if (new Set(departements).size > 1) {
-    throw new DomainError(
-      "Toutes les structures d'une transformation doivent appartenir au même département."
-    );
-  }
-};
-
 const collectDepartements = (
   structureVersionTransformations: DepartementBearingStructureVersionTransformation[]
 ): string[] =>
   structureVersionTransformations
     .map(getStructureVersionTransformationDepartement)
     .filter((departement): departement is string => Boolean(departement));
+
+const findRefusedDepartement = (
+  ability: AppAbility,
+  structureVersionTransformations: DepartementBearingStructureVersionTransformation[]
+): string | undefined =>
+  collectDepartements(structureVersionTransformations).find(
+    (departement) => !canAbilityUpdateDepartement(ability, departement)
+  );
+
+export const canUpdateTransformationDepartements = (
+  ability: AppAbility,
+  structureVersionTransformations: DepartementBearingStructureVersionTransformation[]
+): boolean =>
+  ability.can("update", "Structure") &&
+  !findRefusedDepartement(ability, structureVersionTransformations);
+
+export const isTransformationVisible = (
+  ability: AppAbility,
+  structureVersionTransformations: DepartementBearingStructureVersionTransformation[]
+): boolean => {
+  const departements = collectDepartements(structureVersionTransformations);
+  return (
+    departements.length === 0 ||
+    departements.some((departement) =>
+      canAbilityUpdateDepartement(ability, departement)
+    )
+  );
+};
 
 export const checkCanUpdateDepartements = (
   user: SessionUser | undefined,
@@ -68,13 +83,15 @@ export const checkCanUpdateDepartements = (
     return;
   }
 
-  if (!defineAbilityFor(user).can("update", "Structure")) {
+  const ability = defineAbilityFor(user);
+  if (!ability.can("update", "Structure")) {
     throw new DomainError("Droits insuffisants", 403);
   }
 
-  const refusedDepartement = collectDepartements(
+  const refusedDepartement = findRefusedDepartement(
+    ability,
     structureVersionTransformations
-  ).find((departement) => !canUpdateDepartement(user, departement));
+  );
   if (refusedDepartement) {
     throw new DomainError(
       `Le département ${refusedDepartement} n'est pas dans votre périmètre.`,

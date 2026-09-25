@@ -72,7 +72,7 @@ Le libellé du dossier ne donne que la **destination** (CADA existant ou nouveau
 - Convention de l'extension : début = date d'effet, fin = fin de la convention du CADA **en vigueur à la date d'effet**. Aucune convention à cette date -> rien de pré-rempli, plutôt qu'une date déjà expirée. L'agent corrige.
 - Adresses, contacts, antennes : héritées du CADA et des HUDA par le service, toutes conservées. L'agent arbitre celles qui restent.
 - Code DNA : lu pour résoudre, **jamais écrit**. Le CADA garde le sien.
-- Opérateur du nouveau CADA : celui des HUDA fermés. Des opérateurs divergents dans l'enveloppe contredisent le cas de figure « même opérateur » -> skip.
+- Opérateur du nouveau CADA : celui des HUDA fermés. Des opérateurs divergents laissent le choix ambigu -> skip ; l'agent saisit alors la transfo à la main, où l'opérateur est libre.
 
 ## Étapes marquées `PRE_REMPLI`
 
@@ -94,6 +94,7 @@ Sortie en code 0 même avec des erreurs.
 
 ## Limites assumées
 
+- Aucun contrôle de département commun entre HUDA et CADA : un dossier mêlant plusieurs départements s'importe sans signal (seuls les codes DNA sont contrôlés contre le département du dossier).
 - Union sans somme de contrôle : un code DNA erroné ajoute une fermeture définitive, sans signal.
 - Libellés dupliqués dans un dossier (sections HUDA puis CADA) : le rattachement se fait par `champDescriptorId`, pas par libellé.
 - Après la PR 1534, un HUDA fermé conserve ses codes DNA sur sa version courante - chaque transfo finalisée crée un doublon de code pour les runs suivants.

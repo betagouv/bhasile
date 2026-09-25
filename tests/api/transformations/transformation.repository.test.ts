@@ -1159,6 +1159,46 @@ describe("transformation.repository db integration", () => {
     expect(version.adresses[0].placesAutorisees).toBe(10);
   });
 
+  it("accepte une adresse de création hors du département des structures fermées", async () => {
+    const { structure } = await seedRichStructure();
+
+    const transformationId = await createTransformation({
+      type: TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: structure.id },
+        },
+        { type: StructureVersionTransformationType.CREATION },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const creation =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: {
+          transformationId,
+          type: StructureVersionTransformationType.CREATION,
+        },
+      });
+
+    await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: creation.id,
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: { departementAdministratif: "92" },
+        },
+      ],
+    });
+
+    const version = await prisma.structureVersion.findUniqueOrThrow({
+      where: { structureVersionTransformationId: creation.id },
+    });
+    expect(version.departementAdministratif).toBe("92");
+  });
+
   it("accumule additivement les données de plusieurs structures fermées (couche B)", async () => {
     const first = await seedRichStructure();
     const second = await seedRichStructure();

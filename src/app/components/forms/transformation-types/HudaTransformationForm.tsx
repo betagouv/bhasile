@@ -55,9 +55,9 @@ type Props = {
 };
 
 const CADA_EXISTANT_LABEL =
-  "Leurs places sont transférées à un ou plusieurs CADA existants du même opérateur";
+  "Leurs places sont transférées à un ou plusieurs CADA existants";
 const CADA_NOUVEAU_LABEL =
-  "Leurs places sont transférées à un nouveau CADA du même opérateur";
+  "Leurs places sont transférées à un nouveau CADA";
 const REMISE_EN_CONCURRENCE_LABEL = "Leurs places sont remises en concurrence";
 
 const optionsByDepartureKind: Record<

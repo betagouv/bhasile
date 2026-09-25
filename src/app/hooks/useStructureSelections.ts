@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   StructureSelectionBlock,
@@ -8,7 +8,7 @@ import { StructureVersionTransformationApiCreate } from "@/schemas/api/transform
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
 
-type BlockFilters = {
+export type BlockFilters = {
   structureType?: StructureType;
   operateurName?: string;
   departementNumero?: string;
@@ -17,15 +17,13 @@ type BlockFilters = {
 type Props = {
   transformationType: TransformationType;
   structureId?: number;
-  departureType?: StructureType;
-  departureDepartement?: string;
+  defaultFilters?: BlockFilters;
 };
 
 export const useStructureSelections = ({
   transformationType,
   structureId,
-  departureType,
-  departureDepartement,
+  defaultFilters,
 }: Props) => {
   const transformationSpec = TRANSFORMATION_TYPE_SPECS[transformationType];
 
@@ -36,44 +34,13 @@ export const useStructureSelections = ({
     Record<string, BlockFilters>
   >({});
 
-  const previousTransformationType = useRef(transformationType);
-  if (previousTransformationType.current !== transformationType) {
-    previousTransformationType.current = transformationType;
+  const [previousTransformationType, setPreviousTransformationType] =
+    useState(transformationType);
+  if (previousTransformationType !== transformationType) {
+    setPreviousTransformationType(transformationType);
     setSelectedStructureIdsByBlock({});
     setFiltersByBlock({});
   }
-
-  const resetDependentsOf = (
-    sourceBlockId: string,
-    field: "operateurName" | "departementNumero"
-  ) => {
-    const dependents = transformationSpec.blocks.filter((block) =>
-      field === "operateurName"
-        ? block.inheritOperateurFrom === sourceBlockId
-        : block.inheritDepartementFrom === sourceBlockId
-    );
-    if (dependents.length === 0) {
-      return;
-    }
-
-    setSelectedStructureIdsByBlock((prevSelectedStructureIdsByBlock) => {
-      const newSelectedStructureIdsByBlock = {
-        ...prevSelectedStructureIdsByBlock,
-      };
-      for (const dependent of dependents) {
-        newSelectedStructureIdsByBlock[dependent.id] = [];
-      }
-      return newSelectedStructureIdsByBlock;
-    });
-
-    setFiltersByBlock((prevFiltersByBlock) => {
-      const newFiltersByBlock = { ...prevFiltersByBlock };
-      for (const dependent of dependents) {
-        newFiltersByBlock[dependent.id] = {};
-      }
-      return newFiltersByBlock;
-    });
-  };
 
   const setSelectedStructureIds = (blockId: string, ids: number[]) =>
     setSelectedStructureIdsByBlock((prevSelectedStructureIdsByBlock) => ({
@@ -81,68 +48,30 @@ export const useStructureSelections = ({
       [blockId]: ids,
     }));
 
-  const setOperateurName = (
+  const getFilters = (blockId: string): BlockFilters =>
+    filtersByBlock[blockId] ?? defaultFilters ?? {};
+
+  const setFilter = <TField extends keyof BlockFilters>(
     blockId: string,
-    operateurName: string | undefined
-  ) => {
+    field: TField,
+    value: BlockFilters[TField]
+  ) =>
     setFiltersByBlock((prevFiltersByBlock) => ({
       ...prevFiltersByBlock,
-      [blockId]: { ...prevFiltersByBlock[blockId], operateurName },
+      [blockId]: {
+        ...(prevFiltersByBlock[blockId] ?? defaultFilters),
+        [field]: value,
+      },
     }));
-    resetDependentsOf(blockId, "operateurName");
-  };
-
-  const setDepartementNumero = (
-    blockId: string,
-    departementNumero: string | undefined
-  ) => {
-    setFiltersByBlock((prevFiltersByBlock) => ({
-      ...prevFiltersByBlock,
-      [blockId]: { ...prevFiltersByBlock[blockId], departementNumero },
-    }));
-    resetDependentsOf(blockId, "departementNumero");
-  };
-
-  const setStructureType = (
-    blockId: string,
-    structureType: StructureType | undefined
-  ) => {
-    setFiltersByBlock((prevFiltersByBlock) => ({
-      ...prevFiltersByBlock,
-      [blockId]: { ...prevFiltersByBlock[blockId], structureType },
-    }));
-  };
-
-  const getFixedType = (
-    block: StructureSelectionBlock
-  ): StructureType | undefined =>
-    block.fixedType ?? (block.matchDepartureType ? departureType : undefined);
-
-  const getFixedDepartement = (
-    block: StructureSelectionBlock
-  ): string | undefined =>
-    block.matchDepartureDepartement ? departureDepartement : undefined;
 
   const getEffectiveStructureType = (
     block: StructureSelectionBlock
   ): StructureType | undefined =>
-    getFixedType(block) ?? filtersByBlock[block.id]?.structureType;
+    block.fixedType ?? getFilters(block.id).structureType;
 
-  const getInheritedOperateurName = (
-    block: StructureSelectionBlock
-  ): string | undefined =>
-    block.inheritOperateurFrom
-      ? filtersByBlock[block.inheritOperateurFrom]?.operateurName
-      : undefined;
-
-  const getInheritedDepartementNumero = (
-    block: StructureSelectionBlock
-  ): string | undefined =>
-    block.inheritDepartementFrom
-      ? filtersByBlock[block.inheritDepartementFrom]?.departementNumero
-      : undefined;
-
-  const structureVersionTransformations = useMemo<StructureVersionTransformationApiCreate[]>(
+  const structureVersionTransformations = useMemo<
+    StructureVersionTransformationApiCreate[]
+  >(
     () => [
       ...transformationSpec.buildAutoTransformations(structureId),
       ...transformationSpec.blocks.flatMap((block) =>
@@ -167,16 +96,10 @@ export const useStructureSelections = ({
   return {
     blocks: transformationSpec.blocks,
     selectedStructureIdsByBlock,
-    filtersByBlock,
+    getFilters,
     setSelectedStructureIds,
-    setOperateurName,
-    setDepartementNumero,
-    setStructureType,
-    getFixedType,
-    getFixedDepartement,
+    setFilter,
     getEffectiveStructureType,
-    getInheritedOperateurName,
-    getInheritedDepartementNumero,
     structureVersionTransformations,
     areSelectionsComplete,
   };

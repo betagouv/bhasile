@@ -6,7 +6,6 @@ import {
   getReferenceStructureVersionTransformation,
   getStructureVersionTransformationDepartement,
   getTransformationDefaultValues,
-  getTransformationDepartement,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
   getTransformationOriginRoute,
@@ -1152,36 +1151,6 @@ describe("getReferenceStructureVersionTransformation", () => {
     expect(getReferenceStructureVersionTransformation(transformation)).toBe(
       premiere
     );
-  });
-});
-
-describe("getTransformationDepartement", () => {
-  it("résout le département via la structure liée de la structureVersionTransformation de référence", () => {
-    const transformation = createTransformation({
-      structureVersionTransformations: [
-        createStructureVersionTransformation({ id: 1 }),
-        createStructureVersionTransformation({
-          id: 2,
-          structureVersion: {
-            structure: {
-              codeBhasile: "ABC",
-              isFinalised: true,
-              departementAdministratif: "13",
-            },
-          },
-        }),
-      ],
-    });
-
-    expect(getTransformationDepartement(transformation)).toBe("13");
-  });
-
-  it("retourne undefined quand aucune structureVersionTransformation n'a de département", () => {
-    const transformation = createTransformation({
-      structureVersionTransformations: [createStructureVersionTransformation()],
-    });
-
-    expect(getTransformationDepartement(transformation)).toBeUndefined();
   });
 });
 

@@ -1,3 +1,4 @@
+import { canUpdateTransformationDepartements } from "@/app/api/transformations/transformation.util";
 import { compareSortValues } from "@/app/utils/list.util";
 import { formatPlural } from "@/app/utils/string.util";
 import {
@@ -6,6 +7,7 @@ import {
   getStructureVersionTransformationOperateur,
 } from "@/app/utils/transformation.util";
 import { STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER } from "@/config/transformation.config";
+import { AppAbility } from "@/lib/casl/abilities";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
@@ -113,6 +115,7 @@ export const sortDashboardTransformationRows = (
   );
 
 export type BuildDashboardTransformationRowsOptions = {
+  ability: AppAbility;
   departementList: string[];
   operateurList: string[];
   typeList: string[];
@@ -127,6 +130,19 @@ const hasNonFinalisedStructure = (
         ?.isFinalised === false
   );
 
+const isAcceptedByFilter = (
+  acceptedValues: string[],
+  structureVersionTransformations: StructureVersionTransformationApiRead[],
+  getValue: (
+    structureVersionTransformation: StructureVersionTransformationApiRead
+  ) => string | undefined
+): boolean =>
+  acceptedValues.length === 0 ||
+  structureVersionTransformations.some((structureVersionTransformation) => {
+    const value = getValue(structureVersionTransformation);
+    return value !== undefined && acceptedValues.includes(value);
+  });
+
 export const buildDashboardTransformationRows = (
   transformations: TransformationApiRead[],
   options: BuildDashboardTransformationRowsOptions
@@ -138,43 +154,40 @@ export const buildDashboardTransformationRows = (
       continue;
     }
 
-    const referenceStructureVersionTransformation =
-      getReferenceStructureVersionTransformation(transformation);
-    const departement = getStructureVersionTransformationDepartement(
-      referenceStructureVersionTransformation
-    );
-    if (
-      options.departementList.length > 0 &&
-      (!departement || !options.departementList.includes(departement))
-    ) {
-      continue;
-    }
-
-    const operateur = getStructureVersionTransformationOperateur(
-      referenceStructureVersionTransformation
-    );
-    const operateurId = operateur?.id ?? null;
-    if (
-      options.operateurList.length > 0 &&
-      (operateurId === null ||
-        !options.operateurList.includes(String(operateurId)))
-    ) {
-      continue;
-    }
+    const { structureVersionTransformations } = transformation;
 
     if (
-      options.typeList.length > 0 &&
-      !transformation.structureVersionTransformations.some(
+      !isAcceptedByFilter(
+        options.departementList,
+        structureVersionTransformations,
+        getStructureVersionTransformationDepartement
+      ) ||
+      !isAcceptedByFilter(
+        options.operateurList,
+        structureVersionTransformations,
         (structureVersionTransformation) =>
-          structureVersionTransformation.structureType &&
-          options.typeList.includes(
-            structureVersionTransformation.structureType
-          )
+          getStructureVersionTransformationOperateur(
+            structureVersionTransformation
+          )?.id?.toString()
+      ) ||
+      !isAcceptedByFilter(
+        options.typeList,
+        structureVersionTransformations,
+        (structureVersionTransformation) =>
+          structureVersionTransformation.structureType ?? undefined
       )
     ) {
       continue;
     }
 
+    const referenceStructureVersionTransformation =
+      getReferenceStructureVersionTransformation(transformation);
+    const departement = getStructureVersionTransformationDepartement(
+      referenceStructureVersionTransformation
+    );
+    const operateur = getStructureVersionTransformationOperateur(
+      referenceStructureVersionTransformation
+    );
     const status = getTransformationStatus(transformation);
     rows.push({
       transformationId: transformation.id,
@@ -186,7 +199,12 @@ export const buildDashboardTransformationRows = (
       status,
       updatedAt:
         status === "A_FINALISER" ? (transformation.updatedAt ?? null) : null,
-      actionUrl: `/structures/transformation/${transformation.id}`,
+      actionUrl: canUpdateTransformationDepartements(
+        options.ability,
+        structureVersionTransformations
+      )
+        ? `/structures/transformation/${transformation.id}`
+        : null,
     });
   }
 
