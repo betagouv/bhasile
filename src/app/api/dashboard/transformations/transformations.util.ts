@@ -143,15 +143,6 @@ const isAcceptedByFilter = (
     return value !== undefined && acceptedValues.includes(value);
   });
 
-const getStructureVersionTransformationOperateurId = (
-  structureVersionTransformation: StructureVersionTransformationApiRead
-): string | undefined => {
-  const operateurId = getStructureVersionTransformationOperateur(
-    structureVersionTransformation
-  )?.id;
-  return operateurId === undefined ? undefined : String(operateurId);
-};
-
 export const buildDashboardTransformationRows = (
   transformations: TransformationApiRead[],
   options: BuildDashboardTransformationRowsOptions
@@ -174,7 +165,10 @@ export const buildDashboardTransformationRows = (
       !isAcceptedByFilter(
         options.operateurList,
         structureVersionTransformations,
-        getStructureVersionTransformationOperateurId
+        (structureVersionTransformation) =>
+          getStructureVersionTransformationOperateur(
+            structureVersionTransformation
+          )?.id?.toString()
       ) ||
       !isAcceptedByFilter(
         options.typeList,

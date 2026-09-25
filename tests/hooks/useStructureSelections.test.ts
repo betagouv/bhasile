@@ -23,7 +23,7 @@ describe("useStructureSelections", () => {
     );
 
     const [block] = result.current.blocks;
-    expect(result.current.filtersByBlock[block.id]).toEqual(departureFilters);
+    expect(result.current.getFilters(block.id)).toEqual(departureFilters);
   });
 
   it("laisse modifier un filtre prérempli", () => {
@@ -42,7 +42,7 @@ describe("useStructureSelections", () => {
       result.current.setFilter(block.id, "structureType", StructureType.HUDA);
     });
 
-    expect(result.current.filtersByBlock[block.id]).toMatchObject({
+    expect(result.current.getFilters(block.id)).toMatchObject({
       departementNumero: "92",
       operateurName: "Adoma",
     });
@@ -64,7 +64,7 @@ describe("useStructureSelections", () => {
       result.current.setFilter("huda", "departementNumero", "75");
     });
 
-    expect(result.current.filtersByBlock.cada).toEqual({});
+    expect(result.current.getFilters("cada")).toEqual({});
   });
 
   it("impose le type fixe du bloc quel que soit le filtre choisi", () => {
@@ -117,6 +117,6 @@ describe("useStructureSelections", () => {
     });
 
     expect(result.current.selectedStructureIdsByBlock).toEqual({});
-    expect(result.current.filtersByBlock.main).toEqual(departureFilters);
+    expect(result.current.getFilters("main")).toEqual(departureFilters);
   });
 });

@@ -32,16 +32,14 @@ export const useStructureSelections = ({
 
   const [filtersByBlock, setFiltersByBlock] = useState<
     Record<string, BlockFilters>
-  >(() => buildDefaultFiltersByBlock(transformationType, defaultFilters));
+  >({});
 
   const [previousTransformationType, setPreviousTransformationType] =
     useState(transformationType);
   if (previousTransformationType !== transformationType) {
     setPreviousTransformationType(transformationType);
     setSelectedStructureIdsByBlock({});
-    setFiltersByBlock(
-      buildDefaultFiltersByBlock(transformationType, defaultFilters)
-    );
+    setFiltersByBlock({});
   }
 
   const setSelectedStructureIds = (blockId: string, ids: number[]) =>
@@ -50,6 +48,9 @@ export const useStructureSelections = ({
       [blockId]: ids,
     }));
 
+  const getFilters = (blockId: string): BlockFilters =>
+    filtersByBlock[blockId] ?? defaultFilters ?? {};
+
   const setFilter = <TField extends keyof BlockFilters>(
     blockId: string,
     field: TField,
@@ -57,15 +58,20 @@ export const useStructureSelections = ({
   ) =>
     setFiltersByBlock((prevFiltersByBlock) => ({
       ...prevFiltersByBlock,
-      [blockId]: { ...prevFiltersByBlock[blockId], [field]: value },
+      [blockId]: {
+        ...(prevFiltersByBlock[blockId] ?? defaultFilters),
+        [field]: value,
+      },
     }));
 
   const getEffectiveStructureType = (
     block: StructureSelectionBlock
   ): StructureType | undefined =>
-    block.fixedType ?? filtersByBlock[block.id]?.structureType;
+    block.fixedType ?? getFilters(block.id).structureType;
 
-  const structureVersionTransformations = useMemo<StructureVersionTransformationApiCreate[]>(
+  const structureVersionTransformations = useMemo<
+    StructureVersionTransformationApiCreate[]
+  >(
     () => [
       ...transformationSpec.buildAutoTransformations(structureId),
       ...transformationSpec.blocks.flatMap((block) =>
@@ -90,7 +96,7 @@ export const useStructureSelections = ({
   return {
     blocks: transformationSpec.blocks,
     selectedStructureIdsByBlock,
-    filtersByBlock,
+    getFilters,
     setSelectedStructureIds,
     setFilter,
     getEffectiveStructureType,
@@ -98,14 +104,3 @@ export const useStructureSelections = ({
     areSelectionsComplete,
   };
 };
-
-const buildDefaultFiltersByBlock = (
-  transformationType: TransformationType,
-  defaultFilters: BlockFilters | undefined
-): Record<string, BlockFilters> =>
-  Object.fromEntries(
-    TRANSFORMATION_TYPE_SPECS[transformationType].blocks.map((block) => [
-      block.id,
-      defaultFilters ?? {},
-    ])
-  );

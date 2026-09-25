@@ -17,7 +17,7 @@ export const StructureSelections = ({
   const {
     blocks,
     selectedStructureIdsByBlock,
-    filtersByBlock,
+    getFilters,
     setSelectedStructureIds,
     setFilter,
     getEffectiveStructureType,
@@ -47,11 +47,11 @@ export const StructureSelections = ({
           setStructureType={(structureType) =>
             setFilter(block.id, "structureType", structureType)
           }
-          operateurName={filtersByBlock[block.id]?.operateurName}
+          operateurName={getFilters(block.id).operateurName}
           setOperateurName={(operateurName) =>
             setFilter(block.id, "operateurName", operateurName)
           }
-          departementNumero={filtersByBlock[block.id]?.departementNumero}
+          departementNumero={getFilters(block.id).departementNumero}
           setDepartementNumero={(departementNumero) =>
             setFilter(block.id, "departementNumero", departementNumero)
           }
