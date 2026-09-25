@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
   createOne,
@@ -11,6 +11,7 @@ import {
   createTransformation,
   getTransformation,
   resetTransformationSelection,
+  updateTransformation,
 } from "@/app/api/transformations/transformation.service";
 import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
@@ -24,6 +25,14 @@ import {
 } from "@/types/transformation.type";
 
 import { createReferentialDna } from "../../test-utils/referential-dna";
+
+vi.mock("@/app/api/adresses/ban.client", () => ({
+  searchMunicipality: vi.fn(async ({ commune }: { commune: string }) => ({
+    latitude: 48.677533,
+    longitude: -1.345193,
+    nom: commune,
+  })),
+}));
 
 const findOneOrFail = async (id: number) => {
   const row = await findOne(id);
@@ -444,6 +453,7 @@ describe("transformation.repository db integration", () => {
     expect(adresses[0]).toMatchObject({
       ...newAdresse,
       repartition: "DIFFUS",
+      communeLatitude: null,
     });
   });
 
@@ -1096,7 +1106,11 @@ describe("transformation.repository db integration", () => {
     expect(version.antennes).toHaveLength(1);
     expect(version.antennes[0].id).not.toBe(antenneId);
     expect(version.adresses).toHaveLength(1);
-    expect(version.adresses[0].placesAutorisees).toBe(10);
+    expect(version.adresses[0]).toMatchObject({
+      placesAutorisees: 10,
+      communeNom: "Avranches",
+      communeLatitude: 48.677533,
+    });
 
     // dnaStructures : nouvelle ligne de jonction, mais même Dna réutilisé.
     expect(version.dnaStructures).toHaveLength(1);
@@ -2196,6 +2210,93 @@ describe("transformation.repository db integration", () => {
       transformation.structureVersionTransformations[0].structureVersion
         ?.structureId
     ).toBe(closingStructure.id);
+  });
+
+  it("localise les adresses copiées par une réinitialisation de sélection", async () => {
+    const { structure } = await seedRichStructure();
+    const { transformationId } = await createBareTransformation();
+
+    await resetTransformationSelection(
+      {
+        id: transformationId,
+        type: TransformationType.FERMETURE_SANS_TRANSFERT,
+        structureVersionTransformations: [
+          {
+            type: StructureVersionTransformationType.FERMETURE,
+            structureVersion: { structureId: structure.id },
+          },
+        ],
+      },
+      NATIONAL_USER
+    );
+
+    const adresses = await prisma.adresse.findMany({
+      where: {
+        structureVersion: {
+          structureVersionTransformation: { transformationId },
+        },
+      },
+    });
+    expect(adresses).toHaveLength(1);
+    expect(adresses[0]).toMatchObject({
+      communeNom: "Avranches",
+      communeLatitude: 48.677533,
+    });
+  });
+
+  it("localise les adresses modifiées par la sauvegarde d'une transformation", async () => {
+    const { structure } = await seedRichStructure();
+    const transformationId = await createTransformation({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: structure.id },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+    const transformation = await getTransformation(transformationId);
+    const structureVersionTransformation =
+      transformation?.structureVersionTransformations[0];
+    if (!transformation || !structureVersionTransformation?.structureVersion) {
+      throw new Error("La transformation créée devrait avoir une version");
+    }
+
+    await updateTransformation(
+      {
+        id: transformationId,
+        structureVersionTransformations: [
+          {
+            id: structureVersionTransformation.id,
+            structureVersion: {
+              id: structureVersionTransformation.structureVersion.id,
+              adresses: [
+                {
+                  adresse: "2 rue du Port",
+                  codePostal: "50400",
+                  commune: "Granville",
+                  placesAutorisees: 5,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      transformation,
+      NATIONAL_USER
+    );
+
+    const adresses = await prisma.adresse.findMany({
+      where: {
+        structureVersionId: structureVersionTransformation.structureVersion.id,
+      },
+    });
+    expect(adresses).toHaveLength(1);
+    expect(adresses[0]).toMatchObject({
+      commune: "Granville",
+      communeNom: "Granville",
+    });
   });
 
   it("préremplit la structureVersion de la CREATION depuis la structure fermée (couche B)", async () => {

@@ -7,6 +7,9 @@ model Adresse {
   commune            String?
   repartition        Repartition?
   placesAutorisees   Int?
+  communeLatitude    Float?
+  communeLongitude   Float?
+  communeNom         String?
   isQpv              Boolean            @default(false)
   isLogementSocial   Boolean            @default(false)
 

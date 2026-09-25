@@ -88,6 +88,12 @@ vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
   getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
+vi.mock("@/app/api/adresses/ban.client", () => ({
+  searchMunicipality: vi
+    .fn()
+    .mockResolvedValue({ latitude: 48.859, longitude: 2.347, nom: "Paris" }),
+}));
+
 vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createStructureEvent: (...args: unknown[]) =>
     mockCreateStructureEvent(...args),
@@ -407,7 +413,7 @@ describe("PUT /api/structures/[id]", () => {
     );
   });
 
-  it("transmet les particularités booléennes de l'adresse au service", async () => {
+  it("transmet les particularités booléennes et le centre de commune de l'adresse au repository", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindStructureDepartement.mockResolvedValueOnce({
@@ -448,6 +454,11 @@ describe("PUT /api/structures/[id]", () => {
             placesAutorisees: 10,
             isQpv: true,
             isLogementSocial: false,
+            communeCoordinates: {
+              latitude: 48.859,
+              longitude: 2.347,
+              nom: "Paris",
+            },
           }),
         ],
       }),

@@ -34,6 +34,7 @@ export const REPORTING_QUALITY_COLUMNS: Record<string, AnomalieCode[]> = {
   has_issue_dept_code: ["DEPARTEMENT_INCOHERENT_CODE_DNA"],
   has_issue_multi_dna: ["MULTI_DNA"],
   has_issue_cpom_mono_structure: ["CPOM_MONO_STRUCTURE"],
+  has_issue_adresse_non_localisee: ["ADRESSE_NON_LOCALISEE"],
   has_issue_taux_encadrement_max_gt_threshold: ["TAUX_ENCADREMENT_GT_SEUIL"],
   has_issue_taux_encadrement_min_lt_2: ["TAUX_ENCADREMENT_LT_2"],
   has_issue_cout_journalier_max_gt_tarif_cible: [

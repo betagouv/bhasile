@@ -84,6 +84,7 @@ export type TransformationApiUpdateClient = z.input<
 - Remontée d'erreurs : [Sentry](https://sentry.io/)
 - Hébergement de l'application et de la base de données : [Scalingo](https://scalingo.com/)
 - Stockage objet : [OVH S3](https://www.ovhcloud.com/fr/public-cloud/object-storage/)
+- Géocodage : [BAN / Géoplateforme](https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/geocodage/) (`data.geopf.fr`, sans clé, 50 requêtes/s par IP). À chaque enregistrement, le serveur y demande le centre de la commune de chaque adresse d'hébergement (`type=municipality` + `postcode`) et le stocke dans `Adresse.communeLatitude` / `communeLongitude` / `communeNom` (`ban.service.localiseAdresses`, hors transaction). Commune introuvable ou BAN en échec ⇒ `null` ⇒ anomalie `ADRESSE_NON_LOCALISEE`, résorbée au prochain enregistrement. Stock existant : `yarn one-off 20260923-localise-adresses` (rejouable).
 
 ## 🗃️ Schéma de base de données (au 31/07/25)
 

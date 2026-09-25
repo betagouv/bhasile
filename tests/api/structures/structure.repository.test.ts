@@ -593,6 +593,7 @@ describe("structure.repository db integration", () => {
       placesAutorisees: 11,
       isQpv: true,
       isLogementSocial: true,
+      communeCoordinates: { latitude: 43.6, longitude: 1.44, nom: "Toulouse" },
     };
     await updateOne({
       id: structure.id,
@@ -611,6 +612,21 @@ describe("structure.repository db integration", () => {
       placesAutorisees: 11,
       isQpv: true,
       isLogementSocial: true,
+      communeLatitude: 43.6,
+      communeLongitude: 1.44,
+      communeNom: "Toulouse",
+    });
+
+    // AND: une mise à jour partielle (sans commune ni code postal) garde le centre de commune
+    await updateOne({
+      id: structure.id,
+      adresses: [{ id: version.adresses[0].id, placesAutorisees: 12 }],
+    });
+    const partiallyUpdated = await fetchCurrentVersion(structure.id);
+    expect(partiallyUpdated.adresses[0]).toMatchObject({
+      placesAutorisees: 12,
+      communeLatitude: 43.6,
+      communeNom: "Toulouse",
     });
   });
 

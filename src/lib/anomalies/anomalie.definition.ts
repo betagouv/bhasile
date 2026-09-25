@@ -153,6 +153,16 @@ export const ANOMALIE_DEFINITIONS: Record<AnomalieCode, AnomalieDefinition> = {
     isDisplayed: false,
   },
 
+  ADRESSE_NON_LOCALISEE: {
+    label:
+      "Une ou plusieurs adresses d’hébergement n’ont pas pu être localisées : vérifiez leur commune et leur code postal",
+    category: "CHARACTERISTICS",
+    target: "STRUCTURE",
+    targetFields: [],
+    isDisplayed: true,
+    modificationSection: "adresses",
+  },
+
   TAUX_ENCADREMENT_GT_SEUIL: {
     label:
       "Le taux d’encadrement dépasse le seuil attendu pour ce type de structure",

@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
+import { CommuneCoordinates } from "@/types/adresse.type";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
@@ -23,7 +24,9 @@ const deleteAdresses = async (
 
 export const createOrUpdateAdresses = async (
   tx: PrismaTransaction,
-  adresses: Partial<AdresseApiType>[] = [],
+  adresses: (Partial<AdresseApiType> & {
+    communeCoordinates?: CommuneCoordinates | null;
+  })[] = [],
   entityId: EntityId
 ): Promise<void> => {
   if (!adresses || adresses.length === 0) {
@@ -34,6 +37,16 @@ export const createOrUpdateAdresses = async (
   await deleteAdresses(tx, adresses, entityId);
 
   for (const adresse of adresses) {
+    // Une commune envoyée sans coordonnées (chemin non géocodé) devient non localisée plutôt que de
+    // garder en silence le centre de l'ancienne commune. Sans commune ni code postal : inchangé.
+    const communeLocalisation =
+      adresse.commune === undefined && adresse.codePostal === undefined
+        ? {}
+        : {
+            communeLatitude: adresse.communeCoordinates?.latitude ?? null,
+            communeLongitude: adresse.communeCoordinates?.longitude ?? null,
+            communeNom: adresse.communeCoordinates?.nom ?? null,
+          };
     await tx.adresse.upsert({
       where: { id: adresse.id || 0 },
       update: {
@@ -44,6 +57,7 @@ export const createOrUpdateAdresses = async (
         placesAutorisees: adresse.placesAutorisees,
         isQpv: adresse.isQpv,
         isLogementSocial: adresse.isLogementSocial,
+        ...communeLocalisation,
       },
       create: {
         ...entityId,
@@ -54,6 +68,7 @@ export const createOrUpdateAdresses = async (
         placesAutorisees: adresse.placesAutorisees,
         isQpv: adresse.isQpv,
         isLogementSocial: adresse.isLogementSocial,
+        ...communeLocalisation,
       },
     });
   }

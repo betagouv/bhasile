@@ -1,3 +1,5 @@
+import type { AdresseLocalisation } from "@/types/adresse.type";
+
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 
 export const buildAdresseAdministrativeComplete = (parts: {
@@ -32,3 +34,29 @@ export const getAdressesApiRead = (
       .join(" ")
       .trim(),
   }));
+
+export type NormalizedLocalisation = { codePostal: string; commune: string };
+
+// Excel supprime le zéro initial des codes postaux des départements 01 à 09 et les imports
+// peuvent les formater avec une espace (« 75 011 »).
+export const normalizeLocalisation = ({
+  codePostal,
+  commune,
+}: AdresseLocalisation): NormalizedLocalisation | null => {
+  const trimmedCommune = commune?.trim();
+  const compactCodePostal = codePostal?.replace(/\s/g, "") ?? "";
+  const paddedCodePostal = /^\d{4}$/.test(compactCodePostal)
+    ? `0${compactCodePostal}`
+    : compactCodePostal;
+
+  if (!trimmedCommune || !/^\d{5}$/.test(paddedCodePostal)) {
+    return null;
+  }
+
+  return { codePostal: paddedCodePostal, commune: trimmedCommune };
+};
+
+export const buildCommuneKey = ({
+  codePostal,
+  commune,
+}: NormalizedLocalisation): string => `${codePostal}|${commune.toLowerCase()}`;

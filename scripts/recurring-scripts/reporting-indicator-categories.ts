@@ -22,6 +22,7 @@ export const INDICATEURS_IMPACT = [
 
 export const INDICATEURS_NON_CLASSIFIES = [
   "has_issue_dept_code",
+  "has_issue_adresse_non_localisee",
   "has_issue_authorisation_period_not_15y",
   "has_issue_authorized_convention_not_5y",
   "has_issue_authorized_convention_outside_authorisation_period",

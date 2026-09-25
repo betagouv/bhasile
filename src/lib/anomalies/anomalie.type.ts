@@ -14,7 +14,14 @@ export type AnomalieContext = {
   dnas?: DnaContext[];
   cpoms?: CpomContext[];
   activites?: ActiviteContext[];
+  adressesNonLocalisees?: number;
 };
+
+// Tranches que seul le serveur sait calculer (données absentes du formulaire) : leurs règles
+// ne s'évaluent qu'au recalcul persisté.
+export const SERVER_ONLY_SLICES: readonly (keyof AnomalieContext)[] = [
+  "adressesNonLocalisees",
+];
 
 export type StructureContext = {
   type: StructureType | null;

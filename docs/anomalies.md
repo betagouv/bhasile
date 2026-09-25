@@ -82,6 +82,8 @@ buildFormAnomalieContext({ ...structure, ...getValues() });
 
 Il ne produit que les tranches dont les codes affichés ont besoin : un test échoue si un code affiché en réclame une qui manque. **Une tranche absente du payload reste `undefined`**, jamais `[]` : une tranche vide ferait tourner la règle et conclure à tort (par exemple "aucune convention" alors qu'on n'a simplement pas chargé les actes).
 
+`ADRESSE_NON_LOCALISEE` compte les adresses de la version courante sans coordonnées de commune (`Adresse.communeLatitude`, renseignée par le géocodage BAN à l'enregistrement, voir [architecture](architecture.md)). Le formulaire n'a pas ces coordonnées : sa tranche `adressesNonLocalisees` est calculée par le serveur seul (`SERVER_ONLY_SLICES`, exemptée du test de couverture du formulaire). L'anomalie est portée par la structure, pas par l'adresse : les adresses sont recréées à chaque version, une cible par `Adresse.id` perdrait la justification à chaque transformation.
+
 Les valeurs saisies sont des chaînes au format français : `parseFrenchNumber` les ramène en nombre ou `null`, sinon un champ vidé serait lu comme `0`.
 
 ## Affichage dans les formulaires
