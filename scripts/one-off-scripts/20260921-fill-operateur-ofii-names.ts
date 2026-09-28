@@ -41,9 +41,7 @@ async function main() {
 
   const claimedBy = new Map<string, OperateurRecord>();
   for (const operateur of operateurs) {
-    for (const label of [operateur.name, ...operateur.ofiiNames].map(
-      stripAndUpper
-    )) {
+    for (const label of operateur.ofiiNames.map(stripAndUpper)) {
       claimedBy.set(label, operateur);
     }
   }
@@ -51,6 +49,7 @@ async function main() {
   const toAdd = new Map<number, string[]>();
   const unknown: string[] = [];
   const conflicts: string[] = [];
+  const shadowed: string[] = [];
   let alreadyMapped = 0;
   let sameAsName = 0;
 
@@ -86,6 +85,13 @@ async function main() {
       continue;
     }
 
+    const duplicate = byName.get(ofiiName);
+    if (duplicate) {
+      shadowed.push(
+        `${ofiiName} : opérateur existant en base, redirigé vers ${operateur.name}`
+      );
+    }
+
     toAdd.set(operateur.id, [...(toAdd.get(operateur.id) ?? []), ofiiName]);
     claimedBy.set(ofiiName, operateur);
   }
@@ -117,6 +123,13 @@ async function main() {
   console.log(
     `✅ ${added} libellé(s) ajouté(s) sur ${toAdd.size} opérateur(s), ${alreadyMapped} déjà en place, ${sameAsName} entrée(s) identique(s) au nom en base (aucun alias nécessaire).`
   );
+
+  if (shadowed.length > 0) {
+    console.log(
+      `⚠️ ${shadowed.length} libellé(s) portant aussi le nom d'un opérateur en base (doublons à fusionner à terme) :`
+    );
+    shadowed.forEach((entry) => console.log(`  - ${entry}`));
+  }
 
   if (unknown.length > 0) {
     console.log(
