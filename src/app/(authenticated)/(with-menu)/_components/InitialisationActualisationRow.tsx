@@ -7,6 +7,7 @@ import {
   DashboardStructureRow,
   InitialisationStatus,
 } from "@/types/dashboard.type";
+import { addDashboardOrigin } from "@/utils/dashboardOrigin.util";
 
 export const InitialisationActualisationRow = ({
   row,
@@ -17,11 +18,11 @@ export const InitialisationActualisationRow = ({
   );
 
   return (
-    <div className="col-span-full grid grid-cols-subgrid items-center text-default-grey whitespace-nowrap border-b border-default-grey py-3 px-6 text-sm [&:last-child]:border-none">
-      <span className="font-bold">{row.codeBhasile}</span>
-      <span>{row.type}</span>
-      <span>{row.operateurName}</span>
-      <span>{commune}</span>
+    <div className="col-span-full grid grid-cols-subgrid items-center text-default-grey whitespace-nowrap border-b border-default-grey py-3 text-sm [&:last-child]:border-none">
+      <span className="col-start-2 truncate font-bold">{row.codeBhasile}</span>
+      <span className="truncate">{row.type}</span>
+      <span className="truncate">{row.operateurName}</span>
+      <span className="truncate">{commune}</span>
       <span className="col-start-6 flex justify-center">
         <Badge type={statusBadgeType[row.initialisationStatus]}>
           {initialisationLabels[row.initialisationStatus]}
@@ -35,7 +36,7 @@ export const InitialisationActualisationRow = ({
       <span className="justify-self-end">
         {row.actionUrl && (
           <Link
-            href={row.actionUrl}
+            href={addDashboardOrigin(row.actionUrl)}
             aria-label={`Actualiser ou finaliser ${row.codeBhasile ?? "la structure"}`}
           >
             <span className="fr-icon-arrow-right-line text-title-blue-france" />

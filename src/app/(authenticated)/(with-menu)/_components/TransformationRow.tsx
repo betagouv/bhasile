@@ -8,6 +8,7 @@ import {
   DashboardTransformationRow,
   DashboardTransformationStatus,
 } from "@/types/dashboard.type";
+import { addDashboardOrigin } from "@/utils/dashboardOrigin.util";
 
 export const TransformationRow = ({ row }: Props): ReactElement => {
   const departementName = DEPARTEMENTS.find(
@@ -32,7 +33,7 @@ export const TransformationRow = ({ row }: Props): ReactElement => {
       </span>
       <span className="justify-self-end">
         <Link
-          href={row.actionUrl}
+          href={addDashboardOrigin(row.actionUrl)}
           aria-label="Ouvrir la création, transformation ou fermeture"
         >
           <span className="fr-icon-arrow-right-line text-title-blue-france" />
