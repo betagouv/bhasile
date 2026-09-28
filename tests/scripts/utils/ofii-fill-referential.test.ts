@@ -35,6 +35,20 @@ describe("buildOperateurLookup", () => {
     expect(lookup.get("FTDA")?.name).toBe("FRANCE TERRE D'ASILE");
   });
 
+  it("privilégie le libellé OFII sur le nom d'un opérateur doublon", () => {
+    // GIVEN
+    const operateurs = [
+      { id: 1, name: "COALLIA HABITAT", ofiiNames: [] },
+      { id: 2, name: "COALLIA", ofiiNames: ["COALLIA HABITAT"] },
+    ];
+
+    // WHEN
+    const lookup = buildOperateurLookup(operateurs);
+
+    // THEN
+    expect(lookup.get("COALLIA HABITAT")).toEqual({ id: 2, name: "COALLIA" });
+  });
+
   it("rejette un libellé OFII rattaché à deux opérateurs", () => {
     // GIVEN
     const operateurs = [
