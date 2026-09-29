@@ -36,6 +36,16 @@ export const pluralize = (count: number | undefined, noun: string): string =>
 export const formatPlural = (count: number | undefined, noun: string): string =>
   `${count ?? 0} ${pluralize(count, noun)}`;
 
+export const formatFirstWithRestCount = (
+  items: string[]
+): string | undefined => {
+  const [first, ...rest] = items;
+  if (first === undefined) {
+    return undefined;
+  }
+  return rest.length > 0 ? `${first} +${rest.length}` : first;
+};
+
 export const parseId = (value: string): number | null =>
   /^\d+$/.test(value) ? Number(value) : null;
 

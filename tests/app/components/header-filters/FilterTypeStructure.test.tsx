@@ -1,40 +1,46 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
 
 import { FilterTypeStructure } from "@/app/components/header-filters/FilterTypeStructure";
 
-const mockReplace = vi.fn();
-const mockUseSearchParams = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockReplace }),
-  usePathname: () => "/",
-  useSearchParams: () => mockUseSearchParams(),
-}));
-
-vi.mock("@/contexts/FetchStateContext", () => ({
-  useFetchState: () => ({ setFetchState: vi.fn() }),
-}));
-
 describe("FilterTypeStructure", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+  it("ne coche aucun type quand la sélection est vide", () => {
+    render(<FilterTypeStructure selection={[]} onChange={vi.fn()} />);
+
+    expect(screen.getByLabelText("CADA")).not.toBeChecked();
+    expect(screen.getByLabelText("HUDA")).not.toBeChecked();
   });
 
-  it("coche toutes les cases quand aucun type n'est présent dans l'URL", () => {
-    render(<FilterTypeStructure />);
+  it("coche uniquement les types sélectionnés", () => {
+    render(<FilterTypeStructure selection={["CADA"]} onChange={vi.fn()} />);
 
-    expect(screen.getByLabelText<HTMLInputElement>("CADA").checked).toBe(true);
-    expect(screen.getByLabelText<HTMLInputElement>("HUDA").checked).toBe(true);
+    expect(screen.getByLabelText("CADA")).toBeChecked();
+    expect(screen.getByLabelText("CAES")).not.toBeChecked();
   });
 
-  it("lit la sélection depuis le paramètre types", () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams("types=CADA"));
+  it("ajoute le type cliqué à la sélection", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<FilterTypeStructure selection={["CADA"]} onChange={onChange} />);
 
-    render(<FilterTypeStructure />);
+    await user.click(screen.getByLabelText("HUDA"));
 
-    expect(screen.getByLabelText<HTMLInputElement>("CADA").checked).toBe(true);
-    expect(screen.getByLabelText<HTMLInputElement>("CAES").checked).toBe(false);
+    expect(onChange).toHaveBeenCalledWith(["CADA", "HUDA"]);
+  });
+
+  it("retire le filtre quand tous les types finissent cochés", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <FilterTypeStructure
+        selection={["CADA", "CAES", "CPH"]}
+        onChange={onChange}
+      />
+    );
+
+    await user.click(screen.getByLabelText("HUDA"));
+
+    expect(onChange).toHaveBeenCalledWith([]);
   });
 });
