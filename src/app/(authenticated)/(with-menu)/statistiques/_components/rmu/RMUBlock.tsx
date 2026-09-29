@@ -1,13 +1,32 @@
 import { useSearchParams } from "next/navigation";
 
+import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
+
 import { RMUChart } from "./RMUChart";
 import { RMUStatsTable } from "./RMUStatsTable";
 
 export const RMUBlock = ({ startMonth, endMonth }: Props) => {
   const searchParams = useSearchParams();
-  const noFiltersSelected =
-    searchParams.get("operateurs") === null &&
-    searchParams.get("types") === null;
+
+  const operatorFilterValue = searchParams.get("operateurs");
+  const typeFilterValue = searchParams.get("types");
+
+  const selectedTypes = typeFilterValue
+    ? typeFilterValue.split(",").filter(Boolean)
+    : [];
+
+  const areAllTypesSelected =
+    ACCEPTED_STRUCTURE_TYPES.length > 0 &&
+    ACCEPTED_STRUCTURE_TYPES.every((structureType) =>
+      selectedTypes.includes(structureType)
+    );
+
+  const hasActiveTypeFilter = selectedTypes.length > 0 && !areAllTypesSelected;
+
+  const hasActiveOperatorFilter =
+    operatorFilterValue !== null && operatorFilterValue !== "";
+
+  const noFiltersSelected = !hasActiveTypeFilter && !hasActiveOperatorFilter;
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">

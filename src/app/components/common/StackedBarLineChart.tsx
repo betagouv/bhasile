@@ -129,7 +129,7 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
             pointerEvents: "none",
           }}
         />
-        {activeTooltip && (
+        {activeTooltip && activeTooltip.value !== 0 && (
           <div
             style={{
               position: "absolute",
