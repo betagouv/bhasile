@@ -38,6 +38,8 @@ Sur la page intermédiaire, restez en `eidas1` et cliquez sur "Se connecter"
 
 Pour changer de rôle, déconnectez-vous et reconnectez-vous avec un autre email.
 
+Le modèle de droits (binômes rôle × périmètre) et sa feuille de route sont décrits dans [le document des permissions](docs/permissions.md).
+
 ## 🧪 Tests
 
 Pour lancer les tests, exécutez :

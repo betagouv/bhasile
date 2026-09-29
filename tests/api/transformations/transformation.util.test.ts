@@ -1,3 +1,8 @@
+import {
+  createDepartementalAgent,
+  createNationalAgent,
+  createSessionUser,
+} from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -9,7 +14,6 @@ import {
 } from "@/app/api/transformations/transformation.util";
 import { DomainError } from "@/app/utils/domainError.util";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
-import { SessionUser } from "@/types/global";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -285,15 +289,9 @@ describe("checkUniqueDepartement", () => {
 });
 
 describe("checkCanUpdateDepartements", () => {
-  const agentParis = {
-    role: "DEPARTEMENT_PARIS",
-    allowedDepartements: ["75"],
-  } as unknown as SessionUser;
+  const agentParis = createDepartementalAgent(["75"]);
 
-  const agentNational = {
-    role: "NATIONAL",
-    allowedDepartements: [],
-  } as unknown as SessionUser;
+  const agentNational = createNationalAgent();
 
   const buildStructureVersionTransformation = (
     departementAdministratif: string
@@ -361,10 +359,7 @@ describe("checkCanUpdateDepartements", () => {
   });
 
   it("refuse un utilisateur sans droit d'écriture quand le département est inconnu", () => {
-    const operateur = {
-      role: "ANONYMOUS",
-      allowedDepartements: [],
-    } as unknown as SessionUser;
+    const operateur = createSessionUser();
 
     expect(() => checkCanUpdateDepartements(operateur, [{}])).toThrow(
       "Droits insuffisants"

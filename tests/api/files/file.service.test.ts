@@ -1,4 +1,5 @@
 import { Session } from "next-auth";
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
@@ -6,7 +7,6 @@ import {
   authorizeFileAccess,
   getPrincipal,
 } from "@/app/api/files/file.service";
-import { SessionUser } from "@/types/global";
 import { Principal } from "@/types/principal.type";
 
 const mockCanDeleteFile = vi.fn();
@@ -46,7 +46,7 @@ const linkedFile = buildFile({ documentFinancierId: 1 });
 
 const agent: Principal = {
   type: "agent",
-  user: { id: "1", role: "DEPARTEMENT_PARIS" } as SessionUser,
+  user: createDepartementalAgent(["75"]),
 };
 const operateur: Principal = { type: "operateur" };
 

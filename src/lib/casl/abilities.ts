@@ -2,9 +2,17 @@ import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
-import { Cpom, Operateur, Structure, User } from "@/generated/prisma/client";
+import {
+  AccessRole,
+  Cpom,
+  Operateur,
+  Prisma,
+  Structure,
+  User,
+  UserType,
+} from "@/generated/prisma/client";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
-import { SessionUser } from "@/types/global";
+import { SessionGrant, SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
   [
@@ -28,19 +36,12 @@ export const defineAbilityFor = (user?: SessionUser) => {
 
 const defineRulesFor = (user?: SessionUser) => {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
-  if (!user) {
-    defineAnonymousRules(builder);
-    return builder.rules;
-  }
+  defineAnonymousRules(builder);
 
-  if (
-    user.role === "NATIONAL" ||
-    user.role.startsWith("DEPARTEMENT") ||
-    user.role.startsWith("REGION")
-  ) {
+  if (user?.isSuperAdmin) {
+    builder.can("manage", "all");
+  } else if (user?.type === UserType.AGENT) {
     defineAgentRules(builder, user);
-  } else {
-    defineAnonymousRules(builder);
   }
 
   return builder.rules;
@@ -50,18 +51,50 @@ const defineAgentRules = (
   { can }: AbilityBuilder<AppAbility>,
   user: SessionUser
 ) => {
-  if (user.role === "NATIONAL") {
-    can("update", "Structure");
-  } else {
-    can("update", "Structure", {
-      departementAdministratif: { in: user.allowedDepartements },
-    });
+  const editingGrants = user.grants.filter((grant) =>
+    EDITING_ROLES.includes(grant.role)
+  );
+  if (editingGrants.length === 0) {
+    return;
+  }
+
+  for (const conditions of editingGrants.flatMap(getStructureConditions)) {
+    can("update", "Structure", conditions);
   }
   can("update", ["Cpom", "Operateur"]);
 };
 
 const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
   can("read", ["Structure", "Cpom", "Operateur"]);
+};
+
+const EDITING_ROLES: AccessRole[] = [AccessRole.EDITEUR, AccessRole.ADMIN];
+
+const getStructureConditions = ({
+  isNational,
+  departementNumeros,
+  structureIds,
+  operateurId,
+}: SessionGrant): Prisma.StructureWhereInput[] => {
+  const operateurCondition = operateurId === null ? {} : { operateurId };
+
+  if (isNational) {
+    return [operateurCondition];
+  }
+
+  return [
+    ...(departementNumeros.length > 0
+      ? [
+          {
+            departementAdministratif: { in: departementNumeros },
+            ...operateurCondition,
+          },
+        ]
+      : []),
+    ...(structureIds.length > 0
+      ? [{ id: { in: structureIds }, ...operateurCondition }]
+      : []),
+  ];
 };
 
 export const canUpdateStructure = (

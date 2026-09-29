@@ -1,7 +1,13 @@
+import {
+  createDepartementalAgent,
+  createNationalAgent,
+  createSessionGrant,
+  createSessionUser,
+} from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
-import { Structure } from "@/generated/prisma/client";
+import { AccessRole, Structure, UserType } from "@/generated/prisma/client";
 import {
   canDeleteFile,
   canUpdateDepartement,
@@ -13,66 +19,119 @@ describe("Permissions : canUpdateStructure", () => {
   const structure1 = {
     id: 1,
     departementAdministratif: "1",
+    operateurId: 10,
   } as Structure;
 
   const structure13 = {
     id: 2,
     departementAdministratif: "13",
+    operateurId: 20,
   } as Structure;
 
   const structure69 = {
     id: 3,
     departementAdministratif: "69",
+    operateurId: 10,
   } as Structure;
 
-  it("autorise un agent NATIONAL à modifier une structure si son département est dans allowedDepartements", () => {
-    const user = {
-      id: "user1",
-      role: "NATIONAL",
-      allowedDepartements: [...Array(96).keys()].map((num) => num.toString()),
-    } as SessionUser;
-
-    expect(canUpdateStructure(user, structure69)).toBe(true);
+  it("autorise un agent éditeur national à modifier n'importe quelle structure", () => {
+    expect(canUpdateStructure(createNationalAgent(), structure69)).toBe(true);
   });
 
-  it("autorise un agent DEPARTEMENT à modifier une structure si son département est dans allowedDepartements", () => {
-    const user = {
-      id: "user2",
-      role: "DEPARTEMENT_AIN",
-      allowedDepartements: ["1"],
-    } as SessionUser;
-
-    expect(canUpdateStructure(user, structure1)).toBe(true);
+  it("autorise un agent éditeur à modifier une structure de son département", () => {
+    expect(
+      canUpdateStructure(createDepartementalAgent(["1"]), structure1)
+    ).toBe(true);
   });
 
-  it("refuse à un agent DEPARTEMENT de modifier une structure si son département n'est pas dans allowedDepartements", () => {
-    const user = {
-      id: "user3",
-      role: "DEPARTEMENT_RHONE",
-      allowedDepartements: ["69"],
-    } as SessionUser;
-
-    expect(canUpdateStructure(user, structure13)).toBe(false);
+  it("refuse à un agent de modifier une structure hors de son département malgré son accès viewer national", () => {
+    expect(
+      canUpdateStructure(createDepartementalAgent(["69"]), structure13)
+    ).toBe(false);
   });
 
-  it("autorise un agent REGION à modifier une structure si son département est dans allowedDepartements", () => {
-    const user = {
-      id: "user4",
-      role: "REGION_PAC",
-      allowedDepartements: ["04", "05", "06", "13", "83", "84"],
-    } as SessionUser;
+  it("refuse à un agent uniquement viewer de modifier une structure", () => {
+    const user = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.VIEWER, isNational: true }),
+      ],
+    });
+
+    expect(canUpdateStructure(user, structure69)).toBe(false);
+  });
+
+  it("autorise un agent admin à modifier une structure de son périmètre", () => {
+    const user = createSessionUser({
+      grants: [
+        createSessionGrant({
+          role: AccessRole.ADMIN,
+          departementNumeros: ["13"],
+        }),
+      ],
+    });
 
     expect(canUpdateStructure(user, structure13)).toBe(true);
   });
 
-  it("refuse à un agent ANONYMOUS de modifier une structure", () => {
-    const user = {
-      id: "user5",
-      role: "ANONYMOUS",
-      allowedDepartements: [],
-    } as unknown as SessionUser;
+  it("cumule les binômes de plusieurs périmètres", () => {
+    const user = createSessionUser({
+      grants: [
+        createSessionGrant({ departementNumeros: ["1"] }),
+        createSessionGrant({ structureIds: [2] }),
+      ],
+    });
 
+    expect(canUpdateStructure(user, structure1)).toBe(true);
+    expect(canUpdateStructure(user, structure13)).toBe(true);
     expect(canUpdateStructure(user, structure69)).toBe(false);
+  });
+
+  it("restreint un périmètre à opérateur aux structures de cet opérateur", () => {
+    const user = createSessionUser({
+      grants: [
+        createSessionGrant({
+          departementNumeros: ["1", "13"],
+          operateurId: 10,
+        }),
+      ],
+    });
+
+    expect(canUpdateStructure(user, structure1)).toBe(true);
+    expect(canUpdateStructure(user, structure13)).toBe(false);
+  });
+
+  it("restreint aussi les structures cochées à l'opérateur du périmètre", () => {
+    const user = createSessionUser({
+      grants: [createSessionGrant({ structureIds: [1, 2], operateurId: 10 })],
+    });
+
+    expect(canUpdateStructure(user, structure1)).toBe(true);
+    expect(canUpdateStructure(user, structure13)).toBe(false);
+  });
+
+  it("n'accorde rien à un périmètre vide", () => {
+    const user = createSessionUser({ grants: [createSessionGrant()] });
+
+    expect(canUpdateStructure(user, structure1)).toBe(false);
+  });
+
+  it("n'accorde aucune écriture à un utilisateur opérateur", () => {
+    const user = createSessionUser({
+      type: UserType.OPERATEUR,
+      grants: [createSessionGrant({ isNational: true, operateurId: 10 })],
+    });
+
+    expect(canUpdateStructure(user, structure1)).toBe(false);
+  });
+
+  it("autorise un superadmin sans binôme à tout modifier", () => {
+    const user = createSessionUser({ isSuperAdmin: true });
+
+    expect(canUpdateStructure(user, structure13)).toBe(true);
+  });
+
+  it("refuse à un agent sans binôme de modifier une structure", () => {
+    expect(canUpdateStructure(createSessionUser(), structure69)).toBe(false);
   });
 
   it("refuse à un utilisateur déconnecté de modifier une structure", () => {
@@ -83,53 +142,33 @@ describe("Permissions : canUpdateStructure", () => {
 });
 
 describe("Permissions : canUpdateDepartement", () => {
-  const nationalUser = {
-    id: "national",
-    role: "NATIONAL",
-    allowedDepartements: [] as string[],
-  } as SessionUser;
+  const nationalUser = createNationalAgent();
 
-  const departementUser = {
-    id: "departement",
-    role: "DEPARTEMENT_MANCHE",
-    allowedDepartements: ["50"],
-  } as SessionUser;
+  const departementUser = createDepartementalAgent(["50"]);
 
-  it("autorise un agent NATIONAL sur n'importe quel département, y compris un département undefined", () => {
+  it("autorise un agent éditeur national sur n'importe quel département, y compris un département undefined", () => {
     expect(canUpdateDepartement(nationalUser, "50")).toBe(true);
     expect(canUpdateDepartement(nationalUser, "13")).toBe(true);
     expect(canUpdateDepartement(nationalUser, undefined)).toBe(true);
   });
 
-  it("autorise un agent DEPARTEMENT uniquement sur son propre département", () => {
+  it("autorise un agent départemental uniquement sur son propre département", () => {
     expect(canUpdateDepartement(departementUser, "50")).toBe(true);
     expect(canUpdateDepartement(departementUser, "13")).toBe(false);
   });
 
-  it("masque les transformations sans département à un agent DEPARTEMENT", () => {
+  it("masque les transformations sans département à un agent départemental", () => {
     expect(canUpdateDepartement(departementUser, undefined)).toBe(false);
     expect(canUpdateDepartement(departementUser, null)).toBe(false);
   });
 });
 
 describe("Permissions : canDeleteFile", () => {
-  const nationalUser = {
-    id: "national",
-    role: "NATIONAL",
-    allowedDepartements: [] as string[],
-  } as SessionUser;
+  const nationalUser = createNationalAgent();
 
-  const dep75User = {
-    id: "dep75",
-    role: "DEPARTEMENT_PARIS",
-    allowedDepartements: ["75"],
-  } as SessionUser;
+  const dep75User = createDepartementalAgent(["75"]);
 
-  const dep92User = {
-    id: "dep92",
-    role: "DEPARTEMENT_HAUTS_DE_SEINE",
-    allowedDepartements: ["92"],
-  } as SessionUser;
+  const dep92User = createDepartementalAgent(["92"]);
 
   const buildFile = (overrides: Partial<FileWithParents>): FileWithParents =>
     ({

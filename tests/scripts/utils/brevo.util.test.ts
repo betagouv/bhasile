@@ -1,17 +1,48 @@
 import { toBrevoContact } from "scripts/utils/brevo.util";
 
+import { GrantWithPerimetre } from "@/app/api/users/user.db.type";
+import { AccessRole } from "@/generated/prisma/client";
+
+const buildGrant = (
+  role: AccessRole,
+  perimetre: Partial<GrantWithPerimetre["perimetre"]>
+): GrantWithPerimetre => ({
+  role,
+  perimetre: {
+    name: "Périmètre",
+    isNational: false,
+    operateurId: null,
+    regions: [],
+    departements: [],
+    structures: [],
+    ...perimetre,
+  },
+});
+
+const nationalViewerGrant = buildGrant(AccessRole.VIEWER, {
+  name: "National",
+  isNational: true,
+});
+
+const baseUser = {
+  email: "agent@dreets.gouv.fr",
+  lastConnection: new Date("2026-09-15T08:30:00.000Z"),
+  createdAt: new Date("2025-01-20T10:00:00.000Z"),
+  grants: [],
+  emailPattern: null,
+};
+
 describe("brevo util", () => {
   it("mappe un agent départemental sur les attributs Brevo", () => {
     // GIVEN
     const user = {
-      email: "agent@dreets.gouv.fr",
-      lastConnection: new Date("2026-09-15T08:30:00.000Z"),
-      createdAt: new Date("2025-01-20T10:00:00.000Z"),
-      role: {
-        name: "DEPARTEMENT_BOUCHES_DU_RHONE",
-        roleDepartements: [{ departementNumero: "13" }],
-      },
-      emailPattern: null,
+      ...baseUser,
+      grants: [
+        buildGrant(AccessRole.EDITEUR, {
+          name: "Bouches-du-Rhône",
+          departements: [{ departementNumero: "13" }],
+        }),
+      ],
     };
 
     // WHEN
@@ -23,30 +54,36 @@ describe("brevo util", () => {
       attributes: {
         DEPARTEMENT: "13",
         STATUT: "Agent",
-        PERIMETRE: "DEPARTEMENT_BOUCHES_DU_RHONE",
+        PERIMETRE: "Bouches-du-Rhône",
         LAST_LOGIN: "2026-09-15",
         CREATION_COMPTE: "2025-01-20",
       },
     });
   });
 
-  it("récupère le rôle du pattern d'email quand l'utilisateur n'en porte pas", () => {
+  it("récupère les droits de base du pattern d'email et ignore le binôme viewer national", () => {
     // GIVEN
     const user = {
-      email: "agent@bretagne.gouv.fr",
-      lastConnection: new Date("2026-09-15T08:30:00.000Z"),
-      createdAt: new Date("2025-01-20T10:00:00.000Z"),
-      role: null,
+      ...baseUser,
       emailPattern: {
-        role: {
-          name: "REGION_BRETAGNE",
-          roleDepartements: [
-            { departementNumero: "35" },
-            { departementNumero: "22" },
-            { departementNumero: "56" },
-            { departementNumero: "29" },
-          ],
-        },
+        grants: [
+          nationalViewerGrant,
+          buildGrant(AccessRole.EDITEUR, {
+            name: "Bretagne",
+            regions: [
+              {
+                region: {
+                  departements: [
+                    { numero: "35" },
+                    { numero: "22" },
+                    { numero: "56" },
+                    { numero: "29" },
+                  ],
+                },
+              },
+            ],
+          }),
+        ],
       },
     };
 
@@ -54,26 +91,27 @@ describe("brevo util", () => {
     const contact = toBrevoContact(user);
 
     // THEN
-    expect(contact.attributes.PERIMETRE).toBe("REGION_BRETAGNE");
+    expect(contact.attributes.PERIMETRE).toBe("Bretagne");
     expect(contact.attributes.DEPARTEMENT).toBe("22, 29, 35, 56");
   });
 
-  it("liste tous les départements d'un rôle national", () => {
+  it("cumule les binômes du pattern et ceux de l'utilisateur", () => {
     // GIVEN
     const user = {
-      email: "agent@national.gouv.fr",
-      lastConnection: new Date("2026-09-15T08:30:00.000Z"),
-      createdAt: new Date("2025-01-20T10:00:00.000Z"),
-      role: null,
+      ...baseUser,
+      grants: [
+        buildGrant(AccessRole.ADMIN, {
+          name: "Finistère",
+          departements: [{ departementNumero: "29" }],
+        }),
+      ],
       emailPattern: {
-        role: {
-          name: "NATIONAL",
-          roleDepartements: [
-            { departementNumero: "75" },
-            { departementNumero: "01" },
-            { departementNumero: "13" },
-          ],
-        },
+        grants: [
+          buildGrant(AccessRole.EDITEUR, {
+            name: "Paris",
+            departements: [{ departementNumero: "75" }],
+          }),
+        ],
       },
     };
 
@@ -81,22 +119,13 @@ describe("brevo util", () => {
     const contact = toBrevoContact(user);
 
     // THEN
-    expect(contact.attributes.PERIMETRE).toBe("NATIONAL");
-    expect(contact.attributes.DEPARTEMENT).toBe("01, 13, 75");
+    expect(contact.attributes.PERIMETRE).toBe("Paris, Finistère");
+    expect(contact.attributes.DEPARTEMENT).toBe("29, 75");
   });
 
-  it("laisse le périmètre vide quand aucun rôle n'est rattaché", () => {
-    // GIVEN
-    const user = {
-      email: "agent@sans-role.gouv.fr",
-      lastConnection: new Date("2026-09-15T08:30:00.000Z"),
-      createdAt: new Date("2025-01-20T10:00:00.000Z"),
-      role: null,
-      emailPattern: null,
-    };
-
+  it("laisse le périmètre vide quand aucun binôme n'est rattaché", () => {
     // WHEN
-    const contact = toBrevoContact(user);
+    const contact = toBrevoContact(baseUser);
 
     // THEN
     expect(contact.attributes.PERIMETRE).toBe("");

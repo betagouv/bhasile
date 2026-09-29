@@ -1,3 +1,4 @@
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
 import { AnomalieStructure } from "@/app/api/dashboard/anomalies/anomalies.db.type";
@@ -12,14 +13,7 @@ import { StructureType } from "@/types/structure.type";
 
 const NOW = new Date("2026-07-10T00:00:00.000Z");
 
-const agent: SessionUser = {
-  id: "1",
-  name: "Agent",
-  prenom: "Agent",
-  email: "agent@gouv.fr",
-  role: "DEPARTEMENT",
-  allowedDepartements: ["50", "92"],
-};
+const agent: SessionUser = createDepartementalAgent(["50", "92"]);
 
 const baseOptions = {
   user: agent,
@@ -109,7 +103,9 @@ describe("buildDashboardAnomalies", () => {
 
   it("écarte une structure qui n'est pas finalisée", () => {
     const structure = makeStructure({
-      forms: [{ status: false, formDefinition: { slug: FINALISATION_FORM_SLUG } }],
+      forms: [
+        { status: false, formDefinition: { slug: FINALISATION_FORM_SLUG } },
+      ],
     });
 
     expect(buildDashboardAnomalies([structure], baseOptions)).toEqual([]);
@@ -245,10 +241,12 @@ describe("groupDashboardAnomalies", () => {
 
     const nodes = groupDashboardAnomalies(anomalies, "STRUCTURE");
 
-    expect(nodes.map(({ key, activeCount }) => ({ key, activeCount }))).toEqual([
-      { key: "structure-1", activeCount: 2 },
-      { key: "structure-2", activeCount: 1 },
-    ]);
+    expect(nodes.map(({ key, activeCount }) => ({ key, activeCount }))).toEqual(
+      [
+        { key: "structure-1", activeCount: 2 },
+        { key: "structure-2", activeCount: 1 },
+      ]
+    );
   });
 
   it("groupe par code sans éclater les exercices", () => {

@@ -1,3 +1,4 @@
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
 import { ActeAdministratifDates } from "@/app/api/actes-administratifs/acte-administratif.util";
@@ -14,14 +15,7 @@ import { StructureType } from "@/types/structure.type";
 
 const NOW = new Date("2026-07-10T00:00:00.000Z");
 
-const agent: SessionUser = {
-  id: "1",
-  name: "Agent",
-  prenom: "Agent",
-  email: "agent@gouv.fr",
-  role: "DEPARTEMENT",
-  allowedDepartements: ["50", "92", "93"],
-};
+const agent: SessionUser = createDepartementalAgent(["50", "92", "93"]);
 
 const baseOptions = {
   user: agent,
@@ -131,27 +125,35 @@ const findByTask = (structure: RappelStructure, taskType: string) =>
 describe("buildRappels — criticité v2 (renouvellement autorisation, fenêtre 3 mois)", () => {
   it("marque en urgent quand l'échéance est dépassée", () => {
     const structure = makeStructure({
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
-    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite).toBe(
-      "URGENT"
-    );
+    expect(
+      findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite
+    ).toBe("URGENT");
   });
 
   it("marque en important quand l'échéance est dans la fenêtre de 3 mois", () => {
     const structure = makeStructure({
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-08-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-08-01"),
+      ],
     });
-    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite).toBe(
-      "IMPORTANT"
-    );
+    expect(
+      findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite
+    ).toBe("IMPORTANT");
   });
 
   it("ne crée pas de rappel quand l'échéance est au-delà de la fenêtre", () => {
     const structure = makeStructure({
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2028-01-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2028-01-01"),
+      ],
     });
-    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")).toBeUndefined();
+    expect(
+      findByTask(structure, "RENOUVELLEMENT_AUTORISATION")
+    ).toBeUndefined();
   });
 });
 
@@ -230,7 +232,9 @@ describe("buildRappels — scoping & CPOM", () => {
   it("exclut une structure hors des départements de l'agent", () => {
     const structure = makeStructure({
       departementAdministratif: "69",
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
     expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
   });
@@ -239,7 +243,9 @@ describe("buildRappels — scoping & CPOM", () => {
     const structure = makeStructure({
       departementAdministratif: "50",
       versionDepartement: null,
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
 
     const rappels = buildRappels([structure], [], {
@@ -256,7 +262,9 @@ describe("buildRappels — scoping & CPOM", () => {
       forms: [
         { status: false, formDefinition: { slug: FINALISATION_FORM_SLUG } },
       ],
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
     expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
   });
@@ -265,12 +273,14 @@ describe("buildRappels — scoping & CPOM", () => {
     const structure = makeStructure({
       forms: [],
       versionTransformationType: StructureVersionTransformationType.CREATION,
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
 
-    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite).toBe(
-      "URGENT"
-    );
+    expect(
+      findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite
+    ).toBe("URGENT");
   });
 
   it("exclut une structure dont la transformation de création n'est pas validée", () => {
@@ -278,7 +288,9 @@ describe("buildRappels — scoping & CPOM", () => {
       forms: [],
       versionTransformationType: StructureVersionTransformationType.CREATION,
       versionTransformationFormStatus: false,
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
 
     expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
@@ -289,7 +301,9 @@ describe("buildRappels — scoping & CPOM", () => {
       forms: [],
       versionTransformationType: StructureVersionTransformationType.CREATION,
       versionEffectiveDate: new Date("2027-01-01"),
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
 
     expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
@@ -298,7 +312,9 @@ describe("buildRappels — scoping & CPOM", () => {
   it("exclut une structure déjà fermée", () => {
     const structure = makeStructure({
       fermetureDate: new Date("2026-03-01"),
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
 
     expect(buildRappels([structure], [], baseOptions)).toHaveLength(0);
@@ -307,17 +323,21 @@ describe("buildRappels — scoping & CPOM", () => {
   it("garde une structure dont la fermeture n'est pas encore effective", () => {
     const structure = makeStructure({
       fermetureDate: new Date("2026-12-31"),
-      actesAdministratifs: [parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01")],
+      actesAdministratifs: [
+        parentActe("ARRETE_AUTORISATION", "2010-01-01", "2026-06-01"),
+      ],
     });
 
-    expect(findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite).toBe(
-      "URGENT"
-    );
+    expect(
+      findByTask(structure, "RENOUVELLEMENT_AUTORISATION")?.criticite
+    ).toBe("URGENT");
   });
 
   it("génère un rappel CPOM quand la convention CPOM finit dans la fenêtre", () => {
     const cpom = makeCpom({
-      actesAdministratifs: [parentActe("CONVENTION", "2020-01-01", "2026-08-01")],
+      actesAdministratifs: [
+        parentActe("CONVENTION", "2020-01-01", "2026-08-01"),
+      ],
     });
     const rappels = buildRappels([], [cpom], baseOptions);
     expect(rappels).toHaveLength(1);
@@ -333,7 +353,9 @@ describe("buildRappels — scoping & CPOM", () => {
   it("exclut un CPOM dont aucun département n'est couvert par l'agent", () => {
     const cpom = makeCpom({
       departementNumeros: ["75", "78"],
-      actesAdministratifs: [parentActe("CONVENTION", "2020-01-01", "2026-08-01")],
+      actesAdministratifs: [
+        parentActe("CONVENTION", "2020-01-01", "2026-08-01"),
+      ],
     });
     expect(buildRappels([], [cpom], baseOptions)).toHaveLength(0);
   });

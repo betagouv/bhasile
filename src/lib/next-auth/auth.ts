@@ -9,7 +9,7 @@ import { createOrUpdateUser } from "@/app/api/users/user.service";
 
 import {
   getIsUserAuthorized,
-  getRoleFromSession,
+  getPermissionsFromSession,
   ProConnectUser,
 } from "./auth-util";
 
@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ token, session }) {
-      const role = await getRoleFromSession(session);
+      const permissions = await getPermissionsFromSession(session);
       try {
         await createOrUpdateUser({
           name: session.user?.name as string,
@@ -59,8 +59,7 @@ export const authOptions: NextAuthOptions = {
           ...session,
           user: {
             ...session.user,
-            role: role.name,
-            allowedDepartements: role.allowedDepartements,
+            ...permissions,
             prenom: token.prenom,
           },
           id_token: token.id_token,

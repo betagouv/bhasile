@@ -16,6 +16,7 @@ model Operateur {
   actesAdministratifs             ActeAdministratif[]
   contacts                        Contact[]
   logo                            FileUpload?
+  perimetres                      Perimetre[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
