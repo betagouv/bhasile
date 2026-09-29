@@ -1,3 +1,5 @@
+import type { AccessRole, UserType } from "@/generated/prisma/client";
+
 export type Page = {
   params: Promise<{
     [key: string]: string;
@@ -30,11 +32,20 @@ export const FormKind = {
 
 export type FormKind = (typeof FormKind)[keyof typeof FormKind];
 
+export type SessionGrant = {
+  role: AccessRole;
+  isNational: boolean;
+  departementNumeros: string[];
+  structureIds: number[];
+  operateurId: number | null;
+};
+
 export type SessionUser = {
   id: string;
   name: string;
   prenom: string;
   email: string;
-  role: string;
-  allowedDepartements: string[];
+  type: UserType;
+  isSuperAdmin: boolean;
+  grants: SessionGrant[];
 };

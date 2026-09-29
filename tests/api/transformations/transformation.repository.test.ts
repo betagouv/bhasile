@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { createNationalAgent } from "tests/test-utils/factories/session-user.factory";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
@@ -17,7 +18,6 @@ import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
-import { SessionUser } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
@@ -43,10 +43,7 @@ const findOneOrFail = async (id: number) => {
   return row;
 };
 
-const NATIONAL_USER = {
-  role: "NATIONAL",
-  allowedDepartements: [],
-} as unknown as SessionUser;
+const NATIONAL_USER = createNationalAgent();
 
 describe("transformation.repository db integration", () => {
   const createdStructureIds: number[] = [];

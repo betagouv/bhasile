@@ -1,5 +1,7 @@
-import { getUserRole } from "@/app/api/users/user.util";
+import { GrantWithPerimetre } from "@/app/api/users/user.db.type";
+import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
 import { toDayKey } from "@/app/utils/date.util";
+import { AccessRole } from "@/generated/prisma/client";
 
 const BREVO_IMPORT_URL = "https://api.brevo.com/v3/contacts/import";
 const BATCH_SIZE = 500;
@@ -20,19 +22,21 @@ export type BrevoAgentUser = {
   email: string;
   lastConnection: Date;
   createdAt: Date;
-  role: BrevoAgentRole | null;
-  emailPattern: { role: BrevoAgentRole } | null;
+  grants: GrantWithPerimetre[];
+  emailPattern: { grants: GrantWithPerimetre[] } | null;
 };
 
 export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
-  const role = getUserRole(user);
+  const actionGrants = getEffectiveGrants(user).filter(
+    (grant) => grant.role !== AccessRole.VIEWER
+  );
 
   return {
     email: user.email,
     attributes: {
-      DEPARTEMENT: formatDepartements(role),
+      DEPARTEMENT: formatDepartements(actionGrants),
       STATUT: AGENT_STATUT,
-      PERIMETRE: role?.name ?? "",
+      PERIMETRE: actionGrants.map((grant) => grant.perimetre.name).join(", "),
       LAST_LOGIN: toDayKey(user.lastConnection),
       CREATION_COMPTE: toDayKey(user.createdAt),
     },
@@ -83,13 +87,11 @@ export const pushContactsToBrevo = async (
   }
 };
 
-type BrevoAgentRole = {
-  name: string;
-  roleDepartements: { departementNumero: string }[];
-};
-
-const formatDepartements = (role: BrevoAgentRole | null): string =>
-  (role?.roleDepartements ?? [])
-    .map((roleDepartement) => roleDepartement.departementNumero)
+const formatDepartements = (grants: GrantWithPerimetre[]): string =>
+  [
+    ...new Set(
+      grants.flatMap((grant) => toSessionGrant(grant).departementNumeros)
+    ),
+  ]
     .sort()
     .join(", ");

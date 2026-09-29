@@ -1,6 +1,8 @@
 import { getNow } from "@/app/utils/now.util";
 import prisma from "@/lib/prisma";
 
+import { UserWithGrants, userWithGrantsSelect } from "./user.db.type";
+
 const UPDATE_INTERVAL_MINUTES = 60;
 
 export const upsertUser = async ({
@@ -42,36 +44,17 @@ export const upsertUser = async ({
 export const findUserIdByEmail = (email: string) =>
   prisma.user.findUnique({ where: { email }, select: { id: true } });
 
-export const getUserByEmail = async ({ email }: { email?: string | null }) => {
+export const getUserWithGrantsByEmail = async ({
+  email,
+}: {
+  email?: string | null;
+}): Promise<UserWithGrants | null> => {
   if (!email) {
     return null;
   }
   return prisma.user.findUnique({
     where: { email },
-    include: {
-      emailPattern: {
-        include: {
-          role: {
-            include: {
-              roleDepartements: {
-                include: {
-                  departement: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      role: {
-        include: {
-          roleDepartements: {
-            include: {
-              departement: true,
-            },
-          },
-        },
-      },
-    },
+    select: userWithGrantsSelect,
   });
 };
 

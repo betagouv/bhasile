@@ -1,39 +1,29 @@
-import { PrismaClient } from "@/generated/prisma/client";
-import { getDepartementNumerosForRegion } from "@/utils/region.util";
+import { AccessRole, PrismaClient } from "@/generated/prisma/client";
 
 // Comptes du fournisseur d'identité de test ProConnect (FIA1)
 const TEST_EMAIL_DOMAIN = "test.proconnect.gouv.fr";
 
-const getRegionDepartements = (regionName: string): string[] => {
-  const numeros = getDepartementNumerosForRegion(regionName);
-  if (numeros.length === 0) {
-    throw new Error(`Région ${regionName} absente de DEPARTEMENTS`);
-  }
-  return numeros;
-};
-
-const ANONYMOUS_ROLE_NAME = "ANONYMOUS";
-
-type AgentRoleSeed = {
-  roleName: string;
+type AgentSeed = {
   email: string;
-  departementNumeros?: string[];
+  perimetreName: string;
+  regionName?: string;
+  departementNumero?: string;
 };
 
-const AGENT_ROLES: AgentRoleSeed[] = [
+const AGENTS: AgentSeed[] = [
   {
-    roleName: "NATIONAL",
     email: `national@${TEST_EMAIL_DOMAIN}`,
+    perimetreName: "National",
   },
   {
-    roleName: "REGION_ILE_DE_FRANCE",
     email: `regional@${TEST_EMAIL_DOMAIN}`,
-    departementNumeros: getRegionDepartements("Île-de-France"),
+    perimetreName: "Île-de-France",
+    regionName: "Île-de-France",
   },
   {
-    roleName: "DEPARTEMENT_PARIS",
     email: `departemental@${TEST_EMAIL_DOMAIN}`,
-    departementNumeros: ["75"],
+    perimetreName: "Paris",
+    departementNumero: "75",
   },
 ];
 
@@ -43,40 +33,35 @@ const toEmailPattern = (email: string): string =>
 export const seedRolesAndAgents = async (
   prisma: PrismaClient
 ): Promise<void> => {
-  await prisma.role.create({ data: { name: ANONYMOUS_ROLE_NAME } });
-
-  const allDepartements = await prisma.departement.findMany({
-    select: { numero: true },
+  const national = await prisma.perimetre.create({
+    data: { name: "National", isNational: true },
+    select: { id: true },
   });
 
-  for (const agentRole of AGENT_ROLES) {
-    const departementNumeros =
-      agentRole.departementNumeros ??
-      allDepartements.map((departement) => departement.numero);
-
-    const role = await prisma.role.create({
-      data: {
-        name: agentRole.roleName,
-        roleDepartements: {
-          createMany: {
-            data: departementNumeros.map((departementNumero) => ({
-              departementNumero,
-            })),
-          },
-        },
-      },
-      select: { id: true },
-    });
+  for (const agent of AGENTS) {
+    const grants =
+      agent.regionName || agent.departementNumero
+        ? [
+            { role: AccessRole.VIEWER, perimetreId: national.id },
+            {
+              role: AccessRole.EDITEUR,
+              perimetreId: await createZonePerimetre(prisma, agent),
+            },
+          ]
+        : [{ role: AccessRole.EDITEUR, perimetreId: national.id }];
 
     const emailPattern = await prisma.emailPattern.create({
-      data: { pattern: toEmailPattern(agentRole.email), roleId: role.id },
+      data: {
+        pattern: toEmailPattern(agent.email),
+        grants: { createMany: { data: grants } },
+      },
       select: { id: true },
     });
 
     await prisma.user.create({
       data: {
-        name: agentRole.roleName,
-        email: agentRole.email,
+        name: agent.perimetreName,
+        email: agent.email,
         emailPatternId: emailPattern.id,
         lastConnection: new Date(),
       },
@@ -84,8 +69,32 @@ export const seedRolesAndAgents = async (
   }
 
   console.log(
-    `🧑 ${AGENT_ROLES.length} agents de test créés : ${AGENT_ROLES.map(
-      (agentRole) => agentRole.email
+    `🧑 ${AGENTS.length} agents de test créés : ${AGENTS.map(
+      (agent) => agent.email
     ).join(", ")}`
   );
+};
+
+const createZonePerimetre = async (
+  prisma: PrismaClient,
+  { perimetreName, regionName, departementNumero }: AgentSeed
+): Promise<number> => {
+  const region = regionName
+    ? await prisma.region.findFirstOrThrow({
+        where: { name: regionName },
+        select: { id: true },
+      })
+    : null;
+
+  const perimetre = await prisma.perimetre.create({
+    data: {
+      name: perimetreName,
+      regions: region ? { create: { regionId: region.id } } : undefined,
+      departements: departementNumero
+        ? { create: { departementNumero } }
+        : undefined,
+    },
+    select: { id: true },
+  });
+  return perimetre.id;
 };

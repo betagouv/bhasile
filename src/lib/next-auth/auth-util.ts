@@ -1,10 +1,10 @@
 import { Session, User } from "next-auth";
 
 import { getEmailPatterns } from "@/app/api/email-patterns/email-pattern.repository";
-import { getAnonymousRole } from "@/app/api/roles/role.repository";
-import { getUserByEmail } from "@/app/api/users/user.repository";
-import { getUserRole } from "@/app/api/users/user.util";
-import { Prisma } from "@/generated/prisma/client";
+import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
+import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
+import { UserType } from "@/generated/prisma/client";
+import { SessionUser } from "@/types/global";
 
 export type ProConnectUser = User & {
   id: string;
@@ -13,10 +13,6 @@ export type ProConnectUser = User & {
   email: string;
   poste: string;
 };
-
-type RoleWithDepartements = Prisma.RoleGetPayload<{
-  include: { roleDepartements: { include: { departement: true } } };
-}> & { allowedDepartements: string[] };
 
 export const getIsUserAuthorized = async (email: string): Promise<boolean> => {
   const allowedPatterns = await getEmailPatterns();
@@ -29,22 +25,22 @@ export const getIsUserAuthorized = async (email: string): Promise<boolean> => {
   });
 };
 
-export const getRoleFromSession = async (
+export const getPermissionsFromSession = async (
   session: Session
-): Promise<RoleWithDepartements> => {
-  const userEmail = session.user?.email;
-  const databaseUser = await getUserByEmail({ email: userEmail });
-  const role = databaseUser ? getUserRole(databaseUser) : null;
+): Promise<SessionPermissions> => {
+  const databaseUser = await getUserWithGrantsByEmail({
+    email: session.user?.email,
+  });
 
-  if (!userEmail || !role) {
-    const anonymousRole = await getAnonymousRole();
-    return { ...anonymousRole, allowedDepartements: [] };
+  if (!databaseUser) {
+    return { type: UserType.AGENT, isSuperAdmin: false, grants: [] };
   }
 
   return {
-    ...role,
-    allowedDepartements: role.roleDepartements.map(
-      (roleDepartement) => roleDepartement.departement.numero
-    ),
+    type: databaseUser.type,
+    isSuperAdmin: databaseUser.isSuperAdmin,
+    grants: getEffectiveGrants(databaseUser).map(toSessionGrant),
   };
 };
+
+type SessionPermissions = Pick<SessionUser, "type" | "isSuperAdmin" | "grants">;

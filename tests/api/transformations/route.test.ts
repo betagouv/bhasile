@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/transformations/route";
@@ -10,7 +11,7 @@ import {
 const mockCreateTransformation = vi.fn();
 const mockGetServerSession = vi.fn();
 
-const agentParis = { role: "DEPARTEMENT_PARIS", allowedDepartements: ["75"] };
+const agentParis = createDepartementalAgent(["75"]);
 
 vi.mock("@/app/api/transformations/transformation.service", () => ({
   createTransformation: (...args: unknown[]) =>
