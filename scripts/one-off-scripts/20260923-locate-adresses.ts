@@ -1,7 +1,7 @@
 // One-off rejouable : pose le centre de commune (BAN) sur les adresses d'hébergement qui n'en ont pas.
 // Ne traite que `communeLatitude IS NULL` : une relance ne reprend que les adresses encore non localisées
 // (commune introuvable ou échec BAN pendant l'exécution précédente).
-// Usage: yarn one-off 20260923-localise-adresses
+// Usage: yarn one-off 20260923-locate-adresses
 
 import "dotenv/config";
 
@@ -10,7 +10,7 @@ import prisma from "@/lib/prisma";
 
 const TOP_NON_LOCALISEES_COUNT = 50;
 
-const localiseAdresses = async (): Promise<void> => {
+const locateAdresses = async (): Promise<void> => {
   const couples = await prisma.adresse.groupBy({
     by: ["codePostal", "commune"],
     where: { communeLatitude: null },
@@ -20,11 +20,11 @@ const localiseAdresses = async (): Promise<void> => {
     `🔎 ${couples.length} couples (code postal, commune) à localiser`
   );
 
-  const localisedCouples = await resolveCommuneCoordinates(couples);
+  const locatedCouples = await resolveCommuneCoordinates(couples);
 
-  let localisedCount = 0;
-  const nonLocalisees: typeof localisedCouples = [];
-  for (const couple of localisedCouples) {
+  let locatedCount = 0;
+  const nonLocalisees: typeof locatedCouples = [];
+  for (const couple of locatedCouples) {
     if (!couple.communeCoordinates) {
       nonLocalisees.push(couple);
       continue;
@@ -41,7 +41,7 @@ const localiseAdresses = async (): Promise<void> => {
         communeGeocodee: couple.communeCoordinates.nom,
       },
     });
-    localisedCount += count;
+    locatedCount += count;
   }
 
   const nonLocaliseesCount = nonLocalisees.reduce(
@@ -49,14 +49,15 @@ const localiseAdresses = async (): Promise<void> => {
     0
   );
   console.log(
-    `✅ ${localisedCount} adresses localisées, ${nonLocaliseesCount} non localisées`
+    `✅ ${locatedCount} adresses localisées, ${nonLocaliseesCount} non localisées`
   );
   console.log(
     `❓ Top ${TOP_NON_LOCALISEES_COUNT} des saisies non localisées :`
   );
-  for (const couple of nonLocalisees
+  const topNonLocalisees = nonLocalisees
     .sort((first, second) => second._count._all - first._count._all)
-    .slice(0, TOP_NON_LOCALISEES_COUNT)) {
+    .slice(0, TOP_NON_LOCALISEES_COUNT);
+  for (const couple of topNonLocalisees) {
     console.log(
       `   ${String(couple._count._all).padStart(4)} × ${couple.codePostal ?? "?"} ${couple.commune ?? "?"}`
     );
@@ -66,7 +67,7 @@ const localiseAdresses = async (): Promise<void> => {
   );
 };
 
-localiseAdresses()
+locateAdresses()
   .catch((error) => {
     console.error("❌ Erreur pendant la localisation des adresses :", error);
     process.exitCode = 1;

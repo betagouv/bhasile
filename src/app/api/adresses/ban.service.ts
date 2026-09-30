@@ -73,7 +73,7 @@ export const resolveCommuneCoordinates = async <
   );
 };
 
-export const localiseAdresses = async <
+export const locateAdresses = async <
   TEntity extends { adresses?: AdresseLocalisation[] },
 >(
   entity: TEntity
@@ -83,7 +83,7 @@ export const localiseAdresses = async <
     entity.adresses && (await resolveCommuneCoordinates(entity.adresses)),
 });
 
-export const localiseStructureVersions = async <
+export const locateStructureVersions = async <
   TEntity extends { structureVersion?: { adresses?: AdresseLocalisation[] } },
 >(
   entities: TEntity[]

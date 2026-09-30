@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { searchMunicipality } from "@/app/api/adresses/ban.client";
 import {
-  localiseStructureVersions,
+  locateStructureVersions,
   resolveCommuneCoordinates,
 } from "@/app/api/adresses/ban.service";
 import type { CommuneCoordinates } from "@/types/adresse.type";
@@ -70,7 +70,7 @@ describe("resolveCommuneCoordinates", () => {
   });
 });
 
-describe("localiseStructureVersions", () => {
+describe("locateStructureVersions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -78,7 +78,7 @@ describe("localiseStructureVersions", () => {
   it("localise les adresses de chaque version, avec un seul appel par commune", async () => {
     mockSearchMunicipality.mockResolvedValue(SAINT_LO);
 
-    const [first, withoutVersion, second] = await localiseStructureVersions([
+    const [first, withoutVersion, second] = await locateStructureVersions([
       {
         id: 1,
         structureVersion: {
