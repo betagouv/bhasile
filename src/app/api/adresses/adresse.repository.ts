@@ -45,7 +45,7 @@ export const createOrUpdateAdresses = async (
         : {
             communeLatitude: adresse.communeCoordinates?.latitude ?? null,
             communeLongitude: adresse.communeCoordinates?.longitude ?? null,
-            communeNom: adresse.communeCoordinates?.nom ?? null,
+            communeGeocodee: adresse.communeCoordinates?.nom ?? null,
           };
     await tx.adresse.upsert({
       where: { id: adresse.id || 0 },

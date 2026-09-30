@@ -2,8 +2,8 @@ import {
   ActeAdministratifDates,
   getDatesOfCurrentActeAdministratif,
 } from "@/app/api/actes-administratifs/acte-administratif.util";
+import { searchAddress } from "@/app/api/adresses/ban.client";
 import { getDatesConvention as getCpomDatesConvention } from "@/app/api/cpoms/cpom.util";
-import { getCoordinates } from "@/app/utils/adresse.util";
 import {
   getYearFromDate,
   getYearRange,
@@ -135,7 +135,7 @@ export const getAdresseAdministrativeCoordinates = async (
     return { latitude: undefined, longitude: undefined };
   }
   const fullAddress = `${adresseAdministrative}, ${codePostalAdministratif} ${communeAdministrative}`;
-  const coordinates = await getCoordinates(fullAddress);
+  const coordinates = await searchAddress(fullAddress);
   return {
     latitude: coordinates.latitude?.toString(),
     longitude: coordinates.longitude?.toString(),

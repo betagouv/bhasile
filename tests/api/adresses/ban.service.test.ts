@@ -1,5 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { searchMunicipality } from "@/app/api/adresses/ban.client";
+import {
+  localiseStructureVersions,
+  resolveCommuneCoordinates,
+} from "@/app/api/adresses/ban.service";
 import type { CommuneCoordinates } from "@/types/adresse.type";
 
 const SAINT_LO: CommuneCoordinates = {
@@ -8,76 +13,60 @@ const SAINT_LO: CommuneCoordinates = {
   nom: "Saint-Lô",
 };
 
-// Le mémo vit au niveau du module : on le recharge à chaque test.
-const loadModules = async () => {
-  vi.resetModules();
-  const { localiseStructureVersions, resolveCommuneCoordinates } =
-    await import("@/app/api/adresses/ban.service");
-  const { searchMunicipality } = await import("@/app/api/adresses/ban.client");
-  return {
-    localiseStructureVersions,
-    resolveCommuneCoordinates,
-    searchMunicipality: vi.mocked(searchMunicipality),
-  };
-};
+const mockSearchMunicipality = vi.mocked(searchMunicipality);
 
 describe("resolveCommuneCoordinates", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("appelle la BAN une seule fois par couple code postal / commune", async () => {
-    const { resolveCommuneCoordinates, searchMunicipality } =
-      await loadModules();
-    searchMunicipality.mockResolvedValue(SAINT_LO);
+    mockSearchMunicipality.mockResolvedValue(SAINT_LO);
 
     const adresses = await resolveCommuneCoordinates([
       { id: 1, codePostal: "50000", commune: "Saint-Lô" },
       { id: 2, codePostal: "50000", commune: "SAINT-LÔ" },
     ]);
 
-    expect(searchMunicipality).toHaveBeenCalledTimes(1);
+    expect(mockSearchMunicipality).toHaveBeenCalledTimes(1);
     expect(adresses).toMatchObject([
       { id: 1, communeCoordinates: SAINT_LO },
       { id: 2, communeCoordinates: SAINT_LO },
     ]);
   });
 
-  it("mémorise les communes trouvées et retente les autres au prochain enregistrement", async () => {
-    const { resolveCommuneCoordinates, searchMunicipality } =
-      await loadModules();
-    searchMunicipality.mockImplementation(async ({ commune }) =>
-      commune === "Saint-Lô" ? SAINT_LO : null
-    );
-    const adresses = [
-      { codePostal: "50000", commune: "Saint-Lô" },
-      { codePostal: "50000", commune: "Nimporteou" },
-    ];
-
-    await resolveCommuneCoordinates(adresses);
-    const second = await resolveCommuneCoordinates(adresses);
-
-    expect(searchMunicipality).toHaveBeenCalledTimes(3);
-    expect(second.map((adresse) => adresse.communeCoordinates)).toEqual([
-      SAINT_LO,
-      null,
-    ]);
-  });
-
   it("n'appelle pas la BAN pour une adresse sans commune ou sans code postal", async () => {
-    const { resolveCommuneCoordinates, searchMunicipality } =
-      await loadModules();
-
     const adresses = await resolveCommuneCoordinates([
       { codePostal: "", commune: "Saint-Lô" },
       { codePostal: "50000", commune: null },
     ]);
 
-    expect(searchMunicipality).not.toHaveBeenCalled();
+    expect(mockSearchMunicipality).not.toHaveBeenCalled();
     expect(adresses.map((adresse) => adresse.communeCoordinates)).toEqual([
       null,
       null,
     ]);
+  });
+
+  it("interroge la BAN par lots de 25 communes espacés d'une seconde", async () => {
+    vi.useFakeTimers();
+    mockSearchMunicipality.mockResolvedValue(SAINT_LO);
+    const adresses = Array.from({ length: 30 }, (_, index) => ({
+      codePostal: "50000",
+      commune: `Commune ${index}`,
+    }));
+
+    const resolution = resolveCommuneCoordinates(adresses);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mockSearchMunicipality).toHaveBeenCalledTimes(25);
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    await resolution;
+    expect(mockSearchMunicipality).toHaveBeenCalledTimes(30);
   });
 });
 
@@ -87,9 +76,7 @@ describe("localiseStructureVersions", () => {
   });
 
   it("localise les adresses de chaque version, avec un seul appel par commune", async () => {
-    const { localiseStructureVersions, searchMunicipality } =
-      await loadModules();
-    searchMunicipality.mockResolvedValue(SAINT_LO);
+    mockSearchMunicipality.mockResolvedValue(SAINT_LO);
 
     const [first, withoutVersion, second] = await localiseStructureVersions([
       {
@@ -107,7 +94,7 @@ describe("localiseStructureVersions", () => {
       },
     ]);
 
-    expect(searchMunicipality).toHaveBeenCalledTimes(1);
+    expect(mockSearchMunicipality).toHaveBeenCalledTimes(1);
     expect(first.structureVersion?.adresses).toMatchObject([
       { id: 10, communeCoordinates: SAINT_LO },
     ]);

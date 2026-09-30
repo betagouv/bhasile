@@ -9,9 +9,6 @@ import { resolveCommuneCoordinates } from "@/app/api/adresses/ban.service";
 import prisma from "@/lib/prisma";
 
 const TOP_NON_LOCALISEES_COUNT = 50;
-// La BAN limite à 50 requêtes/s par IP, partagée avec l'application : on en garde la moitié.
-const BAN_BATCH_SIZE = 25;
-const BAN_BATCH_PAUSE_MS = 1_000;
 
 const localiseAdresses = async (): Promise<void> => {
   const couples = await prisma.adresse.groupBy({
@@ -23,17 +20,7 @@ const localiseAdresses = async (): Promise<void> => {
     `🔎 ${couples.length} couples (code postal, commune) à localiser`
   );
 
-  const localisedCouples = [];
-  for (let start = 0; start < couples.length; start += BAN_BATCH_SIZE) {
-    if (start > 0) {
-      await new Promise((resolve) => setTimeout(resolve, BAN_BATCH_PAUSE_MS));
-    }
-    localisedCouples.push(
-      ...(await resolveCommuneCoordinates(
-        couples.slice(start, start + BAN_BATCH_SIZE)
-      ))
-    );
-  }
+  const localisedCouples = await resolveCommuneCoordinates(couples);
 
   let localisedCount = 0;
   const nonLocalisees: typeof localisedCouples = [];
@@ -51,7 +38,7 @@ const localiseAdresses = async (): Promise<void> => {
       data: {
         communeLatitude: couple.communeCoordinates.latitude,
         communeLongitude: couple.communeCoordinates.longitude,
-        communeNom: couple.communeCoordinates.nom,
+        communeGeocodee: couple.communeCoordinates.nom,
       },
     });
     localisedCount += count;

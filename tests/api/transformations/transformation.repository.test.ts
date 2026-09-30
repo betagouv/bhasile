@@ -1108,7 +1108,7 @@ describe("transformation.repository db integration", () => {
     expect(version.adresses).toHaveLength(1);
     expect(version.adresses[0]).toMatchObject({
       placesAutorisees: 10,
-      communeNom: "Avranches",
+      communeGeocodee: "Avranches",
       communeLatitude: 48.677533,
     });
 
@@ -2239,7 +2239,7 @@ describe("transformation.repository db integration", () => {
     });
     expect(adresses).toHaveLength(1);
     expect(adresses[0]).toMatchObject({
-      communeNom: "Avranches",
+      communeGeocodee: "Avranches",
       communeLatitude: 48.677533,
     });
   });
@@ -2295,7 +2295,7 @@ describe("transformation.repository db integration", () => {
     expect(adresses).toHaveLength(1);
     expect(adresses[0]).toMatchObject({
       commune: "Granville",
-      communeNom: "Granville",
+      communeGeocodee: "Granville",
     });
   });
 
