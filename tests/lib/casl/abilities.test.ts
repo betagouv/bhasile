@@ -7,7 +7,7 @@ import {
 import { describe, expect, it } from "vitest";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
-import { AccessRole, Structure, UserType } from "@/generated/prisma/client";
+import { AccessRole, Structure } from "@/generated/prisma/client";
 import {
   canDeleteFile,
   canUpdateDepartement,
@@ -73,7 +73,7 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure13)).toBe(true);
   });
 
-  it("cumule les binômes de plusieurs périmètres", () => {
+  it("cumule les binômes de plusieurs niveaux", () => {
     const user = createSessionUser({
       grants: [
         createSessionGrant({ departementNumeros: ["1"] }),
@@ -86,30 +86,7 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure69)).toBe(false);
   });
 
-  it("restreint un périmètre à opérateur aux structures de cet opérateur", () => {
-    const user = createSessionUser({
-      grants: [
-        createSessionGrant({
-          departementNumeros: ["1", "13"],
-          operateurId: 10,
-        }),
-      ],
-    });
-
-    expect(canUpdateStructure(user, structure1)).toBe(true);
-    expect(canUpdateStructure(user, structure13)).toBe(false);
-  });
-
-  it("restreint aussi les structures cochées à l'opérateur du périmètre", () => {
-    const user = createSessionUser({
-      grants: [createSessionGrant({ structureIds: [1, 2], operateurId: 10 })],
-    });
-
-    expect(canUpdateStructure(user, structure1)).toBe(true);
-    expect(canUpdateStructure(user, structure13)).toBe(false);
-  });
-
-  it("n'accorde rien à un périmètre vide", () => {
+  it("n'accorde rien à un binôme sans cible", () => {
     const user = createSessionUser({ grants: [createSessionGrant()] });
 
     expect(canUpdateStructure(user, structure1)).toBe(false);
@@ -117,8 +94,8 @@ describe("Permissions : canUpdateStructure", () => {
 
   it("n'accorde aucune écriture à un utilisateur opérateur", () => {
     const user = createSessionUser({
-      type: UserType.OPERATEUR,
-      grants: [createSessionGrant({ isNational: true, operateurId: 10 })],
+      operateurId: 10,
+      grants: [createSessionGrant({ isNational: true })],
     });
 
     expect(canUpdateStructure(user, structure1)).toBe(false);

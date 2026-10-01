@@ -1,4 +1,4 @@
-import type { AccessRole, UserType } from "@/generated/prisma/client";
+import type { AccessRole } from "@/generated/prisma/client";
 
 export type Page = {
   params: Promise<{
@@ -37,7 +37,6 @@ export type SessionGrant = {
   isNational: boolean;
   departementNumeros: string[];
   structureIds: number[];
-  operateurId: number | null;
 };
 
 export type SessionUser = {
@@ -45,7 +44,7 @@ export type SessionUser = {
   name: string;
   prenom: string;
   email: string;
-  type: UserType;
+  operateurId: number | null;
   isSuperAdmin: boolean;
   grants: SessionGrant[];
 };

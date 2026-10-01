@@ -1,6 +1,7 @@
 // One-off script: convertit les Role / RoleDepartement en binômes rôle × niveau géographique
-// - Pattern d'email → droits de base : EDITEUR national, ou VIEWER national + EDITEUR sur sa zone
-// - Rôle manuel d'un utilisateur → EDITEUR sur sa zone
+// Pattern d'email et rôle manuel reçoivent les mêmes binômes :
+// EDITEUR national, ou VIEWER national + EDITEUR sur sa zone.
+// Les binômes d'un utilisateur remplacent ceux de son pattern, comme le rôle manuel aujourd'hui.
 // Un rôle couvrant une région entière donne un binôme région, sinon un binôme par département.
 // Idempotent : seuls les binômes manquants sont créés.
 // Usage: yarn one-off 20260929-migrate-roles-to-grants
@@ -10,7 +11,6 @@ import "dotenv/config";
 import {
   AgentZone,
   getAgentBaseGrants,
-  getAgentEditeurGrants,
   isSameGrant,
 } from "scripts/utils/grant.util";
 
@@ -86,7 +86,7 @@ const migrateManualUsers = async (
     where: { roleId },
     select: { id: true, grants: true },
   });
-  const grants = getAgentEditeurGrants(zone);
+  const grants = getAgentBaseGrants(zone);
 
   const { count } = await prisma.userGrant.createMany({
     data: users.flatMap((user) =>
