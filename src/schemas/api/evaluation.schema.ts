@@ -9,7 +9,6 @@ export const evaluationApiSchema = z.object({
   notePersonne: z.number().nullish(),
   notePro: z.number().nullish(),
   noteStructure: z.number().nullish(),
-  note: z.number().nullish(),
   fileUploads: z.array(fileApiSchema).optional(),
 });
 

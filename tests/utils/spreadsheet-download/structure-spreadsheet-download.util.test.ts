@@ -68,7 +68,6 @@ const mockStructure = {
       notePersonne: 4,
       notePro: 4.5,
       noteStructure: 4.2,
-      note: 4.23,
     },
   ],
   controles: [

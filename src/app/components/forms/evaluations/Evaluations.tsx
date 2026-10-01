@@ -27,7 +27,6 @@ export const Evaluations = (): ReactElement => {
       notePersonne: null,
       notePro: null,
       noteStructure: null,
-      note: null,
       uuid: uuidv4(),
     };
 
