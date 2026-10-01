@@ -27,10 +27,10 @@ export const seedAgent = async (): Promise<void> => {
     select: { id: true },
   });
 
-  await prisma.emailPatternGrant.deleteMany({
+  await prisma.grant.deleteMany({
     where: { emailPatternId: emailPattern.id },
   });
-  await prisma.emailPatternGrant.create({
+  await prisma.grant.create({
     data: {
       emailPatternId: emailPattern.id,
       role: AccessRole.EDITEUR,
@@ -49,7 +49,7 @@ export const seedAgent = async (): Promise<void> => {
       lastConnection: getNow(),
     },
   });
-  await prisma.userGrant.deleteMany({
+  await prisma.grant.deleteMany({
     where: { user: { email: E2E_AGENT_EMAIL } },
   });
 };

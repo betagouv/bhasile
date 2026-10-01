@@ -8,7 +8,7 @@ export const grantSelect = {
   },
   departement: { select: { numero: true, name: true } },
   structure: { select: { id: true, codeBhasile: true } },
-} satisfies Prisma.UserGrantSelect;
+} satisfies Prisma.GrantSelect;
 
 export const userWithGrantsSelect = {
   operateurId: true,
@@ -17,7 +17,7 @@ export const userWithGrantsSelect = {
   emailPattern: { select: { grants: { select: grantSelect } } },
 } satisfies Prisma.UserSelect;
 
-export type GrantDb = Prisma.UserGrantGetPayload<{
+export type GrantDb = Prisma.GrantGetPayload<{
   select: typeof grantSelect;
 }>;
 
