@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { FiltersTypesCheckbox } from "@/app/components/filters/FiltersTypesCheckbox";
 import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
@@ -11,39 +12,48 @@ export const FilterTypeStructure = () => {
   const searchParams = useSearchParams();
   const navigateWithFilter = useFilterNavigation();
 
-  const urlTypes = searchParams.get("types")?.split(",").filter(Boolean);
-  const currentTypes =
-    urlTypes && urlTypes.length > 0 ? urlTypes : ACCEPTED_STRUCTURE_TYPES;
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(() => {
+    return searchParams.get("types")?.split(",").filter(Boolean) || [];
+  });
 
-  const isAllChecked = currentTypes.length === ACCEPTED_STRUCTURE_TYPES.length;
-
-  const updateUrl = (newTypes: string[]) => {
-    navigateWithFilter(
-      "types",
-      newTypes.length < ACCEPTED_STRUCTURE_TYPES.length ? newTypes : [],
-      { pathname, scroll: false }
+  const isAllChecked =
+    ACCEPTED_STRUCTURE_TYPES.length > 0 &&
+    ACCEPTED_STRUCTURE_TYPES.every((structureType) =>
+      selectedTypes.includes(structureType)
     );
-  };
 
   const handleSelectAllChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.checked) {
-      updateUrl(ACCEPTED_STRUCTURE_TYPES);
+      setSelectedTypes([...ACCEPTED_STRUCTURE_TYPES]);
     } else {
-      updateUrl([]);
+      setSelectedTypes([]);
     }
   };
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
+    const selectedValue = event.target.value;
 
-    if (currentTypes.includes(value)) {
-      updateUrl(currentTypes.filter((type) => type !== value));
+    if (selectedTypes.includes(selectedValue)) {
+      setSelectedTypes(
+        selectedTypes.filter((structureType) => structureType !== selectedValue)
+      );
     } else {
-      updateUrl([...currentTypes, value]);
+      setSelectedTypes([...selectedTypes, selectedValue]);
     }
   };
+
+  useEffect(() => {
+    const newValue = selectedTypes.join(",");
+    const currentValue = searchParams.get("types") || "";
+
+    if (currentValue === newValue) {
+      return;
+    }
+
+    navigateWithFilter("types", selectedTypes, { pathname, scroll: false });
+  }, [selectedTypes, searchParams, navigateWithFilter, pathname]);
 
   return (
     <div className="p-6 flex flex-col gap-2">
@@ -58,7 +68,7 @@ export const FilterTypeStructure = () => {
           key={structureType}
           label={structureType}
           value={structureType}
-          checked={currentTypes.includes(structureType)}
+          checked={selectedTypes.includes(structureType)}
           onChange={handleTypeChange}
         />
       ))}
