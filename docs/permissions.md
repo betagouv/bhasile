@@ -8,7 +8,7 @@ Quatre périmètres, et rien d'autre : **national, région, département, struct
 
 Elle remplace `Role` / `RoleDepartement` par des binômes, **sans changement visible pour les agents**.
 
-- **Schéma** : `UserGrant`, `EmailPatternGrant`, enums `AccessRole` et `GrantScope`, `User.operateurId`, `User.isSuperAdmin`.
+- **Schéma** : table `Grant`, enums `AccessRole` et `GrantScope`, `User.operateurId`, `User.isSuperAdmin`.
 - **Session** : `role` / `allowedDepartements` deviennent `operateurId`, `isSuperAdmin`, `grants` (régions déjà résolues en départements).
 - **CASL** : une règle `update Structure` par binôme `EDITEUR` / `ADMIN`. La lecture reste ouverte à tous, comme avant.
 - **One-off** `20260929-migrate-roles-to-grants` :
@@ -18,16 +18,17 @@ Elle remplace `Role` / `RoleDepartement` par des binômes, **sans changement vis
 
 ## Modèle
 
-Un binôme (`UserGrant` ou `EmailPatternGrant`) porte :
+Un binôme est une ligne de `Grant` :
 
 | Colonne                                        | Rôle                                               |
 | ---------------------------------------------- | -------------------------------------------------- |
+| `userId` ou `emailPatternId`                   | Le propriétaire : un user, ou un pattern d'email   |
 | `role`                                         | `VIEWER`, `EDITEUR`, `ADMIN`                       |
 | `scope`                                        | `NATIONAL`, `REGION`, `DEPARTEMENT`, `STRUCTURE`   |
 | `regionId`, `departementNumero`, `structureId` | La cible, selon le `scope`. Aucune pour `NATIONAL` |
 
-- `EmailPatternGrant` : droits de base, déduits de l'email à chaque session, non modifiables par user.
-- `UserGrant` : binômes attribués à la main. Dès qu'un user en a, ils **remplacent** ceux de son pattern.
+- Binôme d'un **pattern** : droits de base, déduits de l'email à chaque session, non modifiables par user.
+- Binôme d'un **user** : attribué à la main. Dès qu'un user en a, ils **remplacent** ceux de son pattern.
 - `User.operateurId` : renseigné = user opérateur, limité aux structures de cet opérateur. Vide = agent.
 
 Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `{ scope: REGION, regionId: AURA }`.
@@ -38,7 +39,7 @@ Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `
 - **`scope` explicite** plutôt que déduit des colonnes vides : un binôme sans cible ne donne **rien**, jamais tout.
 - **Région stockée comme région** : une structure qui arrive en AURA entre automatiquement dans les binômes AURA.
 - **Droits de base portés par le pattern, jamais recopiés sur le user** : un changement de poste met les droits à jour tout seul, et ils restent non modifiables par construction.
-- **Deux tables de binômes** plutôt qu'une ligne polymorphe `userId | aliasId` : de vraies clés étrangères, sans contrainte CHECK.
+- **Une seule table `Grant`** pour les users et les patterns, avec `userId` ou `emailPatternId` : les deux binômes ont exactement les mêmes colonnes. Sans contrainte CHECK, une ligne sans propriétaire est possible mais ne donne aucun droit.
 - **Le manuel l'emporte sur le pattern**, comme `user.role ?? emailPattern.role` aujourd'hui : un agent `@national.gouv.fr` rattaché à la Bretagne est viewer national et éditeur Bretagne, rien de plus.
 - **Opérateur porté par le user, pas par le binôme** : un agent n'est jamais limité par opérateur, et un user opérateur appartient à un seul opérateur. Un binôme hors de son opérateur est donc impossible à écrire.
 - **Pas d'enum `User.type`** : opérateur = `operateurId` renseigné, une seule source de vérité.
@@ -48,7 +49,7 @@ Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `
 
 ## Invariants à garantir (PR 2 et 3)
 
-- **Cohérence `scope` / cible** : vérifiée par le service à la création (pas de CHECK en base).
+- **Cohérence d'une ligne `Grant`** : un seul propriétaire (`userId` ou `emailPatternId`) et une cible conforme au `scope`, vérifiés par le service à la création (pas de CHECK en base).
 - **Hiérarchie admin, héritée de la géographie** : un admin ajoute ou révoque un binôme, admin compris, si la cible est **dans** son propre niveau d'admin.
   - Admin national : tout.
   - Admin régional : sa région, ses départements, les structures de sa région. Ni le national, ni les autres régions.
@@ -60,7 +61,7 @@ Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `
 
 ## Points d'attention
 
-- **Ajouter un binôme à un agent qui n'a que ses droits de base** : le premier `UserGrant` remplace tout son pattern. Il faut donc recopier les droits de base à garder (au minimum `VIEWER national`).
+- **Ajouter un binôme à un agent qui n'a que ses droits de base** : son premier binôme personnel remplace tout son pattern. Il faut donc recopier les droits de base à garder (au minimum `VIEWER national`).
 - **Maisons mères et filiales** (`Operateur.parentId`) : non géré. Un user du siège ne voit pas les structures des filiales. À traiter plus tard.
 - **Un user sur deux opérateurs** : cas exclu, il n'arrivera pas.
 

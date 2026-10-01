@@ -77,7 +77,7 @@ const fillEmailPattern = async (row: RoleCsvRow, zone: AgentZone) => {
     (grant) =>
       !emailPattern.grants.some((existing) => isSameGrant(existing, grant))
   );
-  await prisma.emailPatternGrant.createMany({
+  await prisma.grant.createMany({
     data: missingGrants.map((grant) => ({
       ...grant,
       emailPatternId: emailPattern.id,

@@ -61,7 +61,7 @@ const migrateEmailPatterns = async (
   });
   const grants = getAgentBaseGrants(zone);
 
-  const { count } = await prisma.emailPatternGrant.createMany({
+  const { count } = await prisma.grant.createMany({
     data: emailPatterns.flatMap(({ id }) =>
       grants.map((grant) => ({ ...grant, emailPatternId: id }))
     ),
@@ -79,7 +79,7 @@ const migrateManualUsers = async (
   });
   const grants = getAgentBaseGrants(zone);
 
-  const { count } = await prisma.userGrant.createMany({
+  const { count } = await prisma.grant.createMany({
     data: users.flatMap(({ id }) =>
       grants.map((grant) => ({ ...grant, userId: id }))
     ),

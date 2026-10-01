@@ -11,7 +11,7 @@ model User {
   operateur           Operateur?    @relation(fields: [operateurId], references: [id], onDelete: Restrict)
   operateurId         Int?
   isSuperAdmin        Boolean       @default(false)
-  grants              UserGrant[]
+  grants              Grant[]
   notes               Note[]
   anomaliesJustifiees Anomalie[]
 
@@ -62,50 +62,34 @@ model RoleDepartement {
 }
 
 model EmailPattern {
-  id      Int                 @id @default(autoincrement())
-  pattern String              @unique
-  role    Role?               @relation(fields: [roleId], references: [id])
+  id      Int     @id @default(autoincrement())
+  pattern String  @unique
+  role    Role?   @relation(fields: [roleId], references: [id])
   roleId  Int?
   users   User[]
-  grants  EmailPatternGrant[]
+  grants  Grant[]
 
   @@schema("public")
 }
 
-model UserGrant {
-  id                Int          @id @default(autoincrement())
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            Int
+model Grant {
+  id                Int           @id @default(autoincrement())
+  user              User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            Int?
+  emailPattern      EmailPattern? @relation(fields: [emailPatternId], references: [id], onDelete: Cascade)
+  emailPatternId    Int?
   role              AccessRole
   scope             GrantScope
-  region            Region?      @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  region            Region?       @relation(fields: [regionId], references: [id], onDelete: Cascade)
   regionId          Int?
-  departement       Departement? @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
+  departement       Departement?  @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
   departementNumero String?
-  structure         Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade)
+  structure         Structure?    @relation(fields: [structureId], references: [id], onDelete: Cascade)
   structureId       Int?
 
   createdAt DateTime @default(now())
 
   @@index([userId])
-  @@schema("public")
-}
-
-model EmailPatternGrant {
-  id                Int          @id @default(autoincrement())
-  emailPattern      EmailPattern @relation(fields: [emailPatternId], references: [id], onDelete: Cascade)
-  emailPatternId    Int
-  role              AccessRole
-  scope             GrantScope
-  region            Region?      @relation(fields: [regionId], references: [id], onDelete: Cascade)
-  regionId          Int?
-  departement       Departement? @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
-  departementNumero String?
-  structure         Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade)
-  structureId       Int?
-
-  createdAt DateTime @default(now())
-
   @@index([emailPatternId])
   @@schema("public")
 }
