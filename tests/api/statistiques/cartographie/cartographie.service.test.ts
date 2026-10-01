@@ -57,6 +57,17 @@ const buildContext = (
     allStructures: structures,
     activeStructureIdsNow,
     activeStructureIdsByPeriod,
+    finalisedStructureIds: new Set(
+      structures.map((structure) => structure.id)
+    ),
+    actualisationFormDefinitions: [],
+    lastValidatedCampagneYearByStructureId: new Map(),
+    openingDateByStructureId: new Map(),
+    closureDateByStructureId: new Map(),
+    idfDepartementNumeros: new Set(),
+    cadaFromHudaStructureIds: new Set(),
+    tarifsJournaliersCibles: [],
+    tauxEncadrementCibles: [],
     eigs: [],
     evaluations: [],
     typologies: structures.map((structure) => ({

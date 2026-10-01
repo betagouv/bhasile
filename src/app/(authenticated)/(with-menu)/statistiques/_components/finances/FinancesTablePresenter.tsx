@@ -27,29 +27,51 @@ const formatAmountCell = (value?: number | null): ReactElement | string =>
     <EmptyCell />
   );
 
+const formatCostCell = (value?: number | null): ReactElement | string =>
+  value !== null && value !== undefined ? (
+    <NumberDisplay value={value} type="currency" />
+  ) : (
+    <EmptyCell />
+  );
+
 const sectionsConfig: FinanceSectionConfig[] = [
   {
     title: "Indicateurs généraux",
     rows: [
       {
-        label: "Nombre d’ETP",
-        key: "totalETP",
+        label: "Nombre d’ETP prévisionnel",
+        key: "totalETPPrevisionnel",
         format: formatNumberCell,
       },
       {
-        label: "Taux d’encadrement moyen",
-        key: "tauxEncadrement",
+        label: "Nombre d’ETP réel",
+        key: "totalETPRealise",
         format: formatNumberCell,
       },
       {
-        label: "Coût journalier moyen",
-        key: "coutJournalier",
-        format: (value) =>
-          value !== null && value !== undefined ? (
-            <NumberDisplay value={value} type="currency" />
-          ) : (
-            <EmptyCell />
-          ),
+        label: "Taux d’encadrement cible moyen",
+        key: "tauxEncadrementCible",
+        format: formatNumberCell,
+      },
+      {
+        label: "Taux d’encadrement théorique prévisionnel moyen",
+        key: "tauxEncadrementTheoriquePrevisionnel",
+        format: formatNumberCell,
+      },
+      {
+        label: "Taux d’encadrement théorique réel moyen",
+        key: "tauxEncadrementTheoriqueRealise",
+        format: formatNumberCell,
+      },
+      {
+        label: "Coût journalier cible moyen",
+        key: "coutJournalierCible",
+        format: formatCostCell,
+      },
+      {
+        label: "Coût journalier théorique moyen",
+        key: "coutJournalierTheorique",
+        format: formatCostCell,
       },
     ],
   },

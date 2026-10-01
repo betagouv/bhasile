@@ -50,19 +50,19 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.total.totalETP} />
+              <NumberDisplay value={currentYear.total.totalETPPrevisionnel} />
             ),
             secondaryInformation: "ETP au total",
           },
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.autorisees.totalETP} />
+              <NumberDisplay value={currentYear.autorisees.totalETPPrevisionnel} />
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.subventionnees.totalETP} />
+              <NumberDisplay value={currentYear.subventionnees.totalETPPrevisionnel} />
             ),
             secondaryInformation: "pour les structures subventionnées",
           },
@@ -73,20 +73,20 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.total.tauxEncadrement!} />
+              <NumberDisplay value={currentYear.total.tauxEncadrementTheoriquePrevisionnel!} />
             ),
             secondaryInformation: "taux d'encadrement moyen",
           },
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.autorisees.tauxEncadrement!} />
+              <NumberDisplay value={currentYear.autorisees.tauxEncadrementTheoriquePrevisionnel!} />
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
             primaryInformation: (
               <NumberDisplay
-                value={currentYear.subventionnees.tauxEncadrement!}
+                value={currentYear.subventionnees.tauxEncadrementTheoriquePrevisionnel!}
               />
             ),
             secondaryInformation: "pour les structures subventionnées",
@@ -99,7 +99,7 @@ export const FinanceCards = (): ReactElement => {
           {
             primaryInformation: (
               <NumberDisplay
-                value={currentYear.total.coutJournalier}
+                value={currentYear.total.coutJournalierTheorique}
                 type="currency"
               />
             ),
@@ -108,7 +108,7 @@ export const FinanceCards = (): ReactElement => {
           {
             primaryInformation: (
               <NumberDisplay
-                value={currentYear.autorisees.coutJournalier}
+                value={currentYear.autorisees.coutJournalierTheorique}
                 type="currency"
               />
             ),
@@ -117,7 +117,7 @@ export const FinanceCards = (): ReactElement => {
           {
             primaryInformation: (
               <NumberDisplay
-                value={currentYear.subventionnees.coutJournalier}
+                value={currentYear.subventionnees.coutJournalierTheorique}
                 type="currency"
               />
             ),
