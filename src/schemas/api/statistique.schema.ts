@@ -24,6 +24,22 @@ export type StatistiquesFilters = z.infer<typeof statistiquesFiltersSchema>;
 
 // Types de lecture pure (pas d'input à valider) : pas de schéma zod, juste des types.
 
+export const CompletudeReason = {
+  SAISIE_EN_COURS: "SAISIE_EN_COURS",
+  SAISIE_INCOMPLETE: "SAISIE_INCOMPLETE",
+} as const;
+
+export type CompletudeReason =
+  (typeof CompletudeReason)[keyof typeof CompletudeReason];
+
+// `null` sur une année d'initialisation, antérieure aux campagnes d'actualisation.
+export type CompletudeStat = {
+  isComplete: boolean;
+  reason: CompletudeReason | null;
+  nbAttendues: number;
+  nbRenseignees: number;
+};
+
 export type TypeStructureStat = {
   type: StructureType;
   structures: number;
@@ -38,6 +54,9 @@ export type BatiStat = {
 
 export type StructuresByYearStat = {
   year: number;
+  completude: CompletudeStat | null;
+  structureTypes: TypeStructureStat[];
+  structureBatis: BatiStat[];
   totalStructures: number;
   totalCpoms: number;
   structuresAvecCpom: number;
@@ -67,14 +86,19 @@ export type PlacesByYearStat = Omit<
   "qpv" | "logementsSociaux"
 > & {
   year: number;
+  completude: CompletudeStat | null;
 };
 
 export type FinanceByYearScopeStat = {
   dotationDemandee: number;
   dotationAccordee: number;
-  totalETP: number;
-  tauxEncadrement: number | null;
-  coutJournalier: number | null;
+  totalETPPrevisionnel: number | null;
+  totalETPRealise: number | null;
+  tauxEncadrementCible: number | null;
+  tauxEncadrementTheoriquePrevisionnel: number | null;
+  tauxEncadrementTheoriqueRealise: number | null;
+  coutJournalierCible: number | null;
+  coutJournalierTheorique: number | null;
   totalProduits: number;
   totalCharges: number;
   resultatNet: number;
@@ -84,6 +108,7 @@ export type FinanceByYearScopeStat = {
 
 export type FinanceByYearStat = {
   year: number;
+  completude: CompletudeStat | null;
   total: FinanceByYearScopeStat;
   autorisees: FinanceByYearScopeStat;
   subventionnees: FinanceByYearScopeStat;

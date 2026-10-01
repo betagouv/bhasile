@@ -55,27 +55,27 @@ const mockStatistiques = {
       {
         year: 2024,
         total: {
-          totalETP: 20,
-          tauxEncadrement: 1.5,
-          coutJournalier: 85,
+          totalETPRealise: 20,
+          tauxEncadrementTheoriqueRealise: 1.5,
+          coutJournalierTheorique: 85,
           dotationDemandee: 100000,
           dotationAccordee: 90000,
           totalProduits: 100000,
           totalCharges: 95000,
         },
         autorisees: {
-          totalETP: 15,
-          tauxEncadrement: 1.2,
-          coutJournalier: 80,
+          totalETPRealise: 15,
+          tauxEncadrementTheoriqueRealise: 1.2,
+          coutJournalierTheorique: 80,
           dotationDemandee: 80000,
           dotationAccordee: 75000,
           totalProduits: 80000,
           totalCharges: 78000,
         },
         subventionnees: {
-          totalETP: 5,
-          tauxEncadrement: 0.3,
-          coutJournalier: 5,
+          totalETPRealise: 5,
+          tauxEncadrementTheoriqueRealise: 0.3,
+          coutJournalierTheorique: 5,
           dotationDemandee: 20000,
           dotationAccordee: 15000,
           totalProduits: 20000,
@@ -187,14 +187,14 @@ describe("statistiques-spreadsheet-download.util", () => {
       expect(financeTotalSheet?.sheetName).toBe("Finance (total)");
       expect(financeTotalSheet?.data[0]).toMatchObject({
         year: 2024,
-        totalETP: 20,
+        totalETPRealise: 20,
         resultatNet: 5000,
       });
 
       expect(financeAutoriseeSheet?.sheetName).toBe("Finance (autorisées)");
       expect(financeAutoriseeSheet?.data[0]).toMatchObject({
         year: 2024,
-        totalETP: 15,
+        totalETPRealise: 15,
         resultatNet: 2000,
       });
 
@@ -203,7 +203,7 @@ describe("statistiques-spreadsheet-download.util", () => {
       );
       expect(financeSubventionneeSheet?.data[0]).toMatchObject({
         year: 2024,
-        totalETP: 5,
+        totalETPRealise: 5,
         resultatNet: 3000,
       });
     });

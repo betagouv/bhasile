@@ -10,6 +10,7 @@ import {
 import { SessionUser } from "@/types/global";
 
 import { computeActiviteStatistiques } from "./activite/activite.util";
+import { buildLastValidatedCampagneYearByStructureId } from "./completude.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
 import { computeFinanceStatistiques } from "./finance/finance.util";
 import { computePlacesStatistiques } from "./places/places.util";
@@ -17,12 +18,16 @@ import { computeRmuStatistiques } from "./rmu/rmu.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findActivites,
+  findActualisationFormDefinitions,
   findBudgets,
+  findCadaFromHudaStructureIds,
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinks,
   findEigs,
   findEvaluations,
+  findFinalisedStructureIds,
+  findIdfDepartementNumeros,
   findIndicateursFinanciers,
   findOperateurFiliales,
   findPerimeterStructures,
@@ -31,6 +36,9 @@ import {
   findStructureAdresses,
   findStructureTypologies,
   findStructureVersionTimeline,
+  findTarifsJournaliersCibles,
+  findTauxEncadrementCibles,
+  findValidatedActualisationForms,
 } from "./statistiques.repository";
 import {
   applyVersionedPlacesToTypologies,
@@ -91,14 +99,33 @@ export const buildStatistiquesContext = async (
     structureActivityDates
   );
 
-  const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
-    await Promise.all([
-      findStructureTypologies(allStructureIds),
-      findStructureAdresses(allStructureIds),
-      findCpomStructures(allStructureIds),
-      findDnaLinks(allStructureIds),
-      findStructureVersionTimeline(allStructureIds),
-    ]);
+  const [
+    typologies,
+    adresses,
+    cpomLinks,
+    dnaLinks,
+    structureVersionTimeline,
+    finalisedStructureIds,
+    actualisationFormDefinitions,
+    validatedActualisations,
+    idfDepartementNumeros,
+    cadaFromHudaStructureIds,
+    tarifsJournaliersCibles,
+    tauxEncadrementCibles,
+  ] = await Promise.all([
+    findStructureTypologies(allStructureIds),
+    findStructureAdresses(allStructureIds),
+    findCpomStructures(allStructureIds),
+    findDnaLinks(allStructureIds),
+    findStructureVersionTimeline(allStructureIds),
+    findFinalisedStructureIds(allStructureIds),
+    findActualisationFormDefinitions(),
+    findValidatedActualisationForms(allStructureIds),
+    findIdfDepartementNumeros(),
+    findCadaFromHudaStructureIds(allStructureIds),
+    findTarifsJournaliersCibles(),
+    findTauxEncadrementCibles(),
+  ]);
 
   const resolvedTypologies = applyVersionedPlacesToTypologies(
     typologies.filter((typologie) => typologie.year <= referenceYear),
@@ -164,6 +191,16 @@ export const buildStatistiquesContext = async (
     allStructures,
     activeStructureIdsNow,
     activeStructureIdsByPeriod,
+    openingDateByStructureId: activityContext.openingDateByStructureId,
+    closureDateByStructureId: activityContext.closureDateByStructureId,
+    finalisedStructureIds: new Set(finalisedStructureIds),
+    actualisationFormDefinitions,
+    lastValidatedCampagneYearByStructureId:
+      buildLastValidatedCampagneYearByStructureId(validatedActualisations),
+    idfDepartementNumeros: new Set(idfDepartementNumeros),
+    cadaFromHudaStructureIds: new Set(cadaFromHudaStructureIds),
+    tarifsJournaliersCibles,
+    tauxEncadrementCibles,
     eigs,
     evaluations,
     typologies: resolvedTypologies,
