@@ -1,9 +1,6 @@
 import { getServerSession } from "next-auth";
 
-import {
-  UserActionCategory,
-  UserActionDescription,
-} from "@/generated/prisma/enums";
+import { UserActionCategory, UserActionType } from "@/generated/prisma/enums";
 import { authOptions } from "@/lib/next-auth/auth";
 import prisma from "@/lib/prisma";
 
@@ -13,7 +10,8 @@ export const createUserAction = async ({
   cpomId,
   operateurId,
   userEmail,
-  description,
+  type,
+  details,
 }: CreateUserActionArgs): Promise<void> => {
   try {
     const email =
@@ -40,7 +38,8 @@ export const createUserAction = async ({
         structureId,
         cpomId,
         operateurId,
-        description,
+        type,
+        details,
       },
     });
   } catch (error) {
@@ -57,5 +56,6 @@ type CreateUserActionArgs = {
   cpomId?: number;
   operateurId?: number;
   userEmail?: string;
-  description?: UserActionDescription;
+  type?: UserActionType;
+  details?: Record<string, string>;
 };

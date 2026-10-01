@@ -6,14 +6,21 @@ import { searchMunicipality } from "@/app/api/adresses/ban.client";
 
 const mockFetch = vi.fn();
 
-const EU_BODY = {
-  features: [
-    {
-      geometry: { coordinates: [1.423036, 50.04029] },
-      properties: { city: "Eu" },
-    },
-  ],
+const buildFeature = (
+  city: string,
+  citycode: string,
+  coordinates: [number, number]
+) => ({ geometry: { coordinates }, properties: { city, citycode } });
+
+const respondWith = (features: ReturnType<typeof buildFeature>[]) => {
+  vi.stubGlobal("fetch", mockFetch);
+  mockFetch.mockImplementation(
+    async () => new Response(JSON.stringify({ features }), { status: 200 })
+  );
 };
+
+const getSearchParams = () =>
+  Object.fromEntries(new URL(mockFetch.mock.calls[0][0]).searchParams);
 
 describe("searchMunicipality", () => {
   afterEach(() => {
@@ -21,36 +28,60 @@ describe("searchMunicipality", () => {
     mockFetch.mockReset();
   });
 
-  it("interroge la BAN en communes filtrées par code postal, code postal répété dans la recherche", async () => {
-    vi.stubGlobal("fetch", mockFetch);
-    mockFetch.mockResolvedValue(
-      new Response(JSON.stringify(EU_BODY), { status: 200 })
-    );
+  it("cherche la commune seule parmi les communes de la BAN, sans filtrer sur le code postal", async () => {
+    respondWith([]);
 
-    await searchMunicipality({ codePostal: "76260", commune: "Eu" });
+    await searchMunicipality({
+      codePostal: "94290",
+      commune: "Villeneuve-Saint-Georges",
+    });
 
     const url = new URL(mockFetch.mock.calls[0][0]);
     expect(url.origin + url.pathname).toBe(
       "https://data.geopf.fr/geocodage/search/"
     );
-    expect(Object.fromEntries(url.searchParams)).toEqual({
-      q: "Eu 76260",
+    expect(getSearchParams()).toEqual({
+      q: "Villeneuve-Saint-Georges",
       type: "municipality",
-      postcode: "76260",
-      limit: "1",
+      limit: "20",
     });
     expect(mockFetch.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
   });
 
-  it("renvoie le centre et le nom officiel de la commune trouvée", async () => {
-    vi.stubGlobal("fetch", mockFetch);
-    mockFetch.mockResolvedValue(
-      new Response(JSON.stringify(EU_BODY), { status: 200 })
-    );
+  it("ajoute le code postal à la recherche d'un nom trop court pour la BAN", async () => {
+    respondWith([]);
+
+    await searchMunicipality({ codePostal: "76260", commune: "Eu" });
+
+    expect(getSearchParams().q).toBe("Eu 76260");
+  });
+
+  it("retient la commune du département du code postal parmi les homonymes", async () => {
+    respondWith([
+      buildFeature("Sainte-Colombe", "33403", [-0.05, 44.88]),
+      buildFeature("Sainte-Colombe", "77410", [3.26, 48.53]),
+    ]);
 
     expect(
-      await searchMunicipality({ codePostal: "76260", commune: "Eu" })
-    ).toEqual({ latitude: 50.04029, longitude: 1.423036, nom: "Eu" });
+      await searchMunicipality({
+        codePostal: "77650",
+        commune: "Sainte-Colombe",
+      })
+    ).toEqual({ latitude: 48.53, longitude: 3.26, nom: "Sainte-Colombe" });
+    expect(
+      await searchMunicipality({
+        codePostal: "71000",
+        commune: "Sainte-Colombe",
+      })
+    ).toBeNull();
+  });
+
+  it("rapproche les codes commune corses (2A, 2B) de leur code postal en 20", async () => {
+    respondWith([buildFeature("Ajaccio", "2A004", [8.7, 41.93])]);
+
+    expect(
+      await searchMunicipality({ codePostal: "20000", commune: "Ajaccio" })
+    ).toEqual({ latitude: 41.93, longitude: 8.7, nom: "Ajaccio" });
   });
 
   it("rend null quand la commune est introuvable, refusée ou que la BAN ne répond pas", async () => {

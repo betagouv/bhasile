@@ -7,68 +7,43 @@ const PLACES_GAP_RATIO = 0.2;
 // Quelques adresses non localisées alimentent l'anomalie ADRESSE_NON_LOCALISEE
 const NON_LOCALISEE_RATIO = 0.05;
 
-// Points `municipality` renvoyés par la BAN, identiques à ce que produirait le géocodage à l'enregistrement
-const LOCALISATIONS: Pick<
+export const STRUCTURE_ZONE = {
+  minLatitude: 43.550851,
+  maxLatitude: 49.131627,
+  minLongitude: -0.851371,
+  maxLongitude: 5.843377,
+};
+
+const FAKE_COMMUNES_COUNT = 60;
+
+type FakeCommune = Pick<
   Adresse,
   | "codePostal"
   | "commune"
-  | "communeNom"
+  | "communeGeocodee"
   | "communeLatitude"
   | "communeLongitude"
->[] = [
-  // Ville à plusieurs codes postaux : un seul centre
-  {
-    codePostal: "75011",
-    commune: "Paris",
-    communeNom: "Paris",
-    communeLatitude: 48.859,
-    communeLongitude: 2.347,
-  },
-  {
-    codePostal: "69003",
-    commune: "Lyon",
-    communeNom: "Lyon",
-    communeLatitude: 45.758,
-    communeLongitude: 4.835,
-  },
-  // Code postal partagé par deux communes, et variante d'écriture de la même commune
-  {
-    codePostal: "50000",
-    commune: "Saint-Lô",
-    communeNom: "Saint-Lô",
-    communeLatitude: 49.113843,
-    communeLongitude: -1.080182,
-  },
-  {
-    codePostal: "50000",
-    commune: "ST LO",
-    communeNom: "Saint-Lô",
-    communeLatitude: 49.113843,
-    communeLongitude: -1.080182,
-  },
-  {
-    codePostal: "50000",
-    commune: "Baudre",
-    communeNom: "Baudre",
-    communeLatitude: 49.089822,
-    communeLongitude: -1.06874,
-  },
-  // Ancien nom d'une commune fusionnée
-  {
-    codePostal: "50100",
-    commune: "Cherbourg-en-Cotentin",
-    communeNom: "Cherbourg-en-Cotentin",
-    communeLatitude: 49.628684,
-    communeLongitude: -1.63324,
-  },
-  {
-    codePostal: "50130",
-    commune: "Cherbourg-Octeville",
-    communeNom: "Cherbourg-en-Cotentin",
-    communeLatitude: 49.628684,
-    communeLongitude: -1.63324,
-  },
-];
+>;
+
+let fakeCommunes: FakeCommune[] | undefined;
+
+const getFakeCommunes = (): FakeCommune[] =>
+  (fakeCommunes ??= Array.from({ length: FAKE_COMMUNES_COUNT }, () => {
+    const commune = faker.location.city();
+    return {
+      codePostal: faker.location.zipCode(),
+      commune,
+      communeGeocodee: commune,
+      communeLatitude: faker.location.latitude({
+        min: STRUCTURE_ZONE.minLatitude,
+        max: STRUCTURE_ZONE.maxLatitude,
+      }),
+      communeLongitude: faker.location.longitude({
+        min: STRUCTURE_ZONE.minLongitude,
+        max: STRUCTURE_ZONE.maxLongitude,
+      }),
+    };
+  }));
 
 export const createFakeAdresses = ({
   placesAutorisees,
@@ -133,11 +108,11 @@ const createFakeAdresse = ({
     ? {
         codePostal: faker.location.zipCode(),
         commune: faker.location.city(),
-        communeNom: null,
+        communeGeocodee: null,
         communeLatitude: null,
         communeLongitude: null,
       }
-    : faker.helpers.arrayElement(LOCALISATIONS)),
+    : faker.helpers.arrayElement(getFakeCommunes())),
   repartition,
   placesAutorisees,
   isQpv: faker.datatype.boolean(),

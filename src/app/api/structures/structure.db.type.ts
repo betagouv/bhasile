@@ -223,7 +223,7 @@ export type StructureListAdresse = {
   placesAutorisees: number | null;
   communeLatitude: number | null;
   communeLongitude: number | null;
-  communeNom: string | null;
+  communeGeocodee: string | null;
 };
 
 export type StructureVersionAdresses = {

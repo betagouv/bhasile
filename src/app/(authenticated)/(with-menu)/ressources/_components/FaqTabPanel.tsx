@@ -1,14 +1,28 @@
+"use client";
+
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
+import MarkdownIt from "markdown-it";
 import { ReactElement } from "react";
 
+import { FaqApiType } from "@/schemas/api/faq.schema";
 import { FaqTab } from "@/types/ressources.type";
 
-export const FaqTabPanel = ({ tab }: Props): ReactElement => {
+const markdownParser = new MarkdownIt();
+
+export const FaqTabPanel = ({ tab, faqItems }: Props): ReactElement | null => {
+  const filteredFaqItems = faqItems.filter(
+    (faqItem: FaqApiType) => faqItem.category === tab.title
+  );
+
   return (
     <>
-      {tab.questions.map((question) => (
-        <Accordion key={question.id} label={question.title}>
-          <div dangerouslySetInnerHTML={{ __html: question.answerHtml }} />
+      {filteredFaqItems.map((faqItem: FaqApiType) => (
+        <Accordion key={faqItem.id} label={faqItem.question}>
+          <div
+            dangerouslySetInnerHTML={{
+              __html: markdownParser.render(faqItem.contentMarkdown),
+            }}
+          />
         </Accordion>
       ))}
     </>
@@ -17,4 +31,5 @@ export const FaqTabPanel = ({ tab }: Props): ReactElement => {
 
 type Props = {
   tab: FaqTab;
+  faqItems: FaqApiType[];
 };

@@ -6,7 +6,7 @@ import {
 } from "@/utils-server/ressources.server.util";
 
 import { ResourcesBlockList } from "./_components/ResourcesBlockList";
-import { ResourcesContent } from "./_components/ResourcesContent";
+import { RessourcesSkeleton } from "./_components/RessourcesSkeleton";
 
 export default function Ressources(): ReactElement {
   const blocks = readBlocks();
@@ -19,9 +19,8 @@ export default function Ressources(): ReactElement {
           Modèles et ressources
         </h2>
       </div>
-
-      <Suspense fallback={<ResourcesBlockList blocks={blocks} />}>
-        <ResourcesContent blocks={blocks} suggestions={suggestions} />
+      <Suspense fallback={<RessourcesSkeleton />}>
+        <ResourcesBlockList blocks={blocks} suggestions={suggestions} />
       </Suspense>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import { createContext, useContext } from "react";
 
 // null tant que la carte n'a pas fini de charger son style.

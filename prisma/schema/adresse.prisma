@@ -9,7 +9,7 @@ model Adresse {
   placesAutorisees   Int?
   communeLatitude    Float?
   communeLongitude   Float?
-  communeNom         String?
+  communeGeocodee    String?
   isQpv              Boolean            @default(false)
   isLogementSocial   Boolean            @default(false)
 

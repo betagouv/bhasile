@@ -40,7 +40,12 @@ const numberPreprocess = (val: unknown): number | null | undefined => {
     return undefined;
   }
   if (typeof val === "string") {
-    const normalizedValue = val.replace(",", ".").replaceAll(" ", "");
+    const normalizedValue = val.replace(",", ".").replaceAll(" ", "").trim();
+
+    if (normalizedValue === "") {
+      return null;
+    }
+
     const parsed = Number(normalizedValue);
 
     if (!isNaN(parsed)) {

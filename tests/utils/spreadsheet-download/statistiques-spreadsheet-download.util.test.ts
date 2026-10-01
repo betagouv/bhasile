@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
+import { CURRENT_YEAR } from "@/constants";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 vi.mock("../date.util", () => ({
@@ -205,6 +206,31 @@ describe("statistiques-spreadsheet-download.util", () => {
         totalETP: 5,
         resultatNet: 3000,
       });
+    });
+
+    it("vide le résultat des feuilles financières pour l'année en cours", () => {
+      const statistiquesAnneeEnCours = {
+        ...mockStatistiques,
+        finance: {
+          byYear: [
+            {
+              ...mockStatistiques.finance.byYear[0],
+              year: CURRENT_YEAR,
+            },
+          ],
+        },
+      } as unknown as StatistiqueApiRead;
+
+      const content = getStatistiquesDownloadContent(statistiquesAnneeEnCours);
+
+      for (const financeSheetIndex of [2, 3, 4]) {
+        const row = content.sheets?.[financeSheetIndex].data[0];
+
+        expect(row).toMatchObject({ year: CURRENT_YEAR });
+        expect(row?.totalProduits).toBeNull();
+        expect(row?.totalCharges).toBeNull();
+        expect(row?.resultatNet).toBeUndefined();
+      }
     });
 
     it("formate la date et les pourcentages pour la feuille 'Contrôle qualité'", () => {

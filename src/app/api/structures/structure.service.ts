@@ -30,7 +30,7 @@ import {
   buildAdresseAdministrativeComplete,
   getAdressesApiRead,
 } from "../adresses/adresse.util";
-import { localiseAdresses } from "../adresses/ban.service";
+import { locateAdresses } from "../adresses/ban.service";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
@@ -88,13 +88,13 @@ import {
 export const updateStructureAgent = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
-  const [coordinates, localisedStructure] = await Promise.all([
+  const [coordinates, locatedStructure] = await Promise.all([
     getAdresseAdministrativeCoordinates(structure),
-    localiseAdresses(structure),
+    locateAdresses(structure),
   ]);
   return await updateStructureAndRecomputeAnomalies(
     {
-      ...localisedStructure,
+      ...locatedStructure,
       ...coordinates,
     },
     false
@@ -117,7 +117,7 @@ export const updateActualisation = async (
   }
 
   return updateStructureAndRecomputeAnomalies(
-    await localiseAdresses(structure),
+    await locateAdresses(structure),
     false,
     { skipActesOrphanDelete: true }
   );
@@ -125,13 +125,13 @@ export const updateActualisation = async (
 export const updateStructureOperateur = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
-  const [coordinates, localisedStructure] = await Promise.all([
+  const [coordinates, locatedStructure] = await Promise.all([
     getAdresseAdministrativeCoordinates(structure),
-    localiseAdresses(structure),
+    locateAdresses(structure),
   ]);
   return await updateStructureAndRecomputeAnomalies(
     {
-      ...localisedStructure,
+      ...locatedStructure,
       ...coordinates,
     },
     true

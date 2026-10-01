@@ -170,7 +170,7 @@ describe("computeStructureListRow", () => {
         placesAutorisees: 4,
         communeLatitude: 49.1138,
         communeLongitude: -1.0801,
-        communeNom: "Saint-Lô",
+        communeGeocodee: "Saint-Lô",
       },
     ];
 
@@ -889,14 +889,14 @@ describe("buildCommunePoints", () => {
     placesAutorisees,
     communeLatitude: 49.1138,
     communeLongitude: -1.0801,
-    communeNom: "Saint-Lô",
+    communeGeocodee: "Saint-Lô",
   });
   const granville = (placesAutorisees: number) => ({
     commune: "Granville",
     placesAutorisees,
     communeLatitude: 48.8307,
     communeLongitude: -1.574,
-    communeNom: "Granville",
+    communeGeocodee: "Granville",
   });
 
   it("additionne les places par commune, quelle que soit l'écriture saisie, et trie ses structures par places", () => {

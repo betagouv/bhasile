@@ -614,7 +614,7 @@ describe("structure.repository db integration", () => {
       isLogementSocial: true,
       communeLatitude: 43.6,
       communeLongitude: 1.44,
-      communeNom: "Toulouse",
+      communeGeocodee: "Toulouse",
     });
 
     // AND: une mise à jour partielle (sans commune ni code postal) garde le centre de commune
@@ -626,7 +626,7 @@ describe("structure.repository db integration", () => {
     expect(partiallyUpdated.adresses[0]).toMatchObject({
       placesAutorisees: 12,
       communeLatitude: 43.6,
-      communeNom: "Toulouse",
+      communeGeocodee: "Toulouse",
     });
   });
 

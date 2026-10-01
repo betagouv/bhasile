@@ -54,7 +54,7 @@ export const findStructureVersionAdresses = (
           placesAutorisees: true,
           communeLatitude: true,
           communeLongitude: true,
-          communeNom: true,
+          communeGeocodee: true,
         },
       },
     },

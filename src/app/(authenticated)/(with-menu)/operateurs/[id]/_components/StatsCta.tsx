@@ -1,8 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ReactElement } from "react";
 
+import { useOperateurContext } from "@/contexts/OperateurContext";
+
 export const StatsCta = (): ReactElement => {
+  const { operateur } = useOperateurContext();
+
   return (
     <div className="bg-alt-blue-france border border-default-grey rounded-[10px] border-solid flex">
       <div className="relative h-[154] w-[730]">
@@ -20,7 +26,10 @@ export const StatsCta = (): ReactElement => {
           <strong>excédents et déficits</strong>... de cet opérateur à l’échelle
           départementale, régionale et nationale
         </div>
-        <Link href="/statistiques" className="fr-btn">
+        <Link
+          href={`/statistiques?operateurs=${operateur.id}`}
+          className="fr-btn"
+        >
           Consultez l’onglet Statistiques
           <span className="fr-icon-arrow-right-line" />
         </Link>

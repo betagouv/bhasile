@@ -21,6 +21,8 @@ export const SHORT_PAGE_SIZE = 6;
 
 export const SEARCH_PARAM_DEBOUNCE_MS = 300;
 
+export const BAN_SEARCH_URL = "https://data.geopf.fr/geocodage/search/";
+
 export const LIST_NAVIGATION_KEY = "list-navigation";
 
 export const OPERATEURS_STORAGE_KEY = "operateurs-query";
