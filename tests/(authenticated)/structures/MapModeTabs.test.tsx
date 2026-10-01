@@ -27,7 +27,7 @@ describe("MapModeTabs", () => {
     expect(screen.getByLabelText("Structures")).toBeChecked();
   });
 
-  it("pose mode=places dans l'URL en conservant les autres paramètres", async () => {
+  it("ajoute mode=places à l'URL en conservant les autres paramètres", async () => {
     render(<MapModeTabs />);
 
     await userEvent.click(screen.getByLabelText("Places"));
