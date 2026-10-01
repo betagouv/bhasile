@@ -9,7 +9,6 @@ const buildGrant = (overrides: Partial<GrantDb> = {}): GrantDb => ({
   region: null,
   departement: null,
   structure: null,
-  operateurId: null,
   ...overrides,
 });
 
@@ -85,7 +84,7 @@ describe("brevo util", () => {
     expect(contact.attributes.DEPARTEMENT).toBe("22, 29, 35, 56");
   });
 
-  it("cumule les binômes du pattern et ceux de l'utilisateur", () => {
+  it("fait primer les binômes de l'utilisateur sur ceux du pattern", () => {
     // GIVEN
     const user = {
       ...baseUser,
@@ -99,8 +98,8 @@ describe("brevo util", () => {
     const contact = toBrevoContact(user);
 
     // THEN
-    expect(contact.attributes.PERIMETRE).toBe("Paris, Finistère");
-    expect(contact.attributes.DEPARTEMENT).toBe("29, 75");
+    expect(contact.attributes.PERIMETRE).toBe("Finistère");
+    expect(contact.attributes.DEPARTEMENT).toBe("29");
   });
 
   it("laisse le périmètre vide quand aucun binôme n'est rattaché", () => {

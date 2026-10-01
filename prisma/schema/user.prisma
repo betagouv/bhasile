@@ -8,7 +8,8 @@ model User {
   roleId              Int?
   emailPattern        EmailPattern? @relation(fields: [emailPatternId], references: [id])
   emailPatternId      Int?
-  type                UserType      @default(AGENT)
+  operateur           Operateur?    @relation(fields: [operateurId], references: [id], onDelete: Restrict)
+  operateurId         Int?
   isSuperAdmin        Boolean       @default(false)
   grants              UserGrant[]
   notes               Note[]
@@ -83,8 +84,6 @@ model UserGrant {
   departementNumero String?
   structure         Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade)
   structureId       Int?
-  operateur         Operateur?   @relation(fields: [operateurId], references: [id], onDelete: Cascade)
-  operateurId       Int?
 
   createdAt DateTime @default(now())
 
@@ -104,8 +103,6 @@ model EmailPatternGrant {
   departementNumero String?
   structure         Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade)
   structureId       Int?
-  operateur         Operateur?   @relation(fields: [operateurId], references: [id], onDelete: Cascade)
-  operateurId       Int?
 
   createdAt DateTime @default(now())
 
@@ -126,13 +123,6 @@ enum GrantScope {
   REGION
   DEPARTEMENT
   STRUCTURE
-
-  @@schema("public")
-}
-
-enum UserType {
-  AGENT
-  OPERATEUR
 
   @@schema("public")
 }

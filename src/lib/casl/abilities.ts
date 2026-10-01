@@ -9,7 +9,6 @@ import {
   Prisma,
   Structure,
   User,
-  UserType,
 } from "@/generated/prisma/client";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { SessionGrant, SessionUser } from "@/types/global";
@@ -40,7 +39,7 @@ const defineRulesFor = (user?: SessionUser) => {
 
   if (user?.isSuperAdmin) {
     builder.can("manage", "all");
-  } else if (user?.type === UserType.AGENT) {
+  } else if (user && user.operateurId === null) {
     defineAgentRules(builder, user);
   }
 
@@ -74,26 +73,16 @@ const getStructureConditions = ({
   isNational,
   departementNumeros,
   structureIds,
-  operateurId,
 }: SessionGrant): Prisma.StructureWhereInput[] => {
-  const operateurCondition = operateurId === null ? {} : { operateurId };
-
   if (isNational) {
-    return [operateurCondition];
+    return [{}];
   }
 
   return [
     ...(departementNumeros.length > 0
-      ? [
-          {
-            departementAdministratif: { in: departementNumeros },
-            ...operateurCondition,
-          },
-        ]
+      ? [{ departementAdministratif: { in: departementNumeros } }]
       : []),
-    ...(structureIds.length > 0
-      ? [{ id: { in: structureIds }, ...operateurCondition }]
-      : []),
+    ...(structureIds.length > 0 ? [{ id: { in: structureIds } }] : []),
   ];
 };
 

@@ -8,11 +8,10 @@ export const grantSelect = {
   },
   departement: { select: { numero: true, name: true } },
   structure: { select: { id: true, codeBhasile: true } },
-  operateurId: true,
 } satisfies Prisma.UserGrantSelect;
 
 export const userWithGrantsSelect = {
-  type: true,
+  operateurId: true,
   isSuperAdmin: true,
   grants: { select: grantSelect },
   emailPattern: { select: { grants: { select: grantSelect } } },

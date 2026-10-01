@@ -6,7 +6,8 @@ import { GrantDb } from "./user.db.type";
 export const getEffectiveGrants = (user: {
   grants: GrantDb[];
   emailPattern: { grants: GrantDb[] } | null;
-}): GrantDb[] => [...(user.emailPattern?.grants ?? []), ...user.grants];
+}): GrantDb[] =>
+  user.grants.length > 0 ? user.grants : (user.emailPattern?.grants ?? []);
 
 export const toSessionGrant = (grant: GrantDb): SessionGrant => ({
   role: grant.role,
@@ -16,7 +17,6 @@ export const toSessionGrant = (grant: GrantDb): SessionGrant => ({
     grant.scope === GrantScope.STRUCTURE && grant.structure
       ? [grant.structure.id]
       : [],
-  operateurId: grant.operateurId,
 });
 
 const getDepartementNumeros = (grant: GrantDb): string[] => {

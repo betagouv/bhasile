@@ -1,4 +1,4 @@
-import { AccessRole, UserType } from "@/generated/prisma/client";
+import { AccessRole } from "@/generated/prisma/client";
 import { SessionGrant, SessionUser } from "@/types/global";
 
 export const createSessionGrant = (
@@ -8,7 +8,6 @@ export const createSessionGrant = (
   isNational: false,
   departementNumeros: [],
   structureIds: [],
-  operateurId: null,
   ...overrides,
 });
 
@@ -19,7 +18,7 @@ export const createSessionUser = (
   name: "Agent",
   prenom: "Agent",
   email: "agent@gouv.fr",
-  type: UserType.AGENT,
+  operateurId: null,
   isSuperAdmin: false,
   grants: [],
   ...overrides,

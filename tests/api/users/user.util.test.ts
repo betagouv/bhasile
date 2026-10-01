@@ -10,20 +10,16 @@ const buildGrant = (overrides: Partial<GrantDb> = {}): GrantDb => ({
   region: null,
   departement: null,
   structure: null,
-  operateurId: null,
   ...overrides,
 });
 
 describe("toSessionGrant", () => {
-  it("marque un binôme national et conserve son opérateur", () => {
-    expect(
-      toSessionGrant(buildGrant({ role: AccessRole.ADMIN, operateurId: 12 }))
-    ).toEqual({
+  it("marque un binôme national sans département ni structure", () => {
+    expect(toSessionGrant(buildGrant({ role: AccessRole.ADMIN }))).toEqual({
       role: AccessRole.ADMIN,
       isNational: true,
       departementNumeros: [],
       structureIds: [],
-      operateurId: 12,
     });
   });
 
@@ -77,23 +73,28 @@ describe("toSessionGrant", () => {
 });
 
 describe("getEffectiveGrants", () => {
-  it("cumule les droits de base du pattern d'email et les binômes de l'utilisateur", () => {
-    const patternGrant = buildGrant({ role: AccessRole.VIEWER });
-    const userGrant = buildGrant();
+  const patternGrant = buildGrant({ role: AccessRole.VIEWER });
+  const userGrant = buildGrant();
 
+  it("fait primer les binômes de l'utilisateur sur ceux de son pattern d'email", () => {
     expect(
       getEffectiveGrants({
         grants: [userGrant],
         emailPattern: { grants: [patternGrant] },
       })
-    ).toEqual([patternGrant, userGrant]);
+    ).toEqual([userGrant]);
   });
 
-  it("ne renvoie que les binômes de l'utilisateur quand aucun pattern ne correspond", () => {
-    const userGrant = buildGrant();
-
+  it("retombe sur les droits de base du pattern quand l'utilisateur n'a aucun binôme", () => {
     expect(
-      getEffectiveGrants({ grants: [userGrant], emailPattern: null })
-    ).toEqual([userGrant]);
+      getEffectiveGrants({
+        grants: [],
+        emailPattern: { grants: [patternGrant] },
+      })
+    ).toEqual([patternGrant]);
+  });
+
+  it("ne renvoie rien sans binôme ni pattern", () => {
+    expect(getEffectiveGrants({ grants: [], emailPattern: null })).toEqual([]);
   });
 });

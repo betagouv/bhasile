@@ -4,18 +4,14 @@ export const getAgentBaseGrants = (zone: AgentZone): AgentGrant[] => {
   if (zone.scope === GrantScope.NATIONAL) {
     return [{ role: AccessRole.EDITEUR, scope: GrantScope.NATIONAL }];
   }
-  return [
-    { role: AccessRole.VIEWER, scope: GrantScope.NATIONAL },
-    ...getAgentEditeurGrants(zone),
-  ];
-};
 
-export const getAgentEditeurGrants = (zone: AgentZone): AgentGrant[] => {
-  if (zone.scope === GrantScope.NATIONAL) {
-    return [{ role: AccessRole.EDITEUR, scope: GrantScope.NATIONAL }];
-  }
+  const viewerNational = {
+    role: AccessRole.VIEWER,
+    scope: GrantScope.NATIONAL,
+  };
   if (zone.scope === GrantScope.REGION) {
     return [
+      viewerNational,
       {
         role: AccessRole.EDITEUR,
         scope: GrantScope.REGION,
@@ -23,11 +19,14 @@ export const getAgentEditeurGrants = (zone: AgentZone): AgentGrant[] => {
       },
     ];
   }
-  return zone.departementNumeros.map((departementNumero) => ({
-    role: AccessRole.EDITEUR,
-    scope: GrantScope.DEPARTEMENT,
-    departementNumero,
-  }));
+  return [
+    viewerNational,
+    ...zone.departementNumeros.map((departementNumero) => ({
+      role: AccessRole.EDITEUR,
+      scope: GrantScope.DEPARTEMENT,
+      departementNumero,
+    })),
+  ];
 };
 
 export const isSameGrant = (

@@ -3,7 +3,6 @@ import { Session, User } from "next-auth";
 import { getEmailPatterns } from "@/app/api/email-patterns/email-pattern.repository";
 import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
 import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
-import { UserType } from "@/generated/prisma/client";
 import { SessionUser } from "@/types/global";
 
 export type ProConnectUser = User & {
@@ -33,14 +32,17 @@ export const getPermissionsFromSession = async (
   });
 
   if (!databaseUser) {
-    return { type: UserType.AGENT, isSuperAdmin: false, grants: [] };
+    return { operateurId: null, isSuperAdmin: false, grants: [] };
   }
 
   return {
-    type: databaseUser.type,
+    operateurId: databaseUser.operateurId,
     isSuperAdmin: databaseUser.isSuperAdmin,
     grants: getEffectiveGrants(databaseUser).map(toSessionGrant),
   };
 };
 
-type SessionPermissions = Pick<SessionUser, "type" | "isSuperAdmin" | "grants">;
+type SessionPermissions = Pick<
+  SessionUser,
+  "operateurId" | "isSuperAdmin" | "grants"
+>;
