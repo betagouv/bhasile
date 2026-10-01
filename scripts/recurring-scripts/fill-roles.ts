@@ -1,12 +1,16 @@
-// Remplir les patterns d'email autorisés et leurs droits de base (binômes rôle × périmètre)
+// Remplir les patterns d'email autorisés et leurs droits de base (binômes rôle × niveau géographique)
 // Usage: yarn script fill-roles roles.csv
 
 import "dotenv/config";
 
 import { loadCsvFromS3 } from "scripts/utils/csv-loader";
-import { AgentZone, getAgentBaseGrants } from "scripts/utils/perimetre.util";
+import {
+  AgentZone,
+  getAgentBaseGrants,
+  isSameGrant,
+} from "scripts/utils/grant.util";
 
-import { Prisma } from "@/generated/prisma/client";
+import { GrantScope, Prisma } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
 type DepartementWithRegion = Prisma.DepartementGetPayload<{
@@ -34,15 +38,13 @@ const getAgentZone = (
   allDepartements: DepartementWithRegion[]
 ): AgentZone | null => {
   if (row.name === "NATIONAL") {
-    return { kind: "national" };
+    return { scope: GrantScope.NATIONAL };
   }
   if (row.name.startsWith("REGION")) {
     const region = allDepartements.find(
       (departement) => departement.regionAdministrative?.code === row.region
     )?.regionAdministrative;
-    return region
-      ? { kind: "region", regionId: region.id, name: region.name }
-      : null;
+    return region ? { scope: GrantScope.REGION, regionId: region.id } : null;
   }
   if (row.name.startsWith("DEPARTEMENT")) {
     const departement = allDepartements.find(
@@ -50,9 +52,8 @@ const getAgentZone = (
     );
     return departement
       ? {
-          kind: "departements",
+          scope: GrantScope.DEPARTEMENT,
           departementNumeros: [departement.numero],
-          name: departement.name,
         }
       : null;
   }
@@ -69,16 +70,18 @@ const fillEmailPattern = async (row: RoleCsvRow, zone: AgentZone) => {
     where: { pattern },
     update: {},
     create: { pattern },
-    select: { id: true },
+    select: { id: true, grants: true },
   });
 
-  const grants = await getAgentBaseGrants(prisma, zone);
+  const missingGrants = getAgentBaseGrants(zone).filter(
+    (grant) =>
+      !emailPattern.grants.some((existing) => isSameGrant(existing, grant))
+  );
   await prisma.emailPatternGrant.createMany({
-    data: grants.map((grant) => ({
+    data: missingGrants.map((grant) => ({
       ...grant,
       emailPatternId: emailPattern.id,
     })),
-    skipDuplicates: true,
   });
 };
 
@@ -93,7 +96,7 @@ const run = async () => {
     for (const row of csvRows) {
       const zone = getAgentZone(row, allDepartements);
       if (!zone) {
-        console.warn(`⚠️ Ligne ignorée, périmètre introuvable : ${row.name}`);
+        console.warn(`⚠️ Ligne ignorée, niveau introuvable : ${row.name}`);
         continue;
       }
       await fillEmailPattern(row, zone);

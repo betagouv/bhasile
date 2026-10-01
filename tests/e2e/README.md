@@ -31,9 +31,9 @@ yarn test:e2e -g notes # filtre par grep
 
 Aucun passage par ProConnect : `global-setup` **forge** un cookie de session NextAuth avec `encode()` de `next-auth/jwt` et `AUTH_SECRET`. Le cookie produit est celui d'un vrai login — proxy, `getServerSession`, `useSession` et CASL tournent normalement. La suite est donc hermétique : aucun secret, aucun appel réseau sortant.
 
-L'agent est seedé par `seed/agent.seed.ts` : binôme **`EDITEUR` × périmètre `E2E Paris`** (département `75`) rattaché par `EmailPattern`. Les droits sont donc réellement restreints au département `75` — **toute donnée seedée doit vivre en `75`** (défaut de `data/structure.factory.ts`), sinon les écritures partent en 403.
+L'agent est seedé par `seed/agent.seed.ts` : binôme **`EDITEUR` × département `75`** rattaché par `EmailPattern`. Les droits sont donc réellement restreints au département `75` — **toute donnée seedée doit vivre en `75`** (défaut de `data/structure.factory.ts`), sinon les écritures partent en 403.
 
-Le seed suppose que `npx prisma db seed` a déjà tourné (il lui faut le département `75`) et doit passer **après** lui : `wipeTables` détruit `Perimetre`, `EmailPattern` et `User`.
+Le seed suppose que `npx prisma db seed` a déjà tourné (il lui faut le département `75`) et doit passer **après** lui : `wipeTables` détruit `EmailPattern` et `User`.
 
 ## 🧱 Principes
 

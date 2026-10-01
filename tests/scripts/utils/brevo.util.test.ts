@@ -1,28 +1,26 @@
 import { toBrevoContact } from "scripts/utils/brevo.util";
 
-import { GrantWithPerimetre } from "@/app/api/users/user.db.type";
-import { AccessRole } from "@/generated/prisma/client";
+import { GrantDb } from "@/app/api/users/user.db.type";
+import { AccessRole, GrantScope } from "@/generated/prisma/client";
 
-const buildGrant = (
-  role: AccessRole,
-  perimetre: Partial<GrantWithPerimetre["perimetre"]>
-): GrantWithPerimetre => ({
-  role,
-  perimetre: {
-    name: "Périmètre",
-    isNational: false,
-    operateurId: null,
-    regions: [],
-    departements: [],
-    structures: [],
-    ...perimetre,
-  },
+const buildGrant = (overrides: Partial<GrantDb> = {}): GrantDb => ({
+  role: AccessRole.EDITEUR,
+  scope: GrantScope.NATIONAL,
+  region: null,
+  departement: null,
+  structure: null,
+  operateurId: null,
+  ...overrides,
 });
 
-const nationalViewerGrant = buildGrant(AccessRole.VIEWER, {
-  name: "National",
-  isNational: true,
-});
+const departementGrant = (numero: string, name: string, role?: AccessRole) =>
+  buildGrant({
+    ...(role ? { role } : {}),
+    scope: GrantScope.DEPARTEMENT,
+    departement: { numero, name },
+  });
+
+const nationalViewerGrant = buildGrant({ role: AccessRole.VIEWER });
 
 const baseUser = {
   email: "agent@dreets.gouv.fr",
@@ -37,12 +35,7 @@ describe("brevo util", () => {
     // GIVEN
     const user = {
       ...baseUser,
-      grants: [
-        buildGrant(AccessRole.EDITEUR, {
-          name: "Bouches-du-Rhône",
-          departements: [{ departementNumero: "13" }],
-        }),
-      ],
+      grants: [departementGrant("13", "Bouches-du-Rhône")],
     };
 
     // WHEN
@@ -68,20 +61,17 @@ describe("brevo util", () => {
       emailPattern: {
         grants: [
           nationalViewerGrant,
-          buildGrant(AccessRole.EDITEUR, {
-            name: "Bretagne",
-            regions: [
-              {
-                region: {
-                  departements: [
-                    { numero: "35" },
-                    { numero: "22" },
-                    { numero: "56" },
-                    { numero: "29" },
-                  ],
-                },
-              },
-            ],
+          buildGrant({
+            scope: GrantScope.REGION,
+            region: {
+              name: "Bretagne",
+              departements: [
+                { numero: "35" },
+                { numero: "22" },
+                { numero: "56" },
+                { numero: "29" },
+              ],
+            },
           }),
         ],
       },
@@ -99,19 +89,9 @@ describe("brevo util", () => {
     // GIVEN
     const user = {
       ...baseUser,
-      grants: [
-        buildGrant(AccessRole.ADMIN, {
-          name: "Finistère",
-          departements: [{ departementNumero: "29" }],
-        }),
-      ],
+      grants: [departementGrant("29", "Finistère", AccessRole.ADMIN)],
       emailPattern: {
-        grants: [
-          buildGrant(AccessRole.EDITEUR, {
-            name: "Paris",
-            departements: [{ departementNumero: "75" }],
-          }),
-        ],
+        grants: [departementGrant("75", "Paris")],
       },
     };
 

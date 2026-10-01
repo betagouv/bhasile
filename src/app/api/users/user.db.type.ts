@@ -1,21 +1,14 @@
 import { Prisma } from "@/generated/prisma/client";
 
-export const grantPerimetreSelect = {
-  name: true,
-  isNational: true,
-  operateurId: true,
-  regions: {
-    select: {
-      region: { select: { departements: { select: { numero: true } } } },
-    },
-  },
-  departements: { select: { departementNumero: true } },
-  structures: { select: { structureId: true } },
-} satisfies Prisma.PerimetreSelect;
-
 export const grantSelect = {
   role: true,
-  perimetre: { select: grantPerimetreSelect },
+  scope: true,
+  region: {
+    select: { name: true, departements: { select: { numero: true } } },
+  },
+  departement: { select: { numero: true, name: true } },
+  structure: { select: { id: true, codeBhasile: true } },
+  operateurId: true,
 } satisfies Prisma.UserGrantSelect;
 
 export const userWithGrantsSelect = {
@@ -25,7 +18,7 @@ export const userWithGrantsSelect = {
   emailPattern: { select: { grants: { select: grantSelect } } },
 } satisfies Prisma.UserSelect;
 
-export type GrantWithPerimetre = Prisma.UserGrantGetPayload<{
+export type GrantDb = Prisma.UserGrantGetPayload<{
   select: typeof grantSelect;
 }>;
 

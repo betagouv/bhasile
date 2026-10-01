@@ -1,31 +1,11 @@
-import { AccessRole, PrismaClient } from "@/generated/prisma/client";
+import { AgentZone, getAgentBaseGrants } from "scripts/utils/grant.util";
+
+import { GrantScope, PrismaClient } from "@/generated/prisma/client";
 
 // Comptes du fournisseur d'identité de test ProConnect (FIA1)
 const TEST_EMAIL_DOMAIN = "test.proconnect.gouv.fr";
 
-type AgentSeed = {
-  email: string;
-  perimetreName: string;
-  regionName?: string;
-  departementNumero?: string;
-};
-
-const AGENTS: AgentSeed[] = [
-  {
-    email: `national@${TEST_EMAIL_DOMAIN}`,
-    perimetreName: "National",
-  },
-  {
-    email: `regional@${TEST_EMAIL_DOMAIN}`,
-    perimetreName: "Île-de-France",
-    regionName: "Île-de-France",
-  },
-  {
-    email: `departemental@${TEST_EMAIL_DOMAIN}`,
-    perimetreName: "Paris",
-    departementNumero: "75",
-  },
-];
+const ILE_DE_FRANCE = "Île-de-France";
 
 const toEmailPattern = (email: string): string =>
   `^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`;
@@ -33,34 +13,41 @@ const toEmailPattern = (email: string): string =>
 export const seedRolesAndAgents = async (
   prisma: PrismaClient
 ): Promise<void> => {
-  const national = await prisma.perimetre.create({
-    data: { name: "National", isNational: true },
+  const region = await prisma.region.findFirstOrThrow({
+    where: { name: ILE_DE_FRANCE },
     select: { id: true },
   });
 
-  for (const agent of AGENTS) {
-    const grants =
-      agent.regionName || agent.departementNumero
-        ? [
-            { role: AccessRole.VIEWER, perimetreId: national.id },
-            {
-              role: AccessRole.EDITEUR,
-              perimetreId: await createZonePerimetre(prisma, agent),
-            },
-          ]
-        : [{ role: AccessRole.EDITEUR, perimetreId: national.id }];
+  const agents: AgentSeed[] = [
+    {
+      name: "National",
+      email: `national@${TEST_EMAIL_DOMAIN}`,
+      zone: { scope: GrantScope.NATIONAL },
+    },
+    {
+      name: ILE_DE_FRANCE,
+      email: `regional@${TEST_EMAIL_DOMAIN}`,
+      zone: { scope: GrantScope.REGION, regionId: region.id },
+    },
+    {
+      name: "Paris",
+      email: `departemental@${TEST_EMAIL_DOMAIN}`,
+      zone: { scope: GrantScope.DEPARTEMENT, departementNumeros: ["75"] },
+    },
+  ];
 
+  for (const agent of agents) {
     const emailPattern = await prisma.emailPattern.create({
       data: {
         pattern: toEmailPattern(agent.email),
-        grants: { createMany: { data: grants } },
+        grants: { createMany: { data: getAgentBaseGrants(agent.zone) } },
       },
       select: { id: true },
     });
 
     await prisma.user.create({
       data: {
-        name: agent.perimetreName,
+        name: agent.name,
         email: agent.email,
         emailPatternId: emailPattern.id,
         lastConnection: new Date(),
@@ -69,32 +56,14 @@ export const seedRolesAndAgents = async (
   }
 
   console.log(
-    `🧑 ${AGENTS.length} agents de test créés : ${AGENTS.map(
-      (agent) => agent.email
-    ).join(", ")}`
+    `🧑 ${agents.length} agents de test créés : ${agents
+      .map((agent) => agent.email)
+      .join(", ")}`
   );
 };
 
-const createZonePerimetre = async (
-  prisma: PrismaClient,
-  { perimetreName, regionName, departementNumero }: AgentSeed
-): Promise<number> => {
-  const region = regionName
-    ? await prisma.region.findFirstOrThrow({
-        where: { name: regionName },
-        select: { id: true },
-      })
-    : null;
-
-  const perimetre = await prisma.perimetre.create({
-    data: {
-      name: perimetreName,
-      regions: region ? { create: { regionId: region.id } } : undefined,
-      departements: departementNumero
-        ? { create: { departementNumero } }
-        : undefined,
-    },
-    select: { id: true },
-  });
-  return perimetre.id;
+type AgentSeed = {
+  name: string;
+  email: string;
+  zone: AgentZone;
 };

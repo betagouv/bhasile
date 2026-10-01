@@ -139,7 +139,7 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 - [Base de données](docs/database.md) — migrations, vues SQL, process recommandé
 - [Scripts](docs/scripts.md) — scripts one-off et récurrents (Scalingo)
 - [Anomalies](docs/anomalies.md) — détection des incohérences de données (moteur isomorphe, registre, réconciliation)
-- [Permissions](docs/permissions.md) — binômes rôle × périmètre, droits de base par pattern, feuille de route opérateurs
+- [Permissions](docs/permissions.md) — binômes rôle × niveau géographique, droits de base par pattern, feuille de route opérateurs
 - [Départements](docs/departements.md) — les deux départements d'une structure : autorisation vs affichage
 - [Référentiel OFII](docs/ofii_referential.md) — mise à jour mensuelle du référentiel OFII
 - [Tests](docs/tests.md) — outils, nommage des fichiers et des cas (`it` en français)

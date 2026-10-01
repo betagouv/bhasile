@@ -28,7 +28,8 @@ model Structure {
   userNotes                Note[]
   structureVersions        StructureVersion[]
   anomalies                Anomalie[]
-  perimetres               PerimetreStructure[]
+  userGrants               UserGrant[]
+  emailPatternGrants       EmailPatternGrant[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
