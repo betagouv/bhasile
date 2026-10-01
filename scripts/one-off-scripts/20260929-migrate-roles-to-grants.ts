@@ -3,16 +3,14 @@
 // EDITEUR national, ou VIEWER national + EDITEUR sur sa zone.
 // Les binômes d'un utilisateur remplacent ceux de son pattern, comme le rôle manuel aujourd'hui.
 // Un rôle couvrant une région entière donne un binôme région, sinon un binôme par département.
-// Idempotent : seuls les binômes manquants sont créés.
+// Idempotent : seuls les patterns et utilisateurs sans aucun binôme sont migrés,
+// un binôme modifié ou retiré depuis n'est donc jamais recréé.
+// Lancé par scripts/postdeploy.sh jusqu'à la suppression des tables Role.
 // Usage: yarn one-off 20260929-migrate-roles-to-grants
 
 import "dotenv/config";
 
-import {
-  AgentZone,
-  getAgentBaseGrants,
-  isSameGrant,
-} from "scripts/utils/grant.util";
+import { AgentZone, getAgentBaseGrants } from "scripts/utils/grant.util";
 
 import { GrantScope, Prisma } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
@@ -58,21 +56,14 @@ const migrateEmailPatterns = async (
   zone: AgentZone
 ): Promise<number> => {
   const emailPatterns = await prisma.emailPattern.findMany({
-    where: { roleId },
-    select: { id: true, grants: true },
+    where: { roleId, grants: { none: {} } },
+    select: { id: true },
   });
   const grants = getAgentBaseGrants(zone);
 
   const { count } = await prisma.emailPatternGrant.createMany({
-    data: emailPatterns.flatMap((emailPattern) =>
-      grants
-        .filter(
-          (grant) =>
-            !emailPattern.grants.some((existing) =>
-              isSameGrant(existing, grant)
-            )
-        )
-        .map((grant) => ({ ...grant, emailPatternId: emailPattern.id }))
+    data: emailPatterns.flatMap(({ id }) =>
+      grants.map((grant) => ({ ...grant, emailPatternId: id }))
     ),
   });
   return count;
@@ -83,19 +74,14 @@ const migrateManualUsers = async (
   zone: AgentZone
 ): Promise<number> => {
   const users = await prisma.user.findMany({
-    where: { roleId },
-    select: { id: true, grants: true },
+    where: { roleId, grants: { none: {} } },
+    select: { id: true },
   });
   const grants = getAgentBaseGrants(zone);
 
   const { count } = await prisma.userGrant.createMany({
-    data: users.flatMap((user) =>
-      grants
-        .filter(
-          (grant) =>
-            !user.grants.some((existing) => isSameGrant(existing, grant))
-        )
-        .map((grant) => ({ ...grant, userId: user.id }))
+    data: users.flatMap(({ id }) =>
+      grants.map((grant) => ({ ...grant, userId: id }))
     ),
   });
   return count;
