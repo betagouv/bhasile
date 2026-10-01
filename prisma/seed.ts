@@ -10,14 +10,14 @@ import { getRegionFromDepartement } from "@/utils/region.util";
 import { createPrismaClient, DATABASE_POOL_MAX } from "./client";
 import { createFakeActivites } from "./seeders/activite.seed";
 import { createAntenneList } from "./seeders/antenne.seed";
-import { createFakeCpoms } from "./seeders/cpom.seed";
-import { seedRegionsAndDepartements } from "./seeders/departements.seed";
-import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
-import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
 import {
   getFakeTarifsJournaliersCibles,
   getFakeTauxEncadrementCibles,
 } from "./seeders/cible-financiere.seed";
+import { createFakeCpoms } from "./seeders/cpom.seed";
+import { seedRegionsAndDepartements } from "./seeders/departements.seed";
+import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
+import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
 import { getFakeFaqItems } from "./seeders/faq.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
