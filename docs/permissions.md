@@ -66,8 +66,8 @@ Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `
 
 ## Reste à faire
 
-1. **PR 1** : générer la migration Prisma, puis jouer le one-off.
-2. **PR 1 bis, nettoyage** après passage du one-off en prod : supprimer `Role`, `RoleDepartement`, `User.roleId`, `EmailPattern.roleId`.
+1. **PR 1** : générer la migration Prisma.
+2. **PR 1 bis, nettoyage** après passage du one-off en prod : retirer le one-off de `scripts/postdeploy.sh` et supprimer `Role`, `RoleDepartement`, `User.roleId`, `EmailPattern.roleId`.
 3. **PR 2, administration** : API de gestion des binômes avec la hiérarchie admin ci-dessus, et une matrice ressource × action × rôle × type validée par le métier.
 4. **PR 3, ouverture aux opérateurs** :
    - invitation d'un user opérateur par un admin ;
@@ -80,8 +80,8 @@ Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `
 
 ## Déploiement de la PR 1
 
-Juste après le déploiement, lancer le one-off. Tant qu'il n'a pas tourné, les agents gardent la lecture mais perdent l'écriture.
+Le one-off tourne dans `scripts/postdeploy.sh`, après les migrations : les binômes existent avant la mise en service du nouveau code, sans coupure d'écriture pour les agents. S'il échoue, le déploiement échoue.
 
-```bash
-scalingo -a <app> run "yarn one-off 20260929-migrate-roles-to-grants"
-```
+Il ne migre que les patterns et utilisateurs **sans aucun binôme**. Le rejouer à chaque déploiement ne recrée donc pas un binôme modifié ou retiré entre-temps.
+
+Limite : un utilisateur à rôle manuel dont on retire **tous** les binômes les retrouve au déploiement suivant. Elle disparaît avec la PR 1 bis, qui retire aussi la ligne du postdeploy.
