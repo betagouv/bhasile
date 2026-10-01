@@ -686,7 +686,8 @@ export const getTypologieYears = (
 /** Structures comptabilisées sur une année (cf. `resolveStructuresForYear`). */
 export const resolveCountedStructuresForYear = (
   context: StatistiquesYearContext,
-  year: number
+  year: number,
+  lookbackYears?: number
 ): ReturnType<typeof resolveStructuresForYear> =>
   resolveStructuresForYear(
     context,
@@ -696,7 +697,9 @@ export const resolveCountedStructuresForYear = (
       "year",
       String(year)
     ),
-    year
+    year,
+    getNow(),
+    lookbackYears
   );
 
 export const mapTypologieYears = <

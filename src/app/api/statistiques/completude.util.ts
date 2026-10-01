@@ -25,25 +25,32 @@ const getCampagneYears = (
     .filter((year) => Number.isInteger(year))
     .sort((yearA, yearB) => yearA - yearB);
 
+export const FIRST_CAMPAGNE_LOOKBACK_YEARS = 1;
+// Le réalisé financier de l'année N-2 n'est saisi qu'à la première campagne.
+export const FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS = 2;
+
 /**
  * Première année soumise aux campagnes. La frontière est posée une fois par la
- * première campagne jamais déclarée, qui reprend aussi l'année juste avant elle
- * (aucune actualisation n'a eu lieu entre l'initialisation et cette campagne).
- * Les campagnes suivantes ne déplacent pas cette frontière.
+ * première campagne jamais déclarée, qui reprend aussi les années juste avant
+ * elle (aucune actualisation n'a eu lieu entre l'initialisation et cette
+ * campagne). Les campagnes suivantes ne déplacent pas cette frontière.
  */
 export const getFirstCampagneCoveredYear = (
-  definitions: StatistiqueDbFormDefinition[]
+  definitions: StatistiqueDbFormDefinition[],
+  lookbackYears: number = FIRST_CAMPAGNE_LOOKBACK_YEARS
 ): number | null => {
   const campagneYears = getCampagneYears(definitions);
-  return campagneYears.length > 0 ? campagneYears[0] - 1 : null;
+  return campagneYears.length > 0 ? campagneYears[0] - lookbackYears : null;
 };
 
 export const isYearUnderCampagne = (
   context: Pick<StatistiquesCompletudeContext, "actualisationFormDefinitions">,
-  year: number
+  year: number,
+  lookbackYears: number = FIRST_CAMPAGNE_LOOKBACK_YEARS
 ): boolean => {
   const firstCoveredYear = getFirstCampagneCoveredYear(
-    context.actualisationFormDefinitions
+    context.actualisationFormDefinitions,
+    lookbackYears
   );
   return firstCoveredYear !== null && year >= firstCoveredYear;
 };
@@ -100,8 +107,8 @@ const isStructureActualisee = (
 };
 
 /**
- * Structures attendues sur une année : initialisées, et encore ouvertes à la fin
- * de l'année. Une structure fermée en cours d'année n'a plus à être actualisée
+ * Structures attendues sur une année : encore ouvertes à la fin de l'année (le
+ * périmètre ne contient que des structures initialisées). Une structure fermée en cours d'année n'a plus à être actualisée
  * sur cette année-là, ni sur les suivantes.
  */
 export const resolveExpectedStructureIds = (
@@ -112,9 +119,6 @@ export const resolveExpectedStructureIds = (
   const expectedStructureIds = new Set<number>();
 
   for (const structure of structuresForYear) {
-    if (!context.finalisedStructureIds.has(structure.id)) {
-      continue;
-    }
     const closureDate = context.closureDateByStructureId.get(structure.id);
     if (closureDate != null && closureDate.getUTCFullYear() <= year) {
       continue;
@@ -135,12 +139,13 @@ export const resolveStructuresForYear = (
   context: StatistiquesCompletudeContext,
   structuresActiveInYear: StatistiqueDbStructure[],
   year: number,
-  now: Date = getNow()
+  now: Date = getNow(),
+  lookbackYears: number = FIRST_CAMPAGNE_LOOKBACK_YEARS
 ): {
   structures: StatistiqueDbStructure[];
   completude: CompletudeStat | null;
 } => {
-  if (!isYearUnderCampagne(context, year)) {
+  if (!isYearUnderCampagne(context, year, lookbackYears)) {
     return { structures: structuresActiveInYear, completude: null };
   }
 

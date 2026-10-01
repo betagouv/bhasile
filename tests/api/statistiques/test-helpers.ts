@@ -181,7 +181,6 @@ export const buildTestStatistiquesContext = (
         | "rmus"
         | "openingDateByStructureId"
         | "closureDateByStructureId"
-        | "finalisedStructureIds"
         | "actualisationFormDefinitions"
         | "lastValidatedCampagneYearByStructureId"
         | "idfDepartementNumeros"
@@ -240,8 +239,6 @@ export const buildTestStatistiquesContext = (
     rmus: partial.rmus !== undefined ? partial.rmus : [],
     openingDateByStructureId: partial.openingDateByStructureId ?? new Map(),
     closureDateByStructureId: partial.closureDateByStructureId ?? new Map(),
-    finalisedStructureIds:
-      partial.finalisedStructureIds ?? new Set(allStructureIds),
     actualisationFormDefinitions: partial.actualisationFormDefinitions ?? [],
     lastValidatedCampagneYearByStructureId:
       partial.lastValidatedCampagneYearByStructureId ?? new Map(),

@@ -76,6 +76,28 @@ export const findPerimeterStructures = async (
           ],
         },
       },
+      // Structures initialisées uniquement (même règle que `isStructureFinalised`).
+      OR: [
+        {
+          forms: {
+            some: {
+              status: true,
+              formDefinition: { slug: FINALISATION_FORM_SLUG },
+            },
+          },
+        },
+        {
+          structureVersions: {
+            some: {
+              effectiveDate: { lt: startOfNextUtcDay(reference) },
+              structureVersionTransformation: {
+                type: StructureVersionTransformationType.CREATION,
+                transformation: { form: { status: true } },
+              },
+            },
+          },
+        },
+      ],
     },
     select: { id: true, type: true, departementAdministratif: true },
   });
@@ -95,27 +117,6 @@ export const findStructureActivityDates = async (
       fermetureDate: true,
     },
   });
-};
-
-export const findFinalisedStructureIds = async (
-  structureIds: number[]
-): Promise<number[]> => {
-  if (structureIds.length === 0) {
-    return [];
-  }
-
-  const rows = await prisma.form.findMany({
-    where: {
-      structureId: { in: structureIds },
-      status: true,
-      formDefinition: { slug: FINALISATION_FORM_SLUG },
-    },
-    select: { structureId: true },
-  });
-
-  return rows
-    .map((row) => row.structureId)
-    .filter((structureId): structureId is number => structureId !== null);
 };
 
 export const findValidatedActualisationForms = async (

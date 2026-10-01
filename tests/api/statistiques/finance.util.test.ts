@@ -329,7 +329,7 @@ describe("finance - indicateurs théoriques", () => {
 });
 
 describe("finance - structures actualisées", () => {
-  it("ne comptabilise que les structures actualisées sur une année de campagne", () => {
+  it("ne comptabilise que les structures actualisées dès deux ans avant la première campagne", () => {
     const context = {
       ...buildFinanceContext({
         structures: [
@@ -337,10 +337,10 @@ describe("finance - structures actualisées", () => {
           testStructure(2, StructureType.CADA),
         ],
         budgets: [
-          budgetRow(1, 1, 2024, 100, 0),
-          budgetRow(2, 2, 2024, 100, 0),
-          budgetRow(3, 1, 2026, 100, 0),
-          budgetRow(4, 2, 2026, 100, 0),
+          budgetRow(1, 1, 2023, 100, 0),
+          budgetRow(2, 2, 2023, 100, 0),
+          budgetRow(3, 1, 2024, 100, 0),
+          budgetRow(4, 2, 2024, 100, 0),
         ],
       }),
       actualisationFormDefinitions: [
@@ -350,16 +350,16 @@ describe("finance - structures actualisées", () => {
     };
 
     const result = computeFinanceStatistiques(context, "moyenne");
+    const year2023 = result.byYear.find((entry) => entry.year === 2023);
     const year2024 = result.byYear.find((entry) => entry.year === 2024);
-    const year2026 = result.byYear.find((entry) => entry.year === 2026);
 
-    expect(year2024?.completude).toBeNull();
-    expect(year2024?.total.totalProduits).toBe(200);
-    expect(year2026?.completude).toMatchObject({
+    expect(year2023?.completude).toBeNull();
+    expect(year2023?.total.totalProduits).toBe(200);
+    expect(year2024?.completude).toMatchObject({
       nbAttendues: 2,
       nbRenseignees: 1,
     });
-    expect(year2026?.total.totalProduits).toBe(100);
+    expect(year2024?.total.totalProduits).toBe(100);
   });
 });
 
