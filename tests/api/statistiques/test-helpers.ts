@@ -179,6 +179,15 @@ export const buildTestStatistiquesContext = (
         | "indicateurs"
         | "activites"
         | "rmus"
+        | "openingDateByStructureId"
+        | "closureDateByStructureId"
+        | "finalisedStructureIds"
+        | "actualisationFormDefinitions"
+        | "lastValidatedCampagneYearByStructureId"
+        | "idfDepartementNumeros"
+        | "cadaFromHudaStructureIds"
+        | "tarifsJournaliersCibles"
+        | "tauxEncadrementCibles"
       >
     >
 ): StatistiquesContext => {
@@ -229,5 +238,16 @@ export const buildTestStatistiquesContext = (
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],
     rmus: partial.rmus !== undefined ? partial.rmus : [],
+    openingDateByStructureId: partial.openingDateByStructureId ?? new Map(),
+    closureDateByStructureId: partial.closureDateByStructureId ?? new Map(),
+    finalisedStructureIds:
+      partial.finalisedStructureIds ?? new Set(allStructureIds),
+    actualisationFormDefinitions: partial.actualisationFormDefinitions ?? [],
+    lastValidatedCampagneYearByStructureId:
+      partial.lastValidatedCampagneYearByStructureId ?? new Map(),
+    idfDepartementNumeros: partial.idfDepartementNumeros ?? new Set(),
+    cadaFromHudaStructureIds: partial.cadaFromHudaStructureIds ?? new Set(),
+    tarifsJournaliersCibles: partial.tarifsJournaliersCibles ?? [],
+    tauxEncadrementCibles: partial.tauxEncadrementCibles ?? [],
   };
 };

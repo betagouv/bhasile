@@ -1,7 +1,16 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
+import { CODE_REGION_IDF } from "@/constants";
+import {
+  StructureVersionTransformationType,
+  TransformationType,
+} from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
+import {
+  ACTUALISATION_FORM_SLUG_PREFIX,
+  FINALISATION_FORM_SLUG,
+} from "../forms/form.constants";
 import { finalizedVersionWhere } from "../structure-versions/structure-version.db.type";
 import type {
   StatistiqueDbActivite,
@@ -12,12 +21,16 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
+  StatistiqueDbFormDefinition,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbRmu,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
   StatistiqueDbStructureVersionTimeline,
+  StatistiqueDbTarifJournalierCible,
+  StatistiqueDbTauxEncadrementCible,
   StatistiqueDbTypologie,
+  StatistiqueDbValidatedActualisation,
 } from "./statistiques.db.type";
 import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 
@@ -82,6 +95,123 @@ export const findStructureActivityDates = async (
       fermetureDate: true,
     },
   });
+};
+
+export const findFinalisedStructureIds = async (
+  structureIds: number[]
+): Promise<number[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+
+  const rows = await prisma.form.findMany({
+    where: {
+      structureId: { in: structureIds },
+      status: true,
+      formDefinition: { slug: FINALISATION_FORM_SLUG },
+    },
+    select: { structureId: true },
+  });
+
+  return rows
+    .map((row) => row.structureId)
+    .filter((structureId): structureId is number => structureId !== null);
+};
+
+export const findValidatedActualisationForms = async (
+  structureIds: number[]
+): Promise<StatistiqueDbValidatedActualisation[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+
+  return prisma.form.findMany({
+    where: {
+      structureId: { in: structureIds },
+      status: true,
+      formDefinition: { slug: { startsWith: ACTUALISATION_FORM_SLUG_PREFIX } },
+    },
+    select: {
+      structureId: true,
+      formDefinition: { select: { slug: true, deadline: true } },
+    },
+  });
+};
+
+export const findActualisationFormDefinitions = async (): Promise<
+  StatistiqueDbFormDefinition[]
+> =>
+  prisma.formDefinition.findMany({
+    where: { slug: { startsWith: ACTUALISATION_FORM_SLUG_PREFIX } },
+    select: { slug: true, deadline: true },
+  });
+
+export const findIdfDepartementNumeros = async (): Promise<string[]> => {
+  const departements = await prisma.departement.findMany({
+    where: { regionAdministrative: { code: CODE_REGION_IDF } },
+    select: { numero: true },
+  });
+
+  return departements.map((departement) => departement.numero);
+};
+
+/** CADA créés par une transformation HUDA vers CADA finalisée. */
+export const findCadaFromHudaStructureIds = async (
+  structureIds: number[]
+): Promise<number[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+
+  const versions = await prisma.structureVersion.findMany({
+    where: {
+      structureId: { in: structureIds },
+      structureVersionTransformation: {
+        type: StructureVersionTransformationType.CREATION,
+        transformation: {
+          type: {
+            in: [
+              TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
+              TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+            ],
+          },
+          form: { status: true },
+        },
+      },
+    },
+    select: { structureId: true },
+  });
+
+  return versions
+    .map((version) => version.structureId)
+    .filter((structureId): structureId is number => structureId !== null);
+};
+
+export const findTarifsJournaliersCibles = async (): Promise<
+  StatistiqueDbTarifJournalierCible[]
+> => {
+  const cibles = await prisma.tarifJournalierCible.findMany();
+
+  return cibles.map((cible) => ({
+    structureType: cible.structure_type,
+    year: cible.year,
+    isIdf: cible.belongs_to_idf,
+    tarifCible: cible.tarif_cible.toNumber(),
+  }));
+};
+
+export const findTauxEncadrementCibles = async (): Promise<
+  StatistiqueDbTauxEncadrementCible[]
+> => {
+  const cibles = await prisma.tauxEncadrementCible.findMany();
+
+  return cibles.map((cible) => ({
+    structureType: cible.structure_type,
+    year: cible.year,
+    isIdf: cible.belongs_to_idf,
+    isFromHuda: cible.comes_from_huda,
+    tauxCible: cible.taux_cible.toNumber(),
+  }));
 };
 
 const structureVersionScope = (structureIds: number[]) => ({

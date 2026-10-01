@@ -1,4 +1,4 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, StructureType } from "@/generated/prisma/client";
 
 export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   select: {
@@ -29,6 +29,35 @@ export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
 }>;
 
 export type StatistiqueDbTypologieValues = Omit<StatistiqueDbTypologie, "id">;
+
+export type StatistiqueDbFormDefinition = Prisma.FormDefinitionGetPayload<{
+  select: {
+    slug: true;
+    deadline: true;
+  };
+}>;
+
+export type StatistiqueDbValidatedActualisation = Prisma.FormGetPayload<{
+  select: {
+    structureId: true;
+    formDefinition: { select: { slug: true; deadline: true } };
+  };
+}>;
+
+export type StatistiqueDbTarifJournalierCible = {
+  structureType: StructureType;
+  year: number;
+  isIdf: boolean;
+  tarifCible: number;
+};
+
+export type StatistiqueDbTauxEncadrementCible = {
+  structureType: StructureType;
+  year: number;
+  isIdf: boolean;
+  isFromHuda: boolean;
+  tauxCible: number;
+};
 
 /** `structureId` / `structureVersionId` : garantis non nuls par le scope de la requête (`findStructureAdresses`). */
 export type StatistiqueDbAdresse = Omit<
@@ -199,6 +228,18 @@ export type StatistiquesContext = {
   activeStructureIdsNow: Set<number>;
   /** Index des structures actives par période (séries temporelles). */
   activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod;
+  openingDateByStructureId: Map<number, Date>;
+  closureDateByStructureId: Map<number, Date | null>;
+  /** IDs des structures dont l'initialisation est validée. */
+  finalisedStructureIds: Set<number>;
+  actualisationFormDefinitions: StatistiqueDbFormDefinition[];
+  /** Dernière campagne d'actualisation validée par structure. */
+  lastValidatedCampagneYearByStructureId: Map<number, number>;
+  idfDepartementNumeros: Set<string>;
+  /** CADA créés par une transformation HUDA vers CADA. */
+  cadaFromHudaStructureIds: Set<number>;
+  tarifsJournaliersCibles: StatistiqueDbTarifJournalierCible[];
+  tauxEncadrementCibles: StatistiqueDbTauxEncadrementCible[];
   eigs: StatistiqueDbEig[];
   evaluations: StatistiqueDbEvaluation[];
   typologies: StatistiqueDbTypologie[];
@@ -218,10 +259,20 @@ export type StatistiquesContext = {
 export type DnaStructureIdsResolver = (dnaCode: string, date: Date) => number[];
 
 /** Minimal slice of StatistiquesContext needed to resolve structures + typologie for a given year. */
-export type StatistiquesTypologieYearContext = Pick<
+export type StatistiquesTypologieYearContext = StatistiquesYearContext &
+  Pick<StatistiquesContext, "typologies">;
+
+export type StatistiquesCompletudeContext = Pick<
   StatistiquesContext,
-  "allStructures" | "activeStructureIdsByPeriod" | "typologies"
+  | "finalisedStructureIds"
+  | "actualisationFormDefinitions"
+  | "lastValidatedCampagneYearByStructureId"
+  | "closureDateByStructureId"
 >;
+
+/** Structures comptabilisées sur une année : actives, et actualisées sur une année de campagne. */
+export type StatistiquesYearContext = StatistiquesCompletudeContext &
+  Pick<StatistiquesContext, "allStructures" | "activeStructureIdsByPeriod">;
 
 /** Adds CPOM links, for indicators counting structures covered by an active CPOM per year. */
 export type StatistiquesCpomYearContext = StatistiquesTypologieYearContext &
