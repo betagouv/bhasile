@@ -1,11 +1,5 @@
 // One-off script: convertit les Role / RoleDepartement en binômes rôle × niveau géographique
-// Pattern d'email et rôle manuel reçoivent les mêmes binômes :
-// EDITEUR national, ou VIEWER national + EDITEUR sur sa zone.
-// Les binômes d'un utilisateur remplacent ceux de son pattern, comme le rôle manuel aujourd'hui.
-// Un rôle couvrant une région entière donne un binôme région, sinon un binôme par département.
-// Idempotent : seuls les patterns et utilisateurs sans aucun binôme sont migrés,
-// un binôme modifié ou retiré depuis n'est donc jamais recréé.
-// Lancé par scripts/postdeploy.sh jusqu'à la suppression des tables Role.
+//
 // Usage: yarn one-off 20260929-migrate-roles-to-grants
 
 import "dotenv/config";
