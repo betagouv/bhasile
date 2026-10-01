@@ -9,7 +9,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
-import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
+import { getActualisationDefaultValues } from "@/app/utils/default-values.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import {

@@ -23,9 +23,9 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
+import { getActesAdministratifsDefaultValues } from "./acte-administratif.util";
 import { getYearFromDate } from "./date.util";
-import { areAllFormStepsValidated } from "./formStep.util";
+import { areAllFormStepsValidated } from "./form-step.util";
 import {
   getMillesimeIndexForAYear,
   getMostRecentMillesime,

@@ -7,7 +7,7 @@ import {
   checkNoDuplicateStructureIds,
   checkUniqueDepartement,
 } from "@/app/api/transformations/transformation.util";
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
 import {

@@ -3,7 +3,7 @@ import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import {
   getActeDisplayCategory,
   hasDownloadableFile,
-} from "@/app/utils/acteAdministratif.util";
+} from "@/app/utils/acte-administratif.util";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 

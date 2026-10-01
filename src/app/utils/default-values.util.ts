@@ -11,13 +11,13 @@ import { ControleFormValues } from "@/schemas/forms/base/controle.schema";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
 import { StructureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 
-import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
+import { getActesAdministratifsDefaultValues } from "./acte-administratif.util";
 import { getBudgetsDefaultValues } from "./budget.util";
 import { getControlesDefaultValues } from "./controle.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
-import { getIndicateursFinanciersDefaultValues } from "./indicateurFinancier.util";
-import { getStructureMillesimeDefaultValues } from "./structureMillesime.util";
-import { getStructureTypologyDefaultValues } from "./structureTypology.util";
+import { getIndicateursFinanciersDefaultValues } from "./indicateur-financier.util";
+import { getStructureMillesimeDefaultValues } from "./structure-millesime.util";
+import { getStructureTypologyDefaultValues } from "./structure-typology.util";
 
 export const getDefaultValues = ({
   structure,

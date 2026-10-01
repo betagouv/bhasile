@@ -3,7 +3,7 @@ import z from "zod";
 import {
   isYearPrevisionnelle,
   isYearRealisee,
-} from "@/app/utils/indicateurFinancier.util";
+} from "@/app/utils/indicateur-financier.util";
 import {
   zSafePositiveDecimalsNullish,
   zSafeYear,

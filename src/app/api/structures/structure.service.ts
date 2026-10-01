@@ -1,7 +1,7 @@
 import { cache } from "react";
 
 import { recomputeAnomaliesSafely } from "@/app/api/anomalies/anomalie.service";
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import {

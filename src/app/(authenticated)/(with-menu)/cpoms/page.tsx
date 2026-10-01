@@ -9,7 +9,7 @@ import {
   parseCpomColumn,
   parseSortDirection,
   SearchParams,
-} from "@/app/utils/searchParams.util";
+} from "@/app/utils/search-params.util";
 import { CpomsQuery } from "@/types/cpom.type";
 
 import { CpomsContent } from "./CpomsContent";

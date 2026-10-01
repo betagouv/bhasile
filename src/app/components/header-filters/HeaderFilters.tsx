@@ -1,7 +1,7 @@
 import { FiltersDepartement } from "@/app/components/filters/FiltersDepartement";
 import { formatPlural } from "@/app/utils/string.util";
 import { buildZoneSummary } from "@/app/utils/zone.util";
-import { buildTypesSummary } from "@/utils/structureType.util";
+import { buildTypesSummary } from "@/utils/structure-type.util";
 
 import { FilterDropdown } from "./FilterDropdown";
 import { FilterOperateur } from "./FilterOperateur";
@@ -15,14 +15,13 @@ export const HeaderFilters = () => {
         placeholder="Toute la France"
         filterId="departements"
         getSummaryLabel={buildZoneSummary}
-      >
-        {({ selection, setSelection }) => (
+        renderOptions={({ selection, setSelection }) => (
           <FiltersDepartement
             departements={selection}
             onChange={setSelection}
           />
         )}
-      </FilterDropdown>
+      />
 
       <FilterDropdown
         label="Opérateurs"
@@ -31,22 +30,20 @@ export const HeaderFilters = () => {
         getSummaryLabel={(operateurIds) =>
           formatPlural(operateurIds.length, "opérateur")
         }
-      >
-        {({ selection, toggleValue }) => (
+        renderOptions={({ selection, toggleValue }) => (
           <FilterOperateur selection={selection} onToggle={toggleValue} />
         )}
-      </FilterDropdown>
+      />
 
       <FilterDropdown
         label="Types Structure"
         placeholder="Tous les types"
         filterId="types"
         getSummaryLabel={buildTypesSummary}
-      >
-        {({ selection, setSelection }) => (
+        renderOptions={({ selection, setSelection }) => (
           <FilterTypeStructure selection={selection} onChange={setSelection} />
         )}
-      </FilterDropdown>
+      />
     </div>
   );
 };

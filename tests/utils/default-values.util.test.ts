@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
+import { getActualisationDefaultValues } from "@/app/utils/default-values.util";
 import { StructureType } from "@/types/structure.type";
 
 import { createStructure } from "../test-utils/structure.factory";

@@ -10,7 +10,7 @@ import FormWrapper, {
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { getDefaultValues } from "@/app/utils/default-values.util";
 import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";

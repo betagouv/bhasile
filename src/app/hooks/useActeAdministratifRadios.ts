@@ -1,7 +1,7 @@
 import { RadioButtonsProps } from "@codegouvfr/react-dsfr/RadioButtons";
 import { useFormContext } from "react-hook-form";
 
-import { getCategoryGroup } from "@/app/utils/acteAdministratif.util";
+import { getCategoryGroup } from "@/app/utils/acte-administratif.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { lowercaseFirstLetter } from "@/app/utils/string.util";
 import {

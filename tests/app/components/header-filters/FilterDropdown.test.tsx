@@ -23,9 +23,10 @@ const renderDropdown = () =>
       placeholder="Toute la France"
       filterId="departements"
       getSummaryLabel={(departements) => `Résumé de ${departements.join("/")}`}
-    >
-      {({ selection }) => <p>Options pour {selection.join("/") || "aucun"}</p>}
-    </FilterDropdown>
+      renderOptions={({ selection }) => (
+        <p>Options pour {selection.join("/") || "aucun"}</p>
+      )}
+    />
   );
 
 describe("FilterDropdown", () => {

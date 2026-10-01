@@ -14,7 +14,7 @@ export const FilterDropdown = ({
   placeholder,
   filterId,
   getSummaryLabel,
-  children,
+  renderOptions,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -86,7 +86,7 @@ export const FilterDropdown = ({
             className="border-b border-default-grey px-4 pt-3 pb-1 [&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0"
             small
           />
-          {children(filterSelection)}
+          {renderOptions(filterSelection)}
         </div>
       )}
     </div>
@@ -98,5 +98,5 @@ type Props = {
   placeholder: string;
   filterId: string;
   getSummaryLabel: (selection: string[]) => string | undefined;
-  children: (filterSelection: FilterSelection) => ReactNode;
+  renderOptions: (filterSelection: FilterSelection) => ReactNode;
 };

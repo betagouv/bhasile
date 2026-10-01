@@ -9,7 +9,7 @@ import {
   getFirstParam,
   getPageParam,
   SearchParams,
-} from "@/app/utils/searchParams.util";
+} from "@/app/utils/search-params.util";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 

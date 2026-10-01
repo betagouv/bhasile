@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildTypesSummary } from "@/utils/structureType.util";
+import { buildTypesSummary } from "@/utils/structure-type.util";
 
 describe("buildTypesSummary", () => {
   it("affiche le type seul quand un seul est sélectionné", () => {

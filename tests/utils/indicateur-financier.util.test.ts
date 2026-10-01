@@ -6,7 +6,7 @@ import {
   getIndicateursFinanciersDefaultValues,
   isYearPrevisionnelle,
   isYearRealisee,
-} from "@/app/utils/indicateurFinancier.util";
+} from "@/app/utils/indicateur-financier.util";
 import { CURRENT_YEAR } from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 

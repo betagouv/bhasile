@@ -1,4 +1,4 @@
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import { Dna, Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { EntityId } from "@/types/Entity.type";

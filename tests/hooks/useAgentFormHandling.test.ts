@@ -2,7 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { ApiError } from "@/app/utils/apiError.util";
+import { ApiError } from "@/app/utils/api-error.util";
 
 const mockRouterPush = vi.fn();
 const mockRouterRefresh = vi.fn();

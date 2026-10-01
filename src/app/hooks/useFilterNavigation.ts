@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 
-import { setFilterParam } from "@/app/utils/searchParams.util";
+import { setFilterParam } from "@/app/utils/search-params.util";
 
 import {
   SearchParamsNavigationOptions,

@@ -1,4 +1,4 @@
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import {
   getStructureVersionTransformationDepartement,
   isEffectiveDateValid,
