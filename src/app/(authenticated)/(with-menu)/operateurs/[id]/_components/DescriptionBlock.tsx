@@ -42,6 +42,15 @@ export const DescriptionBlock = () => {
             <strong>Siège social</strong>
             {operateur?.siegeSocial || "N/A"}
           </div>
+          {operateur.filiales.length > 0 && (
+            <>
+              <hr className="col-span-2" />
+              <div className="flex gap-2 mb-3">
+                <strong>Filiales</strong>
+                {operateur.filiales.join(", ")}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </Block>

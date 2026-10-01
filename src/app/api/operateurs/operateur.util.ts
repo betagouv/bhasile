@@ -1,11 +1,17 @@
 import { roundTo } from "@/app/utils/math.util";
 import { normalizeAccents } from "@/app/utils/string.util";
 import { StructureType } from "@/generated/prisma/client";
-import type { OperateurListItem } from "@/types/operateur.type";
+import type {
+  OperateurListItem,
+  OperateurSuggestionItem,
+} from "@/types/operateur.type";
 
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { StructureListLight } from "../structures/structure.db.type";
-import { OperateurListRow } from "./operateur.db.type";
+import {
+  OperateurListRow,
+  OperateurSuggestionRow,
+} from "./operateur.db.type";
 
 type OperateurStats = {
   nbStructures: number;
@@ -27,6 +33,27 @@ export const buildTopLevelOperateurMap = (
       operateur.parentId ?? operateur.id,
     ])
   );
+
+export const buildFilialesByParentId = (
+  operateurs: OperateurListRow[]
+): Map<number, string[]> => {
+  const filialesByParentId = new Map<number, string[]>();
+
+  operateurs.forEach((operateur) => {
+    if (operateur.parentId === null) {
+      return;
+    }
+    const filiales = filialesByParentId.get(operateur.parentId) ?? [];
+    filiales.push(operateur.name);
+    filialesByParentId.set(operateur.parentId, filiales);
+  });
+
+  filialesByParentId.forEach((filiales) =>
+    filiales.sort((first, second) => first.localeCompare(second, "fr"))
+  );
+
+  return filialesByParentId;
+};
 
 export const groupStructureStatsByOperateur = (
   structures: StructureListLight[],
@@ -71,7 +98,8 @@ export const groupStructureStatsByOperateur = (
 export const buildOperateurListItem = (
   operateur: OperateurListRow,
   stats: OperateurStats,
-  globalPlaces: number
+  globalPlaces: number,
+  filiales: string[]
 ): OperateurListItem => ({
   id: operateur.id,
   name: operateur.name,
@@ -82,8 +110,18 @@ export const buildOperateurListItem = (
       ? roundTo((stats.totalPlaces / globalPlaces) * 100, 2)
       : 0,
   structureTypes: [...stats.structureTypes].sort(),
+  filiales,
   logo: { key: operateur.logo?.key ?? null },
   logoUrl: null,
+});
+
+export const buildOperateurSuggestionItem = (
+  operateur: OperateurSuggestionRow
+): OperateurSuggestionItem => ({
+  id: operateur.id,
+  name: operateur.name,
+  isFiliale: operateur.parentId !== null,
+  hasFiliales: operateur.filiales.length > 0,
 });
 
 export const filterOperateursBySearch = (

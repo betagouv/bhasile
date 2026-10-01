@@ -55,6 +55,30 @@ export const useUserAction = () => {
     });
   };
 
+  const trackStructurePdfExport = async (
+    structureId: number
+  ): Promise<void> => {
+    postUserAction("/api/user-actions/structure-pdf-export", {
+      structureId,
+    });
+  };
+
+  const trackStatistiquesSpreadsheetExport = async (
+    details: Record<string, string>
+  ): Promise<void> => {
+    postUserAction("/api/user-actions/statistiques-spreadsheet-export", {
+      details,
+    });
+  };
+
+  const trackStatistiquesPdfExport = async (
+    details: Record<string, string>
+  ): Promise<void> => {
+    postUserAction("/api/user-actions/statistiques-pdf-export", {
+      details,
+    });
+  };
+
   return {
     trackStatistiques,
     trackStatistiquesCartographie,
@@ -63,5 +87,8 @@ export const useUserAction = () => {
     trackFinancesSpreadsheetExport,
     trackControleQualiteSpreadsheetExport,
     trackStructureSpreadsheetExport,
+    trackStructurePdfExport,
+    trackStatistiquesSpreadsheetExport,
+    trackStatistiquesPdfExport,
   };
 };
