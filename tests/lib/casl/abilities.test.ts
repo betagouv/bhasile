@@ -86,6 +86,42 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure69)).toBe(false);
   });
 
+  it("garde le rôle le plus fort quand un binôme viewer est inclus dans un binôme admin", () => {
+    const user = createSessionUser({
+      grants: [
+        createSessionGrant({
+          role: AccessRole.ADMIN,
+          departementNumeros: ["1", "69"],
+        }),
+        createSessionGrant({
+          role: AccessRole.VIEWER,
+          departementNumeros: ["69"],
+        }),
+      ],
+    });
+
+    expect(canUpdateStructure(user, structure1)).toBe(true);
+    expect(canUpdateStructure(user, structure69)).toBe(true);
+  });
+
+  it("limite l'écriture au département admin quand la région n'est que viewer", () => {
+    const user = createSessionUser({
+      grants: [
+        createSessionGrant({
+          role: AccessRole.VIEWER,
+          departementNumeros: ["1", "69"],
+        }),
+        createSessionGrant({
+          role: AccessRole.ADMIN,
+          departementNumeros: ["69"],
+        }),
+      ],
+    });
+
+    expect(canUpdateStructure(user, structure69)).toBe(true);
+    expect(canUpdateStructure(user, structure1)).toBe(false);
+  });
+
   it("n'accorde rien à un binôme sans cible", () => {
     const user = createSessionUser({ grants: [createSessionGrant()] });
 

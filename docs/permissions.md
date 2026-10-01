@@ -33,6 +33,22 @@ Un binôme est une ligne de `Grant` :
 
 Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `{ scope: REGION, regionId: AURA }`.
 
+## Hiérarchie des rôles
+
+`VIEWER` < `EDITEUR` < `ADMIN`. Sur une structure donnée, le rôle le plus fort parmi les binômes qui la couvrent s'applique.
+
+| Rôle      | Droits                                                    |
+| --------- | --------------------------------------------------------- |
+| `VIEWER`  | Lecture                                                   |
+| `EDITEUR` | Lecture, écriture                                         |
+| `ADMIN`   | Lecture, écriture, gestion des binômes (à partir de PR 2) |
+
+- **Les binômes s'additionnent, aucun ne restreint** : CASL ne reçoit que des règles « peut ».
+  - Admin AURA + viewer Isère : admin partout en AURA, Isère comprise.
+  - Viewer AURA + admin Isère : admin en Isère, viewer dans le reste d'AURA.
+- **Le code ne compare jamais les rôles entre eux.** La hiérarchie tient parce que chaque rôle reçoit tous les droits du rôle inférieur.
+- **Règle à respecter** : tout droit donné à un rôle dans `abilities.ts` doit l'être aussi aux rôles supérieurs. Sinon la hiérarchie casse.
+
 ## Choix et raisons
 
 - **Pas de table `Perimetre`** : avec quatre niveaux fixes, la cible tient dans le binôme. Moins de tables, et la hiérarchie admin se lit directement sur la géographie.
