@@ -60,6 +60,8 @@ curl -s "http://localhost:3000/api/statistiques" | jq > tmp/statistiques.json
 
 Filtre structures via `findPerimeterStructures` : `type` / `operateurId` / `departementAdministratif`.
 
+**Structures initialisées uniquement** : le périmètre ne retient que les structures dont le formulaire `finalisation-v1` est validé ou qui sont nées d'une création par transformation finalisée (même règle que `isStructureFinalised`, celle qui ouvre une campagne d'actualisation à une structure). Une structure non initialisée n'entre dans aucun indicateur, assiette globale comprise.
+
 **Structures actives (indicateurs globaux)** : `activeStructureIdsNow` sur `StatistiquesContext` - structures ouvertes au jour de référence (`Structure.creationDate` / `fermetureDate`). `context.structures` en est la projection typée.
 
 **Activité par période (séries temporelles)** : index `activeStructureIdsByPeriod` (`month`, `trimester`, `year` -> `Set` d'IDs actifs). Une structure fermée le 05/05 compte sur janvier à mai, pas sur juin.
@@ -82,6 +84,8 @@ Tous les indicateurs annuels (`byYear`) des blocs `structures`, `places` et `fin
 
 Une structure est **actualisée sur l'année N** quand sa dernière campagne validée (`Form.status` sur `actualisation-M`) vérifie `M >= N` : valider une campagne atteste toutes les années jusqu'à elle.
 
+**Décalage finance.** Pour le bloc `finance` (et les indicateurs `finance.*` de la cartographie), la frontière recule d'un an de plus : « première campagne − 2 », soit 2024 avec la campagne 2026. Le formulaire d'actualisation 2026 est en effet celui qui rend obligatoire le réalisé 2024 (ETP réalisé, résultat des structures subventionnées, dotations des structures autorisées), qui n'était pas disponible à l'initialisation. Constantes `FIRST_CAMPAGNE_LOOKBACK_YEARS` / `FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS`.
+
 **Frontière.** Elle est posée une fois par la première campagne jamais déclarée et vaut « année de cette campagne − 1 ». Avec la campagne 2026 : 2021 à 2024 sont des années d'initialisation, 2025 et 2026 sont filtrées sur les structures ayant validé la campagne 2026. Que 2025 soit couvert par la campagne 2026 est un cas particulier de démarrage (projet initié en 2024, aucune actualisation depuis) ; les campagnes suivantes ne déplacent pas la frontière.
 
 ### `completude`
@@ -89,7 +93,7 @@ Une structure est **actualisée sur l'année N** quand sa dernière campagne val
 | Champ           | Contenu                                                                                         |
 | --------------- | ----------------------------------------------------------------------------------------------- |
 | `nbRenseignees` | Nombre de structures comptabilisées sur l'année (exactement celles qui alimentent les chiffres) |
-| `nbAttendues`   | Structures initialisées (`finalisation-v1` validé) encore ouvertes fin d'année, plus les structures comptabilisées qui ont fermé dans l'année |
+| `nbAttendues`   | Structures du périmètre encore ouvertes fin d'année, plus les structures comptabilisées qui ont fermé dans l'année |
 | `isComplete`    | `nbRenseignees >= nbAttendues`                                                                  |
 | `reason`        | `SAISIE_EN_COURS` tant qu'une campagne postérieure ou égale à l'année est ouverte (`FormDefinition.deadline`), `SAISIE_INCOMPLETE` ensuite, `null` si complet |
 

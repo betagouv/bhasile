@@ -8,7 +8,7 @@ Le front choisit l'année affichée dans `byYear`.
 
 ## `byYear` (par scope)
 
-Structures comptabilisées sur l'année (cf. [README racine](../README.md#structures-comptabilisées-par-année)) appartenant au scope. `completude` porte le score de l'année, commun aux trois scopes.
+Structures comptabilisées sur l'année (cf. [README racine](../README.md#structures-comptabilisées-par-année)) appartenant au scope. `completude` porte le score de l'année, commun aux trois scopes. Les années de campagne commencent un an plus tôt que dans les autres blocs (2024 avec la campagne 2026), cf. « Décalage finance » du README racine.
 
 | Champ                                                                   | Calcul                                                                                   |
 | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
