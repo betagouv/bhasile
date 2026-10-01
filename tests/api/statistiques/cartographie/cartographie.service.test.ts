@@ -57,9 +57,6 @@ const buildContext = (
     allStructures: structures,
     activeStructureIdsNow,
     activeStructureIdsByPeriod,
-    finalisedStructureIds: new Set(
-      structures.map((structure) => structure.id)
-    ),
     actualisationFormDefinitions: [],
     lastValidatedCampagneYearByStructureId: new Map(),
     openingDateByStructureId: new Map(),

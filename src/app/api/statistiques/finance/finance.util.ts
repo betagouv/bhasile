@@ -16,6 +16,7 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
+import { FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS } from "../completude.util";
 import type {
   StatistiqueDbBudget,
   StatistiqueDbIndicateurFinancier,
@@ -254,7 +255,8 @@ export const computeFinanceStatistiques = (
     byYear: years.map((year) => {
       const { structures, completude } = resolveCountedStructuresForYear(
         context,
-        year
+        year,
+        FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS
       );
       const [total, autorisees, subventionnees] = FINANCE_SCOPES.map(
         (scope) =>
@@ -305,7 +307,11 @@ export const computeFinanceTotalValuesForYears = (
 ): (number | null)[] =>
   years.map((year) => {
     const result = computeScopeForYear(
-      resolveCountedStructuresForYear(context, year).structures,
+      resolveCountedStructuresForYear(
+        context,
+        year,
+        FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS
+      ).structures,
       context,
       aggregation,
       year

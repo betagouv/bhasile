@@ -230,8 +230,6 @@ export type StatistiquesContext = {
   activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod;
   openingDateByStructureId: Map<number, Date>;
   closureDateByStructureId: Map<number, Date | null>;
-  /** IDs des structures dont l'initialisation est validée. */
-  finalisedStructureIds: Set<number>;
   actualisationFormDefinitions: StatistiqueDbFormDefinition[];
   /** Dernière campagne d'actualisation validée par structure. */
   lastValidatedCampagneYearByStructureId: Map<number, number>;
@@ -264,7 +262,6 @@ export type StatistiquesTypologieYearContext = StatistiquesYearContext &
 
 export type StatistiquesCompletudeContext = Pick<
   StatistiquesContext,
-  | "finalisedStructureIds"
   | "actualisationFormDefinitions"
   | "lastValidatedCampagneYearByStructureId"
   | "closureDateByStructureId"
