@@ -1,24 +1,24 @@
-// One-off script: convertit les Role / RoleDepartement en binômes rôle × périmètre
+// One-off script: convertit les Role / RoleDepartement en binômes rôle × niveau géographique
 // - Pattern d'email → droits de base : EDITEUR national, ou VIEWER national + EDITEUR sur sa zone
-// - Rôle manuel d'un utilisateur → une ligne EDITEUR sur sa zone
-// Idempotent : les périmètres sont retrouvés par nom, les binômes créés avec skipDuplicates.
+// - Rôle manuel d'un utilisateur → EDITEUR sur sa zone
+// Un rôle couvrant une région entière donne un binôme région, sinon un binôme par département.
+// Idempotent : seuls les binômes manquants sont créés.
 // Usage: yarn one-off 20260929-migrate-roles-to-grants
 
 import "dotenv/config";
 
 import {
   AgentZone,
-  findOrCreatePerimetre,
   getAgentBaseGrants,
-} from "scripts/utils/perimetre.util";
+  getAgentEditeurGrants,
+  isSameGrant,
+} from "scripts/utils/grant.util";
 
-import { AccessRole, Prisma } from "@/generated/prisma/client";
+import { GrantScope, Prisma } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
 type RoleWithDepartements = Prisma.RoleGetPayload<{
-  include: {
-    roleDepartements: { include: { departement: true } };
-  };
+  include: { roleDepartements: true };
 }>;
 
 type RegionWithDepartements = Prisma.RegionGetPayload<{
@@ -32,7 +32,7 @@ const getRoleZone = (
   regions: RegionWithDepartements[]
 ): AgentZone | null => {
   if (role.name === "NATIONAL") {
-    return { kind: "national" };
+    return { scope: GrantScope.NATIONAL };
   }
 
   const departementNumeros = role.roleDepartements
@@ -47,17 +47,10 @@ const getRoleZone = (
     return regionNumeros.join(",") === departementNumeros.join(",");
   });
   if (region) {
-    return { kind: "region", regionId: region.id, name: region.name };
+    return { scope: GrantScope.REGION, regionId: region.id };
   }
 
-  return {
-    kind: "departements",
-    departementNumeros,
-    name:
-      departementNumeros.length === 1
-        ? role.roleDepartements[0].departement.name
-        : role.name,
-  };
+  return { scope: GrantScope.DEPARTEMENT, departementNumeros };
 };
 
 const migrateEmailPatterns = async (
@@ -66,15 +59,21 @@ const migrateEmailPatterns = async (
 ): Promise<number> => {
   const emailPatterns = await prisma.emailPattern.findMany({
     where: { roleId },
-    select: { id: true },
+    select: { id: true, grants: true },
   });
-  const grants = await getAgentBaseGrants(prisma, zone);
+  const grants = getAgentBaseGrants(zone);
 
   const { count } = await prisma.emailPatternGrant.createMany({
-    data: emailPatterns.flatMap(({ id }) =>
-      grants.map((grant) => ({ ...grant, emailPatternId: id }))
+    data: emailPatterns.flatMap((emailPattern) =>
+      grants
+        .filter(
+          (grant) =>
+            !emailPattern.grants.some((existing) =>
+              isSameGrant(existing, grant)
+            )
+        )
+        .map((grant) => ({ ...grant, emailPatternId: emailPattern.id }))
     ),
-    skipDuplicates: true,
   });
   return count;
 };
@@ -85,17 +84,19 @@ const migrateManualUsers = async (
 ): Promise<number> => {
   const users = await prisma.user.findMany({
     where: { roleId },
-    select: { id: true },
+    select: { id: true, grants: true },
   });
-  const perimetreId = await findOrCreatePerimetre(prisma, zone);
+  const grants = getAgentEditeurGrants(zone);
 
   const { count } = await prisma.userGrant.createMany({
-    data: users.map(({ id }) => ({
-      userId: id,
-      role: AccessRole.EDITEUR,
-      perimetreId,
-    })),
-    skipDuplicates: true,
+    data: users.flatMap((user) =>
+      grants
+        .filter(
+          (grant) =>
+            !user.grants.some((existing) => isSameGrant(existing, grant))
+        )
+        .map((grant) => ({ ...grant, userId: user.id }))
+    ),
   });
   return count;
 };
@@ -104,9 +105,7 @@ const migrateRolesToGrants = async () => {
   console.log("➡️ Démarrage de la conversion des rôles en binômes");
 
   const [roles, regions] = await Promise.all([
-    prisma.role.findMany({
-      include: { roleDepartements: { include: { departement: true } } },
-    }),
+    prisma.role.findMany({ include: { roleDepartements: true } }),
     prisma.region.findMany({
       include: { departements: { select: { numero: true } } },
     }),
@@ -122,7 +121,7 @@ const migrateRolesToGrants = async () => {
     const emailPatternGrantCount = await migrateEmailPatterns(role.id, zone);
     const userGrantCount = await migrateManualUsers(role.id, zone);
     console.log(
-      `✔️ ${role.name} → ${zone.kind === "national" ? "national" : zone.name} : ${emailPatternGrantCount} binômes de pattern, ${userGrantCount} binômes utilisateur`
+      `✔️ ${role.name} → ${zone.scope} : ${emailPatternGrantCount} binômes de pattern, ${userGrantCount} binômes utilisateur`
     );
   }
 

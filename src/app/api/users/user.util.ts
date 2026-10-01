@@ -1,31 +1,30 @@
+import { GrantScope } from "@/generated/prisma/client";
 import { SessionGrant } from "@/types/global";
 
-import { GrantWithPerimetre } from "./user.db.type";
+import { GrantDb } from "./user.db.type";
 
 export const getEffectiveGrants = (user: {
-  grants: GrantWithPerimetre[];
-  emailPattern: { grants: GrantWithPerimetre[] } | null;
-}): GrantWithPerimetre[] => [
-  ...(user.emailPattern?.grants ?? []),
-  ...user.grants,
-];
+  grants: GrantDb[];
+  emailPattern: { grants: GrantDb[] } | null;
+}): GrantDb[] => [...(user.emailPattern?.grants ?? []), ...user.grants];
 
-export const toSessionGrant = ({
-  role,
-  perimetre,
-}: GrantWithPerimetre): SessionGrant => {
-  const departementNumeros = new Set([
-    ...perimetre.regions.flatMap(({ region }) =>
-      region.departements.map(({ numero }) => numero)
-    ),
-    ...perimetre.departements.map(({ departementNumero }) => departementNumero),
-  ]);
+export const toSessionGrant = (grant: GrantDb): SessionGrant => ({
+  role: grant.role,
+  isNational: grant.scope === GrantScope.NATIONAL,
+  departementNumeros: getDepartementNumeros(grant),
+  structureIds:
+    grant.scope === GrantScope.STRUCTURE && grant.structure
+      ? [grant.structure.id]
+      : [],
+  operateurId: grant.operateurId,
+});
 
-  return {
-    role,
-    isNational: perimetre.isNational,
-    departementNumeros: [...departementNumeros],
-    structureIds: perimetre.structures.map(({ structureId }) => structureId),
-    operateurId: perimetre.operateurId,
-  };
+const getDepartementNumeros = (grant: GrantDb): string[] => {
+  if (grant.scope === GrantScope.REGION) {
+    return grant.region?.departements.map(({ numero }) => numero) ?? [];
+  }
+  if (grant.scope === GrantScope.DEPARTEMENT && grant.departement) {
+    return [grant.departement.numero];
+  }
+  return [];
 };

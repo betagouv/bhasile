@@ -1,12 +1,13 @@
 model Departement {
-  numero               String                 @id
+  numero               String              @id
   name                 String
   population           Int?
   structures           Structure[]
   structureVersions    StructureVersion[]
   roleDepartements     RoleDepartement[]
-  perimetres           PerimetreDepartement[]
-  regionAdministrative Region?                @relation(fields: [regionId], references: [id])
+  userGrants           UserGrant[]
+  emailPatternGrants   EmailPatternGrant[]
+  regionAdministrative Region?             @relation(fields: [regionId], references: [id])
   regionId             Int?
   cpoms                CpomDepartement[]
   dnas                 Dna[]
@@ -16,12 +17,13 @@ model Departement {
 }
 
 model Region {
-  id           Int               @id @default(autoincrement())
-  name         String
-  code         String
-  departements Departement[]
-  cpoms        Cpom[]
-  perimetres   PerimetreRegion[]
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  code               String
+  departements       Departement[]
+  cpoms              Cpom[]
+  userGrants         UserGrant[]
+  emailPatternGrants EmailPatternGrant[]
 
   @@schema("public")
 }

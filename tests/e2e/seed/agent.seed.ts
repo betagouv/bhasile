@@ -1,5 +1,5 @@
 import { getNow } from "@/app/utils/now.util";
-import { AccessRole } from "@/generated/prisma/client";
+import { AccessRole, GrantScope } from "@/generated/prisma/client";
 
 import { prisma } from "./prisma";
 
@@ -8,7 +8,6 @@ export const E2E_AGENT_NAME = "E2E Agent";
 
 const E2E_AGENT_DEPARTEMENT = "75";
 const E2E_AGENT_EMAIL_PATTERN = "^e2e\\.agent@bhasile\\.local$";
-const E2E_AGENT_PERIMETRE = "E2E Paris";
 
 export const seedAgent = async (): Promise<void> => {
   const departement = await prisma.departement.findUnique({
@@ -20,19 +19,6 @@ export const seedAgent = async (): Promise<void> => {
       `Département ${E2E_AGENT_DEPARTEMENT} absent de la base : lancer \`npx prisma db seed\` avant les tests e2e.`
     );
   }
-
-  const perimetre =
-    (await prisma.perimetre.findFirst({
-      where: { name: E2E_AGENT_PERIMETRE },
-      select: { id: true },
-    })) ??
-    (await prisma.perimetre.create({
-      data: {
-        name: E2E_AGENT_PERIMETRE,
-        departements: { create: { departementNumero: departement.numero } },
-      },
-      select: { id: true },
-    }));
 
   const emailPattern = await prisma.emailPattern.upsert({
     where: { pattern: E2E_AGENT_EMAIL_PATTERN },
@@ -48,7 +34,8 @@ export const seedAgent = async (): Promise<void> => {
     data: {
       emailPatternId: emailPattern.id,
       role: AccessRole.EDITEUR,
-      perimetreId: perimetre.id,
+      scope: GrantScope.DEPARTEMENT,
+      departementNumero: departement.numero,
     },
   });
 

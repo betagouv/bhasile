@@ -1,7 +1,7 @@
-import { GrantWithPerimetre } from "@/app/api/users/user.db.type";
+import { GrantDb } from "@/app/api/users/user.db.type";
 import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
 import { toDayKey } from "@/app/utils/date.util";
-import { AccessRole } from "@/generated/prisma/client";
+import { AccessRole, GrantScope } from "@/generated/prisma/client";
 
 const BREVO_IMPORT_URL = "https://api.brevo.com/v3/contacts/import";
 const BATCH_SIZE = 500;
@@ -22,8 +22,8 @@ export type BrevoAgentUser = {
   email: string;
   lastConnection: Date;
   createdAt: Date;
-  grants: GrantWithPerimetre[];
-  emailPattern: { grants: GrantWithPerimetre[] } | null;
+  grants: GrantDb[];
+  emailPattern: { grants: GrantDb[] } | null;
 };
 
 export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
@@ -36,7 +36,7 @@ export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
     attributes: {
       DEPARTEMENT: formatDepartements(actionGrants),
       STATUT: AGENT_STATUT,
-      PERIMETRE: actionGrants.map((grant) => grant.perimetre.name).join(", "),
+      PERIMETRE: actionGrants.map(getGrantLabel).join(", "),
       LAST_LOGIN: toDayKey(user.lastConnection),
       CREATION_COMPTE: toDayKey(user.createdAt),
     },
@@ -87,7 +87,7 @@ export const pushContactsToBrevo = async (
   }
 };
 
-const formatDepartements = (grants: GrantWithPerimetre[]): string =>
+const formatDepartements = (grants: GrantDb[]): string =>
   [
     ...new Set(
       grants.flatMap((grant) => toSessionGrant(grant).departementNumeros)
@@ -95,3 +95,15 @@ const formatDepartements = (grants: GrantWithPerimetre[]): string =>
   ]
     .sort()
     .join(", ");
+
+const getGrantLabel = (grant: GrantDb): string => {
+  if (grant.scope === GrantScope.NATIONAL) {
+    return "National";
+  }
+  return (
+    grant.region?.name ??
+    grant.departement?.name ??
+    grant.structure?.codeBhasile ??
+    ""
+  );
+};
