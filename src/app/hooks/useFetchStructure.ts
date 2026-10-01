@@ -6,7 +6,7 @@ export const useFetchStructure = (id?: number) => {
   const [structure, setStructure] = useState<StructureApiRead | undefined>(
     undefined
   );
-  const [isLoading, setIsLoading] = useState<boolean>(Boolean(id));
+  const [isLoading, setIsLoading] = useState(Boolean(id));
 
   const getStructure = async (
     id: number

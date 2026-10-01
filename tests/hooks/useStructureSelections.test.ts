@@ -22,7 +22,7 @@ describe("useStructureSelections", () => {
       })
     );
 
-    const [block] = result.current.blocks;
+    const block = result.current.blocks[0];
     expect(result.current.getFilters(block.id)).toEqual(departureFilters);
   });
 
@@ -35,7 +35,7 @@ describe("useStructureSelections", () => {
         defaultFilters: departureFilters,
       })
     );
-    const [block] = result.current.blocks;
+    const block = result.current.blocks[0];
 
     act(() => {
       result.current.setFilter(block.id, "departementNumero", "92");
