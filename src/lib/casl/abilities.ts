@@ -10,7 +10,6 @@ import {
   Structure,
   User,
 } from "@/generated/prisma/client";
-import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { SessionGrant, SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -39,8 +38,10 @@ const defineRulesFor = (user?: SessionUser) => {
 
   if (user?.isSuperAdmin) {
     builder.can("manage", "all");
-  } else if (user && user.operateurId === null) {
+  } else if (user?.operateurId === null) {
     defineAgentRules(builder, user);
+  } else if (typeof user?.operateurId === "number") {
+    defineOperateurRules(builder, user, user.operateurId);
   }
 
   return builder.rules;
@@ -60,7 +61,21 @@ const defineAgentRules = (
   for (const conditions of editingGrants.flatMap(getStructureConditions)) {
     can("update", "Structure", conditions);
   }
-  can("update", ["Cpom", "Operateur"]);
+
+  for (const conditions of editingGrants.flatMap(getCpomConditions)) {
+    can("update", "Cpom", conditions);
+  }
+  can("update", "Operateur");
+};
+
+const defineOperateurRules = (
+  { can }: AbilityBuilder<AppAbility>,
+  user: SessionUser,
+  operateurId: number
+) => {
+  if (user.grants.some((grant) => grant.role === AccessRole.ADMIN)) {
+    can("update", "Operateur", { id: operateurId });
+  }
 };
 
 const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
@@ -86,12 +101,45 @@ const getStructureConditions = ({
   ];
 };
 
+const getCpomConditions = ({
+  isNational,
+  departementNumeros,
+  structureIds,
+}: SessionGrant): Prisma.CpomWhereInput[] => {
+  if (isNational) {
+    return [{}];
+  }
+
+  return [
+    ...(departementNumeros.length > 0
+      ? [
+          {
+            departements: {
+              some: {
+                departement: { is: { numero: { in: departementNumeros } } },
+              },
+            },
+          },
+        ]
+      : []),
+    ...(structureIds.length > 0
+      ? [{ structures: { some: { structureId: { in: structureIds } } } }]
+      : []),
+  ];
+};
+
 export const canUpdateStructure = (
   user: SessionUser,
-  structure: Structure | StructureApiRead
+  structure?: StructureScope | null
 ) => {
   const ability = defineAbilityFor(user);
-  return ability.can("update", subject("Structure", structure as Structure));
+  return ability.can(
+    "update",
+    subject("Structure", {
+      id: structure?.id,
+      departementAdministratif: structure?.departementAdministratif,
+    } as Structure)
+  );
 };
 
 export const canUpdateDepartement = (
@@ -120,10 +168,7 @@ export const canDeleteFile = (
       return true;
     }
     if (acte.structureId) {
-      return canUpdateDepartement(
-        user,
-        acte.structure?.departementAdministratif
-      );
+      return canUpdateStructure(user, acte.structure);
     }
     if (acte.cpom) {
       return ability.can("update", subject("Cpom", acte.cpom));
@@ -135,26 +180,22 @@ export const canDeleteFile = (
   }
 
   if (file.documentFinancierId) {
-    return canUpdateDepartement(
-      user,
-      file.documentFinancier?.structure?.departementAdministratif
-    );
+    return canUpdateStructure(user, file.documentFinancier?.structure);
   }
   if (file.controleId) {
-    return canUpdateDepartement(
-      user,
-      file.controle?.structure?.departementAdministratif
-    );
+    return canUpdateStructure(user, file.controle?.structure);
   }
   if (file.evaluationId) {
-    return canUpdateDepartement(
-      user,
-      file.evaluation?.structure?.departementAdministratif
-    );
+    return canUpdateStructure(user, file.evaluation?.structure);
   }
   if (file.operateur) {
     return ability.can("update", subject("Operateur", file.operateur));
   }
 
   return false;
+};
+
+type StructureScope = {
+  id?: number;
+  departementAdministratif?: string | null;
 };

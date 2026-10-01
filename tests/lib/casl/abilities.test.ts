@@ -1,3 +1,4 @@
+import { subject } from "@casl/ability";
 import {
   createDepartementalAgent,
   createNationalAgent,
@@ -12,6 +13,7 @@ import {
   canDeleteFile,
   canUpdateDepartement,
   canUpdateStructure,
+  defineAbilityFor,
 } from "@/lib/casl/abilities";
 import { SessionUser } from "@/types/global";
 
@@ -154,6 +156,125 @@ describe("Permissions : canUpdateStructure", () => {
   });
 });
 
+describe("Permissions : binôme de niveau structure", () => {
+  const structureEditor = createSessionUser({
+    grants: [createSessionGrant({ structureIds: [2] })],
+  });
+
+  it("autorise l'édition de la structure visée sans passer par son département", () => {
+    expect(
+      canUpdateStructure(structureEditor, {
+        id: 2,
+        departementAdministratif: "13",
+      })
+    ).toBe(true);
+    expect(
+      canUpdateStructure(structureEditor, {
+        id: 3,
+        departementAdministratif: "13",
+      })
+    ).toBe(false);
+    expect(canUpdateDepartement(structureEditor, "13")).toBe(false);
+  });
+
+  it("autorise l'édition des seuls CPOM liés à la structure", () => {
+    const ability = defineAbilityFor(structureEditor);
+
+    expect(ability.can("update", buildCpom({ structureIds: [2] }))).toBe(true);
+    expect(ability.can("update", buildCpom({ structureIds: [3] }))).toBe(false);
+  });
+});
+
+describe("Permissions : CPOM et opérateurs", () => {
+  it("autorise un éditeur départemental sur un CPOM au moins en partie lié à son département", () => {
+    const ability = defineAbilityFor(createDepartementalAgent(["13"]));
+
+    expect(
+      ability.can("update", buildCpom({ departementNumeros: ["13", "84"] }))
+    ).toBe(true);
+    expect(
+      ability.can("update", buildCpom({ departementNumeros: ["69"] }))
+    ).toBe(false);
+  });
+
+  it("autorise un éditeur national sur tous les CPOM", () => {
+    const ability = defineAbilityFor(createNationalAgent());
+
+    expect(ability.can("update", buildCpom({}))).toBe(true);
+  });
+
+  it("refuse les CPOM à un agent uniquement viewer", () => {
+    const ability = defineAbilityFor(
+      createSessionUser({
+        grants: [
+          createSessionGrant({ role: AccessRole.VIEWER, isNational: true }),
+        ],
+      })
+    );
+
+    expect(
+      ability.can("update", buildCpom({ departementNumeros: ["13"] }))
+    ).toBe(false);
+  });
+
+  it("autorise un agent éditeur, quel que soit son niveau, à modifier tous les opérateurs", () => {
+    const structureEditor = createSessionUser({
+      grants: [createSessionGrant({ structureIds: [2] })],
+    });
+
+    expect(
+      defineAbilityFor(structureEditor).can("update", buildOperateur(7))
+    ).toBe(true);
+    expect(
+      defineAbilityFor(createDepartementalAgent(["13"])).can(
+        "update",
+        buildOperateur(7)
+      )
+    ).toBe(true);
+  });
+
+  it("autorise un admin opérateur à modifier son seul opérateur", () => {
+    const ability = defineAbilityFor(
+      createSessionUser({
+        operateurId: 7,
+        grants: [
+          createSessionGrant({ role: AccessRole.ADMIN, isNational: true }),
+        ],
+      })
+    );
+
+    expect(ability.can("update", buildOperateur(7))).toBe(true);
+    expect(ability.can("update", buildOperateur(8))).toBe(false);
+  });
+
+  it("refuse à un éditeur opérateur de modifier son opérateur", () => {
+    const ability = defineAbilityFor(
+      createSessionUser({
+        operateurId: 7,
+        grants: [createSessionGrant({ isNational: true })],
+      })
+    );
+
+    expect(ability.can("update", buildOperateur(7))).toBe(false);
+  });
+});
+
+const buildCpom = ({
+  departementNumeros = [],
+  structureIds = [],
+}: {
+  departementNumeros?: string[];
+  structureIds?: number[];
+}) =>
+  subject("Cpom", {
+    departements: departementNumeros.map((numero) => ({
+      departement: { numero },
+    })),
+    structures: structureIds.map((structureId) => ({ structureId })),
+  } as never);
+
+const buildOperateur = (id: number) => subject("Operateur", { id } as never);
+
 describe("Permissions : canUpdateDepartement", () => {
   const nationalUser = createNationalAgent();
 
@@ -229,19 +350,25 @@ describe("Permissions : canDeleteFile", () => {
     expect(canDeleteFile(dep92User, file)).toBe(false);
   });
 
-  it("autorise tout agent à supprimer un fichier d'acte lié à un CPOM (non scopé par département)", () => {
+  it("cloisonne par département la suppression d'un fichier d'acte lié à un CPOM", () => {
     const file = buildFile({
       acteAdministratifId: 1,
       acteAdministratif: {
         structureVersionTransformationId: null,
         structureId: null,
-        cpom: { id: 3 },
+        cpom: {
+          id: 3,
+          structures: [],
+          departements: [{ departement: { numero: "92" } }],
+        },
         operateur: null,
         structure: null,
       } as unknown as FileWithParents["acteAdministratif"],
     });
 
     expect(canDeleteFile(dep92User, file)).toBe(true);
+    expect(canDeleteFile(dep75User, file)).toBe(false);
+    expect(canDeleteFile(nationalUser, file)).toBe(true);
   });
 
   it("cloisonne par département la suppression d'un document financier", () => {

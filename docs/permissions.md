@@ -14,7 +14,8 @@ Elle remplace `Role` / `RoleDepartement` par des binômes, **sans changement vis
 - **One-off** `20260929-migrate-roles-to-grants` :
   - pattern ou rôle manuel, mêmes binômes : `VIEWER national` + `EDITEUR` sur sa zone (`EDITEUR national` pour NATIONAL) ;
   - un rôle qui couvre une région entière donne un binôme région, sinon un binôme par département.
-- **`fill-roles`** et **`brevo-push-users`** passent sur les binômes.
+- **`fill-roles`** : le CSV fait foi, les binômes d'un pattern présent dans le fichier sont **remplacés** et non plus complétés.
+- **`brevo-push-users`** passe sur les binômes.
 
 ## Modèle
 
@@ -47,6 +48,13 @@ Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `
   - Admin AURA + viewer Isère : admin partout en AURA, Isère comprise.
   - Viewer AURA + admin Isère : admin en Isère, viewer dans le reste d'AURA.
 - **Le code ne compare jamais les rôles entre eux.** La hiérarchie tient parce que chaque rôle reçoit tous les droits du rôle inférieur.
+- **CPOM** : un éditeur modifie les CPOM au moins en partie liés à son périmètre.
+  - National : tous.
+  - Région ou département : les CPOM dont au moins un département est dans le sien.
+  - Structure : les CPOM liés à cette structure.
+- **Opérateurs** :
+  - un agent éditeur, quel que soit son niveau, modifie tous les opérateurs ;
+  - un user opérateur `ADMIN` modifie son propre opérateur, pas les autres.
 - **Règle à respecter** : tout droit donné à un rôle dans `abilities.ts` doit l'être aussi aux rôles supérieurs. Sinon la hiérarchie casse.
 
 ## Choix et raisons
@@ -61,7 +69,7 @@ Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `
 - **Pas d'enum `User.type`** : opérateur = `operateurId` renseigné, une seule source de vérité.
 - **`onDelete: Cascade`** sur les cibles : supprimer une région supprime le binôme, il ne l'élargit pas. `Restrict` sur `User.operateur` : supprimer un opérateur ne transforme pas ses users en agents.
 - **Superadmin = booléen** sur `User`, hors binômes (`manage all`).
-- **3 rôles, pas 6** : la matrice agent/opérateur se choisit dans `abilities.ts` selon `User.operateurId`. Un opérateur n'a encore aucun droit d'écriture.
+- **3 rôles, pas 6** : la matrice agent/opérateur se choisit dans `abilities.ts` selon `User.operateurId`. Côté opérateur, seul l'admin peut modifier son propre opérateur pour l'instant.
 
 ## Invariants à garantir (PR 2 et 3)
 
@@ -77,6 +85,7 @@ Exemple : **Coallia AURA** = un user avec `operateurId: Coallia` et un binôme `
 
 ## Points d'attention
 
+- **Niveau structure et transformations** : les transformations et les rappels CPOM du tableau de bord restent contrôlés par département. Un éditeur de niveau structure n'y a pas accès.
 - **Ajouter un binôme à un agent qui n'a que ses droits de base** : son premier binôme personnel remplace tout son pattern. Il faut donc recopier les droits de base à garder (au minimum `VIEWER national`).
 - **Maisons mères et filiales** (`Operateur.parentId`) : non géré. Un user du siège ne voit pas les structures des filiales. À traiter plus tard.
 - **Un user sur deux opérateurs** : cas exclu, il n'arrivera pas.
