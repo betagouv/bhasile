@@ -10,12 +10,8 @@ import {
   isSameGrant,
 } from "scripts/utils/grant.util";
 
-import { GrantScope, Prisma } from "@/generated/prisma/client";
+import { Departement, GrantScope, Region } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
-
-type DepartementWithRegion = Prisma.DepartementGetPayload<{
-  include: { regionAdministrative: true };
-}>;
 
 type RoleCsvRow = {
   name: string;
@@ -35,19 +31,18 @@ const fetchRoles = async (): Promise<RoleCsvRow[]> => {
 
 const getAgentZone = (
   row: RoleCsvRow,
-  allDepartements: DepartementWithRegion[]
+  regions: Region[],
+  departements: Departement[]
 ): AgentZone | null => {
   if (row.name === "NATIONAL") {
     return { scope: GrantScope.NATIONAL };
   }
   if (row.name.startsWith("REGION")) {
-    const region = allDepartements.find(
-      (departement) => departement.regionAdministrative?.code === row.region
-    )?.regionAdministrative;
+    const region = regions.find((region) => region.code === row.region);
     return region ? { scope: GrantScope.REGION, regionId: region.id } : null;
   }
   if (row.name.startsWith("DEPARTEMENT")) {
-    const departement = allDepartements.find(
+    const departement = departements.find(
       (departement) => departement.numero === row.departement
     );
     return departement
@@ -88,13 +83,14 @@ const fillEmailPattern = async (row: RoleCsvRow, zone: AgentZone) => {
 const run = async () => {
   try {
     console.log("🧑 Création des droits de base par pattern d'email");
-    const [csvRows, allDepartements] = await Promise.all([
+    const [csvRows, regions, departements] = await Promise.all([
       fetchRoles(),
-      prisma.departement.findMany({ include: { regionAdministrative: true } }),
+      prisma.region.findMany(),
+      prisma.departement.findMany(),
     ]);
 
     for (const row of csvRows) {
-      const zone = getAgentZone(row, allDepartements);
+      const zone = getAgentZone(row, regions, departements);
       if (!zone) {
         console.warn(`⚠️ Ligne ignorée, niveau introuvable : ${row.name}`);
         continue;
