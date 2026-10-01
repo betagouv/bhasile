@@ -29,19 +29,11 @@ export const getAgentBaseGrants = (zone: AgentZone): AgentGrant[] => {
   ];
 };
 
-export const isSameGrant = (
-  existing: {
-    role: AccessRole;
-    scope: GrantScope;
-    regionId: number | null;
-    departementNumero: string | null;
-  },
-  grant: AgentGrant
-): boolean =>
-  existing.role === grant.role &&
-  existing.scope === grant.scope &&
-  existing.regionId === (grant.regionId ?? null) &&
-  existing.departementNumero === (grant.departementNumero ?? null);
+export const isSameGrant = (first: AgentGrant, second: AgentGrant): boolean =>
+  first.role === second.role &&
+  first.scope === second.scope &&
+  first.regionId === second.regionId &&
+  first.departementNumero === second.departementNumero;
 
 export type AgentZone =
   | { scope: typeof GrantScope.NATIONAL }

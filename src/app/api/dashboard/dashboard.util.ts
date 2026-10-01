@@ -1,7 +1,8 @@
-import { canUpdateDepartement } from "@/lib/casl/abilities";
+import { canUpdateStructure } from "@/lib/casl/abilities";
 import { SessionUser } from "@/types/global";
 
 type ScopedStructure = {
+  id: number;
   departementAdministratif: string;
   operateur: { id: number } | null;
   type: string | null;
@@ -18,10 +19,7 @@ export const isStructureInDashboardScope = (
   structure: ScopedStructure,
   { user, departementList, operateurList, typeList }: ScopeFilters
 ): boolean => {
-  if (
-    !user ||
-    !canUpdateDepartement(user, structure.departementAdministratif)
-  ) {
+  if (!user || !canUpdateStructure(user, structure)) {
     return false;
   }
 
