@@ -16,7 +16,7 @@ Structures actives avec typologie. Dernière valeur non nulle par structure/cham
 
 ## `byYear`
 
-Millésime exact sur `StructureTypologie` (`totalPlaces`, `pmr`, etc.).
+Millésime exact sur `StructureTypologie` (`totalPlaces`, `pmr`, etc.), sur les structures comptabilisées de l'année : sur une année de campagne, seules les structures actualisées (cf. [README racine](../README.md#structures-comptabilisées-par-année)). `completude` porte le score de l'année.
 `qpv` / `logementsSociaux` : `Adresse` n'a pas de millésime propre, mais est rattachée à une `StructureVersion` datée. Pour chaque année, on résout la `StructureVersion` effective de la structure au 31/12 de cette année-là (report de la dernière version connue tant qu'aucune nouvelle n'est effective, plafonné à aujourd'hui pour l'année en cours) via `filterByEffectiveVersionAtDate`, puis on somme les `Adresse` rattachées à cette version.
 
 ## TODO (à valider)
