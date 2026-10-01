@@ -5,22 +5,27 @@ import { ReactElement, ReactNode, useState } from "react";
 
 import { CountCircle } from "@/app/components/common/CountCircle";
 import { countLinks } from "@/app/utils/ressources.util";
+import { FaqApiType } from "@/schemas/api/faq.schema";
 import { Block } from "@/types/ressources.type";
 
 import { FaqTabPanel } from "./FaqTabPanel";
 import { FilesTabPanel } from "./FilesTabPanel";
 
-export const ResourceBlock = ({ block }: Props): ReactElement | null => {
+export const ResourceBlock = ({
+  block,
+  faqItems = [],
+}: Props): ReactElement | null => {
   const [chosenTabId, setChosenTabId] = useState<string | null>(null);
 
-  const tabViews = buildTabViews(block);
+  const tabViews = buildTabViews(block, faqItems);
 
   if (tabViews.length === 0) {
     return null;
   }
 
   const activeTabView =
-    tabViews.find((tabView) => tabView.id === chosenTabId) ?? tabViews[0];
+    tabViews.find((tabViewItem) => tabViewItem.id === chosenTabId) ??
+    tabViews[0];
 
   return (
     <div className="bg-white pt-6 border border-default-grey rounded-[10px] border-solid overflow-hidden">
@@ -32,12 +37,14 @@ export const ResourceBlock = ({ block }: Props): ReactElement | null => {
       <Tabs
         selectedTabId={activeTabView.id}
         onTabChange={setChosenTabId}
-        tabs={tabViews.map((tabView) => ({
-          tabId: tabView.id,
+        tabs={tabViews.map((tabViewItem) => ({
+          tabId: tabViewItem.id,
           label: (
             <span className="flex items-center gap-2">
-              {tabView.title}
-              <CountCircle count={tabView.count} />
+              {tabViewItem.title}
+              {tabViewItem.count !== undefined && (
+                <CountCircle count={tabViewItem.count} />
+              )}
             </span>
           ),
         }))}
@@ -49,36 +56,36 @@ export const ResourceBlock = ({ block }: Props): ReactElement | null => {
   );
 };
 
-const buildTabViews = (block: Block): TabView[] => {
-  if (block.type === "fichiers") {
-    return block.tabs.map((tab) => ({
-      id: tab.id,
-      title: tab.title,
-      count: countLinks(tab),
-      panel: <FilesTabPanel tab={tab} />,
+const buildTabViews = (blockItem: Block, faqItems: FaqApiType[]): TabView[] => {
+  if (blockItem.type === "fichiers") {
+    return blockItem.tabs.map((tabItem) => ({
+      id: tabItem.id,
+      title: tabItem.title,
+      count: countLinks(tabItem),
+      panel: <FilesTabPanel tab={tabItem} />,
     }));
   }
 
-  if (block.type === "faq") {
-    return block.tabs.map((tab) => ({
-      id: tab.id,
-      title: tab.title,
-      count: tab.questions.length,
-      panel: <FaqTabPanel tab={tab} />,
+  if (blockItem.type === "faq") {
+    return blockItem.tabs.map((tabItem) => ({
+      id: tabItem.id,
+      title: tabItem.title,
+      panel: <FaqTabPanel tab={tabItem} faqItems={faqItems} />,
     }));
   }
 
-  const unreachable: never = block;
+  const unreachable: never = blockItem;
   throw new Error(`Type de bloc inconnu : ${JSON.stringify(unreachable)}`);
 };
 
 type TabView = {
   id: string;
   title: string;
-  count: number;
+  count?: number;
   panel: ReactNode;
 };
 
 type Props = {
   block: Block;
+  faqItems?: FaqApiType[];
 };

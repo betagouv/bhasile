@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import { OperateurSuggestionApiRead } from "@/schemas/api/operateur.schema";
+import type { OperateurSuggestionItem } from "@/types/operateur.type";
 
 export const useOperateurSuggestion = () => {
   const fetchSuggestions = async (query: string) => {
@@ -15,10 +16,12 @@ export const useOperateurSuggestion = () => {
       }
       const data = await response.json();
 
-      return data.map((operateur: OperateurSuggestionApiRead) => ({
+      return data.map((operateur: OperateurSuggestionItem) => ({
         id: operateur.id,
         label: operateur.name,
         value: operateur.id,
+        isFiliale: operateur.isFiliale,
+        hasFiliales: operateur.hasFiliales,
       }));
     } catch (error) {
       console.error("Error fetching operateurs suggestions:", error);
@@ -50,4 +53,6 @@ export type OperateurSuggestion = OperateurSuggestionApiRead & {
   id: string;
   label: string;
   key: string;
+  isFiliale: boolean;
+  hasFiliales: boolean;
 };

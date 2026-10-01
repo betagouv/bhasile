@@ -7,6 +7,7 @@ import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
+import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
 
@@ -75,12 +76,14 @@ const sectionsConfig: FinanceSectionConfig[] = [
         subLabel: "dont dotation État",
         key: "totalProduits",
         format: formatAmountCell,
+        emptyYearsStart: CURRENT_YEAR,
       },
       {
         label: "Total charges retenu",
         subLabel: "par les autorités tarifaires",
         key: "totalCharges",
         format: formatAmountCell,
+        emptyYearsStart: CURRENT_YEAR,
       },
       {
         label: "Résultat net retenu",
@@ -88,6 +91,7 @@ const sectionsConfig: FinanceSectionConfig[] = [
         key: "resultatNet",
         format: formatAmountCell,
         isBadge: true,
+        emptyYearsStart: CURRENT_YEAR,
       },
     ],
   },
@@ -118,10 +122,14 @@ export const FinancesTablePresenter = ({
     rows: section.rows.map((row) => {
       const values = financeYears.map((yearItem) => {
         const visualizationType = yearItem[visualization];
-        const rawValue = visualizationType
-          ? (visualizationType[row.key as keyof typeof visualizationType] as
-              number | null)
-          : null;
+        const isEmptyYear =
+          row.emptyYearsStart !== undefined &&
+          yearItem.year >= row.emptyYearsStart;
+        const rawValue =
+          visualizationType && !isEmptyYear
+            ? (visualizationType[row.key as keyof typeof visualizationType] as
+                number | null)
+            : null;
 
         return {
           display: row.format(rawValue),
@@ -220,6 +228,7 @@ type FinanceRowConfig = {
   format: (value?: number | null) => ReactElement | string;
   subLabel?: string;
   isBadge?: boolean;
+  emptyYearsStart?: number;
 };
 
 type FinanceSectionConfig = {

@@ -23,6 +23,7 @@ export const OperateurItem = ({
   totalPlaces,
   pourcentageParc,
   structureTypes,
+  filiales,
   logoUrl,
 }: OperateurListItem): ReactElement => {
   return (
@@ -43,6 +44,11 @@ export const OperateurItem = ({
                 </Badge>
               ))}
             </div>
+            {filiales.length > 0 && (
+              <p className="text-sm mb-0">
+                Filiales&nbsp;: {filiales.join(", ")}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex items-center">

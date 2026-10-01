@@ -22,7 +22,8 @@ type Props = {
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
   const { structure } = useStructureContext();
-  const { trackStructureSpreadsheetExport } = useUserAction();
+  const { trackStructureSpreadsheetExport, trackStructurePdfExport } =
+    useUserAction();
 
   const { triggerExport, isExporting, printRef } = usePdfExport(
     `Structure ${structure.codeBhasile} ${formatDate(new Date()).replaceAll("_", "-")}`
@@ -59,6 +60,7 @@ export const StructureMenu = ({ structureId }: Props) => {
             priority="tertiary no outline"
             onClick={() => {
               triggerExport();
+              trackStructurePdfExport(structure.id);
               setIsPanelOpen(false);
             }}
             className="whitespace-nowrap"

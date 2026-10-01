@@ -4,7 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "carte-facile/carte-facile.css";
 
 import { addOverlay, mapStyles, Overlay } from "carte-facile";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import {
   PropsWithChildren,
   ReactElement,
@@ -24,6 +24,11 @@ import {
 } from "@/constants";
 
 import { MapContext } from "./MapContext";
+
+// maplibre v6 charge son worker depuis un fichier voisin, dont il déduit l'URL de sa
+// propre import.meta.url. Sous Turbopack cette URL pointe sur la page : sans ce réglage
+// le worker reçoit la 404 HTML de Next et la carte reste vide, sans aucune erreur.
+maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
 
 const toLngLat = ([latitude, longitude]: LatLngTuple): [number, number] => {
   return [longitude, latitude];

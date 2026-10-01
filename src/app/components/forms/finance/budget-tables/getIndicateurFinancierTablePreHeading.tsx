@@ -1,5 +1,4 @@
-import { cn } from "@/app/utils/classname.util";
-import { INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR } from "@/constants";
+import { getIndicateurFinancierTypes } from "@/app/utils/indicateurFinancier.util";
 
 export const getIndicateurFinancierTablePreHeading = ({ years }: Props) => {
   return [
@@ -9,9 +8,9 @@ export const getIndicateurFinancierTablePreHeading = ({ years }: Props) => {
         scope="col"
         key={year}
         className="bg-white border-x border-default-grey"
-        colSpan={year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR ? 2 : 1}
+        colSpan={getIndicateurFinancierTypes(year).length}
       >
-        <span className={cn("block text-sm")}>{year}</span>
+        <span className="block text-sm">{year}</span>
       </th>
     )),
   ];

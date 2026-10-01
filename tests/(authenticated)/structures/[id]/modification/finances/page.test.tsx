@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationFinancesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/finances/page";
+import { CURRENT_YEAR } from "@/constants";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createModificationFinancesValidStructure } from "../../../../../test-utils/structure.factory";
@@ -48,12 +49,16 @@ describe("ModificationFinances page integration", () => {
     expect(body.budgets).toEqual(structure.budgets);
     expect(body.indicateursFinanciers).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ year: 2026, type: "PREVISIONNEL" }),
-        expect.objectContaining({ year: 2026, type: "REALISE" }),
+        expect.objectContaining({ year: CURRENT_YEAR, type: "PREVISIONNEL" }),
         expect.objectContaining({ year: 2025, type: "PREVISIONNEL" }),
         expect.objectContaining({ year: 2025, type: "REALISE" }),
       ])
     );
+    expect(
+      body.indicateursFinanciers.filter(
+        (item) => item.year >= CURRENT_YEAR && item.type === "REALISE"
+      )
+    ).toEqual([]);
     expect(body.indicateursFinanciers.every((item) => item.year >= 2021)).toBe(
       true
     );

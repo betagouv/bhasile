@@ -1,3 +1,4 @@
+import { CURRENT_YEAR } from "@/constants";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 import { DownloadOptions } from "@/types/spreadsheet-download.type";
 
@@ -50,16 +51,28 @@ const financeHeadersMap = {
   resultatNet: "Résultat net retenu par les autorités tarifaires",
 };
 
+const getFinanceScopeRows = (
+  statistiques: StatistiqueApiRead,
+  scope: "total" | "autorisees" | "subventionnees"
+) =>
+  statistiques.finance.byYear.map((financeItem) => {
+    const scopeItem = financeItem[scope];
+    const isEmptyResultatYear = financeItem.year >= CURRENT_YEAR;
+    const totalProduits = isEmptyResultatYear ? null : scopeItem.totalProduits;
+    const totalCharges = isEmptyResultatYear ? null : scopeItem.totalCharges;
+
+    return {
+      year: financeItem.year,
+      ...scopeItem,
+      totalProduits,
+      totalCharges,
+      resultatNet: computeResultatNet(totalProduits, totalCharges),
+    };
+  });
+
 const getFinanceTotalDownloadContent = (statistiques: StatistiqueApiRead) => ({
   sheetName: "Finance (total)",
-  data: statistiques.finance.byYear.map((financeItem) => ({
-    year: financeItem.year,
-    ...financeItem.total,
-    resultatNet: computeResultatNet(
-      financeItem.total.totalProduits,
-      financeItem.total.totalCharges
-    ),
-  })),
+  data: getFinanceScopeRows(statistiques, "total"),
   headersMap: financeHeadersMap,
 });
 
@@ -67,14 +80,7 @@ const getFinanceAutoriseeDownloadContent = (
   statistiques: StatistiqueApiRead
 ) => ({
   sheetName: "Finance (autorisées)",
-  data: statistiques.finance.byYear.map((financeItem) => ({
-    year: financeItem.year,
-    ...financeItem.autorisees,
-    resultatNet: computeResultatNet(
-      financeItem.autorisees.totalProduits,
-      financeItem.autorisees.totalCharges
-    ),
-  })),
+  data: getFinanceScopeRows(statistiques, "autorisees"),
   headersMap: financeHeadersMap,
 });
 
@@ -82,14 +88,7 @@ const getFinanceSubventionneeDownloadContent = (
   statistiques: StatistiqueApiRead
 ) => ({
   sheetName: "Finance (subventionnées)",
-  data: statistiques.finance.byYear.map((financeItem) => ({
-    year: financeItem.year,
-    ...financeItem.subventionnees,
-    resultatNet: computeResultatNet(
-      financeItem.subventionnees.totalProduits,
-      financeItem.subventionnees.totalCharges
-    ),
-  })),
+  data: getFinanceScopeRows(statistiques, "subventionnees"),
   headersMap: financeHeadersMap,
 });
 

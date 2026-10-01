@@ -1,6 +1,7 @@
 model Operateur {
   id                              Int                              @id @default(autoincrement())
   name                            String                           @unique
+  ofiiNames                       String[]
   structures                      Structure[]
   structureVersionTransformations StructureVersionTransformation[]
   directionGenerale               String?

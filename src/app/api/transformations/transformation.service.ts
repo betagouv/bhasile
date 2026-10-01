@@ -20,7 +20,7 @@ import {
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
-import { localiseStructureVersions } from "../adresses/ban.service";
+import { locateStructureVersions } from "../adresses/ban.service";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import {
   copyStructureVersion,
@@ -167,7 +167,7 @@ const prepareStructureVersionTransformations = async (
   checkUniqueDepartement(structureVersionTransformationsWithSource);
   checkCanUpdateDepartements(user, structureVersionTransformationsWithSource);
 
-  return localiseStructureVersions(
+  return locateStructureVersions(
     applyPrefill(type, structureVersionTransformationsWithSource)
   );
 };
@@ -282,7 +282,7 @@ export const updateTransformation = async (
     ...input,
     structureVersionTransformations:
       input.structureVersionTransformations &&
-      (await localiseStructureVersions(input.structureVersionTransformations)),
+      (await locateStructureVersions(input.structureVersionTransformations)),
   });
 };
 
