@@ -26,7 +26,9 @@ export const structureAnomalieInclude = (now: Date) =>
     structureVersions: {
       ...currentVersionArgs(now),
       include: {
-        adresses: { select: { id: true, placesAutorisees: true } },
+        adresses: {
+          select: { id: true, placesAutorisees: true, communeLatitude: true },
+        },
         dnaStructures: {
           include: {
             dna: {

@@ -4,6 +4,46 @@ import { Adresse, Repartition } from "@/generated/prisma/client";
 
 // Écart places à l'adrresse x places autorisées : au-delà de 10 % -> anomalie
 const PLACES_GAP_RATIO = 0.2;
+// Quelques adresses non localisées alimentent l'anomalie ADRESSE_NON_LOCALISEE
+const NON_LOCALISEE_RATIO = 0.05;
+
+export const STRUCTURE_ZONE = {
+  minLatitude: 43.550851,
+  maxLatitude: 49.131627,
+  minLongitude: -0.851371,
+  maxLongitude: 5.843377,
+};
+
+const FAKE_COMMUNES_COUNT = 60;
+
+type FakeCommune = Pick<
+  Adresse,
+  | "codePostal"
+  | "commune"
+  | "communeGeocodee"
+  | "communeLatitude"
+  | "communeLongitude"
+>;
+
+let fakeCommunes: FakeCommune[] | undefined;
+
+const getFakeCommunes = (): FakeCommune[] =>
+  (fakeCommunes ??= Array.from({ length: FAKE_COMMUNES_COUNT }, () => {
+    const commune = faker.location.city();
+    return {
+      codePostal: faker.location.zipCode(),
+      commune,
+      communeGeocodee: commune,
+      communeLatitude: faker.location.latitude({
+        min: STRUCTURE_ZONE.minLatitude,
+        max: STRUCTURE_ZONE.maxLatitude,
+      }),
+      communeLongitude: faker.location.longitude({
+        min: STRUCTURE_ZONE.minLongitude,
+        max: STRUCTURE_ZONE.maxLongitude,
+      }),
+    };
+  }));
 
 export const createFakeAdresses = ({
   placesAutorisees,
@@ -64,8 +104,15 @@ const createFakeAdresse = ({
   "id" | "structureDnaCode" | "structureId" | "structureVersionTransformationId"
 > => ({
   adresse: faker.location.streetAddress(),
-  codePostal: faker.location.zipCode(),
-  commune: faker.location.city(),
+  ...(faker.datatype.boolean({ probability: NON_LOCALISEE_RATIO })
+    ? {
+        codePostal: faker.location.zipCode(),
+        commune: faker.location.city(),
+        communeGeocodee: null,
+        communeLatitude: null,
+        communeLongitude: null,
+      }
+    : faker.helpers.arrayElement(getFakeCommunes())),
   repartition,
   placesAutorisees,
   isQpv: faker.datatype.boolean(),

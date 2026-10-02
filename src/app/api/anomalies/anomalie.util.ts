@@ -36,6 +36,9 @@ export const buildAnomalieContext = (
         hasFile: acte._count.fileUploads > 0,
       })),
     adresses: version?.adresses ?? [],
+    adressesNonLocalisees: (version?.adresses ?? []).filter(
+      (adresse) => adresse.communeLatitude === null
+    ).length,
     budgets: dbStructure.budgets,
     indicateurs: dbStructure.indicateursFinanciers.map((indicateur) => ({
       year: indicateur.year,

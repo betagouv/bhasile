@@ -17,3 +17,14 @@ export const REPARTITION_DISPLAY_ORDER: Repartition[] = [
   Repartition.COLLECTIF,
   Repartition.MIXTE,
 ];
+
+export type CommuneCoordinates = {
+  latitude: number;
+  longitude: number;
+  nom: string;
+};
+
+export type AdresseLocalisation = {
+  codePostal?: string | null;
+  commune?: string | null;
+};
