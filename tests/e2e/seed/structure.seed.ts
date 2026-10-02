@@ -1,5 +1,5 @@
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
-import { getIndicateurFinancierTypes } from "@/app/utils/indicateurFinancier.util";
+import { getIndicateurFinancierTypes } from "@/app/utils/indicateur-financier.util";
 
 import {
   buildStructureSeed,

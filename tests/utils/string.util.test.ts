@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   capitalizeFirstLetter,
+  formatFirstWithRestCount,
   formatPlural,
   normalizeAccents,
   parseId,
@@ -88,6 +89,22 @@ describe("string util", () => {
     });
     it("traite undefined comme zéro", () => {
       expect(pluralize(undefined, "Département")).toBe("Département");
+    });
+  });
+
+  describe("formatFirstWithRestCount", () => {
+    it("renvoie undefined pour une liste vide", () => {
+      expect(formatFirstWithRestCount([])).toBeUndefined();
+    });
+
+    it("renvoie l'élément seul quand la liste n'en contient qu'un", () => {
+      expect(formatFirstWithRestCount(["Bretagne"])).toBe("Bretagne");
+    });
+
+    it("compte les éléments au-delà du premier", () => {
+      expect(formatFirstWithRestCount(["Bretagne", "Calvados", "Orne"])).toBe(
+        "Bretagne +2"
+      );
     });
   });
 

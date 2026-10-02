@@ -1,4 +1,4 @@
-import { SearchParams } from "@/app/utils/searchParams.util";
+import { SearchParams } from "@/app/utils/search-params.util";
 import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";

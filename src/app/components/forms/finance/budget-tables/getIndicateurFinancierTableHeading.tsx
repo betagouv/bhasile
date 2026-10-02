@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 
 import { cn } from "@/app/utils/classname.util";
-import { getIndicateurFinancierTypes } from "@/app/utils/indicateurFinancier.util";
+import { getIndicateurFinancierTypes } from "@/app/utils/indicateur-financier.util";
 
 export const getIndicateurFinancierTableHeading = ({ years }: Props) => {
   return [

@@ -1,7 +1,7 @@
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
-import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
+import { getErrorMessages } from "@/app/utils/get-error-messages.util";
 
 import { DeleteButton } from "../../common/DeleteButton";
 import InputWithValidation from "../InputWithValidation";

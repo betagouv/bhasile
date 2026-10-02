@@ -1,4 +1,4 @@
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { defineAbilityFor } from "@/lib/casl/abilities";

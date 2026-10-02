@@ -1,7 +1,7 @@
 import { FieldErrors } from "react-hook-form";
 import { describe, expect, it } from "vitest";
 
-import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
+import { getErrorMessages } from "@/app/utils/get-error-messages.util";
 
 describe("getErrorMessages", () => {
   it("collecte les messages d'une structure d'erreurs de formulaire imbriquée (ex. formulaire avec user.name, user.email)", () => {

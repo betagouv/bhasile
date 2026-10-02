@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
+import { areAllFormStepsValidated } from "@/app/utils/form-step.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
@@ -11,7 +11,7 @@ import {
   FINALISATION_FORM_VERSION,
   getFinalisationForm,
   getFinalisationFormNextStepToValidate,
-} from "../utils/finalisationForm.util";
+} from "../utils/finalisation-form.util";
 import { useSaveMutation } from "./useSaveMutation";
 import { useStructures } from "./useStructures";
 

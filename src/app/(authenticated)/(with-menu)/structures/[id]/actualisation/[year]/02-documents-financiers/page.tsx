@@ -9,7 +9,7 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
-import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
+import { getActualisationDefaultValues } from "@/app/utils/default-values.util";
 import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import {

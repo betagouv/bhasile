@@ -3,7 +3,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 
 import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
-import { deletePaginationParams } from "@/app/utils/searchParams.util";
+import { deletePaginationParams } from "@/app/utils/search-params.util";
 
 export const FiltersReset = ({
   closePanel,

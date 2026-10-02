@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { ApiError, extractApiError } from "../utils/apiError.util";
+import { ApiError, extractApiError } from "../utils/api-error.util";
 
 export type FileUploadResponse = {
   key: string;

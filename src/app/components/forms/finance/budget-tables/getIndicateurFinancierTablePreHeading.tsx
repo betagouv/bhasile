@@ -1,4 +1,4 @@
-import { getIndicateurFinancierTypes } from "@/app/utils/indicateurFinancier.util";
+import { getIndicateurFinancierTypes } from "@/app/utils/indicateur-financier.util";
 
 export const getIndicateurFinancierTablePreHeading = ({ years }: Props) => {
   return [

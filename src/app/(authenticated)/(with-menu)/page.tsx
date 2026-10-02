@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
-import { getFirstParam, SearchParams } from "@/app/utils/searchParams.util";
+import { getFirstParam, SearchParams } from "@/app/utils/search-params.util";
 import { authOptions } from "@/lib/next-auth/auth";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";

@@ -4,7 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 import { OperateurAutocompleteRhf } from "@/app/components/forms/autocomplete/OperateurAutocompleteRhf";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
-import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
+import { getErrorMessages } from "@/app/utils/get-error-messages.util";
 import { DEPARTEMENTS, REGIONS } from "@/constants";
 import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 import { getDepartementsForRegion } from "@/utils/region.util";

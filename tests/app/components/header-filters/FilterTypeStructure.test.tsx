@@ -1,61 +1,46 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
 
 import { FilterTypeStructure } from "@/app/components/header-filters/FilterTypeStructure";
 
-const mockNavigateWithFilter = vi.fn();
-const mockUseSearchParams = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
-  useSearchParams: () => mockUseSearchParams(),
-}));
-
-vi.mock("@/app/hooks/useFilterNavigation", () => ({
-  useFilterNavigation: () => mockNavigateWithFilter,
-}));
-
 describe("FilterTypeStructure", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+  it("ne coche aucun type quand la sélection est vide", () => {
+    render(<FilterTypeStructure selection={[]} onChange={vi.fn()} />);
+
+    expect(screen.getByLabelText("CADA")).not.toBeChecked();
+    expect(screen.getByLabelText("HUDA")).not.toBeChecked();
   });
 
-  it("ne coche aucune case quand aucun type n'est présent dans l'URL", () => {
-    render(<FilterTypeStructure />);
+  it("coche uniquement les types sélectionnés", () => {
+    render(<FilterTypeStructure selection={["CADA"]} onChange={vi.fn()} />);
 
-    const elementCheckboxAll =
-      screen.getByLabelText<HTMLInputElement>("Tous les types");
-    const elementCheckboxCada = screen.getByLabelText<HTMLInputElement>("CADA");
-    const elementCheckboxHuda = screen.getByLabelText<HTMLInputElement>("HUDA");
-
-    expect(elementCheckboxAll.checked).toBe(false);
-    expect(elementCheckboxCada.checked).toBe(false);
-    expect(elementCheckboxHuda.checked).toBe(false);
+    expect(screen.getByLabelText("CADA")).toBeChecked();
+    expect(screen.getByLabelText("CAES")).not.toBeChecked();
   });
 
-  it("lit la sélection depuis le paramètre types dans l'URL", () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams("types=CADA"));
+  it("ajoute le type cliqué à la sélection", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<FilterTypeStructure selection={["CADA"]} onChange={onChange} />);
 
-    render(<FilterTypeStructure />);
+    await user.click(screen.getByLabelText("HUDA"));
 
-    const elementCheckboxCada = screen.getByLabelText<HTMLInputElement>("CADA");
-    const elementCheckboxCaes = screen.getByLabelText<HTMLInputElement>("CAES");
-
-    expect(elementCheckboxCada.checked).toBe(true);
-    expect(elementCheckboxCaes.checked).toBe(false);
+    expect(onChange).toHaveBeenCalledWith(["CADA", "HUDA"]);
   });
 
-  it("coche la case 'Tous les types' lorsque tous les types acceptés sont dans l'URL", () => {
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams("types=CADA,HUDA,CAES,CPH")
+  it("retire le filtre quand tous les types finissent cochés", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <FilterTypeStructure
+        selection={["CADA", "CAES", "CPH"]}
+        onChange={onChange}
+      />
     );
 
-    render(<FilterTypeStructure />);
+    await user.click(screen.getByLabelText("HUDA"));
 
-    const elementCheckboxAll =
-      screen.getByLabelText<HTMLInputElement>("Tous les types");
-
-    expect(elementCheckboxAll.checked).toBe(true);
+    expect(onChange).toHaveBeenCalledWith([]);
   });
 });

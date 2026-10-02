@@ -6,7 +6,7 @@ import {
   resolveCurrentVersion,
   resolvePredecessor,
 } from "@/app/api/structure-versions/structure-version.util";
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 
 const baseVersion = {
   id: 1,

@@ -9,7 +9,7 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { getDefaultValues } from "@/app/utils/default-values.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { structureTypologiesSchema } from "@/schemas/forms/base/structureTypologie.schema";
 import { FormKind } from "@/types/global";

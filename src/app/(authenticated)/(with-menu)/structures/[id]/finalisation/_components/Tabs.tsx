@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-import { FINALISATION_STEPS } from "@/app/utils/finalisationForm.util";
+import { FINALISATION_STEPS } from "@/app/utils/finalisation-form.util";
 
 import { Tab } from "./Tab";
 

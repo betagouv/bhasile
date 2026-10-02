@@ -2,7 +2,7 @@ import { getActualisationFormSlug } from "@/app/api/forms/form.constants";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
-import { areAllFormStepsValidated } from "./formStep.util";
+import { areAllFormStepsValidated } from "./form-step.util";
 
 export const ACTUALISATION_STEPS: ActualisationStep[] = [
   { route: "01-places" },

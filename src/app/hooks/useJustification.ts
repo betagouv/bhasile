@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { ApiError, extractApiError } from "@/app/utils/apiError.util";
+import { ApiError, extractApiError } from "@/app/utils/api-error.util";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { FetchState } from "@/types/fetch-state.type";
 
