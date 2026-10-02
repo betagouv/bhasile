@@ -48,13 +48,13 @@ export const FiltersRegion = ({
       return;
     }
 
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (event: MouseEvent) => {
       // We need to stop the propagation of the native event
       // to avoid opening the accordion when clicking on the checkbox
-      e.stopPropagation();
-      e.stopImmediatePropagation();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
 
-      const target = e.target as HTMLElement;
+      const target = event.target as HTMLElement;
       if (target.tagName !== "LABEL" && target.tagName !== "INPUT") {
         return;
       }
@@ -64,7 +64,7 @@ export const FiltersRegion = ({
       if (target instanceof HTMLInputElement) {
         target.checked = shouldSelectRegion;
       } else {
-        e.preventDefault();
+        event.preventDefault();
       }
 
       if (!shouldSelectRegion) {
@@ -112,8 +112,8 @@ export const FiltersRegion = ({
                   name: "structure-region",
                   value: region,
                   checked: checkedStatus !== "unchecked",
-                  onChange: (e) => {
-                    console.log(e.target.value); // It is never fired because of the stopPropagation
+                  onChange: (event) => {
+                    console.log(event.target.value); // It is never fired because of the stopPropagation
                   },
                 },
               },
