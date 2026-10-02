@@ -76,13 +76,6 @@ export const getReferenceStructureVersionTransformation = (
       )
   ) ?? transformation.structureVersionTransformations[0];
 
-export const getTransformationDepartement = (
-  transformation: TransformationApiRead
-): string | undefined =>
-  getStructureVersionTransformationDepartement(
-    getReferenceStructureVersionTransformation(transformation)
-  );
-
 type GetTransformationFormNavigationProps = {
   transformationSteps: Step[];
   transformationId: number;

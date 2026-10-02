@@ -239,8 +239,6 @@ describe("copyStructureVersion", () => {
     expect(result.adresseAdministrative).toBe("1 rue de la Source");
   });
 
-  // checkUniqueDepartement lit ce champ sur les blocs enrichis : sans cette copie,
-  // il comparerait des undefined et ne rejetterait jamais rien.
   it("copie le département de la structure source", () => {
     const result = copyStructureVersion(buildStructure());
 

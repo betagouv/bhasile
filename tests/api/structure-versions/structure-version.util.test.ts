@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  checkCreatedStructureDepartement,
   checkNoDepartementAdministratifChange,
   isVersionValid,
   resolveCurrentVersion,
@@ -198,21 +197,5 @@ describe("checkNoDepartementAdministratifChange", () => {
     expect(() => checkNoDepartementAdministratifChange("75", "69")).toThrow(
       DomainError
     );
-  });
-});
-
-describe("checkCreatedStructureDepartement", () => {
-  it("rejette une structure créée hors du département des structures d'origine", () => {
-    expect(() => checkCreatedStructureDepartement("75", "92")).toThrow(
-      DomainError
-    );
-  });
-
-  it("laisse créer une structure ex-nihilo quand il n'y a pas d'ancre", () => {
-    expect(() => checkCreatedStructureDepartement(null, "92")).not.toThrow();
-  });
-
-  it("laisse passer une structure créée dans le même département que les sources", () => {
-    expect(() => checkCreatedStructureDepartement("75", "75")).not.toThrow();
   });
 });

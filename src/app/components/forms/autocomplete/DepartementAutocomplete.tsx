@@ -15,6 +15,7 @@ export const DepartementAutocomplete = ({
   externalError,
   inputRef,
   onBlurExtra,
+  id = LABELS.id,
 }: Props): ReactElement => {
   const [label, setLabel] = useState(() => labelForNumero(departementNumero));
 
@@ -27,6 +28,7 @@ export const DepartementAutocomplete = ({
   return (
     <AutocompleteField
       {...LABELS}
+      id={id}
       name="departement.numero"
       value={label}
       inputRef={inputRef}
@@ -56,6 +58,7 @@ type Props = {
   externalError?: string;
   inputRef?: Ref<HTMLInputElement>;
   onBlurExtra?: () => void;
+  id?: string;
 };
 
 const fetchSuggestions = async (

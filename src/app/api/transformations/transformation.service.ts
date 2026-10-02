@@ -1,8 +1,7 @@
 import { DomainError } from "@/app/utils/domainError.util";
 import { getNow } from "@/app/utils/now.util";
-import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
-import { canUpdateDepartement } from "@/lib/casl/abilities";
+import { defineAbilityFor } from "@/lib/casl/abilities";
 import {
   StructureVersionTransformationApiCreate,
   StructureVersionTransformationApiUpdate,
@@ -51,7 +50,7 @@ import {
   checkCanUpdateDepartements,
   checkEffectiveDatesAreValid,
   checkNoDuplicateStructureIds,
-  checkUniqueDepartement,
+  isTransformationVisible,
 } from "./transformation.util";
 
 const resolveReferenceVersion = <TVersion extends ResolvableVersion>(
@@ -141,12 +140,15 @@ export const getOngoingTransformationsForUser = async (
 ): Promise<TransformationApiRead[]> => {
   const dbTransformations = await findAll();
   const now = getNow();
+  const ability = defineAbilityFor(user);
   return dbTransformations
     .map((dbTransformation) => dbTransformationToApiRead(dbTransformation, now))
-    .filter((transformation) => {
-      const departement = getTransformationDepartement(transformation);
-      return !departement || canUpdateDepartement(user, departement);
-    });
+    .filter((transformation) =>
+      isTransformationVisible(
+        ability,
+        transformation.structureVersionTransformations
+      )
+    );
 };
 
 const prepareStructureVersionTransformations = async (
@@ -163,7 +165,6 @@ const prepareStructureVersionTransformations = async (
     )
   );
 
-  checkUniqueDepartement(structureVersionTransformationsWithSource);
   checkCanUpdateDepartements(user, structureVersionTransformationsWithSource);
 
   return applyPrefill(type, structureVersionTransformationsWithSource);

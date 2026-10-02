@@ -16,20 +16,6 @@ export const checkNoDepartementAdministratifChange = (
   }
 };
 
-export const checkCreatedStructureDepartement = (
-  baseDepartement: string | null | undefined,
-  createdDepartement: string | null | undefined
-): void => {
-  if (!baseDepartement || !createdDepartement) {
-    return;
-  }
-  if (baseDepartement !== createdDepartement) {
-    throw new DomainError(
-      `La structure créée doit appartenir au même département que les structures d'origine (${baseDepartement}).`
-    );
-  }
-};
-
 type VersionFields = {
   communeAdministrative: string | null;
 };
