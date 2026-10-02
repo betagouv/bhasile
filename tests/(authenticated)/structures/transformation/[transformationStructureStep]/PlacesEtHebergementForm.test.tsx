@@ -30,6 +30,7 @@ const ORIGINAL_PLACES = 47;
 const mockUseParams = vi.fn();
 
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
   useParams: () => mockUseParams(),
   usePathname: () =>

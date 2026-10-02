@@ -12,6 +12,7 @@ import { useFetchState } from "@/contexts/FetchStateContext";
 import { useOptionalTransformationContext } from "@/contexts/TransformationContext";
 import { FetchState } from "@/types/fetch-state.type";
 import { TransformationFormType } from "@/types/transformation.type";
+import { getBackHref } from "@/utils/dashboardOrigin.util";
 
 import {
   AnnulerDemarcheModal,
@@ -31,6 +32,7 @@ export const TransformationHeader = () => {
   const { navigateWithSave } = useTransformationNavigateWithSave();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const backHref = getBackHref(searchParams, "/structures");
   const { getFetchState, getErrorMessage } = useFetchState();
   const saveState = getFetchState("transformation-save");
   const deleteState = getFetchState("transformation-delete");
@@ -69,7 +71,7 @@ export const TransformationHeader = () => {
     try {
       const saved = await saveCurrentForm();
       if (saved) {
-        router.push("/structures");
+        router.push(backHref);
       } else {
         quitterModal.close();
         errorModal.open();
@@ -85,7 +87,7 @@ export const TransformationHeader = () => {
     }
     const result = await deleteCurrentTransformation(transformation.id);
     if (result !== null) {
-      router.push("/structures");
+      router.push(backHref);
     }
   };
 
@@ -95,10 +97,10 @@ export const TransformationHeader = () => {
         <div className="flex justify-between items-center px-6 py-3">
           <div className="flex items-center gap-2">
             <Link
-              href="/structures"
+              href={backHref}
               onNavigate={(event) => {
                 event.preventDefault();
-                navigateWithSave("/structures");
+                navigateWithSave(backHref);
               }}
               className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
               title="Retour"
@@ -145,7 +147,7 @@ export const TransformationHeader = () => {
                 if (transformation && saveCurrentForm) {
                   quitterModal.open();
                 } else {
-                  router.push("/structures");
+                  router.push(backHref);
                 }
               }}
             >
@@ -161,14 +163,14 @@ export const TransformationHeader = () => {
             deleteState={deleteState}
             onDelete={handleDelete}
           />
-          <EnregistrementModal onQuit={() => router.push("/structures")} />
+          <EnregistrementModal onQuit={() => router.push(backHref)} />
           <QuitterModal
             saveState={saveState}
             errorMessage={getErrorMessage("transformation-save")}
-            onQuit={() => router.push("/structures")}
+            onQuit={() => router.push(backHref)}
             onSaveAndQuit={handleSaveAndQuit}
           />
-          <ErrorModal onQuit={() => router.push("/structures")} />
+          <ErrorModal onQuit={() => router.push(backHref)} />
         </>
       )}
     </>

@@ -4,6 +4,7 @@ import { ReactElement, ReactNode } from "react";
 import { formatAnomalieLabel } from "@/app/utils/anomalie.util";
 import { ANOMALIE_NO_YEAR } from "@/types/anomalie.type";
 import { AnomalieGroupBy, DashboardAnomalie } from "@/types/dashboard.type";
+import { addDashboardOrigin } from "@/utils/dashboardOrigin.util";
 
 export const AnomalieRow = ({
   anomalie,
@@ -36,7 +37,7 @@ export const AnomalieRow = ({
 
         {anomalie.actionUrl && (
           <Link
-            href={anomalie.actionUrl}
+            href={addDashboardOrigin(anomalie.actionUrl)}
             className="shrink-0 flex items-center gap-1 font-bold text-title-blue-france"
           >
             Examiner
@@ -55,7 +56,7 @@ export const AnomalieRow = ({
 };
 
 const renderStructureLabel = (anomalie: DashboardAnomalie): ReactNode => (
-  <span className="grid grid-cols-[9rem_3.5rem_12rem_minmax(0,1fr)_4rem] items-center gap-x-3">
+  <span className="grid grid-cols-[var(--grid-template-columns-structure)_4rem] items-center gap-x-3">
     <strong>{anomalie.structureCodeBhasile}</strong>
     <span>{anomalie.structureType}</span>
     <span className="truncate">{anomalie.operateurName}</span>

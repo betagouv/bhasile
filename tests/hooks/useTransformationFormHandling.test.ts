@@ -21,11 +21,13 @@ const mockUseParams = vi.fn();
 const mockUsePathname = vi.fn();
 const mockRouterPush = vi.fn();
 const mockRouterReplace = vi.fn();
+const mockUseSearchParams = vi.fn();
 const mockUseTransformationContext = vi.fn();
 const mockUpdateTransformation = vi.fn();
 const mockSaveCurrentForm = vi.fn();
 
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => mockUseSearchParams(),
   useParams: () => mockUseParams(),
   usePathname: () => mockUsePathname(),
   useRouter: () => ({
@@ -148,6 +150,7 @@ const buildSavePayload = (
 describe("useTransformationFormHandling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation(),
       saveCurrentForm: mockSaveCurrentForm,
@@ -366,6 +369,21 @@ describe("useTransformationFormHandling", () => {
     expect(mockRouterReplace).toHaveBeenCalledTimes(1);
     expect(mockRouterReplace).toHaveBeenCalledWith(
       "/structures/transformation/12/creation/7/description"
+    );
+  });
+
+  it("conserve l'origine tableau de bord en redirigeant vers firstStep", () => {
+    mockUseParams.mockReturnValue({
+      transformationStructureType: StructureVersionTransformationType.CREATION,
+      transformationStructureId: "7",
+      transformationStructureStep: "unknown-step",
+    });
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("from=dashboard"));
+
+    renderHook(() => useTransformationFormHandling());
+
+    expect(mockRouterReplace).toHaveBeenCalledWith(
+      "/structures/transformation/12/creation/7/description?from=dashboard"
     );
   });
 

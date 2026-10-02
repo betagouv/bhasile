@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
@@ -10,6 +10,7 @@ import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { hasOpenActualisation } from "@/app/utils/actualisation-form.util";
 import { cn } from "@/app/utils/classname.util";
 import { useStructureContext } from "@/contexts/StructureContext";
+import { getBackHref } from "@/utils/dashboardOrigin.util";
 
 import { ActualisationHeader } from "./ActualisationHeader";
 import { FinalisationHeader } from "./FinalisationHeader";
@@ -35,6 +36,7 @@ export const StructureHeader = ({
   const { isHidden } = useHideOnScroll();
 
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isRootPath = pathname === `/structures/${structure?.id}`;
 
   return (
@@ -48,7 +50,7 @@ export const StructureHeader = ({
       >
         <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center relative z-20">
           <Link
-            href="/structures"
+            href={getBackHref(searchParams, "/structures")}
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
             title="Retour"
           >
