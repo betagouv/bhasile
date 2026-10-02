@@ -103,6 +103,7 @@ export const BHASILE_CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
 export const BHASILE_PHONE_NUMBERS =
   process.env.NEXT_PUBLIC_BHASILE_PHONE_NUMBERS || "";
+export const BHASILE_HELP_CENTER_URL = "https://bhasile.crisp.help/fr/";
 
 export const DEPARTEMENTS: Departement[] = [
   {
