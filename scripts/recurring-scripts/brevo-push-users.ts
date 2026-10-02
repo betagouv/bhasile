@@ -5,26 +5,20 @@ import "dotenv/config";
 
 import { pushContactsToBrevo, toBrevoContact } from "scripts/utils/brevo.util";
 
+import { grantSelect } from "@/app/api/users/user.db.type";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
 
 const run = async () => {
   try {
-    const roleSelect = {
-      select: {
-        name: true,
-        roleDepartements: { select: { departementNumero: true } },
-      },
-    };
-
     const users = await prisma.user.findMany({
       select: {
         email: true,
         lastConnection: true,
         createdAt: true,
-        role: roleSelect,
-        emailPattern: { select: { role: roleSelect } },
+        grants: { select: grantSelect },
+        emailPattern: { select: { grants: { select: grantSelect } } },
       },
     });
 

@@ -12,3 +12,6 @@ if [ "${SKIP_POSTDEPLOY:-}" = "1" ] && [ "${IS_PRODUCTION:-}" != "true" ]; then
 fi
 
 yarn delete-views && yarn prisma:deploy && yarn apply-views
+
+# Temporaire : à retirer avec les tables Role
+npx tsx scripts/one-off-scripts/20260929-migrate-roles-to-grants.ts

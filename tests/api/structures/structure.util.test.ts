@@ -1,3 +1,7 @@
+import {
+  createDepartementalAgent,
+  createNationalAgent,
+} from "tests/test-utils/factories/session-user.factory";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
@@ -24,7 +28,6 @@ import {
 } from "@/app/api/structures/structure.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
-import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 import { SearchProps } from "@/types/structure-list.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
@@ -420,7 +423,9 @@ describe("isStructureFinalised", () => {
     expect(
       isStructureFinalised(
         {
-          forms: [{ status: true, formDefinition: { slug: "actualisation-2026" } }],
+          forms: [
+            { status: true, formDefinition: { slug: "actualisation-2026" } },
+          ],
           structureVersions: [],
         },
         now
@@ -480,7 +485,9 @@ describe("isStructureFinalisedAndOpen", () => {
   });
 
   it("est vrai pour une structure finalisée et non fermée", () => {
-    expect(isStructureFinalisedAndOpen(finalisedStructure(null), now)).toBe(true);
+    expect(isStructureFinalisedAndOpen(finalisedStructure(null), now)).toBe(
+      true
+    );
   });
 
   it("est faux pour une structure finalisée dont la fermeture a pris effet", () => {
@@ -746,31 +753,19 @@ describe("getReadableNotes", () => {
   } as StructureApiRead;
 
   it("renvoie les notes à un agent qui peut éditer la structure de son département", () => {
-    const agentParis = {
-      id: "agent-paris",
-      role: "DEPARTEMENT_PARIS",
-      allowedDepartements: ["75"],
-    } as SessionUser;
+    const agentParis = createDepartementalAgent(["75"]);
 
     expect(getReadableNotes(structureParis, agentParis)).toBe("Note 1");
   });
 
   it("renvoie les notes à un agent NATIONAL", () => {
-    const agentNational = {
-      id: "agent-national",
-      role: "NATIONAL",
-      allowedDepartements: [] as string[],
-    } as SessionUser;
+    const agentNational = createNationalAgent();
 
     expect(getReadableNotes(structureParis, agentNational)).toBe("Note 1");
   });
 
   it("masque les notes à un agent d'un autre département", () => {
-    const agentRhone = {
-      id: "agent-rhone",
-      role: "DEPARTEMENT_RHONE",
-      allowedDepartements: ["69"],
-    } as SessionUser;
+    const agentRhone = createDepartementalAgent(["69"]);
 
     expect(getReadableNotes(structureParis, agentRhone)).toBeNull();
   });
@@ -795,17 +790,9 @@ describe("getReadableAdresses", () => {
     adresseComplete: "12 rue Secrète, 75011 Paris",
   };
 
-  const agentParis = {
-    id: "agent-paris",
-    role: "DEPARTEMENT_PARIS",
-    allowedDepartements: ["75"],
-  } as SessionUser;
+  const agentParis = createDepartementalAgent(["75"]);
 
-  const agentRhone = {
-    id: "agent-rhone",
-    role: "DEPARTEMENT_RHONE",
-    allowedDepartements: ["69"],
-  } as SessionUser;
+  const agentRhone = createDepartementalAgent(["69"]);
 
   it("renvoie l'adresse exacte à un agent qui peut éditer la structure", () => {
     const structure = buildStructure(adresseComplete);

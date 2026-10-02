@@ -28,6 +28,7 @@ model Structure {
   userNotes                Note[]
   structureVersions        StructureVersion[]
   anomalies                Anomalie[]
+  grants                   Grant[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

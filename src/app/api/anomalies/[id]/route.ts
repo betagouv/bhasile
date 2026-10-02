@@ -7,7 +7,7 @@ import {
 } from "@/app/api/anomalies/anomalie.service";
 import { createStructureEvent } from "@/app/api/user-actions/user-action.service";
 import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
-import { canUpdateDepartement } from "@/lib/casl/abilities";
+import { canUpdateStructure } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { anomalieApiUpdateSchema } from "@/schemas/api/anomalie.schema";
 import { SessionUser } from "@/types/global";
@@ -36,10 +36,10 @@ export async function PUT(
     }
 
     if (
-      !canUpdateDepartement(
-        session.user as SessionUser,
-        anomalie.departementAdministratif
-      )
+      !canUpdateStructure(session.user as SessionUser, {
+        id: anomalie.structureId,
+        departementAdministratif: anomalie.departementAdministratif,
+      })
     ) {
       return NextResponse.json(
         { error: "Droits insuffisants" },

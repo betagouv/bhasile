@@ -8,6 +8,10 @@ model User {
   roleId              Int?
   emailPattern        EmailPattern? @relation(fields: [emailPatternId], references: [id])
   emailPatternId      Int?
+  operateur           Operateur?    @relation(fields: [operateurId], references: [id], onDelete: Restrict)
+  operateurId         Int?
+  isSuperAdmin        Boolean       @default(false)
+  grants              Grant[]
   notes               Note[]
   anomaliesJustifiees Anomalie[]
 
@@ -58,11 +62,51 @@ model RoleDepartement {
 }
 
 model EmailPattern {
-  id      Int    @id @default(autoincrement())
-  pattern String @unique
-  role    Role   @relation(fields: [roleId], references: [id])
-  roleId  Int
+  id      Int     @id @default(autoincrement())
+  pattern String  @unique
+  role    Role?   @relation(fields: [roleId], references: [id])
+  roleId  Int?
   users   User[]
+  grants  Grant[]
+
+  @@schema("public")
+}
+
+model Grant {
+  id                Int           @id @default(autoincrement())
+  user              User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            Int?
+  emailPattern      EmailPattern? @relation(fields: [emailPatternId], references: [id], onDelete: Cascade)
+  emailPatternId    Int?
+  role              AccessRole
+  scope             GrantScope
+  region            Region?       @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  regionId          Int?
+  departement       Departement?  @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
+  departementNumero String?
+  structure         Structure?    @relation(fields: [structureId], references: [id], onDelete: Cascade)
+  structureId       Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([emailPatternId])
+  @@schema("public")
+}
+
+enum AccessRole {
+  VIEWER
+  EDITEUR
+  ADMIN
+
+  @@schema("public")
+}
+
+enum GrantScope {
+  NATIONAL
+  REGION
+  DEPARTEMENT
+  STRUCTURE
 
   @@schema("public")
 }

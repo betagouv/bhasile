@@ -2,7 +2,18 @@ import { Prisma } from "@/generated/prisma/client";
 
 export const fileWithParentsInclude = {
   acteAdministratif: {
-    include: { structure: true, cpom: true, operateur: true },
+    include: {
+      structure: true,
+      cpom: {
+        include: {
+          structures: { select: { structureId: true } },
+          departements: {
+            select: { departement: { select: { numero: true } } },
+          },
+        },
+      },
+      operateur: true,
+    },
   },
   documentFinancier: { include: { structure: true } },
   controle: { include: { structure: true } },
