@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
-import { getEveryColumn } from "@/app/utils/indicateurFinancier.util";
+import { getEveryColumn } from "@/app/utils/indicateur-financier.util";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 
 import { BudgetTableLineInput } from "./BudgetTableLineInput";

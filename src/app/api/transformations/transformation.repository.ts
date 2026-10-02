@@ -2,7 +2,7 @@ import {
   getNextBhasileCode,
   getNormalizedRegionCodeFromDepartement,
 } from "@/app/utils/bhasile.util";
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";

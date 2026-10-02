@@ -7,7 +7,7 @@ import { ReactElement } from "react";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
-import { hasOpenActualisation } from "@/app/utils/actualisationForm.util";
+import { hasOpenActualisation } from "@/app/utils/actualisation-form.util";
 import { cn } from "@/app/utils/classname.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { getBackHref } from "@/utils/dashboardOrigin.util";

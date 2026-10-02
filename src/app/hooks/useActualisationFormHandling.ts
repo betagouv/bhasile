@@ -6,7 +6,7 @@ import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
 import { getActualisationFormSlug } from "../api/forms/form.constants";
-import { getActualisationNextRoute } from "../utils/actualisationForm.util";
+import { getActualisationNextRoute } from "../utils/actualisation-form.util";
 import { useSaveMutation } from "./useSaveMutation";
 import { useStructures } from "./useStructures";
 

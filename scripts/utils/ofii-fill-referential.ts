@@ -128,24 +128,35 @@ function getCleanName(
   return collapseSpaces(fullName);
 }
 
-export function buildOperateurLookup(operateurs: OperateurRecord[]): OperateurLookup {
+export function buildOperateurLookup(
+  operateurs: OperateurRecord[]
+): OperateurLookup {
   const lookup: OperateurLookup = new Map();
+  const byOfiiName: OperateurLookup = new Map();
 
   for (const operateur of operateurs) {
     const entry = { id: operateur.id, name: operateur.name };
-    const labels = [operateur.name, ...operateur.ofiiNames]
-      .map(stripAndUpper)
-      .filter(Boolean);
+    const name = stripAndUpper(operateur.name);
 
-    for (const label of labels) {
-      const existing = lookup.get(label);
+    if (name) {
+      lookup.set(name, entry);
+    }
+
+    for (const label of operateur.ofiiNames
+      .map(stripAndUpper)
+      .filter(Boolean)) {
+      const existing = byOfiiName.get(label);
       if (existing && existing.id !== operateur.id) {
         throw new Error(
           `Le libellé OFII "${label}" est rattaché à deux opérateurs : ${existing.name} et ${operateur.name}. Corriger les ofiiNames en base.`
         );
       }
-      lookup.set(label, entry);
+      byOfiiName.set(label, entry);
     }
+  }
+
+  for (const [label, entry] of byOfiiName) {
+    lookup.set(label, entry);
   }
 
   return lookup;

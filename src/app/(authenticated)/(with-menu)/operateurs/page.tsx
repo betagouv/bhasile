@@ -7,7 +7,7 @@ import {
   getFirstParam,
   getPageParam,
   SearchParams,
-} from "@/app/utils/searchParams.util";
+} from "@/app/utils/search-params.util";
 import { OPERATEURS_STORAGE_KEY } from "@/constants";
 
 import { OperateursContent } from "./OperateursContent";

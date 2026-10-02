@@ -7,7 +7,7 @@ import {
   getCpomCoveredActeCategories,
   getCurrentStructureParentActe,
   resolveAvenantParentIds,
-} from "@/app/utils/acteAdministratif.util";
+} from "@/app/utils/acte-administratif.util";
 import {
   AdditionalFieldsType,
   CategoryDisplayRule,

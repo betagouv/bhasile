@@ -136,10 +136,8 @@ export const runExtensionFromContractions = async (
     page,
     TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT
   );
-  await selectSources(page, {
-    structureIds: params.contractionSourceIds,
-    fixedDepartement: true,
-  });
+  // Filtres préremplis depuis la structure étendue : pas besoin de les saisir.
+  await pickStructures(page, params.contractionSourceIds);
   await submitSelection(page);
   const transformationId = await captureTransformationId(page);
 
@@ -161,7 +159,10 @@ export const runHudaToNewCada = async (
     page,
     TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU
   );
-  await selectSources(page, { structureIds: params.hudaSourceIds });
+  await selectSources(page, {
+    blockId: "huda",
+    structureIds: params.hudaSourceIds,
+  });
   await submitSelection(page);
   const transformationId = await captureTransformationId(page);
 
@@ -172,7 +173,7 @@ export const runHudaToNewCada = async (
   return transformationId;
 };
 
-/** HUDA → CADA existant (N fermetures + extension, héritage opérateur). */
+/** HUDA → CADA existant (N fermetures + extension). */
 export const runHudaToExistingCada = async (
   page: Page,
   params: { hudaSourceIds: number[]; cadaTargetId: number }
@@ -183,8 +184,14 @@ export const runHudaToExistingCada = async (
     page,
     TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT
   );
-  await selectSources(page, { structureIds: params.hudaSourceIds });
-  await pickStructures(page, [params.cadaTargetId]);
+  await selectSources(page, {
+    blockId: "huda",
+    structureIds: params.hudaSourceIds,
+  });
+  await selectSources(page, {
+    blockId: "cada",
+    structureIds: [params.cadaTargetId],
+  });
   await submitSelection(page);
   const transformationId = await captureTransformationId(page);
 

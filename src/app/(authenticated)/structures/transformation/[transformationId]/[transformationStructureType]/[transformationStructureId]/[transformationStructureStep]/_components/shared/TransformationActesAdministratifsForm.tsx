@@ -9,7 +9,7 @@ import { useTransformationFormHandling } from "@/app/hooks/useTransformationForm
 import {
   getActesAdministratifsDefaultValues,
   resolveAvenantParentIds,
-} from "@/app/utils/acteAdministratif.util";
+} from "@/app/utils/acte-administratif.util";
 import { getNow } from "@/app/utils/now.util";
 import { getTransformationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";

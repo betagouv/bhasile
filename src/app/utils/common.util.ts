@@ -88,3 +88,8 @@ export const areCodesUnique = <T>(
     .filter((code): code is string => Boolean(code));
   return normalizedCodes.length === new Set(normalizedCodes).size;
 };
+
+export const toggleArrayValue = <T>(values: T[], value: T): T[] =>
+  values.includes(value)
+    ? values.filter((currentValue) => currentValue !== value)
+    : [...values, value];

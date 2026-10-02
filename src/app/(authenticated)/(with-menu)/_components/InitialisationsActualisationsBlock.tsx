@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { getInitialisationsActualisations } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.service";
 import { formatDate } from "@/app/utils/date.util";
-import { getPageParam, SearchParams } from "@/app/utils/searchParams.util";
+import { getPageParam, SearchParams } from "@/app/utils/search-params.util";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 

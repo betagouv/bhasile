@@ -10,7 +10,7 @@ import {
   getStructureDepartement,
   getStructureForOperateur,
 } from "@/app/api/structures/structure.service";
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import prisma from "@/lib/prisma";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { Repartition } from "@/types/adresse.type";

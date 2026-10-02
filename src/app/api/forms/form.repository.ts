@@ -1,5 +1,5 @@
-import { DomainError } from "@/app/utils/domainError.util";
-import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
+import { DomainError } from "@/app/utils/domain-error.util";
+import { areAllFormStepsValidated } from "@/app/utils/form-step.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { EntityId } from "@/types/Entity.type";

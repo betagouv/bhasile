@@ -32,12 +32,14 @@ export const TransformationRow = ({ row }: Props): ReactElement => {
         </Badge>
       </span>
       <span className="justify-self-end">
-        <Link
-          href={addDashboardOrigin(row.actionUrl)}
-          aria-label="Ouvrir la création, transformation ou fermeture"
-        >
-          <span className="fr-icon-arrow-right-line text-title-blue-france" />
-        </Link>
+        {row.actionUrl && (
+          <Link
+            href={addDashboardOrigin(row.actionUrl)}
+            aria-label="Ouvrir la création, transformation ou fermeture"
+          >
+            <span className="fr-icon-arrow-right-line text-title-blue-france" />
+          </Link>
+        )}
       </span>
     </div>
   );

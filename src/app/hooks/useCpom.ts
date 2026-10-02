@@ -1,6 +1,6 @@
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 
-import { ApiError, extractApiError } from "../utils/apiError.util";
+import { ApiError, extractApiError } from "../utils/api-error.util";
 
 const createOrUpdateCpom = async (
   url: string,

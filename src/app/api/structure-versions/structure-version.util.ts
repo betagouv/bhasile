@@ -1,5 +1,5 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
 
 export const checkNoDepartementAdministratifChange = (
@@ -12,20 +12,6 @@ export const checkNoDepartementAdministratifChange = (
   if (versionDepartement !== structureDepartement) {
     throw new DomainError(
       "Une structure ne peut pas changer de département administratif."
-    );
-  }
-};
-
-export const checkCreatedStructureDepartement = (
-  baseDepartement: string | null | undefined,
-  createdDepartement: string | null | undefined
-): void => {
-  if (!baseDepartement || !createdDepartement) {
-    return;
-  }
-  if (baseDepartement !== createdDepartement) {
-    throw new DomainError(
-      `La structure créée doit appartenir au même département que les structures d'origine (${baseDepartement}).`
     );
   }
 };

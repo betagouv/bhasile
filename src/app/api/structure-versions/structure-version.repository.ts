@@ -1,4 +1,3 @@
-import { getStructureVersionDepartement } from "@/app/utils/transformation.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
@@ -11,10 +10,7 @@ import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
 import { createOrUpdateStructureFinesses } from "../finesses/finess.repository";
 import { convertToPublicType } from "../structures/structure.util";
-import {
-  checkCreatedStructureDepartement,
-  checkNoDepartementAdministratifChange,
-} from "./structure-version.util";
+import { checkNoDepartementAdministratifChange } from "./structure-version.util";
 
 export const mirrorLegacyPlacesToBaseVersions = async (
   tx: PrismaTransaction,
@@ -114,42 +110,6 @@ const updateOneStructureVersion = async (
   return version.id;
 };
 
-const resolveTransformationBaseDepartement = async (
-  tx: PrismaTransaction,
-  structureVersionTransformationId: number
-): Promise<string | null> => {
-  const current = await tx.structureVersionTransformation.findUniqueOrThrow({
-    where: { id: structureVersionTransformationId },
-    select: {
-      transformation: {
-        select: {
-          structureVersionTransformations: {
-            where: { id: { not: structureVersionTransformationId } },
-            select: {
-              structureVersion: {
-                select: {
-                  departementAdministratif: true,
-                  structure: { select: { departementAdministratif: true } },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  for (const sibling of current.transformation
-    .structureVersionTransformations) {
-    const departement = getStructureVersionDepartement(sibling.structureVersion);
-    if (departement != null) {
-      return departement;
-    }
-  }
-
-  return null;
-};
-
 export const createOrUpdateStructureVersion = async (
   tx: PrismaTransaction,
   version: StructureVersionApiType,
@@ -163,15 +123,6 @@ export const createOrUpdateStructureVersion = async (
     });
     checkNoDepartementAdministratifChange(
       structure?.departementAdministratif,
-      version.departementAdministratif
-    );
-  } else if (parent.structureVersionTransformationId !== undefined) {
-    const baseDepartement = await resolveTransformationBaseDepartement(
-      tx,
-      parent.structureVersionTransformationId
-    );
-    checkCreatedStructureDepartement(
-      baseDepartement,
       version.departementAdministratif
     );
   }

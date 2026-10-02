@@ -33,6 +33,7 @@ Ce script permet de prendre en compte un certain nombre de formats de fichier :
   - ce numéro est stocké dans `Structure.departementAdministratif`.
 - **Opérateur** :
   - le libellé brut est mis en majuscules puis rapproché d'un opérateur par son `name` ou l'un de ses `ofiiNames`,
+  - les `ofiiNames` priment sur les `name` : un libellé qui est aussi le nom d'un opérateur doublon en base est rattaché à l'opérateur qui le déclare en alias,
   - aucun opérateur n'est créé par le script : un libellé non rattaché fait échouer la ligne,
   - `Structure.operateurId` est renseigné pour les structures créées.
 - **Structures absentes du fichier** :
@@ -45,7 +46,7 @@ Ce script permet de prendre en compte un certain nombre de formats de fichier :
     `opérateur inconnu en base : <libellé> (l'ajouter dans Operateur.ofiiNames)`
   - Ajouter le libellé aux `ofiiNames` de l'opérateur concerné, ou créer l'opérateur attendu.
 - **Libellé OFII rattaché à deux opérateurs** :
-  - le script refuse de démarrer si un même libellé apparaît dans le `name` ou les `ofiiNames` de deux opérateurs. Retirer le doublon en base.
+  - le script refuse de démarrer si un même libellé apparaît dans les `ofiiNames` de deux opérateurs. Retirer le doublon en base.
 - **Département invalide** :
   - si la colonne "Département" contient un nom qui ne correspond à aucun enregistrement de la table `Departement`, la ligne est ignorée et un message du type est loggé :  
     `département invalide (nom attendu) : <valeur>`
