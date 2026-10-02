@@ -7,7 +7,7 @@ import { Root } from "react-dom/client";
 
 import { MAX_MAP_ZOOM } from "@/constants";
 
-import { getOrCreatePopup } from "./structuresPopup";
+import { getOrCreatePopup } from "./mapPopup";
 import {
   STRUCTURE_MARKER_LAYOUT,
   STRUCTURES_CLUSTER_FILTER,

@@ -4,6 +4,7 @@ import {
   STRUCTURE_COLUMNS,
   StructureColumn,
 } from "@/types/ListColumn";
+import { MapMode } from "@/types/structure-list.type";
 
 export type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -56,3 +57,9 @@ export const parseSortDirection = (
   }
   return null;
 };
+
+// Le mode Places ne porte que sur les structures actives : l'onglet Fermées reste en mode Structures.
+export const parseMapMode = (
+  value: string | null,
+  isClosed: boolean
+): MapMode => (!isClosed && value === "places" ? "places" : "structures");
