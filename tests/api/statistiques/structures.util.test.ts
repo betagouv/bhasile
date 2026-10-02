@@ -503,4 +503,58 @@ describe("structures - indicateurs annuels (byYear)", () => {
       expect.objectContaining({ year: 2024, totalStructures: 1 })
     );
   });
+
+  it("ne comptabilise que les structures actualisées sur une année de campagne", () => {
+    const structures = [
+      testStructure(1, StructureType.CADA),
+      testStructure(2, StructureType.HUDA),
+    ];
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures,
+        allStructures: structures,
+        typologies: [
+          testTypologie(1, 1, 2024, 10),
+          testTypologie(2, 2, 2024, 20),
+          testTypologie(3, 1, 2026, 10),
+          testTypologie(4, 2, 2026, 20),
+        ],
+        adresses: [
+          testAdresse(1, 1, Repartition.COLLECTIF, 10),
+          testAdresse(2, 2, Repartition.DIFFUS, 20),
+        ],
+        departements: [],
+        actualisationFormDefinitions: [
+          { slug: "actualisation-2026", deadline: null },
+        ],
+        lastValidatedCampagneYearByStructureId: new Map([[2, 2026]]),
+      })
+    );
+    const year2024 = result.byYear.find((entry) => entry.year === 2024);
+    const year2026 = result.byYear.find((entry) => entry.year === 2026);
+
+    expect(result.totalStructures).toBe(2);
+    expect(year2024?.completude).toBeNull();
+    expect(year2024?.totalStructures).toBe(2);
+    expect(year2026?.completude).toMatchObject({
+      nbAttendues: 2,
+      nbRenseignees: 1,
+    });
+    expect(year2026?.totalStructures).toBe(1);
+    expect(year2026?.structureTypes).toContainEqual({
+      type: StructureType.HUDA,
+      structures: 1,
+      places: 20,
+    });
+    expect(year2026?.structureTypes).toContainEqual({
+      type: StructureType.CADA,
+      structures: 0,
+      places: 0,
+    });
+    expect(year2026?.structureBatis).toContainEqual({
+      bati: Repartition.DIFFUS,
+      structures: 1,
+      places: 20,
+    });
+  });
 });

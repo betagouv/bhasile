@@ -155,10 +155,7 @@ describe("socle - périmètre général vs séries temporelles", () => {
   });
 
   it("construit le byYear via mapTypologieYears sur le périmètre annuel", () => {
-    const byYear = mapTypologieYears(
-      allStructures,
-      activeStructureIdsByPeriod,
-      [
+    const typologies = [
         {
           id: 1,
           structureId: 1,
@@ -186,13 +183,23 @@ describe("socle - périmètre général vs séries temporelles", () => {
           lgbt: 0,
           fvvTeh: 0,
         },
-      ],
+      ];
+    const byYear = mapTypologieYears(
+      buildTestStatistiquesContext({
+        structures: allStructures,
+        typologies,
+        adresses: [],
+        departements: [],
+        activeStructureIdsByPeriod,
+      }),
       (_year, structuresForYear) => ({
         structureIds: structuresForYear.map((structure) => structure.id),
       })
     );
 
-    expect(byYear).toEqual([{ year: 2025, structureIds: [1, 2, 3] }]);
+    expect(byYear).toEqual([
+      { year: 2025, completude: null, structureIds: [1, 2, 3] },
+    ]);
   });
 });
 

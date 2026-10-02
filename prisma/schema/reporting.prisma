@@ -1,14 +1,30 @@
 // TABLES
 
-// Tarifs journaliers cibles par type de structure et zonage (remplissage manuel)
+// Tarifs journaliers cibles par type de structure, année et zonage (remplissage manuel)
 model TarifJournalierCible {
   id             Int           @id @default(autoincrement())
   structure_type StructureType
+  year           Int
   belongs_to_idf Boolean
   tarif_cible    Decimal
 
-  @@unique([structure_type, belongs_to_idf])
+  @@unique([structure_type, year, belongs_to_idf])
   @@map("tarif_journalier_cible")
+  @@schema("reporting")
+}
+
+// Taux d'encadrement cibles (places par ETP) par type de structure, année et zonage (remplissage manuel)
+// comes_from_huda : CADA créé par une transformation HUDA vers CADA
+model TauxEncadrementCible {
+  id             Int           @id @default(autoincrement())
+  structure_type StructureType
+  year           Int
+  belongs_to_idf Boolean
+  comes_from_huda   Boolean       @default(false)
+  taux_cible     Decimal
+
+  @@unique([structure_type, year, belongs_to_idf, comes_from_huda], map: "taux_encadrement_cible_key")
+  @@map("taux_encadrement_cible")
   @@schema("reporting")
 }
 

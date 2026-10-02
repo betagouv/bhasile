@@ -154,8 +154,6 @@ export const computePlacesStatistiques = (
 ): StatistiqueApiRead["places"] => {
   const {
     structures,
-    allStructures,
-    activeStructureIdsByPeriod,
     typologies,
     adresses,
     departements,
@@ -173,9 +171,7 @@ export const computePlacesStatistiques = (
       now
     ),
     byYear: mapTypologieYears<PlacesByYearStat>(
-      allStructures,
-      activeStructureIdsByPeriod,
-      typologies,
+      context,
       (year, structuresForYear) =>
         computePlacesTypologieIndicators(
           structuresForYear,
