@@ -18,7 +18,7 @@ import {
 import { StructureType } from "@/types/structure.type";
 
 import { createFakeActeAdministratif } from "./acte-administratif.seed";
-import { createFakeAdresses } from "./adresse.seed";
+import { createFakeAdresses, STRUCTURE_ZONE } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
 import { createFakeContact } from "./contact.seed";
 import { createFakeControle } from "./controle.seed";
@@ -32,13 +32,6 @@ export type FormDefInfo = { id: number; stepDefinitionIds: number[] };
 export type FormDefLookup = Map<string, FormDefInfo>;
 
 export type Coordinates = { latitude: number; longitude: number };
-
-const STRUCTURE_ZONE = {
-  minLatitude: 43.550851,
-  maxLatitude: 49.131627,
-  minLongitude: -0.851371,
-  maxLongitude: 5.843377,
-};
 
 export const COLOCATED_COORDINATES: Coordinates = {
   latitude: STRUCTURE_ZONE.maxLatitude - 0.05,

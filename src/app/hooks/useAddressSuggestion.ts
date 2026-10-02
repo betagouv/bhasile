@@ -1,3 +1,5 @@
+import { BAN_SEARCH_URL } from "@/constants";
+
 export function useAddressSuggestion() {
   return async (query: string): Promise<AddressSuggestion[]> => {
     if (!query || query.length < 3) {
@@ -6,9 +8,7 @@ export function useAddressSuggestion() {
 
     try {
       const response = await fetch(
-        `https://data.geopf.fr/geocodage/search/?q=${encodeURIComponent(
-          query
-        )}&limit=5`
+        `${BAN_SEARCH_URL}?q=${encodeURIComponent(query)}&limit=5`
       );
 
       if (!response.ok) {

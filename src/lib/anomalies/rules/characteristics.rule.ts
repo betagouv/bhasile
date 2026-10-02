@@ -38,6 +38,13 @@ export const CHARACTERISTICS_RULES = [
   }),
 
   defineRule({
+    code: "ADRESSE_NON_LOCALISEE",
+    requires: ["adressesNonLocalisees"],
+    evaluates: ({ adressesNonLocalisees }) =>
+      adressesNonLocalisees > 0 ? [onStructure] : [],
+  }),
+
+  defineRule({
     code: "CPOM_MONO_STRUCTURE",
     requires: ["cpoms"],
     evaluates: ({ cpoms }) =>

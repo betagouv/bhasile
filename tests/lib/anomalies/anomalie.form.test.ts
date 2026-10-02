@@ -65,13 +65,15 @@ describe("buildFormAnomalieContext", () => {
     const requises = DISPLAYED_ANOMALIE_CODES.flatMap(
       (code) =>
         ANOMALIE_RULES.find((rule) => rule.code === code)?.requires ?? []
-    );
+    ).filter((slice) => slice !== "adressesNonLocalisees");
 
     expect(requises.filter((slice) => !produites.includes(slice))).toEqual([]);
   });
 
   it("ne produit pas les tranches dont aucun code affiché n'a besoin", () => {
     const produites = Object.keys(buildFormAnomalieContext(makeStructure()));
+
+    expect(produites).not.toContain("adressesNonLocalisees");
 
     expect(produites).not.toContain("cpoms");
     expect(produites).not.toContain("activites");
