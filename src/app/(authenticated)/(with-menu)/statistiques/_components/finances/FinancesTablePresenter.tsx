@@ -6,10 +6,15 @@ import { Fragment, ReactElement } from "react";
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
-import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
+import {
+  filterDisplayedYears,
+  isYearIncomplete,
+} from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
+
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
 type VisualizationType = "total" | "autorisees" | "subventionnees";
 
@@ -182,23 +187,33 @@ export const FinancesTablePresenter = ({
                   </>
                 )}
               </td>
-              {row.cells.map((cell, index) => (
-                <td
-                  key={`${row.label}-${index}`}
-                  className="whitespace-nowrap align-middle"
-                >
-                  {row.isBadge &&
-                  cell.raw !== null &&
-                  cell.raw !== undefined ? (
-                    <Badge severity={cell.raw < 0 ? "error" : "success"} noIcon>
-                      {cell.raw < 0 ? "" : "+ "}
-                      {cell.display}
-                    </Badge>
-                  ) : (
-                    <span className="text-sm">{cell.display}</span>
-                  )}
-                </td>
-              ))}
+              {row.cells.map((cell, columnIndex) => {
+                const yearItem = financeYears[columnIndex];
+                const isIncomplete = isYearIncomplete(yearItem);
+
+                return (
+                  <td
+                    key={`${row.label}-${columnIndex}`}
+                    className={`whitespace-nowrap align-middle ${
+                      isIncomplete ? "bg-default-grey-active" : ""
+                    }`}
+                  >
+                    {row.isBadge &&
+                    cell.raw !== null &&
+                    cell.raw !== undefined ? (
+                      <Badge
+                        severity={cell.raw < 0 ? "error" : "success"}
+                        noIcon
+                      >
+                        {cell.raw < 0 ? "" : "+ "}
+                        {cell.display}
+                      </Badge>
+                    ) : (
+                      <span className="text-sm">{cell.display}</span>
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </Fragment>
@@ -208,11 +223,30 @@ export const FinancesTablePresenter = ({
 };
 
 const getHeadings = (financeYears: FinanceByYearStat[]) => {
-  const dates = financeYears.map((yearItem) => (
-    <th scope="col" key={yearItem.year} className="text-center font-bold">
-      {yearItem.year}
-    </th>
-  ));
+  const dates =
+    financeYears.map((yearItem) => {
+      const isIncomplete = isYearIncomplete(yearItem);
+
+      return (
+        <th
+          scope="col"
+          key={yearItem.year}
+          className={isIncomplete ? "bg-default-grey-active" : undefined}
+        >
+          <div className="inline-flex items-center justify-center gap-1">
+            <span>{yearItem.year}</span>
+            {!isIncomplete && <span>*</span>}
+            {isIncomplete && (
+              // TODO : ajouter de vraies valeurs
+              <IncompleteDataIndicator
+                nbStructures={42}
+                structuresPercentage={42}
+              />
+            )}
+          </div>
+        </th>
+      );
+    }) ?? [];
 
   return [
     <th scope="col" key="heading-label">

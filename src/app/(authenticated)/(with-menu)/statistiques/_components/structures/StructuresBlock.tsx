@@ -2,45 +2,18 @@
 
 import { ReactElement } from "react";
 
-import { InformationCard } from "@/app/components/InformationCard";
-import { InformationCardBridge } from "@/app/components/InformationCardBridge";
-import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-
 import { AnnualDataNote } from "../AnnualDataNote";
 import { StructuresStatsTable } from "./StructuresStatsTable";
 import { TypesBatis } from "./TypesBatis";
 import { TypesStructures } from "./TypesStructures";
 
 export const StructuresBlock = (): ReactElement => {
-  const { statistiques } = useStatistiquesContext();
-
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
         <div className="flex">
           <span className="text-title-blue-france mr-3 fr-icon-community-line" />
           <h3 className="text-title-blue-france fr-h6 mb-12">Structures</h3>
-        </div>
-      </div>
-      <div className="flex pb-16">
-        <div className="pr-4">
-          <InformationCard
-            primaryInformation={statistiques.structures.totalStructures}
-            secondaryInformation="structures"
-          />
-        </div>
-        <div>
-          <InformationCard
-            primaryInformation={statistiques.structures.totalCpoms}
-            secondaryInformation="CPOM complets ou partiels"
-          />
-        </div>
-        <InformationCardBridge />
-        <div>
-          <InformationCard
-            primaryInformation={statistiques.structures.structuresAvecCpom}
-            secondaryInformation="structures sous CPOM"
-          />
         </div>
       </div>
       <div className="grid grid-cols-2">
