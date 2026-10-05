@@ -1,5 +1,7 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+
+const shouldConfigureSentry =
+  process.env.SENTRY_AUTH_TOKEN && process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
   webpack: (config) => {
@@ -29,13 +31,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-};
-
-const shouldConfigureSentry =
-  process.env.SENTRY_AUTH_TOKEN && process.env.NODE_ENV === "production";
-
-export default shouldConfigureSentry
-  ? withSentryConfig(nextConfig, {
+  ...(shouldConfigureSentry && {
+    sentry: {
       org: "betagouv",
       project: "bhasile",
       sentryUrl: "https://sentry.incubateur.net/",
@@ -46,5 +43,8 @@ export default shouldConfigureSentry
           removeDebugLogging: true,
         },
       },
-    })
-  : nextConfig;
+    },
+  }),
+};
+
+export default nextConfig;

@@ -64,7 +64,7 @@
     "@nazka/map-gl-js-spiderfy": "^2.0.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
-    "@sentry/nextjs": "^10",
+    "@sentry/nextjs": "^11",
     "carte-facile": "^0.10.2",
     "chartist": "^1.4.0",
     "clsx": "^2.1.1",
