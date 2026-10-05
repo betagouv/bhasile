@@ -2,6 +2,11 @@ import dayjs from "dayjs";
 
 import { TimePeriod } from "@/app/components/common/TimePeriodSelector";
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import {
+  FinanceByYearStat,
+  PlacesByYearStat,
+  StructuresByYearStat,
+} from "@/schemas/api/statistique.schema";
 
 import { getYearFromDate } from "./date.util";
 
@@ -81,4 +86,17 @@ export const getLastDisplayedPeriods = <T extends { date: string | Date }>(
         new Date(secondPeriod.date).getTime()
     )
     .slice(-MAX_DISPLAYED_TIME_PERIODS);
+};
+
+export const isYearIncomplete = (
+  yearItem?: StructuresByYearStat | PlacesByYearStat | FinanceByYearStat
+): boolean => {
+  if (!yearItem) {
+    return false;
+  }
+
+  const currentYear = new Date().getFullYear();
+  const yearNumber = Number(yearItem.year);
+
+  return yearNumber === currentYear || yearNumber === currentYear - 1;
 };

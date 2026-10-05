@@ -4,10 +4,14 @@ import {
   filterDisplayedPeriods,
   filterDisplayedYears,
   getLastDisplayedPeriods,
+  isYearIncomplete,
 } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
 
-const periodOfYear = (year: number) => ({ date: `${year}-06-15T00:00:00.000Z` });
+const periodOfYear = (year: number) => ({
+  date: `${year}-06-15T00:00:00.000Z`,
+});
 
 describe("statistiques period util", () => {
   describe("filterDisplayedPeriods", () => {
@@ -18,7 +22,9 @@ describe("statistiques period util", () => {
     });
 
     it("exclut les périodes antérieures à START_YEAR", () => {
-      expect(filterDisplayedPeriods([periodOfYear(START_YEAR - 1)])).toEqual([]);
+      expect(filterDisplayedPeriods([periodOfYear(START_YEAR - 1)])).toEqual(
+        []
+      );
     });
 
     it("exclut les périodes postérieures à l'année courante", () => {
@@ -77,6 +83,44 @@ describe("statistiques period util", () => {
       expect(displayedPeriods[0].date).toBe(
         `${CURRENT_YEAR - 1}-05-01T00:00:00.000Z`
       );
+    });
+  });
+
+  describe("isYearIncomplete", () => {
+    it("renvoie false si yearItem est undefined", () => {
+      expect(isYearIncomplete(undefined)).toBe(false);
+    });
+
+    it("renvoie true pour l'année courante", () => {
+      const yearItem = { year: CURRENT_YEAR } as FinanceByYearStat;
+
+      expect(isYearIncomplete(yearItem)).toBe(true);
+    });
+
+    it("renvoie true pour l'année précédente (N-1)", () => {
+      const yearItem = { year: CURRENT_YEAR - 1 } as FinanceByYearStat;
+
+      expect(isYearIncomplete(yearItem)).toBe(true);
+    });
+
+    it("renvoie false pour une année antérieure à N-1", () => {
+      const yearItem = { year: CURRENT_YEAR - 2 } as FinanceByYearStat;
+
+      expect(isYearIncomplete(yearItem)).toBe(false);
+    });
+
+    it("renvoie false pour une année future", () => {
+      const yearItem = { year: CURRENT_YEAR + 1 } as FinanceByYearStat;
+
+      expect(isYearIncomplete(yearItem)).toBe(false);
+    });
+
+    it("gère la propriété year sous forme de chaîne de caractères", () => {
+      const yearItem = {
+        year: String(CURRENT_YEAR),
+      } as unknown as FinanceByYearStat;
+
+      expect(isYearIncomplete(yearItem)).toBe(true);
     });
   });
 });

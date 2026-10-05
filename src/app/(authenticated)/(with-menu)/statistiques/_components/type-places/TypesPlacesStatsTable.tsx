@@ -3,9 +3,14 @@ import { Fragment, ReactElement, ReactNode } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { formatPerMille } from "@/app/utils/number.util";
-import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
+import {
+  filterDisplayedYears,
+  isYearIncomplete,
+} from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { PlacesByYearStat } from "@/schemas/api/statistique.schema";
+
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
 export const TypesPlacesStatsTable = ({
   startYear,
@@ -84,16 +89,23 @@ export const TypesPlacesStatsTable = ({
               <strong>{structureStat.label}</strong>
               <br />
             </td>
-            {structureStat.value?.map((structureStatItem, index) => (
-              <td
-                key={`${structureStat.label}-${index}`}
-                className="whitespace-nowrap"
-              >
-                <span className="inline-flex items-center gap-6">
-                  <span>{structureStatItem}</span>
-                </span>
-              </td>
-            ))}
+            {structureStat.value?.map((structureStatItem, columnIndex) => {
+              const yearItem = placeYears[columnIndex];
+              const isIncomplete = isYearIncomplete(yearItem);
+
+              return (
+                <td
+                  key={`${structureStat.label}-${columnIndex}`}
+                  className={`whitespace-nowrap ${
+                    isIncomplete ? "bg-default-grey-active" : ""
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-6">
+                    <span>{structureStatItem}</span>
+                  </span>
+                </td>
+              );
+            })}
           </tr>
         ))}
         {typePlacesStats.map((section) => (
@@ -115,16 +127,23 @@ export const TypesPlacesStatsTable = ({
                   <br />
                   <span className="text-xs">{structureStat.subLabel}</span>
                 </td>
-                {structureStat.value?.map((structureStatItem, index) => (
-                  <td
-                    key={`${structureStat.label}-${index}`}
-                    className="whitespace-nowrap"
-                  >
-                    <span className="inline-flex items-center gap-6">
-                      <NumberDisplay value={structureStatItem} />
-                    </span>
-                  </td>
-                ))}
+                {structureStat.value?.map((structureStatItem, columnIndex) => {
+                  const yearItem = placeYears[columnIndex];
+                  const isIncomplete = isYearIncomplete(yearItem);
+
+                  return (
+                    <td
+                      key={`${structureStat.label}-${columnIndex}`}
+                      className={`whitespace-nowrap ${
+                        isIncomplete ? "bg-default-grey-active" : ""
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-6">
+                        <NumberDisplay value={structureStatItem} />
+                      </span>
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </Fragment>
@@ -135,11 +154,32 @@ export const TypesPlacesStatsTable = ({
 };
 
 const getHeadings = (placeYears: PlacesByYearStat[]) => {
+  const currentYear = new Date().getFullYear();
+
   const dates =
     placeYears.map((yearItem) => {
+      const isIncomplete = isYearIncomplete(yearItem);
+      const isNotCurrentYear = Number(yearItem.year) !== currentYear;
+
       return (
-        <th scope="col" key={yearItem.year}>
-          {yearItem.year}
+        <th
+          scope="col"
+          key={yearItem.year}
+          className={isIncomplete ? "bg-default-grey-active" : undefined}
+        >
+          <div className="inline-flex items-center justify-center gap-1">
+            <span>
+              {yearItem.year}
+              {isNotCurrentYear && "*"}
+            </span>
+            {isIncomplete && (
+              // TODO : ajouter de vraies valeurs
+              <IncompleteDataIndicator
+                nbStructures={42}
+                structuresPercentage={42}
+              />
+            )}
+          </div>
         </th>
       );
     }) ?? [];
