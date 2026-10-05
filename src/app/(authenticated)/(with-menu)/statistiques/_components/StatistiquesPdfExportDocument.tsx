@@ -4,7 +4,9 @@ import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";
 import { FiltersNotice } from "./FiltersNotice";
 import { FinancesBlock } from "./finances/FinancesBlock";
+import { PartialDataNotice } from "./PartialDataNotice";
 import { RMUBlock } from "./rmu/RMUBlock";
+import { StatistiquesCallouts } from "./StatistiquesCallouts";
 import { StatistiquesPdfHeader } from "./StatistiquesPdfHeader";
 import { StructuresBlock } from "./structures/StructuresBlock";
 import { TypesPlacesBlock } from "./type-places/TypesPlacesBlock";
@@ -33,6 +35,8 @@ export const StatistiquesPdfExportDocument = ({
         operateursCount={operateursCount}
         typesCount={typesCount}
       />
+      <StatistiquesCallouts />
+      <PartialDataNotice />
       <div className="pb-4 break-after-page">
         <StructuresBlock />
       </div>

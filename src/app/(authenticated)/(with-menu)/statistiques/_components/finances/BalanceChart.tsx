@@ -7,6 +7,9 @@ import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 
+import { ClosedStructuresDisclaimer } from "../ClosedStructuresDisclaimer";
+import { FinanceChartLabel } from "./FinanceChartLabel";
+
 export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
@@ -18,51 +21,60 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
         })
       : getYearRange();
 
-  const yearsWithBudget = years
-    .filter((year) => year < CURRENT_YEAR)
-    .map((year) => {
-      return {
-        year,
-        budget: statistiques.finance.byYear?.find(
-          (budget) => budget.year === year
-        ),
-      };
-    })
-    .reverse();
+  const yearsWithBudget = useMemo(
+    () =>
+      years
+        .map((year) => ({
+          year,
+          budget: statistiques.finance.byYear?.find(
+            (budget) => budget.year === year
+          ),
+        }))
+        .reverse(),
+    [years, statistiques.finance.byYear]
+  );
 
-  const getPropertySerie = (
-    propertyName: keyof FinanceByYearScopeStat
-  ): number[] => {
-    return (
-      yearsWithBudget.map((budget) =>
-        Number(
-          budget.budget?.total[propertyName as keyof FinanceByYearScopeStat]
-        )
-      ) || []
-    );
-  };
+  const chartData = useMemo(() => {
+    const getPropertySerie = (
+      propertyName: keyof FinanceByYearScopeStat
+    ): number[] => {
+      return (
+        yearsWithBudget.map((budget) =>
+          Number(
+            budget.budget?.total[
+              propertyName as keyof FinanceByYearScopeStat
+            ] ?? 0
+          )
+        ) || []
+      );
+    };
 
-  const getChartData = () => {
     const labels = yearsWithBudget.map((budget) => budget.year.toString());
-    const excendentCumule = getPropertySerie("excedentCumule");
+    const excedentCumule = getPropertySerie("excedentCumule");
     const deficitCumuleBrut = getPropertySerie("deficitCumule");
-    const cumul = excendentCumule.map(
+    const cumul = excedentCumule.map(
       (excedent, index) => excedent - deficitCumuleBrut[index]
     );
     const deficitCumuleNegatif = deficitCumuleBrut.map(
       (deficit) => -Math.abs(deficit)
     );
 
-    const series = {
-      barsSeries: [excendentCumule, deficitCumuleNegatif],
-      lineSeries: cumul,
-    };
+    const incompleteYears = yearsWithBudget.map((budget) => {
+      const yearNumber = budget.year;
+      return (
+        !Number.isNaN(yearNumber) &&
+        yearNumber >= CURRENT_YEAR - 2 &&
+        yearNumber <= CURRENT_YEAR
+      );
+    });
 
     return {
       labels,
-      ...series,
+      barsSeries: [excedentCumule, deficitCumuleNegatif],
+      lineSeries: cumul,
+      incompleteYears,
     };
-  };
+  }, [yearsWithBudget]);
 
   const colors = useMemo(
     () => ({
@@ -80,10 +92,18 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
           <StackedBarLineChart
-            data={getChartData()}
+            data={chartData}
             colors={colors}
             axisYLabel="Montant (€)"
+            renderLabel={(label, index) => (
+              <FinanceChartLabel
+                chartData={chartData}
+                label={label}
+                index={index}
+              />
+            )}
           />
+          <ClosedStructuresDisclaimer />
         </div>
         <div>
           <ChartLegend label="Excédents" color="#18753CB2" />
