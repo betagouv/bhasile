@@ -6,8 +6,11 @@ import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
+import { ClosedStructuresDisclaimer } from "../ClosedStructuresDisclaimer";
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { BalanceChart } from "./BalanceChart";
 import { FinanceCards } from "./FinanceCards";
+import { FinanceChartLabel } from "./FinanceChartLabel";
 import { FinancesStatsTable } from "./FinancesStatsTable";
 
 export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
@@ -22,7 +25,9 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
         </div>
       </div>
       <h4 className="text-title-blue-france text-lg">
-        Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}
+        Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}{" "}
+        {/* TODO : mettre les vraies valeurs ici */}
+        <IncompleteDataIndicator nbStructures={42} structuresPercentage={42} />
       </h4>
       <div className="flex pb-16">
         <FinanceCards />
@@ -40,7 +45,16 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
           hideStructureTypeLabels={true}
           startYear={startYear}
           endYear={endYear}
+          showIncompleteYears={true}
+          renderLabel={(label, index, chartData) => (
+            <FinanceChartLabel
+              chartData={chartData}
+              label={label}
+              index={index}
+            />
+          )}
         />
+        <ClosedStructuresDisclaimer />
       </div>
       <div className="py-12 break-inside-avoid">
         <BalanceChart startYear={startYear} endYear={endYear} />

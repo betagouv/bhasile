@@ -2,12 +2,11 @@
 
 import { ReactElement } from "react";
 
-import { InformationCard } from "@/app/components/InformationCard";
-import { formatPerMille } from "@/app/utils/number.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
 import { AnnualDataNote } from "../AnnualDataNote";
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";
 
 export const TypesPlacesBlock = ({
@@ -26,24 +25,15 @@ export const TypesPlacesBlock = ({
           </h3>
         </div>
       </div>
-      <div className="flex pb-16">
-        <div className="pr-4">
-          <InformationCard
-            primaryInformation={statistiques.places.totalPlaces}
-            secondaryInformation="places autorisées"
-          />
-        </div>
-        <div>
-          <InformationCard
-            primaryInformation={formatPerMille(
-              statistiques.places.tauxEquipement
-            )}
-            secondaryInformation="taux d'équipement"
-            tertiaryInformation="nombre de places divisé par le nombre d'habitants"
-          />
-        </div>
-      </div>
       <div className="pb-16">
+        <h4 className="text-title-blue-france text-lg">
+          En {new Date().getFullYear()}{" "}
+          {/* TODO : mettre de vrais chiffres ici */}
+          <IncompleteDataIndicator
+            nbStructures={42}
+            structuresPercentage={42}
+          />
+        </h4>
         <TypePlaceCharts
           placesAutorisees={statistiques.places.totalPlaces}
           placesPmr={statistiques.places.pmr}
