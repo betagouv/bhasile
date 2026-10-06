@@ -42,9 +42,22 @@ structureVersion?.structure?.departementAdministratif ??
   structureVersion?.departementAdministratif;
 ```
 
-Cet helper sert l'**autorisation** (`checkCanUpdateDepartements`, `getTransformationDepartement`)
+Cet helper sert l'**autorisation** (`checkCanUpdateDepartements`, `canUpdateTransformationDepartements`, `isTransformationVisible`)
 et les écrans du parcours transformation où le département conditionne l'affichage d'une
 carte — pas le libellé des listes, qui lit la version directement.
+
+## 🔀 Transformations multi-départements
+
+Une transformation peut réunir des structures de départements différents : aucune règle
+métier n'impose plus un département commun. L'autorisation, elle, reste **par bloc** :
+
+| Action                             | Règle                                                          |
+| ---------------------------------- | -------------------------------------------------------------- |
+| Voir la transformation (dashboard) | au moins un bloc dans le périmètre, ou aucun département connu |
+| Modifier / supprimer               | **tous** les blocs dans le périmètre                           |
+
+Un agent qui voit sans pouvoir modifier n'a pas de lien vers le formulaire (`actionUrl: null`).
+Le masquage est cosmétique : c'est le 403 de `checkCanUpdateDepartements` qui protège.
 
 ## 🗺️ Où la règle s'applique
 

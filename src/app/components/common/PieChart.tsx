@@ -3,7 +3,7 @@
 import "chartist/dist/index.css";
 
 import * as Chartist from "chartist";
-import { PropsWithChildren, useEffect, useId, useRef } from "react";
+import { PropsWithChildren, useEffect, useId, useMemo, useRef } from "react";
 
 export default function PieChart({
   data,
@@ -18,8 +18,49 @@ export default function PieChart({
   isDonut = false,
 }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
-  const id = useId();
-  const chartClass = `piechart-${id.replace(/:/g, "-")}`;
+  const uniqueIdentifier = useId();
+  const chartClass = `piechart-${uniqueIdentifier.replace(/:/g, "-")}`;
+
+  const processedData = useMemo(() => {
+    if (!data.series || data.series.length === 0) {
+      return data;
+    }
+
+    const firstSeriesValue = extractSeriesValue(data.series[0]);
+
+    if (firstSeriesValue !== 0) {
+      return data;
+    }
+
+    const remainingSeriesSum = data.series
+      .slice(1)
+      .reduce<number>((accumulator, seriesItem) => {
+        return accumulator + extractSeriesValue(seriesItem);
+      }, 0);
+
+    if (remainingSeriesSum <= 0) {
+      return data;
+    }
+
+    const minimumPieElementValue = remainingSeriesSum * MINIMUM_PIE_SERIE_SIZE;
+
+    const updatedSeries = data.series.map((seriesItem, index) => {
+      if (index === 0) {
+        if (typeof seriesItem === "number") {
+          return minimumPieElementValue;
+        }
+        if (typeof seriesItem === "object" && seriesItem !== null) {
+          return { ...seriesItem, value: minimumPieElementValue };
+        }
+      }
+      return seriesItem;
+    });
+
+    return {
+      ...data,
+      series: updatedSeries,
+    };
+  }, [data]);
 
   useEffect(() => {
     let chart: Chartist.PieChart | null = null;
@@ -33,7 +74,11 @@ export default function PieChart({
         ...options,
       };
 
-      chart = new Chartist.PieChart(chartRef.current, data, chartOptions);
+      chart = new Chartist.PieChart(
+        chartRef.current,
+        processedData,
+        chartOptions
+      );
     }
 
     return () => {
@@ -41,7 +86,7 @@ export default function PieChart({
         chart.detach();
       }
     };
-  }, [data, options, isDonut, size]);
+  }, [processedData, options, isDonut, size]);
 
   const getPieColors = () => {
     let css = `.${chartClass} .ct-series-a .ct-slice-pie { fill: ${colors[0]} !important; }`;
@@ -88,6 +133,25 @@ export default function PieChart({
     </div>
   );
 }
+
+const extractSeriesValue = (
+  seriesItem: number | Chartist.PieChartData["series"][number] | undefined
+): number => {
+  if (typeof seriesItem === "number") {
+    return seriesItem;
+  }
+  if (
+    typeof seriesItem === "object" &&
+    seriesItem !== null &&
+    "value" in seriesItem &&
+    typeof seriesItem.value === "number"
+  ) {
+    return seriesItem.value;
+  }
+  return 0;
+};
+
+const MINIMUM_PIE_SERIE_SIZE = 0.008;
 
 type Props = PropsWithChildren<{
   data: Chartist.PieChartData;

@@ -5,11 +5,13 @@ import {
   buildTransformationSummary,
   getTransformationStatus,
 } from "@/app/api/dashboard/transformations/transformations.util";
+import { defineAbilityFor } from "@/lib/casl/abilities";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
+import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
@@ -87,7 +89,18 @@ const makeTransformation = (input: {
     structureVersionTransformations: input.svts,
   });
 
+const agentNational = {
+  role: "NATIONAL",
+  allowedDepartements: [],
+} as unknown as SessionUser;
+
+const agentParis = {
+  role: "DEPARTEMENT_PARIS",
+  allowedDepartements: ["75"],
+} as unknown as SessionUser;
+
 const noFilters = {
+  ability: defineAbilityFor(agentNational),
   departementList: [],
   operateurList: [],
   typeList: [],
@@ -358,6 +371,70 @@ describe("buildDashboardTransformationRows", () => {
         typeList: ["CADA"],
       })
     ).toHaveLength(1);
+  });
+
+  const buildTransfertParisVersHautsDeSeine = (): TransformationApiRead =>
+    makeTransformation({
+      svts: [
+        makeSvt({
+          id: 1,
+          type: StructureVersionTransformationType.FERMETURE,
+          departement: "75",
+          operateur: { id: 1, name: "Adoma" },
+        }),
+        makeSvt({
+          id: 2,
+          type: StructureVersionTransformationType.EXTENSION,
+          departement: "92",
+          operateur: { id: 2, name: "Coallia" },
+        }),
+      ],
+    });
+
+  it("retrouve une transformation par le département de n'importe lequel de ses blocs", () => {
+    expect(
+      buildDashboardTransformationRows([buildTransfertParisVersHautsDeSeine()], {
+        ...noFilters,
+        departementList: ["92"],
+      })
+    ).toHaveLength(1);
+  });
+
+  it("retrouve une transformation par l'opérateur de n'importe lequel de ses blocs", () => {
+    expect(
+      buildDashboardTransformationRows([buildTransfertParisVersHautsDeSeine()], {
+        ...noFilters,
+        operateurList: ["2"],
+      })
+    ).toHaveLength(1);
+  });
+
+  it("combine les filtres indépendamment d'un bloc à l'autre", () => {
+    expect(
+      buildDashboardTransformationRows([buildTransfertParisVersHautsDeSeine()], {
+        ...noFilters,
+        departementList: ["75"],
+        operateurList: ["2"],
+      })
+    ).toHaveLength(1);
+  });
+
+  it("retire le lien d'action quand un bloc est hors du périmètre de l'agent", () => {
+    const [row] = buildDashboardTransformationRows(
+      [buildTransfertParisVersHautsDeSeine()],
+      { ...noFilters, ability: defineAbilityFor(agentParis) }
+    );
+
+    expect(row.actionUrl).toBeNull();
+  });
+
+  it("garde le lien d'action quand tous les blocs sont dans le périmètre de l'agent", () => {
+    const [row] = buildDashboardTransformationRows(
+      [openTransformation({ id: 3, departement: "75" })],
+      { ...noFilters, ability: defineAbilityFor(agentParis) }
+    );
+
+    expect(row.actionUrl).toBe("/structures/transformation/3");
   });
 
   it("mappe la ligne et masque la date pour une transformation à initialiser", () => {

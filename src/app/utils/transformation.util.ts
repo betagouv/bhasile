@@ -23,9 +23,9 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
+import { getActesAdministratifsDefaultValues } from "./acte-administratif.util";
 import { getYearFromDate } from "./date.util";
-import { areAllFormStepsValidated } from "./formStep.util";
+import { areAllFormStepsValidated } from "./form-step.util";
 import {
   getMillesimeIndexForAYear,
   getMostRecentMillesime,
@@ -75,13 +75,6 @@ export const getReferenceStructureVersionTransformation = (
         structureVersionTransformation
       )
   ) ?? transformation.structureVersionTransformations[0];
-
-export const getTransformationDepartement = (
-  transformation: TransformationApiRead
-): string | undefined =>
-  getStructureVersionTransformationDepartement(
-    getReferenceStructureVersionTransformation(transformation)
-  );
 
 type GetTransformationFormNavigationProps = {
   transformationSteps: Step[];

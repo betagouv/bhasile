@@ -6,7 +6,7 @@ import {
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
-import { getCpomCoveredDocumentsFinanciers } from "@/app/utils/documentFinancier.util";
+import { getCpomCoveredDocumentsFinanciers } from "@/app/utils/document-financier.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   nullishFrenchDateToISO,

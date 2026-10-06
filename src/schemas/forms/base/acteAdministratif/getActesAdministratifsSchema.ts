@@ -1,4 +1,4 @@
-import { getCpomCoveredActeCategories } from "@/app/utils/acteAdministratif.util";
+import { getCpomCoveredActeCategories } from "@/app/utils/acte-administratif.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import {

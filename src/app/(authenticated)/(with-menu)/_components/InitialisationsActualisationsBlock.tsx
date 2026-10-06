@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { getInitialisationsActualisations } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.service";
 import { formatDate } from "@/app/utils/date.util";
-import { getPageParam, SearchParams } from "@/app/utils/searchParams.util";
+import { getPageParam, SearchParams } from "@/app/utils/search-params.util";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
@@ -30,7 +30,7 @@ export const InitialisationsActualisationsBlock = async ({
         iconClassName={INITIALISATIONS_ACTUALISATIONS_BLOCK_HEADER.icon}
       />
 
-      <div className="grid grid-cols-[repeat(4,max-content)_minmax(0,1fr)_max-content_max-content_auto] gap-x-4">
+      <div className="grid grid-cols-[0.75rem_var(--grid-template-columns-structure)_max-content_max-content_auto_0.75rem] gap-x-3">
         <div className="col-span-full grid grid-cols-subgrid pb-2 text-xs font-bold text-mention-grey">
           <div className="col-start-6 text-center">
             <span className="uppercase">Initialisation</span>

@@ -4,7 +4,7 @@ import {
   deletePaginationParams,
   parseMapMode,
   setFilterParam,
-} from "@/app/utils/searchParams.util";
+} from "@/app/utils/search-params.util";
 
 describe("deletePaginationParams", () => {
   it("supprime le param page", () => {

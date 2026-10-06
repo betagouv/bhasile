@@ -1,4 +1,4 @@
-import { isDocumentCoveredByCpom } from "@/app/utils/documentFinancier.util";
+import { isDocumentCoveredByCpom } from "@/app/utils/document-financier.util";
 import { CURRENT_YEAR, DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { DocumentFinancierCategory } from "@/types/document-financier.type";

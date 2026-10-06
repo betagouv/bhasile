@@ -8,8 +8,8 @@ import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 import { NoteDisclaimer } from "@/app/components/forms/notes/NoteDisclaimer";
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { getDefaultValues } from "@/app/utils/defaultValues.util";
-import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { getDefaultValues } from "@/app/utils/default-values.util";
+import { getFinalisationFormStepStatus } from "@/app/utils/finalisation-form.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import {
   NotesAutoSaveFormValues,

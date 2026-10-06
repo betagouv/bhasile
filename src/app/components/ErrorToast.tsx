@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-import { getErrorEmail } from "@/app/utils/errorMail.util";
+import { getErrorEmail } from "@/app/utils/error-mail.util";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { FetchState } from "@/types/fetch-state.type";
 

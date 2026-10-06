@@ -45,7 +45,7 @@ export type DashboardTransformationRow = {
   summary: string;
   status: DashboardTransformationStatus;
   updatedAt: string | null;
-  actionUrl: string;
+  actionUrl: string | null;
 };
 
 export type DashboardNotification = {

@@ -2,7 +2,7 @@
 
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { Dispatch, SetStateAction, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { cn } from "@/app/utils/classname.util";
 import {
@@ -21,7 +21,7 @@ const REGIONS_WITH_ONE_DEPARTEMENT = [
 export const FiltersRegion = ({
   region,
   departements,
-  setDepartements,
+  onChange,
   children,
 }: Props) => {
   const checkedStatus = useMemo(() => {
@@ -48,31 +48,38 @@ export const FiltersRegion = ({
       return;
     }
 
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (event: MouseEvent) => {
       // We need to stop the propagation of the native event
       // to avoid opening the accordion when clicking on the checkbox
-      e.stopPropagation();
-      e.stopImmediatePropagation();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
 
-      const target = e.target as HTMLElement;
-      if (target.tagName !== "LABEL") {
+      const target = event.target as HTMLElement;
+      if (target.tagName !== "LABEL" && target.tagName !== "INPUT") {
         return;
       }
+      // React never sees this click, so it can't restore the controlled
+      // input: the native toggle must not diverge from the rendered state.
+      const shouldSelectRegion = checkedStatus !== "checked";
+      if (target instanceof HTMLInputElement) {
+        target.checked = shouldSelectRegion;
+      } else {
+        event.preventDefault();
+      }
 
-      if (checkedStatus === "checked") {
-        setDepartements((prevDepartements) =>
-          prevDepartements.filter(
+      if (!shouldSelectRegion) {
+        onChange(
+          departements.filter(
             (departement) => getRegionFromDepartement(departement) !== region
           )
         );
       } else {
-        setDepartements((prevDepartements) => {
-          const newDepartements = [
-            ...prevDepartements,
+        onChange([
+          ...new Set([
+            ...departements,
             ...getDepartementNumerosForRegion(region),
-          ];
-          return [...new Set(newDepartements)];
-        });
+          ]),
+        ]);
       }
     };
 
@@ -81,7 +88,7 @@ export const FiltersRegion = ({
     return () => {
       wrapper.removeEventListener("click", handleClick, true);
     };
-  }, [checkedStatus, setDepartements, region]);
+  }, [checkedStatus, departements, onChange, region]);
 
   const isRegionWithOneDepartement = useMemo(() => {
     return REGIONS_WITH_ONE_DEPARTEMENT.includes(region);
@@ -105,8 +112,8 @@ export const FiltersRegion = ({
                   name: "structure-region",
                   value: region,
                   checked: checkedStatus !== "unchecked",
-                  onChange: (e) => {
-                    console.log(e.target.value); // It is never fired because of the stopPropagation
+                  onChange: (event) => {
+                    console.log(event.target.value); // It is never fired because of the stopPropagation
                   },
                 },
               },
@@ -129,6 +136,6 @@ export const FiltersRegion = ({
 type Props = {
   region: string;
   departements: string[];
-  setDepartements: Dispatch<SetStateAction<string[]>>;
+  onChange: (departements: string[]) => void;
   children: React.ReactElement;
 };

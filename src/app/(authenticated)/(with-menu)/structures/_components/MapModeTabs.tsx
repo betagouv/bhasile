@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
-import { parseMapMode } from "@/app/utils/searchParams.util";
+import { parseMapMode } from "@/app/utils/search-params.util";
 import { MapMode } from "@/types/structure-list.type";
 
 export const MapModeTabs = (): ReactElement => {

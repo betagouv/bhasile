@@ -1,7 +1,7 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { ReactElement } from "react";
 
-import { getErrorEmail } from "@/app/utils/errorMail.util";
+import { getErrorEmail } from "@/app/utils/error-mail.util";
 
 import { ErrorDisclosure } from "./ErrorDisclosure";
 

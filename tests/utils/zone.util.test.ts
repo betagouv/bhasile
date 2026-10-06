@@ -12,6 +12,11 @@ describe("zone util", () => {
       expect(buildZoneSummary(["14", "50"])).toBe("Calvados +1");
     });
 
+    it("conserve un code inconnu pour ne pas afficher un filtre actif comme vide", () => {
+      expect(buildZoneSummary(["999"])).toBe("999");
+      expect(buildZoneSummary(["14", "999"])).toBe("Calvados +1");
+    });
+
     it("place les régions complètes avant les départements isolés", () => {
       expect(
         buildZoneSummary(["14", "27", "50", "61", "76", "29", "35"])
@@ -38,8 +43,8 @@ describe("zone util", () => {
       expect(buildZoneSummary([])).toBeUndefined();
     });
 
-    it("renvoie undefined quand aucun numéro ne correspond à un département", () => {
-      expect(buildZoneSummary(["99", "00"])).toBeUndefined();
+    it("renvoie undefined pour une sélection vide", () => {
+      expect(buildZoneSummary([])).toBeUndefined();
     });
   });
 });

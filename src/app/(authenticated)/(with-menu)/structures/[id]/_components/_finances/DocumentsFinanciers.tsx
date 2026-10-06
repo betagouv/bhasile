@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 
 import { DownloadItem } from "@/app/components/common/DownloadItem";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
-import { getCpomInheritedDocumentsFinanciers } from "@/app/utils/documentFinancier.util";
+import { getCpomInheritedDocumentsFinanciers } from "@/app/utils/document-financier.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 export const DocumentsFinanciers = (): ReactElement => {

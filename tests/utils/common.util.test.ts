@@ -8,6 +8,7 @@ import {
   isNullOrUndefined,
   reverseObjectKeyValues,
   sortKeysByValue,
+  toggleArrayValue,
 } from "@/app/utils/common.util";
 
 describe("common util", () => {
@@ -391,6 +392,16 @@ describe("common util", () => {
 
       // THEN
       expect(result).toStrictEqual(false);
+    });
+  });
+
+  describe("toggleArrayValue", () => {
+    it("ajoute une valeur absente en fin de liste", () => {
+      expect(toggleArrayValue(["CADA"], "HUDA")).toEqual(["CADA", "HUDA"]);
+    });
+
+    it("retire une valeur présente", () => {
+      expect(toggleArrayValue(["CADA", "HUDA"], "CADA")).toEqual(["HUDA"]);
     });
   });
 });

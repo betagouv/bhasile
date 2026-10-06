@@ -52,7 +52,7 @@ export const MultiInformationCard = ({
         )}
       </div>
       {showDetails && (
-        <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm break-words overflow-y-auto">
+        <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm wrap-break-word overflow-y-auto">
           {detailLabel}
         </div>
       )}

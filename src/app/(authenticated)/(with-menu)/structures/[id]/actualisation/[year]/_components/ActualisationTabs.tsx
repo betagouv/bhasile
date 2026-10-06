@@ -4,7 +4,7 @@ import { FormStepTab } from "@/app/components/forms/stepper/FormStepTab";
 import {
   ACTUALISATION_STEPS,
   getActualisationFormStepStatus,
-} from "@/app/utils/actualisationForm.util";
+} from "@/app/utils/actualisation-form.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 const titles: Record<string, ReactNode> = {
