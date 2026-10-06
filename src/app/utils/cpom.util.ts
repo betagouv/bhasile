@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
+import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
@@ -76,6 +77,29 @@ const getCpomBudgetsDefaultValues = (
   return structureTypes.flatMap((structureType) =>
     getBudgetsDefaultValues(budgets, undefined, structureType)
   ) as BudgetCpomFormValues[];
+};
+
+export const getStructuresMissingFromSelection = (
+  cpomStructures: NonNullable<CpomApiRead["structures"]>,
+  selectableStructures: StructureMinimalApiType[]
+): StructureMinimalApiType[] => {
+  const selectableStructureIds = new Set(
+    selectableStructures.map((structure) => structure.id)
+  );
+  return cpomStructures.flatMap(({ structureId, structure }) =>
+    structure && !selectableStructureIds.has(structureId)
+      ? [
+          {
+            id: structureId,
+            codeBhasile: structure.codeBhasile,
+            type: structure.type,
+            operateur: structure.operateur,
+            communeAdministrative: structure.communeAdministrative,
+            departementAdministratif: structure.departementAdministratif ?? "",
+          },
+        ]
+      : []
+  );
 };
 
 export const formatCpomName = (cpom: CpomApiRead): string => {

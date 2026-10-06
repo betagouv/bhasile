@@ -147,3 +147,39 @@ const createOrUpdateCpomStructures = async (
     })),
   });
 };
+
+export const findCpomStructuresOfStructure = (
+  tx: PrismaTransaction,
+  structureId: number
+) =>
+  tx.cpomStructure.findMany({
+    where: { structureId },
+    select: {
+      id: true,
+      dateStart: true,
+      dateEnd: true,
+      cpom: {
+        select: {
+          actesAdministratifs: {
+            select: {
+              id: true,
+              category: true,
+              parentId: true,
+              startDate: true,
+              endDate: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+export const updateCpomStructuresDateEnd = (
+  tx: PrismaTransaction,
+  cpomStructureIds: number[],
+  dateEnd: Date
+) =>
+  tx.cpomStructure.updateMany({
+    where: { id: { in: cpomStructureIds } },
+    data: { dateEnd },
+  });

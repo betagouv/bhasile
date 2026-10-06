@@ -34,6 +34,7 @@ export const cpomDetailsInclude = {
           id: true,
           codeBhasile: true,
           type: true,
+          departementAdministratif: true,
           operateur: {
             select: {
               name: true,
