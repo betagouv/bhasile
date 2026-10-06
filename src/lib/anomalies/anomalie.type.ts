@@ -14,6 +14,8 @@ export type AnomalieContext = {
   dnas?: DnaContext[];
   cpoms?: CpomContext[];
   activites?: ActiviteContext[];
+  // Géocodage BAN fait à l'enregistrement : jamais fournie par le formulaire.
+  adressesNonLocalisees?: number;
 };
 
 export type StructureContext = {

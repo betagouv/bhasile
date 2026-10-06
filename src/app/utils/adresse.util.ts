@@ -2,18 +2,6 @@ import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 
 import { isBlank } from "./common.util";
 
-export const getCoordinates = async (address: string): Promise<Coordinates> => {
-  const result = await fetch(
-    `https://data.geopf.fr/geocodage/search/?q=${address}&autocomplete=0&limit=1`
-  );
-  const data = await result.json();
-  const coordinates = data?.features?.[0]?.geometry?.coordinates;
-  return {
-    longitude: coordinates?.[0],
-    latitude: coordinates?.[1],
-  };
-};
-
 export const getDepartementFromCodePostal = (codePostal: string) =>
   (codePostal?.trim().match(/^(97|98)\d/)
     ? (codePostal?.trim().slice(0, 3) ?? "")
@@ -154,9 +142,4 @@ type LegacyFormAdresse = FormAdresse & {
     qpv?: boolean;
     logementSocial?: boolean;
   }[];
-};
-
-type Coordinates = {
-  latitude: number | undefined;
-  longitude: number | undefined;
 };
