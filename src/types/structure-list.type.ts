@@ -32,6 +32,34 @@ export type StructureMapPoint = {
 
 export type Visualization = "tableau" | "carte";
 
+export type MapMode = "structures" | "places";
+
+export type CommuneStructure = {
+  id: number;
+  nom: string | null;
+  codeBhasile: string | null;
+  type: StructureType | null;
+  operateurLabel: string;
+  places: number;
+  isFinalised: boolean;
+};
+
+export type CommuneMapPoint = {
+  key: string;
+  latitude: number;
+  longitude: number;
+  nom: string;
+  places: number;
+  structures: CommuneStructure[];
+};
+
+export type CommunePoints = {
+  communes: CommuneMapPoint[];
+  totalPlaces: number;
+  nonLocalisedPlaces: number;
+  nonRepresentedStructuresCount: number;
+};
+
 export type SearchProps = {
   search: string | null;
   page: number | null;
@@ -47,4 +75,7 @@ export type SearchProps = {
   isClosed?: boolean;
 };
 
-export type StructuresQuery = SearchProps & { vue: Visualization };
+export type StructuresQuery = SearchProps & {
+  vue: Visualization;
+  mode: MapMode;
+};

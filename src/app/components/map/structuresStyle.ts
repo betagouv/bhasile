@@ -10,9 +10,9 @@ export const STRUCTURES_SOURCE_ID = "structures";
 export const STRUCTURES_LAYER_CLUSTERS_ID = "structure-clusters";
 export const STRUCTURES_LAYER_UNCLUSTERED_ID = "structure-unclustered-point";
 
-const CLUSTER_SMALL_IMAGE_ID = "structure-cluster-small";
-const CLUSTER_MEDIUM_IMAGE_ID = "structure-cluster-medium";
-const CLUSTER_LARGE_IMAGE_ID = "structure-cluster-large";
+export const CLUSTER_SMALL_IMAGE_ID = "structure-cluster-small";
+export const CLUSTER_MEDIUM_IMAGE_ID = "structure-cluster-medium";
+export const CLUSTER_LARGE_IMAGE_ID = "structure-cluster-large";
 
 const CLUSTER_FILL_COLOR = "#000091";
 const CLUSTER_STROKE_COLOR = "#DDDDDD";
@@ -76,13 +76,17 @@ const addClusterCircleImage = (
   });
 };
 
+export const addClusterCircleImages = (map: maplibregl.Map): void => {
+  addClusterCircleImage(map, CLUSTER_SMALL_IMAGE_ID, 18);
+  addClusterCircleImage(map, CLUSTER_MEDIUM_IMAGE_ID, 24);
+  addClusterCircleImage(map, CLUSTER_LARGE_IMAGE_ID, 30);
+};
+
 export const addStructuresImages = async (
   map: maplibregl.Map
 ): Promise<void> => {
   await addSingleMarkerImage(map);
-  addClusterCircleImage(map, CLUSTER_SMALL_IMAGE_ID, 18);
-  addClusterCircleImage(map, CLUSTER_MEDIUM_IMAGE_ID, 24);
-  addClusterCircleImage(map, CLUSTER_LARGE_IMAGE_ID, 30);
+  addClusterCircleImages(map);
 };
 
 export const STRUCTURE_MARKER_LAYOUT: maplibregl.SymbolLayerSpecification["layout"] =

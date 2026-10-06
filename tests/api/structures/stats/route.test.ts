@@ -5,6 +5,7 @@ import { GET } from "@/app/api/structures/stats/route";
 const mockfindAllStructures = vi.fn();
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
+  findStructureVersionAdresses: vi.fn().mockResolvedValue([]),
   findAllStructures: (...args: unknown[]) => mockfindAllStructures(...args),
 }));
 
