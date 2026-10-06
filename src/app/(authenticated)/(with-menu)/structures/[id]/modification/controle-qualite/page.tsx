@@ -12,7 +12,7 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformFormControlesToApiControles } from "@/app/utils/controle.util";
-import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { getDefaultValues } from "@/app/utils/default-values.util";
 import { transformFormEvaluationsToApiEvaluations } from "@/app/utils/evaluation.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { useStructureContext } from "@/contexts/StructureContext";

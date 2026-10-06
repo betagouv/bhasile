@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { DomainError } from "./domainError.util";
+import { DomainError } from "./domain-error.util";
 
 export const apiErrorResponse = (error: unknown): NextResponse => {
   if (error instanceof z.ZodError) {

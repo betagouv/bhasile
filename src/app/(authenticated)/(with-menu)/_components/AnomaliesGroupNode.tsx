@@ -73,7 +73,7 @@ const renderHeaderLabel = (
   }
 
   return (
-    <span className="grid grid-cols-[9rem_3.5rem_12rem_minmax(0,1fr)] items-center gap-x-3">
+    <span className="grid grid-cols-structure items-center gap-x-3">
       <strong>{anomalie.structureCodeBhasile}</strong>
       <span>{anomalie.structureType}</span>
       <span className="truncate">{anomalie.operateurName}</span>

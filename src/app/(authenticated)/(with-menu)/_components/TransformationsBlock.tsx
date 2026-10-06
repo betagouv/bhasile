@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { getDashboardTransformations } from "@/app/api/dashboard/transformations/transformations.service";
-import { getPageParam, SearchParams } from "@/app/utils/searchParams.util";
+import { getPageParam, SearchParams } from "@/app/utils/search-params.util";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 

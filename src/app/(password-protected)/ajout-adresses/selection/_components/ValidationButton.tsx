@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { useStructureAdresseExistence } from "@/app/hooks/useStructureAdresseExistence";
-import { getErrorEmail } from "@/app/utils/errorMail.util";
+import { getErrorEmail } from "@/app/utils/error-mail.util";
 
 const checkAdressesModal = createModal({
   id: "check-adresses-modal",

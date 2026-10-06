@@ -12,8 +12,8 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import {
   getCpomCoveredActeCategories,
   relaxCoveredCategories,
-} from "@/app/utils/acteAdministratif.util";
-import { getDefaultValues } from "@/app/utils/defaultValues.util";
+} from "@/app/utils/acte-administratif.util";
+import { getDefaultValues } from "@/app/utils/default-values.util";
 import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";

@@ -7,7 +7,7 @@ import {
 } from "@/app/api/anomalies/anomalie.repository";
 import { buildAnomalieContext } from "@/app/api/anomalies/anomalie.util";
 import { findUserIdByEmail } from "@/app/api/users/user.repository";
-import { DomainError } from "@/app/utils/domainError.util";
+import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import { Prisma } from "@/generated/prisma/client";
 import { computeAnomalies } from "@/lib/anomalies/anomalie.compute";

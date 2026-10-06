@@ -11,8 +11,8 @@ import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTyp
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useStructures } from "@/app/hooks/useStructures";
 import { migrateLegacyAdresseTypologies } from "@/app/utils/adresse.util";
-import { ApiError } from "@/app/utils/apiError.util";
-import { getErrorEmail } from "@/app/utils/errorMail.util";
+import { ApiError } from "@/app/utils/api-error.util";
+import { getErrorEmail } from "@/app/utils/error-mail.util";
 import {
   TypeBatiAndAdressesFormValues,
   typeBatiAndAdressesSchema,

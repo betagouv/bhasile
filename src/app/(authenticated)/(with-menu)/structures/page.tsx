@@ -10,7 +10,7 @@ import {
   parseSortDirection,
   parseStructureColumn,
   SearchParams,
-} from "@/app/utils/searchParams.util";
+} from "@/app/utils/search-params.util";
 import { STRUCTURES_STORAGE_KEY } from "@/constants";
 import { StructuresQuery } from "@/types/structure-list.type";
 

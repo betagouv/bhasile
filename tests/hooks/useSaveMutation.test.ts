@@ -2,7 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
-import { ApiError } from "@/app/utils/apiError.util";
+import { ApiError } from "@/app/utils/api-error.util";
 
 const mockRouterRefresh = vi.fn();
 const mockSetFetchState = vi.fn();

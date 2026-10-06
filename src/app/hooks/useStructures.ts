@@ -10,7 +10,7 @@ import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.sche
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { DeepPartial } from "@/types/global";
 
-import { ApiError, extractApiError } from "../utils/apiError.util";
+import { ApiError, extractApiError } from "../utils/api-error.util";
 import { parseFrenchNumber } from "../utils/number.util";
 
 dayjs.extend(customParseFormat);

@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 import { useTransformationContext } from "@/contexts/TransformationContext";
@@ -7,6 +7,7 @@ import {
   TransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
 import { AnyZodSchema, StepStatus } from "@/types/form.type";
+import { keepDashboardOrigin } from "@/utils/dashboardOrigin.util";
 
 import { setStructureVersionTransformationFormStepStatus } from "../utils/transformation.util";
 import { useSaveMutation } from "./useSaveMutation";
@@ -16,6 +17,7 @@ import { useTransformations } from "./useTransformations";
 
 export const useTransformationFormHandling = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { transformation, shouldShowIncompleteSteps } =
     useTransformationContext();
@@ -32,9 +34,9 @@ export const useTransformationFormHandling = () => {
 
   useEffect(() => {
     if (!currentStep) {
-      router.replace(firstStep.route);
+      router.replace(keepDashboardOrigin(firstStep.route, searchParams));
     }
-  }, [currentStep, firstStep.route, router]);
+  }, [currentStep, firstStep.route, router, searchParams]);
 
   const handleSave = async ({
     transformationId,

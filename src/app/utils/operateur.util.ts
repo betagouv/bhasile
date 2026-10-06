@@ -3,7 +3,7 @@ import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { OperateurUpdateFormValues } from "@/schemas/forms/base/operateur.schema";
 
-import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
+import { getActesAdministratifsDefaultValues } from "./acte-administratif.util";
 
 type OperateurDefaultValues = Omit<
   OperateurUpdateFormValues,

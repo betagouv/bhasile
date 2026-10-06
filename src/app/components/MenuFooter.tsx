@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ReactElement } from "react";
 
-import { BHASILE_CONTACT_EMAIL } from "@/constants";
+import { BHASILE_CONTACT_EMAIL, BHASILE_HELP_CENTER_URL } from "@/constants";
 
 import { ExternalLink } from "./common/ExternalLink";
 import { User } from "./User";
@@ -28,6 +28,14 @@ const secondaryMenuItems = [
 export const MenuFooter = (): ReactElement => {
   return (
     <div className="mt-auto">
+      <div className="flex justify-center p-6">
+        <ExternalLink
+          title="Centre d’aide"
+          url={BHASILE_HELP_CENTER_URL}
+          className="fr-btn fr-btn--tertiary fr-btn--sm"
+          icon="fr-icon-question-line"
+        />
+      </div>
       <div className="p-6 border-b border-b-border-default-grey border-t border-t-border-default-grey">
         <User />
       </div>

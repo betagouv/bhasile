@@ -6,7 +6,7 @@ import {
 } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
-import { ApiError, extractApiError } from "../utils/apiError.util";
+import { ApiError, extractApiError } from "../utils/api-error.util";
 
 const createOrUpdateTransformation = async (
   url: string,

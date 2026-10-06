@@ -9,7 +9,10 @@ import { StructureHeader } from "@/app/(authenticated)/(with-menu)/structures/[i
 import { AppAbilityProvider } from "@/contexts/AbilityProvider";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
+const mockUseSearchParams = vi.fn();
+
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => mockUseSearchParams(),
   useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/structures/42",
 }));
@@ -35,8 +38,35 @@ const buildClosedStructure = (
 describe("StructureHeader", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
     vi.stubEnv("NEXT_PUBLIC_SHOW_TRANSFORMATION", "true");
     global.fetch = vi.fn();
+  });
+
+  it("ramène à la liste des structures par défaut", () => {
+    renderWithStructurePageProviders(
+      buildClosedStructure(),
+      <StructureHeader actualisationYear={null} />
+    );
+
+    expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
+      "href",
+      "/structures"
+    );
+  });
+
+  it("ramène au tableau de bord quand on en vient", () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("from=dashboard"));
+
+    renderWithStructurePageProviders(
+      buildClosedStructure(),
+      <StructureHeader actualisationYear={null} />
+    );
+
+    expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
+      "href",
+      "/"
+    );
   });
 
   it("affiche la date de fermeture et masque le menu pour une structure fermée", () => {

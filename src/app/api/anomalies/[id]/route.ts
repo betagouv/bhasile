@@ -6,7 +6,7 @@ import {
   setAnomalieJustification,
 } from "@/app/api/anomalies/anomalie.service";
 import { createStructureEvent } from "@/app/api/user-actions/user-action.service";
-import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
+import { apiErrorResponse } from "@/app/utils/api-error-response.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { anomalieApiUpdateSchema } from "@/schemas/api/anomalie.schema";

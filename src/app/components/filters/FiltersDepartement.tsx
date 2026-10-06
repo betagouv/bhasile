@@ -1,45 +1,13 @@
-"use client";
-
 import { fr } from "@codegouvfr/react-dsfr";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 
-import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
+import { toggleArrayValue } from "@/app/utils/common.util";
 import { REGIONS } from "@/constants";
 import { getDepartementsForRegion } from "@/utils/region.util";
 
 import { FiltersRegion } from "./FiltersRegion";
 
-export const FiltersDepartement = () => {
-  const searchParams = useSearchParams();
-  const navigateWithFilter = useFilterNavigation();
-
-  const [departements, setDepartements] = useState<string[]>(
-    searchParams.get("departements")?.split(",") || []
-  );
-
-  const handleDepartementToggle = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = event.target.value;
-    if (departements.includes(value)) {
-      setDepartements(
-        departements.filter((departement) => departement !== value)
-      );
-    } else {
-      setDepartements([...departements, value]);
-    }
-  };
-
-  const prevDepartements = useRef(departements);
-  useEffect(() => {
-    if (prevDepartements.current !== departements) {
-      navigateWithFilter("departements", departements);
-      prevDepartements.current = departements;
-    }
-  }, [departements, navigateWithFilter]);
-
+export const FiltersDepartement = ({ departements, onChange }: Props) => {
   return (
     <div className="py-4">
       <div className={fr.cx("fr-accordions-group")}>
@@ -48,7 +16,7 @@ export const FiltersDepartement = () => {
             region={region.name}
             key={region.name}
             departements={departements}
-            setDepartements={setDepartements}
+            onChange={onChange}
           >
             <>
               {getDepartementsForRegion(region.name)
@@ -63,7 +31,10 @@ export const FiltersDepartement = () => {
                           name: "structure-departement",
                           value: departement.numero,
                           checked: departements.includes(departement.numero),
-                          onChange: handleDepartementToggle,
+                          onChange: () =>
+                            onChange(
+                              toggleArrayValue(departements, departement.numero)
+                            ),
                         },
                       },
                     ]}
@@ -79,4 +50,9 @@ export const FiltersDepartement = () => {
       </div>
     </div>
   );
+};
+
+type Props = {
+  departements: string[];
+  onChange: (departements: string[]) => void;
 };

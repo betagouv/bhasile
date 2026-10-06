@@ -25,6 +25,7 @@ const TRANSFORMATION_ID = 12;
 const mockRouterPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
   useParams: () => ({
     transformationStructureType: StructureVersionTransformationType.FERMETURE,
     transformationStructureId: "7",

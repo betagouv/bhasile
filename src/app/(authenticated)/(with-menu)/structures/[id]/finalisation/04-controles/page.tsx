@@ -9,9 +9,9 @@ import FormWrapper, {
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformFormControlesToApiControles } from "@/app/utils/controle.util";
-import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { getDefaultValues } from "@/app/utils/default-values.util";
 import { transformFormEvaluationsToApiEvaluations } from "@/app/utils/evaluation.util";
-import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { getFinalisationFormStepStatus } from "@/app/utils/finalisation-form.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import {
   FinalisationQualiteAutoSaveFormValues,

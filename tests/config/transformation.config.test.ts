@@ -206,8 +206,6 @@ describe("TRANSFORMATION_TYPE_SPECS — grille HUDA vers CADA", () => {
         multiple: true,
         type: StructureVersionTransformationType.EXTENSION,
         fixedType: StructureType.CADA,
-        inheritOperateurFrom: "huda",
-        inheritDepartementFrom: "huda",
       });
       expect(spec.buildAutoTransformations()).toEqual([]);
       expect(spec.prefill).toEqual([

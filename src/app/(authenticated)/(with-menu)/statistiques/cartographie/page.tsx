@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 
-import { SearchParams } from "@/app/utils/searchParams.util";
+import { SearchParams } from "@/app/utils/search-params.util";
 import { DEFAULT_CARTOGRAPHIE_ANNEE } from "@/constants";
 import { StatistiquesCartographieProvider } from "@/contexts/StatistiquesCartographieContext";
 import { StatistiquesProvider } from "@/contexts/StatistiquesContext";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { areAllFormStepsValidated } from "@/app/utils/formStep.util";
+import { areAllFormStepsValidated } from "@/app/utils/form-step.util";
 import { StepStatus } from "@/types/form.type";
 
 describe("areAllFormStepsValidated", () => {

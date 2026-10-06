@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { ActesAdministratifsCategory } from "@/app/components/blocks/actesAdministratifs/ActesAdministratifsCategory";
 import { Block } from "@/app/components/common/Block";
-import { getActesCategoriesToDisplay } from "@/app/utils/acteAdministratif.util";
+import { getActesCategoriesToDisplay } from "@/app/utils/acte-administratif.util";
 import { CpomActeScope, getCpomActesScopes } from "@/app/utils/cpom.util";
 import { ACTE_ADMINISTRATIF_CATEGORY_LABELS } from "@/config/acte-administratif.config";
 import { useCpomContext } from "@/contexts/CpomContext";
