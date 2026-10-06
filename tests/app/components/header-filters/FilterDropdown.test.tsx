@@ -1,91 +1,105 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FilterDropdown } from "@/app/components/header-filters/FilterDropdown";
 
+const mockReplace = vi.fn();
 const mockUseSearchParams = vi.fn();
 
 vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: mockReplace }),
   useSearchParams: () => mockUseSearchParams(),
 }));
+
+vi.mock("@/contexts/FetchStateContext", () => ({
+  useFetchState: () => ({ setFetchState: vi.fn() }),
+}));
+
+const renderDropdown = () =>
+  render(
+    <FilterDropdown
+      label="Zone"
+      placeholder="Toute la France"
+      filterId="departements"
+      getSummaryLabel={(departements) => `Résumé de ${departements.join("/")}`}
+      renderOptions={({ selection }) => (
+        <p>Options pour {selection.join("/") || "aucun"}</p>
+      )}
+    />
+  );
 
 describe("FilterDropdown", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
   });
 
   it("affiche le placeholder quand le paramètre est une chaîne vide", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams("departements="));
 
-    render(
-      <FilterDropdown
-        label="Zone"
-        placeholder="Sélectionnez une zone"
-        filterId="departements"
-      >
-        <div />
-      </FilterDropdown>
-    );
+    renderDropdown();
 
-    expect(screen.getByText("Sélectionnez une zone")).toBeInTheDocument();
-    expect(
-      screen.queryByText(/filtre\(s\) sélectionné\(s\)/)
-    ).not.toBeInTheDocument();
+    expect(screen.getByText("Toute la France")).toBeInTheDocument();
   });
 
   it("affiche le placeholder quand le paramètre est absent", () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    renderDropdown();
 
-    render(
-      <FilterDropdown
-        label="Zone"
-        placeholder="Sélectionnez une zone"
-        filterId="departements"
-      >
-        <div />
-      </FilterDropdown>
-    );
-
-    expect(screen.getByText("Sélectionnez une zone")).toBeInTheDocument();
-    expect(
-      screen.queryByText(/filtre\(s\) sélectionné\(s\)/)
-    ).not.toBeInTheDocument();
+    expect(screen.getByText("Toute la France")).toBeInTheDocument();
+    expect(screen.queryByText(/Résumé/)).not.toBeInTheDocument();
   });
 
-  it("affiche le nombre de filtres sélectionnés quand le paramètre a des valeurs", () => {
+  it("affiche le résumé fourni quand le paramètre a des valeurs", () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("departements=75,92")
     );
 
-    render(
-      <FilterDropdown
-        label="Zone"
-        placeholder="Sélectionnez une zone"
-        filterId="departements"
-      >
-        <div />
-      </FilterDropdown>
-    );
+    renderDropdown();
 
-    expect(
-      screen.getByText("2 filtres sélectionnés")
-    ).toBeInTheDocument();
-    expect(screen.queryByText("Sélectionnez une zone")).not.toBeInTheDocument();
+    expect(screen.getByText("Résumé de 75/92")).toBeInTheDocument();
+    expect(screen.queryByText("Toute la France")).not.toBeInTheDocument();
   });
 
-  it("accorde au singulier quand un seul filtre est sélectionné", () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams("departements=75"));
+  it("coche « Tous » et transmet une sélection vide quand aucun filtre n'est appliqué", async () => {
+    const user = userEvent.setup();
+    renderDropdown();
 
-    render(
-      <FilterDropdown
-        label="Zone"
-        placeholder="Sélectionnez une zone"
-        filterId="departements"
-      >
-        <div />
-      </FilterDropdown>
+    await user.click(screen.getByRole("button", { name: /Zone/ }));
+
+    expect(
+      screen.getByRole("checkbox", { name: "Toute la France" })
+    ).toBeChecked();
+    expect(screen.getByText("Options pour aucun")).toBeInTheDocument();
+  });
+
+  it("décoche « Tous » et transmet la sélection quand un filtre est appliqué", async () => {
+    const user = userEvent.setup();
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams("departements=75,92")
     );
+    renderDropdown();
 
-    expect(screen.getByText("1 filtre sélectionné")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Zone/ }));
+
+    expect(
+      screen.getByRole("checkbox", { name: "Toute la France" })
+    ).not.toBeChecked();
+    expect(screen.getByText("Options pour 75/92")).toBeInTheDocument();
+  });
+
+  it("supprime le filtre au clic sur « Tous »", async () => {
+    const user = userEvent.setup();
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams("departements=75&operateurs=3")
+    );
+    renderDropdown();
+
+    await user.click(screen.getByRole("button", { name: /Zone/ }));
+    await user.click(screen.getByRole("checkbox", { name: "Toute la France" }));
+
+    expect(mockReplace).toHaveBeenCalledWith("?operateurs=3", {
+      scroll: false,
+    });
   });
 });

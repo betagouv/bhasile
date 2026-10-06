@@ -1,4 +1,4 @@
-import { ApiError, extractApiError } from "../utils/apiError.util";
+import { ApiError, extractApiError } from "../utils/api-error.util";
 
 const postUserAction = async (url: string, body?: unknown): Promise<void> => {
   const response = await fetch(url, {

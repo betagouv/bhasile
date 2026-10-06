@@ -23,6 +23,7 @@ const TRANSFORMATION_ID = 12;
 const STRUCTURE_VERSION_TRANSFORMATION_ID = 7;
 
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
   useParams: () => ({
     transformationId: String(TRANSFORMATION_ID),
     transformationStructureType: StructureVersionTransformationType.CREATION,

@@ -5,7 +5,7 @@ import {
   getActualisationFormStepStatus,
   getActualisationNextRoute,
   isActualisationReadyToValidate,
-} from "@/app/utils/actualisationForm.util";
+} from "@/app/utils/actualisation-form.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 

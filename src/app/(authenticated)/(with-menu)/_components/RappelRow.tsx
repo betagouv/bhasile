@@ -4,6 +4,7 @@ import { ReactElement, ReactNode } from "react";
 import { Badge } from "@/app/components/common/Badge";
 import { formatDate } from "@/app/utils/date.util";
 import { DashboardRappel, RappelGroupBy } from "@/types/dashboard.type";
+import { addDashboardOrigin } from "@/utils/dashboardOrigin.util";
 
 export const RappelRow = ({ rappel, groupBy }: Props): ReactElement => {
   const showTask = groupBy !== "TASK";
@@ -22,7 +23,10 @@ export const RappelRow = ({ rappel, groupBy }: Props): ReactElement => {
         </Badge>
       )}
 
-      <Link href={rappel.actionUrl} aria-label="Ouvrir la fiche">
+      <Link
+        href={addDashboardOrigin(rappel.actionUrl)}
+        aria-label="Ouvrir la fiche"
+      >
         <span className="fr-icon-arrow-right-line text-title-blue-france" />
       </Link>
     </div>

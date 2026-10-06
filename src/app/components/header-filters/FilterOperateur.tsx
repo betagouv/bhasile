@@ -2,18 +2,14 @@
 
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import {
   OperateurSuggestion,
   useOperateurSuggestion,
 } from "@/app/hooks/useOperateurSuggestion";
 
-export const FilterOperateur = () => {
-  const searchParams = useSearchParams();
-  const navigateWithFilter = useFilterNavigation();
+export const FilterOperateur = ({ selection, onToggle }: Props) => {
   const [allOperateurs, setAllOperateurs] = useState<OperateurSuggestion[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { getAllOperateurs } = useOperateurSuggestion();
@@ -26,55 +22,11 @@ export const FilterOperateur = () => {
     fetchOperateurs();
   }, [getAllOperateurs]);
 
-  const [selectedIds, setSelectedIds] = useState<string[]>(() => {
-    return searchParams.get("operateurs")?.split(",").filter(Boolean) || [];
-  });
-
   const filteredOperateurs = useMemo(() => {
     return allOperateurs.filter((operateur) =>
       operateur.label.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [allOperateurs, searchQuery]);
-
-  const isAllChecked =
-    filteredOperateurs.length > 0 &&
-    filteredOperateurs.every((operateur) =>
-      selectedIds.includes(String(operateur.id))
-    );
-
-  const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const operateurId = event.target.value;
-    if (selectedIds.includes(operateurId)) {
-      setSelectedIds(selectedIds.filter((id) => id !== operateurId));
-    } else {
-      setSelectedIds([...selectedIds, operateurId]);
-    }
-  };
-
-  const handleSelectAllChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const filteredIds = filteredOperateurs.map((operateur) =>
-      String(operateur.id)
-    );
-
-    if (event.target.checked) {
-      setSelectedIds([...new Set([...selectedIds, ...filteredIds])]);
-    } else {
-      setSelectedIds(selectedIds.filter((id) => !filteredIds.includes(id)));
-    }
-  };
-
-  useEffect(() => {
-    const newValue = selectedIds.join(",");
-    const currentValue = searchParams.get("operateurs");
-
-    if (currentValue === newValue || (!currentValue && !newValue)) {
-      return;
-    }
-
-    navigateWithFilter("operateurs", selectedIds);
-  }, [selectedIds, searchParams, navigateWithFilter]);
 
   return (
     <div className="p-4 flex flex-col gap-2">
@@ -89,24 +41,6 @@ export const FilterOperateur = () => {
           type: "search",
         }}
       />
-
-      {filteredOperateurs.length !== 0 && (
-        <Checkbox
-          options={[
-            {
-              label: "Tous les opérateurs",
-              nativeInputProps: {
-                name: "operateur-all",
-                value: "all",
-                checked: isAllChecked,
-                onChange: handleSelectAllChange,
-              },
-            },
-          ]}
-          className="[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 mt-2"
-          small
-        />
-      )}
 
       {filteredOperateurs.map((operateur) => (
         <Checkbox
@@ -126,8 +60,8 @@ export const FilterOperateur = () => {
               nativeInputProps: {
                 name: `operateur-${operateur.id}`,
                 value: String(operateur.id),
-                checked: selectedIds.includes(String(operateur.id)),
-                onChange: handleTypeChange,
+                checked: selection.includes(String(operateur.id)),
+                onChange: () => onToggle(String(operateur.id)),
               },
             },
           ]}
@@ -143,6 +77,11 @@ export const FilterOperateur = () => {
       )}
     </div>
   );
+};
+
+type Props = {
+  selection: string[];
+  onToggle: (operateurId: string) => void;
 };
 
 const getRelationLabel = (operateur: OperateurSuggestion): string | null => {

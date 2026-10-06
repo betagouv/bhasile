@@ -1,6 +1,6 @@
 import { OperateurUpdateFormValues } from "@/schemas/forms/base/operateur.schema";
 
-import { ApiError, extractApiError } from "../utils/apiError.util";
+import { ApiError, extractApiError } from "../utils/api-error.util";
 
 export const useOperateur = () => {
   const updateOperateur = async (

@@ -11,8 +11,8 @@ import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHa
 import {
   getCpomCoveredActeCategories,
   relaxCoveredCategories,
-} from "@/app/utils/acteAdministratif.util";
-import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
+} from "@/app/utils/acte-administratif.util";
+import { getActualisationDefaultValues } from "@/app/utils/default-values.util";
 import { getActualisationActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";

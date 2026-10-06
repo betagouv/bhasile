@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { FetchState } from "@/types/fetch-state.type";
 
-import { ApiError } from "../utils/apiError.util";
+import { ApiError } from "../utils/api-error.util";
 
 export const useSaveMutation = <TArgs extends unknown[], TData>(
   saveKey: string,

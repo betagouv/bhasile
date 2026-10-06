@@ -5,7 +5,7 @@ import { useFormContext } from "react-hook-form";
 
 import { CPOM_ACTE_SCOPE, CpomActeScope } from "@/app/utils/cpom.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
-import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
+import { getErrorMessages } from "@/app/utils/get-error-messages.util";
 import { AdditionalFieldsType } from "@/config/acte-administratif.config";
 import { getCpomActesAdministratifsCategoryToDisplay } from "@/config/cpom-acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";

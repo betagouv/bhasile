@@ -19,25 +19,20 @@ export const StructureSearch = ({
   setStructureType,
   multiple = false,
   label,
-  sublabel,
   operateurName,
   setOperateurName,
   departementNumero,
   setDepartementNumero,
   fixedType,
-  fixedOperateurName,
-  fixedDepartementNumero,
   finalisedOnly,
   excludedStructureId,
+  idPrefix,
 }: Props): ReactElement => {
   const effectiveStructureType = fixedType ?? structureType;
-  const effectiveOperateurName = fixedOperateurName ?? operateurName;
-  const effectiveDepartementNumero =
-    fixedDepartementNumero ?? departementNumero;
 
   const { structures } = useStructuresSelection({
-    operateurName: effectiveOperateurName,
-    departements: effectiveDepartementNumero,
+    operateurName,
+    departements: departementNumero,
     types: effectiveStructureType,
     finalisedOnly,
   });
@@ -59,22 +54,15 @@ export const StructureSearch = ({
   return (
     <div className="bg-white p-6 rounded-lg mb-2">
       {label && (
-        <h3
-          className={`text-base font-bold text-title-blue-france ${
-            sublabel ? "mb-1" : "mb-4"
-          }`}
-        >
+        <h3 className="text-base font-bold text-title-blue-france mb-4">
           {label}
         </h3>
-      )}
-      {label && sublabel && (
-        <p className="text-sm text-mention-grey mb-4">{sublabel}</p>
       )}
       <div className="grid grid-cols-3 gap-6 mb-2">
         {!fixedType && (
           <Select
             label="Type de structure"
-            id="type"
+            id={buildId(idPrefix, "type")}
             nativeSelectProps={{
               value: structureType ?? "",
               onChange: (event) => {
@@ -94,18 +82,16 @@ export const StructureSearch = ({
             ))}
           </Select>
         )}
-        {!fixedOperateurName && (
-          <OperateurAutocomplete
-            operateurName={operateurName}
-            setOperateurName={setOperateurName}
-          />
-        )}
-        {!fixedDepartementNumero && (
-          <DepartementAutocomplete
-            departementNumero={departementNumero}
-            setDepartementNumero={setDepartementNumero}
-          />
-        )}
+        <OperateurAutocomplete
+          id={buildId(idPrefix, "operateur")}
+          operateurName={operateurName}
+          setOperateurName={setOperateurName}
+        />
+        <DepartementAutocomplete
+          id={buildId(idPrefix, "departement")}
+          departementNumero={departementNumero}
+          setDepartementNumero={setDepartementNumero}
+        />
       </div>
       <StructuresList
         structures={visibleStructures}
@@ -130,11 +116,12 @@ export type StructureSearchProps = {
   fixedType?: StructureType;
   multiple?: boolean;
   label?: string;
-  sublabel?: string;
-  fixedOperateurName?: string;
-  fixedDepartementNumero?: string;
   finalisedOnly?: boolean;
   excludedStructureId?: number;
+  idPrefix?: string;
 };
 
 type Props = StructureSearchProps;
+
+const buildId = (idPrefix: string | undefined, field: string): string =>
+  idPrefix ? `${idPrefix}-${field}` : field;

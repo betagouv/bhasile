@@ -10,7 +10,7 @@ import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTyp
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { getDefaultValues } from "@/app/utils/default-values.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import {

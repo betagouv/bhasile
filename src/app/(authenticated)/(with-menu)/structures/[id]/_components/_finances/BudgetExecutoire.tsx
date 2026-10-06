@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
-import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
+import { isYearRealisee } from "@/app/utils/indicateur-financier.util";
 import { formatCurrency, formatNumber } from "@/app/utils/number.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 

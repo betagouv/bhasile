@@ -6,6 +6,7 @@
 @import "tailwindcss";
 
 @theme {
+  --grid-template-columns-structure: 9rem 3.5rem 12rem minmax(0, 1fr);
   --hover-tint: var(--hover);
   --active-tint: var(--active);
   --underline-max-width: 100%;

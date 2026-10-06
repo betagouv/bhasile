@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 
-import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
+import { apiErrorResponse } from "@/app/utils/api-error-response.util";
 import { authOptions } from "@/lib/next-auth/auth";
 
 type UserActionCallback<DataType> = (

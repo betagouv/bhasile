@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
+import { apiErrorResponse } from "@/app/utils/api-error-response.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureAgentUpdateApiSchema } from "@/schemas/api/structure.schema";

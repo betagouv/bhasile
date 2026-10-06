@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
 import { cn } from "@/app/utils/classname.util";
-import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
+import { isYearRealisee } from "@/app/utils/indicateur-financier.util";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 
 export const getIndicateurFinancierStaticTableHeading = ({

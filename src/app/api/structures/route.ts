@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
+import { apiErrorResponse } from "@/app/utils/api-error-response.util";
 import {
   parseSortDirection,
   parseStructureColumn,
-} from "@/app/utils/searchParams.util";
+} from "@/app/utils/search-params.util";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";

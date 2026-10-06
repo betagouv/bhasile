@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
+import { apiErrorResponse } from "@/app/utils/api-error-response.util";
 import { cpomApiSchema } from "@/schemas/api/cpom.schema";
 
 import { createCpomEvent } from "../../user-actions/user-action.service";

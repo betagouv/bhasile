@@ -8,7 +8,7 @@ import { FermetureBadge } from "@/app/components/structures/FermetureBadge";
 import { UpcomingTransformationBadge } from "@/app/components/structures/UpcomingTransformationBadge";
 import { ACTUALISATION_SAVE_KEY, useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { isActualisationReadyToValidate } from "@/app/utils/actualisationForm.util";
+import { isActualisationReadyToValidate } from "@/app/utils/actualisation-form.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 import { AutoSaveStatus } from "./AutoSaveStatus";

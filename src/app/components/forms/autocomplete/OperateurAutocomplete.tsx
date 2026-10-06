@@ -15,12 +15,14 @@ export const OperateurAutocomplete = ({
   inputRef,
   onBlurExtra,
   disabled,
+  id = LABELS.id,
 }: Props): ReactElement => {
   const { searchOperateurs } = useOperateurSuggestion();
 
   return (
     <AutocompleteField
       {...LABELS}
+      id={id}
       name="operateur.name"
       value={operateurName ?? ""}
       inputRef={inputRef}
@@ -50,6 +52,7 @@ type Props = {
   externalError?: string;
   inputRef?: Ref<HTMLInputElement>;
   onBlurExtra?: () => void;
+  id?: string;
   disabled?: boolean;
 };
 

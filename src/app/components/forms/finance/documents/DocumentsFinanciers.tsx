@@ -2,7 +2,7 @@ import { useFormContext } from "react-hook-form";
 
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
-import { getCpomCoveredDocumentsFinanciers } from "@/app/utils/documentFinancier.util";
+import { getCpomCoveredDocumentsFinanciers } from "@/app/utils/document-financier.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { FormKind } from "@/types/global";

@@ -87,6 +87,18 @@ describe("AnomaliesGroups", () => {
     expect(mockRefresh).toHaveBeenCalled();
   });
 
+  it("signale l'origine tableau de bord dans le lien d'examen", async () => {
+    const user = userEvent.setup();
+    renderGroups(makeAnomalie());
+
+    await user.click(screen.getByRole("button", { name: /BHA-NOR-024/ }));
+
+    expect(screen.getByRole("link", { name: "Examiner" })).toHaveAttribute(
+      "href",
+      "/structures/42/modification/finances?from=dashboard"
+    );
+  });
+
   it("rouvre une anomalie ignorée sans passer par la pop-in", async () => {
     const user = userEvent.setup();
     renderGroups(makeAnomalie({ isJustified: true, commentaire: "Vérifié" }));

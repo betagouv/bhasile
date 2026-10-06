@@ -1,32 +1,27 @@
 "use client";
 
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Tag from "@codegouvfr/react-dsfr/Tag";
-import { useSearchParams } from "next/navigation";
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 import {
-  formatPlural,
-  parseCommaList,
-  pluralize,
-} from "@/app/utils/string.util";
+  FilterSelection,
+  useFilterSelection,
+} from "@/hooks/useFilterSelection";
 
 export const FilterDropdown = ({
   label,
-  placeholder = "Sélectionner une...",
+  placeholder,
   filterId,
   getSummaryLabel,
-  children,
+  renderOptions,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchParams = useSearchParams();
-  const appliedFilters = parseCommaList(searchParams.get(filterId));
-  const summaryLabel =
-    getSummaryLabel?.(appliedFilters) ??
-    `${formatPlural(appliedFilters.length, "filtre")} ${pluralize(
-      appliedFilters.length,
-      "sélectionné"
-    )}`;
+  const filterSelection = useFilterSelection(filterId);
+  const { selection, setSelection } = filterSelection;
+  const isAllSelected = selection.length === 0;
+  const summaryLabel = isAllSelected ? undefined : getSummaryLabel(selection);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,7 +51,7 @@ export const FilterDropdown = ({
           </div>
           <div className="flex">
             <div className="truncate">
-              {appliedFilters.length > 0 ? (
+              {summaryLabel ? (
                 <Tag
                   linkProps={{
                     href: "#",
@@ -77,16 +72,31 @@ export const FilterDropdown = ({
 
       {isOpen && (
         <div className="absolute left-0 right-0 bg-white border border-default-grey overflow-y-auto shadow p-2 rounded-xs size-max max-h-[50vh] max-w-75">
-          {children}
+          <Checkbox
+            options={[
+              {
+                label: placeholder,
+                nativeInputProps: {
+                  name: `${filterId}-all`,
+                  checked: isAllSelected,
+                  onChange: () => setSelection([]),
+                },
+              },
+            ]}
+            className="border-b border-default-grey px-4 pt-3 pb-1 [&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0"
+            small
+          />
+          {renderOptions(filterSelection)}
         </div>
       )}
     </div>
   );
 };
 
-type Props = PropsWithChildren<{
+type Props = {
   label: string;
-  placeholder?: string;
+  placeholder: string;
   filterId: string;
-  getSummaryLabel?: (appliedFilters: string[]) => string | undefined;
-}>;
+  getSummaryLabel: (selection: string[]) => string | undefined;
+  renderOptions: (filterSelection: FilterSelection) => ReactNode;
+};
