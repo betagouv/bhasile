@@ -23,20 +23,23 @@ async function main() {
     select: { id: true, codeBhasile: true, fermetureDate: true },
   });
 
-  for (const { id, codeBhasile, fermetureDate } of closedStructures) {
-    if (!fermetureDate) {
-      continue;
-    }
-    await prisma.$transaction(async (tx) => {
-      const cpomStructures = await findCpomStructuresOfStructure(tx, id);
-      await updateCpomStructuresDateEnd(
-        tx,
-        getCpomStructureIdsToEndAtFermeture(cpomStructures, fermetureDate),
-        fermetureDate
-      );
-    });
-    console.log(`  • ${codeBhasile} traitée`);
-  }
+  await prisma.$transaction(
+    async (tx) => {
+      for (const { id, codeBhasile, fermetureDate } of closedStructures) {
+        if (!fermetureDate) {
+          continue;
+        }
+        const cpomStructures = await findCpomStructuresOfStructure(tx, id);
+        await updateCpomStructuresDateEnd(
+          tx,
+          getCpomStructureIdsToEndAtFermeture(cpomStructures, fermetureDate),
+          fermetureDate
+        );
+        console.log(`  • ${codeBhasile} traitée`);
+      }
+    },
+    { maxWait: 10000, timeout: 60000 }
+  );
 
   console.log(
     `✅ ${closedStructures.length} structure(s) fermée(s) sous CPOM traitée(s).`
