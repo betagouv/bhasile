@@ -18,8 +18,7 @@ WITH
         OR f."status" IS TRUE
       )
   ),
-  -- Same rule as the statistiques API (applyVersionedPlacesToTypologies):
-  -- from 2026 on, places come from the StructureVersion effective that year
+  -- Same rule as the statistiques API (see dedicated doc to see business choices)
   typologies_resolues AS (
     SELECT
       st."structureId",
