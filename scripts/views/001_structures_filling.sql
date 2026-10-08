@@ -22,7 +22,7 @@ WITH
       public."Form" f
       INNER JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
     WHERE
-      fd."name" = 'finalisation'
+      fd."slug" = 'finalisation-v1'
   )
 SELECT
   sc."id" AS "id",
@@ -51,4 +51,8 @@ SELECT
   sc."updated_at" AS "updated_at"
 FROM
 :"SCHEMA"."structures_core" sc
-  LEFT JOIN finalisation_forms ff ON ff."structureId" = sc."id";
+  INNER JOIN public."Structure" s ON s."id" = sc."id"
+  LEFT JOIN finalisation_forms ff ON ff."structureId" = sc."id"
+WHERE
+  s."fermetureDate" IS NULL
+  OR s."fermetureDate" >= (NOW() AT TIME ZONE 'UTC')::date;
