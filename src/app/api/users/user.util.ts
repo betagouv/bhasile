@@ -1,4 +1,4 @@
-import { GrantScope } from "@/generated/prisma/client";
+import { GrantScope } from "@/generated/prisma/enums";
 import { SessionGrant } from "@/types/global";
 
 import { GrantDb } from "./user.db.type";

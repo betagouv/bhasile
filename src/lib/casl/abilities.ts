@@ -2,14 +2,14 @@ import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
-import {
-  AccessRole,
+import type {
   Cpom,
   Operateur,
   Prisma,
   Structure,
   User,
 } from "@/generated/prisma/client";
+import { AccessRole } from "@/generated/prisma/enums";
 import { SessionGrant, SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -154,7 +154,8 @@ export const canAbilityUpdateDepartement = (
 export const canUpdateDepartement = (
   user: SessionUser,
   departementAdministratif?: string | null
-) => canAbilityUpdateDepartement(defineAbilityFor(user), departementAdministratif);
+) =>
+  canAbilityUpdateDepartement(defineAbilityFor(user), departementAdministratif);
 
 export const canDeleteFile = (
   user: SessionUser,
