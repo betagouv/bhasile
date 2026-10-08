@@ -1008,7 +1008,7 @@ describe("structure.repository db integration", () => {
       data: {
         structureId: structure.id,
         date: new Date("2024-01-01T00:00:00.000Z"),
-        note: 1,
+        notePersonne: 1,
       },
     });
     const file = await createFileUpload("evaluation");
@@ -1016,7 +1016,6 @@ describe("structure.repository db integration", () => {
     // WHEN: sending a new evaluations list
     const newEvaluation = {
       date: "2025-02-01T00:00:00.000Z",
-      note: 4,
       notePersonne: 3,
       notePro: 2,
       noteStructure: 5,
@@ -1036,7 +1035,6 @@ describe("structure.repository db integration", () => {
 
     expect(evaluations).toHaveLength(1);
     expect(evaluations[0]).toMatchObject({
-      note: newEvaluation.note,
       notePersonne: newEvaluation.notePersonne,
       notePro: newEvaluation.notePro,
       noteStructure: newEvaluation.noteStructure,

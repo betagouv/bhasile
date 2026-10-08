@@ -54,7 +54,6 @@ export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
     id: true;
     structureId: true;
     date: true;
-    note: true;
     notePersonne: true;
     notePro: true;
     noteStructure: true;
