@@ -4,7 +4,6 @@ model Departement {
   population           Int?
   structures           Structure[]
   structureVersions    StructureVersion[]
-  roleDepartements     RoleDepartement[]
   grants               Grant[]
   regionAdministrative Region?            @relation(fields: [regionId], references: [id])
   regionId             Int?
