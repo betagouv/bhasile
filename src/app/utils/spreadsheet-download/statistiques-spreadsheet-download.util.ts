@@ -41,9 +41,14 @@ const getTypePlacesDownloadContent = (statistiques: StatistiqueApiRead) => ({
 
 const financeHeadersMap = {
   year: "Année",
-  totalETP: "Nombre d’ETP",
-  tauxEncadrement: "Taux d’encadrement moyen",
-  coutJournalier: "Coût journalier moyen",
+  totalETPPrevisionnel: "Nombre d’ETP prévisionnel",
+  totalETPRealise: "Nombre d’ETP réel",
+  tauxEncadrementCible: "Taux d’encadrement cible moyen",
+  tauxEncadrementTheoriquePrevisionnel:
+    "Taux d’encadrement théorique prévisionnel moyen",
+  tauxEncadrementTheoriqueRealise: "Taux d’encadrement théorique réel moyen",
+  coutJournalierCible: "Coût journalier cible moyen",
+  coutJournalierTheorique: "Coût journalier théorique moyen",
   dotationDemandee: "Dotation demandée",
   dotationAccordee: "Dotation accordée",
   totalProduits: "Total des produits retenu, dont dotation État",

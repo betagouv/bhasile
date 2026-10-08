@@ -11,10 +11,14 @@ import { sumValues } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { StructureType } from "@/generated/prisma/client";
-import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
+import type {
+  CompletudeStat,
+  StatistiquesFilters,
+} from "@/schemas/api/statistique.schema";
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
 
 import { pickVersionBefore } from "../structure-versions/structure-version.util";
+import { resolveStructuresForYear } from "./completude.util";
 import type {
   DnaStructureIdsResolver,
   StatistiqueDbDnaLink,
@@ -28,6 +32,7 @@ import type {
   StatistiquesContext,
   StatistiquesPeriodGranularity,
   StatistiquesTypologieYearContext,
+  StatistiquesYearContext,
 } from "./statistiques.db.type";
 
 export const createEmptyActiveStructureIdsByPeriod =
@@ -199,12 +204,12 @@ export const filterByTwelveMonthWindow = <Item>(
   });
 };
 
-type StructureVersionTimelineIndex = Map<
+export type StructureVersionTimelineIndex = Map<
   number,
   StatistiqueDbStructureVersionTimeline[]
 >;
 
-const indexTimelineByStructureId = (
+export const indexTimelineByStructureId = (
   timeline: StatistiqueDbStructureVersionTimeline[]
 ): StructureVersionTimelineIndex => {
   const timelineByStructureId: StructureVersionTimelineIndex = new Map();
@@ -678,27 +683,41 @@ export const getTypologieYears = (
     (yearA, yearB) => yearA - yearB
   );
 
-export const mapTypologieYears = <Entry extends { year: number }>(
-  allStructures: StatistiqueDbStructure[],
-  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
-  typologies: StatistiqueDbTypologie[],
+/** Structures comptabilisées sur une année (cf. `resolveStructuresForYear`). */
+export const resolveCountedStructuresForYear = (
+  context: StatistiquesYearContext,
+  year: number,
+  lookbackYears?: number
+): ReturnType<typeof resolveStructuresForYear> =>
+  resolveStructuresForYear(
+    context,
+    structuresActiveInPeriod(
+      context.allStructures,
+      context.activeStructureIdsByPeriod,
+      "year",
+      String(year)
+    ),
+    year,
+    getNow(),
+    lookbackYears
+  );
+
+export const mapTypologieYears = <
+  Entry extends { year: number; completude: CompletudeStat | null },
+>(
+  context: StatistiquesTypologieYearContext,
   buildEntry: (
     year: number,
     structuresForYear: StatistiqueDbStructure[]
-  ) => Omit<Entry, "year">
+  ) => Omit<Entry, "year" | "completude">
 ): Entry[] =>
-  getTypologieYears(typologies).map((year) => ({
-    year,
-    ...buildEntry(
-      year,
-      structuresActiveInPeriod(
-        allStructures,
-        activeStructureIdsByPeriod,
-        "year",
-        String(year)
-      )
-    ),
-  })) as Entry[];
+  getTypologieYears(context.typologies).map((year) => {
+    const { structures, completude } = resolveCountedStructuresForYear(
+      context,
+      year
+    );
+    return { year, completude, ...buildEntry(year, structures) };
+  }) as Entry[];
 
 export const filterStructuresWithTypologie = (
   structures: StatistiqueDbStructure[],
@@ -719,11 +738,9 @@ export const resolveStructuresWithTypologieForYear = (
   }
 
   const typologieMap = getTypologieMapForExactYear(context.typologies, year);
-  const structuresForYear = structuresActiveInPeriod(
-    context.allStructures,
-    context.activeStructureIdsByPeriod,
-    "year",
-    String(year)
+  const { structures: structuresForYear } = resolveCountedStructuresForYear(
+    context,
+    year
   );
 
   return {

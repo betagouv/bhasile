@@ -742,3 +742,5 @@ export const REGIONS: Region[] = [
   { code: "FR-974", name: "La Réunion", show: true },
   { code: "FR-976", name: "Mayotte", show: true },
 ];
+
+export const CODE_REGION_IDF = "FR-IDF";
