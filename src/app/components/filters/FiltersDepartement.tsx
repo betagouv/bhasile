@@ -6,8 +6,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useMemo, useState } from "react";
 
 import { toggleArrayValue } from "@/app/utils/common.util";
-import { REGIONS } from "@/constants";
-import { getDepartementsForRegion } from "@/utils/region.util";
+import { filterRegionsWithDepartements } from "@/utils/region.util";
 
 import { FiltersRegion } from "./FiltersRegion";
 
@@ -15,40 +14,7 @@ export const FiltersDepartement = ({ departements, onChange }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredRegionsWithDepartements = useMemo(() => {
-    const queryNormalized = searchQuery.toLowerCase().trim();
-
-    return REGIONS.filter((region) => region.show)
-      .map((region) => {
-        const matchRegion = region.name.toLowerCase().includes(queryNormalized);
-
-        const regionDepartements = getDepartementsForRegion(region.name)
-          .sort((premierDepartement, secondDepartement) =>
-            premierDepartement.name.localeCompare(secondDepartement.name)
-          )
-          .filter((departement) => {
-            if (!queryNormalized || matchRegion) {
-              return true;
-            }
-
-            const matchNomDepartement = departement.name
-              .toLowerCase()
-              .includes(queryNormalized);
-            const matchNumeroDepartement = departement.numero
-              .toLowerCase()
-              .includes(queryNormalized);
-
-            return matchNomDepartement || matchNumeroDepartement;
-          });
-
-        return {
-          region,
-          departements: regionDepartements,
-        };
-      })
-      .filter(
-        (regionWithDepartements) =>
-          regionWithDepartements.departements.length > 0
-      );
+    return filterRegionsWithDepartements(searchQuery);
   }, [searchQuery]);
 
   return (
@@ -82,7 +48,7 @@ export const FiltersDepartement = ({ departements, onChange }: Props) => {
                     key={departement.numero}
                     options={[
                       {
-                        label: `${departement.name} - ${departement.numero}`,
+                        label: `${departement.name} (${departement.numero})`,
                         nativeInputProps: {
                           name: "structure-departement",
                           value: departement.numero,
