@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: convertit les Role / RoleDepartement en binômes rôle × niveau géographique
 //
 // Usage: yarn one-off 20260929-migrate-roles-to-grants
