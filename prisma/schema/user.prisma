@@ -72,45 +72,6 @@ model EmailPattern {
   @@schema("public")
 }
 
-model Grant {
-  id                Int           @id @default(autoincrement())
-  user              User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            Int?
-  emailPattern      EmailPattern? @relation(fields: [emailPatternId], references: [id], onDelete: Cascade)
-  emailPatternId    Int?
-  role              AccessRole
-  scope             GrantScope
-  region            Region?       @relation(fields: [regionId], references: [id], onDelete: Cascade)
-  regionId          Int?
-  departement       Departement?  @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
-  departementNumero String?
-  structure         Structure?    @relation(fields: [structureId], references: [id], onDelete: Cascade)
-  structureId       Int?
-
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([emailPatternId])
-  @@schema("public")
-}
-
-enum AccessRole {
-  VIEWER
-  EDITEUR
-  ADMIN
-
-  @@schema("public")
-}
-
-enum GrantScope {
-  NATIONAL
-  REGION
-  DEPARTEMENT
-  STRUCTURE
-
-  @@schema("public")
-}
-
 enum UserActionCategory {
   CREATE
   READ

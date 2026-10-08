@@ -28,7 +28,7 @@ export type BrevoAgentUser = {
 
 export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
   const actionGrants = getEffectiveGrants(user).filter(
-    (grant) => grant.role !== AccessRole.VIEWER
+    (grant) => grant.role !== AccessRole.LECTEUR
   );
 
   return {

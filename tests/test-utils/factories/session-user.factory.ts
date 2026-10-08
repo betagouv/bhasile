@@ -32,7 +32,7 @@ export const createDepartementalAgent = (
 ): SessionUser =>
   createSessionUser({
     grants: [
-      createSessionGrant({ role: AccessRole.VIEWER, isNational: true }),
+      createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
       createSessionGrant({ departementNumeros }),
     ],
   });

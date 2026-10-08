@@ -46,16 +46,16 @@ describe("Permissions : canUpdateStructure", () => {
     ).toBe(true);
   });
 
-  it("refuse à un agent de modifier une structure hors de son département malgré son accès viewer national", () => {
+  it("refuse à un agent de modifier une structure hors de son département malgré son accès lecteur national", () => {
     expect(
       canUpdateStructure(createDepartementalAgent(["69"]), structure13)
     ).toBe(false);
   });
 
-  it("refuse à un agent uniquement viewer de modifier une structure", () => {
+  it("refuse à un agent uniquement lecteur de modifier une structure", () => {
     const user = createSessionUser({
       grants: [
-        createSessionGrant({ role: AccessRole.VIEWER, isNational: true }),
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
       ],
     });
 
@@ -88,7 +88,7 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure69)).toBe(false);
   });
 
-  it("garde le rôle le plus fort quand un binôme viewer est inclus dans un binôme admin", () => {
+  it("garde le rôle le plus fort quand un binôme lecteur est inclus dans un binôme admin", () => {
     const user = createSessionUser({
       grants: [
         createSessionGrant({
@@ -96,7 +96,7 @@ describe("Permissions : canUpdateStructure", () => {
           departementNumeros: ["1", "69"],
         }),
         createSessionGrant({
-          role: AccessRole.VIEWER,
+          role: AccessRole.LECTEUR,
           departementNumeros: ["69"],
         }),
       ],
@@ -106,11 +106,11 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure69)).toBe(true);
   });
 
-  it("limite l'écriture au département admin quand la région n'est que viewer", () => {
+  it("limite l'écriture au département admin quand la région n'est que lecteur", () => {
     const user = createSessionUser({
       grants: [
         createSessionGrant({
-          role: AccessRole.VIEWER,
+          role: AccessRole.LECTEUR,
           departementNumeros: ["1", "69"],
         }),
         createSessionGrant({
@@ -203,11 +203,11 @@ describe("Permissions : CPOM et opérateurs", () => {
     expect(ability.can("update", buildCpom({}))).toBe(true);
   });
 
-  it("refuse les CPOM à un agent uniquement viewer", () => {
+  it("refuse les CPOM à un agent uniquement lecteur", () => {
     const ability = defineAbilityFor(
       createSessionUser({
         grants: [
-          createSessionGrant({ role: AccessRole.VIEWER, isNational: true }),
+          createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
         ],
       })
     );

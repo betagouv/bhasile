@@ -11,7 +11,7 @@ Un binôme est une ligne de `Grant` :
 | Colonne                                        | Rôle                                               |
 | ---------------------------------------------- | -------------------------------------------------- |
 | `userId` ou `emailPatternId`                   | Le propriétaire : un user, ou un pattern d'email   |
-| `role`                                         | `VIEWER`, `EDITEUR`, `ADMIN`                       |
+| `role`                                         | `LECTEUR`, `EDITEUR`, `ADMIN`                      |
 | `scope`                                        | `NATIONAL`, `REGION`, `DEPARTEMENT`, `STRUCTURE`   |
 | `regionId`, `departementNumero`, `structureId` | La cible, selon le `scope`. Aucune pour `NATIONAL` |
 
@@ -28,10 +28,10 @@ Quels binômes s'appliquent à un user :
 
 ## Droits appliqués aujourd'hui
 
-`VIEWER` < `EDITEUR` < `ADMIN`. Les binômes s'additionnent, aucun ne restreint : sur une structure, le rôle le plus fort parmi les binômes qui la couvrent s'applique.
+`LECTEUR` < `EDITEUR` < `ADMIN`. Les binômes s'additionnent, aucun ne restreint : sur une structure, le rôle le plus fort parmi les binômes qui la couvrent s'applique.
 
-- Admin AURA + viewer Isère : admin partout en AURA, Isère comprise.
-- Viewer AURA + admin Isère : admin en Isère, viewer dans le reste d'AURA.
+- Admin AURA + lecteur Isère : admin partout en AURA, Isère comprise.
+- Lecteur AURA + admin Isère : admin en Isère, lecteur dans le reste d'AURA.
 
 | Qui                        | Lecture | Structures               | CPOM                                          | Opérateurs |
 | -------------------------- | ------- | ------------------------ | --------------------------------------------- | ---------- |
@@ -49,7 +49,7 @@ Détail pour un agent éditeur :
 Limites actuelles :
 
 - **`ADMIN` = `EDITEUR`** tant que la gestion des binômes (PR 2) n'existe pas.
-- **`VIEWER` ne restreint rien** : la lecture est ouverte à tous, user opérateur compris, jusqu'à la PR 3.
+- **`LECTEUR` ne restreint rien** : la lecture est ouverte à tous, user opérateur compris, jusqu'à la PR 3.
 - **Niveau structure** : pas d'accès aux transformations ni aux rappels CPOM du tableau de bord, qui restent contrôlés par département.
 
 Règle à respecter dans `abilities.ts` : le code ne compare jamais les rôles entre eux. Tout droit donné à un rôle doit l'être aussi aux rôles supérieurs, sinon la hiérarchie casse.
@@ -71,7 +71,7 @@ Changements visibles pour les agents :
 
 Le one-off `20260929-migrate-roles-to-grants` convertit `Role` / `RoleDepartement` :
 
-- pattern ou rôle manuel, mêmes binômes : `VIEWER national` + `EDITEUR` sur sa zone, ou `EDITEUR national` pour NATIONAL ;
+- pattern ou rôle manuel, mêmes binômes : `LECTEUR national` + `EDITEUR` sur sa zone, ou `EDITEUR national` pour NATIONAL ;
 - un rôle qui couvre une région entière donne un binôme région, sinon un binôme par département ;
 - un rôle sans département est ignoré.
 
@@ -87,7 +87,7 @@ Limite : un user à rôle manuel dont on retire **tous** les binômes les retrou
 - **`scope` explicite** plutôt que déduit des colonnes vides : un binôme sans cible ne donne **rien**, jamais tout.
 - **Région stockée comme région** : une structure qui arrive en AURA entre automatiquement dans les binômes AURA.
 - **Droits de base portés par le pattern, jamais recopiés sur le user** : un changement de poste met les droits à jour tout seul.
-- **Le manuel l'emporte sur le pattern**, comme `user.role ?? emailPattern.role` avant : un agent `@national.gouv.fr` rattaché à la Bretagne est viewer national et éditeur Bretagne, rien de plus.
+- **Le manuel l'emporte sur le pattern**, comme `user.role ?? emailPattern.role` avant : un agent `@national.gouv.fr` rattaché à la Bretagne est lecteur national et éditeur Bretagne, rien de plus.
 - **Une seule table `Grant`** pour les users et les patterns : mêmes colonnes des deux côtés.
 - **Opérateur porté par le user, pas par le binôme** : un agent n'est jamais limité par opérateur, et un user opérateur appartient à un seul opérateur.
 - **Pas d'enum `User.type`** : opérateur = `operateurId` renseigné, une seule source de vérité.
@@ -97,8 +97,8 @@ Limite : un user à rôle manuel dont on retire **tous** les binômes les retrou
 
 - **API CPOM et opérateurs non protégées** : `src/app/api/cpoms` et `src/app/api/operateurs` ne vérifient aucun droit. Les règles CPOM et opérateurs ne servent qu'au bouton « modifier » et à la suppression de fichiers. Antérieur à cette PR.
 - **CPOM chargé sans ses listes** : la règle CPOM lit `departements` et `structures`. Passer à CASL un CPOM sans ces listes lève une erreur au lieu de refuser.
-- **Pas de contrainte en base sur `Grant`** : une ligne sans propriétaire ou sans cible est possible. Elle ne donne aucun droit.
-- **Premier binôme personnel d'un agent** : il remplace tous ses droits de base. Il faut recopier ceux à garder, au minimum `VIEWER national`.
+- **Pas de contrainte en base sur `Grant`** : Prisma ne modélise pas les CHECK, et on ne veut pas de migration écrite à la main. Une ligne sans propriétaire ou sans cible est donc possible ; elle ne donne aucun droit. La cohérence est vérifiée par le service (PR 2).
+- **Premier binôme personnel d'un agent** : il remplace tous ses droits de base. Il faut recopier ceux à garder, au minimum `LECTEUR national`.
 - **Maisons mères et filiales** (`Operateur.parentId`) : non géré, à traiter plus tard.
 - **Un user sur deux opérateurs** : cas exclu.
 
@@ -117,7 +117,7 @@ Limite : un user à rôle manuel dont on retire **tous** les binômes les retrou
 3. **PR 3, ouverture aux opérateurs** :
    - invitation d'un user opérateur par un admin ;
    - authentification individuelle (ProConnect ou magic link) ;
-   - un email sans pattern est accepté mais ne voit rien tant qu'il n'est pas validé ;
+   - entrée d'un email sans pattern, à trancher : refus à la connexion, ou liste blanche d'adresses exactes à la place de `EmailPattern` ;
    - cloisonnement : toutes les règles d'un user opérateur filtrées sur son `operateurId` ;
    - lecture filtrée via `accessibleBy` dans les repositories (comme `includedStructureWhere`) ;
    - champs réservés aux agents masqués : notes, justification d'anomalies, contrôles, évaluations, CPOM, finalisation de transformation ;

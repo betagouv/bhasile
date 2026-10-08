@@ -19,7 +19,7 @@ const departementGrant = (numero: string, name: string, role?: AccessRole) =>
     departement: { numero, name },
   });
 
-const nationalViewerGrant = buildGrant({ role: AccessRole.VIEWER });
+const nationalLecteurGrant = buildGrant({ role: AccessRole.LECTEUR });
 
 const baseUser = {
   email: "agent@dreets.gouv.fr",
@@ -53,13 +53,13 @@ describe("brevo util", () => {
     });
   });
 
-  it("récupère les droits de base du pattern d'email et ignore le binôme viewer national", () => {
+  it("récupère les droits de base du pattern d'email et ignore le binôme lecteur national", () => {
     // GIVEN
     const user = {
       ...baseUser,
       emailPattern: {
         grants: [
-          nationalViewerGrant,
+          nationalLecteurGrant,
           buildGrant({
             scope: GrantScope.REGION,
             region: {

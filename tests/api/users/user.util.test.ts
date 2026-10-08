@@ -73,7 +73,7 @@ describe("toSessionGrant", () => {
 });
 
 describe("getEffectiveGrants", () => {
-  const patternGrant = buildGrant({ role: AccessRole.VIEWER });
+  const patternGrant = buildGrant({ role: AccessRole.LECTEUR });
   const userGrant = buildGrant();
 
   it("fait primer les binômes de l'utilisateur sur ceux de son pattern d'email", () => {

@@ -5,13 +5,13 @@ export const getAgentBaseGrants = (zone: AgentZone): AgentGrant[] => {
     return [{ role: AccessRole.EDITEUR, scope: GrantScope.NATIONAL }];
   }
 
-  const viewerNational = {
-    role: AccessRole.VIEWER,
+  const lecteurNational = {
+    role: AccessRole.LECTEUR,
     scope: GrantScope.NATIONAL,
   };
   if (zone.scope === GrantScope.REGION) {
     return [
-      viewerNational,
+      lecteurNational,
       {
         role: AccessRole.EDITEUR,
         scope: GrantScope.REGION,
@@ -20,7 +20,7 @@ export const getAgentBaseGrants = (zone: AgentZone): AgentGrant[] => {
     ];
   }
   return [
-    viewerNational,
+    lecteurNational,
     ...zone.departementNumeros.map((departementNumero) => ({
       role: AccessRole.EDITEUR,
       scope: GrantScope.DEPARTEMENT,
