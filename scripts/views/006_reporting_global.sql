@@ -11,7 +11,7 @@ WITH
     LIMIT
       1
   ),
-  cpoms_en_cours AS (
+  ongoing_cpoms AS (
     SELECT
       aa."cpomId",
       aa."startDate" AS "cpom_start",
@@ -43,7 +43,7 @@ WITH
         SELECT
           cp."cpomId"
         FROM
-          cpoms_en_cours cp
+          ongoing_cpoms cp
       )
       AND (
         b."dotationAccordee" IS NOT NULL

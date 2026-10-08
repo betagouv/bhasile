@@ -1,7 +1,7 @@
 -- Objective: per-structure impact inputs (places + budget hors CPOM)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_aggregates" AS
 WITH
-  versions_finalisees AS (
+  finalized_versions AS (
     SELECT
       sv."id",
       sv."structureId",
@@ -19,7 +19,7 @@ WITH
       )
   ),
   -- Same rule as the statistiques API (see dedicated doc to see business choices)
-  typologies_resolues AS (
+  resolved_typologies AS (
     SELECT
       st."structureId",
       st."year",
@@ -28,7 +28,7 @@ WITH
           SELECT
             vf."placesAutorisees"
           FROM
-            versions_finalisees vf
+            finalized_versions vf
           WHERE
             vf."structureId" = st."structureId"
             AND (
@@ -58,7 +58,7 @@ WITH
       ON (tr."structureId") tr."structureId",
       tr."placesAutorisees"
     FROM
-      typologies_resolues tr
+      resolved_typologies tr
       INNER JOIN public."Structure" s ON s."id" = tr."structureId"
     WHERE
       tr."placesAutorisees" IS NOT NULL
@@ -75,7 +75,7 @@ WITH
       tr."structureId",
       tr."year" DESC
   ),
-  cpoms_en_cours AS (
+  ongoing_cpoms AS (
     SELECT
       aa."cpomId",
       aa."startDate" AS "cpom_start",
@@ -123,7 +123,7 @@ WITH
             1
           FROM
             public."CpomStructure" cs
-            JOIN cpoms_en_cours cp ON cp."cpomId" = cs."cpomId"
+            JOIN ongoing_cpoms cp ON cp."cpomId" = cs."cpomId"
           WHERE
             cs."structureId" = sb."structureId"
             AND COALESCE(cs."dateStart", cp."cpom_start") <= (NOW() AT TIME ZONE 'UTC')::date
