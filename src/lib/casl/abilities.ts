@@ -2,9 +2,15 @@ import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
-import { Cpom, Operateur, Structure, User } from "@/generated/prisma/client";
-import { StructureApiRead } from "@/schemas/api/structure.schema";
-import { SessionUser } from "@/types/global";
+import {
+  AccessRole,
+  Cpom,
+  Operateur,
+  Prisma,
+  Structure,
+  User,
+} from "@/generated/prisma/client";
+import { SessionGrant, SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
   [
@@ -28,19 +34,14 @@ export const defineAbilityFor = (user?: SessionUser) => {
 
 const defineRulesFor = (user?: SessionUser) => {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
-  if (!user) {
-    defineAnonymousRules(builder);
-    return builder.rules;
-  }
+  defineAnonymousRules(builder);
 
-  if (
-    user.role === "NATIONAL" ||
-    user.role.startsWith("DEPARTEMENT") ||
-    user.role.startsWith("REGION")
-  ) {
+  if (user?.isSuperAdmin) {
+    builder.can("manage", "all");
+  } else if (user?.operateurId === null) {
     defineAgentRules(builder, user);
-  } else {
-    defineAnonymousRules(builder);
+  } else if (typeof user?.operateurId === "number") {
+    defineOperateurRules(builder, user, user.operateurId);
   }
 
   return builder.rules;
@@ -50,26 +51,95 @@ const defineAgentRules = (
   { can }: AbilityBuilder<AppAbility>,
   user: SessionUser
 ) => {
-  if (user.role === "NATIONAL") {
-    can("update", "Structure");
-  } else {
-    can("update", "Structure", {
-      departementAdministratif: { in: user.allowedDepartements },
-    });
+  const editingGrants = user.grants.filter((grant) =>
+    EDITING_ROLES.includes(grant.role)
+  );
+  if (editingGrants.length === 0) {
+    return;
   }
-  can("update", ["Cpom", "Operateur"]);
+
+  for (const conditions of editingGrants.flatMap(getStructureConditions)) {
+    can("update", "Structure", conditions);
+  }
+
+  for (const conditions of editingGrants.flatMap(getCpomConditions)) {
+    can("update", "Cpom", conditions);
+  }
+  can("update", "Operateur");
+};
+
+const defineOperateurRules = (
+  { can }: AbilityBuilder<AppAbility>,
+  user: SessionUser,
+  operateurId: number
+) => {
+  if (user.grants.some((grant) => grant.role === AccessRole.ADMIN)) {
+    can("update", "Operateur", { id: operateurId });
+  }
 };
 
 const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
   can("read", ["Structure", "Cpom", "Operateur"]);
 };
 
+const EDITING_ROLES: AccessRole[] = [AccessRole.EDITEUR, AccessRole.ADMIN];
+
+const getStructureConditions = ({
+  isNational,
+  departementNumeros,
+  structureIds,
+}: SessionGrant): Prisma.StructureWhereInput[] => {
+  if (isNational) {
+    return [{}];
+  }
+
+  return [
+    ...(departementNumeros.length > 0
+      ? [{ departementAdministratif: { in: departementNumeros } }]
+      : []),
+    ...(structureIds.length > 0 ? [{ id: { in: structureIds } }] : []),
+  ];
+};
+
+const getCpomConditions = ({
+  isNational,
+  departementNumeros,
+  structureIds,
+}: SessionGrant): Prisma.CpomWhereInput[] => {
+  if (isNational) {
+    return [{}];
+  }
+
+  return [
+    ...(departementNumeros.length > 0
+      ? [
+          {
+            departements: {
+              some: {
+                departement: { is: { numero: { in: departementNumeros } } },
+              },
+            },
+          },
+        ]
+      : []),
+    ...(structureIds.length > 0
+      ? [{ structures: { some: { structureId: { in: structureIds } } } }]
+      : []),
+  ];
+};
+
 export const canUpdateStructure = (
   user: SessionUser,
-  structure: Structure | StructureApiRead
+  structure?: StructureScope | null
 ) => {
   const ability = defineAbilityFor(user);
-  return ability.can("update", subject("Structure", structure as Structure));
+  return ability.can(
+    "update",
+    subject("Structure", {
+      id: structure?.id,
+      departementAdministratif: structure?.departementAdministratif,
+    } as Structure)
+  );
 };
 
 export const canAbilityUpdateDepartement = (
@@ -101,10 +171,7 @@ export const canDeleteFile = (
       return true;
     }
     if (acte.structureId) {
-      return canUpdateDepartement(
-        user,
-        acte.structure?.departementAdministratif
-      );
+      return canUpdateStructure(user, acte.structure);
     }
     if (acte.cpom) {
       return ability.can("update", subject("Cpom", acte.cpom));
@@ -116,26 +183,22 @@ export const canDeleteFile = (
   }
 
   if (file.documentFinancierId) {
-    return canUpdateDepartement(
-      user,
-      file.documentFinancier?.structure?.departementAdministratif
-    );
+    return canUpdateStructure(user, file.documentFinancier?.structure);
   }
   if (file.controleId) {
-    return canUpdateDepartement(
-      user,
-      file.controle?.structure?.departementAdministratif
-    );
+    return canUpdateStructure(user, file.controle?.structure);
   }
   if (file.evaluationId) {
-    return canUpdateDepartement(
-      user,
-      file.evaluation?.structure?.departementAdministratif
-    );
+    return canUpdateStructure(user, file.evaluation?.structure);
   }
   if (file.operateur) {
     return ability.can("update", subject("Operateur", file.operateur));
   }
 
   return false;
+};
+
+type StructureScope = {
+  id?: number;
+  departementAdministratif?: string | null;
 };

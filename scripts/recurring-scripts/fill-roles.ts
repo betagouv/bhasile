@@ -1,16 +1,20 @@
-// Remplir la table Roles avec les patterns d'email autorisés pour l'authentification et les groupes de permissions
+// Remplir les patterns d'email autorisés et leurs droits de base (binômes rôle × niveau géographique)
+// Le CSV fait foi : les binômes d'un pattern présent dans le fichier sont remplacés, pas cumulés.
+// Plusieurs lignes pour un même pattern s'additionnent. Un pattern absent du fichier n'est pas touché.
 // Usage: yarn script fill-roles roles.csv
 
 import "dotenv/config";
 
 import { loadCsvFromS3 } from "scripts/utils/csv-loader";
+import {
+  AgentGrant,
+  AgentZone,
+  getAgentBaseGrants,
+  isSameGrant,
+} from "scripts/utils/grant.util";
 
-import { Prisma } from "@/generated/prisma/client";
+import { Departement, GrantScope, Region } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
-
-type DepartementWithRegion = Prisma.DepartementGetPayload<{
-  include: { regionAdministrative: true };
-}>;
 
 type RoleCsvRow = {
   name: string;
@@ -28,109 +32,87 @@ const fetchRoles = async (): Promise<RoleCsvRow[]> => {
   return loadCsvFromS3<RoleCsvRow>(process.env.DOCS_BUCKET_NAME!, csvFilename);
 };
 
-const getTargetDepartementNumeros = (
+const getAgentZone = (
   row: RoleCsvRow,
-  allDepartements: DepartementWithRegion[]
-): string[] => {
+  regions: Region[],
+  departements: Departement[]
+): AgentZone | null => {
   if (row.name === "NATIONAL") {
-    return allDepartements.map((departement) => departement.numero);
+    return { scope: GrantScope.NATIONAL };
   }
   if (row.name.startsWith("REGION")) {
-    return allDepartements
-      .filter((departement) => {
-        return departement.regionAdministrative?.code === row.region;
-      })
-      .map((departement) => {
-        return departement.numero;
-      });
+    const region = regions.find((region) => region.code === row.region);
+    return region ? { scope: GrantScope.REGION, regionId: region.id } : null;
   }
   if (row.name.startsWith("DEPARTEMENT")) {
-    const departement = allDepartements.find(
+    const departement = departements.find(
       (departement) => departement.numero === row.departement
     );
-    return departement ? [departement.numero] : [];
+    return departement
+      ? {
+          scope: GrantScope.DEPARTEMENT,
+          departementNumeros: [departement.numero],
+        }
+      : null;
   }
-  return [];
+  return null;
 };
 
-const createRoles = async (row: RoleCsvRow, departementNumeros: string[]) => {
-  const pattern = row.emailPattern?.trim();
-
-  // Role et departements.
-  const role = await prisma.role.upsert({
-    where: { name: row.name },
-    update: {
-      roleDepartements: {
-        createMany: {
-          data: departementNumeros.map((departementNumero) => ({
-            departementNumero,
-          })),
-          skipDuplicates: true,
-        },
-      },
-    },
-    create: {
-      name: row.name,
-      roleDepartements: {
-        createMany: {
-          data: departementNumeros.map((departementNumero) => ({
-            departementNumero,
-          })),
-          skipDuplicates: true,
-        },
-      },
-    },
+const replaceEmailPatternGrants = async (
+  pattern: string,
+  grants: AgentGrant[]
+) => {
+  const emailPattern = await prisma.emailPattern.upsert({
+    where: { pattern },
+    update: {},
+    create: { pattern },
     select: { id: true },
   });
 
-  if (!pattern) {
-    return;
-  }
-
-  // Si emailPattern, on connecte le pattern au rôle.
-  await prisma.emailPattern.upsert({
-    where: { pattern },
-    update: {
-      role: { connect: { id: role.id } },
-    },
-    create: {
-      pattern,
-      role: {
-        connect: { id: role.id },
-      },
-    },
-  });
-};
-
-const createAnonymousRole = async () => {
-  await prisma.role.upsert({
-    where: { name: "ANONYMOUS" },
-    update: {},
-    create: {
-      name: "ANONYMOUS",
-      roleDepartements: {
-        create: [],
-      },
-    },
-  });
+  await prisma.$transaction([
+    prisma.grant.deleteMany({ where: { emailPatternId: emailPattern.id } }),
+    prisma.grant.createMany({
+      data: grants.map((grant) => ({
+        ...grant,
+        emailPatternId: emailPattern.id,
+      })),
+    }),
+  ]);
 };
 
 const run = async () => {
   try {
-    console.log("🧑 Création des rôles");
-    const [csvRows, allDepartements] = await Promise.all([
+    console.log("🧑 Remplacement des droits de base par pattern d'email");
+    const [csvRows, regions, departements] = await Promise.all([
       fetchRoles(),
-      prisma.departement.findMany({ include: { regionAdministrative: true } }),
+      prisma.region.findMany(),
+      prisma.departement.findMany(),
     ]);
 
-    await createAnonymousRole();
+    const grantsByPattern = new Map<string, AgentGrant[]>();
     for (const row of csvRows) {
-      const targetNumeros = getTargetDepartementNumeros(row, allDepartements);
-      await createRoles(row, targetNumeros);
+      const pattern = row.emailPattern?.trim();
+      if (!pattern) {
+        continue;
+      }
+      const zone = getAgentZone(row, regions, departements);
+      if (!zone) {
+        console.warn(`⚠️ Ligne ignorée, niveau introuvable : ${row.name}`);
+        continue;
+      }
+      const grants = grantsByPattern.get(pattern) ?? [];
+      const newGrants = getAgentBaseGrants(zone).filter(
+        (grant) => !grants.some((existing) => isSameGrant(existing, grant))
+      );
+      grantsByPattern.set(pattern, [...grants, ...newGrants]);
     }
-    console.log("✅ Rôles créés");
+
+    for (const [pattern, grants] of grantsByPattern) {
+      await replaceEmailPatternGrants(pattern, grants);
+    }
+    console.log("✅ Droits de base remplacés");
   } catch (error) {
-    console.error("❌ Erreur lors de la création des roles :", error);
+    console.error("❌ Erreur lors du remplacement des droits de base :", error);
     throw error;
   } finally {
     await prisma.$disconnect();

@@ -6,7 +6,7 @@ import { ReactElement, useState } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
-import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
+import { useCanUpdateStructures } from "@/app/hooks/useCanUpdateStructure";
 import { StructureListItem } from "@/types/structure-list.type";
 
 import { StructureItem } from "./StructureItem";
@@ -33,7 +33,7 @@ export const StructuresTable = ({
   isClosed,
 }: Props): ReactElement => {
   const router = useRouter();
-  const canUpdateDepartement = useCanUpdateDepartement();
+  const canUpdateStructure = useCanUpdateStructures();
 
   const columns = [
     ...SHARED_COLUMNS,
@@ -44,7 +44,7 @@ export const StructuresTable = ({
     useState<StructureListItem | null>(null);
   const handleOpenModal = (structure: StructureListItem) => {
     setSelectedStructure(structure);
-    if (canUpdateDepartement(structure.departementAdministratif)) {
+    if (canUpdateStructure(structure)) {
       finalisationModal.open();
     } else {
       noPermissionsModal.open();

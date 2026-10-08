@@ -5,7 +5,6 @@ import { GET, PUT } from "@/app/api/structures/[id]/route";
 
 const mockGetServerSession = vi.fn();
 const mockCanUpdateStructure = vi.fn();
-const mockCanUpdateDepartement = vi.fn();
 const mockFindOne = vi.fn();
 const mockFindOneOperateur = vi.fn();
 const mockFindStructureDepartement = vi.fn();
@@ -28,8 +27,6 @@ vi.mock("@/app/api/anomalies/anomalie.service", () => ({
 
 vi.mock("@/lib/casl/abilities", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
-  canUpdateDepartement: (...args: unknown[]) =>
-    mockCanUpdateDepartement(...args),
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
@@ -362,7 +359,7 @@ describe("PUT /api/structures/[id]", () => {
     mockFindStructureDepartement.mockResolvedValueOnce({
       departementAdministratif: "75",
     });
-    mockCanUpdateDepartement.mockReturnValueOnce(false);
+    mockCanUpdateStructure.mockReturnValueOnce(false);
 
     const request = new Request("http://localhost/api/structures/2", {
       method: "PUT",
@@ -390,7 +387,7 @@ describe("PUT /api/structures/[id]", () => {
     mockFindStructureDepartement.mockResolvedValueOnce({
       departementAdministratif: "75",
     });
-    mockCanUpdateDepartement.mockReturnValueOnce(true);
+    mockCanUpdateStructure.mockReturnValueOnce(true);
     mockGetAdresseAdministrativeCoordinates.mockResolvedValueOnce(coordinates);
     mockUpdateOne.mockResolvedValueOnce(updatedStructure);
 
@@ -419,7 +416,7 @@ describe("PUT /api/structures/[id]", () => {
     mockFindStructureDepartement.mockResolvedValueOnce({
       departementAdministratif: "75",
     });
-    mockCanUpdateDepartement.mockReturnValueOnce(true);
+    mockCanUpdateStructure.mockReturnValueOnce(true);
     mockGetAdresseAdministrativeCoordinates.mockResolvedValueOnce({});
     mockUpdateOne.mockResolvedValueOnce({ id: 4 });
 

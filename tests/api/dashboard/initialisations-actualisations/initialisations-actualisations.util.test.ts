@@ -1,3 +1,4 @@
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
 import { DashboardStructure } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.db.type";
@@ -19,14 +20,7 @@ import { StructureType } from "@/types/structure.type";
 
 const YEAR = 2026;
 
-const agentDepartement75: SessionUser = {
-  id: "1",
-  name: "Agent",
-  prenom: "Agent",
-  email: "agent@dep75.gouv.fr",
-  role: "DEPARTEMENT",
-  allowedDepartements: ["75"],
-};
+const agentDepartement75: SessionUser = createDepartementalAgent(["75"]);
 
 const actualisationStatusForm = (
   formSteps: { status: StepStatus }[],

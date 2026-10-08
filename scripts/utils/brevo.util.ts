@@ -1,5 +1,7 @@
-import { getUserRole } from "@/app/api/users/user.util";
+import { GrantDb } from "@/app/api/users/user.db.type";
+import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
 import { toDayKey } from "@/app/utils/date.util";
+import { AccessRole, GrantScope } from "@/generated/prisma/client";
 
 const BREVO_IMPORT_URL = "https://api.brevo.com/v3/contacts/import";
 const BATCH_SIZE = 500;
@@ -20,19 +22,21 @@ export type BrevoAgentUser = {
   email: string;
   lastConnection: Date;
   createdAt: Date;
-  role: BrevoAgentRole | null;
-  emailPattern: { role: BrevoAgentRole } | null;
+  grants: GrantDb[];
+  emailPattern: { grants: GrantDb[] } | null;
 };
 
 export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
-  const role = getUserRole(user);
+  const actionGrants = getEffectiveGrants(user).filter(
+    (grant) => grant.role !== AccessRole.LECTEUR
+  );
 
   return {
     email: user.email,
     attributes: {
-      DEPARTEMENT: formatDepartements(role),
+      DEPARTEMENT: formatDepartements(actionGrants),
       STATUT: AGENT_STATUT,
-      PERIMETRE: role?.name ?? "",
+      PERIMETRE: actionGrants.map(getGrantLabel).join(", "),
       LAST_LOGIN: toDayKey(user.lastConnection),
       CREATION_COMPTE: toDayKey(user.createdAt),
     },
@@ -83,13 +87,23 @@ export const pushContactsToBrevo = async (
   }
 };
 
-type BrevoAgentRole = {
-  name: string;
-  roleDepartements: { departementNumero: string }[];
-};
-
-const formatDepartements = (role: BrevoAgentRole | null): string =>
-  (role?.roleDepartements ?? [])
-    .map((roleDepartement) => roleDepartement.departementNumero)
+const formatDepartements = (grants: GrantDb[]): string =>
+  [
+    ...new Set(
+      grants.flatMap((grant) => toSessionGrant(grant).departementNumeros)
+    ),
+  ]
     .sort()
     .join(", ");
+
+const getGrantLabel = (grant: GrantDb): string => {
+  if (grant.scope === GrantScope.NATIONAL) {
+    return "National";
+  }
+  return (
+    grant.region?.name ??
+    grant.departement?.name ??
+    grant.structure?.codeBhasile ??
+    ""
+  );
+};

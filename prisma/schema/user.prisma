@@ -8,6 +8,10 @@ model User {
   roleId              Int?
   emailPattern        EmailPattern? @relation(fields: [emailPatternId], references: [id])
   emailPatternId      Int?
+  operateur           Operateur?    @relation(fields: [operateurId], references: [id], onDelete: Restrict)
+  operateurId         Int?
+  isSuperAdmin        Boolean       @default(false)
+  grants              Grant[]
   notes               Note[]
   anomaliesJustifiees Anomalie[]
 
@@ -58,11 +62,12 @@ model RoleDepartement {
 }
 
 model EmailPattern {
-  id      Int    @id @default(autoincrement())
-  pattern String @unique
-  role    Role   @relation(fields: [roleId], references: [id])
-  roleId  Int
+  id      Int     @id @default(autoincrement())
+  pattern String  @unique
+  role    Role?   @relation(fields: [roleId], references: [id])
+  roleId  Int?
   users   User[]
+  grants  Grant[]
 
   @@schema("public")
 }
