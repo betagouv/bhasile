@@ -19,7 +19,7 @@ const departementGrant = (numero: string, name: string, role?: AccessRole) =>
     departement: { numero, name },
   });
 
-const nationalLecteurGrant = buildGrant({ role: AccessRole.LECTEUR });
+const nationalReadGrant = buildGrant({ role: AccessRole.LECTEUR });
 
 const baseUser = {
   email: "agent@dreets.gouv.fr",
@@ -59,7 +59,7 @@ describe("brevo util", () => {
       ...baseUser,
       emailPattern: {
         grants: [
-          nationalLecteurGrant,
+          nationalReadGrant,
           buildGrant({
             scope: GrantScope.REGION,
             region: {
