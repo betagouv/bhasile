@@ -11,6 +11,27 @@ WITH
     LIMIT
       1
   ),
+  ongoing_cpoms AS (
+    SELECT
+      aa."cpomId",
+      aa."startDate" AS "cpom_start",
+      COALESCE(MAX(av."endDate"), aa."endDate") AS "cpom_end"
+    FROM
+      public."ActeAdministratif" aa
+      LEFT JOIN public."ActeAdministratif" av ON av."parentId" = aa."id"
+    WHERE
+      aa."cpomId" IS NOT NULL
+      AND aa."category" = 'CONVENTION_CPOM'
+      AND aa."parentId" IS NULL
+    GROUP BY
+      aa."id",
+      aa."cpomId",
+      aa."startDate",
+      aa."endDate"
+    HAVING
+      aa."startDate" <= (NOW() AT TIME ZONE 'UTC')::date
+      AND COALESCE(MAX(av."endDate"), aa."endDate") >= (NOW() AT TIME ZONE 'UTC')::date
+  ),
   cpom_dernier_millesime AS (
     SELECT DISTINCT
       ON (b."cpomId") b."cpomId",
@@ -18,7 +39,12 @@ WITH
     FROM
       public."Budget" b
     WHERE
-      b."cpomId" IS NOT NULL
+      b."cpomId" IN (
+        SELECT
+          cp."cpomId"
+        FROM
+          ongoing_cpoms cp
+      )
       AND (
         b."dotationAccordee" IS NOT NULL
         OR b."dotationDemandee" IS NOT NULL
