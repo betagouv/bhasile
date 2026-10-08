@@ -3,11 +3,14 @@ import { parseCommaList } from "@/app/utils/string.util";
 import { CpomListItem } from "@/types/cpom.type";
 import { CpomColumn } from "@/types/ListColumn";
 
-import { getDatesOfCurrentActeAdministratif } from "../actes-administratifs/acte-administratif.util";
-import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
+import {
+  type ActeAdministratifDates,
+  getDatesOfCurrentActeAdministratif,
+} from "../actes-administratifs/acte-administratif.util";
+import { CpomDbList } from "./cpom.db.type";
 
 export const getDatesConvention = (cpom?: {
-  actesAdministratifs: (CpomDbDetails | CpomDbList)["actesAdministratifs"];
+  actesAdministratifs: ActeAdministratifDates[];
 }): [Date | null, Date | null] => {
   if (!cpom) {
     return [null, null];
@@ -19,6 +22,38 @@ export const getDatesConvention = (cpom?: {
     false
   );
 };
+
+export const shouldEndCpomStructureAtFermeture = (
+  cpomStructure: {
+    dateStart: Date | null;
+    dateEnd: Date | null;
+    cpom: { actesAdministratifs: ActeAdministratifDates[] };
+  },
+  fermetureDate: Date
+): boolean => {
+  const [conventionStart, conventionEnd] = getDatesConvention(
+    cpomStructure.cpom
+  );
+  const dateStart = cpomStructure.dateStart ?? conventionStart;
+  const dateEnd = cpomStructure.dateEnd ?? conventionEnd;
+
+  if (dateStart && dateStart > fermetureDate) {
+    return false;
+  }
+  return !dateEnd || dateEnd > fermetureDate;
+};
+
+export const getCpomStructureIdsToEndAtFermeture = (
+  cpomStructures: (Parameters<typeof shouldEndCpomStructureAtFermeture>[0] & {
+    id: number;
+  })[],
+  fermetureDate: Date
+): number[] =>
+  cpomStructures
+    .filter((cpomStructure) =>
+      shouldEndCpomStructureAtFermeture(cpomStructure, fermetureDate)
+    )
+    .map((cpomStructure) => cpomStructure.id);
 
 export const filterCpomsByDepartement = (
   cpoms: CpomDbList[],

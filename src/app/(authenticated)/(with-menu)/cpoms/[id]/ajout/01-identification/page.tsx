@@ -44,7 +44,7 @@ export default function CpomAjoutIdentification() {
 
         <FieldSetGeneral />
         <FieldSetActesAdministratifs />
-        <FieldSetStructures />
+        <FieldSetStructures cpomStructures={cpom.structures} />
       </FormWrapper>
     </>
   );

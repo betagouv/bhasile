@@ -1,15 +1,16 @@
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
-import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
+import { getStructuresMissingFromSelection } from "@/app/utils/cpom.util";
+import { CpomApiRead, CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 import { CpomStructureFormValues } from "@/schemas/forms/base/cpom.schema";
 
 import { StructureLine } from "./StructureLine";
 
-export const StructuresList = ({ structures }: Props) => {
+export const StructuresList = ({ structures, cpomStructures }: Props) => {
   const { watch, setValue, formState } = useFormContext();
 
   const hasErrors = useMemo(
@@ -22,6 +23,23 @@ export const StructuresList = ({ structures }: Props) => {
   ) as CpomStructureFormValues[];
 
   const departements = watch("departements") as CpomDepartementApiType[];
+
+  const missingStructures = useMemo(
+    () => getStructuresMissingFromSelection(cpomStructures ?? [], structures),
+    [cpomStructures, structures]
+  );
+
+  const isMissingStructure = useCallback(
+    (structureId?: number) =>
+      missingStructures.some((structure) => structure.id === structureId),
+    [missingStructures]
+  );
+
+  const findSelectedCpomStructureIndex = (structureId: number) =>
+    selectedCpomStructures.findIndex(
+      (selectedCpomStructure) =>
+        selectedCpomStructure.structureId === structureId
+    );
 
   const handleStructureChange = (structureId?: number) => {
     if (!structureId) {
@@ -51,7 +69,10 @@ export const StructuresList = ({ structures }: Props) => {
   };
 
   const checkedStatus = useMemo(() => {
-    const numOfStructuresChecked = selectedCpomStructures.length;
+    const numOfStructuresChecked = selectedCpomStructures.filter(
+      (selectedCpomStructure) =>
+        !isMissingStructure(selectedCpomStructure.structureId)
+    ).length;
     const totalStructures = structures?.length;
 
     if (numOfStructuresChecked === totalStructures) {
@@ -61,20 +82,29 @@ export const StructuresList = ({ structures }: Props) => {
       return "incomplete";
     }
     return "unchecked";
-  }, [selectedCpomStructures, structures]);
+  }, [selectedCpomStructures, isMissingStructure, structures]);
 
   const handleAllStructuresChange = (checked: boolean) => {
+    const missingSelectedCpomStructures = selectedCpomStructures.filter(
+      (selectedCpomStructure) =>
+        isMissingStructure(selectedCpomStructure.structureId)
+    );
     if (checked) {
-      setValue(
-        "structures",
-        structures.map((structure) => ({
-          structureId: structure.id,
-          dateStart: undefined,
-          dateEnd: undefined,
-        }))
-      );
+      setValue("structures", [
+        ...missingSelectedCpomStructures,
+        ...structures.map(
+          (structure) =>
+            selectedCpomStructures[
+              findSelectedCpomStructureIndex(structure.id)
+            ] ?? {
+              structureId: structure.id,
+              dateStart: undefined,
+              dateEnd: undefined,
+            }
+        ),
+      ]);
     } else {
-      setValue("structures", []);
+      setValue("structures", missingSelectedCpomStructures);
     }
   };
 
@@ -88,6 +118,9 @@ export const StructuresList = ({ structures }: Props) => {
     }
     const structuresToSelect = selectedCpomStructures.filter(
       (selectedCpomStructure) => {
+        if (isMissingStructure(selectedCpomStructure.structureId)) {
+          return true;
+        }
         const currentStructure = structures.find(
           (structure) => structure.id === selectedCpomStructure.structureId
         );
@@ -104,7 +137,13 @@ export const StructuresList = ({ structures }: Props) => {
 
     setValue("structures", structuresToSelect);
     previousDepartements.current = departements;
-  }, [departements, structures, selectedCpomStructures, setValue]);
+  }, [
+    departements,
+    structures,
+    selectedCpomStructures,
+    isMissingStructure,
+    setValue,
+  ]);
 
   return (
     <>
@@ -151,13 +190,22 @@ export const StructuresList = ({ structures }: Props) => {
           <StructureLine
             key={structure.id}
             structure={structure}
-            index={selectedCpomStructures.findIndex(
-              (selectedCpomStructure) =>
-                selectedCpomStructure.structureId === structure.id
-            )}
+            index={findSelectedCpomStructureIndex(structure.id)}
             handleStructureChange={handleStructureChange}
           />
         ))}
+        {missingStructures
+          .filter(
+            (structure) => findSelectedCpomStructureIndex(structure.id) !== -1
+          )
+          .map((structure) => (
+            <StructureLine
+              key={structure.id}
+              structure={structure}
+              index={findSelectedCpomStructureIndex(structure.id)}
+              handleStructureChange={handleStructureChange}
+            />
+          ))}
       </div>
       {hasErrors && (
         <p className="text-default-error m-0 p-0" data-form-error>
@@ -171,4 +219,5 @@ export const StructuresList = ({ structures }: Props) => {
 
 type Props = {
   structures: StructureMinimalApiType[];
+  cpomStructures: CpomApiRead["structures"];
 };

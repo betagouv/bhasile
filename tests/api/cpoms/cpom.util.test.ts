@@ -4,6 +4,7 @@ import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import {
   buildCpomListItem,
   filterCpomsByDepartement,
+  shouldEndCpomStructureAtFermeture,
   sortValueForCpomColumn,
 } from "@/app/api/cpoms/cpom.util";
 import { CpomColumn } from "@/types/ListColumn";
@@ -225,5 +226,94 @@ describe("buildCpomListItem", () => {
     const item = buildCpomListItem(makeCpom({ region: null }));
 
     expect(item.regionName).toBeUndefined();
+  });
+});
+
+describe("shouldEndCpomStructureAtFermeture", () => {
+  const fermetureDate = new Date("2026-06-30T12:00:00.000Z");
+  const convention = {
+    actesAdministratifs: [
+      {
+        id: 1,
+        category: "CONVENTION_CPOM",
+        parentId: null,
+        startDate: new Date("2024-01-01T12:00:00.000Z"),
+        endDate: new Date("2028-12-31T12:00:00.000Z"),
+      },
+    ],
+  };
+  const makeCpomStructure = (
+    overrides: Partial<{ dateStart: Date | null; dateEnd: Date | null }> = {},
+    cpom: {
+      actesAdministratifs: typeof convention.actesAdministratifs;
+    } = convention
+  ) => ({ dateStart: null, dateEnd: null, cpom, ...overrides });
+
+  it("termine une entrée qui suit la convention encore en cours à la fermeture", () => {
+    expect(
+      shouldEndCpomStructureAtFermeture(makeCpomStructure(), fermetureDate)
+    ).toBe(true);
+  });
+
+  it("termine une entrée dont la sortie propre est postérieure à la fermeture", () => {
+    expect(
+      shouldEndCpomStructureAtFermeture(
+        makeCpomStructure({ dateEnd: new Date("2027-01-01T12:00:00.000Z") }),
+        fermetureDate
+      )
+    ).toBe(true);
+  });
+
+  it("termine une entrée d'un CPOM sans convention datée", () => {
+    expect(
+      shouldEndCpomStructureAtFermeture(
+        makeCpomStructure({}, { actesAdministratifs: [] }),
+        fermetureDate
+      )
+    ).toBe(true);
+  });
+
+  it("laisse une sortie déjà antérieure ou égale à la fermeture", () => {
+    expect(
+      shouldEndCpomStructureAtFermeture(
+        makeCpomStructure({ dateEnd: new Date("2025-12-31T12:00:00.000Z") }),
+        fermetureDate
+      )
+    ).toBe(false);
+    expect(
+      shouldEndCpomStructureAtFermeture(
+        makeCpomStructure({ dateEnd: fermetureDate }),
+        fermetureDate
+      )
+    ).toBe(false);
+  });
+
+  it("laisse un CPOM terminé avant la fermeture sans le prolonger", () => {
+    expect(
+      shouldEndCpomStructureAtFermeture(
+        makeCpomStructure(
+          {},
+          {
+            actesAdministratifs: [
+              {
+                ...convention.actesAdministratifs[0],
+                startDate: new Date("2020-01-01T12:00:00.000Z"),
+                endDate: new Date("2022-12-31T12:00:00.000Z"),
+              },
+            ],
+          }
+        ),
+        fermetureDate
+      )
+    ).toBe(false);
+  });
+
+  it("laisse une entrée qui commence après la fermeture", () => {
+    expect(
+      shouldEndCpomStructureAtFermeture(
+        makeCpomStructure({ dateStart: new Date("2027-01-01T12:00:00.000Z") }),
+        fermetureDate
+      )
+    ).toBe(false);
   });
 });
