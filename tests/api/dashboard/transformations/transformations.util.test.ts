@@ -1,3 +1,7 @@
+import {
+  createDepartementalAgent,
+  createNationalAgent,
+} from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -11,7 +15,6 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
-import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
@@ -28,9 +31,13 @@ type SvtInput = {
 
 const makeStructure = (
   input: SvtInput
-): NonNullable<
-  NonNullable<StructureVersionTransformationApiRead["structureVersion"]>["structure"]
-> | undefined => {
+):
+  | NonNullable<
+      NonNullable<
+        StructureVersionTransformationApiRead["structureVersion"]
+      >["structure"]
+    >
+  | undefined => {
   if (!input.structureOperateur && input.structureIsFinalised === undefined) {
     return undefined;
   }
@@ -60,11 +67,20 @@ const makeForm = (
   return {
     id: 1,
     status: false,
-    formDefinition: { id: 1, slug: "transformation", name: "Transfo", version: 1 },
+    formDefinition: {
+      id: 1,
+      slug: "transformation",
+      name: "Transfo",
+      version: 1,
+    },
     formSteps: input.formStepStatuses.map((status, index) => ({
       id: index + 1,
       status,
-      stepDefinition: { id: index + 1, slug: `etape-${index + 1}`, label: "Étape" },
+      stepDefinition: {
+        id: index + 1,
+        slug: `etape-${index + 1}`,
+        label: "Étape",
+      },
     })),
   };
 };
@@ -82,22 +98,15 @@ const makeTransformation = (input: {
   id?: number;
   updatedAt?: string;
   svts: StructureVersionTransformationApiRead[];
-}): TransformationApiRead =>
-  ({
-    id: input.id ?? 1,
-    updatedAt: input.updatedAt ?? "2026-05-04T00:00:00.000Z",
-    structureVersionTransformations: input.svts,
-  });
+}): TransformationApiRead => ({
+  id: input.id ?? 1,
+  updatedAt: input.updatedAt ?? "2026-05-04T00:00:00.000Z",
+  structureVersionTransformations: input.svts,
+});
 
-const agentNational = {
-  role: "NATIONAL",
-  allowedDepartements: [],
-} as unknown as SessionUser;
+const agentNational = createNationalAgent();
 
-const agentParis = {
-  role: "DEPARTEMENT_PARIS",
-  allowedDepartements: ["75"],
-} as unknown as SessionUser;
+const agentParis = createDepartementalAgent(["75"]);
 
 const noFilters = {
   ability: defineAbilityFor(agentNational),
@@ -393,29 +402,38 @@ describe("buildDashboardTransformationRows", () => {
 
   it("retrouve une transformation par le département de n'importe lequel de ses blocs", () => {
     expect(
-      buildDashboardTransformationRows([buildTransfertParisVersHautsDeSeine()], {
-        ...noFilters,
-        departementList: ["92"],
-      })
+      buildDashboardTransformationRows(
+        [buildTransfertParisVersHautsDeSeine()],
+        {
+          ...noFilters,
+          departementList: ["92"],
+        }
+      )
     ).toHaveLength(1);
   });
 
   it("retrouve une transformation par l'opérateur de n'importe lequel de ses blocs", () => {
     expect(
-      buildDashboardTransformationRows([buildTransfertParisVersHautsDeSeine()], {
-        ...noFilters,
-        operateurList: ["2"],
-      })
+      buildDashboardTransformationRows(
+        [buildTransfertParisVersHautsDeSeine()],
+        {
+          ...noFilters,
+          operateurList: ["2"],
+        }
+      )
     ).toHaveLength(1);
   });
 
   it("combine les filtres indépendamment d'un bloc à l'autre", () => {
     expect(
-      buildDashboardTransformationRows([buildTransfertParisVersHautsDeSeine()], {
-        ...noFilters,
-        departementList: ["75"],
-        operateurList: ["2"],
-      })
+      buildDashboardTransformationRows(
+        [buildTransfertParisVersHautsDeSeine()],
+        {
+          ...noFilters,
+          departementList: ["75"],
+          operateurList: ["2"],
+        }
+      )
     ).toHaveLength(1);
   });
 

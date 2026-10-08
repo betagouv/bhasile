@@ -309,10 +309,7 @@ describe("checkCanUpdateDepartements", () => {
 });
 
 describe("isTransformationVisible", () => {
-  const agentParisAbility = defineAbilityFor({
-    role: "DEPARTEMENT_PARIS",
-    allowedDepartements: ["75"],
-  } as unknown as SessionUser);
+  const agentParisAbility = defineAbilityFor(createDepartementalAgent(["75"]));
 
   const buildStructureVersionTransformation = (
     departementAdministratif: string
