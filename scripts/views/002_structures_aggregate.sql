@@ -1,13 +1,80 @@
 -- Objective: per-structure impact inputs (places + budget hors CPOM)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_aggregates" AS
 WITH
-  structure_places_autorisees AS (
+  versions_finalisees AS (
     SELECT
-      sc."id" AS "structureId",
+      sv."id",
+      sv."structureId",
+      sv."effectiveDate",
       sv."placesAutorisees"
     FROM
-:"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureVersion" sv ON sv."id" = sc."structure_version_id"
+      public."StructureVersion" sv
+      LEFT JOIN public."StructureVersionTransformation" svt ON svt."id" = sv."structureVersionTransformationId"
+      LEFT JOIN public."Form" f ON f."transformationId" = svt."transformationId"
+    WHERE
+      sv."structureId" IS NOT NULL
+      AND (
+        sv."structureVersionTransformationId" IS NULL
+        OR f."status" IS TRUE
+      )
+  ),
+  -- Same rule as the statistiques API (applyVersionedPlacesToTypologies):
+  -- from 2026 on, places come from the StructureVersion effective that year
+  typologies_resolues AS (
+    SELECT
+      st."structureId",
+      st."year",
+      CASE
+        WHEN st."year" >= 2026 THEN (
+          SELECT
+            vf."placesAutorisees"
+          FROM
+            versions_finalisees vf
+          WHERE
+            vf."structureId" = st."structureId"
+            AND (
+              vf."effectiveDate" IS NULL
+              OR vf."effectiveDate" < LEAST(MAKE_DATE(st."year", 12, 31), (NOW() AT TIME ZONE 'UTC')::date) + 1
+            )
+          ORDER BY
+            vf."effectiveDate" DESC NULLS LAST,
+            vf."id" DESC
+          LIMIT
+            1
+        )
+        ELSE st."placesAutorisees"
+      END AS "placesAutorisees"
+    FROM
+      public."StructureTypologie" st
+    WHERE
+      st."structureId" IS NOT NULL
+      AND st."year" <= EXTRACT(
+        YEAR
+        FROM
+          NOW() AT TIME ZONE 'UTC'
+      )
+  ),
+  structure_places_autorisees AS (
+    SELECT DISTINCT
+      ON (tr."structureId") tr."structureId",
+      tr."placesAutorisees"
+    FROM
+      typologies_resolues tr
+      INNER JOIN public."Structure" s ON s."id" = tr."structureId"
+    WHERE
+      tr."placesAutorisees" IS NOT NULL
+      AND s."type" IS NOT NULL
+      AND (
+        s."creationDate" IS NULL
+        OR s."creationDate" < (NOW() AT TIME ZONE 'UTC')::date + 1
+      )
+      AND (
+        s."fermetureDate" IS NULL
+        OR s."fermetureDate" >= (NOW() AT TIME ZONE 'UTC')::date
+      )
+    ORDER BY
+      tr."structureId",
+      tr."year" DESC
   ),
   cpom_convention_dates AS (
     SELECT DISTINCT
