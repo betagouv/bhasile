@@ -12,6 +12,7 @@ model Cpom {
   actesAdministratifs ActeAdministratif[]
   documentsFinanciers DocumentFinancier[]
   userActions         UserAction[]
+  notes               Note[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
