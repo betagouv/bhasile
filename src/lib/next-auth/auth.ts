@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: "openid uid given_name usual_name email siret",
-          acr_values: "eidas1",
+          acr_values: "eidas1-mfa",
           redirect_uri:
             process.env.NEXT_PUBLIC_URL + "/api/auth/callback/proconnect",
         },
