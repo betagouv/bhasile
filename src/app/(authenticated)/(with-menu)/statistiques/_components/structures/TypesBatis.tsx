@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { GenericTypeChart } from "./GenericTypeChart";
 
 export const TypesBatis = (): ReactElement => {
@@ -11,7 +12,16 @@ export const TypesBatis = (): ReactElement => {
 
   return (
     <GenericTypeChart
-      title="Types de bâtis"
+      title={
+        <>
+          Types de bâtis en {new Date().getFullYear()}{" "}
+          {/* TODO : mettre de vrais chiffres ici */}
+          <IncompleteDataIndicator
+            nbStructures={42}
+            structuresPercentage={42}
+          />
+        </>
+      }
       colors={colors}
       typeAccessor="structureBatis"
     />

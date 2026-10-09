@@ -25,21 +25,27 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay
-                value={currentYear.autorisees.dotationAccordee}
-                type="currency"
-                compact={true}
-              />
+              <>
+                <span className="text-sm">dont </span>
+                <NumberDisplay
+                  value={currentYear.autorisees.dotationAccordee}
+                  type="currency"
+                  compact={true}
+                />
+              </>
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
             primaryInformation: (
-              <NumberDisplay
-                value={currentYear.subventionnees.dotationAccordee}
-                type="currency"
-                compact={true}
-              />
+              <>
+                <span className="text-sm">dont </span>
+                <NumberDisplay
+                  value={currentYear.subventionnees.dotationAccordee}
+                  type="currency"
+                  compact={true}
+                />
+              </>
             ),
             secondaryInformation: "pour les structures subventionnées",
           },
@@ -52,17 +58,23 @@ export const FinanceCards = (): ReactElement => {
             primaryInformation: (
               <NumberDisplay value={currentYear.total.totalETP} />
             ),
-            secondaryInformation: "ETP au total",
+            secondaryInformation: "nombre prévisionnel d'ETP au total",
           },
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.autorisees.totalETP} />
+              <>
+                <span className="text-sm">dont </span>
+                <NumberDisplay value={currentYear.autorisees.totalETP} />
+              </>
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.subventionnees.totalETP} />
+              <>
+                <span className="text-sm">dont </span>
+                <NumberDisplay value={currentYear.subventionnees.totalETP} />
+              </>
             ),
             secondaryInformation: "pour les structures subventionnées",
           },
@@ -75,7 +87,7 @@ export const FinanceCards = (): ReactElement => {
             primaryInformation: (
               <NumberDisplay value={currentYear.total.tauxEncadrement!} />
             ),
-            secondaryInformation: "taux d'encadrement moyen",
+            secondaryInformation: "taux d'encadrement prévisionnel moyen",
           },
           {
             primaryInformation: (
@@ -103,7 +115,7 @@ export const FinanceCards = (): ReactElement => {
                 type="currency"
               />
             ),
-            secondaryInformation: "coût place journalier moyen",
+            secondaryInformation: "coût place journalier prévisionnel moyen",
           },
           {
             primaryInformation: (
