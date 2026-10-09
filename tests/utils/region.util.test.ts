@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  filterRegionsWithDepartements,
   getDepartementNumerosForRegion,
   getDepartementsForRegion,
   getRegionFromDepartement,
@@ -87,6 +88,58 @@ describe("region util", () => {
 
     it("renvoie une liste vide pour une région inconnue", () => {
       expect(getDepartementNumerosForRegion("Aquitaine")).toEqual([]);
+    });
+  });
+
+  describe("filterRegionsWithDepartements", () => {
+    it("renvoie toutes les régions visibles avec leurs départements triés par nom quand la recherche est vide", () => {
+      const resultats = filterRegionsWithDepartements("");
+
+      expect(resultats.length).toBeGreaterThan(0);
+
+      const bretagne = resultats.find(
+        (regionWithDepartements) =>
+          regionWithDepartements.region.name === "Bretagne"
+      );
+
+      expect(bretagne).toBeDefined();
+      expect(
+        bretagne?.departements.map((departement) => departement.name)
+      ).toEqual(["Côtes-d'Armor", "Finistère", "Ille-et-Vilaine", "Morbihan"]);
+    });
+
+    it("filtre par nom de région (insensible à la casse et aux accents) et conserve tous ses départements", () => {
+      const resultats = filterRegionsWithDepartements("bretagne");
+
+      expect(resultats).toHaveLength(1);
+      expect(resultats[0].region.name).toBe("Bretagne");
+      expect(resultats[0].departements).toHaveLength(4);
+    });
+
+    it("filtre par nom de département", () => {
+      const resultats = filterRegionsWithDepartements("finistere");
+
+      expect(resultats).toHaveLength(1);
+      expect(resultats[0].region.name).toBe("Bretagne");
+      expect(resultats[0].departements).toHaveLength(1);
+      expect(resultats[0].departements[0].name).toBe("Finistère");
+    });
+
+    it("filtre par numéro de département", () => {
+      const resultats = filterRegionsWithDepartements("35");
+
+      expect(resultats).toHaveLength(1);
+      expect(resultats[0].region.name).toBe("Bretagne");
+      expect(resultats[0].departements).toHaveLength(1);
+      expect(resultats[0].departements[0].numero).toBe("35");
+    });
+
+    it("renvoie un tableau vide si aucun département ni région ne correspond", () => {
+      const resultats = filterRegionsWithDepartements(
+        "RechercheInexistante123"
+      );
+
+      expect(resultats).toEqual([]);
     });
   });
 

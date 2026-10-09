@@ -8,6 +8,7 @@ import {
   OperateurSuggestion,
   useOperateurSuggestion,
 } from "@/app/hooks/useOperateurSuggestion";
+import { matchesSearchQuery } from "@/app/utils/string.util";
 
 export const FilterOperateur = ({ selection, onToggle }: Props) => {
   const [allOperateurs, setAllOperateurs] = useState<OperateurSuggestion[]>([]);
@@ -24,7 +25,7 @@ export const FilterOperateur = ({ selection, onToggle }: Props) => {
 
   const filteredOperateurs = useMemo(() => {
     return allOperateurs.filter((operateur) =>
-      operateur.label.toLowerCase().includes(searchQuery.toLowerCase())
+      matchesSearchQuery(operateur.label, searchQuery)
     );
   }, [allOperateurs, searchQuery]);
 
@@ -71,7 +72,7 @@ export const FilterOperateur = ({ selection, onToggle }: Props) => {
       ))}
 
       {filteredOperateurs.length === 0 && allOperateurs.length > 0 && (
-        <p className="text-sm text-gray-500 italic mt-2">
+        <p className="text-sm text-disabled-grey italic mt-2 text-center">
           Aucun opérateur ne correspond à votre recherche.
         </p>
       )}
@@ -79,14 +80,14 @@ export const FilterOperateur = ({ selection, onToggle }: Props) => {
   );
 };
 
-type Props = {
-  selection: string[];
-  onToggle: (operateurId: string) => void;
-};
-
 const getRelationLabel = (operateur: OperateurSuggestion): string | null => {
   if (operateur.isFiliale) {
     return "Filiale";
   }
   return operateur.hasFiliales ? "Groupe" : null;
+};
+
+type Props = {
+  selection: string[];
+  onToggle: (operateurId: string) => void;
 };
