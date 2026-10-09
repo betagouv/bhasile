@@ -1,14 +1,9 @@
 import "@testing-library/jest-dom/vitest";
 
-import { vi } from "vitest";
+import * as matchers from "@testing-library/jest-dom/matchers";
+import { expect } from "vitest";
 
-// Aucun test ne doit appeler la vraie BAN ; un test qui a besoin d'une réponse précise la mocke lui-même.
-vi.mock("@/app/api/adresses/ban.client", () => ({
-  searchMunicipality: vi.fn().mockResolvedValue(null),
-  searchAddress: vi
-    .fn()
-    .mockResolvedValue({ latitude: undefined, longitude: undefined }),
-}));
+expect.extend(matchers);
 
 if (typeof window !== "undefined" && !window.matchMedia) {
   window.matchMedia = (query) => ({
