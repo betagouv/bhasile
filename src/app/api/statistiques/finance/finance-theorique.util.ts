@@ -12,7 +12,7 @@ import type {
 } from "../statistiques.db.type";
 import { countDaysBetween, getStructureOpenBounds } from "../statistiques.util";
 
-export type StructureJoursPlaces = {
+type StructureJoursPlaces = {
   jours: number;
   joursPlaces: number;
 };

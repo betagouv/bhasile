@@ -27,7 +27,6 @@ import { createFakeEvaluation } from "./evaluation.seed";
 import {
   createFakeActualisationFormWithSteps,
   createFakeFormWithSteps,
-  getLastDeclaredYear,
 } from "./form.seed";
 import { createFakeIndicateurFinancier } from "./indicateur-financier";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
@@ -279,14 +278,12 @@ const buildActualisationFormCreate = (params: {
 const buildTypologieSpecs = (
   timeline: VersionSpec[],
   creationDate: Date,
-  now: Date,
-  lastDeclaredYear: number
+  now: Date
 ): TypologieSpec[] => {
   const startYear = Math.max(TYPOLOGIE_START_YEAR, creationDate.getFullYear());
   const lastVersion = timeline[timeline.length - 1];
-  // Une transformation écrit ses millésimes même hors campagne : sa version reste un plancher.
   const endYear = Math.max(
-    Math.min(now.getFullYear(), lastDeclaredYear),
+    now.getFullYear(),
     lastVersion.effectiveDate.getFullYear()
   );
 
@@ -432,11 +429,7 @@ const buildStructureRelations = (params: {
     return relations;
   }
 
-  const lastDeclaredYear = getLastDeclaredYear(
-    params.hasValidatedActualisation
-  );
   const { years } = getYearRange();
-  const declaredYears = years.filter((year) => year <= lastDeclaredYear);
   const indicateurCutoffYear = isStructureAutorisee(params.type)
     ? INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE
     : INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE;
@@ -444,12 +437,12 @@ const buildStructureRelations = (params: {
   return {
     ...relations,
     budgets: {
-      create: declaredYears.map((year) =>
+      create: years.map((year) =>
         createFakeBudget({ year, type: params.type })
       ),
     },
     indicateursFinanciers: {
-      create: declaredYears.map((year) =>
+      create: years.map((year) =>
         createFakeIndicateurFinancier({
           year,
           type: year <= indicateurCutoffYear ? "REALISE" : "PREVISIONNEL",
@@ -606,10 +599,7 @@ export const buildStructureCreate = (
         typologieSpecs: buildTypologieSpecs(
           history.versions,
           history.creationDate,
-          params.now,
-          getLastDeclaredYear(
-            params.isFinalised && params.hasValidatedActualisation
-          )
+          params.now
         ),
         type: params.type,
         isFinalised: params.isFinalised,

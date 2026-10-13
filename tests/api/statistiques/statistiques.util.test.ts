@@ -9,8 +9,8 @@ import {
   buildDnaStructureIdsResolver,
   filterByActiveStructureId,
   getCadaFromHudaStructureIds,
-  getEffectiveStructureVersionAtDate,
   getInitialisedStructureIds,
+  indexTimelineByStructureId,
   lookupActiveStructureIds,
   mapTypologieYears,
   parseStatistiquesPerimeterFilters,
@@ -209,75 +209,6 @@ describe("socle - périmètre général vs séries temporelles", () => {
   });
 });
 
-describe("socle - version effective à date (résolution adresses/typologies/DNA)", () => {
-  const timeline = buildTestStructureVersionTimeline([
-    {
-      structureId: 1,
-      structureVersionId: 10,
-      effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
-    },
-    {
-      structureId: 1,
-      structureVersionId: 11,
-      effectiveDate: new Date("2025-01-01T00:00:00.000Z"),
-    },
-  ]);
-
-  it("sélectionne la version effective à la date via getEffectiveStructureVersionAtDate", () => {
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2024-06-15T12:00:00.000Z"),
-        timeline
-      )
-    ).toMatchObject({ id: 10 });
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2025-06-15T12:00:00.000Z"),
-        timeline
-      )
-    ).toMatchObject({ id: 11 });
-  });
-
-  it("retourne null avant la première version effective", () => {
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2019-06-15T12:00:00.000Z"),
-        timeline
-      )
-    ).toBeNull();
-  });
-
-  it("retombe sur le socle (effectiveDate null) tant qu'aucune version datée n'est effective", () => {
-    const timelineWithSocle = [
-      { id: 10, structureId: 1, effectiveDate: null, placesAutorisees: null },
-      {
-        id: 11,
-        structureId: 1,
-        effectiveDate: new Date("2028-01-01T00:00:00.000Z"),
-        placesAutorisees: null,
-      },
-    ];
-
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2025-06-15T12:00:00.000Z"),
-        timelineWithSocle
-      )
-    ).toMatchObject({ id: 10 });
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2028-06-15T12:00:00.000Z"),
-        timelineWithSocle
-      )
-    ).toMatchObject({ id: 11 });
-  });
-});
-
 describe("socle - résolution DNA à date", () => {
   const timeline = buildTestStructureVersionTimeline([
     {
@@ -305,7 +236,7 @@ describe("socle - résolution DNA à date", () => {
 
   const resolveDnaStructureIds = buildDnaStructureIdsResolver(
     dnaLinks,
-    timeline
+    indexTimelineByStructureId(timeline)
   );
 
   it("rattache un DNA à la structure dont la version effective porte le lien", () => {
@@ -509,7 +440,7 @@ describe("applyVersionedPlacesToTypologies", () => {
 
     const resolved = applyVersionedPlacesToTypologies(
       [buildTypologie(2025, 20)],
-      timeline,
+      indexTimelineByStructureId(timeline),
       new Date("2026-07-01T00:00:00.000Z")
     );
 
@@ -527,7 +458,7 @@ describe("applyVersionedPlacesToTypologies", () => {
 
     const resolved = applyVersionedPlacesToTypologies(
       [buildTypologie(2026, null)],
-      timeline,
+      indexTimelineByStructureId(timeline),
       new Date("2026-07-01T00:00:00.000Z")
     );
 

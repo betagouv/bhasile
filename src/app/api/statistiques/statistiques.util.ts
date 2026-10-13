@@ -285,17 +285,6 @@ const pickEffectiveVersionFromIndex = (
     startOfNextUtcDay(date).getTime()
   );
 
-/* Version effective d'une structure à date : version la plus récente dont la date d'effet est inf à `date`, sinon version socle. */
-export const getEffectiveStructureVersionAtDate = (
-  structureId: number,
-  date: Date,
-  timeline: StatistiqueDbStructureVersionTimeline[]
-): StatistiqueDbStructureVersionTimeline | null =>
-  pickVersionBefore(
-    timeline.filter((version) => version.structureId === structureId),
-    startOfNextUtcDay(date).getTime()
-  );
-
 /**
  * Résolveur `dnaCode → structures` pré-indexé et mémoïsé par `(dnaCode, date)`.
  * Construit une fois par requête : la cartographie découpe le contexte par zone
@@ -304,7 +293,7 @@ export const getEffectiveStructureVersionAtDate = (
  */
 export const buildDnaStructureIdsResolver = (
   dnaLinks: StatistiqueDbDnaLink[],
-  timeline: StatistiqueDbStructureVersionTimeline[]
+  timelineByStructureId: StructureVersionTimelineIndex
 ): DnaStructureIdsResolver => {
   const linksByCode = new Map<
     string,
@@ -319,7 +308,6 @@ export const buildDnaStructureIdsResolver = (
     linksByCode.set(link.dna.code, links);
   }
 
-  const timelineByStructureId = indexTimelineByStructureId(timeline);
 
   // Clé au jour UTC : la résolution ne dépend que de `startOfNextUtcDay(date)`.
   const cache = new Map<string, number[]>();
@@ -362,10 +350,9 @@ export const resolveDnaEventStructureIds = (
 
 export const applyVersionedPlacesToTypologies = (
   typologies: StatistiqueDbTypologie[],
-  timeline: StatistiqueDbStructureVersionTimeline[],
+  timelineByStructureId: StructureVersionTimelineIndex,
   now: Date
 ): StatistiqueDbTypologie[] => {
-  const timelineByStructureId = indexTimelineByStructureId(timeline);
 
   return typologies.map((typologie) => {
     if (
@@ -401,11 +388,10 @@ export const filterByEffectiveVersionAtDate = <
   rows: Row[],
   structureIds: Iterable<number>,
   date: Date,
-  timeline: StatistiqueDbStructureVersionTimeline[],
+  timelineByStructureId: StructureVersionTimelineIndex,
   now: Date = getNow()
 ): Row[] => {
   const cappedDate = date < now ? date : now;
-  const timelineByStructureId = indexTimelineByStructureId(timeline);
   const effectiveVersionIdByStructureId = new Map<number, number>();
 
   for (const structureId of structureIds) {
