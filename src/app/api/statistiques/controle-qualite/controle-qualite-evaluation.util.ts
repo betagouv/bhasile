@@ -1,3 +1,4 @@
+import { getEvaluationNote } from "@/app/utils/evaluation.util";
 import { aggregateValues, NumericAggregation } from "@/app/utils/math.util";
 import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
 import { ControleQualiteEvaluationStat } from "@/schemas/api/statistique.schema";
@@ -17,7 +18,7 @@ export const computeEvaluationGlobalSummary = (
 ): { moyenneEvaluationsLast12Months: number | null } => ({
   moyenneEvaluationsLast12Months: roundStatsNumber(
     aggregateValues(
-      evaluations.map((evaluation) => evaluation.note),
+      evaluations.map(getEvaluationNote),
       aggregation
     )
   ),
@@ -39,7 +40,7 @@ export const sumEvaluationNotes = (
     nbStructuresEvaluees: structureIds.size,
     noteGenerale: roundStatsNumber(
       aggregateValues(
-        evaluations.map((evaluation) => evaluation.note),
+        evaluations.map(getEvaluationNote),
         aggregation
       )
     ),

@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
 
+import { roundTo } from "./math.util";
+
 export const getEvaluationsDefaultValues = (
   evaluations: EvaluationApiType[] = [],
   isAutorisee: boolean
@@ -14,7 +16,6 @@ export const getEvaluationsDefaultValues = (
       notePersonne: evaluation.notePersonne ?? null,
       notePro: evaluation.notePro ?? null,
       noteStructure: evaluation.noteStructure ?? null,
-      note: evaluation.note ?? null,
       fileUploads: evaluation.fileUploads || [],
     };
   });
@@ -25,7 +26,6 @@ export const getEvaluationsDefaultValues = (
       notePersonne: null,
       notePro: null,
       noteStructure: null,
-      note: null,
       fileUploads: [],
       uuid: uuidv4(),
     };
@@ -51,4 +51,25 @@ export const transformFormEvaluationsToApiEvaluations = (
         ) as { id: number; key: string }[] | undefined,
       };
     });
+};
+
+export const getEvaluationNote = ({
+  notePersonne,
+  notePro,
+  noteStructure,
+}: EvaluationNotes): number | null => {
+  if (
+    typeof notePersonne !== "number" ||
+    typeof notePro !== "number" ||
+    typeof noteStructure !== "number"
+  ) {
+    return null;
+  }
+  return roundTo((notePersonne + notePro + noteStructure) / 3, 2);
+};
+
+type EvaluationNotes = {
+  notePersonne?: number | null;
+  notePro?: number | null;
+  noteStructure?: number | null;
 };

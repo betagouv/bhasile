@@ -208,7 +208,6 @@ export const createFinalisationControlesValidStructure = (id: number) => {
         notePersonne: 1,
         notePro: 1,
         noteStructure: 1,
-        note: 1,
         fileUploads: [{ id: 1, key: "evaluation-1" }],
       },
     ],

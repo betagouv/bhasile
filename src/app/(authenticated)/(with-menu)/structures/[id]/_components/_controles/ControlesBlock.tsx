@@ -9,6 +9,7 @@ import { DocumentDownloadDropdown } from "@/app/components/download/DocumentDown
 import { InformationCard } from "@/app/components/InformationCard";
 import { NoDataAccordion } from "@/app/components/NoDataAccordion";
 import { useUserAction } from "@/app/hooks/useUserAction";
+import { getEvaluationNote } from "@/app/utils/evaluation.util";
 import { getNow } from "@/app/utils/now.util";
 import { getControleQualiteDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { getLastPastVisit } from "@/app/utils/structure.util";
@@ -37,8 +38,10 @@ export const ControlesBlock = (): ReactElement => {
   const lastPastEvaluation = getLastPastVisit(evaluations);
   const lastPastControle = getLastPastVisit(controles);
 
-  const lastNote = lastPastEvaluation?.note;
-  const hasLastNote = lastNote !== undefined && lastNote !== null;
+  const lastNote = lastPastEvaluation
+    ? getEvaluationNote(lastPastEvaluation)
+    : null;
+  const hasLastNote = lastNote !== null;
 
   return (
     <Block

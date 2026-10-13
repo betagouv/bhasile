@@ -6,6 +6,7 @@ import {
 
 import { computeResultatNet } from "../budget.util";
 import { formatDate, getTypePlacesYearRange, getYearRange } from "../date.util";
+import { getEvaluationNote } from "../evaluation.util";
 import { getRealCreationYear } from "../structure.util";
 
 export const getTypePlacesDownloadContent = (structure: StructureApiRead) => ({
@@ -159,6 +160,7 @@ export const getControleQualiteDownloadContent = (
           structure.evaluations?.map((evaluation) => ({
             ...evaluation,
             date: formatDate(evaluation.date),
+            note: getEvaluationNote(evaluation),
           })) || [],
         headersMap: {
           date: "Date",

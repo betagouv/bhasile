@@ -17,7 +17,6 @@ describe("evaluationsSchemaWithConditionalValidation", () => {
       notePersonne: 3.63,
       notePro: 3.77,
       noteStructure: 3.17,
-      note: 3.52,
     });
 
     expect(result.success).toBe(true);
@@ -29,7 +28,6 @@ describe("evaluationsSchemaWithConditionalValidation", () => {
       notePersonne: null,
       notePro: null,
       noteStructure: null,
-      note: null,
     });
 
     expect(result.success).toBe(false);
@@ -43,8 +41,7 @@ describe("evaluationsSchemaWithConditionalValidation", () => {
       date: "2024-11-29",
       notePersonne: 3.63,
       notePro: 3.77,
-      noteStructure: 3.17,
-      note: 0,
+      noteStructure: 0,
     });
 
     expect(result.success).toBe(false);
@@ -59,7 +56,6 @@ describe("evaluationsSchemaWithConditionalValidation", () => {
       notePersonne: null,
       notePro: null,
       noteStructure: null,
-      note: null,
     });
 
     expect(result.success).toBe(true);
@@ -71,7 +67,6 @@ describe("evaluationsSchemaWithConditionalValidation", () => {
       notePersonne: 3.63,
       notePro: 3.77,
       noteStructure: 3.17,
-      note: 3.52,
     });
 
     expect(result.success).toBe(true);
@@ -83,7 +78,6 @@ describe("evaluationsSchemaWithConditionalValidation", () => {
       notePersonne: 0,
       notePro: 0,
       noteStructure: 0,
-      note: 0,
     });
 
     expect(result.success).toBe(false);
@@ -97,11 +91,14 @@ describe("evaluationsSchemaWithConditionalValidation", () => {
       date: "2024-11-29",
       notePersonne: 3.63,
       notePro: 3.77,
-      noteStructure: 3.17,
-      note: 0,
+      noteStructure: 0,
     });
 
-    expect(result.error?.issues[0]?.path).toEqual(["evaluations", 0, "note"]);
+    expect(result.error?.issues[0]?.path).toEqual([
+      "evaluations",
+      0,
+      "noteStructure",
+    ]);
   });
 });
 

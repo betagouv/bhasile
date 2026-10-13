@@ -5,6 +5,7 @@ import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { SeeFileButton } from "@/app/components/common/SeeFileButton";
 import { formatDate } from "@/app/utils/date.util";
+import { getEvaluationNote } from "@/app/utils/evaluation.util";
 import { EVALUATION_NOTES_START_YEAR, MAX_EXPORT_ITEMS } from "@/constants";
 import { useExportContext } from "@/contexts/ExportContext";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
@@ -17,7 +18,9 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
       ? evaluations.slice(0, MAX_EXPORT_ITEMS)
       : evaluations;
 
-    return filteredEvaluations.map((evaluation) => [
+    return filteredEvaluations.map((evaluation) => {
+      const note = getEvaluationNote(evaluation);
+      return [
       <span className="inline-block text-center w-full" key={evaluation.id}>
         {formatDate(evaluation.date)}
       </span>,
@@ -52,9 +55,9 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
         )}
       </span>,
       <span className="inline-block text-center w-full" key={evaluation.id}>
-        {evaluation.note ? (
+        {note ? (
           <>
-            <NumberDisplay value={evaluation.note} />
+            <NumberDisplay value={note} />
             <span className="text-disabled-grey">&nbsp;/4</span>
           </>
         ) : (
@@ -77,7 +80,8 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
           <EmptyCell />
         )}
       </span>,
-    ]);
+      ];
+    });
   };
 
   return (

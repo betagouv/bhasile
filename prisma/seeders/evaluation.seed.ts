@@ -1,6 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { roundTo } from "@/app/utils/math.util";
 import { EVALUATION_NOTE_MAX, EVALUATION_NOTE_MIN } from "@/constants";
 import { Evaluation } from "@/generated/prisma/client";
 
@@ -20,7 +19,6 @@ export const createFakeEvaluation = (): Omit<
 
   return {
     date: faker.date.past(),
-    note: roundTo((notePro + notePersonne + noteStructure) / 3, 2),
     notePro,
     notePersonne,
     noteStructure,
