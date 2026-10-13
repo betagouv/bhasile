@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { computeFinanceStatistiques } from "@/app/api/statistiques/finance/finance.util";
+import {
+  computeFinanceStatistiques,
+  computeFinanceTotalValuesForYears,
+} from "@/app/api/statistiques/finance/finance.util";
 import { computeStructureJoursPlaces } from "@/app/api/statistiques/finance/finance-theorique.util";
 import type {
   StatistiqueDbBudget,
@@ -496,6 +499,18 @@ describe("finance - budgets des structures sous CPOM", () => {
     expect(year2024?.total.totalProduits).toBe(1000);
   });
 
+  it("ignore une ligne de budget CPOM non saisie et garde le budget des structures", () => {
+    const context = {
+      ...buildCpomContext(),
+      cpomBudgets: [cpomBudget(1, 100, 2024, StructureType.CADA, 0, 0)],
+    };
+    const year2024 = computeFinanceStatistiques(context, "moyenne").byYear.find(
+      (entry) => entry.year === 2024
+    );
+
+    expect(year2024?.total.totalProduits).toBe(100);
+  });
+
   it("garde le budget de la structure hors des années de CPOM", () => {
     const year2025 = computeFinanceStatistiques(
       buildCpomContext(),
@@ -503,6 +518,26 @@ describe("finance - budgets des structures sous CPOM", () => {
     ).byYear.find((entry) => entry.year === 2025);
 
     expect(year2025?.total.totalProduits).toBe(10);
+  });
+});
+
+describe("finance - cartographie", () => {
+  it("résout l'ETP réalisé sinon prévisionnel structure par structure", () => {
+    const context = buildFinanceContext({
+      structures: [
+        testStructure(1, StructureType.CADA),
+        testStructure(2, StructureType.CADA),
+      ],
+      indicateurs: [
+        indicateurRow(1, 1, 2024, "REALISE", { ETP: 10 }),
+        indicateurRow(2, 1, 2024, "PREVISIONNEL", { ETP: 99 }),
+        indicateurRow(3, 2, 2024, "PREVISIONNEL", { ETP: 5 }),
+      ],
+    });
+
+    expect(
+      computeFinanceTotalValuesForYears(context, [2024], "moyenne", "etp")
+    ).toEqual([15]);
   });
 });
 

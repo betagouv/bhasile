@@ -30,7 +30,7 @@ Chaque structure saisit son budget à son échelle, et chaque CPOM a en plus son
 
 - une structure **sous CPOM sur l'année** (`isCpomLinkActiveInYear`, cf. [structures](../structures/README.md#cpom-actif)) est comptée via la ligne de budget du CPOM de son type, **à la place** de son propre budget ;
 - le budget du CPOM est compté **une fois et en entier**, même si le périmètre ou le filtre sur les structures actualisées ne retient qu'une partie de ses structures (même logique que « CPOM complets ou partiels ») : les montants peuvent donc dépasser le périmètre filtré, à signaler par une infobulle ;
-- sans ligne de budget CPOM pour l'année et le type, repli sur le budget de la structure ;
+- sans ligne de budget CPOM pour l'année et le type, ou avec une ligne à zéro (le formulaire CPOM enregistre une ligne par année même non saisie), repli sur le budget de la structure ;
 - `excedentCumule` / `deficitCumule` : un résultat par ligne de budget CPOM, un par structure hors CPOM ;
 - le coût théorique reste calculé avec la dotation propre de chaque structure, puisqu'il se calcule structure par structure.
 
@@ -68,7 +68,7 @@ Base commune au coût théorique (dénominateur) et au taux théorique (places m
 
 ## Cartographie
 
-`computeFinanceTotalValuesForYears` n'expose qu'un état par indicateur : `etp` et `tauxEncadrement` prennent la valeur réalisée du périmètre, à défaut la prévisionnelle ; `coutJournalier` est le coût théorique.
+`computeFinanceTotalValuesForYears` n'expose qu'un état par indicateur : `etp` et `tauxEncadrement` prennent le réalisé, à défaut le prévisionnel, résolu structure par structure ; `coutJournalier` est le coût théorique. Le budget global d'un CPOM y est compté en entier dans chaque zone qui contient une de ses structures.
 
 ## Calcul
 
