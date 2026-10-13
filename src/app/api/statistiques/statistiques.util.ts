@@ -23,10 +23,15 @@ import type {
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
 
 import { pickVersionBefore } from "../structure-versions/structure-version.util";
-import { isStructureFinalised } from "../structures/structure.util";
+import type { StructureDbList } from "../structures/structure.db.type";
+import {
+  isStructureFinalised,
+  isStructureInCpom,
+} from "../structures/structure.util";
 import { resolveStructuresForYear } from "./completude.util";
 import type {
   DnaStructureIdsResolver,
+  StatistiqueDbCpomStructure,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
@@ -194,22 +199,70 @@ export const getPeriodBounds = (
   }
 };
 
+export const getTwelveMonthWindow = (): { start: Date; end: Date } => {
+  const today = startOfUtcDay();
+  const twelveMonthsAgo = new Date(today);
+  twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - 12);
+
+  return {
+    start: monthKeyToDate(toMonthKey(twelveMonthsAgo)),
+    end: startOfNextUtcDay(today),
+  };
+};
+
 export const filterByTwelveMonthWindow = <Item>(
   items: Item[],
   getDate: (item: Item) => Date | string | null | undefined
 ): Item[] => {
-  const twelveMonthsAgo = startOfUtcDay();
-  twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - 12);
-  const cutoff = toMonthKey(twelveMonthsAgo);
+  const { start } = getTwelveMonthWindow();
 
   return items.filter((item) => {
     const date = getDate(item);
-    if (date == null) {
-      return false;
-    }
-    return toMonthKey(new Date(date)) >= cutoff;
+    return date != null && new Date(date) >= start;
   });
 };
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+type StructureOpenDatesContext = Pick<
+  StatistiquesContext,
+  "openingDateByStructureId" | "closureDateByStructureId"
+>;
+
+export const getStructureOpenBounds = (
+  context: StructureOpenDatesContext,
+  structureId: number,
+  start: Date,
+  end: Date
+): { start: Date; end: Date } | null => {
+  const openingDate = context.openingDateByStructureId.get(structureId);
+  const closureDate = context.closureDateByStructureId.get(structureId);
+  const openStart = openingDate
+    ? Math.max(start.getTime(), startOfUtcDay(openingDate).getTime())
+    : start.getTime();
+  const openEnd = closureDate
+    ? Math.min(end.getTime(), startOfNextUtcDay(closureDate).getTime())
+    : end.getTime();
+
+  return openEnd > openStart
+    ? { start: new Date(openStart), end: new Date(openEnd) }
+    : null;
+};
+
+export const countDaysBetween = (start: Date, end: Date): number =>
+  Math.round((end.getTime() - start.getTime()) / DAY_IN_MS);
+
+export const isStructureOpenAt = (
+  context: StructureOpenDatesContext,
+  structureId: number,
+  date: Date
+): boolean =>
+  getStructureOpenBounds(
+    context,
+    structureId,
+    startOfUtcDay(date),
+    startOfNextUtcDay(date)
+  ) !== null;
 
 export type StructureVersionTimelineIndex = Map<
   number,
@@ -726,6 +779,13 @@ export const getCadaFromHudaStructureIds = (
       )
       .map((structure) => structure.id)
   );
+
+/** Règle unique « sous CPOM sur l'année » : celle des formulaires (`isStructureInCpom`). */
+export const isCpomLinkActiveInYear = (
+  link: StatistiqueDbCpomStructure,
+  year: number
+): boolean =>
+  isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year);
 
 export const filterInitialisedStructures = (
   structures: StatistiqueDbStructure[],

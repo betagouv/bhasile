@@ -1,7 +1,3 @@
-import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
-import type { StructureDbList } from "@/app/api/structures/structure.db.type";
-import { isStructureInCpom } from "@/app/api/structures/structure.util";
-import { startOfUtcDay } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
 import {
   BatiStat,
@@ -31,6 +27,7 @@ import {
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
+  isCpomLinkActiveInYear,
   mapTypologieYears,
   resolveCountedStructuresForYear,
 } from "../statistiques.util";
@@ -123,7 +120,7 @@ const countActiveCpoms = (
   for (const link of cpomLinks) {
     if (
       structureIds.has(link.structureId) &&
-      isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year)
+      isCpomLinkActiveInYear(link, year)
     ) {
       activeCpomIds.add(link.cpomId);
     }
@@ -143,59 +140,13 @@ export const countStructuresAvecCpomForYear = (
   for (const link of cpomLinks) {
     if (
       structureIds.has(link.structureId) &&
-      isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year)
+      isCpomLinkActiveInYear(link, year)
     ) {
       structuresWithActiveCpom.add(link.structureId);
     }
   }
 
   return structuresWithActiveCpom.size;
-};
-
-const isCpomLinkActiveNow = (
-  link: StatistiqueDbCpomStructure,
-  now: Date
-): boolean => {
-  const [cpomDateStart, cpomDateEnd] = getDatesOfCurrentActeAdministratif(
-    link.cpom?.actesAdministratifs ?? [],
-    "CONVENTION_CPOM",
-    false
-  );
-  const dateStart = link.dateStart ?? cpomDateStart;
-  const dateEnd = link.dateEnd ?? cpomDateEnd;
-
-  if (!dateStart || !dateEnd) {
-    return false;
-  }
-
-  const nowDay = startOfUtcDay(now);
-  return dateStart <= nowDay && dateEnd >= nowDay;
-};
-
-const computeActiveCpomStats = (
-  cpomLinks: StatistiqueDbCpomStructure[],
-  activeStructureIds: number[]
-): { totalCpoms: number; structuresAvecCpom: number } => {
-  const now = getNow();
-  const activeStructureIdSet = new Set(activeStructureIds);
-  const activeCpomIds = new Set<number>();
-  const structureIdsWithActiveCpom = new Set<number>();
-
-  for (const link of cpomLinks) {
-    if (!activeStructureIdSet.has(link.structureId)) {
-      continue;
-    }
-    if (!isCpomLinkActiveNow(link, now)) {
-      continue;
-    }
-    activeCpomIds.add(link.cpomId);
-    structureIdsWithActiveCpom.add(link.structureId);
-  }
-
-  return {
-    totalCpoms: activeCpomIds.size,
-    structuresAvecCpom: structureIdsWithActiveCpom.size,
-  };
 };
 
 const fillStructureTypes = (
@@ -337,11 +288,10 @@ export const computeStructuresStatistiques = (
     now
   );
   const batiMap = getBatiPerStructure(currentAdresses);
-  const activeStructureIds = structures.map((structure) => structure.id);
-  const { totalCpoms, structuresAvecCpom } = computeActiveCpomStats(
-    cpomLinks,
-    activeStructureIds
+  const activeStructureIds = new Set(
+    structures.map((structure) => structure.id)
   );
+  const currentYear = now.getUTCFullYear();
 
   const structureBatis = computeBatiStats(structures, batiMap, currentAdresses);
 
@@ -354,8 +304,12 @@ export const computeStructuresStatistiques = (
       (total, bati) => total + bati.places,
       0
     ),
-    totalCpoms,
-    structuresAvecCpom,
+    totalCpoms: countActiveCpoms(cpomLinks, activeStructureIds, currentYear),
+    structuresAvecCpom: countStructuresAvecCpomForYear(
+      cpomLinks,
+      activeStructureIds,
+      currentYear
+    ),
     structureTypes: computeTypeStats(structures, typologieMap),
     structureBatis,
     byYear: computeByYearStats(context, batiMap, currentAdresses),

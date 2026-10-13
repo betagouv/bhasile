@@ -7,6 +7,7 @@ import type {
   StatistiqueDbStructureVersionTimeline,
   StatistiquesContext,
 } from "../statistiques.db.type";
+import { countDaysBetween, getStructureOpenBounds } from "../statistiques.util";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -35,25 +36,23 @@ export const computeStructureJoursPlaces = (
   placesTypologie: number | null,
   now: Date
 ): StructureJoursPlaces | null => {
-  const yearStart = Date.UTC(year, 0, 1);
-  const yearEnd = Date.UTC(year + 1, 0, 1);
-  const openingDate = context.openingDateByStructureId.get(structureId);
-  const closureDate = context.closureDateByStructureId.get(structureId);
-  const start = openingDate
-    ? Math.max(yearStart, startOfUtcDay(openingDate).getTime())
-    : yearStart;
-  const end = closureDate
-    ? Math.min(yearEnd, startOfNextUtcDay(closureDate).getTime())
-    : yearEnd;
-  if (end <= start) {
+  const bounds = getStructureOpenBounds(
+    context,
+    structureId,
+    new Date(Date.UTC(year, 0, 1)),
+    new Date(Date.UTC(year + 1, 0, 1))
+  );
+  if (!bounds) {
     return null;
   }
+  const start = bounds.start.getTime();
+  const end = bounds.end.getTime();
 
   if (year < PLACES_VERSIONED_FROM_YEAR) {
     if (placesTypologie === null) {
       return null;
     }
-    const jours = Math.round((end - start) / DAY_IN_MS);
+    const jours = countDaysBetween(bounds.start, bounds.end);
     return { jours, joursPlaces: jours * placesTypologie };
   }
 
@@ -84,8 +83,9 @@ export const computeStructureJoursPlaces = (
     if (places == null) {
       continue;
     }
-    const segmentJours = Math.round(
-      (boundaries[index + 1] - boundaries[index]) / DAY_IN_MS
+    const segmentJours = countDaysBetween(
+      new Date(boundaries[index]),
+      new Date(boundaries[index + 1])
     );
     jours += segmentJours;
     joursPlaces += segmentJours * places;

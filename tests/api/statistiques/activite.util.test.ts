@@ -88,6 +88,7 @@ describe("activité - agrégés et série mensuelle", () => {
     expect(result.summary.placesEnregistreesDna).toBe(150);
     expect(result.summary.placesIndisponibles).toBe(10);
     expect(result.summary.placesDisponibles).toBe(90);
+    expect(result.summary.placesCaes).toBe(50);
   });
 
   it("dans les agrégés, somme tous les DNA d'une structure multi-DNA sur son dernier mois déclaré", () => {

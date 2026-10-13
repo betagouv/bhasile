@@ -12,6 +12,8 @@ Pour chaque structure **ouverte à la date de référence** (`context.structures
 
 Une structure sans activité n'entre pas dans les totaux.
 
+`placesEnregistreesDna` = `placesDisponibles` + `placesIndisponibles` + `placesCaes` : l'indisponibilité n'est pas suivie pour les CAES, leurs places forment une part à part du camembert.
+
 ## `byMonth` - tableau mensuel
 
 Somme des activités **effectivement déclarées** pour chaque mois.

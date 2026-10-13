@@ -92,6 +92,7 @@ const buildContext = (
     })),
     departements: [],
     budgets: [],
+    cpomBudgets: [],
     indicateurs: [],
     activites: [],
     rmus: [],

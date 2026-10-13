@@ -73,7 +73,7 @@ const cpomLink = (
   cpom: { actesAdministratifs: [] },
 });
 
-describe("structures - CPOM actifs à la date de référence", () => {
+describe("structures - CPOM actifs sur l'année en cours", () => {
   beforeEach(() => {
     vi.setSystemTime(REFERENCE_DATE);
   });
@@ -137,6 +137,23 @@ describe("structures - CPOM actifs à la date de référence", () => {
 
     expect(result.totalCpoms).toBe(1);
     expect(result.structuresAvecCpom).toBe(1);
+  });
+
+  it("compte encore un CPOM terminé plus tôt dans l'année, comme la colonne de l'année", () => {
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures: [testStructure(1)],
+        typologies: [testTypologie(1, 1, 2025, 10)],
+        adresses: [],
+        departements: [],
+        cpomLinks: [cpomLink(1, 100, 1, "2024-01-01", "2025-03-31")],
+      })
+    );
+    const year2025 = result.byYear.find((entry) => entry.year === 2025);
+
+    expect(result.totalCpoms).toBe(1);
+    expect(result.totalCpoms).toBe(year2025?.totalCpoms);
+    expect(result.structuresAvecCpom).toBe(year2025?.structuresAvecCpom);
   });
 
   it("distingue deux CPOM actifs simultanés sur le même parc", () => {

@@ -2,7 +2,7 @@
 
 ## Millésimes
 
-Union des années présentes dans `Budget` ou `IndicateurFinancier`.
+Union des années présentes dans `Budget` (structures et CPOM) ou `IndicateurFinancier`.
 
 Le front choisit l'année affichée dans `byYear`.
 
@@ -23,6 +23,18 @@ Structures comptabilisées sur l'année (cf. [README racine](../README.md#struct
 | `coutJournalierCible`                                                   | Par structure : cible de `reporting.tarif_journalier_cible`, puis moyenne ou médiane     |
 
 Par scope et par année (pas de cumul multi-années). Année absente dans un scope -> zéros pour les montants, `null` pour les indicateurs. Arrondi 1 décimale (`roundStatsNumber`).
+
+## Budgets des structures sous CPOM
+
+Chaque structure saisit son budget à son échelle, et chaque CPOM a en plus son budget global, une ligne par année et par type de structure. Pour ne pas compter deux fois (`buildBudgetEntries`) :
+
+- une structure **sous CPOM sur l'année** (`isCpomLinkActiveInYear`, cf. [structures](../structures/README.md#cpom-actif)) est comptée via la ligne de budget du CPOM de son type, **à la place** de son propre budget ;
+- le budget du CPOM est compté **une fois et en entier**, même si le périmètre ou le filtre sur les structures actualisées ne retient qu'une partie de ses structures (même logique que « CPOM complets ou partiels ») : les montants peuvent donc dépasser le périmètre filtré, à signaler par une infobulle ;
+- sans ligne de budget CPOM pour l'année et le type, repli sur le budget de la structure ;
+- `excedentCumule` / `deficitCumule` : un résultat par ligne de budget CPOM, un par structure hors CPOM ;
+- le coût théorique reste calculé avec la dotation propre de chaque structure, puisqu'il se calcule structure par structure.
+
+Les vues SQL de reporting (`scripts/views/002_structures_aggregate.sql`, `006_reporting_global.sql`) suivent le même principe pour la dotation du parc (budget du CPOM, sinon budget de la structure), avec trois différences : le CPOM y est « en cours » au jour près et non à l'année, le repli se déclenche si le CPOM n'a aucun budget toutes années confondues, et la dotation retenue est la dotation accordée, à défaut la demandée, du dernier millésime.
 
 ## Indicateurs généraux : choix retenus (octobre 2026) et raisons
 
@@ -72,4 +84,4 @@ Par année : `computeFinanceYearData` calcule une fois les budgets et les indica
 
 ## Sources
 
-`Budget`, `IndicateurFinancier` (ETP), `StructureVersion` et `StructureTypologie` (places), `reporting.tarif_journalier_cible`, `reporting.taux_encadrement_cible`.
+`Budget` (structures et CPOM), `CpomStructure`, `IndicateurFinancier` (ETP), `StructureVersion` et `StructureTypologie` (places), `reporting.tarif_journalier_cible`, `reporting.taux_encadrement_cible`.

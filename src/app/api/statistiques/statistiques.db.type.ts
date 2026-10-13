@@ -201,6 +201,13 @@ export type StatistiqueDbBudget = StatistiqueDbBudgetAgg & {
   structureId: number;
 };
 
+/** Budget porté par un CPOM, une ligne par année et par type de structure. */
+export type StatistiqueDbCpomBudget = StatistiqueDbBudgetAgg & {
+  id: number;
+  cpomId: number;
+  structureType: StructureType | null;
+};
+
 export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   select: {
     id: true;
@@ -269,6 +276,7 @@ export type StatistiquesContext = {
   structureVersionTimeline: StatistiqueDbStructureVersionTimeline[];
   departements: StatistiqueDbDepartement[];
   budgets: StatistiqueDbBudget[];
+  cpomBudgets: StatistiqueDbCpomBudget[];
   indicateurs: StatistiqueDbIndicateurFinancier[];
   activites: StatistiqueDbActivite[];
   rmus: StatistiqueDbRmu[] | null;

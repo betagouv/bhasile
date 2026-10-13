@@ -69,6 +69,7 @@ const toActiviteSummary = (totals: ActiviteTotals): ActiviteSummaryStat => {
     placesIndisponibles: totals.placesIndisponibles,
     placesDisponibles:
       totals.placesAutoriseesHorsCaes - totals.placesIndisponibles,
+    placesCaes: totals.placesEnregistreesDna - totals.placesAutoriseesHorsCaes,
     tauxIndisponibilite: roundStatsRate(
       ratio(totals.placesIndisponibles, totals.placesAutoriseesHorsCaes)
     ),
