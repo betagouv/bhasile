@@ -19,6 +19,7 @@ import type {
 import {
   computeTotalPlaces,
   filterByEffectiveVersionAtDate,
+  filterInitialisedStructures,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -152,13 +153,9 @@ const computeAdressePlacesSpecialesSnapshot = (
 export const computePlacesStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["places"] => {
-  const {
-    structures,
-    typologies,
-    adresses,
-    departements,
-    structureVersionTimeline,
-  } = context;
+  const { typologies, adresses, departements, structureVersionTimeline } =
+    context;
+  const structures = filterInitialisedStructures(context.structures, context);
   const typologieMap = getLastTypologiePerStructure(typologies);
   const now = getNow();
 
@@ -210,7 +207,7 @@ export const computeAdresseSnapshot = (
   field: keyof PlacesSpecialesAdresse
 ): number =>
   computeAdressePlacesSpecialesSnapshot(
-    context.structures,
+    filterInitialisedStructures(context.structures, context),
     context.adresses,
     context.structureVersionTimeline,
     getNow()

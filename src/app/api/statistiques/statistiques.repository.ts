@@ -2,10 +2,6 @@ import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
 import { CODE_REGION_IDF } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
-import {
-  StructureVersionTransformationType,
-  TransformationType,
-} from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
 import {
@@ -27,6 +23,7 @@ import type {
   StatistiqueDbRmu,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
+  StatistiqueDbStructureInitialisation,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTarifJournalierCible,
   StatistiqueDbTauxEncadrementCible,
@@ -79,28 +76,6 @@ export const findPerimeterStructures = async (
           ],
         },
       },
-      // Structures initialisées uniquement (même règle que `isStructureFinalised`).
-      OR: [
-        {
-          forms: {
-            some: {
-              status: true,
-              formDefinition: { slug: FINALISATION_FORM_SLUG },
-            },
-          },
-        },
-        {
-          structureVersions: {
-            some: {
-              effectiveDate: { lt: startOfNextUtcDay(reference) },
-              structureVersionTransformation: {
-                type: StructureVersionTransformationType.CREATION,
-                transformation: { form: { status: true } },
-              },
-            },
-          },
-        },
-      ],
     },
     select: { id: true, type: true, departementAdministratif: true },
   });
@@ -118,6 +93,38 @@ export const findStructureActivityDates = async (
       id: true,
       creationDate: true,
       fermetureDate: true,
+    },
+  });
+};
+
+export const findStructureInitialisations = async (
+  structureIds: number[]
+): Promise<StatistiqueDbStructureInitialisation[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+
+  return prisma.structure.findMany({
+    where: { id: { in: structureIds } },
+    select: {
+      id: true,
+      forms: {
+        where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
+        select: { status: true, formDefinition: { select: { slug: true } } },
+      },
+      structureVersions: {
+        select: {
+          effectiveDate: true,
+          structureVersionTransformation: {
+            select: {
+              type: true,
+              transformation: {
+                select: { type: true, form: { select: { status: true } } },
+              },
+            },
+          },
+        },
+      },
     },
   });
 };
@@ -157,38 +164,6 @@ export const findIdfDepartementNumeros = async (): Promise<string[]> => {
   });
 
   return departements.map((departement) => departement.numero);
-};
-
-/** CADA créés par une transformation HUDA vers CADA finalisée. */
-export const findCadaFromHudaStructureIds = async (
-  structureIds: number[]
-): Promise<number[]> => {
-  if (structureIds.length === 0) {
-    return [];
-  }
-
-  const versions = await prisma.structureVersion.findMany({
-    where: {
-      structureId: { in: structureIds },
-      structureVersionTransformation: {
-        type: StructureVersionTransformationType.CREATION,
-        transformation: {
-          type: {
-            in: [
-              TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
-              TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
-            ],
-          },
-          form: { status: true },
-        },
-      },
-    },
-    select: { structureId: true },
-  });
-
-  return versions
-    .map((version) => version.structureId)
-    .filter((structureId): structureId is number => structureId !== null);
 };
 
 export const findTarifsJournaliersCibles = async (): Promise<

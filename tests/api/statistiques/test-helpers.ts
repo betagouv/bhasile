@@ -179,6 +179,7 @@ export const buildTestStatistiquesContext = (
         | "indicateurs"
         | "activites"
         | "rmus"
+        | "initialisedStructureIds"
         | "openingDateByStructureId"
         | "closureDateByStructureId"
         | "actualisationFormDefinitions"
@@ -237,6 +238,8 @@ export const buildTestStatistiquesContext = (
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],
     rmus: partial.rmus !== undefined ? partial.rmus : [],
+    initialisedStructureIds:
+      partial.initialisedStructureIds ?? new Set(allStructureIds),
     openingDateByStructureId: partial.openingDateByStructureId ?? new Map(),
     closureDateByStructureId: partial.closureDateByStructureId ?? new Map(),
     actualisationFormDefinitions: partial.actualisationFormDefinitions ?? [],

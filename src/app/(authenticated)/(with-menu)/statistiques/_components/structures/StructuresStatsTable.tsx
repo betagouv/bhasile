@@ -5,6 +5,21 @@ import { Table } from "@/app/components/common/Table";
 import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { StructuresByYearStat } from "@/schemas/api/statistique.schema";
+import { Repartition, RepartitionLabel } from "@/types/adresse.type";
+import { StructureType } from "@/types/structure.type";
+
+const STRUCTURE_TYPE_ROWS = [
+  StructureType.CADA,
+  StructureType.CPH,
+  StructureType.HUDA,
+  StructureType.CAES,
+];
+
+const BATI_ROWS = [
+  Repartition.COLLECTIF,
+  Repartition.DIFFUS,
+  Repartition.MIXTE,
+];
 
 export const StructuresStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
@@ -25,45 +40,25 @@ export const StructuresStatsTable = (): ReactElement => {
   const structureStats = [
     {
       title: "Types de structures",
-      rows: [
-        {
-          label: "CADA",
-          value: structureYears.map((yearItem) => yearItem.structuresCada),
-        },
-        {
-          label: "CPH",
-          value: structureYears.map((yearItem) => yearItem.structuresCph),
-        },
-        {
-          label: "HUDA",
-          value: structureYears.map((yearItem) => yearItem.structuresHuda),
-        },
-        {
-          label: "CAES",
-          value: structureYears.map((yearItem) => yearItem.structuresCaes),
-        },
-      ],
+      rows: STRUCTURE_TYPE_ROWS.map((type) => ({
+        label: type,
+        value: structureYears.map(
+          (yearItem) =>
+            yearItem.structureTypes.find((stat) => stat.type === type)
+              ?.structures ?? 0
+        ),
+      })),
     },
     {
       title: "Types de bâtis",
-      rows: [
-        {
-          label: "Collectif",
-          value: structureYears.map(
-            (yearItem) => yearItem.structuresBatiCollectif
-          ),
-        },
-        {
-          label: "Diffus",
-          value: structureYears.map(
-            (yearItem) => yearItem.structuresBatiDiffus
-          ),
-        },
-        {
-          label: "Mixte",
-          value: structureYears.map((yearItem) => yearItem.structuresBatiMixte),
-        },
-      ],
+      rows: BATI_ROWS.map((bati) => ({
+        label: RepartitionLabel[bati],
+        value: structureYears.map(
+          (yearItem) =>
+            yearItem.structureBatis.find((stat) => stat.bati === bati)
+              ?.structures ?? 0
+        ),
+      })),
     },
   ];
 

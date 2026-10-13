@@ -16,27 +16,30 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
-import { FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS } from "../completude.util";
+import {
+  FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS,
+  resolveStructuresForYear,
+} from "../completude.util";
 import type {
   StatistiqueDbBudget,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbStructure,
+  StatistiqueDbTypologieValues,
   StatistiquesContext,
 } from "../statistiques.db.type";
 import {
   collectDistinctYears,
+  getInitialisedStructuresActiveInYear,
   getTypologieMapForExactYear,
   indexTimelineByStructureId,
-  resolveCountedStructuresForYear,
+  type StructureVersionTimelineIndex,
 } from "../statistiques.util";
 import {
   buildCiblesFinancieresLookup,
   computeStructureJoursPlaces,
 } from "./finance-theorique.util";
 
-type FinanceScope = keyof Omit<FinanceByYearStat, "year" | "completude">;
-
-const FINANCE_SCOPES: FinanceScope[] = ["total", "autorisees", "subventionnees"];
+type FinanceScope = keyof Omit<FinanceByYearStat, "year">;
 
 const isStructureInFinanceScope = (
   structure: StatistiqueDbStructure,
@@ -91,15 +94,20 @@ const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
   };
 };
 
-type FinanceCartographieStat = {
-  etp: number | null;
-  tauxEncadrement: number | null;
+type StructureFinanceIndicateurs = {
+  structureId: number;
+  etpPrevisionnel: number | null;
+  etpRealise: number | null;
+  tauxPrevisionnel: number | null;
+  tauxRealise: number | null;
+  tauxCible: number | null;
+  coutTheorique: number | null;
+  coutCible: number | null;
 };
 
-type ScopeByYearResult = {
-  stat: FinanceByYearScopeStat;
-  // Réalisé, sinon prévisionnel, résolu par structure : la cartographie n'affiche qu'un état.
-  cartographie: FinanceCartographieStat;
+type FinanceYearData = {
+  budgets: StatistiqueDbBudget[];
+  indicateurs: StructureFinanceIndicateurs[];
   hasData: boolean;
 };
 
@@ -141,14 +149,14 @@ const divideOrNull = (
     ? numerator / denominator
     : null;
 
-const computeScopeForYear = (
+/** Budgets et indicateurs par structure d'une année, calculés une fois puis agrégés par scope. */
+const computeFinanceYearData = (
   structures: StatistiqueDbStructure[],
   context: StatistiquesContext,
-  aggregation: NumericAggregation,
   year: number
-): ScopeByYearResult => {
+): FinanceYearData => {
   const structureIds = new Set(structures.map((structure) => structure.id));
-  const budgetsForYear = context.budgets.filter(
+  const budgets = context.budgets.filter(
     (budget) => budget.year === year && structureIds.has(budget.structureId)
   );
   const indicateursForYear = context.indicateurs.filter(
@@ -160,12 +168,13 @@ const computeScopeForYear = (
 
   const now = getNow();
   const isVersionedYear = year >= PLACES_VERSIONED_FROM_YEAR;
-  const timelineByStructureId = isVersionedYear
+  const timelineByStructureId: StructureVersionTimelineIndex = isVersionedYear
     ? indexTimelineByStructureId(context.structureVersionTimeline)
     : new Map();
-  const typologieMap = isVersionedYear
-    ? new Map()
-    : getTypologieMapForExactYear(context.typologies, year);
+  const typologieMap: Map<number, StatistiqueDbTypologieValues> =
+    isVersionedYear
+      ? new Map()
+      : getTypologieMapForExactYear(context.typologies, year);
   const cibles = buildCiblesFinancieresLookup(context);
   const previsionnelByStructureId = indexIndicateursByStructureId(
     indicateursForYear,
@@ -175,20 +184,9 @@ const computeScopeForYear = (
     indicateursForYear,
     "REALISE"
   );
-  const dotationByStructureId =
-    sumDotationAccordeeByStructureId(budgetsForYear);
+  const dotationByStructureId = sumDotationAccordeeByStructureId(budgets);
 
-  const etpPrevisionnel: (number | null)[] = [];
-  const etpRealise: (number | null)[] = [];
-  const etpResolu: (number | null)[] = [];
-  const tauxPrevisionnel: (number | null)[] = [];
-  const tauxRealise: (number | null)[] = [];
-  const tauxResolu: (number | null)[] = [];
-  const tauxCible: (number | null)[] = [];
-  const coutTheorique: (number | null)[] = [];
-  const coutCible: (number | null)[] = [];
-
-  for (const structure of structures) {
+  const indicateurs = structures.map((structure) => {
     const joursPlaces = computeStructureJoursPlaces(
       context,
       structure.id,
@@ -201,47 +199,84 @@ const computeScopeForYear = (
       joursPlaces?.joursPlaces,
       joursPlaces?.jours
     );
-    const structureEtpPrevisionnel =
+    const etpPrevisionnel =
       previsionnelByStructureId.get(structure.id)?.ETP ?? null;
-    const structureEtpRealise =
-      realiseByStructureId.get(structure.id)?.ETP ?? null;
-    const structureEtpResolu = structureEtpRealise ?? structureEtpPrevisionnel;
+    const etpRealise = realiseByStructureId.get(structure.id)?.ETP ?? null;
 
-    etpPrevisionnel.push(structureEtpPrevisionnel);
-    etpRealise.push(structureEtpRealise);
-    etpResolu.push(structureEtpResolu);
-    tauxPrevisionnel.push(divideOrNull(placesMoyennes, structureEtpPrevisionnel));
-    tauxRealise.push(divideOrNull(placesMoyennes, structureEtpRealise));
-    tauxResolu.push(divideOrNull(placesMoyennes, structureEtpResolu));
-    tauxCible.push(cibles.getTauxEncadrementCible(structure, year));
-    coutTheorique.push(
-      divideOrNull(
+    return {
+      structureId: structure.id,
+      etpPrevisionnel,
+      etpRealise,
+      tauxPrevisionnel: divideOrNull(placesMoyennes, etpPrevisionnel),
+      tauxRealise: divideOrNull(placesMoyennes, etpRealise),
+      tauxCible: cibles.getTauxEncadrementCible(structure, year),
+      coutTheorique: divideOrNull(
         dotationByStructureId.get(structure.id) || null,
         joursPlaces?.joursPlaces
-      )
-    );
-    coutCible.push(cibles.getTarifJournalierCible(structure, year));
-  }
-
-  const aggregate = (values: (number | null)[]): number | null =>
-    roundStatsNumber(aggregateValues(values, aggregation));
+      ),
+      coutCible: cibles.getTarifJournalierCible(structure, year),
+    };
+  });
 
   return {
-    stat: {
-      totalETPPrevisionnel: roundStatsNumber(sumValues(etpPrevisionnel)),
-      totalETPRealise: roundStatsNumber(sumValues(etpRealise)),
-      tauxEncadrementCible: aggregate(tauxCible),
-      tauxEncadrementTheoriquePrevisionnel: aggregate(tauxPrevisionnel),
-      tauxEncadrementTheoriqueRealise: aggregate(tauxRealise),
-      coutJournalierCible: aggregate(coutCible),
-      coutJournalierTheorique: aggregate(coutTheorique),
-      ...sumBudgetsForYear(budgetsForYear),
-    },
-    cartographie: {
-      etp: roundStatsNumber(sumValues(etpResolu)),
-      tauxEncadrement: aggregate(tauxResolu),
-    },
-    hasData: budgetsForYear.length > 0 || indicateursForYear.length > 0,
+    budgets,
+    indicateurs,
+    hasData: budgets.length > 0 || indicateursForYear.length > 0,
+  };
+};
+
+const resolveFinanceStructuresForYear = (
+  context: StatistiquesContext,
+  year: number,
+  scope: FinanceScope
+): ReturnType<typeof resolveStructuresForYear> =>
+  resolveStructuresForYear(
+    context,
+    getInitialisedStructuresActiveInYear(context, year).filter((structure) =>
+      isStructureInFinanceScope(structure, scope)
+    ),
+    year,
+    getNow(),
+    FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS
+  );
+
+const aggregateFinanceScope = (
+  yearData: FinanceYearData,
+  scoped: ReturnType<typeof resolveStructuresForYear>,
+  aggregation: NumericAggregation
+): FinanceByYearScopeStat => {
+  const structureIds = new Set(
+    scoped.structures.map((structure) => structure.id)
+  );
+  const indicateurs = yearData.indicateurs.filter((indicateur) =>
+    structureIds.has(indicateur.structureId)
+  );
+  const aggregate = (
+    field: keyof Omit<StructureFinanceIndicateurs, "structureId">
+  ): number | null =>
+    roundStatsNumber(
+      aggregateValues(
+        indicateurs.map((indicateur) => indicateur[field]),
+        aggregation
+      )
+    );
+  const sum = (field: "etpPrevisionnel" | "etpRealise"): number | null =>
+    roundStatsNumber(
+      sumValues(indicateurs.map((indicateur) => indicateur[field]))
+    );
+
+  return {
+    completude: scoped.completude,
+    totalETPPrevisionnel: sum("etpPrevisionnel"),
+    totalETPRealise: sum("etpRealise"),
+    tauxEncadrementCible: aggregate("tauxCible"),
+    tauxEncadrementTheoriquePrevisionnel: aggregate("tauxPrevisionnel"),
+    tauxEncadrementTheoriqueRealise: aggregate("tauxRealise"),
+    coutJournalierCible: aggregate("coutCible"),
+    coutJournalierTheorique: aggregate("coutTheorique"),
+    ...sumBudgetsForYear(
+      yearData.budgets.filter((budget) => structureIds.has(budget.structureId))
+    ),
   };
 };
 
@@ -253,24 +288,24 @@ export const computeFinanceStatistiques = (
 
   return {
     byYear: years.map((year) => {
-      const { structures, completude } = resolveCountedStructuresForYear(
-        context,
-        year,
-        FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS
-      );
-      const [total, autorisees, subventionnees] = FINANCE_SCOPES.map(
-        (scope) =>
-          computeScopeForYear(
-            structures.filter((structure) =>
-              isStructureInFinanceScope(structure, scope)
-            ),
-            context,
-            aggregation,
-            year
-          ).stat
+      const total = resolveFinanceStructuresForYear(context, year, "total");
+      const yearData = computeFinanceYearData(total.structures, context, year);
+      const [autorisees, subventionnees] = (
+        ["autorisees", "subventionnees"] as const
+      ).map((scope) =>
+        aggregateFinanceScope(
+          yearData,
+          resolveFinanceStructuresForYear(context, year, scope),
+          aggregation
+        )
       );
 
-      return { year, completude, total, autorisees, subventionnees };
+      return {
+        year,
+        total: aggregateFinanceScope(yearData, total, aggregation),
+        autorisees,
+        subventionnees,
+      };
     }),
   };
 };
@@ -282,20 +317,18 @@ export type FinanceCartographieField =
   | "tauxEncadrement"
   | "coutJournalier";
 
-const pickCartographieValue = (
-  result: ScopeByYearResult,
-  field: FinanceCartographieField
-): number | null => {
-  switch (field) {
-    case "etp":
-      return result.cartographie.etp;
-    case "tauxEncadrement":
-      return result.cartographie.tauxEncadrement;
-    case "coutJournalier":
-      return result.stat.coutJournalierTheorique;
-    default:
-      return result.stat[field];
-  }
+// La cartographie n'affiche qu'un état : réalisé, sinon prévisionnel.
+const CARTOGRAPHIE_FIELDS: Record<
+  FinanceCartographieField,
+  (stat: FinanceByYearScopeStat) => number | null
+> = {
+  dotationAccordee: (stat) => stat.dotationAccordee,
+  resultatNet: (stat) => stat.resultatNet,
+  etp: (stat) => stat.totalETPRealise ?? stat.totalETPPrevisionnel,
+  tauxEncadrement: (stat) =>
+    stat.tauxEncadrementTheoriqueRealise ??
+    stat.tauxEncadrementTheoriquePrevisionnel,
+  coutJournalier: (stat) => stat.coutJournalierTheorique,
 };
 
 /** Computes a single total field for given years, for the cartographie one-indicator requests. */
@@ -306,15 +339,12 @@ export const computeFinanceTotalValuesForYears = (
   field: FinanceCartographieField
 ): (number | null)[] =>
   years.map((year) => {
-    const result = computeScopeForYear(
-      resolveCountedStructuresForYear(
-        context,
-        year,
-        FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS
-      ).structures,
-      context,
-      aggregation,
-      year
+    const total = resolveFinanceStructuresForYear(context, year, "total");
+    const yearData = computeFinanceYearData(total.structures, context, year);
+    if (!yearData.hasData) {
+      return null;
+    }
+    return CARTOGRAPHIE_FIELDS[field](
+      aggregateFinanceScope(yearData, total, aggregation)
     );
-    return result.hasData ? pickCartographieValue(result, field) : null;
   });

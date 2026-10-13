@@ -60,13 +60,6 @@ export type StructuresByYearStat = {
   totalStructures: number;
   totalCpoms: number;
   structuresAvecCpom: number;
-  structuresCada: number;
-  structuresCph: number;
-  structuresHuda: number;
-  structuresCaes: number;
-  structuresBatiCollectif: number;
-  structuresBatiDiffus: number;
-  structuresBatiMixte: number;
 };
 
 export type PlacesIndicatorsStat = {
@@ -90,6 +83,7 @@ export type PlacesByYearStat = Omit<
 };
 
 export type FinanceByYearScopeStat = {
+  completude: CompletudeStat | null;
   dotationDemandee: number;
   dotationAccordee: number;
   totalETPPrevisionnel: number | null;
@@ -108,7 +102,6 @@ export type FinanceByYearScopeStat = {
 
 export type FinanceByYearStat = {
   year: number;
-  completude: CompletudeStat | null;
   total: FinanceByYearScopeStat;
   autorisees: FinanceByYearScopeStat;
   subventionnees: FinanceByYearScopeStat;

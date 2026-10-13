@@ -557,4 +557,27 @@ describe("structures - indicateurs annuels (byYear)", () => {
       places: 20,
     });
   });
+
+  it("exclut les structures non initialisées de l'assiette et des années", () => {
+    const structures = [testStructure(1), testStructure(2)];
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures,
+        allStructures: structures,
+        typologies: [
+          testTypologie(1, 1, 2024, 10),
+          testTypologie(2, 2, 2024, 20),
+        ],
+        adresses: [],
+        departements: [],
+        initialisedStructureIds: new Set([1]),
+      })
+    );
+
+    expect(result.totalStructures).toBe(1);
+    expect(result.totalPlaces).toBe(10);
+    expect(result.byYear).toContainEqual(
+      expect.objectContaining({ year: 2024, totalStructures: 1 })
+    );
+  });
 });
