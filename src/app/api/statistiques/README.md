@@ -60,7 +60,7 @@ curl -s "http://localhost:3000/api/statistiques" | jq > tmp/statistiques.json
 
 Filtre structures via `findPerimeterStructures` : `type` / `operateurId` / `departementAdministratif`.
 
-**Structures initialisées uniquement** : le périmètre ne retient que les structures dont le formulaire `finalisation-v1` est validé ou qui sont nées d'une création par transformation finalisée (même règle que `isStructureFinalised`, celle qui ouvre une campagne d'actualisation à une structure). Une structure non initialisée n'entre dans aucun indicateur, assiette globale comprise.
+**Structures initialisées** (`initialisedStructureIds`) : l'assiette globale et les blocs `structures`, `places` et `finance` (cartographie comprise) ne comptent que les structures dont le formulaire `finalisation-v1` est validé ou qui sont nées d'une création par transformation finalisée — c'est `isStructureFinalised`, la règle qui ouvre une campagne d'actualisation à une structure, appliquée telle quelle (`getInitialisedStructureIds`). Les blocs `activite`, `controleQualite` et `rmu` portent sur tout le périmètre, structures non initialisées comprises : leurs données viennent de l'OFII, du DNA ou des évaluations et ne dépendent pas de l'initialisation (ils n'ont d'ailleurs pas de score de complétude).
 
 **Structures actives (indicateurs globaux)** : `activeStructureIdsNow` sur `StatistiquesContext` - structures ouvertes au jour de référence (`Structure.creationDate` / `fermetureDate`). `context.structures` en est la projection typée.
 
@@ -89,6 +89,8 @@ Une structure est **actualisée sur l'année N** quand sa dernière campagne val
 **Frontière.** Elle est posée une fois par la première campagne jamais déclarée et vaut « année de cette campagne − 1 ». Avec la campagne 2026 : 2021 à 2024 sont des années d'initialisation, 2025 et 2026 sont filtrées sur les structures ayant validé la campagne 2026. Que 2025 soit couvert par la campagne 2026 est un cas particulier de démarrage (projet initié en 2024, aucune actualisation depuis) ; les campagnes suivantes ne déplacent pas la frontière.
 
 ### `completude`
+
+Un objet par année pour `structures` et `places`, un objet **par scope** pour `finance` (`byYear[].total.completude`, `.autorisees.completude`, `.subventionnees.completude`) : le tableau financier se lit par onglet, le score doit porter sur les structures de l'onglet.
 
 | Champ           | Contenu                                                                                         |
 | --------------- | ----------------------------------------------------------------------------------------------- |

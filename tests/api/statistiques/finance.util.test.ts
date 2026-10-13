@@ -329,6 +329,12 @@ describe("finance - indicateurs théoriques", () => {
 });
 
 describe("finance - structures actualisées", () => {
+  const campagneContext = {
+    actualisationFormDefinitions: [
+      { slug: "actualisation-2026", deadline: null },
+    ],
+  };
+
   it("ne comptabilise que les structures actualisées dès deux ans avant la première campagne", () => {
     const context = {
       ...buildFinanceContext({
@@ -343,9 +349,7 @@ describe("finance - structures actualisées", () => {
           budgetRow(4, 2, 2024, 100, 0),
         ],
       }),
-      actualisationFormDefinitions: [
-        { slug: "actualisation-2026", deadline: null },
-      ],
+      ...campagneContext,
       lastValidatedCampagneYearByStructureId: new Map([[1, 2026]]),
     };
 
@@ -353,13 +357,68 @@ describe("finance - structures actualisées", () => {
     const year2023 = result.byYear.find((entry) => entry.year === 2023);
     const year2024 = result.byYear.find((entry) => entry.year === 2024);
 
-    expect(year2023?.completude).toBeNull();
+    expect(year2023?.total.completude).toBeNull();
     expect(year2023?.total.totalProduits).toBe(200);
-    expect(year2024?.completude).toMatchObject({
+    expect(year2024?.total.completude).toMatchObject({
       nbAttendues: 2,
       nbRenseignees: 1,
     });
     expect(year2024?.total.totalProduits).toBe(100);
+  });
+
+  it("calcule un score par périmètre", () => {
+    const context = {
+      ...buildFinanceContext({
+        structures: [
+          testStructure(1, StructureType.CADA),
+          testStructure(2, StructureType.CPH),
+          testStructure(3, StructureType.HUDA),
+        ],
+        budgets: [
+          budgetRow(1, 1, 2026, 100, 0),
+          budgetRow(2, 2, 2026, 100, 0),
+          budgetRow(3, 3, 2026, 100, 0),
+        ],
+      }),
+      ...campagneContext,
+      lastValidatedCampagneYearByStructureId: new Map([
+        [1, 2026],
+        [3, 2026],
+      ]),
+    };
+
+    const year2026 = computeFinanceStatistiques(context, "moyenne").byYear[0];
+
+    expect(year2026.total.completude).toMatchObject({
+      nbAttendues: 3,
+      nbRenseignees: 2,
+    });
+    expect(year2026.autorisees.completude).toMatchObject({
+      nbAttendues: 2,
+      nbRenseignees: 1,
+    });
+    expect(year2026.subventionnees.completude).toMatchObject({
+      isComplete: true,
+      nbAttendues: 1,
+      nbRenseignees: 1,
+    });
+  });
+
+  it("ignore les structures non initialisées", () => {
+    const context = {
+      ...buildFinanceContext({
+        structures: [
+          testStructure(1, StructureType.CADA),
+          testStructure(2, StructureType.CADA),
+        ],
+        budgets: [budgetRow(1, 1, 2023, 100, 0), budgetRow(2, 2, 2023, 100, 0)],
+      }),
+      initialisedStructureIds: new Set([1]),
+    };
+
+    const year2023 = computeFinanceStatistiques(context, "moyenne").byYear[0];
+
+    expect(year2023.total.totalProduits).toBe(100);
   });
 });
 

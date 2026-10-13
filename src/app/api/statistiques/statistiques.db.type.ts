@@ -16,6 +16,28 @@ export type StatistiqueDbStructureActivity = Prisma.StructureGetPayload<{
   };
 }>;
 
+export type StatistiqueDbStructureInitialisation = Prisma.StructureGetPayload<{
+  select: {
+    id: true;
+    forms: {
+      select: { status: true; formDefinition: { select: { slug: true } } };
+    };
+    structureVersions: {
+      select: {
+        effectiveDate: true;
+        structureVersionTransformation: {
+          select: {
+            type: true;
+            transformation: {
+              select: { type: true; form: { select: { status: true } } };
+            };
+          };
+        };
+      };
+    };
+  };
+}>;
+
 export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
   select: {
     id: true;
@@ -227,6 +249,8 @@ export type StatistiquesContext = {
   activeStructureIdsNow: Set<number>;
   /** Index des structures actives par période (séries temporelles). */
   activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod;
+  /** Structures initialisées : seules comptées dans l'assiette et les blocs structures, places et finance. */
+  initialisedStructureIds: Set<number>;
   openingDateByStructureId: Map<number, Date>;
   closureDateByStructureId: Map<number, Date | null>;
   actualisationFormDefinitions: StatistiqueDbFormDefinition[];
@@ -268,7 +292,10 @@ export type StatistiquesCompletudeContext = Pick<
 
 /** Structures comptabilisées sur une année : actives, et actualisées sur une année de campagne. */
 export type StatistiquesYearContext = StatistiquesCompletudeContext &
-  Pick<StatistiquesContext, "allStructures" | "activeStructureIdsByPeriod">;
+  Pick<
+    StatistiquesContext,
+    "allStructures" | "activeStructureIdsByPeriod" | "initialisedStructureIds"
+  >;
 
 /** Adds CPOM links, for indicators counting structures covered by an active CPOM per year. */
 export type StatistiquesCpomYearContext = StatistiquesTypologieYearContext &
@@ -277,7 +304,10 @@ export type StatistiquesCpomYearContext = StatistiquesTypologieYearContext &
 /** Structures actives + adresses, pour le snapshot QPV / logement social. */
 export type StatistiquesAdresseSnapshotContext = Pick<
   StatistiquesContext,
-  "structures" | "adresses" | "structureVersionTimeline"
+  | "structures"
+  | "initialisedStructureIds"
+  | "adresses"
+  | "structureVersionTimeline"
 >;
 
 /** Minimal slice of StatistiquesContext needed to compute the current activite snapshot. */

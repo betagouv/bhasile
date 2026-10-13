@@ -22,9 +22,8 @@ Structures comptabilisées sur l'année (cf. [README racine](../README.md#struct
 
 | Champ                                   | Contenu                                                                     |
 | --------------------------------------- | --------------------------------------------------------------------------- |
-| `totalStructures`, `structures<Type>`   | Comptages de l'année                                                        |
-| `structuresBati<Bati>`                  | Comptage par bâti (adresses de la version courante, comme la vue globale)   |
-| `structureTypes[]`, `structureBatis[]`  | Même forme que la vue globale, pour les camemberts « en <année> » : structures et places par type (places = millésime de l'année) et par bâti (places par adresse courante) |
+| `totalStructures`, `totalCpoms`, `structuresAvecCpom` | Comptages de l'année                                          |
+| `structureTypes[]`, `structureBatis[]`  | Même forme que la vue globale, pour les camemberts « en <année> » et le tableau : structures et places par type (places = millésime de l'année) et par bâti (places par adresse courante) |
 
 Sur une année de campagne, seules les structures actualisées sont comptées, y compris pour le type et le bâti que le formulaire ne demande pas : choix d'une assiette commune, détaillé dans le README racine.
 

@@ -59,6 +59,9 @@ const buildContext = (
     activeStructureIdsByPeriod,
     actualisationFormDefinitions: [],
     lastValidatedCampagneYearByStructureId: new Map(),
+    initialisedStructureIds: new Set(
+      structures.map((structure) => structure.id)
+    ),
     openingDateByStructureId: new Map(),
     closureDateByStructureId: new Map(),
     idfDepartementNumeros: new Set(),

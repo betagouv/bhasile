@@ -27,6 +27,7 @@ import {
   computeTotalPlaces,
   filterByActiveStructureId,
   filterByEffectiveVersionAtDate,
+  filterInitialisedStructures,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -274,19 +275,6 @@ const computeBatiStats = (
   );
 };
 
-const countStructuresByType = (
-  structures: StatistiqueDbStructure[],
-  type: StructureType
-): number => structures.filter((structure) => structure.type === type).length;
-
-const countStructuresByBati = (
-  structures: StatistiqueDbStructure[],
-  batiMap: Map<number, Repartition>,
-  bati: Repartition
-): number =>
-  // Aligné sur le global : une structure sans adresse répartie n'a pas de bâti
-  structures.filter((structure) => batiMap.get(structure.id) === bati).length;
-
 const computeByYearStats = (
   context: StatistiquesCpomYearContext,
   batiMap: Map<number, Repartition>,
@@ -328,37 +316,6 @@ const computeByYearStats = (
           structureIdsWithTypologie,
           year
         ),
-        structuresCada: countStructuresByType(
-          structuresWithTypologie,
-          StructureType.CADA
-        ),
-        structuresCph: countStructuresByType(
-          structuresWithTypologie,
-          StructureType.CPH
-        ),
-        structuresHuda: countStructuresByType(
-          structuresWithTypologie,
-          StructureType.HUDA
-        ),
-        structuresCaes: countStructuresByType(
-          structuresWithTypologie,
-          StructureType.CAES
-        ),
-        structuresBatiCollectif: countStructuresByBati(
-          structuresWithTypologie,
-          batiMap,
-          Repartition.COLLECTIF
-        ),
-        structuresBatiDiffus: countStructuresByBati(
-          structuresWithTypologie,
-          batiMap,
-          Repartition.DIFFUS
-        ),
-        structuresBatiMixte: countStructuresByBati(
-          structuresWithTypologie,
-          batiMap,
-          Repartition.MIXTE
-        ),
       };
     }
   );
@@ -366,13 +323,8 @@ const computeByYearStats = (
 export const computeStructuresStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const {
-    structures,
-    typologies,
-    adresses,
-    cpomLinks,
-    structureVersionTimeline,
-  } = context;
+  const { typologies, adresses, cpomLinks, structureVersionTimeline } = context;
+  const structures = filterInitialisedStructures(context.structures, context);
   const typologieMap = getLastTypologiePerStructure(typologies);
   const now = getNow();
   // Le bâti (vue globale et byYear) reflète l'adresse actuelle : `adresses` remonte

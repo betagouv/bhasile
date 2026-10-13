@@ -9,8 +9,13 @@ import {
 } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
+import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
-import { StructureType } from "@/generated/prisma/client";
+import {
+  StructureType,
+  StructureVersionTransformationType,
+  TransformationType,
+} from "@/generated/prisma/client";
 import type {
   CompletudeStat,
   StatistiquesFilters,
@@ -18,12 +23,14 @@ import type {
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
 
 import { pickVersionBefore } from "../structure-versions/structure-version.util";
+import { isStructureFinalised } from "../structures/structure.util";
 import { resolveStructuresForYear } from "./completude.util";
 import type {
   DnaStructureIdsResolver,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
+  StatistiqueDbStructureInitialisation,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
@@ -683,23 +690,74 @@ export const getTypologieYears = (
     (yearA, yearB) => yearA - yearB
   );
 
-/** Structures comptabilisées sur une année (cf. `resolveStructuresForYear`). */
-export const resolveCountedStructuresForYear = (
+export const getInitialisedStructureIds = (
+  initialisations: StatistiqueDbStructureInitialisation[],
+  now: Date
+): Set<number> =>
+  new Set(
+    initialisations
+      .filter((structure) => isStructureFinalised(structure, now))
+      .map((structure) => structure.id)
+  );
+
+const HUDA_VERS_NOUVEAU_CADA_TRANSFORMATION_TYPES: TransformationType[] = [
+  TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
+  TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+];
+
+/** CADA créés par une transformation HUDA vers CADA finalisée. */
+export const getCadaFromHudaStructureIds = (
+  initialisations: StatistiqueDbStructureInitialisation[]
+): Set<number> =>
+  new Set(
+    initialisations
+      .filter((structure) =>
+        structure.structureVersions.some(
+          ({ structureVersionTransformation }) =>
+            structureVersionTransformation?.type ===
+              StructureVersionTransformationType.CREATION &&
+            isTransformationFinalised(
+              structureVersionTransformation.transformation
+            ) &&
+            HUDA_VERS_NOUVEAU_CADA_TRANSFORMATION_TYPES.includes(
+              structureVersionTransformation.transformation.type
+            )
+        )
+      )
+      .map((structure) => structure.id)
+  );
+
+export const filterInitialisedStructures = (
+  structures: StatistiqueDbStructure[],
+  context: Pick<StatistiquesContext, "initialisedStructureIds">
+): StatistiqueDbStructure[] =>
+  structures.filter((structure) =>
+    context.initialisedStructureIds.has(structure.id)
+  );
+
+export const getInitialisedStructuresActiveInYear = (
   context: StatistiquesYearContext,
-  year: number,
-  lookbackYears?: number
-): ReturnType<typeof resolveStructuresForYear> =>
-  resolveStructuresForYear(
-    context,
+  year: number
+): StatistiqueDbStructure[] =>
+  filterInitialisedStructures(
     structuresActiveInPeriod(
       context.allStructures,
       context.activeStructureIdsByPeriod,
       "year",
       String(year)
     ),
-    year,
-    getNow(),
-    lookbackYears
+    context
+  );
+
+/** Structures comptabilisées sur une année (cf. `resolveStructuresForYear`). */
+export const resolveCountedStructuresForYear = (
+  context: StatistiquesYearContext,
+  year: number
+): ReturnType<typeof resolveStructuresForYear> =>
+  resolveStructuresForYear(
+    context,
+    getInitialisedStructuresActiveInYear(context, year),
+    year
   );
 
 export const mapTypologieYears = <

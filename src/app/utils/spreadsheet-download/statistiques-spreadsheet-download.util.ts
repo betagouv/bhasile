@@ -1,6 +1,8 @@
 import { CURRENT_YEAR } from "@/constants";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
+import { Repartition } from "@/types/adresse.type";
 import { DownloadOptions } from "@/types/spreadsheet-download.type";
+import { StructureType } from "@/types/structure.type";
 
 import { computeResultatNet } from "../budget.util";
 import { formatDate } from "../date.util";
@@ -8,18 +10,28 @@ import { formatPercentage } from "../number.util";
 
 const getStructuresDownloadContent = (statistiques: StatistiqueApiRead) => ({
   sheetName: "Structures",
-  data: statistiques.structures.byYear,
+  data: statistiques.structures.byYear.map((structureItem) => ({
+    year: structureItem.year,
+    totalStructures: structureItem.totalStructures,
+    totalCpoms: structureItem.totalCpoms,
+    ...Object.fromEntries(
+      structureItem.structureTypes.map((stat) => [stat.type, stat.structures])
+    ),
+    ...Object.fromEntries(
+      structureItem.structureBatis.map((stat) => [stat.bati, stat.structures])
+    ),
+  })),
   headersMap: {
     year: "Année",
     totalStructures: "Structures",
     totalCpoms: "CPOM complets ou partiels",
-    structuresCada: "CADA",
-    structuresCph: "CPH",
-    structuresHuda: "HUDA",
-    structuresCaes: "CAES",
-    structuresBatiCollectif: "Bâti collectif",
-    structuresBatiDiffus: "Bâti diffus",
-    structuresBatiMixte: "Bâti mixte",
+    [StructureType.CADA]: "CADA",
+    [StructureType.CPH]: "CPH",
+    [StructureType.HUDA]: "HUDA",
+    [StructureType.CAES]: "CAES",
+    [Repartition.COLLECTIF]: "Bâti collectif",
+    [Repartition.DIFFUS]: "Bâti diffus",
+    [Repartition.MIXTE]: "Bâti mixte",
   },
 });
 

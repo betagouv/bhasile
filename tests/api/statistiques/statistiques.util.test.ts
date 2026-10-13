@@ -8,7 +8,9 @@ import {
   applyVersionedPlacesToTypologies,
   buildDnaStructureIdsResolver,
   filterByActiveStructureId,
+  getCadaFromHudaStructureIds,
   getEffectiveStructureVersionAtDate,
+  getInitialisedStructureIds,
   lookupActiveStructureIds,
   mapTypologieYears,
   parseStatistiquesPerimeterFilters,
@@ -16,6 +18,10 @@ import {
   sliceStatistiquesContext,
   structuresActiveInPeriod,
 } from "@/app/api/statistiques/statistiques.util";
+import {
+  StructureVersionTransformationType,
+  TransformationType,
+} from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
 import {
@@ -526,5 +532,64 @@ describe("applyVersionedPlacesToTypologies", () => {
     );
 
     expect(resolved[0].placesAutorisees).toBe(42);
+  });
+});
+
+describe("socle - structures initialisées et CADA issus de HUDA", () => {
+  const now = new Date("2026-10-01T12:00:00.000Z");
+  const finalisationForm = (status: boolean) => ({
+    status,
+    formDefinition: { slug: "finalisation-v1" },
+  });
+  const creationVersion = (
+    type: TransformationType,
+    isFinalised: boolean
+  ) => ({
+    effectiveDate: new Date("2026-03-01T00:00:00.000Z"),
+    structureVersionTransformation: {
+      type: StructureVersionTransformationType.CREATION,
+      transformation: { type, form: { status: isFinalised } },
+    },
+  });
+  const initialisations = [
+    { id: 1, forms: [finalisationForm(true)], structureVersions: [] },
+    { id: 2, forms: [finalisationForm(false)], structureVersions: [] },
+    {
+      id: 3,
+      forms: [],
+      structureVersions: [
+        creationVersion(
+          TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
+          true
+        ),
+      ],
+    },
+    {
+      id: 4,
+      forms: [],
+      structureVersions: [
+        creationVersion(TransformationType.OUVERTURE_EX_NIHILO, true),
+      ],
+    },
+    {
+      id: 5,
+      forms: [],
+      structureVersions: [
+        creationVersion(
+          TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+          false
+        ),
+      ],
+    },
+  ];
+
+  it("retient les structures au formulaire d'initialisation validé ou nées d'une création finalisée", () => {
+    expect(getInitialisedStructureIds(initialisations, now)).toEqual(
+      new Set([1, 3, 4])
+    );
+  });
+
+  it("ne retient comme CADA issus de HUDA que les créations HUDA vers CADA finalisées", () => {
+    expect(getCadaFromHudaStructureIds(initialisations)).toEqual(new Set([3]));
   });
 });
