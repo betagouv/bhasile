@@ -17,12 +17,13 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import {
-  FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS,
+  FINANCE_REALISE_LAG_YEARS,
   resolveStructuresForYear,
 } from "../completude.util";
 import type {
   StatistiqueDbBudget,
   StatistiqueDbBudgetAgg,
+  StatistiqueDbCpomBudget,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbStructure,
   StatistiqueDbTypologieValues,
@@ -32,14 +33,9 @@ import {
   collectDistinctYears,
   getInitialisedStructuresActiveInYear,
   getTypologieMapForExactYear,
-  indexTimelineByStructureId,
   isCpomLinkActiveInYear,
-  type StructureVersionTimelineIndex,
 } from "../statistiques.util";
-import {
-  buildCiblesFinancieresLookup,
-  computeStructureJoursPlaces,
-} from "./finance-theorique.util";
+import { computeStructureJoursPlaces } from "./finance-theorique.util";
 
 type FinanceScope = keyof Omit<FinanceByYearStat, "year">;
 
@@ -98,12 +94,30 @@ const sumBudgetsForYear = (budgetsForYear: FinanceBudgetEntry[]) => {
   };
 };
 
+const toCpomBudgetKey = (
+  cpomId: number,
+  year: number,
+  structureType: string | null
+): string => `${cpomId}|${year}|${structureType}`;
+
 // Le formulaire CPOM enregistre une ligne par année même non saisie : une ligne à zéro vaut absence de budget.
 const hasBudgetAmount = (budget: StatistiqueDbBudgetAgg): boolean =>
   budget.dotationDemandee !== 0 ||
   budget.dotationAccordee !== 0 ||
   budget.totalProduits !== 0 ||
   budget.totalCharges !== 0;
+
+export const indexCpomBudgets = (
+  cpomBudgets: StatistiqueDbCpomBudget[]
+): Map<string, StatistiqueDbCpomBudget> =>
+  new Map(
+    cpomBudgets
+      .filter(hasBudgetAmount)
+      .map((budget) => [
+        toCpomBudgetKey(budget.cpomId, budget.year, budget.structureType),
+        budget,
+      ])
+  );
 
 /**
  * Une structure sous CPOM sur l'année est comptée via le budget global de son
@@ -114,7 +128,7 @@ const hasBudgetAmount = (budget: StatistiqueDbBudgetAgg): boolean =>
 const buildBudgetEntries = (
   structures: StatistiqueDbStructure[],
   structureBudgets: StatistiqueDbBudget[],
-  context: Pick<StatistiquesContext, "cpomLinks" | "cpomBudgets">,
+  context: Pick<StatistiquesContext, "cpomLinks" | "cpomBudgetByKey">,
   year: number
 ): FinanceBudgetEntry[] => {
   const structureById = new Map(
@@ -128,12 +142,8 @@ const buildBudgetEntries = (
     if (!structure || !isCpomLinkActiveInYear(link, year)) {
       continue;
     }
-    const cpomBudget = context.cpomBudgets.find(
-      (budget) =>
-        budget.cpomId === link.cpomId &&
-        budget.year === year &&
-        budget.structureType === structure.type &&
-        hasBudgetAmount(budget)
+    const cpomBudget = context.cpomBudgetByKey.get(
+      toCpomBudgetKey(link.cpomId, year, structure.type)
     );
     if (!cpomBudget) {
       continue;
@@ -239,15 +249,10 @@ const computeFinanceYearData = (
   );
 
   const now = getNow();
-  const isVersionedYear = year >= PLACES_VERSIONED_FROM_YEAR;
-  const timelineByStructureId: StructureVersionTimelineIndex = isVersionedYear
-    ? indexTimelineByStructureId(context.structureVersionTimeline)
-    : new Map();
   const typologieMap: Map<number, StatistiqueDbTypologieValues> =
-    isVersionedYear
+    year >= PLACES_VERSIONED_FROM_YEAR
       ? new Map()
       : getTypologieMapForExactYear(context.typologies, year);
-  const cibles = buildCiblesFinancieresLookup(context);
   const previsionnelByStructureId = indexIndicateursByStructureId(
     indicateursForYear,
     "PREVISIONNEL"
@@ -265,7 +270,7 @@ const computeFinanceYearData = (
       context,
       structure.id,
       year,
-      timelineByStructureId.get(structure.id) ?? [],
+      context.timelineByStructureId.get(structure.id) ?? [],
       typologieMap.get(structure.id)?.placesAutorisees ?? null,
       now
     );
@@ -283,12 +288,12 @@ const computeFinanceYearData = (
       etpRealise,
       tauxPrevisionnel: divideOrNull(placesMoyennes, etpPrevisionnel),
       tauxRealise: divideOrNull(placesMoyennes, etpRealise),
-      tauxCible: cibles.getTauxEncadrementCible(structure, year),
+      tauxCible: context.ciblesFinancieres.getTauxEncadrementCible(structure, year),
       coutTheorique: divideOrNull(
         dotationByStructureId.get(structure.id) || null,
         joursPlaces?.joursPlaces
       ),
-      coutCible: cibles.getTarifJournalierCible(structure, year),
+      coutCible: context.ciblesFinancieres.getTarifJournalierCible(structure, year),
     };
   });
 
@@ -310,7 +315,7 @@ const resolveFinanceStructuresForYear = (
       isStructureInFinanceScope(structure, scope)
     ),
     year,
-    FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS
+    FINANCE_REALISE_LAG_YEARS
   );
 
 const aggregateFinanceScope = (
@@ -361,7 +366,7 @@ export const computeFinanceStatistiques = (
 ): StatistiqueApiRead["finance"] => {
   const years = collectDistinctYears(
     context.budgets,
-    context.cpomBudgets,
+    [...context.cpomBudgetByKey.values()],
     context.indicateurs
   );
 

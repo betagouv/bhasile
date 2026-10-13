@@ -21,9 +21,9 @@ const getCampagneYears = (
     .filter((year) => Number.isInteger(year))
     .sort((yearA, yearB) => yearA - yearB);
 
-export const FIRST_CAMPAGNE_LOOKBACK_YEARS = 1;
-// Le réalisé financier de l'année N-2 n'est saisi qu'à la première campagne.
-export const FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS = 2;
+const FIRST_CAMPAGNE_LOOKBACK_YEARS = 1;
+// Le réalisé financier d'une année N n'est demandé qu'à la campagne N + 2.
+export const FINANCE_REALISE_LAG_YEARS = 2;
 
 /**
  * Première année soumise aux campagnes. La frontière est posée une fois par la
@@ -33,22 +33,38 @@ export const FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS = 2;
  */
 export const getFirstCampagneCoveredYear = (
   definitions: StatistiqueDbFormDefinition[],
-  lookbackYears: number = FIRST_CAMPAGNE_LOOKBACK_YEARS
+  lagYears: number = 0
 ): number | null => {
   const campagneYears = getCampagneYears(definitions);
-  return campagneYears.length > 0 ? campagneYears[0] - lookbackYears : null;
+  return campagneYears.length > 0
+    ? campagneYears[0] - Math.max(FIRST_CAMPAGNE_LOOKBACK_YEARS, lagYears)
+    : null;
 };
 
 export const isYearUnderCampagne = (
   context: Pick<StatistiquesCompletudeContext, "actualisationFormDefinitions">,
   year: number,
-  lookbackYears: number = FIRST_CAMPAGNE_LOOKBACK_YEARS
+  lagYears: number = 0
 ): boolean => {
   const firstCoveredYear = getFirstCampagneCoveredYear(
     context.actualisationFormDefinitions,
-    lookbackYears
+    lagYears
   );
   return firstCoveredYear !== null && year >= firstCoveredYear;
+};
+
+/**
+ * Campagne à valider pour qu'une structure soit à jour sur une année : celle de
+ * l'année, décalée de `lagYears` quand la donnée arrive plus tard, sans dépasser
+ * la dernière campagne déclarée.
+ */
+const getRequiredCampagneYear = (
+  definitions: StatistiqueDbFormDefinition[],
+  year: number,
+  lagYears: number
+): number => {
+  const lastCampagneYear = getCampagneYears(definitions).at(-1) ?? year;
+  return Math.max(year, Math.min(year + lagYears, lastCampagneYear));
 };
 
 export const buildLastValidatedCampagneYearByStructureId = (
@@ -78,21 +94,30 @@ export const buildLastValidatedCampagneYearByStructureId = (
   return lastValidatedYearByStructureId;
 };
 
-/** Valider la campagne N atteste les données de toutes les années jusqu'à N incluse. */
+/** Valider une campagne atteste les données de toutes les années qu'elle couvre et des précédentes. */
 const isStructureActualisee = (
   context: StatistiquesCompletudeContext,
   structureId: number,
-  year: number
+  year: number,
+  lagYears: number
 ): boolean => {
   const lastValidatedYear =
     context.lastValidatedCampagneYearByStructureId.get(structureId);
-  return lastValidatedYear !== undefined && lastValidatedYear >= year;
+  return (
+    lastValidatedYear !== undefined &&
+    lastValidatedYear >=
+      getRequiredCampagneYear(
+        context.actualisationFormDefinitions,
+        year,
+        lagYears
+      )
+  );
 };
 
 /**
- * Structures attendues sur une année : encore ouvertes à la fin de l'année (le
- * périmètre ne contient que des structures initialisées). Une structure fermée en cours d'année n'a plus à être actualisée
- * sur cette année-là, ni sur les suivantes.
+ * Structures attendues sur une année : encore ouvertes à la fin de l'année. Une
+ * structure fermée en cours d'année n'a plus à être actualisée sur cette
+ * année-là, ni sur les suivantes.
  */
 export const resolveExpectedStructureIds = (
   context: StatistiquesCompletudeContext,
@@ -122,17 +147,17 @@ export const resolveStructuresForYear = (
   context: StatistiquesCompletudeContext,
   structuresActiveInYear: StatistiqueDbStructure[],
   year: number,
-  lookbackYears: number = FIRST_CAMPAGNE_LOOKBACK_YEARS
+  lagYears: number = 0
 ): {
   structures: StatistiqueDbStructure[];
   completude: CompletudeStat | null;
 } => {
-  if (!isYearUnderCampagne(context, year, lookbackYears)) {
+  if (!isYearUnderCampagne(context, year, lagYears)) {
     return { structures: structuresActiveInYear, completude: null };
   }
 
   const structures = structuresActiveInYear.filter((structure) =>
-    isStructureActualisee(context, structure.id, year)
+    isStructureActualisee(context, structure.id, year, lagYears)
   );
   const expectedStructureIds = resolveExpectedStructureIds(
     context,

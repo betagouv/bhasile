@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeFinanceStatistiques,
   computeFinanceTotalValuesForYears,
+  indexCpomBudgets,
 } from "@/app/api/statistiques/finance/finance.util";
 import { computeStructureJoursPlaces } from "@/app/api/statistiques/finance/finance-theorique.util";
 import type {
@@ -16,6 +17,7 @@ import { StructureType } from "@/types/structure.type";
 
 import {
   buildTestActiveStructureIdsByPeriod,
+  buildTestCiblesFinancieres,
   buildTestStatistiquesContext,
   buildTestStructureVersionTimeline,
 } from "./test-helpers";
@@ -296,18 +298,20 @@ describe("finance - indicateurs théoriques", () => {
         ],
         budgets: [budgetRow(1, 1, 2024, 0, 0)],
       }),
-      idfDepartementNumeros: new Set(["75"]),
-      cadaFromHudaStructureIds: new Set([3]),
-      tarifsJournaliersCibles: [
-        cibleTarif(2024, true, 30),
-        cibleTarif(2024, false, 20),
-        cibleTarif(2023, false, 1),
-      ],
-      tauxEncadrementCibles: [
-        cibleTaux(2024, true, false, 12),
-        cibleTaux(2024, false, false, 15),
-        cibleTaux(2024, false, true, 21),
-      ],
+      ciblesFinancieres: buildTestCiblesFinancieres({
+        idfDepartementNumeros: new Set(["75"]),
+        cadaFromHudaStructureIds: new Set([3]),
+        tarifsJournaliersCibles: [
+          cibleTarif(2024, true, 30),
+          cibleTarif(2024, false, 20),
+          cibleTarif(2023, false, 1),
+        ],
+        tauxEncadrementCibles: [
+          cibleTaux(2024, true, false, 12),
+          cibleTaux(2024, false, false, 15),
+          cibleTaux(2024, false, true, 21),
+        ],
+      }),
     };
 
     const year2024 = computeFinanceStatistiques(context, "moyenne").byYear[0];
@@ -322,7 +326,9 @@ describe("finance - indicateurs théoriques", () => {
         structures: [testStructure(1, StructureType.CADA)],
         budgets: [budgetRow(1, 1, 2024, 0, 0)],
       }),
-      tarifsJournaliersCibles: [cibleTarif(2023, false, 20)],
+      ciblesFinancieres: buildTestCiblesFinancieres({
+        tarifsJournaliersCibles: [cibleTarif(2023, false, 20)],
+      }),
     };
 
     const year2024 = computeFinanceStatistiques(context, "moyenne").byYear[0];
@@ -368,6 +374,31 @@ describe("finance - structures actualisées", () => {
       nbRenseignees: 1,
     });
     expect(year2024?.total.totalProduits).toBe(100);
+  });
+
+  it("exige la campagne N + 2 pour le réalisé d'une année N dès qu'elle est déclarée", () => {
+    const context = {
+      ...buildFinanceContext({
+        structures: [testStructure(1, StructureType.CADA)],
+        budgets: [
+          budgetRow(1, 1, 2024, 100, 0),
+          budgetRow(2, 1, 2025, 100, 0),
+        ],
+      }),
+      actualisationFormDefinitions: [
+        { slug: "actualisation-2026" },
+        { slug: "actualisation-2027" },
+      ],
+      lastValidatedCampagneYearByStructureId: new Map([[1, 2026]]),
+    };
+
+    const result = computeFinanceStatistiques(context, "moyenne");
+    const year2024 = result.byYear.find((entry) => entry.year === 2024);
+    const year2025 = result.byYear.find((entry) => entry.year === 2025);
+
+    expect(year2024?.total.completude?.nbRenseignees).toBe(1);
+    expect(year2025?.total.completude?.nbRenseignees).toBe(0);
+    expect(year2025?.total.totalProduits).toBe(0);
   });
 
   it("calcule un score par périmètre", () => {
@@ -474,7 +505,9 @@ describe("finance - budgets des structures sous CPOM", () => {
   ) => ({
     ...buildFinanceContext({ structures: contextStructures, budgets }),
     cpomLinks: [cpomLink(1, 100, 1), cpomLink(2, 100, 2), cpomLink(3, 100, 3)],
-    cpomBudgets: [cpomBudget(1, 100, 2024, StructureType.CADA, 1000, 400)],
+    cpomBudgetByKey: indexCpomBudgets([
+      cpomBudget(1, 100, 2024, StructureType.CADA, 1000, 400),
+    ]),
   });
 
   it("remplace le budget des structures sous CPOM par le budget global du CPOM, compté une fois", () => {
@@ -502,7 +535,9 @@ describe("finance - budgets des structures sous CPOM", () => {
   it("ignore une ligne de budget CPOM non saisie et garde le budget des structures", () => {
     const context = {
       ...buildCpomContext(),
-      cpomBudgets: [cpomBudget(1, 100, 2024, StructureType.CADA, 0, 0)],
+      cpomBudgetByKey: indexCpomBudgets([
+        cpomBudget(1, 100, 2024, StructureType.CADA, 0, 0),
+      ]),
     };
     const year2024 = computeFinanceStatistiques(context, "moyenne").byYear.find(
       (entry) => entry.year === 2024

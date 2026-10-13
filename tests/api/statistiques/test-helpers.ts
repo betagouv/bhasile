@@ -1,4 +1,6 @@
+import { buildCiblesFinancieresLookup } from "@/app/api/statistiques/finance/finance-theorique.util";
 import type {
+  CiblesFinancieresLookup,
   StatistiqueDbAdresse,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
@@ -13,6 +15,7 @@ import {
   buildStatistiquesActivityContext,
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
+  indexTimelineByStructureId,
 } from "@/app/api/statistiques/statistiques.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
@@ -159,6 +162,17 @@ export const buildTestActiveStructureIdsByPeriod = (
 ): StatistiquesContext["activeStructureIdsByPeriod"] =>
   buildTestActivityIndex(structureIds, options).activeStructureIdsByPeriod;
 
+export const buildTestCiblesFinancieres = (
+  inputs: Partial<Parameters<typeof buildCiblesFinancieresLookup>[0]> = {}
+): CiblesFinancieresLookup =>
+  buildCiblesFinancieresLookup({
+    tarifsJournaliersCibles: [],
+    tauxEncadrementCibles: [],
+    idfDepartementNumeros: new Set(),
+    cadaFromHudaStructureIds: new Set(),
+    ...inputs,
+  });
+
 export const buildTestStatistiquesContext = (
   partial: Pick<
     StatistiquesContext,
@@ -176,7 +190,7 @@ export const buildTestStatistiquesContext = (
         | "eigs"
         | "evaluations"
         | "budgets"
-        | "cpomBudgets"
+        | "cpomBudgetByKey"
         | "indicateurs"
         | "activites"
         | "rmus"
@@ -185,10 +199,7 @@ export const buildTestStatistiquesContext = (
         | "closureDateByStructureId"
         | "actualisationFormDefinitions"
         | "lastValidatedCampagneYearByStructureId"
-        | "idfDepartementNumeros"
-        | "cadaFromHudaStructureIds"
-        | "tarifsJournaliersCibles"
-        | "tauxEncadrementCibles"
+        | "ciblesFinancieres"
       >
     >
 ): StatistiquesContext => {
@@ -231,12 +242,13 @@ export const buildTestStatistiquesContext = (
     cpomLinks: partial.cpomLinks ?? [],
     dnaLinks,
     structureVersionTimeline,
+    timelineByStructureId: indexTimelineByStructureId(structureVersionTimeline),
     resolveDnaStructureIds: buildDnaStructureIdsResolver(
       dnaLinks,
       structureVersionTimeline
     ),
     budgets: partial.budgets ?? [],
-    cpomBudgets: partial.cpomBudgets ?? [],
+    cpomBudgetByKey: partial.cpomBudgetByKey ?? new Map(),
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],
     rmus: partial.rmus !== undefined ? partial.rmus : [],
@@ -247,9 +259,7 @@ export const buildTestStatistiquesContext = (
     actualisationFormDefinitions: partial.actualisationFormDefinitions ?? [],
     lastValidatedCampagneYearByStructureId:
       partial.lastValidatedCampagneYearByStructureId ?? new Map(),
-    idfDepartementNumeros: partial.idfDepartementNumeros ?? new Set(),
-    cadaFromHudaStructureIds: partial.cadaFromHudaStructureIds ?? new Set(),
-    tarifsJournaliersCibles: partial.tarifsJournaliersCibles ?? [],
-    tauxEncadrementCibles: partial.tauxEncadrementCibles ?? [],
+    ciblesFinancieres:
+      partial.ciblesFinancieres ?? buildTestCiblesFinancieres(),
   };
 };

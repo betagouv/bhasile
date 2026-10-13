@@ -575,6 +575,28 @@ describe("structures - indicateurs annuels (byYear)", () => {
     });
   });
 
+  it("sur une année de campagne, compte les structures actualisées même sans millésime", () => {
+    const structures = [testStructure(1), testStructure(2)];
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures,
+        allStructures: structures,
+        typologies: [testTypologie(1, 1, 2026, 10)],
+        adresses: [],
+        departements: [],
+        actualisationFormDefinitions: [{ slug: "actualisation-2026" }],
+        lastValidatedCampagneYearByStructureId: new Map([
+          [1, 2026],
+          [2, 2026],
+        ]),
+      })
+    );
+    const year2026 = result.byYear.find((entry) => entry.year === 2026);
+
+    expect(year2026?.completude?.nbRenseignees).toBe(2);
+    expect(year2026?.totalStructures).toBe(2);
+  });
+
   it("exclut les structures non initialisées de l'assiette et des années", () => {
     const structures = [testStructure(1), testStructure(2)];
     const result = computeStructuresStatistiques(

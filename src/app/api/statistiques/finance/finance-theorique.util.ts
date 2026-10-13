@@ -3,13 +3,14 @@ import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 
 import { pickVersionBefore } from "../../structure-versions/structure-version.util";
 import type {
+  CiblesFinancieresLookup,
   StatistiqueDbStructure,
   StatistiqueDbStructureVersionTimeline,
+  StatistiqueDbTarifJournalierCible,
+  StatistiqueDbTauxEncadrementCible,
   StatistiquesContext,
 } from "../statistiques.db.type";
 import { countDaysBetween, getStructureOpenBounds } from "../statistiques.util";
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export type StructureJoursPlaces = {
   jours: number;
@@ -78,7 +79,7 @@ export const computeStructureJoursPlaces = (
   for (let index = 0; index < boundaries.length - 1; index += 1) {
     const places = pickVersionBefore(
       effectiveVersions,
-      boundaries[index] + DAY_IN_MS
+      startOfNextUtcDay(new Date(boundaries[index])).getTime()
     )?.placesAutorisees;
     if (places == null) {
       continue;
@@ -94,23 +95,11 @@ export const computeStructureJoursPlaces = (
   return jours > 0 ? { jours, joursPlaces } : null;
 };
 
-type CiblesContext = Pick<
-  StatistiquesContext,
-  | "tarifsJournaliersCibles"
-  | "tauxEncadrementCibles"
-  | "idfDepartementNumeros"
-  | "cadaFromHudaStructureIds"
->;
-
-export type CiblesFinancieresLookup = {
-  getTarifJournalierCible: (
-    structure: StatistiqueDbStructure,
-    year: number
-  ) => number | null;
-  getTauxEncadrementCible: (
-    structure: StatistiqueDbStructure,
-    year: number
-  ) => number | null;
+type CiblesFinancieresInputs = {
+  tarifsJournaliersCibles: StatistiqueDbTarifJournalierCible[];
+  tauxEncadrementCibles: StatistiqueDbTauxEncadrementCible[];
+  idfDepartementNumeros: Set<string>;
+  cadaFromHudaStructureIds: Set<number>;
 };
 
 const toCibleKey = (
@@ -122,16 +111,16 @@ const toCibleKey = (
 
 /** Cibles par structure : selon son type, l'année, son zonage IDF et, pour le taux, son origine HUDA. */
 export const buildCiblesFinancieresLookup = (
-  context: CiblesContext
+  inputs: CiblesFinancieresInputs
 ): CiblesFinancieresLookup => {
   const tarifByKey = new Map(
-    context.tarifsJournaliersCibles.map((cible) => [
+    inputs.tarifsJournaliersCibles.map((cible) => [
       toCibleKey(cible.structureType, cible.year, cible.isIdf),
       cible.tarifCible,
     ])
   );
   const tauxByKey = new Map(
-    context.tauxEncadrementCibles.map((cible) => [
+    inputs.tauxEncadrementCibles.map((cible) => [
       toCibleKey(
         cible.structureType,
         cible.year,
@@ -142,7 +131,7 @@ export const buildCiblesFinancieresLookup = (
     ])
   );
   const isIdf = (structure: StatistiqueDbStructure): boolean =>
-    context.idfDepartementNumeros.has(structure.departementAdministratif);
+    inputs.idfDepartementNumeros.has(structure.departementAdministratif);
 
   return {
     getTarifJournalierCible: (structure, year) =>
@@ -154,7 +143,7 @@ export const buildCiblesFinancieresLookup = (
           structure.type,
           year,
           isIdf(structure),
-          context.cadaFromHudaStructureIds.has(structure.id)
+          inputs.cadaFromHudaStructureIds.has(structure.id)
         )
       ) ?? null,
   };

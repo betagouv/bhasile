@@ -8,7 +8,11 @@ import type {
   StatistiquesContext,
 } from "@/app/api/statistiques/statistiques.db.type";
 
-import { buildTestActivityIndex, testStructure } from "../test-helpers";
+import {
+  buildTestActivityIndex,
+  buildTestCiblesFinancieres,
+  testStructure,
+} from "../test-helpers";
 
 const mockBuildStatistiquesContext = vi.fn();
 const mockFindAllDepartementsWithRegion = vi.fn();
@@ -65,10 +69,7 @@ const buildContext = (
     ),
     openingDateByStructureId: new Map(),
     closureDateByStructureId: new Map(),
-    idfDepartementNumeros: new Set(),
-    cadaFromHudaStructureIds: new Set(),
-    tarifsJournaliersCibles: [],
-    tauxEncadrementCibles: [],
+    ciblesFinancieres: buildTestCiblesFinancieres(),
     eigs: [],
     evaluations: [],
     typologies: structures.map((structure) => ({
@@ -91,9 +92,10 @@ const buildContext = (
       type: structure.type,
       departementAdministratif: structure.departementAdministratif,
     })),
+    timelineByStructureId: new Map(),
     departements: [],
     budgets: [],
-    cpomBudgets: [],
+    cpomBudgetByKey: new Map(),
     indicateurs: [],
     activites: [],
     rmus: [],

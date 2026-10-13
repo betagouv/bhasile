@@ -130,20 +130,9 @@ const isStructureActiveInPeriod = (
   periodStart: Date,
   periodEnd: Date,
   activityContext: StatistiquesActivityContext
-): boolean => {
-  const openingDate = activityContext.openingDateByStructureId.get(structureId);
-  if (openingDate != null && openingDate >= periodEnd) {
-    return false;
-  }
-
-  const closureDate =
-    activityContext.closureDateByStructureId.get(structureId) ?? null;
-  if (closureDate != null && closureDate < periodStart) {
-    return false;
-  }
-
-  return true;
-};
+): boolean =>
+  getStructureOpenBounds(activityContext, structureId, periodStart, periodEnd) !==
+  null;
 
 export const parseTrimesterKey = (
   trimesterKey: string
@@ -826,7 +815,8 @@ export const mapTypologieYears = <
   context: StatistiquesTypologieYearContext,
   buildEntry: (
     year: number,
-    structuresForYear: StatistiqueDbStructure[]
+    structuresForYear: StatistiqueDbStructure[],
+    completude: CompletudeStat | null
   ) => Omit<Entry, "year" | "completude">
 ): Entry[] =>
   getTypologieYears(context.typologies).map((year) => {
@@ -834,7 +824,7 @@ export const mapTypologieYears = <
       context,
       year
     );
-    return { year, completude, ...buildEntry(year, structures) };
+    return { year, completude, ...buildEntry(year, structures, completude) };
   }) as Entry[];
 
 export const filterStructuresWithTypologie = (
