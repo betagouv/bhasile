@@ -13,6 +13,7 @@ import type {
   StatistiqueDbActivite,
   StatistiqueDbAdresse,
   StatistiqueDbBudget,
+  StatistiqueDbCpomBudget,
   StatistiqueDbCpomStructure,
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
@@ -421,6 +422,47 @@ export const findBudgets = async (
       {
         id: budget.id,
         structureId: budget.structureId,
+        year: budget.year,
+        dotationDemandee: budget.dotationDemandee ?? 0,
+        dotationAccordee: budget.dotationAccordee ?? 0,
+        totalProduits: budget.totalProduits ?? 0,
+        totalCharges: budget.totalCharges ?? 0,
+      },
+    ];
+  });
+};
+
+export const findCpomBudgets = async (
+  cpomIds: number[]
+): Promise<StatistiqueDbCpomBudget[]> => {
+  if (cpomIds.length === 0) {
+    return [];
+  }
+
+  const budgets = await prisma.budget.findMany({
+    where: { cpomId: { in: cpomIds } },
+    select: {
+      id: true,
+      cpomId: true,
+      year: true,
+      cpomStructureType: true,
+      dotationDemandee: true,
+      dotationAccordee: true,
+      totalProduits: true,
+      totalCharges: true,
+    },
+  });
+
+  return budgets.flatMap((budget) => {
+    if (budget.cpomId === null) {
+      return [];
+    }
+
+    return [
+      {
+        id: budget.id,
+        cpomId: budget.cpomId,
+        structureType: budget.cpomStructureType,
         year: budget.year,
         dotationDemandee: budget.dotationDemandee ?? 0,
         dotationAccordee: budget.dotationAccordee ?? 0,

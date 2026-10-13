@@ -176,6 +176,7 @@ export const buildTestStatistiquesContext = (
         | "eigs"
         | "evaluations"
         | "budgets"
+        | "cpomBudgets"
         | "indicateurs"
         | "activites"
         | "rmus"
@@ -235,6 +236,7 @@ export const buildTestStatistiquesContext = (
       structureVersionTimeline
     ),
     budgets: partial.budgets ?? [],
+    cpomBudgets: partial.cpomBudgets ?? [],
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],
     rmus: partial.rmus !== undefined ? partial.rmus : [],

@@ -155,6 +155,8 @@ export type ActiviteSummaryStat = {
   placesOccupees: number;
   placesIndisponibles: number;
   placesDisponibles: number;
+  // Places des CAES : hors suivi de l'indisponibilité, ni disponibles ni indisponibles.
+  placesCaes: number;
   tauxIndisponibilite: number | null;
   motifsIndisponibilite: ActiviteMotifsIndisponibiliteStat;
   presencesInduesBPI: number;

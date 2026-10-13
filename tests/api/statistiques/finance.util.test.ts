@@ -4,6 +4,7 @@ import { computeFinanceStatistiques } from "@/app/api/statistiques/finance/finan
 import { computeStructureJoursPlaces } from "@/app/api/statistiques/finance/finance-theorique.util";
 import type {
   StatistiqueDbBudget,
+  StatistiqueDbCpomStructure,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
@@ -419,6 +420,89 @@ describe("finance - structures actualisées", () => {
     const year2023 = computeFinanceStatistiques(context, "moyenne").byYear[0];
 
     expect(year2023.total.totalProduits).toBe(100);
+  });
+});
+
+describe("finance - budgets des structures sous CPOM", () => {
+  const cpomLink = (
+    id: number,
+    cpomId: number,
+    structureId: number
+  ): StatistiqueDbCpomStructure => ({
+    id,
+    cpomId,
+    structureId,
+    dateStart: new Date("2023-01-01"),
+    dateEnd: new Date("2024-12-31"),
+    cpom: { actesAdministratifs: [] },
+  });
+  const cpomBudget = (
+    id: number,
+    cpomId: number,
+    year: number,
+    structureType: StructureType,
+    totalProduits: number,
+    totalCharges: number
+  ) => ({
+    id,
+    cpomId,
+    year,
+    structureType,
+    dotationDemandee: 0,
+    dotationAccordee: 0,
+    totalProduits,
+    totalCharges,
+  });
+  const structures = [
+    testStructure(1, StructureType.CADA),
+    testStructure(2, StructureType.CADA),
+    testStructure(3, StructureType.HUDA),
+    testStructure(4, StructureType.CADA),
+  ];
+  const budgets = [
+    budgetRow(1, 1, 2024, 10, 0),
+    budgetRow(2, 2, 2024, 20, 0),
+    budgetRow(3, 3, 2024, 30, 0),
+    budgetRow(4, 4, 2024, 40, 0),
+    budgetRow(5, 1, 2025, 10, 0),
+  ];
+  const buildCpomContext = (
+    contextStructures: StatistiqueDbStructure[] = structures
+  ) => ({
+    ...buildFinanceContext({ structures: contextStructures, budgets }),
+    cpomLinks: [cpomLink(1, 100, 1), cpomLink(2, 100, 2), cpomLink(3, 100, 3)],
+    cpomBudgets: [cpomBudget(1, 100, 2024, StructureType.CADA, 1000, 400)],
+  });
+
+  it("remplace le budget des structures sous CPOM par le budget global du CPOM, compté une fois", () => {
+    const year2024 = computeFinanceStatistiques(
+      buildCpomContext(),
+      "moyenne"
+    ).byYear.find((entry) => entry.year === 2024);
+
+    // CPOM CADA (1000) + HUDA sous CPOM sans budget CPOM de son type (30) + CADA hors CPOM (40)
+    expect(year2024?.total.totalProduits).toBe(1070);
+    expect(year2024?.autorisees.totalProduits).toBe(1040);
+    expect(year2024?.subventionnees.totalProduits).toBe(30);
+    expect(year2024?.autorisees.excedentCumule).toBe(640);
+  });
+
+  it("compte le budget du CPOM en entier même si une seule de ses structures est dans le périmètre", () => {
+    const year2024 = computeFinanceStatistiques(
+      buildCpomContext([structures[0]]),
+      "moyenne"
+    ).byYear.find((entry) => entry.year === 2024);
+
+    expect(year2024?.total.totalProduits).toBe(1000);
+  });
+
+  it("garde le budget de la structure hors des années de CPOM", () => {
+    const year2025 = computeFinanceStatistiques(
+      buildCpomContext(),
+      "moyenne"
+    ).byYear.find((entry) => entry.year === 2025);
+
+    expect(year2025?.total.totalProduits).toBe(10);
   });
 });
 

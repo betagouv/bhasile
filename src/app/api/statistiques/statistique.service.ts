@@ -20,6 +20,7 @@ import {
   findActivites,
   findActualisationFormDefinitions,
   findBudgets,
+  findCpomBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinks,
@@ -140,20 +141,16 @@ export const buildStatistiquesContext = async (
     eigs,
     evaluations,
     budgets,
+    cpomBudgets,
     indicateurs,
     activites,
     rmus,
   ] = await Promise.all([
-    findDepartementsWithPopulation([
-      ...new Set(
-        allStructures
-          .map((structure) => structure.departementAdministratif)
-          .filter((departement): departement is string => departement !== null)
-      ),
-    ]),
+    findDepartementsWithPopulation([...(resolvedFilters.departements ?? [])]),
     findEigs(dnaCodes),
     findEvaluations(allStructureIds),
     findBudgets(allStructureIds),
+    findCpomBudgets([...new Set(cpomLinks.map((link) => link.cpomId))]),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
     resolvedFilters.operateurIds === null && filters.types === null
@@ -178,7 +175,7 @@ export const buildStatistiquesContext = async (
         ...evaluations.map((evaluation) => evaluation.date),
         ...activites.map((activite) => activite.date),
       ],
-      financeYears: collectDistinctYears(budgets, indicateurs),
+      financeYears: collectDistinctYears(budgets, cpomBudgets, indicateurs),
     }
   );
   const structures = allStructures.filter((structure) =>
@@ -214,6 +211,7 @@ export const buildStatistiquesContext = async (
     structureVersionTimeline,
     departements,
     budgets,
+    cpomBudgets,
     indicateurs,
     activites,
     rmus,

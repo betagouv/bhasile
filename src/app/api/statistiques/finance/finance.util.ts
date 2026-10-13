@@ -22,6 +22,7 @@ import {
 } from "../completude.util";
 import type {
   StatistiqueDbBudget,
+  StatistiqueDbBudgetAgg,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbStructure,
   StatistiqueDbTypologieValues,
@@ -32,6 +33,7 @@ import {
   getInitialisedStructuresActiveInYear,
   getTypologieMapForExactYear,
   indexTimelineByStructureId,
+  isCpomLinkActiveInYear,
   type StructureVersionTimelineIndex,
 } from "../statistiques.util";
 import {
@@ -54,12 +56,22 @@ const isStructureInFinanceScope = (
   return true;
 };
 
-const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
+/**
+ * Budget compté sur une année : celui d'une structure, ou celui d'un CPOM (par
+ * type de structure) qui remplace alors le budget de ses structures.
+ */
+type FinanceBudgetEntry = StatistiqueDbBudgetAgg & {
+  key: string;
+  structureIds: number[];
+};
+
+const sumBudgetsForYear = (budgetsForYear: FinanceBudgetEntry[]) => {
   let dotationDemandee = 0;
   let dotationAccordee = 0;
   let totalProduits = 0;
   let totalCharges = 0;
-  const resultatNetByStructureId = new Map<number, number>();
+  let excedentCumule = 0;
+  let deficitCumule = 0;
 
   for (const budget of budgetsForYear) {
     dotationDemandee += budget.dotationDemandee;
@@ -67,19 +79,11 @@ const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
     totalProduits += budget.totalProduits;
     totalCharges += budget.totalCharges;
 
-    resultatNetByStructureId.set(
-      budget.structureId,
-      budget.totalProduits - budget.totalCharges
-    );
-  }
-
-  let excedent = 0;
-  let deficit = 0;
-  for (const resultatNet of resultatNetByStructureId.values()) {
+    const resultatNet = budget.totalProduits - budget.totalCharges;
     if (resultatNet > 0) {
-      excedent += resultatNet;
-    } else if (resultatNet < 0) {
-      deficit += Math.abs(resultatNet);
+      excedentCumule += resultatNet;
+    } else {
+      deficitCumule += Math.abs(resultatNet);
     }
   }
 
@@ -89,9 +93,63 @@ const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
     totalProduits,
     totalCharges,
     resultatNet: totalProduits - totalCharges,
-    excedentCumule: excedent,
-    deficitCumule: deficit,
+    excedentCumule,
+    deficitCumule,
   };
+};
+
+/**
+ * Une structure sous CPOM sur l'année est comptée via le budget global de son
+ * CPOM (ligne de son type), en entier même si le périmètre ne retient qu'une
+ * partie des structures du CPOM. Sans budget CPOM saisi pour l'année, repli sur
+ * le budget de la structure.
+ */
+const buildBudgetEntries = (
+  structures: StatistiqueDbStructure[],
+  structureBudgets: StatistiqueDbBudget[],
+  context: Pick<StatistiquesContext, "cpomLinks" | "cpomBudgets">,
+  year: number
+): FinanceBudgetEntry[] => {
+  const structureById = new Map(
+    structures.map((structure) => [structure.id, structure])
+  );
+  const cpomEntryByBudgetId = new Map<number, FinanceBudgetEntry>();
+  const structureIdsUnderCpomBudget = new Set<number>();
+
+  for (const link of context.cpomLinks) {
+    const structure = structureById.get(link.structureId);
+    if (!structure || !isCpomLinkActiveInYear(link, year)) {
+      continue;
+    }
+    const cpomBudget = context.cpomBudgets.find(
+      (budget) =>
+        budget.cpomId === link.cpomId &&
+        budget.year === year &&
+        budget.structureType === structure.type
+    );
+    if (!cpomBudget) {
+      continue;
+    }
+    const entry = cpomEntryByBudgetId.get(cpomBudget.id) ?? {
+      ...cpomBudget,
+      key: `cpom-${cpomBudget.id}`,
+      structureIds: [],
+    };
+    entry.structureIds.push(structure.id);
+    cpomEntryByBudgetId.set(cpomBudget.id, entry);
+    structureIdsUnderCpomBudget.add(structure.id);
+  }
+
+  return [
+    ...cpomEntryByBudgetId.values(),
+    ...structureBudgets
+      .filter((budget) => !structureIdsUnderCpomBudget.has(budget.structureId))
+      .map((budget) => ({
+        ...budget,
+        key: `structure-${budget.id}`,
+        structureIds: [budget.structureId],
+      })),
+  ];
 };
 
 type StructureFinanceIndicateurs = {
@@ -106,7 +164,7 @@ type StructureFinanceIndicateurs = {
 };
 
 type FinanceYearData = {
-  budgets: StatistiqueDbBudget[];
+  budgets: FinanceBudgetEntry[];
   indicateurs: StructureFinanceIndicateurs[];
   hasData: boolean;
 };
@@ -156,8 +214,14 @@ const computeFinanceYearData = (
   year: number
 ): FinanceYearData => {
   const structureIds = new Set(structures.map((structure) => structure.id));
-  const budgets = context.budgets.filter(
+  const structureBudgets = context.budgets.filter(
     (budget) => budget.year === year && structureIds.has(budget.structureId)
+  );
+  const budgets = buildBudgetEntries(
+    structures,
+    structureBudgets,
+    context,
+    year
   );
   const indicateursForYear = context.indicateurs.filter(
     (indicateur) =>
@@ -184,7 +248,9 @@ const computeFinanceYearData = (
     indicateursForYear,
     "REALISE"
   );
-  const dotationByStructureId = sumDotationAccordeeByStructureId(budgets);
+  // Le coût théorique se calcule par structure : il garde la dotation propre de chacune.
+  const dotationByStructureId =
+    sumDotationAccordeeByStructureId(structureBudgets);
 
   const indicateurs = structures.map((structure) => {
     const joursPlaces = computeStructureJoursPlaces(
@@ -274,7 +340,9 @@ const aggregateFinanceScope = (
     coutJournalierCible: aggregate("coutCible"),
     coutJournalierTheorique: aggregate("coutTheorique"),
     ...sumBudgetsForYear(
-      yearData.budgets.filter((budget) => structureIds.has(budget.structureId))
+      yearData.budgets.filter((budget) =>
+        budget.structureIds.some((structureId) => structureIds.has(structureId))
+      )
     ),
   };
 };
@@ -283,7 +351,11 @@ export const computeFinanceStatistiques = (
   context: StatistiquesContext,
   aggregation: NumericAggregation
 ): StatistiqueApiRead["finance"] => {
-  const years = collectDistinctYears(context.budgets, context.indicateurs);
+  const years = collectDistinctYears(
+    context.budgets,
+    context.cpomBudgets,
+    context.indicateurs
+  );
 
   return {
     byYear: years.map((year) => {
