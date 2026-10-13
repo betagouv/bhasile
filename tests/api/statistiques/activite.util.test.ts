@@ -90,6 +90,50 @@ describe("activité - agrégés et série mensuelle", () => {
     expect(result.summary.placesDisponibles).toBe(90);
   });
 
+  it("dans les agrégés, somme tous les DNA d'une structure multi-DNA sur son dernier mois déclaré", () => {
+    const structures = allStructures.slice(0, 1);
+
+    const result = computeActiviteStatistiques(
+      buildTestStatistiquesContext({
+        structures,
+        allStructures: structures,
+        typologies: [],
+        adresses: [],
+        departements: [],
+        dnaLinks: buildTestDnaLinks([
+          { structureId: 1, dnaCode: "DNA01" },
+          { structureId: 1, dnaCode: "DNA01-BIS" },
+        ]),
+        activites: [
+          activiteRow({
+            id: 1,
+            dnaCode: "DNA01",
+            date: new Date("2025-02-28"),
+            placesAutorisees: 70,
+            placesOccupees: 60,
+          }),
+          activiteRow({
+            id: 2,
+            dnaCode: "DNA01",
+            date: new Date("2025-03-31"),
+            placesAutorisees: 80,
+            placesOccupees: 70,
+          }),
+          activiteRow({
+            id: 3,
+            dnaCode: "DNA01-BIS",
+            date: new Date("2025-03-31"),
+            placesAutorisees: 20,
+            placesOccupees: 15,
+          }),
+        ],
+      })
+    );
+
+    expect(result.summary.placesEnregistreesDna).toBe(100);
+    expect(result.summary.placesOccupees).toBe(85);
+  });
+
   it("somme placesOccupees comme placesEnregistreesDna, sans filtre par type de structure", () => {
     const result = computeActiviteStatistiques(
       buildTestStatistiquesContext({
