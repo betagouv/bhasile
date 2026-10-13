@@ -122,9 +122,12 @@ export const buildStatistiquesContext = async (
     findTauxEncadrementCibles(),
   ]);
 
+  const timelineByStructureId = indexTimelineByStructureId(
+    structureVersionTimeline
+  );
   const resolvedTypologies = applyVersionedPlacesToTypologies(
     typologies.filter((typologie) => typologie.year <= referenceYear),
-    structureVersionTimeline,
+    timelineByStructureId,
     now
   );
 
@@ -200,8 +203,7 @@ export const buildStatistiquesContext = async (
     adresses,
     cpomLinks,
     dnaLinks,
-    structureVersionTimeline,
-    timelineByStructureId: indexTimelineByStructureId(structureVersionTimeline),
+    timelineByStructureId,
     departements,
     budgets,
     cpomBudgetByKey: indexCpomBudgets(cpomBudgets),
@@ -210,7 +212,7 @@ export const buildStatistiquesContext = async (
     rmus,
     resolveDnaStructureIds: buildDnaStructureIdsResolver(
       dnaLinks,
-      structureVersionTimeline
+      timelineByStructureId
     ),
   };
 };

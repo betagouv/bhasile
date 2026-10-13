@@ -183,7 +183,6 @@ export const buildTestStatistiquesContext = (
         StatistiquesContext,
         | "cpomLinks"
         | "dnaLinks"
-        | "structureVersionTimeline"
         | "allStructures"
         | "activeStructureIdsNow"
         | "activeStructureIdsByPeriod"
@@ -201,7 +200,9 @@ export const buildTestStatistiquesContext = (
         | "lastValidatedCampagneYearByStructureId"
         | "ciblesFinancieres"
       >
-    >
+    > & {
+    structureVersionTimeline?: StatistiqueDbStructureVersionTimeline[];
+  }
 ): StatistiquesContext => {
   const structures = partial.structures;
   const allStructures = partial.allStructures ?? structures;
@@ -225,9 +226,10 @@ export const buildTestStatistiquesContext = (
     );
 
   const dnaLinks = partial.dnaLinks ?? [];
-  const structureVersionTimeline =
+  const timelineByStructureId = indexTimelineByStructureId(
     partial.structureVersionTimeline ??
-    buildTestStructureVersionTimeline(allStructureIds);
+    buildTestStructureVersionTimeline(allStructureIds)
+  );
 
   return {
     structures,
@@ -241,11 +243,10 @@ export const buildTestStatistiquesContext = (
     departements: partial.departements,
     cpomLinks: partial.cpomLinks ?? [],
     dnaLinks,
-    structureVersionTimeline,
-    timelineByStructureId: indexTimelineByStructureId(structureVersionTimeline),
+    timelineByStructureId,
     resolveDnaStructureIds: buildDnaStructureIdsResolver(
       dnaLinks,
-      structureVersionTimeline
+      timelineByStructureId
     ),
     budgets: partial.budgets ?? [],
     cpomBudgetByKey: partial.cpomBudgetByKey ?? new Map(),

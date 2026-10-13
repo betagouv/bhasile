@@ -274,7 +274,7 @@ const computeByYearStats = (
 export const computeStructuresStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const { typologies, adresses, cpomLinks, structureVersionTimeline } = context;
+  const { typologies, adresses, cpomLinks, timelineByStructureId } = context;
   const structures = filterInitialisedStructures(context.structures, context);
   const typologieMap = getLastTypologiePerStructure(typologies);
   const now = getNow();
@@ -284,7 +284,7 @@ export const computeStructuresStatistiques = (
     adresses,
     structures.map((structure) => structure.id),
     now,
-    structureVersionTimeline,
+    timelineByStructureId,
     now
   );
   const batiMap = getBatiPerStructure(currentAdresses);

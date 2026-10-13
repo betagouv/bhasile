@@ -1,6 +1,7 @@
 import {
   aggregateValues,
   NumericAggregation,
+  ratio,
   sumValues,
 } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
@@ -57,7 +58,6 @@ const isStructureInFinanceScope = (
  * type de structure) qui remplace alors le budget de ses structures.
  */
 type FinanceBudgetEntry = StatistiqueDbBudgetAgg & {
-  key: string;
   structureIds: number[];
 };
 
@@ -150,7 +150,6 @@ const buildBudgetEntries = (
     }
     const entry = cpomEntryByBudgetId.get(cpomBudget.id) ?? {
       ...cpomBudget,
-      key: `cpom-${cpomBudget.id}`,
       structureIds: [],
     };
     entry.structureIds.push(structure.id);
@@ -164,7 +163,6 @@ const buildBudgetEntries = (
       .filter((budget) => !structureIdsUnderCpomBudget.has(budget.structureId))
       .map((budget) => ({
         ...budget,
-        key: `structure-${budget.id}`,
         structureIds: [budget.structureId],
       })),
   ];
@@ -203,26 +201,12 @@ const indexIndicateursByStructureId = (
   return indicateurByStructureId;
 };
 
-const sumDotationAccordeeByStructureId = (
-  budgets: StatistiqueDbBudget[]
-): Map<number, number> => {
-  const dotationByStructureId = new Map<number, number>();
-  for (const budget of budgets) {
-    dotationByStructureId.set(
-      budget.structureId,
-      (dotationByStructureId.get(budget.structureId) ?? 0) +
-        budget.dotationAccordee
-    );
-  }
-  return dotationByStructureId;
-};
-
 const divideOrNull = (
   numerator: number | null | undefined,
   denominator: number | null | undefined
 ): number | null =>
-  numerator != null && denominator != null && denominator > 0
-    ? numerator / denominator
+  numerator != null && denominator != null
+    ? ratio(numerator, denominator)
     : null;
 
 /** Budgets et indicateurs par structure d'une année, calculés une fois puis agrégés par scope. */
@@ -262,8 +246,12 @@ const computeFinanceYearData = (
     "REALISE"
   );
   // Le coût théorique se calcule par structure : il garde la dotation propre de chacune.
-  const dotationByStructureId =
-    sumDotationAccordeeByStructureId(structureBudgets);
+  const dotationByStructureId = new Map(
+    structureBudgets.map((budget) => [
+      budget.structureId,
+      budget.dotationAccordee,
+    ])
+  );
 
   const indicateurs = structures.map((structure) => {
     const joursPlaces = computeStructureJoursPlaces(

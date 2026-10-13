@@ -10,7 +10,6 @@ import type {
   StatistiqueDbAdresse,
   StatistiqueDbDepartement,
   StatistiqueDbStructure,
-  StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologieValues,
   StatistiquesAdresseSnapshotContext,
   StatistiquesContext,
@@ -137,14 +136,14 @@ const computePlacesTypologieIndicators = (
 const computeAdressePlacesSpecialesSnapshot = (
   structures: StatistiqueDbStructure[],
   adresses: StatistiqueDbAdresse[],
-  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[],
+  timelineByStructureId: StatistiquesContext["timelineByStructureId"],
   now: Date
 ): PlacesSpecialesAdresse => {
   const adressesInScope = filterByEffectiveVersionAtDate(
     adresses,
     structures.map((structure) => structure.id),
     now,
-    structureVersionTimeline,
+    timelineByStructureId,
     now
   );
   return sumAdressePlacesSpeciales(adressesInScope);
@@ -153,7 +152,7 @@ const computeAdressePlacesSpecialesSnapshot = (
 export const computePlacesStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["places"] => {
-  const { typologies, adresses, departements, structureVersionTimeline } =
+  const { typologies, adresses, departements, timelineByStructureId } =
     context;
   const structures = filterInitialisedStructures(context.structures, context);
   const typologieMap = getLastTypologiePerStructure(typologies);
@@ -164,7 +163,7 @@ export const computePlacesStatistiques = (
     ...computeAdressePlacesSpecialesSnapshot(
       structures,
       adresses,
-      structureVersionTimeline,
+      timelineByStructureId,
       now
     ),
     byYear: mapTypologieYears<PlacesByYearStat>(
@@ -209,6 +208,6 @@ export const computeAdresseSnapshot = (
   computeAdressePlacesSpecialesSnapshot(
     filterInitialisedStructures(context.structures, context),
     context.adresses,
-    context.structureVersionTimeline,
+    context.timelineByStructureId,
     getNow()
   )[field];

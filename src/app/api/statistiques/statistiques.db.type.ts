@@ -281,8 +281,7 @@ export type StatistiquesContext = {
   adresses: StatistiqueDbAdresse[];
   cpomLinks: StatistiqueDbCpomStructure[];
   dnaLinks: StatistiqueDbDnaLink[];
-  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[];
-  /** `structureVersionTimeline` indexée par structure, construite une fois. */
+  /** Versions de chaque structure, indexées une fois par structure. */
   timelineByStructureId: Map<number, StatistiqueDbStructureVersionTimeline[]>;
   departements: StatistiqueDbDepartement[];
   budgets: StatistiqueDbBudget[];
@@ -325,7 +324,7 @@ export type StatistiquesAdresseSnapshotContext = Pick<
   | "structures"
   | "initialisedStructureIds"
   | "adresses"
-  | "structureVersionTimeline"
+  | "timelineByStructureId"
 >;
 
 /** Minimal slice of StatistiquesContext needed to compute the current activite snapshot. */

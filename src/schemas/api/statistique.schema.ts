@@ -4,7 +4,6 @@ import type { NumericAggregation } from "@/app/utils/math.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
-import type { BudgetApiType } from "./budget.schema";
 
 export type StatistiquesAggregation = NumericAggregation;
 
@@ -227,67 +226,3 @@ export type StatistiqueApiRead = {
 };
 
 export type StatistiqueApiResponse = StatistiqueApiRead | null;
-
-/** @deprecated Ancien type du mock page `/stats`
- * Benjamin : à remplacer par `StatistiqueApiRead`. */
-export type StatistiquesApiType = {
-  totalStructures: number;
-  totalCpoms: number;
-  totalPlaces: number;
-  tauxEquipement: number;
-  structuresAvecCpom: number;
-  placesAutorisees: number;
-  dotationAnnuelle: number;
-  dotationAutorisees: number;
-  dotationSubventionnees: number;
-  ETP: number;
-  ETPAutorisees: number;
-  ETPSubventionnees: number;
-  tauxEncadrement: number;
-  tauxEncadrementAutorisees: number;
-  tauxEncadrementSubventionnees: number;
-  coutJournalier: number;
-  coutJournalierAutorisees: number;
-  coutJournalierSubventionnees: number;
-  budgets: (BudgetApiType & {
-    excedentCumule: number;
-    deficitCumule: number;
-    soldeCumule: number;
-  })[];
-  placesPmr: number;
-  placesLgbt: number;
-  placesFvvTeh: number;
-  placesQPV: number;
-  placesLogementsSociaux: number;
-  typesPlaces: {
-    label: string;
-    subLabel?: string;
-    byYear: { year: number; nbPlaces: number }[];
-  }[];
-  structureTypes: {
-    label: string;
-    byYear: {
-      year: number;
-      nbStructures: number;
-      nbCpoms: number;
-      nbPlaces: number;
-    }[];
-  }[];
-  structureBatis: {
-    label: string;
-    byYear: {
-      year: number;
-      nbStructures: number;
-      nbCpoms: number;
-      nbPlaces: number;
-    }[];
-  }[];
-  finance: {
-    byYear: {
-      year: number;
-      total: FinanceByYearScopeStat & { soldeCumule: number };
-      autorisees: FinanceByYearScopeStat & { soldeCumule: number };
-      subventionnees: FinanceByYearScopeStat & { soldeCumule: number };
-    }[];
-  };
-};
