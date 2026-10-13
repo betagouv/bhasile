@@ -331,7 +331,7 @@ describe("finance - indicateurs théoriques", () => {
 describe("finance - structures actualisées", () => {
   const campagneContext = {
     actualisationFormDefinitions: [
-      { slug: "actualisation-2026", deadline: null },
+      { slug: "actualisation-2026" },
     ],
   };
 

@@ -144,7 +144,7 @@ export const findValidatedActualisationForms = async (
     },
     select: {
       structureId: true,
-      formDefinition: { select: { slug: true, deadline: true } },
+      formDefinition: { select: { slug: true } },
     },
   });
 };
@@ -154,7 +154,7 @@ export const findActualisationFormDefinitions = async (): Promise<
 > =>
   prisma.formDefinition.findMany({
     where: { slug: { startsWith: ACTUALISATION_FORM_SLUG_PREFIX } },
-    select: { slug: true, deadline: true },
+    select: { slug: true },
   });
 
 export const findIdfDepartementNumeros = async (): Promise<string[]> => {

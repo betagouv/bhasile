@@ -525,7 +525,7 @@ describe("structures - indicateurs annuels (byYear)", () => {
         ],
         departements: [],
         actualisationFormDefinitions: [
-          { slug: "actualisation-2026", deadline: null },
+          { slug: "actualisation-2026" },
         ],
         lastValidatedCampagneYearByStructureId: new Map([[2, 2026]]),
       })

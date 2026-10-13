@@ -55,14 +55,13 @@ export type StatistiqueDbTypologieValues = Omit<StatistiqueDbTypologie, "id">;
 export type StatistiqueDbFormDefinition = Prisma.FormDefinitionGetPayload<{
   select: {
     slug: true;
-    deadline: true;
   };
 }>;
 
 export type StatistiqueDbValidatedActualisation = Prisma.FormGetPayload<{
   select: {
     structureId: true;
-    formDefinition: { select: { slug: true; deadline: true } };
+    formDefinition: { select: { slug: true } };
   };
 }>;
 

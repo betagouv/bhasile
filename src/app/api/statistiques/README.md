@@ -97,7 +97,6 @@ Un objet par année pour `structures` et `places`, un objet **par scope** pour `
 | `nbRenseignees` | Nombre de structures comptabilisées sur l'année (exactement celles qui alimentent les chiffres) |
 | `nbAttendues`   | Structures du périmètre encore ouvertes fin d'année, plus les structures comptabilisées qui ont fermé dans l'année |
 | `isComplete`    | `nbRenseignees >= nbAttendues`                                                                  |
-| `reason`        | `SAISIE_EN_COURS` tant qu'une campagne postérieure ou égale à l'année est ouverte (`FormDefinition.deadline`), `SAISIE_INCOMPLETE` ensuite, `null` si complet |
 
 Une structure fermée en cours d'année sans avoir actualisé n'est pas attendue : elle n'a plus à être actualisée sur cette année ni sur les suivantes.
 

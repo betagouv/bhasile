@@ -24,18 +24,9 @@ export type StatistiquesFilters = z.infer<typeof statistiquesFiltersSchema>;
 
 // Types de lecture pure (pas d'input à valider) : pas de schéma zod, juste des types.
 
-export const CompletudeReason = {
-  SAISIE_EN_COURS: "SAISIE_EN_COURS",
-  SAISIE_INCOMPLETE: "SAISIE_INCOMPLETE",
-} as const;
-
-export type CompletudeReason =
-  (typeof CompletudeReason)[keyof typeof CompletudeReason];
-
 // `null` sur une année d'initialisation, antérieure aux campagnes d'actualisation.
 export type CompletudeStat = {
   isComplete: boolean;
-  reason: CompletudeReason | null;
   nbAttendues: number;
   nbRenseignees: number;
 };
