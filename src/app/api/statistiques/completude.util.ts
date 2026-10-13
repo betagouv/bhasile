@@ -1,8 +1,4 @@
-import { getNow } from "@/app/utils/now.util";
-import {
-  CompletudeReason,
-  CompletudeStat,
-} from "@/schemas/api/statistique.schema";
+import { CompletudeStat } from "@/schemas/api/statistique.schema";
 
 import { ACTUALISATION_FORM_SLUG_PREFIX } from "../forms/form.constants";
 import type {
@@ -54,19 +50,6 @@ export const isYearUnderCampagne = (
   );
   return firstCoveredYear !== null && year >= firstCoveredYear;
 };
-
-const isCampagneOpenForYear = (
-  definitions: StatistiqueDbFormDefinition[],
-  year: number,
-  now: Date
-): boolean =>
-  definitions.some((definition) => {
-    const campagneYear = parseCampagneYear(definition);
-    if (!Number.isInteger(campagneYear) || campagneYear < year) {
-      return false;
-    }
-    return definition.deadline === null || definition.deadline >= now;
-  });
 
 export const buildLastValidatedCampagneYearByStructureId = (
   validatedActualisations: StatistiqueDbValidatedActualisation[]
@@ -139,7 +122,6 @@ export const resolveStructuresForYear = (
   context: StatistiquesCompletudeContext,
   structuresActiveInYear: StatistiqueDbStructure[],
   year: number,
-  now: Date = getNow(),
   lookbackYears: number = FIRST_CAMPAGNE_LOOKBACK_YEARS
 ): {
   structures: StatistiqueDbStructure[];
@@ -163,17 +145,11 @@ export const resolveStructuresForYear = (
 
   const nbAttendues = expectedStructureIds.size;
   const nbRenseignees = structures.length;
-  const isComplete = nbRenseignees >= nbAttendues;
 
   return {
     structures,
     completude: {
-      isComplete,
-      reason: isComplete
-        ? null
-        : isCampagneOpenForYear(context.actualisationFormDefinitions, year, now)
-          ? CompletudeReason.SAISIE_EN_COURS
-          : CompletudeReason.SAISIE_INCOMPLETE,
+      isComplete: nbRenseignees >= nbAttendues,
       nbAttendues,
       nbRenseignees,
     },

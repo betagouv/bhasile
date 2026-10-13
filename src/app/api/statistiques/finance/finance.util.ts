@@ -236,7 +236,6 @@ const resolveFinanceStructuresForYear = (
       isStructureInFinanceScope(structure, scope)
     ),
     year,
-    getNow(),
     FIRST_CAMPAGNE_FINANCE_LOOKBACK_YEARS
   );
 

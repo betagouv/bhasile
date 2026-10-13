@@ -10,10 +10,7 @@ import type {
   StatistiqueDbValidatedActualisation,
   StatistiquesCompletudeContext,
 } from "@/app/api/statistiques/statistiques.db.type";
-import { CompletudeReason } from "@/schemas/api/statistique.schema";
 import { StructureType } from "@/types/structure.type";
-
-const NOW = new Date("2026-09-10T12:00:00.000Z");
 
 const testStructure = (id: number): StatistiqueDbStructure => ({
   id,
@@ -26,21 +23,20 @@ const testValidatedActualisation = (
   year: number
 ): StatistiqueDbValidatedActualisation => ({
   structureId,
-  formDefinition: { slug: `actualisation-${year}`, deadline: null },
+  formDefinition: { slug: `actualisation-${year}` },
 });
 
 const buildContext = ({
-  campagnes = [{ year: 2026, deadline: new Date("2026-09-30T00:00:00.000Z") }],
+  campagnes = [2026],
   validated = [] as StatistiqueDbValidatedActualisation[],
   closureDates = [] as [number, Date][],
 }: {
-  campagnes?: { year: number; deadline: Date | null }[];
+  campagnes?: number[];
   validated?: StatistiqueDbValidatedActualisation[];
   closureDates?: [number, Date][];
 } = {}): StatistiquesCompletudeContext => ({
-  actualisationFormDefinitions: campagnes.map((campagne) => ({
-    slug: `actualisation-${campagne.year}`,
-    deadline: campagne.deadline,
+  actualisationFormDefinitions: campagnes.map((year) => ({
+    slug: `actualisation-${year}`,
   })),
   lastValidatedCampagneYearByStructureId:
     buildLastValidatedCampagneYearByStructureId(validated),
@@ -107,11 +103,11 @@ describe("buildLastValidatedCampagneYearByStructureId", () => {
     const map = buildLastValidatedCampagneYearByStructureId([
       {
         structureId: null,
-        formDefinition: { slug: "actualisation-2026", deadline: null },
+        formDefinition: { slug: "actualisation-2026" },
       },
       {
         structureId: 3,
-        formDefinition: { slug: "actualisation-v1", deadline: null },
+        formDefinition: { slug: "actualisation-v1" },
       },
     ]);
 
@@ -125,7 +121,7 @@ describe("resolveStructuresForYear", () => {
   it("garde toutes les structures sans score sur une année d'initialisation", () => {
     const context = buildContext();
 
-    expect(resolveStructuresForYear(context, structures, 2024, NOW)).toEqual({
+    expect(resolveStructuresForYear(context, structures, 2024)).toEqual({
       structures,
       completude: null,
     });
@@ -134,7 +130,7 @@ describe("resolveStructuresForYear", () => {
   it("garde toutes les structures sans score tant qu'aucune campagne n'existe", () => {
     const context = buildContext({ campagnes: [] });
 
-    expect(resolveStructuresForYear(context, structures, 2026, NOW)).toEqual({
+    expect(resolveStructuresForYear(context, structures, 2026)).toEqual({
       structures,
       completude: null,
     });
@@ -145,11 +141,10 @@ describe("resolveStructuresForYear", () => {
       validated: [testValidatedActualisation(1, 2026)],
     });
 
-    expect(resolveStructuresForYear(context, structures, 2026, NOW)).toEqual({
+    expect(resolveStructuresForYear(context, structures, 2026)).toEqual({
       structures: [testStructure(1)],
       completude: {
         isComplete: false,
-        reason: CompletudeReason.SAISIE_EN_COURS,
         nbAttendues: 2,
         nbRenseignees: 1,
       },
@@ -164,11 +159,10 @@ describe("resolveStructuresForYear", () => {
       ],
     });
 
-    expect(resolveStructuresForYear(context, structures, 2025, NOW)).toEqual({
+    expect(resolveStructuresForYear(context, structures, 2025)).toEqual({
       structures,
       completude: {
         isComplete: true,
-        reason: null,
         nbAttendues: 2,
         nbRenseignees: 2,
       },
@@ -178,42 +172,24 @@ describe("resolveStructuresForYear", () => {
   it("ne déplace pas la frontière avec les campagnes suivantes", () => {
     const context = buildContext({
       campagnes: [
-        { year: 2026, deadline: new Date("2026-08-31T00:00:00.000Z") },
-        { year: 2027, deadline: new Date("2027-09-30T00:00:00.000Z") },
+        2026,
+        2027,
       ],
       validated: [testValidatedActualisation(1, 2026)],
     });
 
     expect(
-      resolveStructuresForYear(context, structures, 2024, NOW).completude
+      resolveStructuresForYear(context, structures, 2024).completude
     ).toBeNull();
     expect(
-      resolveStructuresForYear(context, [testStructure(1)], 2027, NOW)
+      resolveStructuresForYear(context, [testStructure(1)], 2027)
     ).toEqual({
       structures: [],
       completude: {
         isComplete: false,
-        reason: CompletudeReason.SAISIE_EN_COURS,
         nbAttendues: 1,
         nbRenseignees: 0,
       },
-    });
-  });
-
-  it("qualifie la saisie d'incomplète quand plus aucune campagne n'est ouverte", () => {
-    const context = buildContext({
-      campagnes: [
-        { year: 2026, deadline: new Date("2026-08-31T00:00:00.000Z") },
-      ],
-    });
-
-    expect(
-      resolveStructuresForYear(context, structures, 2026, NOW).completude
-    ).toEqual({
-      isComplete: false,
-      reason: CompletudeReason.SAISIE_INCOMPLETE,
-      nbAttendues: 2,
-      nbRenseignees: 0,
     });
   });
 
@@ -223,11 +199,10 @@ describe("resolveStructuresForYear", () => {
       closureDates: [[2, new Date("2026-06-30T00:00:00.000Z")]],
     });
 
-    expect(resolveStructuresForYear(context, structures, 2026, NOW)).toEqual({
+    expect(resolveStructuresForYear(context, structures, 2026)).toEqual({
       structures: [testStructure(2)],
       completude: {
         isComplete: false,
-        reason: CompletudeReason.SAISIE_EN_COURS,
         nbAttendues: 2,
         nbRenseignees: 1,
       },
