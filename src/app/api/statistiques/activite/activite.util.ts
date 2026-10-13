@@ -174,24 +174,44 @@ const accumulateActivite = (
   }
 };
 
-const buildLatestActiviteByStructureId = (
+type LatestActivites = {
+  monthKey: string;
+  activiteByDnaCode: Map<string, StatistiqueDbActivite>;
+};
+
+/** Dernier mois déclaré par structure, avec une activité par DNA rattaché à la structure ce mois-là. */
+const buildLatestActivitesByStructureId = (
   activites: StatistiqueDbActivite[],
   resolveDnaStructureIds: StatistiquesContext["resolveDnaStructureIds"],
   structureIdsInScope: Set<number>
-): Map<number, StatistiqueDbActivite> => {
-  const latestByStructureId = new Map<number, StatistiqueDbActivite>();
+): Map<number, LatestActivites> => {
+  const latestByStructureId = new Map<number, LatestActivites>();
 
   for (const activite of [...activites].sort(
     (activiteA, activiteB) =>
       new Date(activiteB.date).getTime() - new Date(activiteA.date).getTime()
   )) {
+    if (!activite.dnaCode) {
+      continue;
+    }
+    const monthKey = toMonthKey(new Date(activite.date));
+
     for (const structureId of resolveActiviteStructureIds(
       activite,
       resolveDnaStructureIds,
       structureIdsInScope
     )) {
-      if (!latestByStructureId.has(structureId)) {
-        latestByStructureId.set(structureId, activite);
+      const latest = latestByStructureId.get(structureId);
+      if (!latest) {
+        latestByStructureId.set(structureId, {
+          monthKey,
+          activiteByDnaCode: new Map([[activite.dnaCode, activite]]),
+        });
+      } else if (
+        latest.monthKey === monthKey &&
+        !latest.activiteByDnaCode.has(activite.dnaCode)
+      ) {
+        latest.activiteByDnaCode.set(activite.dnaCode, activite);
       }
     }
   }
@@ -207,19 +227,21 @@ const accumulateActiviteSummaryTotals = (
   const structureIdsNow = new Set(structures.map((structure) => structure.id));
 
   const summaryTotals = emptyActiviteTotals();
-  const latestActiviteByStructureId = buildLatestActiviteByStructureId(
+  const latestActivitesByStructureId = buildLatestActivitesByStructureId(
     activites,
     resolveDnaStructureIds,
     structureIdsNow
   );
 
-  for (const [structureId, activite] of latestActiviteByStructureId) {
-    accumulateActivite(
-      summaryTotals,
-      activite,
-      [structureId],
-      structureTypeById
-    );
+  for (const [structureId, latest] of latestActivitesByStructureId) {
+    for (const activite of latest.activiteByDnaCode.values()) {
+      accumulateActivite(
+        summaryTotals,
+        activite,
+        [structureId],
+        structureTypeById
+      );
+    }
   }
 
   return summaryTotals;
