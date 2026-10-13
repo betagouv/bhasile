@@ -1,4 +1,3 @@
-import prisma from "@/lib/prisma";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { CommuneCoordinates } from "@/types/adresse.type";
 import { EntityId } from "@/types/Entity.type";
@@ -72,13 +71,4 @@ export const createOrUpdateAdresses = async (
       },
     });
   }
-};
-
-export const checkAdressesExistence = async (
-  structureId: number
-): Promise<boolean> => {
-  const adresses = await prisma.adresse.findMany({
-    where: { structureVersion: { structureId } },
-  });
-  return adresses.length > 0;
 };

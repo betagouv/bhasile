@@ -104,7 +104,6 @@ export const config = {
     "/statistiques/:path*",
     "/ressources/:path*",
     "/ajout-structure/:path*",
-    "/ajout-adresses/:path*",
     "/mot-de-passe",
     // Routes API
     "/api/:path*",

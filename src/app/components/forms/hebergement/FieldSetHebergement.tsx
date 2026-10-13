@@ -159,21 +159,20 @@ export const FieldSetHebergement = ({
           />
         )}
 
-        {typeBati === Repartition.COLLECTIF &&
-          formKind !== FormKind.ADRESSES_RECOVERY && (
-            <div className="flex mt-6 -mb-4">
-              <ToggleSwitch
-                inputTitle="Adresse d'hébergement identique"
-                label="L'adresse d'hébergement est-elle la même que l'adresse administrative ?"
-                labelPosition="left"
-                showCheckedHint={false}
-                className="w-fit [&_label]:gap-2"
-                checked={sameAddress}
-                onChange={handleSameAddressChange}
-              />
-              <p className="pl-2">{sameAddress ? "Oui" : "Non"}</p>
-            </div>
-          )}
+        {typeBati === Repartition.COLLECTIF && (
+          <div className="flex mt-6 -mb-4">
+            <ToggleSwitch
+              inputTitle="Adresse d'hébergement identique"
+              label="L'adresse d'hébergement est-elle la même que l'adresse administrative ?"
+              labelPosition="left"
+              showCheckedHint={false}
+              className="w-fit [&_label]:gap-2"
+              checked={sameAddress}
+              onChange={handleSameAddressChange}
+            />
+            <p className="pl-2">{sameAddress ? "Oui" : "Non"}</p>
+          </div>
+        )}
         {fields.map((field, index) => {
           const adresse =
             (watchedAdresses[index] as FormAdresse | undefined) ??
