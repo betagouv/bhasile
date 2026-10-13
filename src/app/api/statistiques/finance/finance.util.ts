@@ -98,6 +98,13 @@ const sumBudgetsForYear = (budgetsForYear: FinanceBudgetEntry[]) => {
   };
 };
 
+// Le formulaire CPOM enregistre une ligne par année même non saisie : une ligne à zéro vaut absence de budget.
+const hasBudgetAmount = (budget: StatistiqueDbBudgetAgg): boolean =>
+  budget.dotationDemandee !== 0 ||
+  budget.dotationAccordee !== 0 ||
+  budget.totalProduits !== 0 ||
+  budget.totalCharges !== 0;
+
 /**
  * Une structure sous CPOM sur l'année est comptée via le budget global de son
  * CPOM (ligne de son type), en entier même si le périmètre ne retient qu'une
@@ -125,7 +132,8 @@ const buildBudgetEntries = (
       (budget) =>
         budget.cpomId === link.cpomId &&
         budget.year === year &&
-        budget.structureType === structure.type
+        budget.structureType === structure.type &&
+        hasBudgetAmount(budget)
     );
     if (!cpomBudget) {
       continue;
@@ -388,18 +396,37 @@ export type FinanceCartographieField =
   | "tauxEncadrement"
   | "coutJournalier";
 
-// La cartographie n'affiche qu'un état : réalisé, sinon prévisionnel.
-const CARTOGRAPHIE_FIELDS: Record<
-  FinanceCartographieField,
-  (stat: FinanceByYearScopeStat) => number | null
-> = {
-  dotationAccordee: (stat) => stat.dotationAccordee,
-  resultatNet: (stat) => stat.resultatNet,
-  etp: (stat) => stat.totalETPRealise ?? stat.totalETPPrevisionnel,
-  tauxEncadrement: (stat) =>
-    stat.tauxEncadrementTheoriqueRealise ??
-    stat.tauxEncadrementTheoriquePrevisionnel,
-  coutJournalier: (stat) => stat.coutJournalierTheorique,
+// La cartographie n'affiche qu'un état : réalisé, sinon prévisionnel, résolu structure par structure.
+const computeCartographieValue = (
+  yearData: FinanceYearData,
+  total: ReturnType<typeof resolveStructuresForYear>,
+  aggregation: NumericAggregation,
+  field: FinanceCartographieField
+): number | null => {
+  if (field === "etp") {
+    return roundStatsNumber(
+      sumValues(
+        yearData.indicateurs.map(
+          (indicateur) => indicateur.etpRealise ?? indicateur.etpPrevisionnel
+        )
+      )
+    );
+  }
+  if (field === "tauxEncadrement") {
+    return roundStatsNumber(
+      aggregateValues(
+        yearData.indicateurs.map(
+          (indicateur) => indicateur.tauxRealise ?? indicateur.tauxPrevisionnel
+        ),
+        aggregation
+      )
+    );
+  }
+
+  const stat = aggregateFinanceScope(yearData, total, aggregation);
+  return field === "coutJournalier"
+    ? stat.coutJournalierTheorique
+    : stat[field];
 };
 
 /** Computes a single total field for given years, for the cartographie one-indicator requests. */
@@ -412,10 +439,8 @@ export const computeFinanceTotalValuesForYears = (
   years.map((year) => {
     const total = resolveFinanceStructuresForYear(context, year, "total");
     const yearData = computeFinanceYearData(total.structures, context, year);
-    if (!yearData.hasData) {
-      return null;
-    }
-    return CARTOGRAPHIE_FIELDS[field](
-      aggregateFinanceScope(yearData, total, aggregation)
-    );
+
+    return yearData.hasData
+      ? computeCartographieValue(yearData, total, aggregation, field)
+      : null;
   });

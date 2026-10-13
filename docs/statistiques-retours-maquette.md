@@ -35,3 +35,7 @@
 
 - **Astérisque 2021 à 2024** : "Les structures fermées avant le lancement de l'outil en 2024 ne figurent pas dans ces données."
 - **"Données au 31/12 de chaque année"** : c'est vrai pour les places seulement, le type et le bâti sont sur l'état actuel.
+
+## Cartographie
+
+- **Dotation et résultat des structures sous CPOM** : le budget global du CPOM est compté en entier dans chaque zone qui contient une de ses structures. Un CPOM régional apparaît donc avec son montant complet dans chacun de ses départements : prévoir une infobulle sur ces deux indicateurs.
