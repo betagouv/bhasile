@@ -22,7 +22,7 @@ Une seule règle, `isCpomLinkActiveInYear` : un CPOM est actif sur une année si
 
 ## `byYear`
 
-Structures comptabilisées sur l'année (cf. [README racine](../README.md#structures-comptabilisées-par-année)) **avec** un millésime exact `StructureTypologie`. CPOM par année. `completude` porte le score de l'année, `null` sur une année d'initialisation.
+Structures comptabilisées sur l'année (cf. [README racine](../README.md#structures-comptabilisées-par-année)). Sur une année d'initialisation, seules celles **avec** un millésime exact `StructureTypologie` ; sur une année de campagne, toutes les structures actualisées, avec ou sans millésime, pour que `totalStructures` et les camemberts portent exactement sur les structures du score. CPOM par année. `completude` porte le score de l'année, `null` sur une année d'initialisation.
 
 | Champ                                   | Contenu                                                                     |
 | --------------------------------------- | --------------------------------------------------------------------------- |

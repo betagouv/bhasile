@@ -7,7 +7,11 @@ import {
 import { computeActiviteStatistiques } from "./activite/activite.util";
 import { buildLastValidatedCampagneYearByStructureId } from "./completude.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
-import { computeFinanceStatistiques } from "./finance/finance.util";
+import {
+  computeFinanceStatistiques,
+  indexCpomBudgets,
+} from "./finance/finance.util";
+import { buildCiblesFinancieresLookup } from "./finance/finance-theorique.util";
 import { computePlacesStatistiques } from "./places/places.util";
 import { computeRmuStatistiques } from "./rmu/rmu.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
@@ -45,6 +49,7 @@ import {
   getCadaFromHudaStructureIds,
   getInitialisedStructureIds,
   getTypologieYears,
+  indexTimelineByStructureId,
   parseStatistiquesPerimeterFilters,
   type StatistiquesResolvedPerimeterFilters,
 } from "./statistiques.util";
@@ -181,12 +186,14 @@ export const buildStatistiquesContext = async (
     actualisationFormDefinitions,
     lastValidatedCampagneYearByStructureId:
       buildLastValidatedCampagneYearByStructureId(validatedActualisations),
-    idfDepartementNumeros: new Set(idfDepartementNumeros),
-    cadaFromHudaStructureIds: getCadaFromHudaStructureIds(
-      structureInitialisations
-    ),
-    tarifsJournaliersCibles,
-    tauxEncadrementCibles,
+    ciblesFinancieres: buildCiblesFinancieresLookup({
+      tarifsJournaliersCibles,
+      tauxEncadrementCibles,
+      idfDepartementNumeros: new Set(idfDepartementNumeros),
+      cadaFromHudaStructureIds: getCadaFromHudaStructureIds(
+        structureInitialisations
+      ),
+    }),
     eigs,
     evaluations,
     typologies: resolvedTypologies,
@@ -194,9 +201,10 @@ export const buildStatistiquesContext = async (
     cpomLinks,
     dnaLinks,
     structureVersionTimeline,
+    timelineByStructureId: indexTimelineByStructureId(structureVersionTimeline),
     departements,
     budgets,
-    cpomBudgets,
+    cpomBudgetByKey: indexCpomBudgets(cpomBudgets),
     indicateurs,
     activites,
     rmus,

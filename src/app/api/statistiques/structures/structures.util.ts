@@ -233,38 +233,38 @@ const computeByYearStats = (
 ): StructuresByYearStat[] =>
   mapTypologieYears<StructuresByYearStat>(
     context,
-    (year, structuresForYear) => {
+    (year, structuresForYear, completude) => {
       const typologieMapForYear = getTypologieMapForExactYear(
         context.typologies,
         year
       );
-      const structuresWithTypologie = filterStructuresWithTypologie(
-        structuresForYear,
-        typologieMapForYear
-      );
-      const structureIdsWithTypologie = new Set(
-        structuresWithTypologie.map((structure) => structure.id)
+      // Année de campagne : exactement les structures actualisées, celles du score.
+      const countedStructures = completude
+        ? structuresForYear
+        : filterStructuresWithTypologie(structuresForYear, typologieMapForYear);
+      const countedStructureIds = new Set(
+        countedStructures.map((structure) => structure.id)
       );
 
       return {
         structureTypes: computeTypeStats(
-          structuresWithTypologie,
+          countedStructures,
           typologieMapForYear
         ),
         structureBatis: computeBatiStats(
-          structuresWithTypologie,
+          countedStructures,
           batiMap,
           currentAdresses
         ),
-        totalStructures: structuresWithTypologie.length,
+        totalStructures: countedStructures.length,
         totalCpoms: countActiveCpoms(
           context.cpomLinks,
-          structureIdsWithTypologie,
+          countedStructureIds,
           year
         ),
         structuresAvecCpom: countStructuresAvecCpomForYear(
           context.cpomLinks,
-          structureIdsWithTypologie,
+          countedStructureIds,
           year
         ),
       };

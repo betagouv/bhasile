@@ -188,6 +188,17 @@ export type StatistiqueDbDepartement = Prisma.DepartementGetPayload<{
   };
 }>;
 
+export type CiblesFinancieresLookup = {
+  getTarifJournalierCible: (
+    structure: StatistiqueDbStructure,
+    year: number
+  ) => number | null;
+  getTauxEncadrementCible: (
+    structure: StatistiqueDbStructure,
+    year: number
+  ) => number | null;
+};
+
 export type StatistiqueDbBudgetAgg = {
   year: number;
   dotationDemandee: number;
@@ -262,11 +273,8 @@ export type StatistiquesContext = {
   actualisationFormDefinitions: StatistiqueDbFormDefinition[];
   /** Dernière campagne d'actualisation validée par structure. */
   lastValidatedCampagneYearByStructureId: Map<number, number>;
-  idfDepartementNumeros: Set<string>;
-  /** CADA créés par une transformation HUDA vers CADA. */
-  cadaFromHudaStructureIds: Set<number>;
-  tarifsJournaliersCibles: StatistiqueDbTarifJournalierCible[];
-  tauxEncadrementCibles: StatistiqueDbTauxEncadrementCible[];
+  /** Cibles (tarif journalier, taux d'encadrement) par structure et par année, indexées une fois. */
+  ciblesFinancieres: CiblesFinancieresLookup;
   eigs: StatistiqueDbEig[];
   evaluations: StatistiqueDbEvaluation[];
   typologies: StatistiqueDbTypologie[];
@@ -274,9 +282,12 @@ export type StatistiquesContext = {
   cpomLinks: StatistiqueDbCpomStructure[];
   dnaLinks: StatistiqueDbDnaLink[];
   structureVersionTimeline: StatistiqueDbStructureVersionTimeline[];
+  /** `structureVersionTimeline` indexée par structure, construite une fois. */
+  timelineByStructureId: Map<number, StatistiqueDbStructureVersionTimeline[]>;
   departements: StatistiqueDbDepartement[];
   budgets: StatistiqueDbBudget[];
-  cpomBudgets: StatistiqueDbCpomBudget[];
+  /** Budgets CPOM saisis, par CPOM, année et type de structure (cf. `indexCpomBudgets`). */
+  cpomBudgetByKey: Map<string, StatistiqueDbCpomBudget>;
   indicateurs: StatistiqueDbIndicateurFinancier[];
   activites: StatistiqueDbActivite[];
   rmus: StatistiqueDbRmu[] | null;
