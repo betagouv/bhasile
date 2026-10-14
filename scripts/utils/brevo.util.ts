@@ -20,7 +20,7 @@ export type BrevoContact = {
 
 export type BrevoAgentUser = {
   email: string;
-  lastConnection: Date;
+  lastConnection: Date | null;
   createdAt: Date;
   grants: GrantDb[];
   emailPattern: { grants: GrantDb[] } | null;
@@ -37,7 +37,7 @@ export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
       DEPARTEMENT: formatDepartements(actionGrants),
       STATUT: AGENT_STATUT,
       PERIMETRE: actionGrants.map(getGrantLabel).join(", "),
-      LAST_LOGIN: toDayKey(user.lastConnection),
+      LAST_LOGIN: user.lastConnection ? toDayKey(user.lastConnection) : "",
       CREATION_COMPTE: toDayKey(user.createdAt),
     },
   };

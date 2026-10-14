@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import type { FileWithParents } from "@/app/api/files/file.db.type";
 import { AccessRole, Structure } from "@/generated/prisma/client";
 import {
+  canAccessApp,
   canDeleteFile,
   canUpdateDepartement,
   canUpdateStructure,
@@ -274,6 +275,35 @@ const buildCpom = ({
   } as never);
 
 const buildOperateur = (id: number) => subject("Operateur", { id } as never);
+
+describe("Permissions : canAccessApp", () => {
+  it("refuse l'accès à un utilisateur sans aucun binôme", () => {
+    expect(canAccessApp(createSessionUser())).toBe(false);
+  });
+
+  it("donne l'accès dès un binôme, même lecteur", () => {
+    const user = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(canAccessApp(user)).toBe(true);
+  });
+
+  it("donne l'accès à un superadmin sans binôme", () => {
+    expect(canAccessApp(createSessionUser({ isSuperAdmin: true }))).toBe(true);
+  });
+
+  it("n'accorde aucune lecture à un utilisateur sans binôme", () => {
+    expect(
+      defineAbilityFor(createSessionUser()).can(
+        "read",
+        subject("Structure", {} as never)
+      )
+    ).toBe(false);
+  });
+});
 
 describe("Permissions : canUpdateDepartement", () => {
   const nationalUser = createNationalAgent();

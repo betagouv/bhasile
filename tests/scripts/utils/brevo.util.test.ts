@@ -102,6 +102,14 @@ describe("brevo util", () => {
     expect(contact.attributes.DEPARTEMENT).toBe("29");
   });
 
+  it("laisse la date de dernière connexion vide pour un utilisateur jamais connecté", () => {
+    // WHEN
+    const contact = toBrevoContact({ ...baseUser, lastConnection: null });
+
+    // THEN
+    expect(contact.attributes.LAST_LOGIN).toBe("");
+  });
+
   it("laisse le périmètre vide quand aucun binôme n'est rattaché", () => {
     // WHEN
     const contact = toBrevoContact(baseUser);

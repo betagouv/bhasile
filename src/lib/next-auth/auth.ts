@@ -7,11 +7,7 @@ import { getServerSession, NextAuthOptions } from "next-auth";
 
 import { createOrUpdateUser } from "@/app/api/users/user.service";
 
-import {
-  getIsUserAuthorized,
-  getPermissionsFromSession,
-  ProConnectUser,
-} from "./auth-util";
+import { getPermissionsFromSession, ProConnectUser } from "./auth-util";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -19,16 +15,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user }) {
-      const email = user?.email;
-      if (!email) {
-        return false;
-      }
-      try {
-        return getIsUserAuthorized(email);
-      } catch (error) {
-        console.error("Erreur de connexion", error);
-        return false;
-      }
+      return !!user?.email;
     },
     async jwt({ token, account, user }) {
       if (account) {
