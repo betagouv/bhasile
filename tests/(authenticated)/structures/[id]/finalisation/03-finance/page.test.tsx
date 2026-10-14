@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationFinancePage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/03-finance/page";
+import { CURRENT_YEAR } from "@/constants";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationFinanceValidStructure } from "../../../../../test-utils/structure.factory";
@@ -58,10 +59,15 @@ describe("FinalisationFinance page integration", () => {
     });
   });
 
-  it("bloque la validation quand les indicateurs financiers sont manquants", async () => {
+  it("bloque la validation quand les indicateurs financiers d'une année hors CPOM sont manquants", async () => {
     // GIVEN
+    const validStructure = createFinalisationFinanceValidStructure(78);
     const structure = {
-      ...createFinalisationFinanceValidStructure(78),
+      ...validStructure,
+      isInCpomPerYear: {
+        ...validStructure.isInCpomPerYear,
+        [CURRENT_YEAR]: false,
+      },
       indicateursFinanciers: [],
     };
     const mockedFetch = mockStructurePageFetch(structure);
@@ -71,6 +77,11 @@ describe("FinalisationFinance page integration", () => {
     await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
+    expect(
+      screen.getByText(
+        new RegExp(`réalisé ou prévisionnel ${CURRENT_YEAR}.*requis`, "i")
+      )
+    ).toBeInTheDocument();
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
