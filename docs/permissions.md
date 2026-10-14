@@ -20,6 +20,13 @@ Sur `User` :
 - `operateurId` : renseigné = user opérateur, vide = agent.
 - `isSuperAdmin` : tous les droits, hors binômes. Réservé à l'équipe Bhasile.
 
+## Connexion et accès
+
+- **Connexion** : tout compte ProConnect peut se connecter. Le user est créé ou mis à jour à chaque connexion, et rattaché au pattern d'email qui lui correspond, s'il en existe un.
+- **Accès à l'application** : il faut au moins un binôme effectif, ou être superadmin. Sinon, le user est redirigé vers `/acces-en-attente` et les routes d'API ProConnect lui renvoient 401 : il ne voit aucune structure, aucun CPOM, aucune statistique.
+- **Droits de base** : ceux du pattern d'email, s'il en matche un.
+- **Droits spécifiques** : des binômes ajoutés à la main sur le user.
+
 Quels binômes s'appliquent à un user :
 
 - s'il a des binômes personnels, **eux seuls** ;
@@ -35,7 +42,8 @@ Quels binômes s'appliquent à un user :
 
 | Qui                        | Lecture | Structures               | CPOM                                          | Opérateurs |
 | -------------------------- | ------- | ------------------------ | --------------------------------------------- | ---------- |
-| Tout le monde              | Tout    | —                        | —                                             | —          |
+| User sans binôme           | Rien    | —                        | —                                             | —          |
+| Tout user avec un binôme   | Tout    | —                        | —                                             | —          |
 | Agent `EDITEUR` ou `ADMIN` | Tout    | Celles de ses périmètres | Ceux liés au moins en partie à ses périmètres | Tous       |
 | User opérateur `ADMIN`     | Tout    | —                        | —                                             | Le sien    |
 | Autre user opérateur       | Tout    | —                        | —                                             | —          |
@@ -49,7 +57,7 @@ Détail pour un agent éditeur :
 Limites actuelles :
 
 - **`ADMIN` = `EDITEUR`** tant que la gestion des binômes (PR 2) n'existe pas.
-- **`LECTEUR` ne restreint rien** : la lecture est ouverte à tous, user opérateur compris, jusqu'à la PR 3.
+- **La lecture n'est pas encore filtrée par périmètre** : un seul binôme, même `LECTEUR` d'un département, donne la lecture de tout, user opérateur compris, jusqu'à la PR 3.
 - **Niveau structure** : pas d'accès aux transformations ni aux rappels CPOM du tableau de bord, qui restent contrôlés par département.
 
 Règle à respecter dans `abilities.ts` : le code ne compare jamais les rôles entre eux. Tout droit donné à un rôle doit l'être aussi aux rôles supérieurs, sinon la hiérarchie casse.
@@ -104,8 +112,7 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
    - matrice ressource × action × rôle × agent/opérateur validée par le métier.
 2. **PR 3, ouverture aux opérateurs** :
    - invitation d'un user opérateur par un admin ;
-   - authentification individuelle (ProConnect ou magic link) ;
-   - entrée d'un email sans pattern, à trancher : refus à la connexion, ou liste blanche d'adresses exactes à la place de `EmailPattern` ;
+   - authentification des users opérateurs sans ProConnect (adresses gmail) : magic link ou liste blanche ;
    - cloisonnement : toutes les règles d'un user opérateur filtrées sur son `operateurId` ;
    - lecture filtrée via `accessibleBy` dans les repositories (comme `includedStructureWhere`) ;
    - champs réservés aux agents masqués : notes, justification d'anomalies, contrôles, évaluations, CPOM, finalisation de transformation ;

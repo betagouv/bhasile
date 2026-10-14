@@ -206,3 +206,5 @@ export const proConnectProtectedPages = [
 export const passwordProtectedPages = ["/ajout-structure"];
 
 export const noProtectionPage = "/mot-de-passe";
+
+export const pendingAccessPage = "/acces-en-attente";
