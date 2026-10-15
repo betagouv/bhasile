@@ -242,14 +242,13 @@ const updateStructure = async (
   structure: StructureAgentUpdateApiType,
   isOperateurUpdate: boolean
 ): Promise<Structure> => {
-  const { operateur, filiale, creationDate, date303 } = structure;
+  const { operateur, creationDate, date303 } = structure;
 
   const updatedStructure = await tx.structure.update({
     where: {
       id: structure.id,
     },
     data: {
-      filiale,
       creationDate: creationDate ?? undefined,
       date303,
       type: isOperateurUpdate ? structure.type : undefined,

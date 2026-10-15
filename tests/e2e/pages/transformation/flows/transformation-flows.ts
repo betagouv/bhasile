@@ -98,7 +98,6 @@ export const runCreationExNihilo = async (
       withAntennes: true,
       withSecondDna: true,
       withSecondContact: true,
-      withFiliale: true,
     },
     { typeBati: Repartition.DIFFUS, withQpvPmr: true },
     { withUploadActe: true },

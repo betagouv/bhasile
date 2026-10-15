@@ -116,7 +116,6 @@ describe("GET /api/structures/[id]", () => {
     const dbStructure = {
       id: 1,
       name: "Test",
-      filiale: null,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
       cpomStructures: [],
@@ -146,7 +145,6 @@ describe("GET /api/structures/[id]", () => {
       id: 1,
       name: "Test",
       nom: "",
-      filiale: undefined,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
       adresses: [{ id: 1 }],
@@ -209,7 +207,6 @@ describe("GET /api/structures/[id]", () => {
     const dbStructure = {
       id: 2,
       name: "Test",
-      filiale: null,
       operateur: { id: 1, name: "Adoma" },
       cpomStructures: [],
       creationDate: new Date("2020-01-01"),
