@@ -55,7 +55,6 @@ export const createStructure = ({
     placesAutorisees: null,
     anomalies: [],
     operateur: createOperateur(id),
-    filiale: undefined,
     operateurLabel: "Adoma",
     type: structureType,
     adresseAdministrative: adresseAdministrativeValue,
