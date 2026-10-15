@@ -13,7 +13,8 @@ export default function AccesEnAttente(): ReactElement {
         description={
           <span>
             Votre compte ProConnect est bien reconnu, mais aucun droit ne vous a
-            encore été attribué sur Bhasile.{" "}
+            encore été attribué sur Bhasile. Veuillez contacter votre
+            administrateur·ice pour activer votre accès.{" "}
             <ExternalLink
               url={`mailto:${BHASILE_CONTACT_EMAIL}`}
               title="Contacter le support"
