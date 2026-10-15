@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
 
 import { getCpomById } from "@/app/api/cpoms/cpom.service";
 import { createReadEvent } from "@/app/api/user-actions/user-action.service";
 import { parseId } from "@/app/utils/string.util";
 import { CpomProvider } from "@/contexts/CpomContext";
+import { authOptions } from "@/lib/next-auth/auth";
+import { SessionUser } from "@/types/global";
 
 import { CpomHeader } from "./_components/CpomHeader";
 
@@ -20,7 +23,11 @@ export default async function CpomLayout({
     notFound();
   }
 
-  const cpom = await getCpomById(cpomId);
+  const session = await getServerSession(authOptions);
+  const cpom = await getCpomById(
+    cpomId,
+    session?.user as SessionUser | undefined
+  );
   if (!cpom) {
     notFound();
   }

@@ -49,11 +49,12 @@ export async function GET(request: NextRequest) {
     selection,
     isFinalised,
     isClosed,
+    user: session?.user as SessionUser | undefined,
   };
 
   const { structures, totalStructures } = await getFullStructures(
     searchProps,
-    session?.user as SessionUser | undefined
+    searchProps.user
   );
 
   return NextResponse.json({ structures, totalStructures });

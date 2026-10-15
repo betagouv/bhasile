@@ -4,6 +4,7 @@ import {
   CartographieSupportedGranularite,
   StatistiqueCartographieFilters,
 } from "@/schemas/api/statistique-cartographie.schema";
+import { SessionUser } from "@/types/global";
 
 import { buildStatistiquesContext } from "../statistique.service";
 import { sliceStatistiquesContext } from "../statistiques.util";
@@ -27,7 +28,8 @@ const emptyZoneResult = (zone: CartographieZoneDefinition) => ({
 export const getCartographieStatistiques = async (
   filters: StatistiqueCartographieFilters & {
     granularite: CartographieSupportedGranularite;
-  }
+  },
+  user: SessionUser
 ): Promise<CartographieApiRead> => {
   const { granularite, indicateur, annee, aggregation } = filters;
 
@@ -50,7 +52,7 @@ export const getCartographieStatistiques = async (
     aggregation,
   };
 
-  const context = await buildStatistiquesContext(perimeterFilters);
+  const context = await buildStatistiquesContext(perimeterFilters, user);
 
   if (!context) {
     return {

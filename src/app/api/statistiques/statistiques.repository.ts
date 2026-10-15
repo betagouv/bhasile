@@ -1,5 +1,6 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
+import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
 import { finalizedVersionWhere } from "../structure-versions/structure-version.db.type";
@@ -39,10 +40,12 @@ export const findOperateurFiliales = async (
 
 export const findPerimeterStructures = async (
   resolved: StatistiquesResolvedPerimeterFilters,
+  readableWhere: Prisma.StructureWhereInput,
   reference: Date = getNow()
 ): Promise<StatistiqueDbStructure[]> =>
   prisma.structure.findMany({
     where: {
+      AND: [readableWhere],
       type: { in: [...resolved.types] },
       ...(resolved.departements
         ? { departementAdministratif: { in: [...resolved.departements] } }

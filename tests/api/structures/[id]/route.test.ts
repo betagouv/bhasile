@@ -27,6 +27,8 @@ vi.mock("@/app/api/anomalies/anomalie.service", () => ({
 
 vi.mock("@/lib/casl/abilities", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
+  canAbilityReadStructure: () => true,
+  defineAbilityFor: () => ({}),
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({

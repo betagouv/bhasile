@@ -9,12 +9,7 @@ export const CpomsCount = async ({
 }: {
   query: CpomsQuery;
 }): Promise<ReactElement> => {
-  const { totalCpoms } = await getCpoms(
-    query.page,
-    query.departements,
-    query.column,
-    query.direction
-  );
+  const { totalCpoms } = await getCpoms(query);
 
   return (
     <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
