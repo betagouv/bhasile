@@ -33,6 +33,7 @@ Chaque structure saisit son budget à son échelle, et chaque CPOM a en plus son
 - sans ligne de budget CPOM pour l'année et le type, ou avec une ligne à zéro (le formulaire CPOM enregistre une ligne par année même non saisie), repli sur le budget de la structure ;
 - `excedentCumule` / `deficitCumule` : un résultat par ligne de budget CPOM, un par structure hors CPOM ;
 - le coût théorique reste calculé avec la dotation propre de chaque structure, puisqu'il se calcule structure par structure.
+- depuis #1717, les indicateurs financiers (ETP) d'une structure ne sont plus obligatoires les années où elle est sous CPOM, et le CPOM n'en porte pas. Une structure sous CPOM sans ETP saisi sort donc des sommes d'ETP et des taux d'encadrement théoriques de l'année : ces indicateurs peuvent être partiels sur les périmètres qui comptent des CPOM.
 
 Les vues SQL de reporting (`scripts/views/002_structures_aggregate.sql`, `006_reporting_global.sql`) suivent le même principe pour la dotation du parc (budget du CPOM, sinon budget de la structure), avec trois différences : le CPOM y est « en cours » au jour près et non à l'année, le repli se déclenche si le CPOM n'a aucun budget toutes années confondues, et la dotation retenue est la dotation accordée, à défaut la demandée, du dernier millésime.
 

@@ -7,7 +7,6 @@ import {
   STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS,
   TRANSFORMATION_FORM_SLUG,
 } from "@/app/api/forms/form.constants";
-import { CURRENT_YEAR } from "@/constants";
 import {
   Form,
   FormDefinition,
@@ -16,9 +15,6 @@ import {
   StepStatus,
 } from "@/generated/prisma/client";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
-
-/** Dernière année seedée : c'est elle qu'actualise la campagne ouverte. */
-export const ACTUALISATION_SEED_YEAR = CURRENT_YEAR;
 
 export const createFakeFormTransformation = (): Omit<FormDefinition, "id"> => {
   return {

@@ -4,6 +4,7 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import { recomputeAllAnomalies } from "@/app/api/anomalies/anomalie.service";
 import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
+import { CURRENT_YEAR } from "@/constants";
 import { StructureType } from "@/types/structure.type";
 import { getRegionFromDepartement } from "@/utils/region.util";
 
@@ -21,7 +22,6 @@ import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesira
 import { getFakeFaqItems } from "./seeders/faq.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
-  ACTUALISATION_SEED_YEAR,
   createFakeActualisationFormStepDefinition,
   createFakeFinalisationFormStepDefinition,
   createFakeFormActualisation,
@@ -71,8 +71,8 @@ const STRUCTURE_LOG_STEP = 200;
 const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
 
-// Part des structures initialisées ayant validé leur actualisation, calé sur l'observé en prod.
-const ACTUALISATION_VALIDATED_RATIO = 0.2;
+// Part des structures initialisées ayant validé leur actualisation
+const ACTUALISATION_VALIDATED_RATIO = 0.8;
 
 // Au-delà de 65 535 paramètres Postgres refuse la requête : on découpe en amont
 const CREATE_CHUNK_SIZE = 1000;
@@ -169,7 +169,7 @@ async function seed(): Promise<void> {
 
   // Campagne d'actualisation en cours sur la dernière année seedée.
   const actualisationFormDefinition = await prisma.formDefinition.create({
-    data: createFakeFormActualisation(ACTUALISATION_SEED_YEAR),
+    data: createFakeFormActualisation(CURRENT_YEAR),
   });
   await prisma.formStepDefinition.createMany({
     data: createFakeActualisationFormStepDefinition(
@@ -184,7 +184,7 @@ async function seed(): Promise<void> {
     }
   );
   console.log(
-    `📅 Campagne actualisation ${ACTUALISATION_SEED_YEAR} ouverte jusqu'au 31/12`
+    `📅 Campagne actualisation ${CURRENT_YEAR} ouverte jusqu'au 31/12`
   );
 
   const formDefinitions = await prisma.formDefinition.findMany({
