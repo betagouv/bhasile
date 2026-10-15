@@ -470,7 +470,6 @@ const dbStructureToApiRead = (
     isInCpomPerYear: isStructureInCpomPerYear(dbStructure),
     nom: dbStructure.nom ?? "",
     operateur: dbStructure.operateur ?? undefined,
-    filiale: dbStructure.filiale ?? undefined,
     date303: dbStructure.date303 ?? undefined,
     public: dbStructure.public
       ? PublicType[dbStructure.public as string as keyof typeof PublicType]

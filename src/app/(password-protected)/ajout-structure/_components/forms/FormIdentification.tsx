@@ -1,10 +1,8 @@
 "use client";
 
-import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
-import autoAnimate from "@formkit/auto-animate";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { OperateurAutocompleteRhf } from "@/app/components/forms/autocomplete/OperateurAutocompleteRhf";
@@ -31,27 +29,10 @@ export default function FormIdentification() {
   const nextRoute = isEditMode
     ? `/ajout-structure/${params.id}/05-verification`
     : `/ajout-structure/${params.id}/02-adresses`;
-  const filialesContainerRef = useRef(null);
-
-  useEffect(() => {
-    if (filialesContainerRef.current) {
-      autoAnimate(filialesContainerRef.current);
-    }
-  }, [filialesContainerRef]);
 
   const { currentValue: localStorageValues } = useLocalStorage<
     Partial<AjoutIdentificationFormValues>
   >(`ajout-structure-${params.id}-identification`, {});
-
-  const [isManagedByAFiliale, setIsManagedByAFiliale] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    if (localStorageValues && !isInitialized) {
-      setIsManagedByAFiliale(!!localStorageValues.filiale);
-      setIsInitialized(true);
-    }
-  }, [localStorageValues, isInitialized]);
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
@@ -104,20 +85,6 @@ export default function FormIdentification() {
                 type="hidden"
               />
 
-              <div className="flex">
-                <ToggleSwitch
-                  label="Cette structure appartient-elle à une filiale d’opérateur (ex: YSOS, filiale de SOS) ?"
-                  labelPosition="left"
-                  showCheckedHint={false}
-                  className="w-fit [&_label]:gap-2"
-                  checked={isManagedByAFiliale}
-                  name="managed-by-a-filiale"
-                  id="managed-by-a-filiale"
-                  onChange={() => setIsManagedByAFiliale(!isManagedByAFiliale)}
-                />
-                <p className="pl-2">{isManagedByAFiliale ? "Oui" : "Non"}</p>
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <SelectWithValidation
                   name="type"
@@ -135,18 +102,6 @@ export default function FormIdentification() {
                 </SelectWithValidation>
 
                 <OperateurAutocompleteRhf />
-
-                <div ref={filialesContainerRef}>
-                  {isManagedByAFiliale && (
-                    <InputWithValidation
-                      name="filiale"
-                      control={control}
-                      type="text"
-                      label="Filiale"
-                      id="filiale"
-                    />
-                  )}
-                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
