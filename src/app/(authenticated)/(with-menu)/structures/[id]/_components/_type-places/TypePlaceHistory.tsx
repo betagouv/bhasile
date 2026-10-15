@@ -3,7 +3,7 @@
 import { ReactElement, ReactNode } from "react";
 
 import { CustomAccordion } from "@/app/components/common/CustomAccordion";
-import { EmptyCell } from "@/app/components/common/EmptyCell";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { PlacesWithPercentage } from "@/app/components/common/PlacesWithPercentage";
 import { Table } from "@/app/components/common/Table";
 import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
@@ -65,11 +65,8 @@ export const TypePlaceHistory = ({
 
   const renderCell = (row: PlaceRow, year: number): ReactNode => {
     const value = row.getValue(year);
-    if (value === undefined || value === null) {
-      return <EmptyCell />;
-    }
-    if (!row.hasPercentage) {
-      return value;
+    if (!row.hasPercentage || value === undefined || value === null) {
+      return <NumberDisplay value={value} showEmptyCell />;
     }
     return (
       <PlacesWithPercentage
