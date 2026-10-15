@@ -37,7 +37,7 @@ const defineRulesFor = (user?: SessionUser) => {
   if (!user || !canAccessApp(user)) {
     return builder.rules;
   }
-  builder.can("read", ["Structure", "Cpom", "Operateur"]);
+  defineReadRules(builder, user);
 
   if (user.isSuperAdmin) {
     builder.can("manage", "all");
@@ -48,6 +48,22 @@ const defineRulesFor = (user?: SessionUser) => {
   }
 
   return builder.rules;
+};
+
+const defineReadRules = (
+  { can }: AbilityBuilder<AppAbility>,
+  user: SessionUser
+) => {
+  const operateurCondition =
+    user.operateurId === null ? {} : { operateurId: user.operateurId };
+
+  for (const conditions of user.grants.flatMap(getStructureConditions)) {
+    can("read", "Structure", { ...conditions, ...operateurCondition });
+  }
+  for (const conditions of user.grants.flatMap(getCpomConditions)) {
+    can("read", "Cpom", { ...conditions, ...operateurCondition });
+  }
+  can("read", "Operateur");
 };
 
 const defineAgentRules = (
@@ -130,6 +146,35 @@ const getCpomConditions = ({
 export const canAccessApp = (user: SessionUser): boolean =>
   user.isSuperAdmin || (user.grants?.length ?? 0) > 0;
 
+export const getReadableStructureWhere = (
+  user: SessionUser
+): Prisma.StructureWhereInput => {
+  if (user.isSuperAdmin) {
+    return {};
+  }
+  const where: Prisma.StructureWhereInput = {
+    OR: user.grants.flatMap(getStructureConditions),
+  };
+  return user.operateurId === null
+    ? where
+    : { AND: [where, { operateurId: user.operateurId }] };
+};
+
+export const canAbilityReadStructure = (
+  ability: AppAbility,
+  structure: StructureScope
+) =>
+  ability.can(
+    "read",
+    subject("Structure", {
+      id: structure.id,
+      departementAdministratif: structure.departementAdministratif,
+    } as Structure)
+  );
+
+export const canAbilityReadCpom = (ability: AppAbility, cpom: CpomScope) =>
+  ability.can("read", subject("Cpom", { ...cpom } as never));
+
 export const canUpdateStructure = (
   user: SessionUser,
   structure?: StructureScope | null
@@ -204,4 +249,9 @@ export const canDeleteFile = (
 type StructureScope = {
   id?: number;
   departementAdministratif?: string | null;
+};
+
+type CpomScope = {
+  departements: { departement?: { numero: string } | null }[];
+  structures: { structureId: number }[];
 };

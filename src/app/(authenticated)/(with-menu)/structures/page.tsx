@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
@@ -13,6 +14,8 @@ import {
   SearchParams,
 } from "@/app/utils/search-params.util";
 import { STRUCTURES_STORAGE_KEY } from "@/constants";
+import { authOptions } from "@/lib/next-auth/auth";
+import { SessionUser } from "@/types/global";
 import { StructuresQuery } from "@/types/structure-list.type";
 
 import { Toolbar } from "./_components/Toolbar";
@@ -29,7 +32,11 @@ export default async function Structures({
   searchParams: Promise<SearchParams>;
 }): Promise<ReactElement> {
   const params = await searchParams;
-  const query = buildStructuresQuery(params);
+  const session = await getServerSession(authOptions);
+  const query = buildStructuresQuery(
+    params,
+    session?.user as SessionUser | undefined
+  );
 
   const count = (
     <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
@@ -128,7 +135,10 @@ export default async function Structures({
   );
 }
 
-const buildStructuresQuery = (params: SearchParams): StructuresQuery => {
+const buildStructuresQuery = (
+  params: SearchParams,
+  user: SessionUser | undefined
+): StructuresQuery => {
   const isClosed = getFirstParam(params.statut) === "fermees";
   return {
     vue: getFirstParam(params.vue) === "carte" ? "carte" : "tableau",
@@ -143,5 +153,6 @@ const buildStructuresQuery = (params: SearchParams): StructuresQuery => {
     column: parseStructureColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
     isClosed,
+    user,
   };
 };

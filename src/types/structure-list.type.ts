@@ -1,6 +1,7 @@
 import type { StructureType } from "@/generated/prisma/client";
 
 import type { Repartition } from "./adresse.type";
+import type { SessionUser } from "./global";
 import type { StructureColumn } from "./ListColumn";
 
 export type StructureCommune = {
@@ -73,6 +74,7 @@ export type SearchProps = {
   selection?: boolean;
   isFinalised?: boolean;
   isClosed?: boolean;
+  user?: SessionUser;
 };
 
 export type StructuresQuery = SearchProps & {

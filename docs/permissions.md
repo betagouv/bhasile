@@ -40,24 +40,28 @@ Quels binômes s'appliquent à un user :
 - Admin AURA + lecteur Isère : admin partout en AURA, Isère comprise.
 - Lecteur AURA + admin Isère : admin en Isère, lecteur dans le reste d'AURA.
 
-| Qui                        | Lecture | Structures               | CPOM                                          | Opérateurs |
-| -------------------------- | ------- | ------------------------ | --------------------------------------------- | ---------- |
-| User sans binôme           | Rien    | —                        | —                                             | —          |
-| Tout user avec un binôme   | Tout    | —                        | —                                             | —          |
-| Agent `EDITEUR` ou `ADMIN` | Tout    | Celles de ses périmètres | Ceux liés au moins en partie à ses périmètres | Tous       |
-| User opérateur `ADMIN`     | Tout    | —                        | —                                             | Le sien    |
-| Autre user opérateur       | Tout    | —                        | —                                             | —          |
-| Superadmin                 | Tout    | Toutes                   | Tous                                          | Tous       |
+| Qui                      | Lecture                                | Écriture                               |
+| ------------------------ | -------------------------------------- | -------------------------------------- |
+| User sans binôme         | Rien (page `/acces-en-attente`)        | Rien                                   |
+| Binôme `LECTEUR`         | Les structures et CPOM de ce périmètre | Rien                                   |
+| Binôme `EDITEUR`/`ADMIN` | Les structures et CPOM de ce périmètre | Les structures et CPOM de ce périmètre |
+| Superadmin               | Tout                                   | Tout                                   |
 
-Détail pour un agent éditeur :
+Ce que couvre un binôme :
 
 - **Structures** : national = toutes ; région ou département = celles dont le département de rattachement est couvert ; structure = celle-là.
 - **CPOM** : national = tous ; région ou département = ceux dont au moins un département est couvert ; structure = ceux liés à cette structure.
+- **Opérateurs** : un agent éditeur, quel que soit son niveau, modifie tous les opérateurs ; un user opérateur `ADMIN` modifie le sien. La lecture des opérateurs n'est pas filtrée.
+- **User opérateur** : tout est en plus restreint aux structures et CPOM de son opérateur.
+
+Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
+
+Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `abilities.ts`) sert à la fois aux règles CASL de lecture et d'écriture et au filtre Prisma `getReadableStructureWhere` des statistiques.
 
 Limites actuelles :
 
 - **`ADMIN` = `EDITEUR`** tant que la gestion des binômes (PR 2) n'existe pas.
-- **La lecture n'est pas encore filtrée par périmètre** : un seul binôme, même `LECTEUR` d'un département, donne la lecture de tout, user opérateur compris, jusqu'à la PR 3.
+- **Non filtré en lecture** : la fiche opérateur (et la liste de ses structures), la moyenne départementale d'activité, et les vues `reporting` / Metabase (hors application).
 - **Niveau structure** : pas d'accès aux transformations ni aux rappels CPOM du tableau de bord, qui restent contrôlés par département.
 
 Règle à respecter dans `abilities.ts` : le code ne compare jamais les rôles entre eux. Tout droit donné à un rôle doit l'être aussi aux rôles supérieurs, sinon la hiérarchie casse.
@@ -114,6 +118,6 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
    - invitation d'un user opérateur par un admin ;
    - authentification des users opérateurs via ProConnect (adresses gmail) ;
    - cloisonnement : toutes les règles d'un user opérateur filtrées sur son `operateurId` ;
-   - lecture filtrée via `accessibleBy` dans les repositories (comme `includedStructureWhere`) ;
+   - lecture des opérateurs filtrée ;
    - champs réservés aux agents masqués : notes, justification d'anomalies, contrôles, évaluations, CPOM, finalisation de transformation ;
    - Metabase et statistiques fermés aux opérateurs.

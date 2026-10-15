@@ -12,6 +12,10 @@ import {
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Structure } from "@/generated/prisma/client";
 import {
+  canAbilityReadStructure,
+  defineAbilityFor,
+} from "@/lib/casl/abilities";
+import {
   StructureAgentUpdateApiType,
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
@@ -182,8 +186,11 @@ const computeAllStructureRows = cache(
 const getSortedStructureRows = cache(
   async (props: SearchProps): Promise<StructureListComputedRow[]> => {
     const rows = await computeAllStructureRows();
+    const readableRows = props.user
+      ? filterReadableRows(rows, props.user)
+      : rows;
 
-    const filtered = filterStructureRows(rows, props, {
+    const filtered = filterStructureRows(readableRows, props, {
       includeNonVisible: Boolean(props.selection),
     });
 
@@ -194,6 +201,14 @@ const getSortedStructureRows = cache(
     );
   }
 );
+
+const filterReadableRows = (
+  rows: StructureListComputedRow[],
+  user: SessionUser
+): StructureListComputedRow[] => {
+  const ability = defineAbilityFor(user);
+  return rows.filter((row) => canAbilityReadStructure(ability, row));
+};
 
 export const getStructuresTotal = async (props: SearchProps): Promise<number> =>
   (await getSortedStructureRows(props)).length;
@@ -313,7 +328,11 @@ export const getFullStructure = async (
   const now = getNow();
   const resolvedDbStructure = await getResolvedStructure(id, now);
 
-  if (!resolvedDbStructure) {
+  if (
+    !resolvedDbStructure ||
+    (user &&
+      !canAbilityReadStructure(defineAbilityFor(user), resolvedDbStructure))
+  ) {
     return null;
   }
 
