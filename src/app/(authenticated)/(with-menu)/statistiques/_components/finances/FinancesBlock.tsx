@@ -2,6 +2,7 @@
 
 import { ReactElement } from "react";
 
+import { getPercentage } from "@/app/utils/common.util";
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
@@ -15,6 +16,9 @@ import { FinancesStatsTable } from "./FinancesStatsTable";
 
 export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const documentsFinanciersOpenYearCompletude = statistiques.places.byYear.find(
+    (yearItem) => yearItem.year === DOCUMENTS_FINANCIERS_OPEN_YEAR
+  )?.completude;
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -26,8 +30,15 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
       </div>
       <h4 className="text-title-blue-france text-lg">
         Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}{" "}
-        {/* TODO : mettre les vraies valeurs ici */}
-        <IncompleteDataIndicator nbStructures={42} structuresPercentage={42} />
+        <IncompleteDataIndicator
+          nbStructures={
+            documentsFinanciersOpenYearCompletude?.nbRenseignees || 0
+          }
+          structuresPercentage={getPercentage(
+            documentsFinanciersOpenYearCompletude?.nbRenseignees || 0,
+            documentsFinanciersOpenYearCompletude?.nbAttendues || 1
+          )}
+        />
       </h4>
       <div className="flex pb-16">
         <FinanceCards />

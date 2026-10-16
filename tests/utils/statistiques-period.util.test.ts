@@ -5,6 +5,7 @@ import {
   filterDisplayedYears,
   getLastDisplayedPeriods,
   isYearIncomplete,
+  shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
 import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
@@ -121,6 +122,29 @@ describe("statistiques period util", () => {
       } as unknown as FinanceByYearStat;
 
       expect(isYearIncomplete(yearItem)).toBe(true);
+    });
+  });
+
+  describe("shouldShowYearAsterisk", () => {
+    it("renvoie true pour 2024", () => {
+      expect(shouldShowYearAsterisk(2024)).toBe(true);
+    });
+
+    it("renvoie true pour les années avant 2024", () => {
+      expect(shouldShowYearAsterisk(2020)).toBe(true);
+      expect(shouldShowYearAsterisk(2015)).toBe(true);
+    });
+
+    it("renvoie true pour 2024 sous forme de chaîne", () => {
+      expect(shouldShowYearAsterisk("2024")).toBe(true);
+    });
+
+    it("renvoie false pour 2025", () => {
+      expect(shouldShowYearAsterisk(2025)).toBe(false);
+    });
+
+    it("renvoie false pour 2025 sous forme de chaîne", () => {
+      expect(shouldShowYearAsterisk("2025")).toBe(false);
     });
   });
 });

@@ -100,3 +100,8 @@ export const isYearIncomplete = (
 
   return yearNumber === currentYear || yearNumber === currentYear - 1;
 };
+
+export const shouldShowYearAsterisk = (year: number | string): boolean => {
+  const yearNumber = typeof year === "string" ? parseInt(year, 10) : year;
+  return yearNumber <= 2024;
+};
