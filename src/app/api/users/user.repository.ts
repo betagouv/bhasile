@@ -14,31 +14,39 @@ export const upsertUser = async ({
   const threshold = new Date(
     now.getTime() - UPDATE_INTERVAL_MINUTES * 60 * 1000
   );
-  const data = {
-    name,
-    lastConnection: now,
-    emailPattern: {
-      connect: {
-        pattern: emailPattern,
-      },
-    },
-  };
-
   const existing = await prisma.user.findUnique({
     where: { email },
     select: { lastConnection: true },
   });
 
   if (!existing) {
-    await prisma.user.create({ data: { email, ...data } });
+    await prisma.user.create({
+      data: {
+        email,
+        name,
+        lastConnection: now,
+        ...(emailPattern && {
+          emailPattern: { connect: { pattern: emailPattern } },
+        }),
+      },
+    });
     return;
   }
 
-  if (existing.lastConnection >= threshold) {
+  if (existing.lastConnection && existing.lastConnection >= threshold) {
     return;
   }
 
-  await prisma.user.update({ where: { email }, data });
+  await prisma.user.update({
+    where: { email },
+    data: {
+      name,
+      lastConnection: now,
+      emailPattern: emailPattern
+        ? { connect: { pattern: emailPattern } }
+        : { disconnect: true },
+    },
+  });
 };
 
 export const findUserIdByEmail = (email: string) =>
