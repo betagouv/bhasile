@@ -5,6 +5,7 @@ import { Table } from "@/app/components/common/Table";
 import {
   filterDisplayedYears,
   isYearIncomplete,
+  shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { StructuresByYearStat } from "@/schemas/api/statistique.schema";
@@ -162,7 +163,7 @@ const getHeadings = (structureYears: StructuresByYearStat[]) => {
         >
           <div className="inline-flex items-center justify-center gap-1">
             <span>{yearItem.year}</span>
-            {!isIncomplete && <span>*</span>}
+            {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
             {isIncomplete && (
               // TODO : ajouter de vraies valeurs
               <IncompleteDataIndicator

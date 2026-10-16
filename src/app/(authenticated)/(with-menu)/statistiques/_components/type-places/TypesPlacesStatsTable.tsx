@@ -6,6 +6,7 @@ import { formatPerMille } from "@/app/utils/number.util";
 import {
   filterDisplayedYears,
   isYearIncomplete,
+  shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { PlacesByYearStat } from "@/schemas/api/statistique.schema";
@@ -154,12 +155,9 @@ export const TypesPlacesStatsTable = ({
 };
 
 const getHeadings = (placeYears: PlacesByYearStat[]) => {
-  const currentYear = new Date().getFullYear();
-
   const dates =
     placeYears.map((yearItem) => {
       const isIncomplete = isYearIncomplete(yearItem);
-      const isNotCurrentYear = Number(yearItem.year) !== currentYear;
 
       return (
         <th
@@ -170,7 +168,7 @@ const getHeadings = (placeYears: PlacesByYearStat[]) => {
           <div className="inline-flex items-center justify-center gap-1">
             <span>
               {yearItem.year}
-              {isNotCurrentYear && "*"}
+              {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
             </span>
             {isIncomplete && (
               // TODO : ajouter de vraies valeurs

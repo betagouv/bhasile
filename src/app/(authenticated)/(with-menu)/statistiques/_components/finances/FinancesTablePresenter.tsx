@@ -5,13 +5,18 @@ import { ComponentProps, Fragment, ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
+import { getPercentage } from "@/app/utils/common.util";
 import {
   filterDisplayedYears,
   isYearIncomplete,
+  shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
+import {
+  CompletudeStat,
+  FinanceByYearStat,
+} from "@/schemas/api/statistique.schema";
 
 import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
@@ -122,6 +127,12 @@ export const FinancesTablePresenter = ({
     return true;
   });
 
+  const completudeByYear = new Map<number, CompletudeStat | undefined>(
+    (statistiques?.places?.byYear ?? []).map(
+      (yearItem) => [yearItem.year, yearItem.completude ?? undefined] as const
+    )
+  );
+
   const financeStats = sectionsConfig.map((section) => ({
     title: section.title,
     rows: section.rows.map((row) => {
@@ -162,7 +173,7 @@ export const FinancesTablePresenter = ({
 
   return (
     <Table
-      headings={getHeadings(financeYears)}
+      headings={getHeadings(financeYears, completudeByYear)}
       ariaLabelledBy={tableId}
       className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full break-inside-avoid"
       enableBorders
@@ -229,10 +240,16 @@ export const FinancesTablePresenter = ({
   );
 };
 
-const getHeadings = (financeYears: FinanceByYearStat[]) => {
+const getHeadings = (
+  financeYears: FinanceByYearStat[],
+  completudeByYear: ReadonlyMap<number, CompletudeStat | undefined>
+) => {
   const dates =
     financeYears.map((yearItem) => {
       const isIncomplete = isYearIncomplete(yearItem);
+      const completude = completudeByYear.get(yearItem.year);
+      const nbRenseignees = completude?.nbRenseignees ?? 0;
+      const nbAttendues = completude?.nbAttendues ?? 1;
 
       return (
         <th
@@ -242,12 +259,11 @@ const getHeadings = (financeYears: FinanceByYearStat[]) => {
         >
           <div className="inline-flex items-center justify-center gap-1">
             <span>{yearItem.year}</span>
-            {!isIncomplete && <span>*</span>}
+            {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
             {isIncomplete && (
-              // TODO : ajouter de vraies valeurs
               <IncompleteDataIndicator
-                nbStructures={42}
-                structuresPercentage={42}
+                nbStructures={nbRenseignees}
+                structuresPercentage={getPercentage(nbRenseignees, nbAttendues)}
               />
             )}
           </div>

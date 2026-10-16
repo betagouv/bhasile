@@ -10,12 +10,6 @@
 - **Bandeau d'avertissement** (`PartialDataNotice`) : ne l'afficher que s'il existe au moins une année incomplète.
 - **Export PDF** : afficher « N structures actualisées » sous l'année au lieu de l'infobulle au survol (cf. spec « version export »).
 
-## Astérisque
-
-- Trois règles différentes coexistent (tableau structures : année non grisée ; tableau types de places et libellés des graphiques : année différente de l'année courante). En 2025, le tableau types de places affiche à la fois l'astérisque et le symbole.
-- Règle unique : astérisque sur les années d'initialisation, 2021 à 2024 (structures fermées avant le lancement de l'outil), dans un seul utilitaire partagé.
-- Texte de `ClosedStructuresDisclaimer` : « Les structures fermées avant le lancement de l'outil en 2024 ne figurent pas dans ces données. »
-
 ## Structures
 
 - **Camemberts « en 2026 »** (`TypeChartPresenter`) : lire `structures.byYear` de l'année affichée (`structureTypes`, `structureBatis`, `totalStructures`) au lieu de la vue globale, avec le symbole de cette année. Prendre l'année dans les données plutôt que `new Date().getFullYear()`.

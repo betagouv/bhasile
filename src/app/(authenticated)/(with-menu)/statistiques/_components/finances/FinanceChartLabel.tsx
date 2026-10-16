@@ -1,5 +1,7 @@
 import { ReactElement } from "react";
 
+import { shouldShowYearAsterisk } from "@/app/utils/statistiques-period.util";
+
 import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
 export const FinanceChartLabel = ({
@@ -8,13 +10,11 @@ export const FinanceChartLabel = ({
   label,
 }: Props): ReactElement => {
   const isIncomplete = chartData.incompleteYears?.[index] ?? false;
-  const isCurrentYear =
-    Number(chartData.labels[index]) === new Date().getFullYear();
 
   return (
     <span className="flex items-center gap-1 text-xs text-disabled-grey">
       {label}
-      {!isCurrentYear && <span> * </span>}
+      {shouldShowYearAsterisk(chartData.labels[index]) && <span> * </span>}
       {isIncomplete && (
         // TODO : mettre de vrais valeurs ici
         <IncompleteDataIndicator nbStructures={42} structuresPercentage={42} />
