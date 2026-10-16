@@ -16,6 +16,10 @@ vi.mock("@/app/api/structures/structure.repository", () => ({
   findAllStructures: vi.fn(),
 }));
 
+vi.mock("@/app/api/files/file.service", () => ({
+  getDownloadLink: vi.fn(),
+}));
+
 vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createOperateurEvent: (...args: unknown[]) =>
     mockCreateOperateurEvent(...args),

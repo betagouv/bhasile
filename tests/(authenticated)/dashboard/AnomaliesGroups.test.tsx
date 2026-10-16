@@ -65,14 +65,8 @@ describe("AnomaliesGroups", () => {
 
     expect(openModal).toHaveBeenCalled();
 
-    // Le <dialog> DSFR n'est ouvert que par le runtime dsfr, absent de jsdom.
-    await user.type(
-      screen.getByRole("textbox", { hidden: true }),
-      "Exercice contrôlé"
-    );
-    await user.click(
-      screen.getByRole("button", { name: "Valider", hidden: true })
-    );
+    await user.type(screen.getByRole("textbox"), "Exercice contrôlé");
+    await user.click(screen.getByRole("button", { name: "Valider" }));
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith("/api/anomalies/7", {

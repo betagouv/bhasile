@@ -13,6 +13,10 @@ vi.mock("@/app/api/structures/structure.repository", () => ({
   findAllStructures: vi.fn(),
 }));
 
+vi.mock("@/app/api/files/file.service", () => ({
+  getDownloadLink: vi.fn(),
+}));
+
 const makeRow = (
   id: number,
   name: string,
