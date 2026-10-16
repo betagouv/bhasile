@@ -1,10 +1,4 @@
-export type AuthFailureReason =
-  | "email_absent"
-  | "mfa_absente"
-  | "mfa_non_conforme"
-  | "token_illisible"
-  | "non_autorise"
-  | "erreur_technique";
+import { AuthFailureReason } from "./auth-failure";
 
 export class AuthError extends Error {
   readonly reason: AuthFailureReason;
@@ -23,7 +17,13 @@ export const ACCEPTED_ACR_VALUES = [
   "eidas1-mfa",
   "eidas2",
   "eidas3",
-];
+] as const;
+
+export type AcceptedAcrValue = (typeof ACCEPTED_ACR_VALUES)[number];
+
+const isAcceptedAcrValue = (value: unknown): value is AcceptedAcrValue =>
+  typeof value === "string" &&
+  (ACCEPTED_ACR_VALUES as readonly string[]).includes(value);
 
 const decodePayload = (token: string): Record<string, unknown> => {
   const segment = token.split(".")[1];
@@ -34,7 +34,7 @@ const decodePayload = (token: string): Record<string, unknown> => {
   return JSON.parse(Buffer.from(base64, "base64").toString("utf8"));
 };
 
-export const checkAcr = (idToken?: string | null): string => {
+export const checkAcr = (idToken?: string | null): AcceptedAcrValue => {
   if (!idToken) {
     throw new AuthError(
       "mfa_absente",
@@ -56,7 +56,7 @@ export const checkAcr = (idToken?: string | null): string => {
   if (typeof acr !== "string" || acr.length === 0) {
     throw new AuthError("mfa_absente", "claim `acr` absente de l'id_token");
   }
-  if (!ACCEPTED_ACR_VALUES.includes(acr)) {
+  if (!isAcceptedAcrValue(acr)) {
     throw new AuthError("mfa_non_conforme", `niveau ACR insuffisant : ${acr}`);
   }
 

@@ -146,7 +146,7 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.AUTH_SECRET,
   pages: {
     signIn: "/connexion",
-    error: "/connexion?accesRefuse=true",
+    error: "/connexion",
   },
   providers: [
     {
@@ -164,7 +164,6 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: "openid uid given_name usual_name email siret",
-          acr_values: "eidas1-mfa",
           claims: JSON.stringify({
             id_token: {
               acr: {
