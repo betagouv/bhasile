@@ -3,15 +3,18 @@ import { ReactElement } from "react";
 
 import { getFaqItems } from "@/app/api/faq/faq.service";
 import { FaqApiType } from "@/schemas/api/faq.schema";
-import { Block, FaqBlock } from "@/types/ressources.type";
+import { FaqBlock } from "@/types/ressources.type";
+import {
+  readBlocks,
+  readSuggestions,
+} from "@/utils-server/ressources.server.util";
 
 import { ResourcesContent } from "./ResourcesContent";
 
-export const ResourcesBlockList = async ({
-  blocks,
-  suggestions,
-}: Props): Promise<ReactElement> => {
+export const ResourcesBlockList = async (): Promise<ReactElement> => {
   await connection();
+  const blocks = await readBlocks();
+  const suggestions = await readSuggestions();
   const { faqItems } = await getFaqItems();
   const validFaqItems = Array.isArray(faqItems) ? faqItems : [];
 
@@ -44,9 +47,4 @@ export const ResourcesBlockList = async ({
       hasFaqTabs={dynamicTabs.length > 0}
     />
   );
-};
-
-type Props = {
-  blocks: Block[];
-  suggestions: string[];
 };
