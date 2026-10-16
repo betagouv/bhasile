@@ -2,6 +2,8 @@
 
 import { ReactElement } from "react";
 
+import { getPercentage } from "@/app/utils/common.util";
+import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
@@ -14,6 +16,9 @@ export const TypesPlacesBlock = ({
   endYear,
 }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const currentYearCompletude = statistiques.places.byYear.find(
+    (yearItem) => yearItem.year === CURRENT_YEAR
+  )?.completude;
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -27,11 +32,13 @@ export const TypesPlacesBlock = ({
       </div>
       <div className="pb-16">
         <h4 className="text-title-blue-france text-lg">
-          En {new Date().getFullYear()}{" "}
-          {/* TODO : mettre de vrais chiffres ici */}
+          En {CURRENT_YEAR}{" "}
           <IncompleteDataIndicator
-            nbStructures={42}
-            structuresPercentage={42}
+            nbStructures={currentYearCompletude?.nbRenseignees || 0}
+            structuresPercentage={getPercentage(
+              currentYearCompletude?.nbRenseignees || 0,
+              currentYearCompletude?.nbAttendues || 1
+            )}
           />
         </h4>
         <TypePlaceCharts

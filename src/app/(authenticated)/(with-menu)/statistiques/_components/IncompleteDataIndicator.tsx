@@ -6,7 +6,7 @@ export const IncompleteDataIndicator = ({
   structuresPercentage,
 }: Props): ReactElement => {
   return (
-    <span className="group relative inline-flex items-center border-b border-dashed z-5">
+    <span className="group relative inline-flex items-center border-b border-dashed z-30">
       <span className="relative inline-block h-3 w-3 align-middle filter-[invert(9%)_sepia(100%)_saturate(7080%)_hue-rotate(247deg)_brightness(67%)_contrast(118%)]">
         <Image
           src="/incomplete.svg"
@@ -19,7 +19,7 @@ export const IncompleteDataIndicator = ({
         Donnée en cours de récolte
         <br />
         <strong>{nbStructures}</strong> structures comptabilisées (
-        {structuresPercentage}%)
+        {structuresPercentage})
       </span>
     </span>
   );
@@ -27,5 +27,5 @@ export const IncompleteDataIndicator = ({
 
 type Props = {
   nbStructures: number;
-  structuresPercentage: number;
+  structuresPercentage: string;
 };
