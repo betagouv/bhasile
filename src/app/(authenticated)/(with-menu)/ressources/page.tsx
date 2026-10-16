@@ -1,17 +1,9 @@
 import { ReactElement, Suspense } from "react";
 
-import {
-  readBlocks,
-  readSuggestions,
-} from "@/utils-server/ressources.server.util";
-
 import { ResourcesBlockList } from "./_components/ResourcesBlockList";
 import { RessourcesSkeleton } from "./_components/RessourcesSkeleton";
 
-export default async function Ressources(): Promise<ReactElement> {
-  const blocks = await readBlocks();
-  const suggestions = await readSuggestions();
-
+export default function Ressources(): ReactElement {
   return (
     <div className="h-full w-full flex flex-col">
       <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] items-center sticky top-0 bg-lifted-grey z-10">
@@ -20,7 +12,7 @@ export default async function Ressources(): Promise<ReactElement> {
         </h2>
       </div>
       <Suspense fallback={<RessourcesSkeleton />}>
-        <ResourcesBlockList blocks={blocks} suggestions={suggestions} />
+        <ResourcesBlockList />
       </Suspense>
     </div>
   );
