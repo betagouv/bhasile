@@ -12,12 +12,7 @@ export const CpomsContent = async ({
 }: {
   query: CpomsQuery;
 }): Promise<ReactElement> => {
-  const { cpoms, totalCpoms } = await getCpoms(
-    query.page,
-    query.departements,
-    query.column,
-    query.direction
-  );
+  const { cpoms, totalCpoms } = await getCpoms(query);
 
   return (
     <ListLoader
