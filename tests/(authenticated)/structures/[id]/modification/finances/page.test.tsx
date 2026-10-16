@@ -1,3 +1,4 @@
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationFinancesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/finances/page";
@@ -76,10 +77,15 @@ describe("ModificationFinances page integration", () => {
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 
-  it("bloque la soumission quand les indicateurs financiers sont manquants", async () => {
+  it("bloque la soumission quand les indicateurs financiers d'une année hors CPOM sont manquants", async () => {
     // GIVEN
+    const validStructure = createModificationFinancesValidStructure(78);
     const structure = {
-      ...createModificationFinancesValidStructure(78),
+      ...validStructure,
+      isInCpomPerYear: {
+        ...validStructure.isInCpomPerYear,
+        [CURRENT_YEAR]: false,
+      },
       indicateursFinanciers: [],
     };
     const mockedFetch = mockStructurePageFetch(structure);
@@ -89,6 +95,11 @@ describe("ModificationFinances page integration", () => {
     await clickButtonByName("Valider");
 
     // THEN
+    expect(
+      screen.getByText(
+        new RegExp(`réalisé ou prévisionnel ${CURRENT_YEAR}.*requis`, "i")
+      )
+    ).toBeInTheDocument();
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });

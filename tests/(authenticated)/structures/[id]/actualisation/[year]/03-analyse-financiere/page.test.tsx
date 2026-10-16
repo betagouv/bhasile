@@ -1,7 +1,11 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ActualisationAnalyseFinanciere from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/03-analyse-financiere/page";
+import { getIndicateursFinanciersDefaultValues } from "@/app/utils/indicateur-financier.util";
+import { getRealCreationYear } from "@/app/utils/structure.util";
+import { CURRENT_YEAR } from "@/constants";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { createActualisationForm } from "../../../../../../test-utils/factories/actualisation-form.factory";
 import { createFinalisationFinanceValidStructure } from "../../../../../../test-utils/structure.factory";
@@ -67,6 +71,7 @@ describe("Page actualisation 03-analyse-financiere", () => {
   it("affiche l'erreur d'obligation et bloque quand le réalisé du cutoff manque", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     const structure = financeStructure();
+    structure.isInCpomPerYear = { ...structure.isInCpomPerYear, 2024: false };
     structure.indicateursFinanciers = structure.indicateursFinanciers.filter(
       (indicateurFinancier) =>
         !(
@@ -86,5 +91,70 @@ describe("Page actualisation 03-analyse-financiere", () => {
       screen.getByText(/réalisé 2024.*obligatoire/i)
     ).toBeInTheDocument();
     expect(findActualisationPut(fetchMock)).toBeUndefined();
+  });
+
+  it("n'exige les indicateurs financiers que pour les années hors CPOM", async () => {
+    // GIVEN
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => financeStructure(),
+    });
+    const structure = {
+      ...financeStructure(),
+      indicateursFinanciers: [],
+    };
+    structure.isInCpomPerYear = {
+      ...structure.isInCpomPerYear,
+      [CURRENT_YEAR]: false,
+    };
+    renderWithStructurePageProviders(
+      structure,
+      <ActualisationAnalyseFinanciere />
+    );
+
+    const indicateursTable = screen.getByRole("table", {
+      name: "Indicateurs généraux",
+    });
+    expect(within(indicateursTable).getAllByText("Hors CPOM")).toHaveLength(1);
+    expect(
+      within(indicateursTable).getAllByText("En CPOM").length
+    ).toBeGreaterThan(0);
+
+    // WHEN
+    await clickButtonByName("Valider");
+
+    // THEN
+    expect(
+      screen.getByText(
+        new RegExp(`réalisé ou prévisionnel ${CURRENT_YEAR}.*requis`, "i")
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/réalisé 2024.*obligatoire/i)).toBeNull();
+    expect(findActualisationPut(fetchMock)).toBeUndefined();
+
+    // WHEN
+    const previsionnelIndex = getIndicateursFinanciersDefaultValues(
+      [],
+      getRealCreationYear(structure as unknown as StructureApiRead)
+    ).findIndex(
+      (indicateurFinancier) =>
+        indicateurFinancier.year === CURRENT_YEAR &&
+        indicateurFinancier.type === "PREVISIONNEL"
+    );
+    for (const field of ["ETP", "tauxEncadrement", "coutJournalier"]) {
+      fireEvent.change(
+        document.getElementById(
+          `indicateursFinanciers.${previsionnelIndex}.${field}`
+        ) as HTMLInputElement,
+        { target: { value: "12" } }
+      );
+    }
+    await clickButtonByName("Valider");
+
+    // THEN
+    const put = findActualisationPut(fetchMock);
+    expect(put).toBeDefined();
+    expect(stepStatusInPayload(put, "03-analyse-financiere")).toBe("VALIDE");
   });
 });

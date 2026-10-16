@@ -43,6 +43,7 @@ export const HistoriqueIndicateursGeneraux = ({
         headings={getIndicateurFinancierStaticTableHeading({
           years: yearsToDisplay,
           indicateursFinanciers: indicateursFinanciers,
+          isInCpomPerYear: structure.isInCpomPerYear,
         })}
         enableBorders
         stickFirstColumn

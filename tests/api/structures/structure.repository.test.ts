@@ -132,7 +132,6 @@ describe("structure.repository db integration", () => {
       adresseAdministrative: "10 rue de la Paix",
       codePostalAdministratif: "75001",
       communeAdministrative: "Paris",
-      filiale: "Filiale test",
       type: StructureType.CADA,
       latitude: "48.8566",
       longitude: "2.3522",
@@ -144,7 +143,7 @@ describe("structure.repository db integration", () => {
       directionTerritoriale: "DT75",
     });
 
-    // THEN: les scalaires versionnés sont sur le rolling, filiale reste sur Structure
+    // THEN: les scalaires versionnés sont sur le rolling
     const version = await fetchCurrentVersion(structure.id);
     expect(version.public).toBe("FAMILLE");
     expect(version.adresseAdministrative).toBe("10 rue de la Paix");
@@ -161,7 +160,6 @@ describe("structure.repository db integration", () => {
     const updated = await prisma.structure.findUniqueOrThrow({
       where: { id: structure.id },
     });
-    expect(updated.filiale).toBe("Filiale test");
     expect(updated.creationDate?.toISOString()).toBe(creationDate);
     expect(updated.date303?.toISOString()).toBe(date303);
   });
