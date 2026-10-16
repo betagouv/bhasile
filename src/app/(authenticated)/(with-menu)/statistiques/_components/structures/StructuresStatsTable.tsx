@@ -2,7 +2,11 @@ import { Fragment, ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
-import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
+import {
+  filterDisplayedYears,
+  isYearIncomplete,
+  shouldShowYearAsterisk,
+} from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { StructuresByYearStat } from "@/schemas/api/statistique.schema";
 import { Repartition, RepartitionLabel } from "@/types/adresse.type";
@@ -20,6 +24,8 @@ const BATI_ROWS = [
   Repartition.DIFFUS,
   Repartition.MIXTE,
 ];
+
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
 export const StructuresStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
@@ -81,16 +87,23 @@ export const StructuresStatsTable = (): ReactElement => {
               <strong>{structureStat.label}</strong>
               <br />
             </td>
-            {structureStat.value?.map((structureStatItem, index) => (
-              <td
-                key={`${structureStat.label}-${index}`}
-                className="whitespace-nowrap"
-              >
-                <span className="inline-flex items-center gap-6">
-                  <NumberDisplay value={structureStatItem} />
-                </span>
-              </td>
-            ))}
+            {structureStat.value?.map((structureStatItem, columnIndex) => {
+              const yearItem = structureYears[columnIndex];
+              const isIncomplete = isYearIncomplete(yearItem);
+
+              return (
+                <td
+                  key={`${structureStat.label}-${columnIndex}`}
+                  className={`whitespace-nowrap ${
+                    isIncomplete ? "bg-default-grey-active" : ""
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-6">
+                    <NumberDisplay value={structureStatItem} />
+                  </span>
+                </td>
+              );
+            })}
           </tr>
         ))}
         {structureStats.map((section) => (
@@ -111,16 +124,23 @@ export const StructuresStatsTable = (): ReactElement => {
                   <strong>{structureStat.label}</strong>
                   <br />
                 </td>
-                {structureStat.value?.map((structureStatItem, index) => (
-                  <td
-                    key={`${structureStat.label}-${index}`}
-                    className="whitespace-nowrap"
-                  >
-                    <span className="inline-flex items-center gap-6">
-                      <NumberDisplay value={structureStatItem} />
-                    </span>
-                  </td>
-                ))}
+                {structureStat.value?.map((structureStatItem, columnIndex) => {
+                  const yearItem = structureYears[columnIndex];
+                  const isIncomplete = isYearIncomplete(yearItem);
+
+                  return (
+                    <td
+                      key={`${structureStat.label}-${columnIndex}`}
+                      className={`whitespace-nowrap ${
+                        isIncomplete ? "bg-default-grey-active" : ""
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-6">
+                        <NumberDisplay value={structureStatItem} />
+                      </span>
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </Fragment>
@@ -133,9 +153,25 @@ export const StructuresStatsTable = (): ReactElement => {
 const getHeadings = (structureYears: StructuresByYearStat[]) => {
   const dates =
     structureYears.map((yearItem) => {
+      const isIncomplete = isYearIncomplete(yearItem);
+
       return (
-        <th scope="col" key={yearItem.year}>
-          {yearItem.year}
+        <th
+          scope="col"
+          key={yearItem.year}
+          className={isIncomplete ? "bg-default-grey-active" : undefined}
+        >
+          <div className="inline-flex items-center justify-center gap-1">
+            <span>{yearItem.year}</span>
+            {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
+            {isIncomplete && (
+              // TODO : ajouter de vraies valeurs
+              <IncompleteDataIndicator
+                nbStructures={42}
+                structuresPercentage={42}
+              />
+            )}
+          </div>
         </th>
       );
     }) ?? [];

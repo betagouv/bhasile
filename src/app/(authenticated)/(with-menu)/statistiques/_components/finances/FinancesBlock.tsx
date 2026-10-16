@@ -2,16 +2,23 @@
 
 import { ReactElement } from "react";
 
+import { getPercentage } from "@/app/utils/common.util";
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
+import { ClosedStructuresDisclaimer } from "../ClosedStructuresDisclaimer";
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { BalanceChart } from "./BalanceChart";
 import { FinanceCards } from "./FinanceCards";
+import { FinanceChartLabel } from "./FinanceChartLabel";
 import { FinancesStatsTable } from "./FinancesStatsTable";
 
 export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const documentsFinanciersOpenYearCompletude = statistiques.places.byYear.find(
+    (yearItem) => yearItem.year === DOCUMENTS_FINANCIERS_OPEN_YEAR
+  )?.completude;
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -22,7 +29,16 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
         </div>
       </div>
       <h4 className="text-title-blue-france text-lg">
-        Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}
+        Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}{" "}
+        <IncompleteDataIndicator
+          nbStructures={
+            documentsFinanciersOpenYearCompletude?.nbRenseignees || 0
+          }
+          structuresPercentage={getPercentage(
+            documentsFinanciersOpenYearCompletude?.nbRenseignees || 0,
+            documentsFinanciersOpenYearCompletude?.nbAttendues || 1
+          )}
+        />
       </h4>
       <div className="flex pb-16">
         <FinanceCards />
@@ -40,7 +56,16 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
           hideStructureTypeLabels={true}
           startYear={startYear}
           endYear={endYear}
+          showIncompleteYears={true}
+          renderLabel={(label, index, chartData) => (
+            <FinanceChartLabel
+              chartData={chartData}
+              label={label}
+              index={index}
+            />
+          )}
         />
+        <ClosedStructuresDisclaimer />
       </div>
       <div className="py-12 break-inside-avoid">
         <BalanceChart startYear={startYear} endYear={endYear} />
