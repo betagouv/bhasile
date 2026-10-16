@@ -5,27 +5,39 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import { computeActiviteStatistiques } from "./activite/activite.util";
+import { buildLastValidatedCampagneYearByStructureId } from "./completude.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
-import { computeFinanceStatistiques } from "./finance/finance.util";
+import {
+  computeFinanceStatistiques,
+  indexCpomBudgets,
+} from "./finance/finance.util";
+import { buildCiblesFinancieresLookup } from "./finance/finance-theorique.util";
 import { computePlacesStatistiques } from "./places/places.util";
 import { computeRmuStatistiques } from "./rmu/rmu.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findActivites,
+  findActualisationFormDefinitions,
   findBudgets,
+  findCpomBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinks,
   findEigs,
   findEvaluations,
+  findIdfDepartementNumeros,
   findIndicateursFinanciers,
   findOperateurFiliales,
   findPerimeterStructures,
   findRmus,
   findStructureActivityDates,
   findStructureAdresses,
+  findStructureInitialisations,
   findStructureTypologies,
   findStructureVersionTimeline,
+  findTarifsJournaliersCibles,
+  findTauxEncadrementCibles,
+  findValidatedActualisationForms,
 } from "./statistiques.repository";
 import {
   applyVersionedPlacesToTypologies,
@@ -34,7 +46,10 @@ import {
   buildStatistiquesActivityContext,
   collectDistinctYears,
   createEmptyActiveStructureIdsByPeriod,
+  getCadaFromHudaStructureIds,
+  getInitialisedStructureIds,
   getTypologieYears,
+  indexTimelineByStructureId,
   parseStatistiquesPerimeterFilters,
   type StatistiquesResolvedPerimeterFilters,
 } from "./statistiques.util";
@@ -81,18 +96,38 @@ export const buildStatistiquesContext = async (
     structureActivityDates
   );
 
-  const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
-    await Promise.all([
-      findStructureTypologies(allStructureIds),
-      findStructureAdresses(allStructureIds),
-      findCpomStructures(allStructureIds),
-      findDnaLinks(allStructureIds),
-      findStructureVersionTimeline(allStructureIds),
-    ]);
+  const [
+    typologies,
+    adresses,
+    cpomLinks,
+    dnaLinks,
+    structureVersionTimeline,
+    structureInitialisations,
+    actualisationFormDefinitions,
+    validatedActualisations,
+    idfDepartementNumeros,
+    tarifsJournaliersCibles,
+    tauxEncadrementCibles,
+  ] = await Promise.all([
+    findStructureTypologies(allStructureIds),
+    findStructureAdresses(allStructureIds),
+    findCpomStructures(allStructureIds),
+    findDnaLinks(allStructureIds),
+    findStructureVersionTimeline(allStructureIds),
+    findStructureInitialisations(allStructureIds),
+    findActualisationFormDefinitions(),
+    findValidatedActualisationForms(allStructureIds),
+    findIdfDepartementNumeros(),
+    findTarifsJournaliersCibles(),
+    findTauxEncadrementCibles(),
+  ]);
 
+  const timelineByStructureId = indexTimelineByStructureId(
+    structureVersionTimeline
+  );
   const resolvedTypologies = applyVersionedPlacesToTypologies(
     typologies.filter((typologie) => typologie.year <= referenceYear),
-    structureVersionTimeline,
+    timelineByStructureId,
     now
   );
 
@@ -104,20 +139,16 @@ export const buildStatistiquesContext = async (
     eigs,
     evaluations,
     budgets,
+    cpomBudgets,
     indicateurs,
     activites,
     rmus,
   ] = await Promise.all([
-    findDepartementsWithPopulation([
-      ...new Set(
-        allStructures
-          .map((structure) => structure.departementAdministratif)
-          .filter((departement): departement is string => departement !== null)
-      ),
-    ]),
+    findDepartementsWithPopulation([...(resolvedFilters.departements ?? [])]),
     findEigs(dnaCodes),
     findEvaluations(allStructureIds),
     findBudgets(allStructureIds),
+    findCpomBudgets([...new Set(cpomLinks.map((link) => link.cpomId))]),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
     resolvedFilters.operateurIds === null && filters.types === null
@@ -137,7 +168,7 @@ export const buildStatistiquesContext = async (
         ...evaluations.map((evaluation) => evaluation.date),
         ...activites.map((activite) => activite.date),
       ],
-      financeYears: collectDistinctYears(budgets, indicateurs),
+      financeYears: collectDistinctYears(budgets, cpomBudgets, indicateurs),
     }
   );
   const structures = allStructures.filter((structure) =>
@@ -149,21 +180,39 @@ export const buildStatistiquesContext = async (
     allStructures,
     activeStructureIdsNow,
     activeStructureIdsByPeriod,
+    initialisedStructureIds: getInitialisedStructureIds(
+      structureInitialisations,
+      now
+    ),
+    openingDateByStructureId: activityContext.openingDateByStructureId,
+    closureDateByStructureId: activityContext.closureDateByStructureId,
+    actualisationFormDefinitions,
+    lastValidatedCampagneYearByStructureId:
+      buildLastValidatedCampagneYearByStructureId(validatedActualisations),
+    ciblesFinancieres: buildCiblesFinancieresLookup({
+      tarifsJournaliersCibles,
+      tauxEncadrementCibles,
+      idfDepartementNumeros: new Set(idfDepartementNumeros),
+      cadaFromHudaStructureIds: getCadaFromHudaStructureIds(
+        structureInitialisations
+      ),
+    }),
     eigs,
     evaluations,
     typologies: resolvedTypologies,
     adresses,
     cpomLinks,
     dnaLinks,
-    structureVersionTimeline,
+    timelineByStructureId,
     departements,
     budgets,
+    cpomBudgetByKey: indexCpomBudgets(cpomBudgets),
     indicateurs,
     activites,
     rmus,
     resolveDnaStructureIds: buildDnaStructureIdsResolver(
       dnaLinks,
-      structureVersionTimeline
+      timelineByStructureId
     ),
   };
 };

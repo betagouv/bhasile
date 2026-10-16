@@ -9,14 +9,14 @@ Structures actives avec typologie. Dernière valeur non nulle par structure/cham
 | Champ                     | Calcul                                                   |
 | ------------------------- | -------------------------------------------------------- |
 | `totalPlaces`             | Somme `placesAutorisees` résolues (`StructureTypologie`) |
-| `population`              | Somme `Departement.population` ; `null` si manque        |
+| `population`              | Somme `Departement.population` des départements filtrés (toute la France sans filtre `departements`), qu'ils aient ou non une structure dans le périmètre ; `null` si une population manque |
 | `tauxEquipement`          | `totalPlaces / population` (ratio 0-1, `roundStatsRate`) |
 | `pmr`, `lgbt`, `fvvTeh`   | Somme dernières valeurs `StructureTypologie`             |
 | `qpv`, `logementsSociaux` | Somme `Adresse.qpv` / `Adresse.logementSocial` de la version effective à date |
 
 ## `byYear`
 
-Millésime exact sur `StructureTypologie` (`totalPlaces`, `pmr`, etc.).
+Millésime exact sur `StructureTypologie` (`totalPlaces`, `pmr`, etc.), sur les structures comptabilisées de l'année : sur une année de campagne, seules les structures actualisées (cf. [README racine](../README.md#structures-comptabilisées-par-année)). `completude` porte le score de l'année.
 `qpv` / `logementsSociaux` : `Adresse` n'a pas de millésime propre, mais est rattachée à une `StructureVersion` datée. Pour chaque année, on résout la `StructureVersion` effective de la structure au 31/12 de cette année-là (report de la dernière version connue tant qu'aucune nouvelle n'est effective, plafonné à aujourd'hui pour l'année en cours) via `filterByEffectiveVersionAtDate`, puis on somme les `Adresse` rattachées à cette version.
 
 ## TODO (à valider)

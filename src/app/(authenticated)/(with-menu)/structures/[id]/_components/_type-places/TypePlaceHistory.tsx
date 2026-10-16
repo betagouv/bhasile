@@ -3,7 +3,7 @@
 import { ReactElement } from "react";
 
 import { CustomAccordion } from "@/app/components/common/CustomAccordion";
-import { EmptyCell } from "@/app/components/common/EmptyCell";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
@@ -94,7 +94,7 @@ export const TypePlaceHistory = ({
                   isExporting ? "min-w-0 px-1" : "min-w-25"
                 }`}
               >
-                {row.getValue(year) ?? <EmptyCell />}
+                <NumberDisplay value={row.getValue(year)} showEmptyCell />
               </td>
             ))}
           </tr>

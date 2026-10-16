@@ -8,7 +8,9 @@ import {
   applyVersionedPlacesToTypologies,
   buildDnaStructureIdsResolver,
   filterByActiveStructureId,
-  getEffectiveStructureVersionAtDate,
+  getCadaFromHudaStructureIds,
+  getInitialisedStructureIds,
+  indexTimelineByStructureId,
   lookupActiveStructureIds,
   mapTypologieYears,
   parseStatistiquesPerimeterFilters,
@@ -16,6 +18,10 @@ import {
   sliceStatistiquesContext,
   structuresActiveInPeriod,
 } from "@/app/api/statistiques/statistiques.util";
+import {
+  StructureVersionTransformationType,
+  TransformationType,
+} from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
 import {
@@ -155,10 +161,7 @@ describe("socle - périmètre général vs séries temporelles", () => {
   });
 
   it("construit le byYear via mapTypologieYears sur le périmètre annuel", () => {
-    const byYear = mapTypologieYears(
-      allStructures,
-      activeStructureIdsByPeriod,
-      [
+    const typologies = [
         {
           id: 1,
           structureId: 1,
@@ -186,82 +189,23 @@ describe("socle - périmètre général vs séries temporelles", () => {
           lgbt: 0,
           fvvTeh: 0,
         },
-      ],
+      ];
+    const byYear = mapTypologieYears(
+      buildTestStatistiquesContext({
+        structures: allStructures,
+        typologies,
+        adresses: [],
+        departements: [],
+        activeStructureIdsByPeriod,
+      }),
       (_year, structuresForYear) => ({
         structureIds: structuresForYear.map((structure) => structure.id),
       })
     );
 
-    expect(byYear).toEqual([{ year: 2025, structureIds: [1, 2, 3] }]);
-  });
-});
-
-describe("socle - version effective à date (résolution adresses/typologies/DNA)", () => {
-  const timeline = buildTestStructureVersionTimeline([
-    {
-      structureId: 1,
-      structureVersionId: 10,
-      effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
-    },
-    {
-      structureId: 1,
-      structureVersionId: 11,
-      effectiveDate: new Date("2025-01-01T00:00:00.000Z"),
-    },
-  ]);
-
-  it("sélectionne la version effective à la date via getEffectiveStructureVersionAtDate", () => {
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2024-06-15T12:00:00.000Z"),
-        timeline
-      )
-    ).toMatchObject({ id: 10 });
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2025-06-15T12:00:00.000Z"),
-        timeline
-      )
-    ).toMatchObject({ id: 11 });
-  });
-
-  it("retourne null avant la première version effective", () => {
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2019-06-15T12:00:00.000Z"),
-        timeline
-      )
-    ).toBeNull();
-  });
-
-  it("retombe sur le socle (effectiveDate null) tant qu'aucune version datée n'est effective", () => {
-    const timelineWithSocle = [
-      { id: 10, structureId: 1, effectiveDate: null, placesAutorisees: null },
-      {
-        id: 11,
-        structureId: 1,
-        effectiveDate: new Date("2028-01-01T00:00:00.000Z"),
-        placesAutorisees: null,
-      },
-    ];
-
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2025-06-15T12:00:00.000Z"),
-        timelineWithSocle
-      )
-    ).toMatchObject({ id: 10 });
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2028-06-15T12:00:00.000Z"),
-        timelineWithSocle
-      )
-    ).toMatchObject({ id: 11 });
+    expect(byYear).toEqual([
+      { year: 2025, completude: null, structureIds: [1, 2, 3] },
+    ]);
   });
 });
 
@@ -292,7 +236,7 @@ describe("socle - résolution DNA à date", () => {
 
   const resolveDnaStructureIds = buildDnaStructureIdsResolver(
     dnaLinks,
-    timeline
+    indexTimelineByStructureId(timeline)
   );
 
   it("rattache un DNA à la structure dont la version effective porte le lien", () => {
@@ -496,7 +440,7 @@ describe("applyVersionedPlacesToTypologies", () => {
 
     const resolved = applyVersionedPlacesToTypologies(
       [buildTypologie(2025, 20)],
-      timeline,
+      indexTimelineByStructureId(timeline),
       new Date("2026-07-01T00:00:00.000Z")
     );
 
@@ -514,10 +458,69 @@ describe("applyVersionedPlacesToTypologies", () => {
 
     const resolved = applyVersionedPlacesToTypologies(
       [buildTypologie(2026, null)],
-      timeline,
+      indexTimelineByStructureId(timeline),
       new Date("2026-07-01T00:00:00.000Z")
     );
 
     expect(resolved[0].placesAutorisees).toBe(42);
+  });
+});
+
+describe("socle - structures initialisées et CADA issus de HUDA", () => {
+  const now = new Date("2026-10-01T12:00:00.000Z");
+  const finalisationForm = (status: boolean) => ({
+    status,
+    formDefinition: { slug: "finalisation-v1" },
+  });
+  const creationVersion = (
+    type: TransformationType,
+    isFinalised: boolean
+  ) => ({
+    effectiveDate: new Date("2026-03-01T00:00:00.000Z"),
+    structureVersionTransformation: {
+      type: StructureVersionTransformationType.CREATION,
+      transformation: { type, form: { status: isFinalised } },
+    },
+  });
+  const initialisations = [
+    { id: 1, forms: [finalisationForm(true)], structureVersions: [] },
+    { id: 2, forms: [finalisationForm(false)], structureVersions: [] },
+    {
+      id: 3,
+      forms: [],
+      structureVersions: [
+        creationVersion(
+          TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
+          true
+        ),
+      ],
+    },
+    {
+      id: 4,
+      forms: [],
+      structureVersions: [
+        creationVersion(TransformationType.OUVERTURE_EX_NIHILO, true),
+      ],
+    },
+    {
+      id: 5,
+      forms: [],
+      structureVersions: [
+        creationVersion(
+          TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+          false
+        ),
+      ],
+    },
+  ];
+
+  it("retient les structures au formulaire d'initialisation validé ou nées d'une création finalisée", () => {
+    expect(getInitialisedStructureIds(initialisations, now)).toEqual(
+      new Set([1, 3, 4])
+    );
+  });
+
+  it("ne retient comme CADA issus de HUDA que les créations HUDA vers CADA finalisées", () => {
+    expect(getCadaFromHudaStructureIds(initialisations)).toEqual(new Set([3]));
   });
 });

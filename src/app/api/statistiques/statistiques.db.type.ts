@@ -1,4 +1,4 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, StructureType } from "@/generated/prisma/client";
 
 export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   select: {
@@ -16,6 +16,28 @@ export type StatistiqueDbStructureActivity = Prisma.StructureGetPayload<{
   };
 }>;
 
+export type StatistiqueDbStructureInitialisation = Prisma.StructureGetPayload<{
+  select: {
+    id: true;
+    forms: {
+      select: { status: true; formDefinition: { select: { slug: true } } };
+    };
+    structureVersions: {
+      select: {
+        effectiveDate: true;
+        structureVersionTransformation: {
+          select: {
+            type: true;
+            transformation: {
+              select: { type: true; form: { select: { status: true } } };
+            };
+          };
+        };
+      };
+    };
+  };
+}>;
+
 export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
   select: {
     id: true;
@@ -29,6 +51,34 @@ export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
 }>;
 
 export type StatistiqueDbTypologieValues = Omit<StatistiqueDbTypologie, "id">;
+
+export type StatistiqueDbFormDefinition = Prisma.FormDefinitionGetPayload<{
+  select: {
+    slug: true;
+  };
+}>;
+
+export type StatistiqueDbValidatedActualisation = Prisma.FormGetPayload<{
+  select: {
+    structureId: true;
+    formDefinition: { select: { slug: true } };
+  };
+}>;
+
+export type StatistiqueDbTarifJournalierCible = {
+  structureType: StructureType;
+  year: number;
+  isIdf: boolean;
+  tarifCible: number;
+};
+
+export type StatistiqueDbTauxEncadrementCible = {
+  structureType: StructureType;
+  year: number;
+  isIdf: boolean;
+  isFromHuda: boolean;
+  tauxCible: number;
+};
 
 /** `structureId` / `structureVersionId` : garantis non nuls par le scope de la requête (`findStructureAdresses`). */
 export type StatistiqueDbAdresse = Omit<
@@ -138,6 +188,17 @@ export type StatistiqueDbDepartement = Prisma.DepartementGetPayload<{
   };
 }>;
 
+export type CiblesFinancieresLookup = {
+  getTarifJournalierCible: (
+    structure: StatistiqueDbStructure,
+    year: number
+  ) => number | null;
+  getTauxEncadrementCible: (
+    structure: StatistiqueDbStructure,
+    year: number
+  ) => number | null;
+};
+
 export type StatistiqueDbBudgetAgg = {
   year: number;
   dotationDemandee: number;
@@ -149,6 +210,13 @@ export type StatistiqueDbBudgetAgg = {
 export type StatistiqueDbBudget = StatistiqueDbBudgetAgg & {
   id: number;
   structureId: number;
+};
+
+/** Budget porté par un CPOM, une ligne par année et par type de structure. */
+export type StatistiqueDbCpomBudget = StatistiqueDbBudgetAgg & {
+  id: number;
+  cpomId: number;
+  structureType: StructureType | null;
 };
 
 export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
@@ -198,15 +266,27 @@ export type StatistiquesContext = {
   activeStructureIdsNow: Set<number>;
   /** Index des structures actives par période (séries temporelles). */
   activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod;
+  /** Structures initialisées : seules comptées dans l'assiette et les blocs structures, places et finance. */
+  initialisedStructureIds: Set<number>;
+  openingDateByStructureId: Map<number, Date>;
+  closureDateByStructureId: Map<number, Date | null>;
+  actualisationFormDefinitions: StatistiqueDbFormDefinition[];
+  /** Dernière campagne d'actualisation validée par structure. */
+  lastValidatedCampagneYearByStructureId: Map<number, number>;
+  /** Cibles (tarif journalier, taux d'encadrement) par structure et par année, indexées une fois. */
+  ciblesFinancieres: CiblesFinancieresLookup;
   eigs: StatistiqueDbEig[];
   evaluations: StatistiqueDbEvaluation[];
   typologies: StatistiqueDbTypologie[];
   adresses: StatistiqueDbAdresse[];
   cpomLinks: StatistiqueDbCpomStructure[];
   dnaLinks: StatistiqueDbDnaLink[];
-  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[];
+  /** Versions de chaque structure, indexées une fois par structure. */
+  timelineByStructureId: Map<number, StatistiqueDbStructureVersionTimeline[]>;
   departements: StatistiqueDbDepartement[];
   budgets: StatistiqueDbBudget[];
+  /** Budgets CPOM saisis, par CPOM, année et type de structure (cf. `indexCpomBudgets`). */
+  cpomBudgetByKey: Map<string, StatistiqueDbCpomBudget>;
   indicateurs: StatistiqueDbIndicateurFinancier[];
   activites: StatistiqueDbActivite[];
   rmus: StatistiqueDbRmu[] | null;
@@ -217,10 +297,22 @@ export type StatistiquesContext = {
 export type DnaStructureIdsResolver = (dnaCode: string, date: Date) => number[];
 
 /** Minimal slice of StatistiquesContext needed to resolve structures + typologie for a given year. */
-export type StatistiquesTypologieYearContext = Pick<
+export type StatistiquesTypologieYearContext = StatistiquesYearContext &
+  Pick<StatistiquesContext, "typologies">;
+
+export type StatistiquesCompletudeContext = Pick<
   StatistiquesContext,
-  "allStructures" | "activeStructureIdsByPeriod" | "typologies"
+  | "actualisationFormDefinitions"
+  | "lastValidatedCampagneYearByStructureId"
+  | "closureDateByStructureId"
 >;
+
+/** Structures comptabilisées sur une année : actives, et actualisées sur une année de campagne. */
+export type StatistiquesYearContext = StatistiquesCompletudeContext &
+  Pick<
+    StatistiquesContext,
+    "allStructures" | "activeStructureIdsByPeriod" | "initialisedStructureIds"
+  >;
 
 /** Adds CPOM links, for indicators counting structures covered by an active CPOM per year. */
 export type StatistiquesCpomYearContext = StatistiquesTypologieYearContext &
@@ -229,7 +321,10 @@ export type StatistiquesCpomYearContext = StatistiquesTypologieYearContext &
 /** Structures actives + adresses, pour le snapshot QPV / logement social. */
 export type StatistiquesAdresseSnapshotContext = Pick<
   StatistiquesContext,
-  "structures" | "adresses" | "structureVersionTimeline"
+  | "structures"
+  | "initialisedStructureIds"
+  | "adresses"
+  | "timelineByStructureId"
 >;
 
 /** Minimal slice of StatistiquesContext needed to compute the current activite snapshot. */
