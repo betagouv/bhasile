@@ -2,7 +2,6 @@
 
 import { ReactElement } from "react";
 
-import { AnnualDataNote } from "../AnnualDataNote";
 import { StructuresStatsTable } from "./StructuresStatsTable";
 import { TypesBatis } from "./TypesBatis";
 import { TypesStructures } from "./TypesStructures";
@@ -25,7 +24,6 @@ export const StructuresBlock = (): ReactElement => {
       <div className="pt-16">
         <StructuresStatsTable />
       </div>
-      <AnnualDataNote />
     </div>
   );
 };
