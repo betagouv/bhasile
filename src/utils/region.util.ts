@@ -22,42 +22,38 @@ export const getDepartementNumerosForRegion = (regionName: string): string[] =>
 type RegionWithDepartements = {
   region: (typeof REGIONS)[number];
   departements: ReturnType<typeof getDepartementsForRegion>;
+  hasMatchingDepartement: boolean;
 };
 
 export const filterRegionsWithDepartements = (
   searchQuery: string
 ): RegionWithDepartements[] => {
-  return REGIONS.filter((region) => region.show)
-    .map((region) => {
-      const matchRegion = matchesSearchQuery(region.name, searchQuery);
+  return REGIONS.filter((region) => region.show).map((region) => {
+    const regionDepartements = getDepartementsForRegion(region.name).sort(
+      (premierDepartement, secondDepartement) =>
+        premierDepartement.name.localeCompare(secondDepartement.name)
+    );
 
-      const regionDepartements = getDepartementsForRegion(region.name)
-        .sort((premierDepartement, secondDepartement) =>
-          premierDepartement.name.localeCompare(secondDepartement.name)
-        )
-        .filter((departement) => {
-          if (!searchQuery.trim() || matchRegion) {
-            return true;
-          }
-
-          const matchNomDepartement = matchesSearchQuery(
-            departement.name,
-            searchQuery
-          );
-          const matchNumeroDepartement = matchesSearchQuery(
-            departement.numero,
-            searchQuery
-          );
-
-          return matchNomDepartement || matchNumeroDepartement;
-        });
-
+    if (!searchQuery.trim()) {
       return {
         region,
         departements: regionDepartements,
+        hasMatchingDepartement: false,
       };
-    })
-    .filter(
-      (regionWithDepartements) => regionWithDepartements.departements.length > 0
+    }
+
+    const matchingDepartements = regionDepartements.filter(
+      (departement) =>
+        matchesSearchQuery(departement.name, searchQuery) ||
+        matchesSearchQuery(departement.numero, searchQuery)
     );
+
+    return {
+      region,
+      departements: matchesSearchQuery(region.name, searchQuery)
+        ? regionDepartements
+        : matchingDepartements,
+      hasMatchingDepartement: matchingDepartements.length > 0,
+    };
+  });
 };

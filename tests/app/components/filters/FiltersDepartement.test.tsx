@@ -82,6 +82,46 @@ describe("FiltersDepartement", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("déplie les régions contenant un département recherché", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<FiltersDepartement departements={[]} onChange={onChange} />);
+
+    const searchInput = screen.getByRole("searchbox", {
+      name: "Rechercher une région, un département",
+    });
+
+    await user.type(searchInput, "iser");
+
+    expect(
+      screen.getByRole("button", { name: "Auvergne-Rhône-Alpes" })
+    ).toHaveAttribute("aria-expanded", "true");
+
+    await user.clear(searchInput);
+
+    expect(
+      screen.getByRole("button", { name: "Auvergne-Rhône-Alpes" })
+    ).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("ne déplie pas une région trouvée uniquement par son nom", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<FiltersDepartement departements={[]} onChange={onChange} />);
+
+    await user.type(
+      screen.getByRole("searchbox", {
+        name: "Rechercher une région, un département",
+      }),
+      "bretagne"
+    );
+
+    expect(screen.getByRole("button", { name: "Bretagne" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+  });
+
   it("affiche un message d'absence de résultat lorsque la recherche ne correspond à rien", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

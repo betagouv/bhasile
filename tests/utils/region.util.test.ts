@@ -109,39 +109,61 @@ describe("region util", () => {
     });
 
     it("filtre par nom de région (insensible à la casse et aux accents) et conserve tous ses départements", () => {
-      const resultats = filterRegionsWithDepartements("bretagne");
+      const resultats = getRegionsWithResults("bretagne");
 
       expect(resultats).toHaveLength(1);
       expect(resultats[0].region.name).toBe("Bretagne");
       expect(resultats[0].departements).toHaveLength(4);
+      expect(resultats[0].hasMatchingDepartement).toBe(false);
     });
 
     it("filtre par nom de département", () => {
-      const resultats = filterRegionsWithDepartements("finistere");
+      const resultats = getRegionsWithResults("finistere");
 
       expect(resultats).toHaveLength(1);
       expect(resultats[0].region.name).toBe("Bretagne");
       expect(resultats[0].departements).toHaveLength(1);
       expect(resultats[0].departements[0].name).toBe("Finistère");
+      expect(resultats[0].hasMatchingDepartement).toBe(true);
     });
 
     it("filtre par numéro de département", () => {
-      const resultats = filterRegionsWithDepartements("35");
+      const resultats = getRegionsWithResults("35");
 
       expect(resultats).toHaveLength(1);
       expect(resultats[0].region.name).toBe("Bretagne");
       expect(resultats[0].departements).toHaveLength(1);
       expect(resultats[0].departements[0].numero).toBe("35");
+      expect(resultats[0].hasMatchingDepartement).toBe(true);
     });
 
-    it("renvoie un tableau vide si aucun département ni région ne correspond", () => {
+    it("signale un département correspondant même quand la région correspond aussi", () => {
+      const resultats = getRegionsWithResults("guadeloupe");
+
+      expect(resultats).toHaveLength(1);
+      expect(resultats[0].departements).toHaveLength(1);
+      expect(resultats[0].hasMatchingDepartement).toBe(true);
+    });
+
+    it("conserve toutes les régions visibles, sans département si rien ne correspond", () => {
       const resultats = filterRegionsWithDepartements(
         "RechercheInexistante123"
       );
 
-      expect(resultats).toEqual([]);
+      expect(resultats).toHaveLength(filterRegionsWithDepartements("").length);
+      expect(
+        resultats.every(
+          (regionWithDepartements) =>
+            regionWithDepartements.departements.length === 0
+        )
+      ).toBe(true);
     });
   });
+
+  const getRegionsWithResults = (searchQuery: string) =>
+    filterRegionsWithDepartements(searchQuery).filter(
+      (regionWithDepartements) => regionWithDepartements.departements.length > 0
+    );
 
   it("associe chaque département de la région à cette région", () => {
     const numeros = getDepartementNumerosForRegion("Bretagne");

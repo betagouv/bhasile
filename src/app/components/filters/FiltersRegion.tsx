@@ -20,8 +20,11 @@ const REGIONS_WITH_ONE_DEPARTEMENT = [
 
 export const FiltersRegion = ({
   region,
+  hidden,
   departements,
   onChange,
+  expanded,
+  onExpandedChange,
   children,
 }: Props) => {
   const checkedStatus = useMemo(() => {
@@ -96,8 +99,11 @@ export const FiltersRegion = ({
 
   return (
     <Accordion
+      expanded={expanded}
+      onExpandedChange={onExpandedChange}
       className={cn(
         "[&:before]:content-none",
+        hidden && "hidden",
         "[&>h3>button]:py-1.5 [&>h3>button]:px-6 [&>h3>button]:min-h-0 [&>h3>button]:bg-transparent!",
         "[&>div]:py-0 [&>div]:px-6",
         isRegionWithOneDepartement && "[&>h3>button:after]:content-none"
@@ -135,7 +141,10 @@ export const FiltersRegion = ({
 
 type Props = {
   region: string;
+  hidden: boolean;
   departements: string[];
   onChange: (departements: string[]) => void;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
   children: React.ReactElement;
 };
