@@ -56,7 +56,7 @@ Ce que couvre un binôme :
 
 Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
 
-Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `abilities.ts`) sert à la fois aux règles CASL de lecture et d'écriture et au filtre Prisma `getReadableStructureWhere` des statistiques.
+Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `abilities.ts`) sert à la fois aux règles CASL de lecture et d'écriture et au filtre de droits `getReadableStructureWhere` des statistiques.
 
 Limites actuelles :
 

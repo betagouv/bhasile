@@ -337,13 +337,13 @@ describe("Permissions : lecture", () => {
     ).toBe(false);
   });
 
-  it("construit un filtre Prisma qui reprend les binômes", () => {
+  it("construit un filtre sur les structures qui reprend les binômes de droits", () => {
     expect(getReadableStructureWhere(lecteurVar)).toEqual({
       OR: [{ departementAdministratif: { in: ["83"] } }],
     });
   });
 
-  it("construit un filtre Prisma qui ne renvoie rien sans binôme", () => {
+  it("construit un filtre qui ne renvoie rien sans binôme de droits", () => {
     expect(getReadableStructureWhere(createSessionUser())).toEqual({ OR: [] });
   });
 
@@ -353,7 +353,7 @@ describe("Permissions : lecture", () => {
     ).toEqual({});
   });
 
-  it("restreint le filtre Prisma d'un user opérateur à son opérateur", () => {
+  it("restreint le filtre d'un utilisateur type opérateur à son opérateur", () => {
     const user = createSessionUser({
       operateurId: 7,
       grants: [
@@ -368,7 +368,7 @@ describe("Permissions : lecture", () => {
 });
 
 describe("Permissions : canAccessApp", () => {
-  it("refuse l'accès à un utilisateur sans aucun binôme", () => {
+  it("refuse l'accès à un utilisateur sans aucun binôme de droits", () => {
     expect(canAccessApp(createSessionUser())).toBe(false);
   });
 
