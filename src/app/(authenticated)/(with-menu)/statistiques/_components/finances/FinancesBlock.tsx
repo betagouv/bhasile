@@ -35,13 +35,16 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
           <h3 className="text-title-blue-france fr-h6 mb-12">Finance</h3>
         </div>
       </div>
-      <h4 className="text-title-blue-france text-lg">
+      <h4 className="text-title-blue-france text-lg print:mb-0">
         Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}{" "}
         <IncompleteDataIndicator
           nbStructures={nbStructures}
           structuresPercentage={structuresPercentage}
         />
       </h4>
+      <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
+        {nbStructures} structures actualisées
+      </h5>
       <div className="flex pb-16">
         <FinanceCards />
       </div>

@@ -9,6 +9,7 @@ import {
   isYearIncomplete,
   shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { PlacesByYearStat } from "@/schemas/api/statistique.schema";
 
@@ -19,6 +20,7 @@ export const TypesPlacesStatsTable = ({
   endYear,
 }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const isExporting = useExportContext();
 
   const placeYears = filterDisplayedYears(statistiques.places.byYear).filter(
     (yearItem) => {
@@ -78,7 +80,7 @@ export const TypesPlacesStatsTable = ({
         Tableau de données
       </h4>
       <Table
-        headings={getHeadings(placeYears)}
+        headings={getHeadings(placeYears, isExporting)}
         ariaLabelledBy="type-places-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
@@ -92,8 +94,9 @@ export const TypesPlacesStatsTable = ({
               <br />
             </td>
             {structureStat.value?.map((structureStatItem, columnIndex) => {
-              const yearItem = placeYears[columnIndex];
-              const isIncomplete = isYearIncomplete(yearItem);
+              const isIncomplete = isYearIncomplete(
+                statistiques.places.byYear[columnIndex].completude
+              );
 
               return (
                 <td
@@ -130,8 +133,9 @@ export const TypesPlacesStatsTable = ({
                   <span className="text-xs">{structureStat.subLabel}</span>
                 </td>
                 {structureStat.value?.map((structureStatItem, columnIndex) => {
-                  const yearItem = placeYears[columnIndex];
-                  const isIncomplete = isYearIncomplete(yearItem);
+                  const isIncomplete = isYearIncomplete(
+                    statistiques.places.byYear[columnIndex].completude
+                  );
 
                   return (
                     <td
@@ -155,10 +159,10 @@ export const TypesPlacesStatsTable = ({
   );
 };
 
-const getHeadings = (placeYears: PlacesByYearStat[]) => {
+const getHeadings = (placeYears: PlacesByYearStat[], isExporting: boolean) => {
   const dates =
     placeYears.map((yearItem) => {
-      const isIncomplete = isYearIncomplete(yearItem);
+      const isIncomplete = isYearIncomplete(yearItem.completude);
       const nbRenseignees = yearItem.completude?.nbRenseignees ?? 0;
       const nbAttendues = yearItem.completude?.nbAttendues ?? 1;
 
@@ -168,17 +172,25 @@ const getHeadings = (placeYears: PlacesByYearStat[]) => {
           key={yearItem.year}
           className={isIncomplete ? "bg-default-grey-active" : undefined}
         >
-          <div className="inline-flex items-center justify-center gap-1">
+          <div className="inline-flex print:block items-center justify-center gap-1">
             <span>
               {yearItem.year}
               {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
             </span>
-            {isIncomplete && (
-              <IncompleteDataIndicator
-                nbStructures={nbRenseignees}
-                structuresPercentage={getPercentage(nbRenseignees, nbAttendues)}
-              />
-            )}
+            {isIncomplete &&
+              (isExporting ? (
+                <div className="text-[10px] font-normal">
+                  {nbRenseignees} structures actualisées
+                </div>
+              ) : (
+                <IncompleteDataIndicator
+                  nbStructures={nbRenseignees}
+                  structuresPercentage={getPercentage(
+                    nbRenseignees,
+                    nbAttendues
+                  )}
+                />
+              ))}
           </div>
         </th>
       );
