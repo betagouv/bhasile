@@ -112,7 +112,7 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
    - matrice ressource × action × rôle × agent/opérateur validée par le métier.
 2. **PR 3, ouverture aux opérateurs** :
    - invitation d'un user opérateur par un admin ;
-   - authentification des users opérateurs sans ProConnect (adresses gmail) : magic link ou liste blanche ;
+   - authentification des users opérateurs via ProConnect (adresses gmail) ;
    - cloisonnement : toutes les règles d'un user opérateur filtrées sur son `operateurId` ;
    - lecture filtrée via `accessibleBy` dans les repositories (comme `includedStructureWhere`) ;
    - champs réservés aux agents masqués : notes, justification d'anomalies, contrôles, évaluations, CPOM, finalisation de transformation ;
