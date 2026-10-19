@@ -2,14 +2,6 @@
 
 État au 14/10/2026, après rebase de `improve-stats` sur `fix-stats-back`. Le front compile contre le nouveau back ; les points ci-dessous ne sont pas encore branchés. Règles de calcul : [README de l'API](../src/app/api/statistiques/README.md). Retours à faire sur la maquette : [statistiques-retours-maquette.md](./statistiques-retours-maquette.md).
 
-## Score de fraîcheur
-
-- **Valeurs de l'infobulle** : remplacer les `42` en dur de `IncompleteDataIndicator` par `completude.nbRenseignees` et `nbRenseignees / nbAttendues` (attention à `nbAttendues = 0`).
-- **Années concernées** : `isYearIncomplete` et les `incompleteYears` des graphiques (`DotationChart`, `BalanceChart`) se basent sur l'année courante et les précédentes. Les baser sur `completude` : symbole et fond gris quand `completude !== null && !completude.isComplete`, rien sinon (`completude` vaut `null` sur une année d'initialisation, et une année complète n'a plus de symbole).
-- **Finance** : le score est par onglet, `byYear[].total.completude`, `.autorisees.completude`, `.subventionnees.completude`. Le tableau lit celui de l'onglet affiché, les graphiques celui de `total`.
-- **Bandeau d'avertissement** (`PartialDataNotice`) : ne l'afficher que s'il existe au moins une année incomplète.
-- **Export PDF** : afficher « N structures actualisées » sous l'année au lieu de l'infobulle au survol (cf. spec « version export »).
-
 ## Structures
 
 - **Camemberts « en 2026 »** (`TypeChartPresenter`) : lire `structures.byYear` de l'année affichée (`structureTypes`, `structureBatis`, `totalStructures`) au lieu de la vue globale, avec le symbole de cette année. Prendre l'année dans les données plutôt que `new Date().getFullYear()`.

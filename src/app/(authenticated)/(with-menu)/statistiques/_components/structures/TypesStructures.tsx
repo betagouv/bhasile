@@ -33,6 +33,9 @@ export const TypesStructures = (): ReactElement => {
               currentYearCompletude?.nbAttendues ?? 1
             )}
           />
+          <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
+            {currentYearCompletude?.nbRenseignees} structures actualisées
+          </h5>
         </>
       }
       colors={colors}

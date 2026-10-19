@@ -8,7 +8,7 @@ import {
   shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
-import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
+import { CompletudeStat } from "@/schemas/api/statistique.schema";
 
 const periodOfYear = (year: number) => ({
   date: `${year}-06-15T00:00:00.000Z`,
@@ -88,40 +88,42 @@ describe("statistiques period util", () => {
   });
 
   describe("isYearIncomplete", () => {
-    it("renvoie false si yearItem est undefined", () => {
+    it("renvoie false si completude est undefined", () => {
       expect(isYearIncomplete(undefined)).toBe(false);
     });
 
-    it("renvoie true pour l'année courante", () => {
-      const yearItem = { year: CURRENT_YEAR } as FinanceByYearStat;
-
-      expect(isYearIncomplete(yearItem)).toBe(true);
+    it("renvoie false si completude est null", () => {
+      expect(isYearIncomplete(null)).toBe(false);
     });
 
-    it("renvoie true pour l'année précédente (N-1)", () => {
-      const yearItem = { year: CURRENT_YEAR - 1 } as FinanceByYearStat;
+    it("renvoie false si completude.isComplete est true", () => {
+      const completude: CompletudeStat = {
+        isComplete: true,
+        nbAttendues: 12,
+        nbRenseignees: 12,
+      };
 
-      expect(isYearIncomplete(yearItem)).toBe(true);
+      expect(isYearIncomplete(completude)).toBe(false);
     });
 
-    it("renvoie false pour une année antérieure à N-1", () => {
-      const yearItem = { year: CURRENT_YEAR - 2 } as FinanceByYearStat;
+    it("renvoie true si completude.isComplete est false", () => {
+      const completude: CompletudeStat = {
+        isComplete: false,
+        nbAttendues: 12,
+        nbRenseignees: 8,
+      };
 
-      expect(isYearIncomplete(yearItem)).toBe(false);
+      expect(isYearIncomplete(completude)).toBe(true);
     });
 
-    it("renvoie false pour une année future", () => {
-      const yearItem = { year: CURRENT_YEAR + 1 } as FinanceByYearStat;
+    it("gère un objet complet avec toutes les propriétés", () => {
+      const completude: CompletudeStat = {
+        isComplete: false,
+        nbAttendues: 24,
+        nbRenseignees: 12,
+      };
 
-      expect(isYearIncomplete(yearItem)).toBe(false);
-    });
-
-    it("gère la propriété year sous forme de chaîne de caractères", () => {
-      const yearItem = {
-        year: String(CURRENT_YEAR),
-      } as unknown as FinanceByYearStat;
-
-      expect(isYearIncomplete(yearItem)).toBe(true);
+      expect(isYearIncomplete(completude)).toBe(true);
     });
   });
 

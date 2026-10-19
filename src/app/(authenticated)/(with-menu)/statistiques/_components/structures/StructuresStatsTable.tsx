@@ -26,11 +26,13 @@ const BATI_ROWS = [
 ];
 
 import { getPercentage } from "@/app/utils/common.util";
+import { useExportContext } from "@/contexts/ExportContext";
 
 import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
 export const StructuresStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const isExporting = useExportContext();
 
   const structureYears = filterDisplayedYears(statistiques.structures.byYear);
 
@@ -76,7 +78,7 @@ export const StructuresStatsTable = (): ReactElement => {
         Tableau de données
       </h4>
       <Table
-        headings={getHeadings(structureYears)}
+        headings={getHeadings(structureYears, isExporting)}
         ariaLabelledBy="structure-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
@@ -90,8 +92,9 @@ export const StructuresStatsTable = (): ReactElement => {
               <br />
             </td>
             {structureStat.value?.map((structureStatItem, columnIndex) => {
-              const yearItem = structureYears[columnIndex];
-              const isIncomplete = isYearIncomplete(yearItem);
+              const isIncomplete = isYearIncomplete(
+                statistiques.structures.byYear[columnIndex].completude
+              );
 
               return (
                 <td
@@ -127,8 +130,9 @@ export const StructuresStatsTable = (): ReactElement => {
                   <br />
                 </td>
                 {structureStat.value?.map((structureStatItem, columnIndex) => {
-                  const yearItem = structureYears[columnIndex];
-                  const isIncomplete = isYearIncomplete(yearItem);
+                  const isIncomplete = isYearIncomplete(
+                    statistiques.structures.byYear[columnIndex].completude
+                  );
 
                   return (
                     <td
@@ -152,10 +156,13 @@ export const StructuresStatsTable = (): ReactElement => {
   );
 };
 
-const getHeadings = (structureYears: StructuresByYearStat[]) => {
+const getHeadings = (
+  structureYears: StructuresByYearStat[],
+  isExporting: boolean
+) => {
   const dates =
     structureYears.map((yearItem) => {
-      const isIncomplete = isYearIncomplete(yearItem);
+      const isIncomplete = isYearIncomplete(yearItem.completude);
       const nbRenseignees = yearItem.completude?.nbRenseignees ?? 0;
       const nbAttendues = yearItem.completude?.nbAttendues ?? 1;
 
@@ -165,15 +172,23 @@ const getHeadings = (structureYears: StructuresByYearStat[]) => {
           key={yearItem.year}
           className={isIncomplete ? "bg-default-grey-active" : undefined}
         >
-          <div className="inline-flex items-center justify-center gap-1">
+          <div className="inline-flex print:block items-center justify-center gap-1">
             <span>{yearItem.year}</span>
             {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
-            {isIncomplete && (
-              <IncompleteDataIndicator
-                nbStructures={nbRenseignees}
-                structuresPercentage={getPercentage(nbRenseignees, nbAttendues)}
-              />
-            )}
+            {isIncomplete &&
+              (isExporting ? (
+                <div className="text-[10px] font-normal">
+                  {nbRenseignees} structures actualisées
+                </div>
+              ) : (
+                <IncompleteDataIndicator
+                  nbStructures={nbRenseignees}
+                  structuresPercentage={getPercentage(
+                    nbRenseignees,
+                    nbAttendues
+                  )}
+                />
+              ))}
           </div>
         </th>
       );

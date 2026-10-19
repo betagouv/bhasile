@@ -31,7 +31,7 @@ export const TypesPlacesBlock = ({
         </div>
       </div>
       <div className="pb-16">
-        <h4 className="text-title-blue-france text-lg">
+        <h4 className="text-title-blue-france text-lg print:mb-0">
           En {CURRENT_YEAR}{" "}
           <IncompleteDataIndicator
             nbStructures={currentYearCompletude?.nbRenseignees || 0}
@@ -41,6 +41,9 @@ export const TypesPlacesBlock = ({
             )}
           />
         </h4>
+        <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
+          {currentYearCompletude?.nbRenseignees} structures actualisées
+        </h5>
         <TypePlaceCharts
           placesAutorisees={statistiques.places.totalPlaces}
           placesPmr={statistiques.places.pmr}
