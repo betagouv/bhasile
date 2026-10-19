@@ -25,6 +25,8 @@ const BATI_ROWS = [
   Repartition.MIXTE,
 ];
 
+import { getPercentage } from "@/app/utils/common.util";
+
 import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
 export const StructuresStatsTable = (): ReactElement => {
@@ -154,6 +156,8 @@ const getHeadings = (structureYears: StructuresByYearStat[]) => {
   const dates =
     structureYears.map((yearItem) => {
       const isIncomplete = isYearIncomplete(yearItem);
+      const nbRenseignees = yearItem.completude?.nbRenseignees ?? 0;
+      const nbAttendues = yearItem.completude?.nbAttendues ?? 1;
 
       return (
         <th
@@ -165,10 +169,9 @@ const getHeadings = (structureYears: StructuresByYearStat[]) => {
             <span>{yearItem.year}</span>
             {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
             {isIncomplete && (
-              // TODO : ajouter de vraies valeurs
               <IncompleteDataIndicator
-                nbStructures={42}
-                structuresPercentage={42}
+                nbStructures={nbRenseignees}
+                structuresPercentage={getPercentage(nbRenseignees, nbAttendues)}
               />
             )}
           </div>
