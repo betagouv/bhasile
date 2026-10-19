@@ -2,6 +2,7 @@ import { Fragment, ReactElement, ReactNode } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
+import { getPercentage } from "@/app/utils/common.util";
 import { formatPerMille } from "@/app/utils/number.util";
 import {
   filterDisplayedYears,
@@ -158,6 +159,8 @@ const getHeadings = (placeYears: PlacesByYearStat[]) => {
   const dates =
     placeYears.map((yearItem) => {
       const isIncomplete = isYearIncomplete(yearItem);
+      const nbRenseignees = yearItem.completude?.nbRenseignees ?? 0;
+      const nbAttendues = yearItem.completude?.nbAttendues ?? 1;
 
       return (
         <th
@@ -171,10 +174,9 @@ const getHeadings = (placeYears: PlacesByYearStat[]) => {
               {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
             </span>
             {isIncomplete && (
-              // TODO : ajouter de vraies valeurs
               <IncompleteDataIndicator
-                nbStructures={42}
-                structuresPercentage={42}
+                nbStructures={nbRenseignees}
+                structuresPercentage={getPercentage(nbRenseignees, nbAttendues)}
               />
             )}
           </div>

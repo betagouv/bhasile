@@ -10,7 +10,12 @@ import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 import { ClosedStructuresDisclaimer } from "../ClosedStructuresDisclaimer";
 import { FinanceChartLabel } from "./FinanceChartLabel";
 
-export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
+export const BalanceChart = ({
+  startYear,
+  endYear,
+  nbStructures,
+  structuresPercentage,
+}: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
   const { years } =
@@ -100,6 +105,8 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
                 chartData={chartData}
                 label={label}
                 index={index}
+                nbStructures={nbStructures}
+                structuresPercentage={structuresPercentage}
               />
             )}
           />
@@ -122,4 +129,6 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
 type Props = {
   startYear?: number;
   endYear?: number;
+  nbStructures?: number;
+  structuresPercentage?: string;
 };

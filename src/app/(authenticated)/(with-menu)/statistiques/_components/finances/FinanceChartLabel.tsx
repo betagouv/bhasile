@@ -8,6 +8,8 @@ export const FinanceChartLabel = ({
   chartData,
   index,
   label,
+  nbStructures,
+  structuresPercentage,
 }: Props): ReactElement => {
   const isIncomplete = chartData.incompleteYears?.[index] ?? false;
 
@@ -16,8 +18,10 @@ export const FinanceChartLabel = ({
       {label}
       {shouldShowYearAsterisk(chartData.labels[index]) && <span> * </span>}
       {isIncomplete && (
-        // TODO : mettre de vrais valeurs ici
-        <IncompleteDataIndicator nbStructures={42} structuresPercentage={42} />
+        <IncompleteDataIndicator
+          nbStructures={nbStructures ?? 0}
+          structuresPercentage={structuresPercentage || ""}
+        />
       )}
     </span>
   );
@@ -30,4 +34,6 @@ type Props = {
   };
   index: number;
   label: string;
+  nbStructures?: number;
+  structuresPercentage?: string;
 };

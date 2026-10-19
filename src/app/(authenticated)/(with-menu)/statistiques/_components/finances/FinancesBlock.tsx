@@ -20,6 +20,13 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
     (yearItem) => yearItem.year === DOCUMENTS_FINANCIERS_OPEN_YEAR
   )?.completude;
 
+  const nbStructures =
+    documentsFinanciersOpenYearCompletude?.nbRenseignees || 0;
+  const structuresPercentage = getPercentage(
+    documentsFinanciersOpenYearCompletude?.nbRenseignees || 0,
+    documentsFinanciersOpenYearCompletude?.nbAttendues || 1
+  );
+
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
@@ -31,13 +38,8 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
       <h4 className="text-title-blue-france text-lg">
         Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}{" "}
         <IncompleteDataIndicator
-          nbStructures={
-            documentsFinanciersOpenYearCompletude?.nbRenseignees || 0
-          }
-          structuresPercentage={getPercentage(
-            documentsFinanciersOpenYearCompletude?.nbRenseignees || 0,
-            documentsFinanciersOpenYearCompletude?.nbAttendues || 1
-          )}
+          nbStructures={nbStructures}
+          structuresPercentage={structuresPercentage}
         />
       </h4>
       <div className="flex pb-16">
@@ -62,13 +64,20 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
               chartData={chartData}
               label={label}
               index={index}
+              nbStructures={nbStructures}
+              structuresPercentage={structuresPercentage}
             />
           )}
         />
         <ClosedStructuresDisclaimer />
       </div>
       <div className="py-12 break-inside-avoid">
-        <BalanceChart startYear={startYear} endYear={endYear} />
+        <BalanceChart
+          startYear={startYear}
+          endYear={endYear}
+          nbStructures={nbStructures}
+          structuresPercentage={structuresPercentage}
+        />
       </div>
       <FinancesStatsTable startYear={startYear} endYear={endYear} />
     </div>
