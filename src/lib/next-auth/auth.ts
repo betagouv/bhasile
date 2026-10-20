@@ -30,7 +30,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ token, session }) {
-      const permissions = await getPermissionsFromSession(session);
       try {
         await createOrUpdateUser({
           name: session.user?.name as string,
@@ -41,20 +40,20 @@ export const authOptions: NextAuthOptions = {
           "Erreur dans l'ajout ou la mise à jour de l'utilisateur",
           error
         );
-      } finally {
-        return {
-          ...session,
-          user: {
-            ...session.user,
-            ...permissions,
-            prenom: token.prenom,
-          },
-          id_token: token.id_token,
-          provider: token.provider,
-          user_id: token.user_id,
-          name: token.name,
-        };
       }
+      const permissions = await getPermissionsFromSession(session);
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          ...permissions,
+          prenom: token.prenom,
+        },
+        id_token: token.id_token,
+        provider: token.provider,
+        user_id: token.user_id,
+        name: token.name,
+      };
     },
   },
   secret: process.env.AUTH_SECRET,

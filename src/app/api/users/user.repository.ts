@@ -16,7 +16,10 @@ export const upsertUser = async ({
   );
   const existing = await prisma.user.findUnique({
     where: { email },
-    select: { lastConnection: true },
+    select: {
+      lastConnection: true,
+      emailPattern: { select: { pattern: true } },
+    },
   });
 
   if (!existing) {
@@ -33,7 +36,10 @@ export const upsertUser = async ({
     return;
   }
 
-  if (existing.lastConnection && existing.lastConnection >= threshold) {
+  const isRecentConnection =
+    existing.lastConnection && existing.lastConnection >= threshold;
+  const isSameEmailPattern = existing.emailPattern?.pattern === emailPattern;
+  if (isRecentConnection && isSameEmailPattern) {
     return;
   }
 
