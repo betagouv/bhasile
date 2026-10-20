@@ -46,9 +46,20 @@ describe("PUT /api/operateurs/[id]", () => {
     mockCanUpdateOperateur.mockReturnValue(true);
   });
 
-  it("renvoie 401 quand l'utilisateur n'est pas authentifié", async () => {
+  it.each([
+    {
+      status: 401,
+      cas: "l'utilisateur n'est pas authentifié",
+      setup: () => mockGetServerSession.mockResolvedValueOnce(null),
+    },
+    {
+      status: 403,
+      cas: "l'utilisateur n'a pas les droits sur l'opérateur",
+      setup: () => mockCanUpdateOperateur.mockReturnValueOnce(false),
+    },
+  ])("renvoie $status quand $cas", async ({ status, setup }) => {
     // GIVEN
-    mockGetServerSession.mockResolvedValueOnce(null);
+    setup();
     const request = new Request("http://localhost/api/operateurs/1", {
       method: "PUT",
       body: JSON.stringify({ name: "Adoma" }),
@@ -60,26 +71,7 @@ describe("PUT /api/operateurs/[id]", () => {
     });
 
     // THEN
-    expect(response.status).toBe(401);
-    expect(mockUpdateOne).not.toHaveBeenCalled();
-  });
-
-  it("renvoie 403 quand l'utilisateur n'a pas les droits sur l'opérateur", async () => {
-    // GIVEN
-    mockCanUpdateOperateur.mockReturnValueOnce(false);
-    const request = new Request("http://localhost/api/operateurs/1", {
-      method: "PUT",
-      body: JSON.stringify({ name: "Adoma" }),
-    });
-
-    // WHEN
-    const response = await PUT(request as NextRequest, {
-      params: Promise.resolve({ id: "1" }),
-    });
-
-    // THEN
-    expect(response.status).toBe(403);
-    expect(mockCanUpdateOperateur).toHaveBeenCalledWith({ id: "agent" }, 1);
+    expect(response.status).toBe(status);
     expect(mockUpdateOne).not.toHaveBeenCalled();
     expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
   });

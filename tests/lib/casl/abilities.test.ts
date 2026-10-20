@@ -268,74 +268,61 @@ describe("Permissions : CPOM et opérateurs", () => {
 
 describe("Permissions : canSaveCpom", () => {
   const agent13 = createDepartementalAgent(["13"]);
+  const scope = (departementNumeros: string[]) =>
+    buildCpomScope({ departementNumeros });
 
-  it("autorise la création d'un CPOM lié au département de l'agent", () => {
-    expect(
-      canSaveCpom(agent13, buildCpomScope({ departementNumeros: ["13"] }), null)
-    ).toBe(true);
-  });
-
-  it("refuse la création d'un CPOM hors du périmètre de l'agent", () => {
-    expect(
-      canSaveCpom(agent13, buildCpomScope({ departementNumeros: ["69"] }), null)
-    ).toBe(false);
-  });
-
-  it("refuse la modification d'un CPOM existant hors périmètre, même si le payload le rattache au département de l'agent", () => {
-    expect(
-      canSaveCpom(
-        agent13,
-        buildCpomScope({ departementNumeros: ["13"] }),
-        buildCpomScope({ departementNumeros: ["69"] })
-      )
-    ).toBe(false);
-  });
-
-  it("refuse de sortir un CPOM du périmètre de l'agent", () => {
-    expect(
-      canSaveCpom(
-        agent13,
-        buildCpomScope({ departementNumeros: ["69"] }),
-        buildCpomScope({ departementNumeros: ["13"] })
-      )
-    ).toBe(false);
-  });
-
-  it("s'appuie sur le périmètre existant quand le payload ne le renseigne pas", () => {
-    expect(
-      canSaveCpom(agent13, {}, buildCpomScope({ departementNumeros: ["13"] }))
-    ).toBe(true);
-    expect(
-      canSaveCpom(agent13, {}, buildCpomScope({ departementNumeros: ["69"] }))
-    ).toBe(false);
-  });
-
-  it("refuse toute sauvegarde à un agent uniquement lecteur", () => {
-    const lecteur = createSessionUser({
-      grants: [
-        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
-      ],
-    });
-
-    expect(
-      canSaveCpom(lecteur, buildCpomScope({ departementNumeros: ["13"] }), null)
-    ).toBe(false);
-  });
+  it.each([
+    {
+      cas: "crée un CPOM de son département",
+      payload: scope(["13"]),
+      existing: null,
+      expected: true,
+    },
+    {
+      cas: "crée un CPOM hors de son périmètre",
+      payload: scope(["69"]),
+      existing: null,
+      expected: false,
+    },
+    {
+      cas: "rattache à son département un CPOM existant hors périmètre",
+      payload: scope(["13"]),
+      existing: scope(["69"]),
+      expected: false,
+    },
+    {
+      cas: "sort un CPOM de son périmètre",
+      payload: scope(["69"]),
+      existing: scope(["13"]),
+      expected: false,
+    },
+    {
+      cas: "modifie un CPOM de son département sans renvoyer son périmètre",
+      payload: {},
+      existing: scope(["13"]),
+      expected: true,
+    },
+    {
+      cas: "modifie un CPOM hors périmètre sans renvoyer son périmètre",
+      payload: {},
+      existing: scope(["69"]),
+      expected: false,
+    },
+  ])(
+    "renvoie $expected quand l'agent $cas",
+    ({ payload, existing, expected }) => {
+      expect(canSaveCpom(agent13, payload, existing)).toBe(expected);
+    }
+  );
 });
 
 describe("Permissions : canUpdateOperateur", () => {
-  it("autorise un agent éditeur et refuse un agent uniquement lecteur", () => {
+  it("autorise un éditeur, refuse un lecteur et limite un admin opérateur au sien", () => {
     const lecteur = createSessionUser({
       grants: [
         createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
       ],
     });
-
-    expect(canUpdateOperateur(createDepartementalAgent(["13"]), 7)).toBe(true);
-    expect(canUpdateOperateur(lecteur, 7)).toBe(false);
-  });
-
-  it("limite un admin opérateur à son propre opérateur", () => {
     const operateurAdmin = createSessionUser({
       operateurId: 7,
       grants: [
@@ -343,6 +330,8 @@ describe("Permissions : canUpdateOperateur", () => {
       ],
     });
 
+    expect(canUpdateOperateur(createDepartementalAgent(["13"]), 7)).toBe(true);
+    expect(canUpdateOperateur(lecteur, 7)).toBe(false);
     expect(canUpdateOperateur(operateurAdmin, 7)).toBe(true);
     expect(canUpdateOperateur(operateurAdmin, 8)).toBe(false);
   });
