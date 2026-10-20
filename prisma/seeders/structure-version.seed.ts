@@ -24,7 +24,10 @@ import { createFakeContact } from "./contact.seed";
 import { createFakeControle } from "./controle.seed";
 import { createFakeDocumentFinancier } from "./document-financier";
 import { createFakeEvaluation } from "./evaluation.seed";
-import { createFakeFormWithSteps } from "./form.seed";
+import {
+  createFakeActualisationFormWithSteps,
+  createFakeFormWithSteps,
+} from "./form.seed";
 import { createFakeIndicateurFinancier } from "./indicateur-financier";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
@@ -54,6 +57,9 @@ export type SeedStructureParams = {
   formDefs: FormDefLookup;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
+  actualisationFormDefId: number;
+  actualisationStepDefinitions: { id: number; slug: string }[];
+  hasValidatedActualisation: boolean;
   coordinates?: Coordinates;
 };
 
@@ -254,6 +260,21 @@ type StableContacts = ReturnType<typeof createFakeContact>[];
 
 type TypologieSpec = { year: number; placesAutorisees: number };
 
+const buildActualisationFormCreate = (params: {
+  actualisationFormDefId: number;
+  actualisationStepDefinitions: { id: number; slug: string }[];
+  hasValidatedActualisation: boolean;
+}) => {
+  const { formSteps, ...actualisationForm } =
+    createFakeActualisationFormWithSteps(
+      params.actualisationFormDefId,
+      params.actualisationStepDefinitions,
+      { isValidated: params.hasValidatedActualisation }
+    );
+
+  return { ...actualisationForm, formSteps: { create: formSteps } };
+};
+
 const buildTypologieSpecs = (
   timeline: VersionSpec[],
   creationDate: Date,
@@ -364,6 +385,9 @@ const buildStructureRelations = (params: {
   creationDate: Date;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
+  actualisationFormDefId: number;
+  actualisationStepDefinitions: { id: number; slug: string }[];
+  hasValidatedActualisation: boolean;
   typologieSpecs: TypologieSpec[];
 }): StructureRelations => {
   const { formSteps, ...finalisationForm } = createFakeFormWithSteps(
@@ -388,6 +412,10 @@ const buildStructureRelations = (params: {
           status: params.isFinalised,
           formSteps: { create: formSteps },
         },
+        // L'actualisation ne concerne que les structures déjà initialisées.
+        ...(params.isFinalised
+          ? [buildActualisationFormCreate(params)]
+          : []),
       ],
     },
     structureTypologies: {
@@ -578,6 +606,9 @@ export const buildStructureCreate = (
         creationDate: history.creationDate,
         finalisationFormDefId: params.finalisationFormDefId,
         finalisationStepDefinitions: params.finalisationStepDefinitions,
+        actualisationFormDefId: params.actualisationFormDefId,
+        actualisationStepDefinitions: params.actualisationStepDefinitions,
+        hasValidatedActualisation: params.hasValidatedActualisation,
       });
 
   const fermeture = history.versions.find(

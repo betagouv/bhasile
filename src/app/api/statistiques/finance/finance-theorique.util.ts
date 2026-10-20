@@ -1,0 +1,150 @@
+import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
+
+import { pickVersionBefore } from "../../structure-versions/structure-version.util";
+import type {
+  CiblesFinancieresLookup,
+  StatistiqueDbStructure,
+  StatistiqueDbStructureVersionTimeline,
+  StatistiqueDbTarifJournalierCible,
+  StatistiqueDbTauxEncadrementCible,
+  StatistiquesContext,
+} from "../statistiques.db.type";
+import { countDaysBetween, getStructureOpenBounds } from "../statistiques.util";
+
+type StructureJoursPlaces = {
+  jours: number;
+  joursPlaces: number;
+};
+
+type JoursPlacesContext = Pick<
+  StatistiquesContext,
+  "openingDateByStructureId" | "closureDateByStructureId"
+>;
+
+/**
+ * Jours d'ouverture et jours x places d'une structure sur une année, bornés par
+ * ses dates d'ouverture et de fermeture. À partir de `PLACES_VERSIONED_FROM_YEAR`,
+ * les places suivent les versions de la structure (une transformation en cours
+ * d'année découpe l'année) ; avant, le millésime de typologie vaut pour l'année.
+ * L'année en cours est comptée en entier, avec les versions effectives à `now`.
+ */
+export const computeStructureJoursPlaces = (
+  context: JoursPlacesContext,
+  structureId: number,
+  year: number,
+  versions: StatistiqueDbStructureVersionTimeline[],
+  placesTypologie: number | null,
+  now: Date
+): StructureJoursPlaces | null => {
+  const bounds = getStructureOpenBounds(
+    context,
+    structureId,
+    new Date(Date.UTC(year, 0, 1)),
+    new Date(Date.UTC(year + 1, 0, 1))
+  );
+  if (!bounds) {
+    return null;
+  }
+  const start = bounds.start.getTime();
+  const end = bounds.end.getTime();
+
+  if (year < PLACES_VERSIONED_FROM_YEAR) {
+    if (placesTypologie === null) {
+      return null;
+    }
+    const jours = countDaysBetween(bounds.start, bounds.end);
+    return { jours, joursPlaces: jours * placesTypologie };
+  }
+
+  const nowCutoff = startOfNextUtcDay(now).getTime();
+  const effectiveVersions = versions.filter(
+    (version) =>
+      version.effectiveDate === null ||
+      version.effectiveDate.getTime() < nowCutoff
+  );
+  const changeDays = effectiveVersions
+    .flatMap((version) =>
+      version.effectiveDate === null
+        ? []
+        : [startOfUtcDay(version.effectiveDate).getTime()]
+    )
+    .filter((changeDay) => changeDay > start && changeDay < end);
+  const boundaries = [...new Set([start, ...changeDays, end])].sort(
+    (boundaryA, boundaryB) => boundaryA - boundaryB
+  );
+
+  let jours = 0;
+  let joursPlaces = 0;
+  for (let index = 0; index < boundaries.length - 1; index += 1) {
+    const places = pickVersionBefore(
+      effectiveVersions,
+      startOfNextUtcDay(new Date(boundaries[index])).getTime()
+    )?.placesAutorisees;
+    if (places == null) {
+      continue;
+    }
+    const segmentJours = countDaysBetween(
+      new Date(boundaries[index]),
+      new Date(boundaries[index + 1])
+    );
+    jours += segmentJours;
+    joursPlaces += segmentJours * places;
+  }
+
+  return jours > 0 ? { jours, joursPlaces } : null;
+};
+
+type CiblesFinancieresInputs = {
+  tarifsJournaliersCibles: StatistiqueDbTarifJournalierCible[];
+  tauxEncadrementCibles: StatistiqueDbTauxEncadrementCible[];
+  idfDepartementNumeros: Set<string>;
+  cadaFromHudaStructureIds: Set<number>;
+};
+
+const toCibleKey = (
+  structureType: string | null,
+  year: number,
+  isIdf: boolean,
+  isFromHuda = false
+): string => `${structureType}|${year}|${isIdf}|${isFromHuda}`;
+
+/** Cibles par structure : selon son type, l'année, son zonage IDF et, pour le taux, son origine HUDA. */
+export const buildCiblesFinancieresLookup = (
+  inputs: CiblesFinancieresInputs
+): CiblesFinancieresLookup => {
+  const tarifByKey = new Map(
+    inputs.tarifsJournaliersCibles.map((cible) => [
+      toCibleKey(cible.structureType, cible.year, cible.isIdf),
+      cible.tarifCible,
+    ])
+  );
+  const tauxByKey = new Map(
+    inputs.tauxEncadrementCibles.map((cible) => [
+      toCibleKey(
+        cible.structureType,
+        cible.year,
+        cible.isIdf,
+        cible.isFromHuda
+      ),
+      cible.tauxCible,
+    ])
+  );
+  const isIdf = (structure: StatistiqueDbStructure): boolean =>
+    inputs.idfDepartementNumeros.has(structure.departementAdministratif);
+
+  return {
+    getTarifJournalierCible: (structure, year) =>
+      tarifByKey.get(toCibleKey(structure.type, year, isIdf(structure))) ??
+      null,
+    getTauxEncadrementCible: (structure, year) =>
+      tauxByKey.get(
+        toCibleKey(
+          structure.type,
+          year,
+          isIdf(structure),
+          inputs.cadaFromHudaStructureIds.has(structure.id)
+        )
+      ) ?? null,
+  };
+};

@@ -109,6 +109,32 @@ describe("contrôle qualité - agrégats de référence (12 derniers mois)", () 
     expect(result.eig.tauxEig).toBe(0.02);
     expect(result.eig.tauxEigComportementViolent).toBe(0.5);
   });
+  it("compte une structure fermée au prorata de sa durée d'ouverture, avec ses seuls EIG d'avant fermeture", () => {
+    const eig = (id: number, dnaCode: string, date: string) => ({
+      id,
+      dnaCode,
+      type: "autre motif",
+      evenementDate: new Date(date),
+    });
+    const context = {
+      ...buildControleQualiteContext([1, 2], {
+        eigs: [
+          eig(1, "DNA01", "2025-06-10T00:00:00.000Z"),
+          eig(2, "DNA02", "2025-03-10T00:00:00.000Z"),
+          eig(3, "DNA02", "2025-10-10T00:00:00.000Z"),
+        ],
+      }),
+      // Fenêtre du 01/01/2025 au 15/01/2026 : 380 jours, dont 200 d'ouverture pour la structure 2.
+      closureDateByStructureId: new Map<number, Date | null>([
+        [2, new Date("2025-07-19T00:00:00.000Z")],
+      ]),
+    };
+
+    const result = computeControleQualiteStatistiques(context, "moyenne");
+
+    expect(result.eig.nbEig).toBe(2);
+    expect(result.eig.tauxEig).toBe(0.0131);
+  });
 });
 
 describe("contrôle qualité - regroupements mois / trimestre / année", () => {
