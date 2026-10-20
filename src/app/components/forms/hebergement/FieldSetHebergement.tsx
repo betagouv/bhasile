@@ -147,7 +147,7 @@ export const FieldSetHebergement = ({
         <h2 className="text-xl font-bold mb-4 text-title-blue-france max-w-3xl">
           {`Veuillez conserver uniquement les adresses d’hébergement qui composent l’ensemble de la structure une fois ${getTransformationNounAvecArticle(
             formKind
-          )} effective et actualiser le nombre de place attribué à chacune d’entre elles ainsi que leurs particularités.`}
+          )} effective et actualiser le nombre de places attribuées à chacune d’entre elles ainsi que leurs particularités.`}
         </h2>
       )}
       <fieldset className="flex flex-col gap-6">

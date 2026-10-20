@@ -90,8 +90,8 @@ export const AdressImporter = ({ typeBati }: Props): ReactElement => {
             </li>
             <li>
               Dans la colonne “Logement social”, avez-vous bien indiqué “Oui” si
-              le logement est loué à un bailleur social et “Non” le cas échéant
-              ?
+              le logement est loué à un bailleur social et “Non” dans le cas
+              contraire ?
             </li>
             <li>
               Dans la colonne “QPV”, après avoir vérifié si l’adresse en
@@ -104,8 +104,8 @@ export const AdressImporter = ({ typeBati }: Props): ReactElement => {
               >
                 ce lien
               </Link>{" "}
-              avez-vous bien indiqué “Oui” si c’était le cas et “Non” le cas
-              échéant ou si vous n’obtenez pas de réponse ?
+              avez-vous bien indiqué “Oui” si c’était le cas et “Non” dans le
+              cas contraire ou si vous n’obtenez pas de réponse ?
             </li>
           </ul>
         </div>

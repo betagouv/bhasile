@@ -43,12 +43,12 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
         format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
-        label: "EIG “comportement violent“",
+        label: "EIG “comportement violent”",
         key: "nbEigComportementViolent",
         format: (value) => <NumberDisplay value={Number(value)} />,
       },
       {
-        label: "Taux d'EIG “comportement violent“",
+        label: "Taux d'EIG “comportement violent”",
         key: "tauxEigComportementViolent",
         format: (value) => formatPercentage(Number(value)),
       },
