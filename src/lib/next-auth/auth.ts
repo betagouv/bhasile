@@ -7,11 +7,7 @@ import { getServerSession, NextAuthOptions } from "next-auth";
 
 import { createOrUpdateUser } from "@/app/api/users/user.service";
 
-import {
-  getIsUserAuthorized,
-  getPermissionsFromSession,
-  ProConnectUser,
-} from "./auth-util";
+import { getPermissionsFromSession, ProConnectUser } from "./auth-util";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -19,16 +15,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user }) {
-      const email = user?.email;
-      if (!email) {
-        return false;
-      }
-      try {
-        return getIsUserAuthorized(email);
-      } catch (error) {
-        console.error("Erreur de connexion", error);
-        return false;
-      }
+      return !!user?.email;
     },
     async jwt({ token, account, user }) {
       if (account) {
@@ -43,7 +30,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ token, session }) {
-      const permissions = await getPermissionsFromSession(session);
       try {
         await createOrUpdateUser({
           name: session.user?.name as string,
@@ -54,20 +40,20 @@ export const authOptions: NextAuthOptions = {
           "Erreur dans l'ajout ou la mise à jour de l'utilisateur",
           error
         );
-      } finally {
-        return {
-          ...session,
-          user: {
-            ...session.user,
-            ...permissions,
-            prenom: token.prenom,
-          },
-          id_token: token.id_token,
-          provider: token.provider,
-          user_id: token.user_id,
-          name: token.name,
-        };
       }
+      const permissions = await getPermissionsFromSession(session);
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          ...permissions,
+          prenom: token.prenom,
+        },
+        id_token: token.id_token,
+        provider: token.provider,
+        user_id: token.user_id,
+        name: token.name,
+      };
     },
   },
   secret: process.env.AUTH_SECRET,

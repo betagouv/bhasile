@@ -34,13 +34,16 @@ export const defineAbilityFor = (user?: SessionUser) => {
 
 const defineRulesFor = (user?: SessionUser) => {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
-  defineAnonymousRules(builder);
+  if (!user || !canAccessApp(user)) {
+    return builder.rules;
+  }
+  builder.can("read", ["Structure", "Cpom", "Operateur"]);
 
-  if (user?.isSuperAdmin) {
+  if (user.isSuperAdmin) {
     builder.can("manage", "all");
-  } else if (user?.operateurId === null) {
+  } else if (user.operateurId === null) {
     defineAgentRules(builder, user);
-  } else if (typeof user?.operateurId === "number") {
+  } else if (typeof user.operateurId === "number") {
     defineOperateurRules(builder, user, user.operateurId);
   }
 
@@ -76,10 +79,6 @@ const defineOperateurRules = (
   if (user.grants.some((grant) => grant.role === AccessRole.ADMIN)) {
     can("update", "Operateur", { id: operateurId });
   }
-};
-
-const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
-  can("read", ["Structure", "Cpom", "Operateur"]);
 };
 
 const EDITING_ROLES: AccessRole[] = [AccessRole.EDITEUR, AccessRole.ADMIN];
@@ -127,6 +126,9 @@ const getCpomConditions = ({
       : []),
   ];
 };
+
+export const canAccessApp = (user: SessionUser): boolean =>
+  user.isSuperAdmin || (user.grants?.length ?? 0) > 0;
 
 export const canUpdateStructure = (
   user: SessionUser,
