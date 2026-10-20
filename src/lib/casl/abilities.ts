@@ -225,6 +225,38 @@ export const canUpdateDepartement = (
 ) =>
   canAbilityUpdateDepartement(defineAbilityFor(user), departementAdministratif);
 
+export const canSaveCpom = (
+  user: SessionUser,
+  cpom: CpomScope,
+  existingCpom: CpomScope | null
+): boolean => {
+  if (existingCpom && !canUpdateCpom(user, existingCpom)) {
+    return false;
+  }
+  return canUpdateCpom(user, {
+    departements: cpom.departements ?? existingCpom?.departements,
+    structures: cpom.structures ?? existingCpom?.structures,
+  });
+};
+
+const canUpdateCpom = (user: SessionUser, cpom: CpomScope): boolean =>
+  defineAbilityFor(user).can(
+    "update",
+    subject("Cpom", {
+      departements: cpom.departements ?? [],
+      structures: cpom.structures ?? [],
+    } as unknown as Cpom)
+  );
+
+export const canUpdateOperateur = (
+  user: SessionUser,
+  operateurId: number
+): boolean =>
+  defineAbilityFor(user).can(
+    "update",
+    subject("Operateur", { id: operateurId } as Operateur)
+  );
+
 export const canDeleteFile = (
   user: SessionUser,
   file: FileWithParents
@@ -276,4 +308,9 @@ type StructureScope = {
 type CpomScope = {
   departements: { departement?: { numero: string } | null }[];
   structures: { structureId: number }[];
+};
+
+type CpomScope = {
+  departements?: { departement?: { numero: string } | null }[];
+  structures?: { structureId: number }[];
 };

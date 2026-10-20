@@ -14,7 +14,9 @@ import {
   canAbilityReadStructure,
   canAccessApp,
   canDeleteFile,
+  canSaveCpom,
   canUpdateDepartement,
+  canUpdateOperateur,
   canUpdateStructure,
   defineAbilityFor,
   getReadableDepartementNumeros,
@@ -262,6 +264,101 @@ describe("Permissions : CPOM et opérateurs", () => {
 
     expect(ability.can("update", buildOperateur(7))).toBe(false);
   });
+});
+
+describe("Permissions : canSaveCpom", () => {
+  const agent13 = createDepartementalAgent(["13"]);
+
+  it("autorise la création d'un CPOM lié au département de l'agent", () => {
+    expect(
+      canSaveCpom(agent13, buildCpomScope({ departementNumeros: ["13"] }), null)
+    ).toBe(true);
+  });
+
+  it("refuse la création d'un CPOM hors du périmètre de l'agent", () => {
+    expect(
+      canSaveCpom(agent13, buildCpomScope({ departementNumeros: ["69"] }), null)
+    ).toBe(false);
+  });
+
+  it("refuse la modification d'un CPOM existant hors périmètre, même si le payload le rattache au département de l'agent", () => {
+    expect(
+      canSaveCpom(
+        agent13,
+        buildCpomScope({ departementNumeros: ["13"] }),
+        buildCpomScope({ departementNumeros: ["69"] })
+      )
+    ).toBe(false);
+  });
+
+  it("refuse de sortir un CPOM du périmètre de l'agent", () => {
+    expect(
+      canSaveCpom(
+        agent13,
+        buildCpomScope({ departementNumeros: ["69"] }),
+        buildCpomScope({ departementNumeros: ["13"] })
+      )
+    ).toBe(false);
+  });
+
+  it("s'appuie sur le périmètre existant quand le payload ne le renseigne pas", () => {
+    expect(
+      canSaveCpom(agent13, {}, buildCpomScope({ departementNumeros: ["13"] }))
+    ).toBe(true);
+    expect(
+      canSaveCpom(agent13, {}, buildCpomScope({ departementNumeros: ["69"] }))
+    ).toBe(false);
+  });
+
+  it("refuse toute sauvegarde à un agent uniquement lecteur", () => {
+    const lecteur = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(
+      canSaveCpom(lecteur, buildCpomScope({ departementNumeros: ["13"] }), null)
+    ).toBe(false);
+  });
+});
+
+describe("Permissions : canUpdateOperateur", () => {
+  it("autorise un agent éditeur et refuse un agent uniquement lecteur", () => {
+    const lecteur = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(canUpdateOperateur(createDepartementalAgent(["13"]), 7)).toBe(true);
+    expect(canUpdateOperateur(lecteur, 7)).toBe(false);
+  });
+
+  it("limite un admin opérateur à son propre opérateur", () => {
+    const operateurAdmin = createSessionUser({
+      operateurId: 7,
+      grants: [
+        createSessionGrant({ role: AccessRole.ADMIN, isNational: true }),
+      ],
+    });
+
+    expect(canUpdateOperateur(operateurAdmin, 7)).toBe(true);
+    expect(canUpdateOperateur(operateurAdmin, 8)).toBe(false);
+  });
+});
+
+const buildCpomScope = ({
+  departementNumeros = [],
+  structureIds = [],
+}: {
+  departementNumeros?: string[];
+  structureIds?: number[];
+}) => ({
+  departements: departementNumeros.map((numero) => ({
+    departement: { numero },
+  })),
+  structures: structureIds.map((structureId) => ({ structureId })),
 });
 
 const buildCpom = ({

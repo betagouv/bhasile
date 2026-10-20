@@ -13,8 +13,10 @@ import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/docum
 import {
   CpomDbDetails,
   CpomDbList,
+  CpomDbScope,
   cpomDetailsInclude,
   cpomListInclude,
+  cpomScopeSelect,
 } from "./cpom.db.type";
 
 export const findAllCpoms = (
@@ -29,6 +31,12 @@ export const findOne = async (id: number): Promise<CpomDbDetails | null> => {
   });
   return cpom;
 };
+
+export const findCpomScope = (id: number): Promise<CpomDbScope | null> =>
+  prisma.cpom.findUnique({
+    where: { id },
+    select: cpomScopeSelect,
+  });
 
 export const createOrUpdateCpom = async (
   cpom: CpomApiWrite
