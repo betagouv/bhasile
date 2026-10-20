@@ -160,6 +160,15 @@ export const getReadableStructureWhere = (
     : { AND: [where, { operateurId: user.operateurId }] };
 };
 
+export const getReadableDepartementNumeros = (
+  user: SessionUser
+): Set<string> | null => {
+  if (user.isSuperAdmin || user.grants.some((grant) => grant.isNational)) {
+    return null;
+  }
+  return new Set(user.grants.flatMap((grant) => grant.departementNumeros));
+};
+
 export const canAbilityReadStructure = (
   ability: AppAbility,
   structure: StructureScope

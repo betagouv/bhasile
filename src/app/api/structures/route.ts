@@ -52,10 +52,7 @@ export async function GET(request: NextRequest) {
     user: session?.user as SessionUser | undefined,
   };
 
-  const { structures, totalStructures } = await getFullStructures(
-    searchProps,
-    searchProps.user
-  );
+  const { structures, totalStructures } = await getFullStructures(searchProps);
 
   return NextResponse.json({ structures, totalStructures });
 }

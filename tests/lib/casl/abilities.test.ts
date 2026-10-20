@@ -17,6 +17,7 @@ import {
   canUpdateDepartement,
   canUpdateStructure,
   defineAbilityFor,
+  getReadableDepartementNumeros,
   getReadableStructureWhere,
 } from "@/lib/casl/abilities";
 import { SessionUser } from "@/types/global";
@@ -351,6 +352,33 @@ describe("Permissions : lecture", () => {
     expect(
       getReadableStructureWhere(createSessionUser({ isSuperAdmin: true }))
     ).toEqual({});
+  });
+
+  it("refuse la lecture sans utilisateur", () => {
+    const ability = defineAbilityFor(undefined);
+
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 1,
+        departementAdministratif: "83",
+      })
+    ).toBe(false);
+    expect(
+      canAbilityReadCpom(ability, {
+        departements: [{ departement: { numero: "83" } }],
+        structures: [],
+      })
+    ).toBe(false);
+  });
+
+  it("liste les départements lisibles, sans limite pour un binôme national", () => {
+    expect(getReadableDepartementNumeros(lecteurVar)).toEqual(new Set(["83"]));
+    expect(
+      getReadableDepartementNumeros(createDepartementalAgent(["75"]))
+    ).toBeNull();
+    expect(getReadableDepartementNumeros(createSessionUser())).toEqual(
+      new Set()
+    );
   });
 
   it("restreint le filtre d'un utilisateur type opérateur à son opérateur", () => {

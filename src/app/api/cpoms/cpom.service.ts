@@ -58,9 +58,9 @@ export const getCpoms = cache(
   }: CpomsQuery): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
     const allCpoms = await findAllCpoms();
     const ability = defineAbilityFor(user);
-    const readableCpoms = user
-      ? allCpoms.filter((cpom) => canAbilityReadCpom(ability, cpom))
-      : allCpoms;
+    const readableCpoms = allCpoms.filter((cpom) =>
+      canAbilityReadCpom(ability, cpom)
+    );
     const filtered = filterCpomsByDepartement(readableCpoms, departements);
     const sorted = sortRows(
       filtered,
@@ -82,7 +82,7 @@ export const getCpomById = async (
   user: SessionUser | undefined
 ): Promise<CpomApiRead | null> => {
   const cpom = await findOne(id);
-  if (!cpom || (user && !canAbilityReadCpom(defineAbilityFor(user), cpom))) {
+  if (!cpom || !canAbilityReadCpom(defineAbilityFor(user), cpom)) {
     return null;
   }
   const now = getNow();

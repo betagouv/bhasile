@@ -1,5 +1,8 @@
 import { getNow } from "@/app/utils/now.util";
-import { getReadableStructureWhere } from "@/lib/casl/abilities";
+import {
+  getReadableDepartementNumeros,
+  getReadableStructureWhere,
+} from "@/lib/casl/abilities";
 import {
   StatistiqueApiRead,
   StatistiquesFilters,
@@ -128,7 +131,12 @@ export const buildStatistiquesContext = async (
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
     resolvedFilters.operateurIds === null && filters.types === null
-      ? findRmus(resolvedFilters.departements)
+      ? findRmus(
+          getReadableDepartements(
+            resolvedFilters.departements,
+            getReadableDepartementNumeros(user)
+          )
+        )
       : Promise.resolve(null),
   ]);
 
@@ -173,6 +181,20 @@ export const buildStatistiquesContext = async (
       structureVersionTimeline
     ),
   };
+};
+
+const getReadableDepartements = (
+  filteredDepartements: Set<string> | null,
+  readableDepartements: Set<string> | null
+): Set<string> | null => {
+  if (!filteredDepartements || !readableDepartements) {
+    return filteredDepartements ?? readableDepartements;
+  }
+  return new Set(
+    [...filteredDepartements].filter((departement) =>
+      readableDepartements.has(departement)
+    )
+  );
 };
 
 export const getStatistiques = async (

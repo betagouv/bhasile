@@ -74,7 +74,7 @@ export type SearchProps = {
   selection?: boolean;
   isFinalised?: boolean;
   isClosed?: boolean;
-  user?: SessionUser;
+  user: SessionUser | undefined;
 };
 
 export type StructuresQuery = SearchProps & {

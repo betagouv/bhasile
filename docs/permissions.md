@@ -54,7 +54,7 @@ Ce que couvre un binôme :
 - **Opérateurs** : un agent éditeur, quel que soit son niveau, modifie tous les opérateurs ; un user opérateur `ADMIN` modifie le sien. La lecture des opérateurs n'est pas filtrée.
 - **User opérateur** : tout est en plus restreint aux structures et CPOM de son opérateur.
 
-Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
+Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports, RMU compris : ceux des départements couverts), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404, et sans user la lecture est refusée. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
 
 Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `abilities.ts`) sert à la fois aux règles CASL de lecture et d'écriture et au filtre de droits `getReadableStructureWhere` des statistiques.
 

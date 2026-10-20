@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { createNationalAgent } from "tests/test-utils/factories/session-user.factory";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
@@ -712,7 +713,7 @@ describe("structure.repository db integration", () => {
     });
 
     // WHEN: the fiche is read end-to-end (findOne + résolution + merge)
-    const read = await getFullStructure(structure.id);
+    const read = await getFullStructure(structure.id, createNationalAgent());
 
     // THEN: the read model reflects the rolling version, not the frozen shell
     expect(read?.nom).toBe("Nom versionné");
@@ -1150,6 +1151,7 @@ describe("structure.repository db integration", () => {
       direction: null,
       selection: true,
       isFinalised: false,
+      user: createNationalAgent(),
     };
 
     const listStructures = async (overrides: Partial<SearchProps>) => {
@@ -1308,7 +1310,7 @@ describe("structure.repository db integration", () => {
       await updateOne({ id: structure.id, nom });
 
       // WHEN: read through both the fiche and the list
-      const fiche = await getFullStructure(structure.id);
+      const fiche = await getFullStructure(structure.id, createNationalAgent());
       const [listRow] = await listStructures({ search: structure.codeBhasile });
 
       // THEN: both resolve the version identically
@@ -1341,7 +1343,10 @@ describe("structure.repository db integration", () => {
       });
 
       // WHEN: the transfo form is a draft -> it is ignored, the rolling wins
-      const ficheDraft = await getFullStructure(structure.id);
+      const ficheDraft = await getFullStructure(
+        structure.id,
+        createNationalAgent()
+      );
       const [listDraft] = await listStructures({
         search: structure.codeBhasile,
       });
@@ -1353,7 +1358,10 @@ describe("structure.repository db integration", () => {
         where: { id: form.id },
         data: { status: true },
       });
-      const ficheFinal = await getFullStructure(structure.id);
+      const ficheFinal = await getFullStructure(
+        structure.id,
+        createNationalAgent()
+      );
       const [listFinal] = await listStructures({
         search: structure.codeBhasile,
       });
@@ -1379,6 +1387,7 @@ describe("structure.repository db integration", () => {
       direction: null,
       selection: false,
       isFinalised: false,
+      user: createNationalAgent(),
     };
 
     const listBy = async (
@@ -1505,7 +1514,7 @@ describe("structure.repository db integration", () => {
       expect(row?.isFinalised).toBe(true);
 
       // AND: the detail read (TS .some() realization) agrees with the SQL one
-      const fiche = await getFullStructure(structure.id);
+      const fiche = await getFullStructure(structure.id, createNationalAgent());
       expect(fiche?.isFinalised).toBe(true);
     });
 
@@ -1556,7 +1565,7 @@ describe("structure.repository db integration", () => {
       expect(row?.isFinalised).toBe(true);
 
       // AND: the detail .some() realization also scans history, not just the current EXTENSION
-      const fiche = await getFullStructure(structure.id);
+      const fiche = await getFullStructure(structure.id, createNationalAgent());
       expect(fiche?.isFinalised).toBe(true);
     });
 
@@ -1577,7 +1586,7 @@ describe("structure.repository db integration", () => {
 
       // AND: detail agrees — born-from-creation only counts once the CREATION is effective,
       // so isFinalised is false instead of the loose .some() returning true.
-      const fiche = await getFullStructure(structure.id);
+      const fiche = await getFullStructure(structure.id, createNationalAgent());
       expect(fiche?.isFinalised).toBe(false);
     });
 
@@ -1738,7 +1747,10 @@ describe("structure.repository db integration", () => {
       createdCpomIds.push(cpom.id);
 
       // WHEN: the host fiche is read
-      const fiche = await getFullStructure(hostStructure.id);
+      const fiche = await getFullStructure(
+        hostStructure.id,
+        createNationalAgent()
+      );
 
       // THEN: the linked partner reflects its version, not the frozen scalar
       const linkedPartner = fiche?.cpomStructures

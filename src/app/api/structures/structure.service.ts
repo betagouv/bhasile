@@ -186,13 +186,13 @@ const computeAllStructureRows = cache(
 const getSortedStructureRows = cache(
   async (props: SearchProps): Promise<StructureListComputedRow[]> => {
     const rows = await computeAllStructureRows();
-    const readableRows = props.user
-      ? filterReadableRows(rows, props.user)
-      : rows;
-
-    const filtered = filterStructureRows(readableRows, props, {
-      includeNonVisible: Boolean(props.selection),
-    });
+    const filtered = filterStructureRows(
+      filterReadableRows(rows, props.user),
+      props,
+      {
+        includeNonVisible: Boolean(props.selection),
+      }
+    );
 
     return sortStructureRows(
       filtered,
@@ -204,7 +204,7 @@ const getSortedStructureRows = cache(
 
 const filterReadableRows = (
   rows: StructureListComputedRow[],
-  user: SessionUser
+  user: SessionUser | undefined
 ): StructureListComputedRow[] => {
   const ability = defineAbilityFor(user);
   return rows.filter((row) => canAbilityReadStructure(ability, row));
@@ -253,8 +253,7 @@ export const getStructureListItems = async (
 };
 
 export const getFullStructures = async (
-  props: SearchProps,
-  user?: SessionUser
+  props: SearchProps
 ): Promise<{
   structures: StructureApiRead[];
   totalStructures: number;
@@ -289,7 +288,7 @@ export const getFullStructures = async (
         simple: true,
       });
       structure.currentPlaces.placesAutorisees = row.placesAutorisees ?? 0;
-      structure.adresses = getReadableAdresses(structure, user);
+      structure.adresses = getReadableAdresses(structure, props.user);
       structure.notes = null;
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);
@@ -323,15 +322,14 @@ export const getResolvedStructure = async (
 
 export const getFullStructure = async (
   id: number,
-  user?: SessionUser
+  user: SessionUser | undefined
 ): Promise<StructureApiRead | null> => {
   const now = getNow();
   const resolvedDbStructure = await getResolvedStructure(id, now);
 
   if (
     !resolvedDbStructure ||
-    (user &&
-      !canAbilityReadStructure(defineAbilityFor(user), resolvedDbStructure))
+    !canAbilityReadStructure(defineAbilityFor(user), resolvedDbStructure)
   ) {
     return null;
   }
