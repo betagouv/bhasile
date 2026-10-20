@@ -54,14 +54,15 @@ Ce que couvre un binôme :
 - **Opérateurs** : un agent éditeur, quel que soit son niveau, modifie tous les opérateurs ; un user opérateur `ADMIN` modifie le sien. La lecture des opérateurs n'est pas filtrée.
 - **User opérateur** : tout est en plus restreint aux structures et CPOM de son opérateur.
 
-Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports, RMU compris : ceux des départements couverts), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404, et sans user la lecture est refusée. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
+Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports, RMU compris : ceux des départements couverts), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404, et sans user la lecture est refusée. Exception : la sélection de structure du formulaire opérateur (mot de passe, sans session) reste non filtrée, via `getFullStructuresForOperateur`. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
 
 Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `abilities.ts`) sert à la fois aux règles CASL de lecture et d'écriture et au filtre de droits `getReadableStructureWhere` des statistiques.
 
 Limites actuelles :
 
 - **`ADMIN` = `EDITEUR`** tant que la gestion des binômes (PR 2) n'existe pas.
-- **Non filtré en lecture** : la fiche opérateur (et la liste de ses structures), la moyenne départementale d'activité, et les vues `reporting` / Metabase (hors application).
+- **Non filtré en lecture** : la fiche opérateur (et la liste de ses structures), les fichiers (`/api/files`, ouverts à toute session), les pages de transformation, la moyenne départementale d'activité, et les vues `reporting` / Metabase (hors application).
+- **Users opérateurs** : les RMU des statistiques ne sont filtrés que par département, pas par opérateur. À fermer avec les statistiques en PR 3.
 - **Niveau structure** : pas d'accès aux transformations ni aux rappels CPOM du tableau de bord, qui restent contrôlés par département.
 
 Règle à respecter dans `abilities.ts` : le code ne compare jamais les rôles entre eux. Tout droit donné à un rôle doit l'être aussi aux rôles supérieurs, sinon la hiérarchie casse.

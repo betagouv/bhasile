@@ -10,7 +10,7 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Structure } from "@/generated/prisma/client";
+import { Prisma, Structure } from "@/generated/prisma/client";
 import {
   canAbilityReadStructure,
   defineAbilityFor,
@@ -155,51 +155,57 @@ const updateStructureAndRecomputeAnomalies = async (
 
 const getRequestNow = cache((): Date => getNow());
 
-const computeAllStructureRows = cache(
-  async (
-    user: SessionUser | undefined
-  ): Promise<StructureListComputedRow[]> => {
-    const now = getRequestNow();
-    const structures = await findAllStructures(getReadableStructureWhere(user));
-    const currentVersions = structures.map((structure) =>
-      resolveCurrentVersion(structure.structureVersions, now)
-    );
-    const versionsAdresses = await findStructureVersionAdresses(
-      currentVersions.flatMap((version) => (version ? [version.id] : []))
-    );
-    const adressesByVersionId = new Map(
-      versionsAdresses.map((version) => [version.id, version.adresses])
-    );
+const computeAllStructureRows = async (
+  where: Prisma.StructureWhereInput
+): Promise<StructureListComputedRow[]> => {
+  const now = getRequestNow();
+  const structures = await findAllStructures(where);
+  const currentVersions = structures.map((structure) =>
+    resolveCurrentVersion(structure.structureVersions, now)
+  );
+  const versionsAdresses = await findStructureVersionAdresses(
+    currentVersions.flatMap((version) => (version ? [version.id] : []))
+  );
+  const adressesByVersionId = new Map(
+    versionsAdresses.map((version) => [version.id, version.adresses])
+  );
 
-    return structures
-      .map((structure, index) =>
-        computeStructureListRow(
-          structure,
-          currentVersions[index],
-          now,
-          adressesByVersionId.get(currentVersions[index]?.id ?? 0) ?? []
-        )
+  return structures
+    .map((structure, index) =>
+      computeStructureListRow(
+        structure,
+        currentVersions[index],
+        now,
+        adressesByVersionId.get(currentVersions[index]?.id ?? 0) ?? []
       )
-      .filter((row): row is StructureListComputedRow => row !== null);
-  }
-);
+    )
+    .filter((row): row is StructureListComputedRow => row !== null);
+};
 
 // Mémoïsé sur la référence de props : la page construit une seule query et la
 // passe à chaque Suspense, donc compteur, tableau et carte partagent le cache
 const getSortedStructureRows = cache(
-  async (props: SearchProps): Promise<StructureListComputedRow[]> => {
-    const rows = await computeAllStructureRows(props.user);
-    const filtered = filterStructureRows(rows, props, {
-      includeNonVisible: Boolean(props.selection),
-    });
-
-    return sortStructureRows(
-      filtered,
-      props.column ?? "departementAdministratif",
-      props.direction ?? "asc"
-    );
-  }
+  async (props: SearchProps): Promise<StructureListComputedRow[]> =>
+    filterAndSortStructureRows(
+      await computeAllStructureRows(getReadableStructureWhere(props.user)),
+      props
+    )
 );
+
+const filterAndSortStructureRows = (
+  rows: StructureListComputedRow[],
+  props: SearchProps
+): StructureListComputedRow[] => {
+  const filtered = filterStructureRows(rows, props, {
+    includeNonVisible: Boolean(props.selection),
+  });
+
+  return sortStructureRows(
+    filtered,
+    props.column ?? "departementAdministratif",
+    props.direction ?? "asc"
+  );
+};
 
 export const getStructuresTotal = async (props: SearchProps): Promise<number> =>
   (await getSortedStructureRows(props)).length;
@@ -245,12 +251,22 @@ export const getStructureListItems = async (
 
 export const getFullStructures = async (
   props: SearchProps
-): Promise<{
-  structures: StructureApiRead[];
-  totalStructures: number;
-}> => {
+): Promise<FullStructures> =>
+  buildFullStructures(await getSortedStructureRows(props), props);
+
+export const getFullStructuresForOperateur = async (
+  props: SearchProps
+): Promise<FullStructures> =>
+  buildFullStructures(
+    filterAndSortStructureRows(await computeAllStructureRows({}), props),
+    props
+  );
+
+const buildFullStructures = async (
+  sorted: StructureListComputedRow[],
+  props: SearchProps
+): Promise<FullStructures> => {
   const now = getRequestNow();
-  const sorted = await getSortedStructureRows(props);
 
   const { total: totalStructures, rows: pageRows } = props.selection
     ? { total: sorted.length, rows: sorted }
@@ -291,6 +307,11 @@ export const getFullStructures = async (
     );
 
   return { structures, totalStructures };
+};
+
+type FullStructures = {
+  structures: StructureApiRead[];
+  totalStructures: number;
 };
 
 export const getResolvedStructure = async (
@@ -512,7 +533,7 @@ export const getBoundsPlacesAutorisees = async (
   min: number;
   max: number;
 }> => {
-  const rows = await computeAllStructureRows(user);
+  const rows = await computeAllStructureRows(getReadableStructureWhere(user));
   const places = rows
     .map((row) => row.latestNonNullPlacesAutorisees)
     .filter(

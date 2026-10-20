@@ -6,6 +6,7 @@ import {
   parseSortDirection,
   parseStructureColumn,
 } from "@/app/utils/search-params.util";
+import { canAccessApp } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
@@ -13,6 +14,7 @@ import { SessionUser } from "@/types/global";
 import { createStructureEvent } from "../user-actions/user-action.service";
 import {
   getFullStructures,
+  getFullStructuresForOperateur,
   updateStructureOperateur,
 } from "./structure.service";
 
@@ -52,7 +54,10 @@ export async function GET(request: NextRequest) {
     user: session?.user as SessionUser | undefined,
   };
 
-  const { structures, totalStructures } = await getFullStructures(searchProps);
+  const { structures, totalStructures } =
+    searchProps.user && canAccessApp(searchProps.user)
+      ? await getFullStructures(searchProps)
+      : await getFullStructuresForOperateur(searchProps);
 
   return NextResponse.json({ structures, totalStructures });
 }

@@ -189,6 +189,7 @@ export const canAbilityReadStructure = (
     subject("Structure", {
       id: structure.id,
       departementAdministratif: structure.departementAdministratif,
+      operateurId: structure.operateurId,
     } as Structure)
   );
 
@@ -269,6 +270,7 @@ export const canDeleteFile = (
 type StructureScope = {
   id?: number;
   departementAdministratif?: string | null;
+  operateurId?: number | null;
 };
 
 type CpomScope = {

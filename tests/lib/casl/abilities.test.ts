@@ -383,6 +383,32 @@ describe("Permissions : lecture", () => {
     );
   });
 
+  it("donne la lecture de la fiche d'une structure de son opérateur à un utilisateur opérateur", () => {
+    const ability = defineAbilityFor(
+      createSessionUser({
+        operateurId: 7,
+        grants: [
+          createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+        ],
+      })
+    );
+
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 1,
+        departementAdministratif: "83",
+        operateurId: 7,
+      })
+    ).toBe(true);
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 2,
+        departementAdministratif: "83",
+        operateurId: 8,
+      })
+    ).toBe(false);
+  });
+
   it("restreint le filtre d'un utilisateur type opérateur à son opérateur", () => {
     const user = createSessionUser({
       operateurId: 7,
