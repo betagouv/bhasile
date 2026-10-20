@@ -62,6 +62,34 @@ export const DocumentsFinanciersFlexibleSchema =
     }
   );
 
+const checkAutresDocumentsHaveFile = (
+  data: { documentsFinanciers?: z.infer<typeof DocumentFinancierSchema>[] },
+  ctx: z.RefinementCtx
+): void => {
+  data.documentsFinanciers?.forEach((documentFinancier, index) => {
+    const isNamedAutreWithoutFile =
+      documentFinancier.category === "AUTRE_FINANCIER" &&
+      !!documentFinancier.name?.trim() &&
+      !hasDocumentFile(documentFinancier);
+    if (isNamedAutreWithoutFile) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["documentsFinanciers", index, "fileUploads"],
+        message: "Importez le document ou supprimez la ligne",
+      });
+    }
+  });
+};
+
+export const DocumentsFinanciersSubmitSchema =
+  DocumentsFinanciersFlexibleSchema.superRefine(checkAutresDocumentsHaveFile);
+
+export const documentsFinanciersCpomSchema = z
+  .object({
+    documentsFinanciers: z.array(DocumentFinancierSchema).optional(),
+  })
+  .superRefine(checkAutresDocumentsHaveFile);
+
 export const getDocumentsFinanciersStrictSchema = (
   structure: StructureApiRead
 ) => {
@@ -126,7 +154,8 @@ export const getDocumentsFinanciersStrictSchema = (
         }
       });
     })
-  );
+  )
+  .superRefine(checkAutresDocumentsHaveFile);
 };
 
 export type DocumentFinancierFlexibleFormValues = z.infer<

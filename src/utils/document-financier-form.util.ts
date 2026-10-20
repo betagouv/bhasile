@@ -76,8 +76,8 @@ export const updateDocumentFinancierRow = (
       getDocumentFinancierRowKey(documentFinancier) === rowKey
   );
   if (!hasRow) {
-    // Une ligne absente a pu être supprimée pendant un upload : seule la ligne
-    // fantôme, jamais encore écrite, a le droit d'être créée ici.
+    // Une ligne absente a pu être supprimée pendant un upload : seule une
+    // ligne jamais supprimée a le droit d'être créée ici.
     return canCreate
       ? [...documentsFinanciers, { ...row, ...changes }]
       : documentsFinanciers;

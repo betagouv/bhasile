@@ -15,17 +15,26 @@ export const AutreDocumentFinancierRow = ({
   documentFinancier,
   year,
   canRemove,
+  isSubmitted,
   onChange,
   onRemove,
 }: Props): ReactElement => {
   const documentLabelId = useId();
   const { deleteFile } = useFileUpload();
   const [removeErrorMessage, setRemoveErrorMessage] = useState("");
+  const [draftName, setDraftName] = useState(documentFinancier.name ?? "");
 
   const fileUpload = hasDocumentFile(documentFinancier)
     ? documentFinancier.fileUploads?.[0]
     : undefined;
   const name = documentFinancier.name ?? "";
+  const hasMissingFileError = isSubmitted && !!name.trim() && !fileUpload;
+
+  const commitName = () => {
+    if (draftName !== name) {
+      onChange({ name: draftName });
+    }
+  };
 
   const handleRemove = async () => {
     if (fileUpload?.key) {
@@ -50,8 +59,15 @@ export const AutreDocumentFinancierRow = ({
           hintText="32 caractères maximum"
           className="mb-0"
           nativeInputProps={{
-            value: name,
-            onChange: (event) => onChange({ name: event.target.value }),
+            value: draftName,
+            maxLength: 32,
+            onChange: (event) => setDraftName(event.target.value),
+            onBlur: commitName,
+            onKeyDown: (event) => {
+              if (event.key === "Enter") {
+                commitName();
+              }
+            },
           }}
         />
         <div>
@@ -61,11 +77,16 @@ export const AutreDocumentFinancierRow = ({
           <FileUploadBox
             value={fileUpload}
             onUpload={(uploadedFile) =>
-              onChange({ fileUploads: [uploadedFile] })
+              onChange({ name: draftName, fileUploads: [uploadedFile] })
             }
             onDelete={() => onChange({ fileUploads: [] })}
             ariaLabelledBy={documentLabelId}
             accessibleLabel={`Autre document ${year}${name ? ` ${name}` : ""}`}
+            errorMessage={
+              hasMissingFileError
+                ? "Importez le document ou supprimez la ligne"
+                : undefined
+            }
           />
         </div>
         {canRemove && (
@@ -91,6 +112,7 @@ type Props = {
   documentFinancier: DocumentFinancierFlexibleFormValues;
   year: number;
   canRemove: boolean;
+  isSubmitted: boolean;
   onChange: (changes: Partial<DocumentFinancierFlexibleFormValues>) => void;
   onRemove: () => void;
 };

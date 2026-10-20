@@ -235,14 +235,21 @@ describe("DocumentsFinanciersGrid", () => {
     ).toBeInTheDocument();
   });
 
-  it("crée l'autre document à la première frappe sans perdre le focus", async () => {
+  it("n'écrit le nom de l'autre document dans le formulaire qu'à la sortie du champ", async () => {
     const { onSubmit } = renderGrid();
 
     const nameInput = screen.getByLabelText(/Nom du document/);
     await userEvent.type(nameInput, "Annexe");
 
-    expect(screen.getByLabelText(/Nom du document/)).toHaveFocus();
-    expect(screen.getByLabelText(/Nom du document/)).toHaveValue("Annexe");
+    expect(nameInput).toHaveFocus();
+    expect(
+      screen.queryByRole("button", { name: /Supprimer la ligne/ })
+    ).not.toBeInTheDocument();
+
+    await userEvent.tab();
+    expect(
+      screen.getByRole("button", { name: "Supprimer la ligne Annexe" })
+    ).toBeInTheDocument();
     expect(await submitAndGetDocuments(onSubmit)).toEqual([
       expect.objectContaining({
         year: YEAR,
@@ -383,5 +390,70 @@ describe("DocumentsFinanciersGrid", () => {
         "Chargement du fichier…"
       )
     ).toBeInTheDocument();
+  });
+
+  it("permet de supprimer la seule ligne restante et réaffiche une ligne vide", async () => {
+    renderGrid({
+      documentsFinanciers: [
+        { id: 1, year: YEAR, category: "AUTRE_FINANCIER", name: "Unique" },
+      ],
+    });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Supprimer la ligne Unique" })
+    );
+
+    expect(screen.getByLabelText(/Nom du document/)).toHaveValue("");
+    expect(
+      screen.queryByRole("button", { name: /Supprimer la ligne/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it("ne recrée pas la ligne issue de la ligne vide supprimée pendant son upload", async () => {
+    let resolveUpload: (fileUpload: FileUploadResponse) => void = () => {};
+    mockUploadFile.mockImplementation(
+      () =>
+        new Promise<FileUploadResponse>((resolve) => {
+          resolveUpload = resolve;
+        })
+    );
+    const { onSubmit } = renderGrid();
+
+    await userEvent.type(screen.getByLabelText(/Nom du document/), "Annexe");
+    await userEvent.tab();
+    await userEvent.upload(
+      getFileInput(screen.getByRole("group", { name: "Document" })),
+      createPdf("tardif")
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Supprimer la ligne Annexe" })
+    );
+    await act(async () => {
+      resolveUpload(createFileUpload("tardif"));
+    });
+
+    expect(await submitAndGetDocuments(onSubmit)).toEqual([]);
+  });
+
+  it("signale un autre document nommé sans fichier après une tentative de validation", async () => {
+    const { onSubmit } = renderGrid({
+      documentsFinanciers: [
+        {
+          id: 1,
+          year: YEAR,
+          category: "AUTRE_FINANCIER",
+          name: "Sans fichier",
+        },
+      ],
+    });
+
+    expect(
+      screen.queryAllByText("Importez le document ou supprimez la ligne")
+    ).toHaveLength(0);
+    await submitAndGetDocuments(onSubmit);
+
+    expect(
+      screen.getAllByText("Importez le document ou supprimez la ligne")
+    ).not.toHaveLength(0);
   });
 });

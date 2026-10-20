@@ -23,7 +23,7 @@ import {
   budgetSubventionneeOpenSchema,
 } from "../budget.schema";
 import { cpomStructureSchema } from "../cpom.schema";
-import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
+import { DocumentsFinanciersSubmitSchema } from "../documentFinancier.schema";
 import { getIndicateursFinanciersSchema } from "../indicateurFinancier.schema";
 
 export const getFinanceSchema = (
@@ -104,7 +104,7 @@ export const getFinanceSchema = (
       cpomStructures: z.array(cpomStructureSchema),
     })
     .and(indicateursFinanciersSchema)
-    .and(DocumentsFinanciersFlexibleSchema);
+    .and(DocumentsFinanciersSubmitSchema);
 };
 
 type BudgetSchema =

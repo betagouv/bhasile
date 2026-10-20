@@ -2,7 +2,11 @@ import { createFinalisationDocumentsFinanciersValidStructure } from "tests/test-
 import { describe, expect, it } from "vitest";
 
 import { StructureApiRead } from "@/schemas/api/structure.schema";
-import { getDocumentsFinanciersStrictSchema } from "@/schemas/forms/base/documentFinancier.schema";
+import {
+  DocumentsFinanciersFlexibleSchema,
+  DocumentsFinanciersSubmitSchema,
+  getDocumentsFinanciersStrictSchema,
+} from "@/schemas/forms/base/documentFinancier.schema";
 
 const parseDocumentsFinanciers = (
   documentsFinanciers: StructureApiRead["documentsFinanciers"]
@@ -39,5 +43,38 @@ describe("getDocumentsFinanciersStrictSchema", () => {
       "documentsFinanciers",
       firstDocument.year,
     ]);
+  });
+});
+
+describe("DocumentsFinanciersSubmitSchema", () => {
+  const autreDocument = (fileUploads: { key: string }[]) => ({
+    documentsFinanciers: [
+      { year: 2024, category: "AUTRE_FINANCIER", name: "Annexe", fileUploads },
+    ],
+  });
+
+  it("rejette un autre document nommé sans fichier", () => {
+    const result = DocumentsFinanciersSubmitSchema.safeParse(autreDocument([]));
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].path).toEqual([
+      "documentsFinanciers",
+      0,
+      "fileUploads",
+    ]);
+  });
+
+  it("accepte un autre document nommé avec son fichier", () => {
+    expect(
+      DocumentsFinanciersSubmitSchema.safeParse(
+        autreDocument([{ key: "annexe" }])
+      ).success
+    ).toBe(true);
+  });
+
+  it("laisse passer un autre document sans fichier dans le schéma de sauvegarde automatique", () => {
+    expect(
+      DocumentsFinanciersFlexibleSchema.safeParse(autreDocument([])).success
+    ).toBe(true);
   });
 });
