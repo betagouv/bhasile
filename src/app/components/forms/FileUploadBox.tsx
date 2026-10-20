@@ -15,6 +15,7 @@ import Loader from "@/app/components/ui/Loader";
 import { FileUploadResponse, useFileUpload } from "@/app/hooks/useFileUpload";
 import { cn } from "@/app/utils/classname.util";
 import { formatBytes } from "@/app/utils/number.util";
+import { DOCUMENT_MIME_TYPES } from "@/constants";
 import {
   confirmFileDeletion,
   FILE_DELETION_ERROR_MESSAGE,
@@ -27,7 +28,7 @@ export const FileUploadBox = ({
   ariaLabelledBy,
   accessibleLabel,
   errorMessage,
-  accept = DEFAULT_ACCEPT,
+  accept = DOCUMENT_MIME_TYPES.join(","),
   className,
 }: Props): ReactElement => {
   const { uploadFile, deleteFile, getDownloadLink } = useFileUpload();
@@ -224,7 +225,6 @@ const getStatusMessage = (
   return "Pas de fichier";
 };
 
-const DEFAULT_ACCEPT = ".pdf,.xls,.xlsx,.xlsm,.csv,.ods";
 const DEFAULT_UPLOAD_ERROR = "Erreur lors de l'upload du fichier";
 
 type Status = "idle" | "loading" | "deleting";

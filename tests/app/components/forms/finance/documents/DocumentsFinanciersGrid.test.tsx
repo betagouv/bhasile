@@ -357,4 +357,31 @@ describe("DocumentsFinanciersGrid", () => {
       screen.getByRole("button", { name: "Ajouter un autre document" })
     ).toHaveFocus();
   });
+
+  it("garde l'upload en cours de la ligne vide quand une autre boîte change", async () => {
+    const pendingUploads: Array<(fileUpload: FileUploadResponse) => void> = [];
+    mockUploadFile.mockImplementation(
+      () =>
+        new Promise<FileUploadResponse>((resolve) => {
+          pendingUploads.push(resolve);
+        })
+    );
+    renderGrid();
+
+    const ghostRowBox = screen.getByRole("group", { name: "Document" });
+    await userEvent.upload(getFileInput(ghostRowBox), createPdf("autre"));
+    await userEvent.upload(
+      getFileInput(getBox(/^Rapport d'activité$/)),
+      createPdf("rapport")
+    );
+    await act(async () => {
+      pendingUploads[1](createFileUpload("rapport"));
+    });
+
+    expect(
+      within(screen.getByRole("group", { name: "Document" })).getByText(
+        "Chargement du fichier…"
+      )
+    ).toBeInTheDocument();
+  });
 });
