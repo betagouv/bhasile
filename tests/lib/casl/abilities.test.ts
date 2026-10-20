@@ -361,19 +361,8 @@ const buildCpomScope = ({
   structures: structureIds.map((structureId) => ({ structureId })),
 });
 
-const buildCpom = ({
-  departementNumeros = [],
-  structureIds = [],
-}: {
-  departementNumeros?: string[];
-  structureIds?: number[];
-}) =>
-  subject("Cpom", {
-    departements: departementNumeros.map((numero) => ({
-      departement: { numero },
-    })),
-    structures: structureIds.map((structureId) => ({ structureId })),
-  } as never);
+const buildCpom = (scope: Parameters<typeof buildCpomScope>[0]) =>
+  subject("Cpom", buildCpomScope(scope) as never);
 
 const buildOperateur = (id: number) => subject("Operateur", { id } as never);
 

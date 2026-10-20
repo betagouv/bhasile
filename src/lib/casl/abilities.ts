@@ -227,35 +227,29 @@ export const canUpdateDepartement = (
 
 export const canSaveCpom = (
   user: SessionUser,
-  cpom: CpomScope,
+  cpom: Partial<CpomScope>,
   existingCpom: CpomScope | null
 ): boolean => {
-  if (existingCpom && !canUpdateCpom(user, existingCpom)) {
+  const ability = defineAbilityFor(user);
+  if (existingCpom && !canAbilityUpdateCpom(ability, existingCpom)) {
     return false;
   }
-  return canUpdateCpom(user, {
-    departements: cpom.departements ?? existingCpom?.departements,
-    structures: cpom.structures ?? existingCpom?.structures,
+  return canAbilityUpdateCpom(ability, {
+    departements: cpom.departements ?? existingCpom?.departements ?? [],
+    structures: cpom.structures ?? existingCpom?.structures ?? [],
   });
 };
 
-const canUpdateCpom = (user: SessionUser, cpom: CpomScope): boolean =>
-  defineAbilityFor(user).can(
-    "update",
-    subject("Cpom", {
-      departements: cpom.departements ?? [],
-      structures: cpom.structures ?? [],
-    } as unknown as Cpom)
-  );
+const canAbilityUpdateCpom = (ability: AppAbility, cpom: CpomScope) =>
+  ability.can("update", subject("Cpom", { ...cpom } as never));
 
 export const canUpdateOperateur = (
   user: SessionUser,
   operateurId: number
-): boolean =>
-  defineAbilityFor(user).can(
-    "update",
-    subject("Operateur", { id: operateurId } as Operateur)
-  );
+): boolean => canAbilityUpdateOperateur(defineAbilityFor(user), operateurId);
+
+const canAbilityUpdateOperateur = (ability: AppAbility, operateurId: number) =>
+  ability.can("update", subject("Operateur", { id: operateurId } as Operateur));
 
 export const canDeleteFile = (
   user: SessionUser,
@@ -275,10 +269,10 @@ export const canDeleteFile = (
       return canUpdateStructure(user, acte.structure);
     }
     if (acte.cpom) {
-      return ability.can("update", subject("Cpom", acte.cpom));
+      return canAbilityUpdateCpom(ability, acte.cpom);
     }
     if (acte.operateur) {
-      return ability.can("update", subject("Operateur", acte.operateur));
+      return canAbilityUpdateOperateur(ability, acte.operateur.id);
     }
     return false;
   }
@@ -293,7 +287,7 @@ export const canDeleteFile = (
     return canUpdateStructure(user, file.evaluation?.structure);
   }
   if (file.operateur) {
-    return ability.can("update", subject("Operateur", file.operateur));
+    return canAbilityUpdateOperateur(ability, file.operateur.id);
   }
 
   return false;
@@ -308,9 +302,4 @@ type StructureScope = {
 type CpomScope = {
   departements: { departement?: { numero: string } | null }[];
   structures: { structureId: number }[];
-};
-
-type CpomScope = {
-  departements?: { departement?: { numero: string } | null }[];
-  structures?: { structureId: number }[];
 };
