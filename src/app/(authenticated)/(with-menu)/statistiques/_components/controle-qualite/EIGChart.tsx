@@ -91,11 +91,11 @@ export const EIGChart = ({ startYear, endYear }: Props): ReactElement => {
             setTimePeriod={setTimePeriod}
           />
           <ChartLegend
-            label="Nombre d’EIG au motif de “comportement violent“"
+            label="Nombre d’EIG au motif de “comportement violent”"
             color="#4F9D91"
           />
           <ChartLegend
-            label="Nombre d’EIG au motif autre que “comportement violent“"
+            label="Nombre d’EIG au motif autre que “comportement violent”"
             color="var(--green-menthe-850-200)"
           />
         </div>
