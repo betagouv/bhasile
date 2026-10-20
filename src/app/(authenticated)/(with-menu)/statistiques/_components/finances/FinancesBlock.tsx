@@ -2,16 +2,30 @@
 
 import { ReactElement } from "react";
 
+import { getPercentage } from "@/app/utils/common.util";
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
+import { ClosedStructuresDisclaimer } from "../ClosedStructuresDisclaimer";
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { BalanceChart } from "./BalanceChart";
 import { FinanceCards } from "./FinanceCards";
+import { FinanceChartLabel } from "./FinanceChartLabel";
 import { FinancesStatsTable } from "./FinancesStatsTable";
 
 export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const documentsFinanciersOpenYearCompletude = statistiques.places.byYear.find(
+    (yearItem) => yearItem.year === DOCUMENTS_FINANCIERS_OPEN_YEAR
+  )?.completude;
+
+  const nbStructures =
+    documentsFinanciersOpenYearCompletude?.nbRenseignees || 0;
+  const structuresPercentage = getPercentage(
+    documentsFinanciersOpenYearCompletude?.nbRenseignees || 0,
+    documentsFinanciersOpenYearCompletude?.nbAttendues || 1
+  );
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -21,9 +35,16 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
           <h3 className="text-title-blue-france fr-h6 mb-12">Finance</h3>
         </div>
       </div>
-      <h4 className="text-title-blue-france text-lg">
-        Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}
+      <h4 className="text-title-blue-france text-lg print:mb-0">
+        Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}{" "}
+        <IncompleteDataIndicator
+          nbStructures={nbStructures}
+          structuresPercentage={structuresPercentage}
+        />
       </h4>
+      <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
+        {nbStructures} structures actualisées
+      </h5>
       <div className="flex pb-16">
         <FinanceCards />
       </div>
@@ -40,10 +61,26 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
           hideStructureTypeLabels={true}
           startYear={startYear}
           endYear={endYear}
+          showIncompleteYears={true}
+          renderLabel={(label, index, chartData) => (
+            <FinanceChartLabel
+              chartData={chartData}
+              label={label}
+              index={index}
+              nbStructures={nbStructures}
+              structuresPercentage={structuresPercentage}
+            />
+          )}
         />
+        <ClosedStructuresDisclaimer />
       </div>
       <div className="py-12 break-inside-avoid">
-        <BalanceChart startYear={startYear} endYear={endYear} />
+        <BalanceChart
+          startYear={startYear}
+          endYear={endYear}
+          nbStructures={nbStructures}
+          structuresPercentage={structuresPercentage}
+        />
       </div>
       <FinancesStatsTable startYear={startYear} endYear={endYear} />
     </div>

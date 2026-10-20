@@ -25,21 +25,27 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay
-                value={currentYear.autorisees.dotationAccordee}
-                type="currency"
-                compact={true}
-              />
+              <>
+                <span className="text-sm">dont </span>
+                <NumberDisplay
+                  value={currentYear.autorisees.dotationAccordee}
+                  type="currency"
+                  compact={true}
+                />
+              </>
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
             primaryInformation: (
-              <NumberDisplay
-                value={currentYear.subventionnees.dotationAccordee}
-                type="currency"
-                compact={true}
-              />
+              <>
+                <span className="text-sm">dont </span>
+                <NumberDisplay
+                  value={currentYear.subventionnees.dotationAccordee}
+                  type="currency"
+                  compact={true}
+                />
+              </>
             ),
             secondaryInformation: "pour les structures subventionnées",
           },
@@ -52,17 +58,27 @@ export const FinanceCards = (): ReactElement => {
             primaryInformation: (
               <NumberDisplay value={currentYear.total.totalETPPrevisionnel} />
             ),
-            secondaryInformation: "ETP au total",
+            secondaryInformation: "nombre prévisionnel d'ETP au total",
           },
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.autorisees.totalETPPrevisionnel} />
+              <>
+                <span className="text-sm">dont </span>
+                <NumberDisplay
+                  value={currentYear.autorisees.totalETPPrevisionnel}
+                />
+              </>
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.subventionnees.totalETPPrevisionnel} />
+              <>
+                <span className="text-sm">dont </span>
+                <NumberDisplay
+                  value={currentYear.subventionnees.totalETPPrevisionnel}
+                />
+              </>
             ),
             secondaryInformation: "pour les structures subventionnées",
           },
@@ -73,20 +89,29 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.total.tauxEncadrementTheoriquePrevisionnel!} />
+              <NumberDisplay
+                value={currentYear.total.tauxEncadrementTheoriquePrevisionnel!}
+              />
             ),
-            secondaryInformation: "taux d'encadrement moyen",
+            secondaryInformation: "taux d'encadrement prévisionnel moyen",
           },
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.autorisees.tauxEncadrementTheoriquePrevisionnel!} />
+              <NumberDisplay
+                value={
+                  currentYear.autorisees.tauxEncadrementTheoriquePrevisionnel!
+                }
+              />
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
             primaryInformation: (
               <NumberDisplay
-                value={currentYear.subventionnees.tauxEncadrementTheoriquePrevisionnel!}
+                value={
+                  currentYear.subventionnees
+                    .tauxEncadrementTheoriquePrevisionnel!
+                }
               />
             ),
             secondaryInformation: "pour les structures subventionnées",
@@ -103,7 +128,7 @@ export const FinanceCards = (): ReactElement => {
                 type="currency"
               />
             ),
-            secondaryInformation: "coût place journalier moyen",
+            secondaryInformation: "coût place journalier prévisionnel moyen",
           },
           {
             primaryInformation: (

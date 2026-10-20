@@ -4,10 +4,15 @@ import {
   filterDisplayedPeriods,
   filterDisplayedYears,
   getLastDisplayedPeriods,
+  isYearIncomplete,
+  shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import { CompletudeStat } from "@/schemas/api/statistique.schema";
 
-const periodOfYear = (year: number) => ({ date: `${year}-06-15T00:00:00.000Z` });
+const periodOfYear = (year: number) => ({
+  date: `${year}-06-15T00:00:00.000Z`,
+});
 
 describe("statistiques period util", () => {
   describe("filterDisplayedPeriods", () => {
@@ -18,7 +23,9 @@ describe("statistiques period util", () => {
     });
 
     it("exclut les périodes antérieures à START_YEAR", () => {
-      expect(filterDisplayedPeriods([periodOfYear(START_YEAR - 1)])).toEqual([]);
+      expect(filterDisplayedPeriods([periodOfYear(START_YEAR - 1)])).toEqual(
+        []
+      );
     });
 
     it("exclut les périodes postérieures à l'année courante", () => {
@@ -77,6 +84,69 @@ describe("statistiques period util", () => {
       expect(displayedPeriods[0].date).toBe(
         `${CURRENT_YEAR - 1}-05-01T00:00:00.000Z`
       );
+    });
+  });
+
+  describe("isYearIncomplete", () => {
+    it("renvoie false si completude est undefined", () => {
+      expect(isYearIncomplete(undefined)).toBe(false);
+    });
+
+    it("renvoie false si completude est null", () => {
+      expect(isYearIncomplete(null)).toBe(false);
+    });
+
+    it("renvoie false si completude.isComplete est true", () => {
+      const completude: CompletudeStat = {
+        isComplete: true,
+        nbAttendues: 12,
+        nbRenseignees: 12,
+      };
+
+      expect(isYearIncomplete(completude)).toBe(false);
+    });
+
+    it("renvoie true si completude.isComplete est false", () => {
+      const completude: CompletudeStat = {
+        isComplete: false,
+        nbAttendues: 12,
+        nbRenseignees: 8,
+      };
+
+      expect(isYearIncomplete(completude)).toBe(true);
+    });
+
+    it("gère un objet complet avec toutes les propriétés", () => {
+      const completude: CompletudeStat = {
+        isComplete: false,
+        nbAttendues: 24,
+        nbRenseignees: 12,
+      };
+
+      expect(isYearIncomplete(completude)).toBe(true);
+    });
+  });
+
+  describe("shouldShowYearAsterisk", () => {
+    it("renvoie true pour 2024", () => {
+      expect(shouldShowYearAsterisk(2024)).toBe(true);
+    });
+
+    it("renvoie true pour les années avant 2024", () => {
+      expect(shouldShowYearAsterisk(2020)).toBe(true);
+      expect(shouldShowYearAsterisk(2015)).toBe(true);
+    });
+
+    it("renvoie true pour 2024 sous forme de chaîne", () => {
+      expect(shouldShowYearAsterisk("2024")).toBe(true);
+    });
+
+    it("renvoie false pour 2025", () => {
+      expect(shouldShowYearAsterisk(2025)).toBe(false);
+    });
+
+    it("renvoie false pour 2025 sous forme de chaîne", () => {
+      expect(shouldShowYearAsterisk("2025")).toBe(false);
     });
   });
 });

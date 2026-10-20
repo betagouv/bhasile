@@ -2,12 +2,13 @@
 
 import { ReactElement } from "react";
 
-import { InformationCard } from "@/app/components/InformationCard";
-import { formatPerMille } from "@/app/utils/number.util";
+import { getPercentage } from "@/app/utils/common.util";
+import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
 import { AnnualDataNote } from "../AnnualDataNote";
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";
 
 export const TypesPlacesBlock = ({
@@ -15,6 +16,9 @@ export const TypesPlacesBlock = ({
   endYear,
 }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const currentYearCompletude = statistiques.places.byYear.find(
+    (yearItem) => yearItem.year === CURRENT_YEAR
+  )?.completude;
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -26,24 +30,20 @@ export const TypesPlacesBlock = ({
           </h3>
         </div>
       </div>
-      <div className="flex pb-16">
-        <div className="pr-4">
-          <InformationCard
-            primaryInformation={statistiques.places.totalPlaces}
-            secondaryInformation="places autorisées"
-          />
-        </div>
-        <div>
-          <InformationCard
-            primaryInformation={formatPerMille(
-              statistiques.places.tauxEquipement
-            )}
-            secondaryInformation="taux d'équipement"
-            tertiaryInformation="nombre de places divisé par le nombre d'habitants"
-          />
-        </div>
-      </div>
       <div className="pb-16">
+        <h4 className="text-title-blue-france text-lg print:mb-0">
+          En {CURRENT_YEAR}{" "}
+          <IncompleteDataIndicator
+            nbStructures={currentYearCompletude?.nbRenseignees || 0}
+            structuresPercentage={getPercentage(
+              currentYearCompletude?.nbRenseignees || 0,
+              currentYearCompletude?.nbAttendues || 1
+            )}
+          />
+        </h4>
+        <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
+          {currentYearCompletude?.nbRenseignees} structures actualisées
+        </h5>
         <TypePlaceCharts
           placesAutorisees={statistiques.places.totalPlaces}
           placesPmr={statistiques.places.pmr}
