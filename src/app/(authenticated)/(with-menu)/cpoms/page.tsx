@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
@@ -10,7 +11,9 @@ import {
   parseSortDirection,
   SearchParams,
 } from "@/app/utils/search-params.util";
+import { authOptions } from "@/lib/next-auth/auth";
 import { CpomsQuery } from "@/types/cpom.type";
+import { SessionUser } from "@/types/global";
 
 import { CpomsContent } from "./CpomsContent";
 import { CpomsCount } from "./CpomsCount";
@@ -22,11 +25,13 @@ export default async function Cpoms({
   searchParams: Promise<SearchParams>;
 }): Promise<ReactElement> {
   const params = await searchParams;
+  const session = await getServerSession(authOptions);
   const query: CpomsQuery = {
     page: getPageParam(params, "page"),
     departements: getFirstParam(params.departements),
     column: parseCpomColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
+    user: session?.user as SessionUser | undefined,
   };
 
   return (

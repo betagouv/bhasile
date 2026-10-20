@@ -44,7 +44,7 @@ export const getOperateurs = cache(
   }> => {
     const now = getNow();
     const [structures, operateurs] = await Promise.all([
-      findAllStructures(),
+      findAllStructures({}),
       findAllOperateurs(),
     ]);
 

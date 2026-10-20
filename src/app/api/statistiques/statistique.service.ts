@@ -1,8 +1,13 @@
 import { getNow } from "@/app/utils/now.util";
 import {
+  getReadableDepartementNumeros,
+  getReadableStructureWhere,
+} from "@/lib/casl/abilities";
+import {
   StatistiqueApiRead,
   StatistiquesFilters,
 } from "@/schemas/api/statistique.schema";
+import { SessionUser } from "@/types/global";
 
 import { computeActiviteStatistiques } from "./activite/activite.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
@@ -61,13 +66,18 @@ const resolveStatistiquesPerimeterFilters = async (
 };
 
 export const buildStatistiquesContext = async (
-  filters: StatistiquesFilters
+  filters: StatistiquesFilters,
+  user: SessionUser
 ): Promise<StatistiquesContext | null> => {
   const now = getNow();
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
-  const allStructures = await findPerimeterStructures(resolvedFilters, now);
+  const allStructures = await findPerimeterStructures(
+    resolvedFilters,
+    getReadableStructureWhere(user),
+    now
+  );
   const allStructureIds = allStructures.map((structure) => structure.id);
   if (allStructureIds.length === 0) {
     return null;
@@ -121,7 +131,12 @@ export const buildStatistiquesContext = async (
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
     resolvedFilters.operateurIds === null && filters.types === null
-      ? findRmus(resolvedFilters.departements)
+      ? findRmus(
+          getReadableDepartements(
+            resolvedFilters.departements,
+            getReadableDepartementNumeros(user)
+          )
+        )
       : Promise.resolve(null),
   ]);
 
@@ -168,10 +183,25 @@ export const buildStatistiquesContext = async (
   };
 };
 
+const getReadableDepartements = (
+  filteredDepartements: Set<string> | null,
+  readableDepartements: Set<string> | null
+): Set<string> | null => {
+  if (!filteredDepartements || !readableDepartements) {
+    return filteredDepartements ?? readableDepartements;
+  }
+  return new Set(
+    [...filteredDepartements].filter((departement) =>
+      readableDepartements.has(departement)
+    )
+  );
+};
+
 export const getStatistiques = async (
-  filters: StatistiquesFilters
+  filters: StatistiquesFilters,
+  user: SessionUser
 ): Promise<StatistiqueApiRead | null> => {
-  const context = await buildStatistiquesContext(filters);
+  const context = await buildStatistiquesContext(filters, user);
   if (!context) {
     return null;
   }
