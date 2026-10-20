@@ -1,24 +1,22 @@
-"use server";
-
 import { NextResponse } from "next/server";
 
 import { createUploadedFile, uploadFile, validateUpload } from "./file.service";
 
 export async function POST(req: Request) {
   const formData = await req.formData();
-  const file = formData.get("file") as File;
+  const file = formData.get("file");
+
+  if (!(file instanceof File)) {
+    return NextResponse.json(
+      { error: "Aucun fichier fourni" },
+      { status: 400 }
+    );
+  }
 
   const validationResult = validateUpload(file.type, file.size);
 
   if (validationResult) {
     return NextResponse.json({ error: validationResult }, { status: 400 });
-  }
-
-  if (!file) {
-    return NextResponse.json(
-      { error: "Aucun fichier fourni" },
-      { status: 400 }
-    );
   }
 
   const arrayBuffer = await file.arrayBuffer();
