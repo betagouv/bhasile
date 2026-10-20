@@ -1,5 +1,10 @@
 import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
-import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
+import {
+  accessibleBy,
+  createPrismaAbility,
+  PrismaQuery,
+  Subjects,
+} from "@casl/prisma";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
 import type {
@@ -146,18 +151,24 @@ const getCpomConditions = ({
 export const canAccessApp = (user: SessionUser): boolean =>
   user.isSuperAdmin || (user.grants?.length ?? 0) > 0;
 
+const NO_RECORD_WHERE = { id: { in: [] } };
+
 export const getReadableStructureWhere = (
-  user: SessionUser
+  user: SessionUser | undefined
 ): Prisma.StructureWhereInput => {
-  if (user.isSuperAdmin) {
-    return {};
-  }
-  const where: Prisma.StructureWhereInput = {
-    OR: user.grants.flatMap(getStructureConditions),
-  };
-  return user.operateurId === null
-    ? where
-    : { AND: [where, { operateurId: user.operateurId }] };
+  const ability = defineAbilityFor(user);
+  return ability.can("read", "Structure")
+    ? accessibleBy(ability).Structure
+    : NO_RECORD_WHERE;
+};
+
+export const getReadableCpomWhere = (
+  user: SessionUser | undefined
+): Prisma.CpomWhereInput => {
+  const ability = defineAbilityFor(user);
+  return ability.can("read", "Cpom")
+    ? accessibleBy(ability).Cpom
+    : NO_RECORD_WHERE;
 };
 
 export const getReadableDepartementNumeros = (

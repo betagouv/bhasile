@@ -3,7 +3,11 @@ import { cache } from "react";
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { canAbilityReadCpom, defineAbilityFor } from "@/lib/casl/abilities";
+import {
+  canAbilityReadCpom,
+  defineAbilityFor,
+  getReadableCpomWhere,
+} from "@/lib/casl/abilities";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
@@ -56,11 +60,7 @@ export const getCpoms = cache(
     direction,
     user,
   }: CpomsQuery): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
-    const allCpoms = await findAllCpoms();
-    const ability = defineAbilityFor(user);
-    const readableCpoms = allCpoms.filter((cpom) =>
-      canAbilityReadCpom(ability, cpom)
-    );
+    const readableCpoms = await findAllCpoms(getReadableCpomWhere(user));
     const filtered = filterCpomsByDepartement(readableCpoms, departements);
     const sorted = sortRows(
       filtered,

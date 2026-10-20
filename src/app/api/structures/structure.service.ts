@@ -14,6 +14,7 @@ import { Structure } from "@/generated/prisma/client";
 import {
   canAbilityReadStructure,
   defineAbilityFor,
+  getReadableStructureWhere,
 } from "@/lib/casl/abilities";
 import {
   StructureAgentUpdateApiType,
@@ -155,9 +156,11 @@ const updateStructureAndRecomputeAnomalies = async (
 const getRequestNow = cache((): Date => getNow());
 
 const computeAllStructureRows = cache(
-  async (): Promise<StructureListComputedRow[]> => {
+  async (
+    user: SessionUser | undefined
+  ): Promise<StructureListComputedRow[]> => {
     const now = getRequestNow();
-    const structures = await findAllStructures();
+    const structures = await findAllStructures(getReadableStructureWhere(user));
     const currentVersions = structures.map((structure) =>
       resolveCurrentVersion(structure.structureVersions, now)
     );
@@ -185,14 +188,10 @@ const computeAllStructureRows = cache(
 // passe à chaque Suspense, donc compteur, tableau et carte partagent le cache
 const getSortedStructureRows = cache(
   async (props: SearchProps): Promise<StructureListComputedRow[]> => {
-    const rows = await computeAllStructureRows();
-    const filtered = filterStructureRows(
-      filterReadableRows(rows, props.user),
-      props,
-      {
-        includeNonVisible: Boolean(props.selection),
-      }
-    );
+    const rows = await computeAllStructureRows(props.user);
+    const filtered = filterStructureRows(rows, props, {
+      includeNonVisible: Boolean(props.selection),
+    });
 
     return sortStructureRows(
       filtered,
@@ -201,14 +200,6 @@ const getSortedStructureRows = cache(
     );
   }
 );
-
-const filterReadableRows = (
-  rows: StructureListComputedRow[],
-  user: SessionUser | undefined
-): StructureListComputedRow[] => {
-  const ability = defineAbilityFor(user);
-  return rows.filter((row) => canAbilityReadStructure(ability, row));
-};
 
 export const getStructuresTotal = async (props: SearchProps): Promise<number> =>
   (await getSortedStructureRows(props)).length;
@@ -515,11 +506,13 @@ const dbStructureToApiRead = (
   }) as StructureApiRead;
 };
 
-export const getBoundsPlacesAutorisees = async (): Promise<{
+export const getBoundsPlacesAutorisees = async (
+  user: SessionUser | undefined
+): Promise<{
   min: number;
   max: number;
 }> => {
-  const rows = await computeAllStructureRows();
+  const rows = await computeAllStructureRows(user);
   const places = rows
     .map((row) => row.latestNonNullPlacesAutorisees)
     .filter(

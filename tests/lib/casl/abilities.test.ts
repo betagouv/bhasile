@@ -345,7 +345,9 @@ describe("Permissions : lecture", () => {
   });
 
   it("construit un filtre qui ne renvoie rien sans binôme de droits", () => {
-    expect(getReadableStructureWhere(createSessionUser())).toEqual({ OR: [] });
+    expect(getReadableStructureWhere(createSessionUser())).toEqual({
+      id: { in: [] },
+    });
   });
 
   it("ne filtre rien pour un superadmin", () => {
@@ -390,7 +392,7 @@ describe("Permissions : lecture", () => {
     });
 
     expect(getReadableStructureWhere(user)).toEqual({
-      AND: [{ OR: [{}] }, { operateurId: 7 }],
+      OR: [{ operateurId: 7 }],
     });
   });
 });
