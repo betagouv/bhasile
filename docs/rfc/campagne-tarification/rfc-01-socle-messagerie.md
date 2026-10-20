@@ -1,44 +1,52 @@
 # Socle messagerie de la campagne de tarification
 
-Le chantier fait passer dans Bhasile toute la campagne annuelle de tarification des CADA/CPH, du dépôt du CA et du BP par l'opérateur jusqu'aux pièces de paiement. Il repose sur **deux socles**, développés en parallèle et tous deux nécessaires aux briques suivantes :
+Le chantier fait passer dans Bhasile toute la campagne annuelle de tarification des CADA/CPH, du dépôt du CA et du BP par l'opérateur jusqu'aux documents de paiement (DAI, DAM, échéancier). Il repose sur **deux socles**, développés en parallèle et tous deux nécessaires aux briques suivantes :
 
-- le socle **messagerie** (cette RFC) : où et comment opérateurs, DDETS, DREETS et national échangent messages et documents, étape par étape ;
+- le socle **messagerie** (cette RFC) : où et comment opérateurs, DDETS et DREETS échangent messages et documents tout au long d'une campagne, et en gardent l'historique (archivage) ;
 - le socle **donnée** (RFC séparée) : où vivent les montants, compte par compte, pour que les documents soient générés au lieu d'être recopiés.
 
 Cette RFC propose :
 
-- **des threads**, un par **document réglementaire**, par structure et par année de campagne. Il y a **8 types nationaux**, identiques partout : `CA`, `RCA`, `BP`, `L48`, `CONTRADICTOIRE`, `DAB`, `ARRETE`, `PAIEMENT` ;
-- **un journal d'événements en ajout seul** : messages, dépôts, issues, réouvertures et notifications sont tous des événements horodatés, jamais modifiés ni supprimés, qui forment la preuve ;
+- **un thread par structure et par campagne**, avec deux canaux : un canal **partagé** avec l'opérateur et un canal **agents** (DDETS et DREETS) ;
+- **des documents typés** : chaque fichier envoyé dit ce qu'il est (CA, BP, RCA, L48, pièce justificative…) et dans quel état il est (brouillon, version finale, partagé). Les **étapes** de la campagne se calculent à partir de ces documents ;
+- **un journal d'événements en ajout seul** : messages, documents, lectures et notifications sont des événements horodatés, jamais modifiés ni supprimés, qui forment la preuve ;
 - **un outil descriptif, jamais prescriptif** : les échéances sont affichées et les retards signalés, mais rien n'est jamais bloqué ;
-- **des plugins** : des modules de code qui se branchent sur les événements d'un thread. C'est par là qu'arriveront l'extraction des chiffres, l'analyse IA et la génération des documents.
+- **des plugins** : des modules de code qui se branchent sur les événements et les types de documents. C'est par là qu'arriveront l'extraction des chiffres, l'analyse IA et la génération des documents.
 
 ## 1. Contexte
 
-Douze documents par structure et par an. L'opérateur en produit trois (CA, BP, réponse au contradictoire) ; tous les autres reprennent ses chiffres. Une campagne N couvre **tout le cycle de tarification de l'exercice N**, soit environ 15 mois :
+Douze documents par structure et par an. L'opérateur en produit trois (CA, BP, réponse au contradictoire) ; tous les autres reprennent ses chiffres. Une campagne N couvre **l'analyse du CA N-2 et la tarification du BP N**, soit environ 15 mois :
 
-| Quand             | Quoi                                         |
-| ----------------- | -------------------------------------------- |
-| 30 avril N-1      | Dépôt du CA N-2 par l'opérateur              |
-| 31 octobre N-1    | Dépôt du BP N par l'opérateur                |
-| déc. N-1 → mars N | Rapport sur le CA (RCA), selon le territoire |
-| début N           | DAI (douzièmes provisoires)                  |
-| ~mai N            | Publication de la DRL au JO : J0             |
-| J0 → J48          | Questions-réponses, dialogue de gestion, L48 |
-| J48 → J+8         | Contradictoire (le silence vaut accord)      |
-| ≤ J60             | DAB                                          |
-| sept.-oct. N      | Arrêté de tarification, DAM / échéancier     |
+| Quand              | Quoi                                                     |
+| ------------------ | -------------------------------------------------------- |
+| 30 avril N-1       | Dépôt du CA N-2 par l'opérateur                          |
+| 31 octobre N-1     | Dépôt du BP N par l'opérateur                            |
+| après chaque dépôt | Questions-réponses et pièces justificatives              |
+| déc. N-1 → mars N  | Rapport sur le CA (RCA), selon le territoire             |
+| fin N-1 / début N  | DAI (douzièmes provisoires de N)                         |
+| ~mai N             | Publication de la DRL au JO : J0                         |
+| J0 → J48           | Questions-réponses, dialogue de gestion, envoi de la L48 |
+| L48 → +8 jours     | Contradictoire (le silence vaut accord)                  |
+| ≤ J60              | DAB                                                      |
+| sept.-déc. N       | Arrêté de tarification, DAM / échéancier                 |
 
-À un instant donné, une structure a donc deux campagnes en cours. En mai 2027, par exemple, la campagne 2027 est en pleine L48 et la campagne 2028 reçoit déjà le CA 2026.
+La campagne suit **deux parcours parallèles**, qui se rejoignent à la L48 :
+
+- **parcours CA** : dépôt du CA → questions-réponses → RCA ;
+- **parcours BP** : dépôt du BP → questions-réponses → L48 → contradictoire → DAB → arrêté (avec DAI, DAM, échéancier).
+
+La L48 affecte le résultat du CA N-2 et tarife le BP N ; certaines DDETS y joignent le RCA. À un instant donné, une structure a donc **deux campagnes en cours** : en mai 2027, la campagne 2027 est en pleine L48 et la campagne 2028 reçoit déjà le CA 2026.
 
 ## 2. Objectifs, non-objectifs et hypothèses
 
 **Objectifs**
 
-1. Chaque document réglementaire de la campagne a un lieu unique où il est déposé, discuté, relu et notifié.
-2. Les échanges et les dépôts font preuve : horodatés, en ajout seul, avec empreinte.
-3. DREETS et national voient l'avancement et les échanges de leur périmètre.
+1. Chaque campagne d'une structure a un lieu unique où ses documents sont déposés, discutés, relus et partagés.
+2. Les échanges et les documents font preuve : horodatés, en ajout seul, avec empreinte, avec la trace de qui les a lus ou ouverts.
+3. La DREETS voit l'avancement et les échanges de son périmètre.
 4. Les briques futures (extraction, IA, génération de documents, tableaux de bord) se branchent sans réécrire le socle.
-5. Fonctionner sans dev après le chantier : seules des valeurs annuelles (DRL, dates) sont à saisir.
+5. Fonctionner sans dev après le chantier : seules des valeurs annuelles (date de la DRL) sont à saisir.
+6. L'historique des échanges et des documents reste consultable des années après (archives publiques, § 4.6).
 
 **Non-objectifs**
 
@@ -47,45 +55,39 @@ Douze documents par structure et par an. L'opérateur en produit trois (CA, BP, 
 - La signature électronique, l'envoi en recommandé (papier ou électronique, par ex. via Maileva comme en CVL), la saisie Chorus.
 - Les circuits de validation internes (règles d'organisation propres à chaque service).
 - Le ROB et la DRL en tant que documents (régionaux ou nationaux, pas par structure).
-- Les threads multi-structures et les threads libres.
+- Les threads multi-structures.
+- L'accès des agents nationaux aux threads de tarification.
 
 **Hypothèses**
 
-Chacune est à confirmer par les retours sur cette RFC, **avant tout développement**.
-
-| #    | Hypothèse                                                                                                                                                                                                                        | Ce que ça implique                                                                                                | Si c'est faux                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| H1   | **La réception d'un document par l'opérateur = sa mise à disposition dans Bhasile** (`OUTCOME` + mail), pas sa première consultation.                                                                                            | Les délais opérateur partent de l'`OUTCOME`, et de la dernière en cas de courriers successifs.                    | Si le régime de notification électronique du CRPA s'applique (L112-15, R112-17 à R112-20 ; l'article L100-3 pourrait en exclure les associations gestionnaires) : la réception est la première consultation, ou la mise à disposition + 15 jours, et l'accord exprès préalable de l'opérateur est requis. Il faut alors tracer la première consultation et recalculer les échéances. Le CASF (R314-24 II) fait courir les 8 jours « après réception de chaque courrier ». |
-| H2   | **Aucun accusé de lecture n'est nécessaire**, ni comme preuve ni pour l'usage.                                                                                                                                                   | La preuve repose sur l'`OUTCOME` et le mail (§ 4.5).                                                              | Ajouter un événement de première consultation (lié à H1).                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| H3   | **La mise à disposition + le mail valent notification**, sans recommandé. L'IdF le pense ; la CVL en doute et garde Maileva.                                                                                                     | Pas d'intégration Maileva / LRE.                                                                                  | Brancher un envoi recommandé comme plugin sur `OUTCOME`.                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| H4   | **Les échéances sont en jours calendaires, sans report** (week-end, jour férié). Exemple : le 31/10/2027 est un dimanche.                                                                                                        | Pas de calendrier des jours fériés.                                                                               | Ajouter un calendrier des jours fériés, à maintenir chaque année.                                                                                                                                                                                                                                                                                                                                                                                                         |
-| H5   | **Une structure ne change jamais d'opérateur.**                                                                                                                                                                                  | Pas d'`operateurId` sur `Thread`.                                                                                 | Le code le permet aujourd'hui (le PUT agent peut changer l'opérateur) : figer `operateurId` sur `Thread`, décider ce que voit le repreneur.                                                                                                                                                                                                                                                                                                                               |
-| H6   | **Les documents financiers restent modifiables** via les formulaires existants, même quand un thread existe.                                                                                                                     | Deux points d'entrée, reliés par le miroir (§ 4.6).                                                               | Le miroir se simplifie.                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| H7   | **Le déroulé de la campagne est national** (CASF) ; seule la forme des documents varie selon le territoire.                                                                                                                      | Pas d'activation des types par territoire.                                                                        | Ajouter une activation par type × territoire.                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| H8   | **Un document réglementaire = un thread**, avec les précisions H8.1 à H8.6.                                                                                                                                                      | 8 types (§ 4.2).                                                                                                  | Redéfinir les types : sans reprise de données jusqu'à la mise en service, puisqu'aucun thread n'existe avant.                                                                                                                                                                                                                                                                                                                                                             |
-| H8.1 | **Le CA et le BP se déposent dans un thread dédié** (`CA`, `BP`).                                                                                                                                                                | Dépôt et vérification dans le thread du document.                                                                 | Les déposer directement dans le thread d'analyse (`RCA`, `L48` : 6 types au lieu de 8), ou via l'onglet Finances existant, observé par le thread (le verdict de vérification arrive alors ailleurs que le dépôt).                                                                                                                                                                                                                                                         |
-| H8.2 | **Les questions-réponses et le dialogue de gestion se tiennent dans `BP`.**                                                                                                                                                      | `BP` reste ouvert pendant la campagne.                                                                            | Les tenir dans `L48`.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| H8.3 | **L'onglet Finances reste réservé aux agents** ; les opérateurs déposent dans les threads.                                                                                                                                       | Aucun droit nouveau sur les formulaires existants.                                                                | Ouvrir l'onglet Finances aux opérateurs, avec des droits par catégorie de document financier.                                                                                                                                                                                                                                                                                                                                                                             |
-| H8.4 | **`PAIEMENT` est un seul thread**, qui regroupe les documents de paiement de chaque territoire.                                                                                                                                  | Pas d'activation par territoire.                                                                                  | Un thread par pièce (DAI, DAM, échéancier), donc une activation par territoire.                                                                                                                                                                                                                                                                                                                                                                                           |
-| H8.5 | **`RCA` est un thread séparé partout**, passé en `NOT_APPLICABLE` là où le RCA est intégré à la L48. Son statut juridique (décision administrative avec délai de recours propre, ou document informatif) ne change pas ce choix. | Un thread `RCA` par structure et par campagne.                                                                    | Intégrer le RCA au thread `L48`.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| H8.6 | **`CONTRADICTOIRE` est un thread à part.**                                                                                                                                                                                       | Son échéance et son accord tacite lui sont propres.                                                               | En faire une partie de `L48`.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| H9   | **La visibilité de la DREETS et du national sur tous les échanges est acceptée** par les DDETS (réticence exprimée par une DDETS).                                                                                               | Visibilité à 2 valeurs.                                                                                           | Ajouter une règle de lecture par territoire, sans migration.                                                                                                                                                                                                                                                                                                                                                                                                              |
-| H10  | **Le volume reste faible** (quelques milliers d'événements par jour au pic).                                                                                                                                                     | Pas de file de tâches en V1.                                                                                      | Passer à pg-boss plus tôt.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| H11  | **Les dépendances externes** (cadre normalisé, atelier gabarits de novembre) **ne concernent que les plugins.**                                                                                                                  | Le socle se livre indépendamment.                                                                                 | Seuls les plugins concernés sont retardés.                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| H12  | **Les fichiers ne sont pas confidentiels, seuls les messages le sont.** Les documents finaux sont de toute façon copiés dans les documents financiers, lisibles par tous les agents.                                             | Les fichiers suivent la règle d'accès existante ; leur confidentialité repose sur des clés impossibles à deviner. | Ajouter une règle d'accès par visibilité pour les fichiers (brouillons du fil agents, justificatifs nominatifs).                                                                                                                                                                                                                                                                                                                                                          |
+| #   | Hypothèse                                                                                                                                                                                                    | Si c'est faux                                                                                               | Statut       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | ------------ |
+| H1  | **La réception de la L48 = sa première ouverture par un utilisateur de l'opérateur.** C'est la seule réception qui fait courir un délai : les dépôts du CA et du BP ont des dates fixes.                     | —                                                                                                           | ✅ Validée   |
+| H2  | **Si la L48 n'est jamais ouverte, elle est réputée reçue 15 jours après son partage** (règle du CRPA, R112-20).                                                                                              | Définir une autre règle ; sans règle, un opérateur qui n'ouvre jamais la L48 bloque le contradictoire.      | ⏳ À valider |
+| H3  | **Aucun accord exprès préalable de l'opérateur n'est requis** pour lui notifier les documents par Bhasile (le CRPA, L112-15, l'exige ; l'article L100-3 pourrait en exclure les associations gestionnaires). | Recueillir et tracer cet accord avant le premier partage.                                                   | ⏳ À valider |
+| H4  | **Le partage dans Bhasile + le mail valent notification**, sans recommandé.                                                                                                                                  | Brancher un envoi recommandé comme plugin.                                                                  | ✅ Validée   |
+| H5  | **Les échéances sont en jours calendaires, sans report** (week-end, jour férié).                                                                                                                             | Ajouter un calendrier des jours fériés.                                                                     | ✅ Validée   |
+| H6  | **Une structure ne change jamais d'opérateur.**                                                                                                                                                              | Le code le permet aujourd'hui : figer `operateurId` sur `Thread`, décider ce que voit le repreneur.         | ✅ Validée   |
+| H7  | **Les documents financiers restent modifiables** via les formulaires existants.                                                                                                                              | Le miroir (§ 4.7) se simplifie.                                                                             | ✅ Validée   |
+| H8  | **Le déroulé de la campagne est national** ; chaque DREETS peut seulement préciser un calendrier indicatif (§ 5).                                                                                            | Ajouter des règles par territoire.                                                                          | ✅ Validée   |
+| H9  | **Un document peut porter plusieurs types** (par ex. une L48 qui contient le RCA).                                                                                                                           | Un document = un type ; le RCA intégré à la L48 se déclare par un événement « sans objet » sur l'étape RCA. | ⏳ À valider |
+| H10 | **Le volume reste faible** (quelques milliers d'événements par jour au pic).                                                                                                                                 | Passer à pg-boss plus tôt.                                                                                  | ✅ Validée   |
+| H11 | **Les dépendances externes** (cadre normalisé, atelier gabarits de novembre) **ne concernent que les plugins.**                                                                                              | Seuls les plugins concernés sont retardés.                                                                  | ✅ Validée   |
+| H12 | **Les fichiers ne sont pas confidentiels, seuls les messages le sont** : côté agents, même règle d'accès que la fiche structure ; côté opérateur, ses structures seulement.                                  | Ajouter une règle d'accès par visibilité pour les fichiers.                                                 | ✅ Validée   |
 
 ## 3. Vocabulaire
 
-| Terme                 | Définition                                                                                                                                               |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Thread**            | Lieu d'échange d'**une** structure, pour **une** année de campagne et **un** type de document réglementaire.                                             |
-| **Type de thread**    | L'un des 8 types nationaux. Sa logique (ouverture, fermeture, échéances, plugins) est déclarée en code.                                                  |
-| **Année de campagne** | L'exercice tarifé. Ce n'est pas l'année du document : le CA de l'année Y relève de la campagne Y+2.                                                      |
-| **Événement**         | Tout ce qui arrive dans un thread : message, dépôt, issue, réouverture, notification… Jamais modifié ni supprimé.                                        |
-| **Issue** (`OUTCOME`) | Ce sur quoi débouche un thread : un document validé, un accord tacite à l'échéance, ou une fermeture « sans objet ».                                     |
-| **Fil**               | Chaque thread a deux fils : le fil **partagé** (opérateur + agents) et le fil **agents**. Un événement appartient à l'un ou l'autre selon sa visibilité. |
-| **Échéance**          | Date réglementaire, qui s'impose soit à l'opérateur, soit à l'État. Affichée, jamais bloquante.                                                          |
-| **Plugin**            | Module de code déclaré sur un type de thread, qui réagit à ses événements et peut ajouter de l'UI.                                                       |
+| Terme           | Définition                                                                                                                                                            |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Campagne**    | La campagne de tarification N (`TarificationCampaign`) : nationale, une par an. Elle porte la date de la DRL.                                                         |
+| **Thread**      | Les échanges d'**une** structure pour **une** campagne. Une structure a souvent deux threads actifs (campagne en cours et suivante).                                  |
+| **Canal**       | Chaque thread contient deux canaux : le canal **partagé** (opérateur + agents) et le canal **agents**. Un événement appartient à l'un ou l'autre selon sa visibilité. |
+| **Événement**   | Tout ce qui arrive dans un thread : message, document, relecture, partage, notification… Jamais modifié ni supprimé.                                                  |
+| **Document**    | Un fichier envoyé dans un canal, avec un **type** (CA, BP, L48…) et un **état** (brouillon, final, partagé).                                                          |
+| **Étape**       | Un jalon de la campagne (CA déposé, L48 partagée, DAB partagée…). Son état se **calcule** à partir des documents ; il n'est jamais saisi.                             |
+| **Échéance**    | Date réglementaire d'une étape, qui s'impose soit à l'opérateur, soit à l'État. Affichée, jamais bloquante.                                                           |
+| **Lu / ouvert** | Première lecture d'un message, première ouverture d'un document, par utilisateur. Un fait, conservé.                                                                  |
+| **Plugin**      | Module de code qui réagit aux événements et aux types de documents, et peut ajouter de l'UI.                                                                          |
 
 ## 4. Design
 
@@ -94,175 +96,219 @@ Chacune est à confirmer par les retours sur cette RFC, **avant tout développem
 Esquisse (noms définitifs en PR 1) :
 
 ```prisma
-model Thread {
-  id          Int          @id @default(autoincrement())
-  structureId Int          // onDelete: Restrict
-  year        Int          // année de campagne
-  type        ThreadType
-  status      ThreadStatus // cache, écrit uniquement par le service d'ajout d'événement
-  @@unique([structureId, year, type])
+model TarificationCampaign {
+  id             Int       @id @default(autoincrement())
+  year           Int       @unique
+  drlPublishedAt DateTime? @db.Date // saisie par un admin national
 }
 
-model ThreadEvent {     // ajout seul
-  id           Int        @id @default(autoincrement())
-  threadId     Int        // onDelete: Restrict
-  type         ThreadEventType
-  userId       Int?       // auteur ; null = système (cron, plugin)
-  authorLevel  AuthorLevel
-  visibility   Visibility // ALL | AGENTS
-  text         String?
-  payload      Json?      // validé par le schéma Zod du type d'événement
-  createdAt    DateTime   @default(now()) // horodatage serveur, fait foi
-  files        FileUpload[]
+model Thread {                 // une structure × une campagne
+  id          Int @id @default(autoincrement())
+  structureId Int // onDelete: Restrict
+  campaignId  Int // onDelete: Restrict
+  createdAt   DateTime @default(now())
+  @@unique([structureId, campaignId])
 }
 
-model ThreadView { threadId Int; userId Int; updatedAt DateTime @updatedAt }
+model ThreadEvent {            // ajout seul
+  id          Int             @id @default(autoincrement())
+  threadId    Int             // onDelete: Restrict
+  type        ThreadEventType
+  userId      Int?            // auteur ; null = système (cron, plugin)
+  authorLevel AuthorLevel
+  visibility  Visibility      // SHARED | AGENTS
+  text        String?
+  payload     Json?           // validé par le schéma Zod du type d'événement
+  createdAt   DateTime        @default(now()) // horodatage serveur, fait foi
+  documents   ThreadDocument[]
+}
 
-model PluginExecution { eventId Int; pluginKey String; status PluginStatus } // outbox (§ 4.7)
+model ThreadDocument {         // un fichier typé dans un événement
+  id           Int            @id @default(autoincrement())
+  eventId      Int            // onDelete: Restrict
+  fileUploadId Int            // onDelete: Restrict
+  types        DocumentType[] // CA, BP, RCA, L48, PIECE_JUSTIFICATIVE… (H9)
+  status       DocumentStatus // DRAFT | FINAL | SHARED
+}
 
-model FileUpload { /* existant */ sha256 String?; threadEventId Int? /* Restrict */ }
+model ThreadEventReceipt {     // « lu » / « ouvert », ajout seul
+  eventId   Int
+  userId    Int
+  kind      ReceiptKind        // READ | OPENED
+  createdAt DateTime @default(now())
+  @@unique([eventId, userId, kind])
+}
+
+model ThreadSubscription {     // écarts au défaut uniquement (§ 4.5)
+  threadId     Int
+  userId       Int
+  visibility   Visibility
+  isSubscribed Boolean
+  @@id([threadId, userId, visibility])
+}
+
+model ThreadEventTask { eventId Int; pluginKey String; status TaskStatus } // tâches restant à exécuter après un événement (§ 4.8)
+
+model FileUpload { /* existant */ sha256 String? }
+
+enum Visibility     { SHARED AGENTS }
+enum DocumentStatus { DRAFT FINAL SHARED }
+enum ReceiptKind    { READ OPENED }
 ```
 
-**Types d'événements** : `MESSAGE` ; cycle de vie (`OPENED`, `OUTCOME`, `TACIT_APPROVAL`, `MARKED_NOT_APPLICABLE`, `REOPENED`) ; informatifs (`SUBMITTED_FOR_REVIEW`, `APPROVED`) ; miroir (`EXTERNAL_DOCUMENT`) ; mails (envoyé, échec) ; `PLUGIN_ERROR` ; et les types propres à chaque plugin.
+**Types d'événements** : `MESSAGE` (texte et/ou documents) ; `DOCUMENT_SHARED` (partage dans le canal partagé d'un document `FINAL` du canal agents) ; relecture (`SUBMITTED_FOR_REVIEW`, `APPROVED`, `CHANGES_REQUESTED`) ; `STEP_NOT_APPLICABLE` ; `TACIT_APPROVAL` ; miroir (`EXTERNAL_DOCUMENT`) ; mails (envoyé, échec) ; `PLUGIN_ERROR` ; et les types propres à chaque plugin.
 
-**Paramètres en base** : la date de la DRL par année, les dates d'ouverture et d'échéance par type × année et la date de mise en service.
+**Paramètres en base** : la date de la DRL par campagne et la date de mise en service.
 
 **Principes d'intégrité**
 
-- **Ajout seul**, protégé par des triggers PostgreSQL contre les modifications accidentelles (`UPDATE`, `DELETE`, `TRUNCATE`). Une correction est un nouvel événement. Le trigger protège contre les bugs, pas contre un administrateur de la base.
-- **L'état d'un thread est un cache** du journal, écrit dans la même transaction que l'événement, et reconstructible.
-- **Unicité `(structure, année, type)`** : toute ouverture est idempotente.
-- **Transitions d'état atomiques** : deux agents ne peuvent pas poser deux issues en même temps.
-- **Aucune cascade** n'atteint un événement ou ses fichiers.
+- **Ajout seul**, protégé par des triggers PostgreSQL contre les modifications accidentelles (`UPDATE`, `DELETE`, `TRUNCATE`) sur les événements, les documents et les accusés de lecture. Une correction est un nouvel événement. Le trigger protège contre les bugs, pas contre un administrateur de la base.
+- **Création à la volée** : le thread et la campagne sont créés au premier événement (création idempotente sur leur clé unique). Aucun cron d'ouverture.
+- **Aucune cascade** n'atteint un événement, un document ou ses fichiers.
 
-### 4.2 Les 8 types
+### 4.2 Documents et états
 
-La logique de chaque type est déclarée dans un registre typé en code, sur le modèle de `ANOMALIE_DEFINITIONS` (éligibilité, ouverture, fermeture, échéances, types suivants, plugins). Règle provisoire : **un document réglementaire = un thread** (H8).
+Chaque fichier envoyé porte un **type** et un **état**, choisis par l'auteur au moment de l'envoi. Un document ne change jamais d'état en place : la version suivante est un nouvel événement.
 
-| Type             | Ouverture                            | Issue                                                                                        | Échéance (s'impose à)                          | Copié dans les documents financiers (catégorie) ⚠️  |
-| ---------------- | ------------------------------------ | -------------------------------------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------- |
-| `CA`             | Date fixe ⚠️ (avant le 30 avril N-1) | CA (+ rapport d'activité) déposé et reçu                                                     | 30 avril N-1 (opérateur)                       | `COMPTE_ADMINISTRATIF_SOUMIS`, `RAPPORT_ACTIVITE`   |
-| `RCA`            | Issue de `CA`                        | RCA signé                                                                                    | ⚠️                                             | `COMPTE_ADMINISTRATIF_RETENU` ⚠️                    |
-| `BP`             | Date fixe ⚠️ (ex. 15 juillet N-1)    | BP (+ rapport budgétaire) déposé et reçu ; héberge questions-réponses et dialogue de gestion | 31 octobre N-1 (opérateur)                     | `BUDGET_PREVISIONNEL_DEMANDE`, `RAPPORT_BUDGETAIRE` |
-| `L48`            | Publication de la DRL                | L48 signée                                                                                   | J48 (État)                                     | ⚠️                                                  |
-| `CONTRADICTOIRE` | Issue de `L48`                       | Réponse de l'opérateur, ou accord tacite à l'échéance                                        | Dernière issue de la L48 + 8 j (opérateur, H1) | —                                                   |
-| `DAB`            | Issue de `CONTRADICTOIRE`            | DAB signée                                                                                   | J60 (État)                                     | `BUDGET_PREVISIONNEL_RETENU` ⚠️                     |
-| `ARRETE`         | Issue de `DAB`                       | Arrêté signé                                                                                 | —                                              | `ActeAdministratif.ARRETE_TARIFICATION` ⚠️          |
-| `PAIEMENT`       | Date fixe ⚠️ (début d'année N)       | Fermeture manuelle ⚠️                                                                        | —                                              | —                                                   |
+| État     | Où                                                                            | Qui le voit         |
+| -------- | ----------------------------------------------------------------------------- | ------------------- |
+| `DRAFT`  | Canal agents, pour relecture                                                  | Agents              |
+| `FINAL`  | Canal agents, version définitive (par ex. le scan signé), pas encore partagée | Agents              |
+| `SHARED` | Canal partagé : remis à l'autre partie                                        | Agents et opérateur |
 
-⚠️ = donnée à fournir par l'équipe métier avant la mise en service : règle d'ouverture (date ? laquelle ?), règle de fermeture et nature de l'issue, échéances et à qui elles s'imposent, éligibilité (quelles structures, quels threads pour les CPOM), catégorie de document financier où le document est copié.
+- **Les documents de l'opérateur** (CA, BP, réponse au contradictoire, pièces justificatives) sont `SHARED` d'office.
+- **Les documents des agents** passent par `DRAFT` → relecture → `FINAL` → « envoyer à l'opérateur » → `SHARED`. **Valider n'est pas envoyer** : le partage est une action séparée (événement `DOCUMENT_SHARED`, qui pointe vers le même fichier).
+- **Relecture DREETS** : sur un brouillon, la DREETS valide (`APPROVED`) ou demande des modifications (`CHANGES_REQUESTED`, avec la liste) ; la DDETS dépose une nouvelle version. Rien ne bloque : une DDETS peut partager sans validation.
+- **L'interface ne propose que les types pertinents** à ce moment de la campagne et pour cet émetteur (on ne peut pas déposer un BP dans la campagne suivante, ni un arrêté côté opérateur).
+- **L'exercice d'un document se déduit** de son type et de la campagne : le CA d'une campagne N est le CA N-2, son BP est le BP N.
 
-- **`PAIEMENT` est une exception assumée** : il regroupe les documents de paiement, que chaque territoire produit différemment (DAI + avenants + DAM, DAM seule, échéancier régional…). Un thread par pièce réintroduirait une activation par territoire.
-- **Éligibilité** (règle nationale par structure) : structures autorisées (CADA, CPH ⚠️) ; CPOM « vrais » : `CA` et `RCA` seulement ⚠️ ; structures subventionnées : aucun thread.
-- **Pas d'activation par territoire** (H7) : les différences territoriales s'absorbent en fichiers échangés dans un même thread, ou en `NOT_APPLICABLE` (RCA intégré à la L48 dans certaines DREETS). La forme des documents relève des futurs plugins de génération.
+### 4.3 Étapes
 
-### 4.3 Cycle de vie
+Les étapes sont déclarées dans un registre typé en code, sur le modèle de `ANOMALIE_DEFINITIONS`. Leur état se **calcule** à partir des documents partagés : rien n'est stocké.
 
-| État             | Stocké ? | Sens                                                  |
-| ---------------- | -------- | ----------------------------------------------------- |
-| `OPEN`           | Oui      | Des échanges sont en cours                            |
-| `FINALIZED`      | Oui      | Le thread a débouché sur son issue                    |
-| `NOT_APPLICABLE` | Oui      | Fermé sans issue, motif obligatoire                   |
-| `EXPECTED`       | **Non**  | Prévu par les règles, pas encore ouvert (calculé)     |
-| `LATE`           | **Non**  | Ouvert et échéance dépassée (calculé, dépend du jour) |
+| Parcours | Étape                           | Sens               | Faite quand…                                               | Échéance (s'impose à)                                             |
+| -------- | ------------------------------- | ------------------ | ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| CA       | CA déposé                       | Opérateur → agents | un `CA` est `SHARED`                                       | 30 avril N-1 (opérateur)                                          |
+| CA       | RCA                             | Agents → opérateur | un `RCA` est `SHARED`                                      | ⚠️                                                                |
+| BP       | BP déposé                       | Opérateur → agents | un `BP` est `SHARED`                                       | 31 octobre N-1 (opérateur)                                        |
+| BP       | L48                             | Agents → opérateur | une `L48` est `SHARED`                                     | J48 (État)                                                        |
+| BP       | Contradictoire                  | Opérateur → agents | une réponse est `SHARED`, ou `TACIT_APPROVAL` à l'échéance | 8 jours après la première ouverture de la L48 (opérateur, H1, H2) |
+| BP       | DAB                             | Agents → opérateur | une `DAB` est `SHARED`                                     | J60 (État)                                                        |
+| BP       | Arrêté et documents de paiement | Agents → opérateur | `ARRETE` (et `DAI`, `DAM`, `ECHEANCIER`) `SHARED`          | —                                                                 |
 
-- **Tout changement d'état est un événement.** Les états calculés n'en produisent jamais : un événement est un fait, un état calculé une interprétation.
-- **Ouverture** : date fixe, date relative à la DRL, issue d'un autre thread, ou manuelle par un agent.
-- **Fermeture** : document validé (`OUTCOME`), échéance sans réponse (`TACIT_APPROVAL`, posé automatiquement), ou manuelle (`MARKED_NOT_APPLICABLE`).
-- **Réouverture** par un agent, motif obligatoire (L48 modificative, BP corrigé). Le même thread porte les issues successives.
-- **Rien ne bloque.** On poste dans tout état, y compris après l'échéance ; un agent peut ouvrir un thread avant que son prédécesseur soit finalisé. Seule règle : un `OUTCOME` exige l'état `OPEN`. Les dépendances entre threads **déclenchent** des ouvertures, elles ne les **conditionnent** pas.
+⚠️ = donnée à fournir par l'équipe métier avant la mise en service.
+
+| État calculé     | Sens                                                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| `EXPECTED`       | Prévue par les règles, pas encore faite                                                                   |
+| `LATE`           | Pas faite et échéance dépassée (dépend du jour)                                                           |
+| `DONE`           | Faite, à la date du premier document partagé                                                              |
+| `NOT_APPLICABLE` | Déclarée sans objet par un agent (`STEP_NOT_APPLICABLE`, motif obligatoire) : CPOM, RCA intégré à la L48… |
+
+- **Rien ne bloque.** On poste à tout moment, y compris après l'échéance ; une étape peut être faite avant la précédente. Une L48 modificative est simplement une nouvelle L48 partagée : le délai du contradictoire repart de sa première ouverture.
+- **`TACIT_APPROVAL`** est posé automatiquement à l'échéance du contradictoire, s'il n'y a pas eu de réponse.
+- **Éligibilité** (règle nationale par structure) : structures autorisées (CADA, CPH ⚠️) ; CPOM « vrais » : parcours CA seulement ⚠️ ; structures subventionnées : aucun thread.
 
 ### 4.4 Droits et visibilité
 
-- **Accès à un thread = droit d'édition sur la structure** (`canUpdateStructure`), agents comme opérateurs. Lire et participer relèvent du même droit ; les `LECTEUR` n'ont pas accès.
+- **Accès à un thread = droit d'édition sur la structure** (`canUpdateStructure`), pour les agents DDETS et DREETS et pour les opérateurs. Lire et participer relèvent du même droit ; les `LECTEUR` n'ont pas accès.
+- **Les agents nationaux n'ont pas accès** aux threads de tarification. Ils n'interviennent pas dans le dialogue de tarification, et les services territoriaux préfèrent qu'ils n'y aient pas accès.
 - **Fermé par défaut.** Les threads ne reprennent **pas** la règle de lecture actuelle de Bhasile, ouverte à tous (`docs/permissions.md`).
-- **DREETS et national voient et participent à tout leur périmètre** : c'est un objectif de la feature (H9).
-- **Deux fils par thread** : le fil **partagé** (`ALL`) et le fil **agents** (`AGENTS` : brouillons, relectures, échanges DDETS / DREETS). C'est un seul journal ; le fil d'un événement est sa visibilité. Une pièce jointe s'affiche dans le fil de son message, sans règle d'accès propre (H12). Les événements de cycle de vie sont visibles de tous ; mails, relectures et erreurs de plugin relèvent du fil agents.
-- **Dépendance au chantier accès opérateur** : `getPrincipal` (`src/app/api/files/file.service.ts`) classe aujourd'hui toute session comme agent pour l'accès aux fichiers. Avec des comptes opérateurs individuels, c'est acceptable en lecture (H12), mais à aligner avec ce chantier.
+- **Deux canaux** : le canal **partagé** (`SHARED` : DDETS, DREETS, opérateur) et le canal **agents** (`AGENTS` : DDETS, DREETS). C'est un seul journal ; le canal d'un événement est sa visibilité.
+- **La DREETS voit le canal partagé**, mais n'en est pas notifiée (§ 4.5).
+- **Fichiers** : même règle d'accès que la fiche structure (H12).
+- **Dépendance au chantier accès opérateur** : `getPrincipal` (`src/app/api/files/file.service.ts`) classe aujourd'hui toute session comme agent pour l'accès aux fichiers. À aligner avec ce chantier.
 
-### 4.5 Fichiers, preuve et conservation
+### 4.5 Notifications, lectures et ouvertures
 
-- **Le dépôt et l'issue sont deux faits distincts.** L'opérateur poste son BP (« déposé le 30/10 à 23h41 », fait foi pour le délai) ; l'agent crée ensuite l'`OUTCOME` qui pointe vers ce fichier (« retenu le 04/11 »).
-- **Versions = fichiers successifs dans le journal.** Aucun fichier de thread n'est jamais supprimé.
+- **Le mail est une notification, jamais un contenu** : un lien vers le thread, avec le nom et l'empreinte du document s'il y en a un, mais ni texte ni pièce jointe.
+- **Sont notifiés tous les membres du canal, sauf l'auteur** :
+
+  | Canal   | Notifiés par défaut                                             |
+  | ------- | --------------------------------------------------------------- |
+  | Partagé | Agents de la DDETS, utilisateurs de l'opérateur (pas la DREETS) |
+  | Agents  | Agents de la DDETS et de la DREETS                              |
+
+- **Chacun peut suivre ou ne plus suivre un canal** d'un thread (`ThreadSubscription`, qui ne stocke que les écarts au défaut). Une DREETS peut ainsi suivre le canal partagé d'une structure sensible.
+- **Les notifications réglementaires ne se désactivent pas** : un document partagé par les agents à l'opérateur, et les relances d'échéance de l'opérateur.
+- **Chaque envoi de mail est un événement** (destinataires, identifiant Brevo), dans le canal agents. Les rebonds produisent un événement visible des agents. Fournisseur : Brevo transactionnel.
+- **« Lu » et « ouvert »** : la première lecture d'un message et la première ouverture d'un document sont enregistrées par utilisateur (`ThreadEventReceipt`, en ajout seul). La **première ouverture de la L48 par l'opérateur fait courir le délai du contradictoire** (H1). L'affichage (qui a lu quoi, et pour qui) est laissé au design.
+
+### 4.6 Fichiers, preuve et conservation
+
+- **Le dépôt fait foi pour le délai** : « CA déposé le 30/04 à 23h41 » est l'horodatage serveur de l'événement.
+- **Versions = documents successifs dans le journal.** Aucun fichier d'un thread n'est jamais supprimé.
 - **Empreinte SHA-256** de chaque fichier, calculée à l'upload.
-- **Formats** : ajout de `.docx`, `.odt`, `.pptx` (rapports, brouillons de L48). Limite de 30 Mo inchangée.
+- **Formats** : ajout de `.docx`, `.odt`, `.pptx` (rapports, brouillons) aux formats déjà acceptés (PDF, tableurs, images). Limite de 30 Mo inchangée.
 
-**Niveau de preuve** : un **faisceau d'indices**. Journal en ajout seul, horodatage serveur, empreinte du fichier, trace du mail chez un tiers (Brevo), et empreinte du document dans le mail reçu par l'opérateur, une copie hors de notre contrôle. Ce n'est **pas** un horodatage qualifié eIDAS ni un recommandé électronique qualifié ; la valeur juridique est à confirmer (H1 à H3).
+**Niveau de preuve** : un **faisceau d'indices**. Journal en ajout seul, horodatage serveur, empreinte du fichier, accusés d'ouverture, trace du mail chez un tiers (Brevo), et empreinte du document dans le mail reçu par l'opérateur. Ce n'est **pas** un horodatage qualifié eIDAS. Si un horodatage qualifié s'avère un besoin réglementaire, le pattern de Démarches Numériques (empreintes du jour horodatées chaque nuit par un tiers qualifié) se branche comme plugin (§ 5).
 
-**Conservation** : le journal et les pièces sont des **archives publiques** (Code du patrimoine, L211-4) : aucune purge automatique, aucune élimination sans visa. Les pièces peuvent contenir des données nominatives (salariés, demandeurs d'asile). Un tableau de gestion (durées, sort final) et une analyse d'impact (AIPD) sont à établir avec la mission archives du ministère et le DPO, avant la mise en service.
+**Conservation** : le journal et les pièces sont des **archives publiques** (Code du patrimoine, L211-4) : leur durée de conservation est à définir avec la mission archives (durée d'utilité administrative et sort final), et aucune élimination n'est possible sans son visa. Une purge éventuelle sera paramétrée selon ce tableau de gestion. Les pièces peuvent contenir des données nominatives (salariés, demandeurs d'asile). Le tableau de gestion (mission archives du ministère) et une analyse d'impact (AIPD, avec le DPO) sont à établir avant la mise en service.
 
-### 4.6 Intégration avec les documents financiers
+### 4.7 Intégration avec les documents financiers
 
 Les documents financiers existants (`DocumentFinancier`, déposés par les agents via la finalisation, l'actualisation et la modification) restent lus partout : fiche structure, CPOM, actualisation. Le socle s'y articule dans les deux sens, **toujours par copie** :
 
-| Sens                          | Déclencheur                                                              | Effet                                                                                             |
-| ----------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Thread → documents financiers | `OUTCOME` (ou dépôt) dans un thread                                      | Un plugin crée le document financier correspondant, avec sa propre copie du fichier               |
-| Documents financiers → thread | Document financier créé, remplacé ou supprimé via un formulaire existant | Événement `EXTERNAL_DOCUMENT` dans le thread, avec copie du fichier (simple trace si suppression) |
+| Sens                          | Déclencheur                                                              | Effet                                                                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Thread → documents financiers | Un document passe en `SHARED`                                            | Un plugin crée le document financier correspondant, avec sa propre copie du fichier. Un document redéposé (CA corrigé) **remplace** le précédent. |
+| Documents financiers → thread | Document financier créé, remplacé ou supprimé via un formulaire existant | Événement `EXTERNAL_DOCUMENT` dans le thread, avec copie du fichier (simple trace si suppression)                                                 |
 
+- **Les pièces justificatives restent uniquement dans le thread** : elles ne sont pas copiées dans les documents financiers.
 - **Pourquoi la copie** : `FileUpload.documentFinancier` est en `onDelete: Cascade`. Si un fichier de thread partageait sa ligne avec un document financier, retirer un document dans l'actualisation effacerait la preuve.
-- **Garde-fous** : seuls les documents financiers d'une campagne en cours déclenchent quelque chose (pas les reprises d'historique) ; la suppression d'un document financier est tracée, elle ne rouvre ni ne modifie le thread ; les documents financiers de CPOM et ceux du formulaire d'ajout de structure sont hors miroir.
+- **Garde-fous** : seuls les documents financiers d'une campagne en cours déclenchent quelque chose (pas les reprises d'historique) ; la suppression d'un document financier est tracée, elle ne modifie pas le thread ; les documents financiers de CPOM et ceux du formulaire d'ajout de structure sont hors miroir.
 
-### 4.7 Plugins
+### 4.8 Plugins
 
-Un plugin est un **module de code**, déclaré par clé dans le registre des types. Un plugin peut réagir aux événements d'un thread, écrire dans ses propres tables (par ex. le registre des montants), et afficher des composants dans des emplacements prévus.
+Un plugin est un **module de code**, déclaré par clé, qui se branche sur un **type d'événement** ou un **type de document** (« quand un CA est partagé, extraire les montants »). Il peut écrire dans ses propres tables (par ex. le registre des montants) et afficher des composants dans des emplacements prévus de l'écran.
 
 **Contrat**
 
-1. Un plugin ne modifie **jamais** l'état d'un thread directement : il passe par le service d'ajout d'événement.
+1. Un plugin ne modifie **jamais** le journal directement : il passe par le service d'ajout d'événement.
 2. Un plugin ne bloque rien : son verdict (« fichier non conforme au cadre normalisé ») est un événement d'information.
 3. L'échec d'un plugin ne casse pas le thread : il devient un événement `PLUGIN_ERROR` visible des agents.
 4. Un plugin est **idempotent** : rejoué après une panne, il ne produit pas d'effet en double.
 
-**Exécution** : chaque événement enregistre, **dans la même transaction**, ce que ses plugins doivent traiter (outbox `PluginExecution`). Les plugins s'exécutent juste après, et un cron reprend ce qui n'a pas abouti : un redémarrage du conteneur ne peut pas faire perdre un mail sans bruit. Quand arriveront les plugins lents (extraction, Albert API), **pg-boss** (une file de tâches dans PostgreSQL, écrite dans la même transaction) prendra le relais, sans changer le contrat. Redis est écarté : double écriture, et un composant d'infra de plus sans dev pour le maintenir.
+**Exécution** : chaque événement enregistre, **dans la même transaction**, les tâches que ses plugins doivent exécuter (`ThreadEventTask` : « après cet événement, il reste à envoyer tel mail, à copier tel document »). Les plugins s'exécutent juste après, et un cron reprend ce qui n'a pas abouti : un redémarrage du conteneur ne peut pas faire perdre un mail sans bruit. Quand arriveront les plugins lents (extraction, Albert API), **pg-boss** (une file de tâches dans PostgreSQL, écrite dans la même transaction) prendra le relais, sans changer le contrat.
 
-**Plugins livrés par le socle** : la copie vers les documents financiers (§ 4.6) et les mails (§ 4.8).
-
-### 4.8 Mails
-
-- **Le mail est une notification, jamais un contenu** : un lien vers le thread, avec le nom et l'empreinte du document s'il y en a un, mais ni texte ni pièce jointe.
-- **Chaque envoi est un événement** (destinataires, identifiant Brevo), dans le fil agents.
-- **Les rebonds** (contacts opérateurs partis par exemple) produisent un événement visible des agents, et sont rattrapés par une réconciliation si le webhook échoue.
-- **Fournisseur : Brevo transactionnel**, compte existant.
-- **Pas de préférences de notification en V1**, pas d'accusé de lecture (H1, H2).
+**Plugins livrés par le socle** : la copie vers les documents financiers (§ 4.7) et les mails (§ 4.5).
 
 ### 4.9 Échéances
 
-- **Uniquement les échéances réglementaires**, nationales. Pas de deadlines internes DREETS : ce sont des règles d'organisation.
-- **Chaque échéance indique à qui elle s'impose.** La visibilité s'en déduit : une échéance opérateur (dépôts, 8 jours) est visible par tous ; une échéance État (J48, J60) n'est visible que des agents. C'est ce que demandaient PDL et IdF, qui raccourcissent leurs délais.
-- **Jours calendaires, sans report** (H4), comptés en heure de Paris.
-- **Les délais opérateur partent de la mise à disposition** (`OUTCOME`), et de la **dernière** en cas de courriers successifs (H1).
-- **La DRL est saisie par un admin** chaque année : c'est la seule ancre impossible à connaître d'avance.
+- **Uniquement les échéances réglementaires**, nationales, calculées : dates fixes (dépôts), J48 et J60 (depuis la DRL), contradictoire (depuis la première ouverture de la L48).
+- **Chaque échéance indique à qui elle s'impose.** Une échéance opérateur (dépôts, contradictoire) est visible par tous ; une échéance État (J48, J60) n'est visible que des agents.
+- **Jours calendaires, sans report** (H5), comptés en heure de Paris.
+- **La DRL est saisie par un admin national** chaque année (directement en base pour l'instant, puis dans le back office de pérennisation).
+- **Les calendriers internes des DREETS** (« envoyez-nous tout à J45 ») ne sont pas des échéances : ils relèvent d'un plugin d'affichage (§ 5).
 
 ### 4.10 Interface
 
-- **Une entrée « Tarification » dans la fiche structure** (section ou onglet, au choix du design) : les 8 threads de l'année de campagne choisie, leurs états, la frise, et chaque thread avec ses deux fils.
-- **Un bloc « Tarification » sur le dashboard**, sur le gabarit des blocs existants, filtré comme eux et par année de campagne. L'opérateur a le même bloc sur son propre dashboard, limité à ses structures. Le tableau de bord agrégé DREETS se branchera sur le même service.
-- **« Non lu »** via `ThreadView` : un confort, pas une preuve.
-- **Laissé au design** : libellés, frise, composition de l'écran de thread et des deux fils, affichage de `NOT_APPLICABLE` (« terminé », pas « manquant ») et des retards.
+- **Une page par campagne** dans la fiche structure : les deux canaux en ordre chronologique, la frise des deux parcours (CA et BP) avec l'état de chaque étape, et les documents utiles de la campagne (dont ceux de N-2 et N-1, rappelés depuis la fiche structure).
+- **Un bloc « Tarification » sur le dashboard**, sur le gabarit des blocs existants, filtré comme eux et par campagne. L'opérateur a le même bloc sur son propre dashboard, limité à ses structures. Le tableau de bord agrégé DREETS se branchera sur le même service.
 
 ### 4.11 Mise en service
 
 La campagne 2027 sera à moitié passée hors de Bhasile au lancement : CA 2025, BP 2027, DAI et parfois RCA auront déjà circulé par mail.
 
-- **Un script d'amorçage** crée les threads 2027 déjà « passés » (`CA`, `RCA`, `BP`, `PAIEMENT`) à l'état `OPEN`, avec l'événement « mise en service, étapes antérieures traitées hors Bhasile ». Les documents financiers existants s'y rattachent par le miroir, et le dialogue de gestion 2027 peut se tenir dans `BP`.
+- **Un script d'amorçage** rattache aux threads 2027 les documents financiers déjà présents (BP 2027, CA 2025…), par le miroir. Les échanges antérieurs restent hors Bhasile.
 - **Une date de mise en service en base** : une échéance antérieure ne déclenche jamais `LATE`.
-- **La campagne 2028 démarre normalement.**
-- **Mise en service avant le 30 avril 2027** : le premier usage réel sera le dépôt des CA 2026, quelques semaines avant la bascule de la DRL 2027.
-- **Dark launch** : tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient l'entrée « Tarification » et le bloc dashboard.
+- **Mise en service avant le 30 avril 2027** : le premier usage réel sera le dépôt des CA 2026 (campagne 2028), quelques semaines avant la bascule de la DRL 2027.
+- **Dark launch** : tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient la page et le bloc dashboard.
 
 ## 5. Points d'accroche des briques futures
 
-| Brique future                                          | Se branche sur                                                                                             |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Relances avant échéance                                | Plugin mail + états calculés                                                                               |
-| Vérification du cadre normalisé au dépôt               | Plugin sur le dépôt dans `CA` / `BP` ; verdict en événement d'information, dans le même thread             |
-| Extraction des chiffres                                | Plugin (pg-boss) sur le dépôt ; écrit dans le registre des montants (socle donnée)                         |
-| Pré-analyse (écarts N-1, ratios)                       | Plugin de lecture du registre ; résultat dans le fil agents                                                |
-| Agent IA (Albert API)                                  | Plugin (pg-boss) ; sorties structurées par compte, dans le fil agents                                      |
-| Pré-rédaction RCA / L48, génération DAB / arrêté / DAM | Plugins de génération ; gabarits par territoire (atelier de novembre) ; brouillon posté dans le fil agents |
-| Tableau de bord DREETS agrégé                          | Même service que le bloc dashboard                                                                         |
-| Consolidation N-1                                      | Socle donnée                                                                                               |
-| Pré-remplissage de l'actualisation                     | Les documents financiers copiés par les threads                                                            |
+| Brique future                                          | Se branche sur                                                                                                        |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Calendrier régional de la DREETS                       | Plugin : texte libre par région et par campagne, saisi par la DREETS, affiché dans le canal agents, sans contrôle     |
+| Relances avant échéance                                | Plugin mail + états calculés des étapes                                                                               |
+| Vérification du cadre normalisé au dépôt               | Plugin sur un `CA` / `BP` partagé ; verdict en événement d'information, dans le thread                                |
+| Extraction des chiffres                                | Plugin (pg-boss) sur un `CA` / `BP` partagé ; écrit dans le registre des montants (socle donnée)                      |
+| Pré-analyse (écarts N-1, ratios)                       | Plugin de lecture du registre ; résultat dans le canal agents                                                         |
+| Agent IA (Albert API)                                  | Plugin (pg-boss) ; sorties structurées par compte, dans le canal agents                                               |
+| Pré-rédaction RCA / L48, génération DAB / arrêté / DAM | Plugins de génération ; gabarits par territoire (atelier de novembre) ; brouillon posté dans le canal agents          |
+| Horodatage qualifié (si besoin réglementaire)          | Plugin quotidien : empreintes des événements du jour, horodatées par un tiers qualifié (pattern Démarches Numériques) |
+| Tableau de bord DREETS agrégé                          | Même service que le bloc dashboard                                                                                    |
+| Consolidation N-1                                      | Socle donnée                                                                                                          |
+| Pré-remplissage de l'actualisation                     | Les documents financiers copiés depuis les threads                                                                    |
 
-**Pour la data** : le contrat de plugin (§ 4.7) est l'interface entre ce socle et le socle donnée. Un plugin d'extraction lit le fichier d'un événement, écrit dans le registre, et publie son verdict en événement. Il n'a besoin d'aucune autre prise.
+**Pour la data** : le contrat de plugin (§ 4.8) est l'interface entre ce socle et le socle donnée. Un plugin d'extraction lit le fichier d'un document typé, écrit dans le registre, et publie son verdict en événement. Il n'a besoin d'aucune autre prise.
