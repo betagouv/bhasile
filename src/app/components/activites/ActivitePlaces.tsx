@@ -16,6 +16,7 @@ const pieChartOptions = {
 export const ActivitePlaces = ({
   placesAutorisees = 0,
   placesIndisponibles = 0,
+  placesCaes = 0,
 }: Props): ReactElement => {
   const placesDisponibles = placesAutorisees - Number(placesIndisponibles);
 
@@ -25,11 +26,18 @@ export const ActivitePlaces = ({
         <PieChart
           size={180}
           data={{
-            labels: ["Places indisponibles", "Places disponibles"],
-            series: [placesIndisponibles, placesDisponibles],
+            labels: [
+              "Places indisponibles",
+              "Places disponibles",
+              ...(placesCaes ? ["Places CAES"] : []),
+            ],
+            series: [
+              placesIndisponibles,
+              placesDisponibles,
+              ...(placesCaes ? [placesCaes] : []),
+            ],
           }}
           options={pieChartOptions}
-          colors={["var(--grey-925-125)", "", "var(--yellow-moutarde-850-200)"]}
           isDonut={true}
         >
           <div className="absolute w-22 top-15 left-12 text-sm text-center">
@@ -58,6 +66,17 @@ export const ActivitePlaces = ({
               ({getPercentage(placesDisponibles || 0, placesAutorisees)})
             </span>
           </div>
+          {placesCaes ? (
+            <div>
+              <strong>
+                <NumberDisplay value={placesCaes} />
+              </strong>{" "}
+              places CAES{" "}
+              <span className="text-mention-grey">
+                ({getPercentage(placesCaes || 0, placesAutorisees)})
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
@@ -67,4 +86,5 @@ export const ActivitePlaces = ({
 type Props = {
   placesAutorisees?: number;
   placesIndisponibles?: number | null;
+  placesCaes?: number | null;
 };

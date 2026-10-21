@@ -1,11 +1,13 @@
 import Image from "next/image";
 import { ReactElement } from "react";
 
+import { cn } from "@/app/utils/classname.util";
 import { pluralize } from "@/app/utils/string.util";
 
 export const IncompleteDataIndicator = ({
   nbStructures,
   structuresPercentage,
+  align,
 }: Props): ReactElement => {
   return (
     <span className="group relative inline-flex items-center border-b border-dashed print:border-0 z-30">
@@ -17,7 +19,12 @@ export const IncompleteDataIndicator = ({
           loading="lazy"
         />
       </span>
-      <span className="absolute top-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded px-2 py-1 text-xs shadow-md group-hover:block text-default-grey bg-white text-center">
+      <span
+        className={cn(
+          "absolute top-full mb-1 hidden rounded px-2 py-1 text-center text-xs whitespace-nowrap text-default-grey shadow-md group-hover:block bg-white",
+          align === "end" ? "right-0" : "left-1/2 -translate-x-1/2"
+        )}
+      >
         Donnée en cours de récolte
         <br />
         <strong>{nbStructures}</strong> {pluralize(nbStructures, "structure")}{" "}
@@ -30,4 +37,5 @@ export const IncompleteDataIndicator = ({
 type Props = {
   nbStructures: number;
   structuresPercentage: string;
+  align?: "end" | null;
 };

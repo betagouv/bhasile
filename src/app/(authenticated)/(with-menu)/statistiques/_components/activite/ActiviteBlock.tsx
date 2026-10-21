@@ -50,6 +50,7 @@ export const ActiviteBlock = ({ startMonth, endMonth }: Props) => {
           placesIndisponibles={
             statistiques.activite.summary.placesIndisponibles
           }
+          placesCaes={statistiques.activite.summary.placesCaes}
         />
         <div className="pl-20 w-100">
           <ActiviteMotifsIndisponibilite

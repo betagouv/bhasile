@@ -4,6 +4,8 @@ import { ReactElement, useEffect } from "react";
 
 import { Section } from "@/app/components/common/Section";
 import { useUserAction } from "@/app/hooks/useUserAction";
+import { isSomeDataIncomplete } from "@/app/utils/statistiques.util";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";
@@ -15,6 +17,7 @@ import { StructuresBlock } from "./structures/StructuresBlock";
 import { TypesPlacesBlock } from "./type-places/TypesPlacesBlock";
 
 export const StatistiquesContent = (): ReactElement => {
+  const { statistiques } = useStatistiquesContext();
   const { trackStatistiques } = useUserAction();
 
   useEffect(() => {
@@ -25,7 +28,7 @@ export const StatistiquesContent = (): ReactElement => {
   return (
     <div className="flex flex-col gap-3 px-3 pt-3">
       <StatistiquesCallouts />
-      <PartialDataNotice />
+      {isSomeDataIncomplete(statistiques) && <PartialDataNotice />}
       <Section id="structures">
         <StructuresBlock />
       </Section>

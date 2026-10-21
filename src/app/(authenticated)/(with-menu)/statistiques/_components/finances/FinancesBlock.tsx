@@ -28,6 +28,9 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
     documentsFinanciersOpenYearCompletude?.nbAttendues || 1
   );
 
+  const budgetsExecutoiresLastYear =
+    statistiques.finance.byYear[statistiques.finance.byYear.length - 1].year;
+
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
@@ -37,7 +40,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
         </div>
       </div>
       <h4 className="text-title-blue-france text-lg print:mb-0">
-        Budgets exécutoires pour {DOCUMENTS_FINANCIERS_OPEN_YEAR}{" "}
+        Budgets exécutoires pour {budgetsExecutoiresLastYear}{" "}
         <IncompleteDataIndicator
           nbStructures={nbStructures}
           structuresPercentage={structuresPercentage}
