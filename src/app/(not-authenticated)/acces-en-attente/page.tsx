@@ -6,7 +6,7 @@ import { ReactElement } from "react";
 
 import { ExternalLink } from "@/app/components/common/ExternalLink";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
-import { canAccessApp } from "@/lib/casl/abilities";
+import { canAccessApp } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 

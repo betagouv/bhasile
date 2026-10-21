@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { withAuth } from "next-auth/middleware";
 
-import { canAccessApp } from "./lib/casl/abilities";
+import { canAccessApp } from "./lib/casl";
 import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,

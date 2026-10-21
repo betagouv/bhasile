@@ -12,7 +12,7 @@ import {
   AppAbility,
   canAbilityUpdateDepartement,
   defineAbilityFor,
-} from "@/lib/casl/abilities";
+} from "@/lib/casl";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import {
   StructureVersionTransformationApiCreate,

@@ -7,7 +7,7 @@ import {
   canAbilityReadCpom,
   defineAbilityFor,
   getReadableCpomWhere,
-} from "@/lib/casl/abilities";
+} from "@/lib/casl";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";

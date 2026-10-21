@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { canSaveCpom } from "@/lib/casl/abilities";
+import { canSaveCpom } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { cpomApiSchema } from "@/schemas/api/cpom.schema";
 import { SessionUser } from "@/types/global";

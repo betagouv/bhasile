@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { createCpomEvent } from "@/app/api/user-actions/user-action.service";
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { canSaveCpom } from "@/lib/casl/abilities";
+import { canSaveCpom } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { cpomApiAjoutSchema } from "@/schemas/api/cpom.schema";
 import { SessionUser } from "@/types/global";

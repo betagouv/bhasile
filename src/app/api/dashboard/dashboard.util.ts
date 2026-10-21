@@ -1,4 +1,4 @@
-import { canUpdateStructure } from "@/lib/casl/abilities";
+import { canUpdateStructure } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
 type ScopedStructure = {

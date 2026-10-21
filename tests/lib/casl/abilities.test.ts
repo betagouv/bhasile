@@ -21,7 +21,7 @@ import {
   defineAbilityFor,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
-} from "@/lib/casl/abilities";
+} from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
 describe("Permissions : canUpdateStructure", () => {

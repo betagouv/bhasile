@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { canUpdateOperateur } from "@/lib/casl/abilities";
+import { canUpdateOperateur } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { operateurWriteApiSchema } from "@/schemas/api/operateur.schema";
 import { SessionUser } from "@/types/global";

@@ -8,7 +8,7 @@ import {
 } from "@/app/api/structures/structure.util";
 import { RAPPEL_TASK_LABEL } from "@/app/utils/rappel.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { canUpdateDepartement } from "@/lib/casl/abilities";
+import { canUpdateDepartement } from "@/lib/casl";
 import {
   DashboardRappel,
   RappelCriticite,

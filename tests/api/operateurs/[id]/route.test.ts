@@ -17,7 +17,7 @@ vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
 }));
 
-vi.mock("@/lib/casl/abilities", () => ({
+vi.mock("@/lib/casl", () => ({
   canUpdateOperateur: (...args: unknown[]) => mockCanUpdateOperateur(...args),
 }));
 
