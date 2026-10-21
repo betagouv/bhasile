@@ -7,8 +7,7 @@ const TEST_EMAIL_DOMAIN = "test.proconnect.gouv.fr";
 
 const ILE_DE_FRANCE = "Île-de-France";
 
-const toEmailPattern = (email: string): string =>
-  `^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`;
+const TEST_EMAIL_PATTERN = `@${TEST_EMAIL_DOMAIN.replaceAll(".", "\\.")}$`;
 
 export const seedRolesAndAgents = async (
   prisma: PrismaClient
@@ -36,21 +35,19 @@ export const seedRolesAndAgents = async (
     },
   ];
 
-  for (const agent of agents) {
-    const emailPattern = await prisma.emailPattern.create({
-      data: {
-        pattern: toEmailPattern(agent.email),
-        grants: { createMany: { data: getAgentBaseGrants(agent.zone) } },
-      },
-      select: { id: true },
-    });
+  const emailPattern = await prisma.emailPattern.create({
+    data: { pattern: TEST_EMAIL_PATTERN },
+    select: { id: true },
+  });
 
+  for (const agent of agents) {
     await prisma.user.create({
       data: {
         name: agent.name,
         email: agent.email,
         emailPatternId: emailPattern.id,
         lastConnection: new Date(),
+        grants: { createMany: { data: getAgentBaseGrants(agent.zone) } },
       },
     });
   }
