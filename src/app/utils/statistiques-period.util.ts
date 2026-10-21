@@ -91,7 +91,7 @@ export const isYearIncomplete = (
     return false;
   }
 
-  return completude !== null && !completude.isComplete;
+  return !completude.isComplete;
 };
 
 export const shouldShowYearAsterisk = (year: number | string): boolean => {

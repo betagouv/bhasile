@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { ReactElement } from "react";
 
+import { pluralize } from "@/app/utils/string.util";
+
 export const IncompleteDataIndicator = ({
   nbStructures,
   structuresPercentage,
@@ -18,8 +20,8 @@ export const IncompleteDataIndicator = ({
       <span className="absolute top-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded px-2 py-1 text-xs shadow-md group-hover:block text-default-grey bg-white text-center">
         Donnée en cours de récolte
         <br />
-        <strong>{nbStructures}</strong> structures comptabilisées (
-        {structuresPercentage})
+        <strong>{nbStructures}</strong> {pluralize(nbStructures, "structure")}{" "}
+        comptabilisées ({structuresPercentage})
       </span>
     </span>
   );

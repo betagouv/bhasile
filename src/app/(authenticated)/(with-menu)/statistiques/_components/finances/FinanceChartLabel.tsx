@@ -16,7 +16,7 @@ export const FinanceChartLabel = ({
   const isExporting = useExportContext();
 
   return (
-    <span className="flex print:block print:text-center items-center gap-1 text-xs text-disabled-grey">
+    <div className="flex print:block print:text-center items-center gap-1 text-xs text-disabled-grey">
       {label}
       {shouldShowYearAsterisk(chartData.labels[index]) && <span> * </span>}
       {isIncomplete &&
@@ -30,7 +30,7 @@ export const FinanceChartLabel = ({
             structuresPercentage={structuresPercentage || ""}
           />
         ))}
-    </span>
+    </div>
   );
 };
 

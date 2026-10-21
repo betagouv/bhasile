@@ -3,8 +3,10 @@ import { ReactElement, ReactNode, useMemo } from "react";
 import { ChartLegend } from "@/app/components/ChartLegend";
 import BarChart from "@/app/components/common/BarChart";
 import { getYearRange } from "@/app/utils/date.util";
+import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
+import { CompletudeStat } from "@/schemas/api/statistique.schema";
 
 export const DotationChart = ({
   budgets,
@@ -26,6 +28,7 @@ export const DotationChart = ({
   const yearsWithBudget = useMemo(
     () =>
       years
+        .filter((year) => year < CURRENT_YEAR)
         .map((year) => ({
           year,
           budget: budgets?.find((budget) => budget.year === year),
@@ -52,12 +55,10 @@ export const DotationChart = ({
     ];
 
     const incompleteYears = yearsWithBudget.map((budget) => {
-      const yearNumber = budget.year;
-      return (
-        !Number.isNaN(yearNumber) &&
-        yearNumber >= CURRENT_YEAR - 2 &&
-        yearNumber <= CURRENT_YEAR
-      );
+      const typedBudget = budget.budget as BudgetApiType & {
+        completude?: CompletudeStat;
+      };
+      return isYearIncomplete(typedBudget.completude);
     });
 
     return {
