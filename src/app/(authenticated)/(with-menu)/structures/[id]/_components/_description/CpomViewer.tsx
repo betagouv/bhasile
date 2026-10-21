@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 
+import { useCanUpdateStructures } from "@/app/hooks/useCanUpdateStructure";
 import { getCurrentCpomStructure } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
+import { getCpomStructureLink } from "@/utils/cpom-structure-link.util";
 
 export const CpomViewer = (): ReactElement => {
   const [showCpom, setShowCpom] = useState(false);
 
   const { structure } = useStructureContext();
+  const canUpdateStructure = useCanUpdateStructures();
 
   const currentCpomStructure = getCurrentCpomStructure(structure);
 
@@ -31,31 +34,35 @@ export const CpomViewer = (): ReactElement => {
       </div>
       {showCpom && (
         <div className="col-span-2 text-mention-grey">
-          {currentCpomStructure?.cpom?.structures?.map(
-            (structure) =>
-              structure.structure && (
-                <div key={structure.id} className="flex gap-2 items-center">
-                  <span className="flex gap-2 my-2">
-                    <strong className="pr-3">
-                      {structure.structure.codeBhasile}
-                    </strong>
-                    <span>{structure.structure.type}</span>{" "}
-                    <span>{structure.structure.operateur?.name}</span>{" "}
-                    <span>
-                      {structure.structure.communeAdministrative}
-                    </span>{" "}
-                  </span>
-                  {structure.structure.forms?.some((form) => form.status) && (
-                    <Link
-                      className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
-                      title="Voir la structure"
-                      aria-label="Voir la structure"
-                      href={`/structures/${structure.structure.id}`}
-                    />
-                  )}
-                </div>
-              )
-          )}
+          {currentCpomStructure?.cpom?.structures?.map((structure) => {
+            if (!structure.structure) {
+              return null;
+            }
+            const link = getCpomStructureLink(
+              structure.structure,
+              canUpdateStructure
+            );
+            return (
+              <div key={structure.id} className="flex gap-2 items-center">
+                <span className="flex gap-2 my-2">
+                  <strong className="pr-3">
+                    {structure.structure.codeBhasile}
+                  </strong>
+                  <span>{structure.structure.type}</span>{" "}
+                  <span>{structure.structure.operateur?.name}</span>{" "}
+                  <span>{structure.structure.communeAdministrative}</span>{" "}
+                </span>
+                {link && (
+                  <Link
+                    className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
+                    title={link.title}
+                    aria-label={link.title}
+                    href={link.href}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </>
