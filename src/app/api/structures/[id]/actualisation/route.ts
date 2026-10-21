@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { canUpdateStructure } from "@/lib/casl/abilities";
+import { canUpdateStructure } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureAgentUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";

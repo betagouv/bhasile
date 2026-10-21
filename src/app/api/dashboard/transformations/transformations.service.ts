@@ -2,7 +2,7 @@ import { getOngoingTransformationsForUser } from "@/app/api/transformations/tran
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { parseCommaList } from "@/app/utils/string.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
-import { defineAbilityFor } from "@/lib/casl/abilities";
+import { defineAbilityFor } from "@/lib/casl";
 import { DashboardTransformationRow } from "@/types/dashboard.type";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";

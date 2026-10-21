@@ -15,7 +15,7 @@ import {
   canAbilityReadStructure,
   defineAbilityFor,
   getReadableStructureWhere,
-} from "@/lib/casl/abilities";
+} from "@/lib/casl";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,

@@ -19,17 +19,17 @@ export const seedRolesAndAgents = async (
 
   const agents: AgentSeed[] = [
     {
-      name: "National",
+      name: "Jean Nation",
       email: `national@${TEST_EMAIL_DOMAIN}`,
       zone: { scope: GrantScope.NATIONAL },
     },
     {
-      name: ILE_DE_FRANCE,
+      name: "Jean Idf",
       email: `regional@${TEST_EMAIL_DOMAIN}`,
       zone: { scope: GrantScope.REGION, regionId: region.id },
     },
     {
-      name: "Paris",
+      name: "Jean Paris",
       email: `departemental@${TEST_EMAIL_DOMAIN}`,
       zone: { scope: GrantScope.DEPARTEMENT, departementNumeros: ["75"] },
     },

@@ -11,7 +11,7 @@ import { Principal } from "@/types/principal.type";
 
 const mockCanDeleteFile = vi.fn();
 
-vi.mock("@/lib/casl/abilities", () => ({
+vi.mock("@/lib/casl", () => ({
   canDeleteFile: (...args: unknown[]) => mockCanDeleteFile(...args),
 }));
 

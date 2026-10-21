@@ -2,7 +2,7 @@ import { getNow } from "@/app/utils/now.util";
 import {
   getReadableDepartementNumeros,
   getReadableStructureWhere,
-} from "@/lib/casl/abilities";
+} from "@/lib/casl";
 import {
   StatistiqueApiRead,
   StatistiquesFilters,

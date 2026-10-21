@@ -3,9 +3,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PUT } from "@/app/api/operateurs/[id]/route";
 
+const mockGetServerSession = vi.fn();
+const mockCanUpdateOperateur = vi.fn();
 const mockFindOne = vi.fn();
 const mockUpdateOne = vi.fn();
 const mockCreateOperateurEvent = vi.fn();
+
+vi.mock("next-auth", () => ({
+  getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
+}));
+
+vi.mock("@/lib/next-auth/auth", () => ({
+  authOptions: {},
+}));
+
+vi.mock("@/lib/casl", () => ({
+  canUpdateOperateur: (...args: unknown[]) => mockCanUpdateOperateur(...args),
+}));
 
 vi.mock("@/app/api/operateurs/operateur.repository", () => ({
   findOne: (...args: unknown[]) => mockFindOne(...args),
@@ -28,6 +42,38 @@ vi.mock("@/app/api/user-actions/user-action.service", () => ({
 describe("PUT /api/operateurs/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetServerSession.mockResolvedValue({ user: { id: "agent" } });
+    mockCanUpdateOperateur.mockReturnValue(true);
+  });
+
+  it.each([
+    {
+      status: 401,
+      cas: "l'utilisateur n'est pas authentifié",
+      setup: () => mockGetServerSession.mockResolvedValueOnce(null),
+    },
+    {
+      status: 403,
+      cas: "l'utilisateur n'a pas les droits sur l'opérateur",
+      setup: () => mockCanUpdateOperateur.mockReturnValueOnce(false),
+    },
+  ])("renvoie $status quand $cas", async ({ status, setup }) => {
+    // GIVEN
+    setup();
+    const request = new Request("http://localhost/api/operateurs/1", {
+      method: "PUT",
+      body: JSON.stringify({ name: "Adoma" }),
+    });
+
+    // WHEN
+    const response = await PUT(request as NextRequest, {
+      params: Promise.resolve({ id: "1" }),
+    });
+
+    // THEN
+    expect(response.status).toBe(status);
+    expect(mockUpdateOne).not.toHaveBeenCalled();
+    expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
   });
 
   it("renvoie 200 avec operateurId en cas de succès", async () => {

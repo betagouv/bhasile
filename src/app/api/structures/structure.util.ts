@@ -23,7 +23,7 @@ import {
   StructureType,
   StructureVersionTransformationType,
 } from "@/generated/prisma/client";
-import { canUpdateStructure } from "@/lib/casl/abilities";
+import { canUpdateStructure } from "@/lib/casl";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import {
   StructureAgentUpdateApiType,

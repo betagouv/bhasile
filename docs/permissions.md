@@ -56,7 +56,7 @@ Ce que couvre un binôme :
 
 Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports, RMU compris : ceux des départements couverts), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404, et sans user la lecture est refusée. Exception : la sélection de structure du formulaire opérateur (mot de passe, sans session) reste non filtrée, via `getFullStructuresForOperateur`. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
 
-Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `abilities.ts`) sert à la fois aux règles CASL de lecture et d'écriture et au filtre de droits `getReadableStructureWhere` des statistiques.
+Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `casl/rules.ts`) sert à la fois aux règles CASL de lecture et d'écriture et au filtre de droits `getReadableStructureWhere` des statistiques.
 
 Limites actuelles :
 
@@ -65,7 +65,7 @@ Limites actuelles :
 - **Users opérateurs** : les RMU des statistiques ne sont filtrés que par département, pas par opérateur. À fermer avec les statistiques en PR 3.
 - **Niveau structure** : pas d'accès aux transformations ni aux rappels CPOM du tableau de bord, qui restent contrôlés par département.
 
-Règle à respecter dans `abilities.ts` : le code ne compare jamais les rôles entre eux. Tout droit donné à un rôle doit l'être aussi aux rôles supérieurs, sinon la hiérarchie casse.
+Règle à respecter dans `casl/rules.ts` : le code ne compare jamais les rôles entre eux. Tout droit donné à un rôle doit l'être aussi aux rôles supérieurs, sinon la hiérarchie casse.
 
 ## Historique
 
@@ -97,7 +97,6 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
 
 ## Points d'attention
 
-- **API CPOM et opérateurs non protégées** : `src/app/api/cpoms` et `src/app/api/operateurs` ne vérifient aucun droit. Les règles CPOM et opérateurs ne servent qu'au bouton « modifier » et à la suppression de fichiers. Antérieur à cette PR.
 - **CPOM chargé sans ses listes** : la règle CPOM lit `departements` et `structures`. Passer à CASL un CPOM sans ces listes lève une erreur au lieu de refuser.
 - **Pas de contrainte en base sur `Grant`** : Prisma ne modélise pas les CHECK, et on ne veut pas de migration écrite à la main. Une ligne sans propriétaire ou sans cible est donc possible ; elle ne donne aucun droit. La cohérence est vérifiée par le service (PR 2).
 - **Premier binôme personnel d'un agent** : il remplace tous ses droits de base. Il faut recopier ceux à garder, au minimum `LECTEUR national`.
