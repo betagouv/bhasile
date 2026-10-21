@@ -95,7 +95,7 @@ export const TypesPlacesStatsTable = ({
             </td>
             {structureStat.value?.map((structureStatItem, columnIndex) => {
               const isIncomplete = isYearIncomplete(
-                statistiques.places.byYear[columnIndex].completude
+                placeYears[columnIndex].completude
               );
 
               return (
@@ -134,7 +134,7 @@ export const TypesPlacesStatsTable = ({
                 </td>
                 {structureStat.value?.map((structureStatItem, columnIndex) => {
                   const isIncomplete = isYearIncomplete(
-                    statistiques.places.byYear[columnIndex].completude
+                    placeYears[columnIndex].completude
                   );
 
                   return (
