@@ -119,5 +119,6 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
    - authentification des users opérateurs via ProConnect (adresses gmail) ;
    - cloisonnement : toutes les règles d'un user opérateur filtrées sur son `operateurId` ;
    - lecture des opérateurs filtrée ;
+   - écriture des CPOM : aucune règle ne la donne aux users opérateurs, même `ADMIN`, qui reçoivent un 403 sur `POST /api/cpoms` et `PUT /api/cpoms/[id]`. À trancher : leur ouvrir les CPOM de leur opérateur ou confirmer le refus ;
    - champs réservés aux agents masqués : notes, justification d'anomalies, contrôles, évaluations, CPOM, finalisation de transformation ;
    - Metabase et statistiques fermés aux opérateurs.

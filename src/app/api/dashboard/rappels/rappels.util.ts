@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+import { getCpomDepartementNumeros } from "@/app/api/cpoms/cpom.util";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   getDatesConvention,
@@ -126,9 +127,7 @@ const findCurrentCpom = (
       return {
         id: cpom.id,
         label: cpom.name ?? cpom.operateur?.name ?? null,
-        departements: cpom.departements.map(
-          (cpomDepartement) => cpomDepartement.departement.numero
-        ),
+        departements: getCpomDepartementNumeros(cpom),
       };
     }
   }
@@ -239,9 +238,7 @@ export const buildRappels = (
   }
 
   for (const cpom of cpoms) {
-    const departements = cpom.departements.map(
-      (cpomDepartement) => cpomDepartement.departement.numero
-    );
+    const departements = getCpomDepartementNumeros(cpom);
     if (!departements.some((dept) => canUpdateDepartement(user, dept))) {
       continue;
     }

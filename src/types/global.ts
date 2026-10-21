@@ -35,6 +35,7 @@ export type SessionGrant = {
   role: AccessRole;
   isNational: boolean;
   departementNumeros: string[];
+  regionIds: number[];
   structureIds: number[];
 };
 
