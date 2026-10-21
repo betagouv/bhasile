@@ -3,6 +3,7 @@ import { ReactElement, useMemo } from "react";
 import { ChartLegend } from "@/app/components/ChartLegend";
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
+import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
@@ -29,6 +30,7 @@ export const BalanceChart = ({
   const yearsWithBudget = useMemo(
     () =>
       years
+        .filter((year) => year < CURRENT_YEAR)
         .map((year) => ({
           year,
           budget: statistiques.finance.byYear?.find(
@@ -64,14 +66,9 @@ export const BalanceChart = ({
       (deficit) => -Math.abs(deficit)
     );
 
-    const incompleteYears = yearsWithBudget.map((budget) => {
-      const yearNumber = budget.year;
-      return (
-        !Number.isNaN(yearNumber) &&
-        yearNumber >= CURRENT_YEAR - 2 &&
-        yearNumber <= CURRENT_YEAR
-      );
-    });
+    const incompleteYears = yearsWithBudget.map((budget) =>
+      isYearIncomplete(budget.budget?.total.completude)
+    );
 
     return {
       labels,

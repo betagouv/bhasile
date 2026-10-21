@@ -24,7 +24,7 @@ export const PartialDataNotice = (): ReactElement => {
               loading="eager"
             />
           </span>{" "}
-          qui précise le nombre de structure qu’elle représente.
+          qui précise le nombre de structures qu’elle représente.
         </span>
       }
       className="rounded-lg bg-contrast-yellow-tournesol text-action-high-yellow-tournesol [&_.fr-container]:max-w-none"

@@ -15,6 +15,8 @@ const defaultColors = [
   "var(--blue-cumulus-850-200)",
 ];
 
+const PADDING_LEFT = 50;
+
 export default function BarChart({
   data,
   options,
@@ -74,7 +76,7 @@ export default function BarChart({
           style={{
             position: "absolute",
             top: 0,
-            left: 50,
+            left: PADDING_LEFT,
             right: 0,
             bottom: 0,
             display: "flex",
@@ -113,7 +115,7 @@ export default function BarChart({
         <div
           style={{
             display: "flex",
-            paddingLeft: 50,
+            paddingLeft: PADDING_LEFT,
             marginTop: 8,
           }}
         >

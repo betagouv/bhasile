@@ -93,7 +93,8 @@ export const FinanceCards = (): ReactElement => {
                 value={currentYear.total.tauxEncadrementTheoriquePrevisionnel!}
               />
             ),
-            secondaryInformation: "taux d'encadrement prévisionnel moyen",
+            secondaryInformation:
+              "taux d'encadrement théorique prévisionnel moyen",
           },
           {
             primaryInformation: (
@@ -128,7 +129,8 @@ export const FinanceCards = (): ReactElement => {
                 type="currency"
               />
             ),
-            secondaryInformation: "coût place journalier prévisionnel moyen",
+            secondaryInformation:
+              "coût place journalier théorique prévisionnel moyen",
           },
           {
             primaryInformation: (

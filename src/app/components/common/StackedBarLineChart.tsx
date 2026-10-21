@@ -9,6 +9,8 @@ import { useBarLineChart } from "@/app/hooks/useBarLineChart";
 
 import { StackedBarChartTooltip } from "./StackedBarChartTooltip";
 
+const PADDING_LEFT = 50;
+
 export const StackedBarLineChart = ({
   data,
   colors,
@@ -39,7 +41,7 @@ export const StackedBarLineChart = ({
       stackBars: false,
       fullWidth: false,
       axisX: { showGrid: false, showLabel: !renderLabel },
-      axisY: { offset: 50 },
+      axisY: { offset: PADDING_LEFT },
       seriesBarDistance: 0,
     }),
     [syncOptions, renderLabel]
@@ -52,7 +54,7 @@ export const StackedBarLineChart = ({
       lineSmooth: false,
       showGridBackground: false,
       axisX: { showGrid: false, showLabel: false },
-      axisY: { offset: 50, showGrid: false, showLabel: false },
+      axisY: { offset: PADDING_LEFT, showGrid: false, showLabel: false },
     }),
     [syncOptions]
   );
@@ -70,8 +72,8 @@ export const StackedBarLineChart = ({
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const containerBounds = event.currentTarget.getBoundingClientRect();
     const cursorX = event.clientX - containerBounds.left;
-    const availableWidth = containerBounds.width - 50;
-    const relativeX = cursorX - 50;
+    const availableWidth = containerBounds.width - PADDING_LEFT;
+    const relativeX = cursorX - PADDING_LEFT;
 
     if (relativeX < 0 || relativeX > availableWidth) {
       setActiveTooltip(null);
@@ -118,7 +120,7 @@ export const StackedBarLineChart = ({
           style={{
             position: "absolute",
             top: 0,
-            left: 50,
+            left: PADDING_LEFT,
             right: 0,
             bottom: 0,
             display: "flex",
@@ -184,7 +186,7 @@ export const StackedBarLineChart = ({
         <div
           style={{
             display: "flex",
-            paddingLeft: 50,
+            paddingLeft: PADDING_LEFT,
             marginTop: 8,
           }}
         >

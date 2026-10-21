@@ -11,21 +11,21 @@ export const StatistiquesCallouts = (): ReactElement => {
     {
       icon: "fr-icon-team-line",
       value: statistiques.places.totalPlaces.toLocaleString("fr-FR"),
-      titre: "places autorisées comptabilisées sur Bhasile",
+      title: "places autorisées comptabilisées sur Bhasile",
       description:
         "(somme des derniers chiffres en date issus des structures actives sur l’outil)",
     },
     {
       icon: "fr-icon-community-line",
       value: statistiques.structures.totalStructures.toLocaleString("fr-FR"),
-      titre: "structures d’hébergement comptabilisées sur Bhasile",
+      title: "structures d’hébergement comptabilisées sur Bhasile",
       description:
         "(parc hors PRAHDA, nuitées hôtelières et structures non initialisées dans l’outil)",
     },
     {
       icon: "ri-exchange-2-line",
       value: statistiques.structures.totalCpoms.toLocaleString("fr-FR"),
-      titre: "CPOM complets ou partiels comptabilisés sur Bhasile",
+      title: "CPOM complets ou partiels comptabilisés sur Bhasile",
       description:
         "(les CPOM partiels ont des structures en dehors de la zone définie dans les filtres)",
     },
@@ -39,7 +39,7 @@ export const StatistiquesCallouts = (): ReactElement => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {callouts.map((callout) => (
           <div
-            key={callout.titre}
+            key={callout.title}
             className="border-l-2 border-text-title-blue-france pl-4 flex flex-col justify-start"
           >
             <div className="flex items-center gap-2 mb-2">
@@ -52,7 +52,7 @@ export const StatistiquesCallouts = (): ReactElement => {
               </span>
             </div>
             <p className="font-bold text-title-blue-france mb-2">
-              {callout.titre}
+              {callout.title}
             </p>
             <p className="text-xs text-title-grey">{callout.description}</p>
           </div>
@@ -62,9 +62,9 @@ export const StatistiquesCallouts = (): ReactElement => {
   );
 };
 
-interface Callout {
+type Callout = {
   icon: string;
   value: string;
-  titre: string;
+  title: string;
   description: string;
-}
+};

@@ -9,7 +9,7 @@ import { GenericTypeChart } from "./GenericTypeChart";
 
 export const TypesStructures = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
-  const currentYearCompletude = statistiques.places.byYear.find(
+  const currentYearCompletude = statistiques.structures.byYear.find(
     (yearItem) => yearItem.year === CURRENT_YEAR
   )?.completude;
 
@@ -26,16 +26,20 @@ export const TypesStructures = (): ReactElement => {
       title={
         <>
           Types de structures en {CURRENT_YEAR}{" "}
-          <IncompleteDataIndicator
-            nbStructures={currentYearCompletude?.nbRenseignees ?? 0}
-            structuresPercentage={getPercentage(
-              currentYearCompletude?.nbRenseignees ?? 0,
-              currentYearCompletude?.nbAttendues ?? 1
-            )}
-          />
-          <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
-            {currentYearCompletude?.nbRenseignees} structures actualisées
-          </h5>
+          {!currentYearCompletude?.isComplete && (
+            <>
+              <IncompleteDataIndicator
+                nbStructures={currentYearCompletude?.nbRenseignees ?? 0}
+                structuresPercentage={getPercentage(
+                  currentYearCompletude?.nbRenseignees ?? 0,
+                  currentYearCompletude?.nbAttendues ?? 1
+                )}
+              />
+              <span className="hidden print:block text-title-blue-france text-sm font-normal">
+                {currentYearCompletude?.nbRenseignees} structures actualisées
+              </span>
+            </>
+          )}
         </>
       }
       colors={colors}
