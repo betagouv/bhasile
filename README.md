@@ -34,7 +34,7 @@ Le seed crée trois agents de test. Connectez-vous via ProConnect avec l'email v
 | Régional      | `regional@test.proconnect.gouv.fr`      | Île-de-France |
 | Départemental | `departemental@test.proconnect.gouv.fr` | Paris (75)    |
 
-Sur la page intermédiaire, choisissez `eidas2` et cliquez sur "Se connecter" : l'application exige la double authentification et refuse `eidas1`.
+Sur la page intermédiaire, choisissez `eidas1-mfa` et cliquez sur "Se connecter" : l'application exige la double authentification. `eidas2` et `eidas3` passent aussi ; `eidas1` et `eidas0` sont refusés.
 
 Pour changer de rôle, déconnectez-vous et reconnectez-vous avec un autre email.
 
