@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
+  CpomLinkedStructureDb,
   StructureDbList,
   StructureListLight,
   StructureListLightVersion,
@@ -24,6 +25,7 @@ import {
   isStructureClosed,
   isStructureFinalised,
   isStructureFinalisedAndOpen,
+  resolveCpomLinkedStructureFields,
   sortStructureRows,
   StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
@@ -465,6 +467,87 @@ describe("isStructureFinalised", () => {
         now
       )
     ).toBe(false);
+  });
+});
+
+describe("resolveCpomLinkedStructureFields", () => {
+  const buildCpomLinkedStructure = (
+    overrides: Partial<CpomLinkedStructureDb> = {}
+  ): CpomLinkedStructureDb =>
+    ({
+      id: 7,
+      codeBhasile: "CADA-007",
+      type: StructureType.CADA,
+      departementAdministratif: "54",
+      fermetureDate: null,
+      operateur: { name: "Opérateur" },
+      forms: [],
+      structureVersions: [buildVersion({ communeAdministrative: "Nancy" })],
+      ...overrides,
+    }) as CpomLinkedStructureDb;
+
+  const resolveStructure = (structure: CpomLinkedStructureDb) =>
+    resolveCpomLinkedStructureFields({ id: 1, structure }, now).structure;
+
+  it("marque non visible une structure sans formulaire ni création", () => {
+    expect(resolveStructure(buildCpomLinkedStructure())).toMatchObject({
+      isFinalised: false,
+      isVisible: false,
+      isClosed: false,
+    });
+  });
+
+  it("marque visible et non finalisée une structure au formulaire de finalisation en cours", () => {
+    const structure = buildCpomLinkedStructure({
+      forms: [
+        { status: false, formDefinition: { slug: FINALISATION_FORM_SLUG } },
+      ],
+    });
+    expect(resolveStructure(structure)).toMatchObject({
+      isFinalised: false,
+      isVisible: true,
+    });
+  });
+
+  it("marque finalisée et visible une structure née d'une création, sans formulaire", () => {
+    const structure = buildCpomLinkedStructure({
+      structureVersions: [
+        buildVersion({
+          communeAdministrative: "Nancy",
+          structureVersionTransformationId: 5,
+          structureVersionTransformation: {
+            type: StructureVersionTransformationType.CREATION,
+            transformation: { form: { status: true } },
+          } as unknown as StructureListLightVersion["structureVersionTransformation"],
+        }),
+      ],
+    });
+    expect(resolveStructure(structure)).toMatchObject({
+      isFinalised: true,
+      isVisible: true,
+    });
+  });
+
+  it("marque fermée une structure dont la fermeture est passée", () => {
+    const structure = buildCpomLinkedStructure({
+      fermetureDate: new Date("2025-01-01T00:00:00.000Z"),
+    });
+    expect(resolveStructure(structure)).toMatchObject({ isClosed: true });
+  });
+
+  it("résout la commune de la version courante sans exposer les formulaires ni les versions", () => {
+    const structure = resolveStructure(buildCpomLinkedStructure());
+    expect(structure).toMatchObject({ communeAdministrative: "Nancy" });
+    expect(structure).not.toHaveProperty("forms");
+    expect(structure).not.toHaveProperty("structureVersions");
+    expect(structure).not.toHaveProperty("fermetureDate");
+  });
+
+  it("laisse intacte une ligne sans structure", () => {
+    const cpomStructure = { id: 1, structure: null };
+    expect(resolveCpomLinkedStructureFields(cpomStructure, now)).toBe(
+      cpomStructure
+    );
   });
 });
 

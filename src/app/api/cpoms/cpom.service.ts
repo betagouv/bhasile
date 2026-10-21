@@ -13,7 +13,7 @@ import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
-import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
+import { resolveCpomLinkedStructureFields } from "../structures/structure.util";
 import { CpomDbDetails } from "./cpom.db.type";
 import { createOrUpdateCpom, findAllCpoms, findOne } from "./cpom.repository";
 import {
@@ -23,21 +23,10 @@ import {
   sortValueForCpomColumn,
 } from "./cpom.util";
 
-const resolveCpomStructureFields = (
-  cpomStructure: CpomDbDetails["structures"][number],
-  now: Date
-) => {
-  if (!cpomStructure.structure) {
-    return cpomStructure;
-  }
-  return {
-    ...cpomStructure,
-    structure: resolveCurrentVersionFields(cpomStructure.structure, now),
-  };
-};
-
 type ResolvedCpomDetails = Omit<CpomDbDetails, "structures"> & {
-  structures: ReturnType<typeof resolveCpomStructureFields>[];
+  structures: ReturnType<
+    typeof resolveCpomLinkedStructureFields<CpomDbDetails["structures"][number]>
+  >[];
 };
 
 const getFullCpom = (cpom: ResolvedCpomDetails): CpomApiRead => {
@@ -89,7 +78,7 @@ export const getCpomById = async (
   const resolvedCpom = {
     ...cpom,
     structures: cpom.structures.map((cpomStructure) =>
-      resolveCpomStructureFields(cpomStructure, now)
+      resolveCpomLinkedStructureFields(cpomStructure, now)
     ),
   };
   return getFullCpom(resolvedCpom);
