@@ -7,6 +7,7 @@ export const createSessionGrant = (
   role: AccessRole.EDITEUR,
   isNational: false,
   departementNumeros: [],
+  regionIds: [],
   structureIds: [],
   ...overrides,
 });

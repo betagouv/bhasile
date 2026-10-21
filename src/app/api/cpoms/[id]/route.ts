@@ -8,7 +8,7 @@ import { cpomApiSchema } from "@/schemas/api/cpom.schema";
 import { SessionUser } from "@/types/global";
 
 import { createCpomEvent } from "../../user-actions/user-action.service";
-import { getCpomScope, saveCpom } from "../cpom.service";
+import { getCpomScope, prepareCpomToSave, saveCpom } from "../cpom.service";
 
 export async function PUT(
   request: NextRequest,
@@ -28,14 +28,15 @@ export async function PUT(
     if (!existingCpom) {
       return NextResponse.json({ error: "CPOM introuvable" }, { status: 404 });
     }
-    if (!canSaveCpom(session.user as SessionUser, result, existingCpom)) {
+    const cpomToSave = await prepareCpomToSave(result, existingCpom);
+    if (!canSaveCpom(session.user as SessionUser, cpomToSave, existingCpom)) {
       return NextResponse.json(
         { error: "Droits insuffisants" },
         { status: 403 }
       );
     }
 
-    const cpomId = await saveCpom(result);
+    const cpomId = await saveCpom(cpomToSave);
     createCpomEvent(request.method, cpomId);
     return NextResponse.json({ cpomId }, { status: 200 });
   } catch (error) {

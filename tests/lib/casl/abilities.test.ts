@@ -8,7 +8,11 @@ import {
 import { describe, expect, it } from "vitest";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
-import { AccessRole, Structure } from "@/generated/prisma/client";
+import {
+  AccessRole,
+  CpomGranularity,
+  Structure,
+} from "@/generated/prisma/client";
 import {
   canAbilityReadCpom,
   canAbilityReadStructure,
@@ -193,6 +197,53 @@ describe("Permissions : binôme de niveau structure", () => {
   });
 });
 
+describe("Permissions : CPOM régionaux", () => {
+  const agent59 = createSessionUser({
+    grants: [
+      createSessionGrant({ departementNumeros: ["59"], regionIds: [7] }),
+    ],
+  });
+
+  it("couvre les CPOM régionaux de la région d'un binôme départemental ou régional", () => {
+    const ability = defineAbilityFor(agent59);
+
+    expect(
+      ability.can(
+        "update",
+        buildCpom({ granularity: "REGIONALE", regionId: 7 })
+      )
+    ).toBe(true);
+    expect(
+      ability.can(
+        "update",
+        buildCpom({ granularity: "REGIONALE", regionId: 8 })
+      )
+    ).toBe(false);
+  });
+
+  it("ne couvre pas un CPOM départemental d'un autre département de la même région", () => {
+    expect(
+      defineAbilityFor(agent59).can(
+        "update",
+        buildCpom({
+          granularity: "DEPARTEMENTALE",
+          regionId: 7,
+          departementNumeros: ["62"],
+        })
+      )
+    ).toBe(false);
+  });
+
+  it("contrôle la sauvegarde d'un CPOM régional sur sa région", () => {
+    const regional = (regionId: number) =>
+      buildCpomScope({ granularity: "REGIONALE", regionId });
+
+    expect(canSaveCpom(agent59, regional(7), null)).toBe(true);
+    expect(canSaveCpom(agent59, regional(8), null)).toBe(false);
+    expect(canSaveCpom(agent59, regional(8), regional(7))).toBe(false);
+  });
+});
+
 describe("Permissions : CPOM et opérateurs", () => {
   it("autorise un éditeur départemental sur un CPOM au moins en partie lié à son département", () => {
     const ability = defineAbilityFor(createDepartementalAgent(["13"]));
@@ -339,12 +390,18 @@ describe("Permissions : canUpdateOperateur", () => {
 });
 
 const buildCpomScope = ({
+  granularity,
+  regionId,
   departementNumeros = [],
   structureIds = [],
 }: {
+  granularity?: CpomGranularity;
+  regionId?: number;
   departementNumeros?: string[];
   structureIds?: number[];
 }) => ({
+  granularity,
+  regionId,
   departements: departementNumeros.map((numero) => ({
     departement: { numero },
   })),

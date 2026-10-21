@@ -106,11 +106,14 @@ const makeCpom = (
     actesAdministratifs: ActeAdministratifDates[];
     departementNumeros: string[];
     operateur: { id: number; name: string };
+    region: RappelCpom["region"];
   }> = {}
 ): RappelCpom => ({
   id: overrides.id ?? 10,
   name: "COALLIA",
   operateur: overrides.operateur ?? { id: 2, name: "Coallia" },
+  granularity: overrides.region ? "REGIONALE" : "INTERDEPARTEMENTALE",
+  region: overrides.region ?? null,
   departements: (overrides.departementNumeros ?? ["92", "93"]).map(
     (numero) => ({ departement: { numero } })
   ),
@@ -358,5 +361,18 @@ describe("buildRappels — scoping & CPOM", () => {
       ],
     });
     expect(buildRappels([], [cpom], baseOptions)).toHaveLength(0);
+  });
+
+  it("prend les départements d'un CPOM régional dans sa région", () => {
+    const cpom = makeCpom({
+      departementNumeros: [],
+      region: { departements: [{ numero: "92" }, { numero: "75" }] },
+      actesAdministratifs: [
+        parentActe("CONVENTION", "2020-01-01", "2026-08-01"),
+      ],
+    });
+    expect(buildRappels([], [cpom], baseOptions)).toMatchObject([
+      { cpomId: 10, cpomDepartements: ["92", "75"] },
+    ]);
   });
 });

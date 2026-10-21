@@ -4,9 +4,13 @@ export const grantSelect = {
   role: true,
   scope: true,
   region: {
-    select: { name: true, departements: { select: { numero: true } } },
+    select: {
+      id: true,
+      name: true,
+      departements: { select: { numero: true } },
+    },
   },
-  departement: { select: { numero: true, name: true } },
+  departement: { select: { numero: true, name: true, regionId: true } },
   structure: { select: { id: true, codeBhasile: true } },
 } satisfies Prisma.GrantSelect;
 
