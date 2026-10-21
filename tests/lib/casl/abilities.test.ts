@@ -19,6 +19,7 @@ import {
   canUpdateOperateur,
   canUpdateStructure,
   defineAbilityFor,
+  getReadableCpomWhere,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
 } from "@/lib/casl";
@@ -423,6 +424,18 @@ describe("Permissions : lecture", () => {
     expect(getReadableStructureWhere(createSessionUser())).toEqual({
       id: { in: [] },
     });
+  });
+
+  it("ne filtre rien pour un agent qui lit au niveau national", () => {
+    const lecteurNational = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(getReadableStructureWhere(lecteurNational)).toEqual({});
+    expect(getReadableCpomWhere(lecteurNational)).toEqual({});
+    expect(getReadableCpomWhere(createDepartementalAgent(["75"]))).toEqual({});
   });
 
   it("ne filtre rien pour un superadmin", () => {

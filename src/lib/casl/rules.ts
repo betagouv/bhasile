@@ -57,10 +57,18 @@ const defineReadRules = (
     user.operateurId === null ? {} : { operateurId: user.operateurId };
 
   for (const conditions of user.grants.flatMap(getStructureConditions)) {
-    can("read", "Structure", { ...conditions, ...operateurCondition });
+    can(
+      "read",
+      "Structure",
+      toRuleConditions({ ...conditions, ...operateurCondition })
+    );
   }
   for (const conditions of user.grants.flatMap(getCpomConditions)) {
-    can("read", "Cpom", { ...conditions, ...operateurCondition });
+    can(
+      "read",
+      "Cpom",
+      toRuleConditions({ ...conditions, ...operateurCondition })
+    );
   }
   can("read", "Operateur");
 };
@@ -77,11 +85,11 @@ const defineAgentRules = (
   }
 
   for (const conditions of editingGrants.flatMap(getStructureConditions)) {
-    can("update", "Structure", conditions);
+    can("update", "Structure", toRuleConditions(conditions));
   }
 
   for (const conditions of editingGrants.flatMap(getCpomConditions)) {
-    can("update", "Cpom", conditions);
+    can("update", "Cpom", toRuleConditions(conditions));
   }
   can("update", "Operateur");
 };
@@ -95,6 +103,11 @@ const defineOperateurRules = (
     can("update", "Operateur", { id: operateurId });
   }
 };
+
+// Prisma traduit `OR: [{}]` par « aucune ligne » : une règle sans restriction
+// doit être déclarée sans conditions pour qu'accessibleBy renvoie `{}`.
+const toRuleConditions = <T extends object>(conditions: T): T | undefined =>
+  Object.keys(conditions).length > 0 ? conditions : undefined;
 
 const EDITING_ROLES: AccessRole[] = [AccessRole.EDITEUR, AccessRole.ADMIN];
 
