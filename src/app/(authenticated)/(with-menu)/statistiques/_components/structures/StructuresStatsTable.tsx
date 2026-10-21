@@ -93,7 +93,7 @@ export const StructuresStatsTable = (): ReactElement => {
             </td>
             {structureStat.value?.map((structureStatItem, columnIndex) => {
               const isIncomplete = isYearIncomplete(
-                statistiques.structures.byYear[columnIndex].completude
+                structureYears[columnIndex].completude
               );
 
               return (
@@ -131,7 +131,7 @@ export const StructuresStatsTable = (): ReactElement => {
                 </td>
                 {structureStat.value?.map((structureStatItem, columnIndex) => {
                   const isIncomplete = isYearIncomplete(
-                    statistiques.structures.byYear[columnIndex].completude
+                    structureYears[columnIndex].completude
                   );
 
                   return (

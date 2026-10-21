@@ -130,8 +130,12 @@ export const FinancesTablePresenter = ({
   });
 
   const completudeByYear = new Map<number, CompletudeStat | undefined>(
-    (statistiques?.places?.byYear ?? []).map(
-      (yearItem) => [yearItem.year, yearItem.completude ?? undefined] as const
+    (statistiques?.finance?.byYear ?? []).map(
+      (yearItem) =>
+        [
+          yearItem.year,
+          yearItem[visualization].completude ?? undefined,
+        ] as const
     )
   );
 

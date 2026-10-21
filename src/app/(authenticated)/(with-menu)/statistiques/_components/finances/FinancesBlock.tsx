@@ -16,9 +16,10 @@ import { FinancesStatsTable } from "./FinancesStatsTable";
 
 export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
-  const documentsFinanciersOpenYearCompletude = statistiques.places.byYear.find(
-    (yearItem) => yearItem.year === DOCUMENTS_FINANCIERS_OPEN_YEAR
-  )?.completude;
+  const documentsFinanciersOpenYearCompletude =
+    statistiques.finance.byYear.find(
+      (yearItem) => yearItem.year === DOCUMENTS_FINANCIERS_OPEN_YEAR
+    )?.total.completude;
 
   const nbStructures =
     documentsFinanciersOpenYearCompletude?.nbRenseignees || 0;
