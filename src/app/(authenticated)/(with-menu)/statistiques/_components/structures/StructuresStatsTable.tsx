@@ -161,7 +161,7 @@ const getHeadings = (
   isExporting: boolean
 ) => {
   const dates =
-    structureYears.map((yearItem) => {
+    structureYears.map((yearItem, index) => {
       const isIncomplete = isYearIncomplete(yearItem.completude);
       const nbRenseignees = yearItem.completude?.nbRenseignees ?? 0;
       const nbAttendues = yearItem.completude?.nbAttendues ?? 1;
@@ -187,6 +187,7 @@ const getHeadings = (
                     nbRenseignees,
                     nbAttendues
                   )}
+                  align={index === structureYears.length - 1 ? "end" : null}
                 />
               ))}
           </div>

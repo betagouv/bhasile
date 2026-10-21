@@ -2,6 +2,7 @@
 
 import { ReactElement } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const StatistiquesCallouts = (): ReactElement => {
@@ -10,21 +11,21 @@ export const StatistiquesCallouts = (): ReactElement => {
   const callouts: Callout[] = [
     {
       icon: "fr-icon-team-line",
-      value: statistiques.places.totalPlaces.toLocaleString("fr-FR"),
+      value: statistiques.places.totalPlaces,
       title: "places autorisées comptabilisées sur Bhasile",
       description:
         "(somme des derniers chiffres en date issus des structures actives sur l’outil)",
     },
     {
       icon: "fr-icon-community-line",
-      value: statistiques.structures.totalStructures.toLocaleString("fr-FR"),
+      value: statistiques.structures.totalStructures,
       title: "structures d’hébergement comptabilisées sur Bhasile",
       description:
         "(parc hors PRAHDA, nuitées hôtelières et structures non initialisées dans l’outil)",
     },
     {
       icon: "ri-exchange-2-line",
-      value: statistiques.structures.totalCpoms.toLocaleString("fr-FR"),
+      value: statistiques.structures.totalCpoms,
       title: "CPOM complets ou partiels comptabilisés sur Bhasile",
       description:
         "(les CPOM partiels ont des structures en dehors de la zone définie dans les filtres)",
@@ -48,7 +49,7 @@ export const StatistiquesCallouts = (): ReactElement => {
                 aria-hidden="true"
               />
               <span className="text-5xl font-bold text-title-blue-france">
-                {callout.value}
+                <NumberDisplay value={callout.value} />
               </span>
             </div>
             <p className="font-bold text-title-blue-france mb-2">
@@ -64,7 +65,7 @@ export const StatistiquesCallouts = (): ReactElement => {
 
 type Callout = {
   icon: string;
-  value: string;
+  value: number;
   title: string;
   description: string;
 };

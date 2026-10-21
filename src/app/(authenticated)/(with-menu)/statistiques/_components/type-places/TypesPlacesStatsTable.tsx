@@ -161,7 +161,7 @@ export const TypesPlacesStatsTable = ({
 
 const getHeadings = (placeYears: PlacesByYearStat[], isExporting: boolean) => {
   const dates =
-    placeYears.map((yearItem) => {
+    placeYears.map((yearItem, index) => {
       const isIncomplete = isYearIncomplete(yearItem.completude);
       const nbRenseignees = yearItem.completude?.nbRenseignees ?? 0;
       const nbAttendues = yearItem.completude?.nbAttendues ?? 1;
@@ -189,6 +189,7 @@ const getHeadings = (placeYears: PlacesByYearStat[], isExporting: boolean) => {
                     nbRenseignees,
                     nbAttendues
                   )}
+                  align={index === placeYears.length - 1 ? "end" : null}
                 />
               ))}
           </div>

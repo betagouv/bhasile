@@ -3,6 +3,7 @@
 import { ReactElement } from "react";
 
 import { getPercentage } from "@/app/utils/common.util";
+import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
@@ -33,13 +34,15 @@ export const TypesPlacesBlock = ({
       <div className="pb-16">
         <h4 className="text-title-blue-france text-lg print:mb-0">
           En {CURRENT_YEAR}{" "}
-          <IncompleteDataIndicator
-            nbStructures={currentYearCompletude?.nbRenseignees || 0}
-            structuresPercentage={getPercentage(
-              currentYearCompletude?.nbRenseignees || 0,
-              currentYearCompletude?.nbAttendues || 1
-            )}
-          />
+          {isYearIncomplete(currentYearCompletude) && (
+            <IncompleteDataIndicator
+              nbStructures={currentYearCompletude?.nbRenseignees || 0}
+              structuresPercentage={getPercentage(
+                currentYearCompletude?.nbRenseignees || 0,
+                currentYearCompletude?.nbAttendues || 1
+              )}
+            />
+          )}
         </h4>
         <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
           {currentYearCompletude?.nbRenseignees} structures actualisées

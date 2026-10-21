@@ -259,7 +259,7 @@ const getHeadings = (
   isExporting: boolean
 ) => {
   const dates =
-    financeYears.map((yearItem) => {
+    financeYears.map((yearItem, index) => {
       const isIncomplete = isYearIncomplete(yearItem[visualization].completude);
       const completude = completudeByYear.get(yearItem.year);
       const nbRenseignees = completude?.nbRenseignees ?? 0;
@@ -286,6 +286,7 @@ const getHeadings = (
                     nbRenseignees,
                     nbAttendues
                   )}
+                  align={index === financeYears.length - 1 ? "end" : null}
                 />
               ))}
           </div>

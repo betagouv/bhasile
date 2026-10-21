@@ -58,7 +58,7 @@ export const DotationChart = ({
       const typedBudget = budget.budget as BudgetApiType & {
         completude?: CompletudeStat;
       };
-      return isYearIncomplete(typedBudget.completude);
+      return isYearIncomplete(typedBudget?.completude);
     });
 
     return {
