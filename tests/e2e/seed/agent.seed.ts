@@ -7,7 +7,6 @@ export const E2E_AGENT_EMAIL = "e2e.agent@bhasile.local";
 export const E2E_AGENT_NAME = "E2E Agent";
 
 const E2E_AGENT_DEPARTEMENT = "75";
-const E2E_AGENT_EMAIL_PATTERN = "^e2e\\.agent@bhasile\\.local$";
 
 export const seedAgent = async (): Promise<void> => {
   const departement = await prisma.departement.findUnique({
@@ -20,36 +19,24 @@ export const seedAgent = async (): Promise<void> => {
     );
   }
 
-  const emailPattern = await prisma.emailPattern.upsert({
-    where: { pattern: E2E_AGENT_EMAIL_PATTERN },
+  const user = await prisma.user.upsert({
+    where: { email: E2E_AGENT_EMAIL },
     update: {},
-    create: { pattern: E2E_AGENT_EMAIL_PATTERN },
+    create: {
+      email: E2E_AGENT_EMAIL,
+      name: E2E_AGENT_NAME,
+      lastConnection: getNow(),
+    },
     select: { id: true },
   });
 
-  await prisma.grant.deleteMany({
-    where: { emailPatternId: emailPattern.id },
-  });
+  await prisma.grant.deleteMany({ where: { userId: user.id } });
   await prisma.grant.create({
     data: {
-      emailPatternId: emailPattern.id,
+      userId: user.id,
       role: AccessRole.EDITEUR,
       scope: GrantScope.DEPARTEMENT,
       departementNumero: departement.numero,
     },
-  });
-
-  await prisma.user.upsert({
-    where: { email: E2E_AGENT_EMAIL },
-    update: { emailPatternId: emailPattern.id },
-    create: {
-      email: E2E_AGENT_EMAIL,
-      name: E2E_AGENT_NAME,
-      emailPatternId: emailPattern.id,
-      lastConnection: getNow(),
-    },
-  });
-  await prisma.grant.deleteMany({
-    where: { user: { email: E2E_AGENT_EMAIL } },
   });
 };
