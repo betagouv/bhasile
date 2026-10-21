@@ -84,13 +84,18 @@ export const getFinanceSchema = (
     z.infer<BudgetSchema>[]
   >;
 
+  const indicateursFinanciersSchema = getIndicateursFinanciersSchema(
+    indicateurCutoff,
+    structure.isInCpomPerYear
+  );
+
   if (formKind === FormKind.FINALISATION) {
     return z
       .object({
         budgets,
         cpomStructures: z.array(cpomStructureSchema),
       })
-      .and(getIndicateursFinanciersSchema(indicateurCutoff));
+      .and(indicateursFinanciersSchema);
   }
 
   return z
@@ -98,7 +103,7 @@ export const getFinanceSchema = (
       budgets,
       cpomStructures: z.array(cpomStructureSchema),
     })
-    .and(getIndicateursFinanciersSchema(indicateurCutoff))
+    .and(indicateursFinanciersSchema)
     .and(DocumentsFinanciersFlexibleSchema);
 };
 

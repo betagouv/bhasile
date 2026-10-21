@@ -39,6 +39,22 @@ describe("POST /api/files", () => {
     mockUuidV4.mockReturnValue("fixed-uuid");
   });
 
+  it("retourne 400 quand aucun fichier n'est fourni", async () => {
+    // GIVEN
+    const request = new Request("http://localhost/api/files", {
+      method: "POST",
+      body: new FormData(),
+    });
+
+    // WHEN
+    const response = await POST(request);
+
+    // THEN
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Aucun fichier fourni" });
+    expect(mockPutObject).not.toHaveBeenCalled();
+  });
+
   it("retourne 400 quand la validation du fichier échoue", async () => {
     // GIVEN
     const file = new File(["content"], "test.exe", { type: "application/exe" });

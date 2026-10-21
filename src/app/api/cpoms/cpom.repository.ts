@@ -1,3 +1,4 @@
+import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
   CpomApiWrite,
@@ -16,8 +17,10 @@ import {
   cpomListInclude,
 } from "./cpom.db.type";
 
-export const findAllCpoms = (): Promise<CpomDbList[]> =>
-  prisma.cpom.findMany({ include: cpomListInclude });
+export const findAllCpoms = (
+  where: Prisma.CpomWhereInput
+): Promise<CpomDbList[]> =>
+  prisma.cpom.findMany({ where, include: cpomListInclude });
 
 export const findOne = async (id: number): Promise<CpomDbDetails | null> => {
   const cpom = await prisma.cpom.findFirst({

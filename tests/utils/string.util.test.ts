@@ -4,6 +4,7 @@ import {
   capitalizeFirstLetter,
   formatFirstWithRestCount,
   formatPlural,
+  matchesSearchQuery,
   normalizeAccents,
   parseId,
   pluralize,
@@ -43,6 +44,41 @@ describe("string util", () => {
       expect(normalizeAccents("Ex æquo")).toBe("ex aequo");
     });
   });
+
+  describe("matchesSearchQuery", () => {
+    it("retourne vrai pour une correspondance exacte", () => {
+      expect(matchesSearchQuery("Finistère", "Finistère")).toBe(true);
+    });
+
+    it("est insensible à la casse et aux accents", () => {
+      expect(matchesSearchQuery("Finistère", "finistere")).toBe(true);
+      expect(matchesSearchQuery("ÎLE-DE-FRANCE", "ile de france")).toBe(true);
+    });
+
+    it("est insensible aux tirets, apostrophes et espaces multiples", () => {
+      expect(matchesSearchQuery("Ille-et-Vilaine", "ille et vilaine")).toBe(
+        true
+      );
+      expect(matchesSearchQuery("Côtes-d'Armor", "cotes d armor")).toBe(true);
+      expect(matchesSearchQuery("Val-d'Oise", "val-d'oise")).toBe(true);
+    });
+
+    it("prend en compte les recherches partielles", () => {
+      expect(matchesSearchQuery("Ille-et-Vilaine", "vilaine")).toBe(true);
+      expect(matchesSearchQuery("Finistère", "fini")).toBe(true);
+    });
+
+    it("retourne vrai lorsque la recherche est vide ou constituée d'espaces", () => {
+      expect(matchesSearchQuery("Finistère", "")).toBe(true);
+      expect(matchesSearchQuery("Finistère", "   ")).toBe(true);
+    });
+
+    it("retourne faux lorsqu'il n'y a pas de correspondance", () => {
+      expect(matchesSearchQuery("Finistère", "Gironde")).toBe(false);
+      expect(matchesSearchQuery("Finistère", "29")).toBe(false);
+    });
+  });
+
   describe("capitalizeFirstLetter", () => {
     it("préserve une chaîne déjà capitalisée", () => {
       expect(capitalizeFirstLetter("Hello")).toBe("Hello");
@@ -67,6 +103,7 @@ describe("string util", () => {
       expect(capitalizeFirstLetter(undefined)).toBe("");
     });
   });
+
   describe("formatPlural", () => {
     it("ne met pas de 's' au singulier ni à zéro", () => {
       expect(formatPlural(0, "entrée")).toBe("0 entrée");
@@ -79,6 +116,7 @@ describe("string util", () => {
       expect(formatPlural(undefined, "entrée")).toBe("0 entrée");
     });
   });
+
   describe("pluralize", () => {
     it("ne met pas de 's' au singulier ni à zéro, sans préfixer le nombre", () => {
       expect(pluralize(0, "structure")).toBe("structure");

@@ -25,8 +25,13 @@ vi.mock("@/app/api/anomalies/anomalie.service", () => ({
   recomputeAnomaliesSafely: vi.fn(),
 }));
 
+const mockCanAccessApp = vi.fn().mockReturnValue(true);
+
 vi.mock("@/lib/casl/abilities", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
+  canAbilityReadStructure: () => true,
+  canAccessApp: (...args: unknown[]) => mockCanAccessApp(...args),
+  defineAbilityFor: () => ({}),
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
@@ -116,7 +121,6 @@ describe("GET /api/structures/[id]", () => {
     const dbStructure = {
       id: 1,
       name: "Test",
-      filiale: null,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
       cpomStructures: [],
@@ -146,7 +150,6 @@ describe("GET /api/structures/[id]", () => {
       id: 1,
       name: "Test",
       nom: "",
-      filiale: undefined,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
       adresses: [{ id: 1 }],
@@ -209,7 +212,6 @@ describe("GET /api/structures/[id]", () => {
     const dbStructure = {
       id: 2,
       name: "Test",
-      filiale: null,
       operateur: { id: 1, name: "Adoma" },
       cpomStructures: [],
       creationDate: new Date("2020-01-01"),
@@ -292,6 +294,24 @@ describe("GET /api/structures/[id]", () => {
     // THEN
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(structure);
+    expect(mockFindOneOperateur).toHaveBeenCalledWith(1);
+    expect(mockFindOne).not.toHaveBeenCalled();
+  });
+
+  it("passe par le chemin opérateur pour une session sans binôme", async () => {
+    // GIVEN
+    const structure = { id: 1 };
+    mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
+    mockCanAccessApp.mockReturnValueOnce(false);
+    mockFindOneOperateur.mockResolvedValueOnce(structure);
+
+    const request = new NextRequest("http://localhost/api/structures/1");
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(response.status).toBe(200);
     expect(mockFindOneOperateur).toHaveBeenCalledWith(1);
     expect(mockFindOne).not.toHaveBeenCalled();
   });

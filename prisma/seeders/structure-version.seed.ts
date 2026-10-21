@@ -45,7 +45,6 @@ const TYPOLOGIE_START_YEAR = 2022;
 
 export type SeedStructureParams = {
   operateurId: number;
-  filiale: string | null;
   codeBhasile: string;
   departementAdministratif: string;
   type: StructureType;
@@ -589,7 +588,6 @@ export const buildStructureCreate = (
   return {
     codeBhasile: params.codeBhasile,
     operateur: { connect: { id: params.operateurId } },
-    filiale: params.filiale,
     creationDate: history.creationDate,
     fermetureDate: fermeture?.effectiveDate ?? null,
     departement: { connect: { numero: params.departementAdministratif } },

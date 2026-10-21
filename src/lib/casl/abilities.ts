@@ -1,5 +1,10 @@
 import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
-import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
+import {
+  accessibleBy,
+  createPrismaAbility,
+  PrismaQuery,
+  Subjects,
+} from "@casl/prisma";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
 import type {
@@ -34,17 +39,36 @@ export const defineAbilityFor = (user?: SessionUser) => {
 
 const defineRulesFor = (user?: SessionUser) => {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
-  defineAnonymousRules(builder);
+  if (!user || !canAccessApp(user)) {
+    return builder.rules;
+  }
+  defineReadRules(builder, user);
 
-  if (user?.isSuperAdmin) {
+  if (user.isSuperAdmin) {
     builder.can("manage", "all");
-  } else if (user?.operateurId === null) {
+  } else if (user.operateurId === null) {
     defineAgentRules(builder, user);
-  } else if (typeof user?.operateurId === "number") {
+  } else if (typeof user.operateurId === "number") {
     defineOperateurRules(builder, user, user.operateurId);
   }
 
   return builder.rules;
+};
+
+const defineReadRules = (
+  { can }: AbilityBuilder<AppAbility>,
+  user: SessionUser
+) => {
+  const operateurCondition =
+    user.operateurId === null ? {} : { operateurId: user.operateurId };
+
+  for (const conditions of user.grants.flatMap(getStructureConditions)) {
+    can("read", "Structure", { ...conditions, ...operateurCondition });
+  }
+  for (const conditions of user.grants.flatMap(getCpomConditions)) {
+    can("read", "Cpom", { ...conditions, ...operateurCondition });
+  }
+  can("read", "Operateur");
 };
 
 const defineAgentRules = (
@@ -76,10 +100,6 @@ const defineOperateurRules = (
   if (user.grants.some((grant) => grant.role === AccessRole.ADMIN)) {
     can("update", "Operateur", { id: operateurId });
   }
-};
-
-const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
-  can("read", ["Structure", "Cpom", "Operateur"]);
 };
 
 const EDITING_ROLES: AccessRole[] = [AccessRole.EDITEUR, AccessRole.ADMIN];
@@ -127,6 +147,54 @@ const getCpomConditions = ({
       : []),
   ];
 };
+
+export const canAccessApp = (user: SessionUser): boolean =>
+  user.isSuperAdmin || (user.grants?.length ?? 0) > 0;
+
+const NO_RECORD_WHERE = { id: { in: [] } };
+
+export const getReadableStructureWhere = (
+  user: SessionUser | undefined
+): Prisma.StructureWhereInput => {
+  const ability = defineAbilityFor(user);
+  return ability.can("read", "Structure")
+    ? accessibleBy(ability).Structure
+    : NO_RECORD_WHERE;
+};
+
+export const getReadableCpomWhere = (
+  user: SessionUser | undefined
+): Prisma.CpomWhereInput => {
+  const ability = defineAbilityFor(user);
+  return ability.can("read", "Cpom")
+    ? accessibleBy(ability).Cpom
+    : NO_RECORD_WHERE;
+};
+
+export const getReadableDepartementNumeros = (
+  user: SessionUser
+): Set<string> | null => {
+  if (user.isSuperAdmin || user.grants.some((grant) => grant.isNational)) {
+    return null;
+  }
+  return new Set(user.grants.flatMap((grant) => grant.departementNumeros));
+};
+
+export const canAbilityReadStructure = (
+  ability: AppAbility,
+  structure: StructureScope
+) =>
+  ability.can(
+    "read",
+    subject("Structure", {
+      id: structure.id,
+      departementAdministratif: structure.departementAdministratif,
+      operateurId: structure.operateurId,
+    } as Structure)
+  );
+
+export const canAbilityReadCpom = (ability: AppAbility, cpom: CpomScope) =>
+  ability.can("read", subject("Cpom", { ...cpom } as never));
 
 export const canUpdateStructure = (
   user: SessionUser,
@@ -202,4 +270,10 @@ export const canDeleteFile = (
 type StructureScope = {
   id?: number;
   departementAdministratif?: string | null;
+  operateurId?: number | null;
+};
+
+type CpomScope = {
+  departements: { departement?: { numero: string } | null }[];
+  structures: { structureId: number }[];
 };

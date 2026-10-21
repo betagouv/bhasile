@@ -2,25 +2,38 @@ import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import {
+  createDepartementalAgent,
+  createSessionUser,
+} from "tests/test-utils/factories/session-user.factory";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { config, proxy } from "@/proxy";
 import {
   noProtectionPage,
   passwordProtectedPages,
+  pendingAccessPage,
   proConnectProtectedPages,
   protectedApiRoutes,
 } from "@/proxy/auth-config";
 
 vi.stubEnv("NEXTAUTH_SECRET", "secret-de-test");
 
-vi.mock("next-auth", () => ({ getServerSession: () => null }));
+const { mockGetServerSession } = vi.hoisted(() => ({
+  mockGetServerSession: vi.fn(),
+}));
+
+vi.mock("next-auth", () => ({ getServerSession: mockGetServerSession }));
 vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
 
 const httpMethods = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
 const unprotectedAuthenticatedPages = ["/deconnexion"];
 
 describe("proxy", () => {
+  beforeEach(() => {
+    mockGetServerSession.mockResolvedValue(null);
+  });
+
   it("redirige vers la connexion chaque page authentifiée", async () => {
     const pages = listAuthenticatedPages().filter(
       (page) => !unprotectedAuthenticatedPages.includes(page)
@@ -40,6 +53,40 @@ describe("proxy", () => {
         (page) => `${page} → /connexion?callbackUrl=${encodeURIComponent(page)}`
       )
     );
+  });
+
+  it("redirige un utilisateur connecté sans aucun droit vers la page d'attente", async () => {
+    mockGetServerSession.mockResolvedValue({ user: createSessionUser() });
+
+    const response = await proxy(
+      new NextRequest("http://localhost/structures")
+    );
+
+    expect(response.headers.get("location")).toBe(
+      `http://localhost${pendingAccessPage}`
+    );
+  });
+
+  it("refuse les routes d'API ProConnect à un utilisateur connecté sans aucun droit", async () => {
+    mockGetServerSession.mockResolvedValue({ user: createSessionUser() });
+
+    const response = await proxy(
+      new NextRequest("http://localhost/api/statistiques")
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it("laisse passer un utilisateur qui a au moins un binôme", async () => {
+    mockGetServerSession.mockResolvedValue({
+      user: createDepartementalAgent(["75"]),
+    });
+
+    const response = await proxy(
+      new NextRequest("http://localhost/api/statistiques")
+    );
+
+    expect(response.status).toBe(200);
   });
 
   it("intercepte chaque page déclarée comme protégée", () => {

@@ -3,9 +3,14 @@ import { cache } from "react";
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
+import {
+  canAbilityReadCpom,
+  defineAbilityFor,
+  getReadableCpomWhere,
+} from "@/lib/casl/abilities";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
-import { CpomListItem } from "@/types/cpom.type";
-import { CpomColumn } from "@/types/ListColumn";
+import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
+import { SessionUser } from "@/types/global";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
@@ -45,17 +50,18 @@ const getFullCpom = (cpom: ResolvedCpomDetails): CpomApiRead => {
   }) as CpomApiRead;
 };
 
-// Arguments primitifs obligatoires : cache() compare avec Object.is, un objet
-// littéral serait recréé à chaque appel et les Suspense requêteraient deux fois.
+// Mémoïsé sur la référence de query : la page construit une seule query et la
+// passe à chaque Suspense, donc compteur et tableau partagent le cache.
 export const getCpoms = cache(
-  async (
-    page: number | null,
-    departements: string | null,
-    column: CpomColumn | null,
-    direction: "asc" | "desc" | null
-  ): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
-    const allCpoms = await findAllCpoms();
-    const filtered = filterCpomsByDepartement(allCpoms, departements);
+  async ({
+    page,
+    departements,
+    column,
+    direction,
+    user,
+  }: CpomsQuery): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
+    const readableCpoms = await findAllCpoms(getReadableCpomWhere(user));
+    const filtered = filterCpomsByDepartement(readableCpoms, departements);
     const sorted = sortRows(
       filtered,
       (cpom) => sortValueForCpomColumn(cpom, column ?? "region"),
@@ -71,9 +77,12 @@ export const getCpoms = cache(
   }
 );
 
-export const getCpomById = async (id: number): Promise<CpomApiRead | null> => {
+export const getCpomById = async (
+  id: number,
+  user: SessionUser | undefined
+): Promise<CpomApiRead | null> => {
   const cpom = await findOne(id);
-  if (!cpom) {
+  if (!cpom || !canAbilityReadCpom(defineAbilityFor(user), cpom)) {
     return null;
   }
   const now = getNow();

@@ -4,6 +4,7 @@ import {
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
+import { addDashboardOrigin } from "@/utils/dashboardOrigin.util";
 
 import { expect, test } from "../fixtures/test";
 import { mockBanApi } from "../pages/shared/ban-mock.helper";
@@ -110,7 +111,9 @@ test.describe("Transformations — comportements transverses", () => {
     // dans le DOM : on cible celle qui est réellement rendue à l'écran.
     await expect(
       page
-        .locator(`a[href="/structures/transformation/${transformationId}"]`)
+        .locator(
+          `a[href="${addDashboardOrigin(`/structures/transformation/${transformationId}`)}"]`
+        )
         .filter({ visible: true })
     ).toBeVisible();
   });

@@ -1,5 +1,5 @@
 import { getNow } from "@/app/utils/now.util";
-import { Structure } from "@/generated/prisma/client";
+import { Prisma, Structure } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
@@ -35,9 +35,11 @@ import {
   StructureVersionAdresses,
 } from "./structure.db.type";
 
-export const findAllStructures = (): Promise<StructureListLight[]> =>
+export const findAllStructures = (
+  where: Prisma.StructureWhereInput
+): Promise<StructureListLight[]> =>
   prisma.structure.findMany({
-    where: includedStructureWhere,
+    where: { AND: [includedStructureWhere, where] },
     select: structureListLightSelect,
   });
 
@@ -242,14 +244,13 @@ const updateStructure = async (
   structure: StructureAgentUpdateApiType,
   isOperateurUpdate: boolean
 ): Promise<Structure> => {
-  const { operateur, filiale, creationDate, date303 } = structure;
+  const { operateur, creationDate, date303 } = structure;
 
   const updatedStructure = await tx.structure.update({
     where: {
       id: structure.id,
     },
     data: {
-      filiale,
       creationDate: creationDate ?? undefined,
       date303,
       type: isOperateurUpdate ? structure.type : undefined,

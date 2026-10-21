@@ -283,7 +283,6 @@ async function seed(): Promise<void> {
 
       structureParams.push({
         operateurId: filiale?.id ?? operateur.id,
-        filiale: filiale?.name ?? null,
         codeBhasile,
         departementAdministratif,
         type: randomType(),

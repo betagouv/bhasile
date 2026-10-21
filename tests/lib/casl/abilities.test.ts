@@ -10,10 +10,15 @@ import { describe, expect, it } from "vitest";
 import type { FileWithParents } from "@/app/api/files/file.db.type";
 import { AccessRole, Structure } from "@/generated/prisma/client";
 import {
+  canAbilityReadCpom,
+  canAbilityReadStructure,
+  canAccessApp,
   canDeleteFile,
   canUpdateDepartement,
   canUpdateStructure,
   defineAbilityFor,
+  getReadableDepartementNumeros,
+  getReadableStructureWhere,
 } from "@/lib/casl/abilities";
 import { SessionUser } from "@/types/global";
 
@@ -274,6 +279,178 @@ const buildCpom = ({
   } as never);
 
 const buildOperateur = (id: number) => subject("Operateur", { id } as never);
+
+describe("Permissions : lecture", () => {
+  const lecteurVar = createSessionUser({
+    grants: [
+      createSessionGrant({
+        role: AccessRole.LECTEUR,
+        departementNumeros: ["83"],
+      }),
+    ],
+  });
+
+  it("limite la lecture des structures aux binômes de l'utilisateur, lecteur compris", () => {
+    const ability = defineAbilityFor(lecteurVar);
+
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 1,
+        departementAdministratif: "83",
+      })
+    ).toBe(true);
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 2,
+        departementAdministratif: "01",
+      })
+    ).toBe(false);
+  });
+
+  it("donne la lecture de toutes les structures avec un binôme national", () => {
+    const ability = defineAbilityFor(createDepartementalAgent(["75"]));
+
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 2,
+        departementAdministratif: "01",
+      })
+    ).toBe(true);
+  });
+
+  it("limite la lecture des CPOM à ceux liés au moins en partie aux binômes", () => {
+    const ability = defineAbilityFor(lecteurVar);
+
+    expect(
+      canAbilityReadCpom(ability, {
+        departements: [
+          { departement: { numero: "06" } },
+          { departement: { numero: "83" } },
+        ],
+        structures: [],
+      })
+    ).toBe(true);
+    expect(
+      canAbilityReadCpom(ability, {
+        departements: [{ departement: { numero: "01" } }],
+        structures: [],
+      })
+    ).toBe(false);
+  });
+
+  it("construit un filtre sur les structures qui reprend les binômes de droits", () => {
+    expect(getReadableStructureWhere(lecteurVar)).toEqual({
+      OR: [{ departementAdministratif: { in: ["83"] } }],
+    });
+  });
+
+  it("construit un filtre qui ne renvoie rien sans binôme de droits", () => {
+    expect(getReadableStructureWhere(createSessionUser())).toEqual({
+      id: { in: [] },
+    });
+  });
+
+  it("ne filtre rien pour un superadmin", () => {
+    expect(
+      getReadableStructureWhere(createSessionUser({ isSuperAdmin: true }))
+    ).toEqual({});
+  });
+
+  it("refuse la lecture sans utilisateur", () => {
+    const ability = defineAbilityFor(undefined);
+
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 1,
+        departementAdministratif: "83",
+      })
+    ).toBe(false);
+    expect(
+      canAbilityReadCpom(ability, {
+        departements: [{ departement: { numero: "83" } }],
+        structures: [],
+      })
+    ).toBe(false);
+  });
+
+  it("liste les départements lisibles, sans limite pour un binôme national", () => {
+    expect(getReadableDepartementNumeros(lecteurVar)).toEqual(new Set(["83"]));
+    expect(
+      getReadableDepartementNumeros(createDepartementalAgent(["75"]))
+    ).toBeNull();
+    expect(getReadableDepartementNumeros(createSessionUser())).toEqual(
+      new Set()
+    );
+  });
+
+  it("donne la lecture de la fiche d'une structure de son opérateur à un utilisateur opérateur", () => {
+    const ability = defineAbilityFor(
+      createSessionUser({
+        operateurId: 7,
+        grants: [
+          createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+        ],
+      })
+    );
+
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 1,
+        departementAdministratif: "83",
+        operateurId: 7,
+      })
+    ).toBe(true);
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 2,
+        departementAdministratif: "83",
+        operateurId: 8,
+      })
+    ).toBe(false);
+  });
+
+  it("restreint le filtre d'un utilisateur type opérateur à son opérateur", () => {
+    const user = createSessionUser({
+      operateurId: 7,
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(getReadableStructureWhere(user)).toEqual({
+      OR: [{ operateurId: 7 }],
+    });
+  });
+});
+
+describe("Permissions : canAccessApp", () => {
+  it("refuse l'accès à un utilisateur sans aucun binôme de droits", () => {
+    expect(canAccessApp(createSessionUser())).toBe(false);
+  });
+
+  it("donne l'accès dès un binôme, même lecteur", () => {
+    const user = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(canAccessApp(user)).toBe(true);
+  });
+
+  it("donne l'accès à un superadmin sans binôme", () => {
+    expect(canAccessApp(createSessionUser({ isSuperAdmin: true }))).toBe(true);
+  });
+
+  it("n'accorde aucune lecture à un utilisateur sans binôme", () => {
+    expect(
+      defineAbilityFor(createSessionUser()).can(
+        "read",
+        subject("Structure", {} as never)
+      )
+    ).toBe(false);
+  });
+});
 
 describe("Permissions : canUpdateDepartement", () => {
   const nationalUser = createNationalAgent();

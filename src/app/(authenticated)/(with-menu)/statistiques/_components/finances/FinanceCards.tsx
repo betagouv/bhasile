@@ -21,7 +21,7 @@ export const FinanceCards = (): ReactElement => {
                 compact={true}
               />
             ),
-            secondaryInformation: "dotation totale annuelle versée par l'Etat",
+            secondaryInformation: "dotation totale annuelle versée par l'État",
           },
           {
             primaryInformation: (

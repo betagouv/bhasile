@@ -32,7 +32,10 @@ export const IndicateursFinanciers = () => {
 
   return (
     <fieldset className="flex flex-col gap-6 min-w-0 w-full">
-      <legend className="text-xl font-bold mb-8 text-title-blue-france">
+      <legend
+        id="indicateursGeneraux"
+        className="text-xl font-bold mb-8 text-title-blue-france"
+      >
         Indicateurs généraux
       </legend>
       <CustomNotice
@@ -45,9 +48,10 @@ export const IndicateursFinanciers = () => {
         janvier de chaque année.
       </p>
       <Table
-        ariaLabelledBy="gestionBudgetaire"
+        ariaLabelledBy="indicateursGeneraux"
         preHeadings={getIndicateurFinancierTablePreHeading({
           years: yearsToDisplay,
+          isInCpomPerYear: structure.isInCpomPerYear,
         })}
         headings={getIndicateurFinancierTableHeading({
           years: yearsToDisplay,

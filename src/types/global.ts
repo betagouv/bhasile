@@ -22,7 +22,6 @@ export const FormKind = {
   MODIFICATION: "modification",
   FINALISATION: "finalisation",
   ACTUALISATION: "actualisation",
-  ADRESSES_RECOVERY: "adresses-recovery",
   OUVERTURE_EX_NIHILO: "ouverture-ex-nihilo",
   OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES:
     "ouverture-depuis-une-ou-plusieurs-structures",

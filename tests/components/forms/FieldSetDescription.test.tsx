@@ -1,5 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
@@ -12,11 +11,6 @@ vi.mock("@/app/components/forms/autocomplete/OperateurAutocompleteRhf", () => ({
   OperateurAutocompleteRhf: () => <div data-testid="operateur-autocomplete" />,
 }));
 
-// Mock auto-animate
-vi.mock("@formkit/auto-animate", () => ({
-  default: vi.fn(),
-}));
-
 describe("FieldSetDescription", () => {
   describe("Rendering finalisation form", () => {
     it("rend tous les champs correctement", () => {
@@ -26,7 +20,6 @@ describe("FieldSetDescription", () => {
             dnaCode: "C0001",
             type: StructureType.CADA,
             operateur: { id: 1, name: "Adoma" },
-            filiale: "",
             creationDate: "01/01/2020",
             public: PublicType.TOUT_PUBLIC,
             cpom: false,
@@ -37,12 +30,6 @@ describe("FieldSetDescription", () => {
       );
 
       expect(screen.getByText("Description")).toBeInTheDocument();
-
-      expect(
-        screen.getByRole("checkbox", {
-          name: /Cette structure appartient-elle à une filiale/i,
-        })
-      ).toBeInTheDocument();
 
       expect(screen.getByLabelText("Type de structure")).toBeInTheDocument();
 
@@ -105,74 +92,8 @@ describe("FieldSetDescription", () => {
       );
 
       expect(
-        screen.queryByText(/Cette structure appartient-elle à une filiale/i)
-      ).not.toBeInTheDocument();
-      expect(
         screen.queryByLabelText("Date de création de la structure")
       ).not.toBeInTheDocument();
-    });
-  });
-
-  describe("Filiale toggle interaction", () => {
-    it("affiche le champ filiale quand l'interrupteur est activé", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-            filiale: "",
-          }}
-        >
-          <FieldSetDescription formKind={FormKind.FINALISATION} />
-        </FormTestWrapper>
-      );
-
-      expect(screen.queryByLabelText("Filiale")).not.toBeInTheDocument();
-
-      const toggle = screen.getByRole("checkbox", {
-        name: /Cette structure appartient-elle à une filiale/i,
-      });
-      await user.click(toggle);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText("Filiale")).toBeInTheDocument();
-      });
-    });
-
-    it("affiche le champ filiale quand l'interrupteur est activé", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-            filiale: "",
-          }}
-        >
-          <FieldSetDescription formKind={FormKind.FINALISATION} />
-        </FormTestWrapper>
-      );
-
-      const toggle = screen.getByRole("checkbox", {
-        name: /Cette structure appartient-elle à une filiale/i,
-      });
-
-      // First click - show filiale field
-      await user.click(toggle);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText("Filiale")).toBeInTheDocument();
-      });
-
-      // Second click - hide filiale field
-      await user.click(toggle);
-
-      await waitFor(() => {
-        expect(screen.queryByLabelText("Filiale")).not.toBeInTheDocument();
-      });
     });
   });
 

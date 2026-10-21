@@ -1,8 +1,18 @@
+import { createNationalAgent } from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "@/app/api/structures/stats/route";
 
 const mockfindAllStructures = vi.fn();
+const mockGetServerSession = vi.fn();
+
+vi.mock("next-auth", () => ({
+  getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
+}));
+
+vi.mock("@/lib/next-auth/auth", () => ({
+  authOptions: {},
+}));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
   findStructureVersionAdresses: vi.fn().mockResolvedValue([]),
@@ -48,6 +58,7 @@ describe("GET /api/structures/stats", () => {
 
   it("retourne le minimum et le maximum de places autorisées", async () => {
     // GIVEN
+    mockGetServerSession.mockResolvedValue({ user: createNationalAgent() });
     mockfindAllStructures.mockResolvedValue([
       lightStructureWithPlaces(1, 500),
       lightStructureWithPlaces(2, 10),
@@ -63,5 +74,6 @@ describe("GET /api/structures/stats", () => {
       minPlacesAutorisees: 10,
     });
     expect(mockfindAllStructures).toHaveBeenCalledTimes(1);
+    expect(mockfindAllStructures).toHaveBeenCalledWith({ OR: [{}] });
   });
 });

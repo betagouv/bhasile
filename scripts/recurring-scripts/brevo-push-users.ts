@@ -13,6 +13,13 @@ const prisma = createPrismaClient();
 const run = async () => {
   try {
     const users = await prisma.user.findMany({
+      where: {
+        operateurId: null,
+        OR: [
+          { grants: { some: {} } },
+          { emailPattern: { grants: { some: {} } } },
+        ],
+      },
       select: {
         email: true,
         lastConnection: true,

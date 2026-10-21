@@ -580,6 +580,7 @@ const emptyFilters: SearchProps = {
   placesAutorisees: null,
   departements: null,
   operateurs: null,
+  user: undefined,
 };
 
 describe("filterStructureRows", () => {

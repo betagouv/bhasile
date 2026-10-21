@@ -33,7 +33,7 @@ export const getDashboardRappels = async (
   const now = getNow();
   const [structures, cpoms] = await Promise.all([
     findRappelStructures(),
-    findAllCpoms(),
+    findAllCpoms({}),
   ]);
 
   const rappels = buildRappels(structures, cpoms, {
