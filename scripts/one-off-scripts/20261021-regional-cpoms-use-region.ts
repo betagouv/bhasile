@@ -71,7 +71,7 @@ const migrateRegionalCpoms = async () => {
       ]);
     }
     console.log(
-      `  • ${label} : ${cpom.departements.length} ligne(s) CpomDepartement supprimée(s)`
+      `  • ${label} : ${cpom.departements.length} ligne(s) CpomDepartement ${isDryRun ? "à supprimer" : "supprimée(s)"}`
     );
     counts.migrated++;
   }

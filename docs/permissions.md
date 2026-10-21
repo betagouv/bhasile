@@ -50,7 +50,7 @@ Quels binômes s'appliquent à un user :
 Ce que couvre un binôme :
 
 - **Structures** : national = toutes ; région ou département = celles dont le département de rattachement est couvert ; structure = celle-là.
-- **CPOM** : national = tous ; région ou département = ceux dont au moins un département est couvert ; structure = ceux liés à cette structure.
+- **CPOM** : national = tous ; région ou département = ceux dont au moins un département est couvert, plus les CPOM régionaux de la région concernée ; structure = ceux liés à cette structure. Un CPOM régional n'a pas de ligne `CpomDepartement` : il couvre tous les départements de sa région (`regionId`), et `getCpomDepartements` (`cpoms/cpom.util.ts`) les en déduit pour toute l'application.
 - **Opérateurs** : un agent éditeur, quel que soit son niveau, modifie tous les opérateurs ; un user opérateur `ADMIN` modifie le sien. La lecture des opérateurs n'est pas filtrée.
 - **User opérateur** : tout est en plus restreint aux structures et CPOM de son opérateur.
 
@@ -97,7 +97,7 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
 
 ## Points d'attention
 
-- **CPOM chargé sans ses listes** : la règle CPOM lit `departements` et `structures`. Passer à CASL un CPOM sans ces listes lève une erreur au lieu de refuser.
+- **CPOM chargé sans ses listes** : la règle CPOM lit `departements`, `structures`, `granularity` et `regionId`. Passer à CASL un CPOM sans ces listes lève une erreur au lieu de refuser.
 - **Pas de contrainte en base sur `Grant`** : Prisma ne modélise pas les CHECK, et on ne veut pas de migration écrite à la main. Une ligne sans propriétaire ou sans cible est donc possible ; elle ne donne aucun droit. La cohérence est vérifiée par le service (PR 2).
 - **Premier binôme personnel d'un agent** : il remplace tous ses droits de base. Il faut recopier ceux à garder, au minimum `LECTEUR national`.
 - **Maisons mères et filiales** (`Operateur.parentId`) : non géré, à traiter plus tard.
