@@ -58,16 +58,12 @@ export const buildFilialesByParentId = (
 
 export const filterStructuresByZoneAndTypes = (
   structures: StructureListLight[],
-  filters: ParsedGlobalFilters,
-  now: Date
+  filters: ParsedGlobalFilters
 ): StructureListLight[] =>
   structures.filter((structure) =>
     matchesGlobalFilters(
       {
-        departements: [
-          resolveCurrentVersion(structure.structureVersions, now)
-            ?.departementAdministratif,
-        ],
+        departements: [structure.departementAdministratif],
         types: [structure.type],
       },
       filters

@@ -35,7 +35,13 @@ export default async function StatistiquesPage({
     <StatistiquesProvider entity={statistiques}>
       <div className="flex flex-col h-full">
         <StatistiquesHeader />
-        <StatistiquesContent />
+        {statistiques ? (
+          <StatistiquesContent />
+        ) : (
+          <p className="p-16">
+            Aucune structure finalisée ne correspond à vos filtres.
+          </p>
+        )}
       </div>
     </StatistiquesProvider>
   );
