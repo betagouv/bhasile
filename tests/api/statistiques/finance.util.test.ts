@@ -576,6 +576,24 @@ describe("finance - cartographie", () => {
   });
 });
 
+describe("finance - années", () => {
+  it("ne renvoie pas d'année postérieure à l'année en cours", () => {
+    const currentYear = new Date().getUTCFullYear();
+    const result = computeFinanceStatistiques(
+      buildFinanceContext({
+        structures: [testStructure(1, StructureType.CADA)],
+        budgets: [
+          budgetRow(1, 1, currentYear, 100, 0),
+          budgetRow(2, 1, currentYear + 1, 100, 0),
+        ],
+      }),
+      "moyenne"
+    );
+
+    expect(result.byYear.map((entry) => entry.year)).toEqual([currentYear]);
+  });
+});
+
 describe("finance - jours x places", () => {
   const context = {
     openingDateByStructureId: new Map([

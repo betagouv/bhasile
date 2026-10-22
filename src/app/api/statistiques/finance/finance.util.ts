@@ -352,11 +352,12 @@ export const computeFinanceStatistiques = (
   context: StatistiquesContext,
   aggregation: NumericAggregation
 ): StatistiqueApiRead["finance"] => {
+  const currentYear = getNow().getUTCFullYear();
   const years = collectDistinctYears(
     context.budgets,
     [...context.cpomBudgetByKey.values()],
     context.indicateurs
-  );
+  ).filter((year) => year <= currentYear);
 
   return {
     byYear: years.map((year) => {
