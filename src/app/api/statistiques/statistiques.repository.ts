@@ -9,7 +9,6 @@ import {
   FINALISATION_FORM_SLUG,
 } from "../forms/form.constants";
 import { finalizedVersionWhere } from "../structure-versions/structure-version.db.type";
-import { visibleStructureWhere } from "../structures/structure.db.type";
 import type {
   StatistiqueDbActivite,
   StatistiqueDbAdresse,
@@ -57,7 +56,7 @@ export const findPerimeterStructures = async (
 ): Promise<StatistiqueDbStructure[]> =>
   prisma.structure.findMany({
     where: {
-      AND: [readableWhere, visibleStructureWhere(reference)],
+      AND: [readableWhere],
       type: { in: [...resolved.types] },
       ...(resolved.departements
         ? { departementAdministratif: { in: [...resolved.departements] } }

@@ -38,9 +38,7 @@ export default async function StatistiquesPage({
         {statistiques ? (
           <StatistiquesContent />
         ) : (
-          <p className="p-16">
-            Aucune structure finalisée ne correspond à vos filtres.
-          </p>
+          <p className="p-16">Aucune structure ne correspond à vos filtres.</p>
         )}
       </div>
     </StatistiquesProvider>
