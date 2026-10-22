@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { SearchParamsNavigationOptions } from "@/app/hooks/useSearchParamsNavigation";
+import { GLOBAL_FILTERS_COOKIE } from "@/constants";
 
 const mockReplace = vi.fn();
 let mockSearchParams = new URLSearchParams();
@@ -22,6 +23,34 @@ describe("useFilterNavigation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSearchParams = new URLSearchParams("page=3&search=coquelic");
+    document.cookie = `${GLOBAL_FILTERS_COOKIE}=; path=/`;
+  });
+
+  it("mémorise les filtres globaux dans le cookie, y compris une sélection vidée", async () => {
+    // GIVEN
+    const user = userEvent.setup();
+    mockSearchParams = new URLSearchParams("departements=75&types=CADA");
+    render(<Filter filterKey="types" values={[]} />);
+
+    // WHEN
+    await user.click(screen.getByRole("button", { name: "filtrer" }));
+
+    // THEN
+    expect(document.cookie).toContain(
+      `${GLOBAL_FILTERS_COOKIE}=${encodeURIComponent("departements=75")}`
+    );
+  });
+
+  it("ne touche pas au cookie pour un filtre propre à la page", async () => {
+    // GIVEN
+    const user = userEvent.setup();
+    render(<Filter filterKey="search" values={["abri"]} />);
+
+    // WHEN
+    await user.click(screen.getByRole("button", { name: "filtrer" }));
+
+    // THEN
+    expect(document.cookie).not.toContain("search");
   });
 
   it("joint la sélection et ramène à la première page", async () => {
@@ -71,15 +100,17 @@ describe("useFilterNavigation", () => {
 });
 
 const Filter = ({
+  filterKey = "departements",
   values,
   options,
 }: {
+  filterKey?: string;
   values: (string | number)[];
   options?: SearchParamsNavigationOptions;
 }): ReactElement => {
   const navigateWithFilter = useFilterNavigation();
   return (
-    <button onClick={() => navigateWithFilter("departements", values, options)}>
+    <button onClick={() => navigateWithFilter(filterKey, values, options)}>
       filtrer
     </button>
   );

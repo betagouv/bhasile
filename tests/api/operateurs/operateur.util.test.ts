@@ -5,10 +5,13 @@ import {
   buildOperateurListItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
+  filterStructuresByZoneAndTypes,
   groupStructureStatsByOperateur,
+  isOperateurSelected,
 } from "@/app/api/operateurs/operateur.util";
 import type { OperateurListItem } from "@/types/operateur.type";
 import { StructureType } from "@/types/structure.type";
+import { parseGlobalFilters } from "@/utils/global-filters.util";
 
 const now = new Date("2025-01-01T00:00:00.000Z");
 
@@ -16,6 +19,7 @@ type StructureFixtureVersion = {
   effectiveDate: Date;
   type: StructureType | null;
   placesAutorisees: number | null;
+  departementAdministratif?: string;
 };
 
 let versionIdSeq = 0;
@@ -38,6 +42,7 @@ const makeStructure = (
             structureVersionTransformationId: null,
             structureVersionTransformation: null,
             placesAutorisees: version.placesAutorisees,
+            departementAdministratif: version.departementAdministratif,
           },
         ]
       : [],
@@ -232,5 +237,49 @@ describe("filterOperateursBySearch", () => {
     expect(
       filterOperateursBySearch(items, "ADOMA").map((operateur) => operateur.id)
     ).toEqual([2]);
+  });
+});
+
+describe("filterStructuresByZoneAndTypes", () => {
+  it("garde les structures dont la version courante est dans la zone et du type filtrés", () => {
+    const structures = [
+      makeStructure(1, 1, {
+        ...currentVersion(StructureType.CADA, 10),
+        departementAdministratif: "75",
+      }),
+      makeStructure(2, 1, {
+        ...currentVersion(StructureType.HUDA, 10),
+        departementAdministratif: "75",
+      }),
+      makeStructure(3, 2, {
+        ...currentVersion(StructureType.CADA, 10),
+        departementAdministratif: "92",
+      }),
+    ];
+
+    const filtered = filterStructuresByZoneAndTypes(
+      structures,
+      parseGlobalFilters({ departements: "75", types: "CADA" }),
+      now
+    );
+
+    expect(filtered.map((structure) => structure.id)).toEqual([1]);
+  });
+});
+
+describe("isOperateurSelected", () => {
+  const topLevelByOperateurId = buildTopLevelOperateurMap([
+    makeOperateur(1, "Groupe", null),
+    makeOperateur(2, "Filiale", null, 1),
+    makeOperateur(3, "Autre", null),
+  ]);
+
+  it("sélectionne tous les opérateurs sans filtre", () => {
+    expect(isOperateurSelected(3, [], topLevelByOperateurId)).toBe(true);
+  });
+
+  it("sélectionne le groupe quand une de ses filiales est filtrée", () => {
+    expect(isOperateurSelected(1, ["2"], topLevelByOperateurId)).toBe(true);
+    expect(isOperateurSelected(3, ["2"], topLevelByOperateurId)).toBe(false);
   });
 });

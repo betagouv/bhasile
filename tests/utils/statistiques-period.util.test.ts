@@ -7,7 +7,9 @@ import {
 } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
 
-const periodOfYear = (year: number) => ({ date: `${year}-06-15T00:00:00.000Z` });
+const periodOfYear = (year: number) => ({
+  date: `${year}-06-15T00:00:00.000Z`,
+});
 
 describe("statistiques period util", () => {
   describe("filterDisplayedPeriods", () => {
@@ -18,7 +20,9 @@ describe("statistiques period util", () => {
     });
 
     it("exclut les périodes antérieures à START_YEAR", () => {
-      expect(filterDisplayedPeriods([periodOfYear(START_YEAR - 1)])).toEqual([]);
+      expect(filterDisplayedPeriods([periodOfYear(START_YEAR - 1)])).toEqual(
+        []
+      );
     });
 
     it("exclut les périodes postérieures à l'année courante", () => {

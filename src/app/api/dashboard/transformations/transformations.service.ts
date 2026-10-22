@@ -1,11 +1,11 @@
 import { getOngoingTransformationsForUser } from "@/app/api/transformations/transformation.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
-import { parseCommaList } from "@/app/utils/string.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { defineAbilityFor } from "@/lib/casl";
 import { DashboardTransformationRow } from "@/types/dashboard.type";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
+import { parseGlobalFilters } from "@/utils/global-filters.util";
 
 import { buildDashboardTransformationRows } from "./transformations.util";
 
@@ -22,9 +22,7 @@ export const getDashboardTransformations = async (
 
   const rows = buildDashboardTransformationRows(transformations, {
     ability: defineAbilityFor(user),
-    departementList: parseCommaList(filters.departements),
-    operateurList: parseCommaList(filters.operateurs),
-    typeList: parseCommaList(filters.type),
+    ...parseGlobalFilters(filters),
   });
 
   return paginateWithTotal(rows, page, MIDDLE_PAGE_SIZE);

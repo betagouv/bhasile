@@ -5,11 +5,11 @@ import {
 import { getActualisationYear } from "@/app/api/structures/actualisation.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
-import { parseCommaList } from "@/app/utils/string.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { InitialisationsActualisationsApiRead } from "@/types/dashboard.type";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
+import { parseGlobalFilters } from "@/utils/global-filters.util";
 
 import {
   findDashboardStructures,
@@ -29,9 +29,7 @@ export const getInitialisationsActualisations = async (
 
   const rows = buildDashboardRows(structures, {
     user,
-    typeList: parseCommaList(filters.type),
-    departementList: parseCommaList(filters.departements),
-    operateurList: parseCommaList(filters.operateurs),
+    ...parseGlobalFilters(filters),
     year,
     now,
   });
