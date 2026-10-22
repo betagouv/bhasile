@@ -2,7 +2,7 @@
 
 ## Millésimes
 
-Union des années présentes dans `Budget` (structures et CPOM) ou `IndicateurFinancier`.
+Union des années présentes dans `Budget` (structures et CPOM) ou `IndicateurFinancier`, jusqu'à l'année en cours : un budget CPOM saisi pour une année future (convention en cours) ne crée pas de colonne.
 
 Le front choisit l'année affichée dans `byYear`.
 
