@@ -148,8 +148,8 @@ export const StackedBarLineChart = ({
           style={{
             position: "absolute",
             top: 0,
-            left: 0,
-            width: "100%",
+            left: PADDING_LEFT,
+            right: 0,
             height: "100%",
           }}
         />
