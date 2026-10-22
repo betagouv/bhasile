@@ -11,12 +11,12 @@ import { useUserAction } from "@/app/hooks/useUserAction";
 import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
 import { PageHeader } from "@/components/PageHeader";
-import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { useOptionalStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { StatistiquesPdfExportDocument } from "./StatistiquesPdfExportDocument";
 
 export const StatistiquesHeader = (): ReactElement => {
-  const { statistiques } = useStatistiquesContext();
+  const { statistiques } = useOptionalStatistiquesContext();
   const { trackStatistiquesSpreadsheetExport, trackStatistiquesPdfExport } =
     useUserAction();
 
@@ -94,29 +94,33 @@ export const StatistiquesHeader = (): ReactElement => {
           ]}
         />
       }
-      menuActions={[
-        {
-          label: "Exporter la fiche (PDF)",
-          onClick: () => {
-            triggerExport();
-            trackStatistiquesPdfExport(jsonSearchParams);
-          },
-        },
-        {
-          label: "Exporter tous les tableaux (ODS)",
-          onClick: () => {
-            downloadDocument(
-              getStatistiquesDownloadContent(
-                statistiques,
-                searchParams.size !== 0
-              )
-            );
-            trackStatistiquesSpreadsheetExport(jsonSearchParams);
-          },
-        },
-      ]}
+      menuActions={
+        statistiques
+          ? [
+              {
+                label: "Exporter la fiche (PDF)",
+                onClick: () => {
+                  triggerExport();
+                  trackStatistiquesPdfExport(jsonSearchParams);
+                },
+              },
+              {
+                label: "Exporter tous les tableaux (ODS)",
+                onClick: () => {
+                  downloadDocument(
+                    getStatistiquesDownloadContent(
+                      statistiques,
+                      searchParams.size !== 0
+                    )
+                  );
+                  trackStatistiquesSpreadsheetExport(jsonSearchParams);
+                },
+              },
+            ]
+          : []
+      }
     >
-      {visualization === "tableaux" && (
+      {statistiques && visualization === "tableaux" && (
         <NavigationMenu
           menuElements={[
             { label: "Structures", section: "#structures" },
@@ -129,14 +133,16 @@ export const StatistiquesHeader = (): ReactElement => {
         />
       )}
 
-      <PrintableContainer isExporting={isExporting} printRef={printRef}>
-        <StatistiquesPdfExportDocument
-          data={exportPayload}
-          departements={departements}
-          operateurs={operateurs}
-          types={types}
-        />
-      </PrintableContainer>
+      {statistiques && (
+        <PrintableContainer isExporting={isExporting} printRef={printRef}>
+          <StatistiquesPdfExportDocument
+            data={exportPayload}
+            departements={departements}
+            operateurs={operateurs}
+            types={types}
+          />
+        </PrintableContainer>
+      )}
     </PageHeader>
   );
 };

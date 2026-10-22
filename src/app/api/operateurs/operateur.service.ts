@@ -62,7 +62,7 @@ export const getOperateurs = cache(
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
     const filialesByParentId = buildFilialesByParentId(operateurs);
     const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
-      filterStructuresByZoneAndTypes(structures, globalFilters, now),
+      filterStructuresByZoneAndTypes(structures, globalFilters),
       topLevelByOperateurId,
       now
     );

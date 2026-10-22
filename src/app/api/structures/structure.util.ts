@@ -307,6 +307,7 @@ export type StructureListComputedRow = {
   operateurId: number | null;
   operateurName: string | null;
   operateurLabel: string;
+  structureDepartement: string;
   departementAdministratif: string | null;
   communeAdministrative: string | null;
   bati: Repartition | undefined;
@@ -373,6 +374,7 @@ export const computeStructureListRow = (
     operateurId: structure.operateurId,
     operateurName,
     operateurLabel,
+    structureDepartement: structure.departementAdministratif,
     departementAdministratif: currentVersion.departementAdministratif,
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
@@ -424,7 +426,7 @@ export const filterStructureRows = (
     if (
       !matchesGlobalFilters(
         {
-          departements: [row.departementAdministratif],
+          departements: [row.structureDepartement],
           operateurIds: [row.operateurId],
           types: [row.type],
         },

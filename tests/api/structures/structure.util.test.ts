@@ -535,6 +535,7 @@ const buildRow = (
   type: StructureType.CADA,
   operateurId: 1,
   operateurName: "Operateur Alpha",
+  structureDepartement: "75",
   departementAdministratif: "75",
   communeAdministrative: "Paris",
   bati: Repartition.COLLECTIF,
@@ -584,18 +585,19 @@ describe("filterStructureRows", () => {
     ).toHaveLength(1);
   });
 
-  it("filtre sur la zone, les opérateurs et les types globaux", () => {
+  it("filtre sur la zone de rattachement, les opérateurs et les types globaux", () => {
     const rows = [
       buildRow({
         id: 1,
         type: StructureType.CADA,
-        departementAdministratif: "75",
+        structureDepartement: "75",
+        departementAdministratif: null,
         operateurId: 1,
       }),
       buildRow({
         id: 2,
         type: StructureType.HUDA,
-        departementAdministratif: "92",
+        structureDepartement: "92",
         operateurId: 2,
       }),
     ];
@@ -607,6 +609,7 @@ describe("filterStructureRows", () => {
       ).map((row) => row.id);
 
     expect(filterIds({ types: "CADA" })).toEqual([1]);
+    expect(filterIds({ departements: "75" })).toEqual([1]);
     expect(filterIds({ departements: "92,93" })).toEqual([2]);
     expect(filterIds({ operateurs: "2" })).toEqual([2]);
     expect(filterIds({ types: "CADA", operateurs: "2" })).toEqual([]);

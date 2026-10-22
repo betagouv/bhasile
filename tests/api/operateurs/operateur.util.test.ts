@@ -19,7 +19,6 @@ type StructureFixtureVersion = {
   effectiveDate: Date;
   type: StructureType | null;
   placesAutorisees: number | null;
-  departementAdministratif?: string;
 };
 
 let versionIdSeq = 0;
@@ -27,12 +26,14 @@ let versionIdSeq = 0;
 const makeStructure = (
   id: number,
   operateurId: number | null,
-  version: StructureFixtureVersion | null
+  version: StructureFixtureVersion | null,
+  departementAdministratif = "75"
 ) => {
   versionIdSeq += 1;
   return {
     id,
     operateurId,
+    departementAdministratif,
     type: version?.type ?? null,
     structureVersions: version
       ? [
@@ -42,7 +43,6 @@ const makeStructure = (
             structureVersionTransformationId: null,
             structureVersionTransformation: null,
             placesAutorisees: version.placesAutorisees,
-            departementAdministratif: version.departementAdministratif,
           },
         ]
       : [],
@@ -241,26 +241,16 @@ describe("filterOperateursBySearch", () => {
 });
 
 describe("filterStructuresByZoneAndTypes", () => {
-  it("garde les structures dont la version courante est dans la zone et du type filtrés", () => {
+  it("garde les structures rattachées à la zone et du type filtrés", () => {
     const structures = [
-      makeStructure(1, 1, {
-        ...currentVersion(StructureType.CADA, 10),
-        departementAdministratif: "75",
-      }),
-      makeStructure(2, 1, {
-        ...currentVersion(StructureType.HUDA, 10),
-        departementAdministratif: "75",
-      }),
-      makeStructure(3, 2, {
-        ...currentVersion(StructureType.CADA, 10),
-        departementAdministratif: "92",
-      }),
+      makeStructure(1, 1, currentVersion(StructureType.CADA, 10), "75"),
+      makeStructure(2, 1, currentVersion(StructureType.HUDA, 10), "75"),
+      makeStructure(3, 2, currentVersion(StructureType.CADA, 10), "92"),
     ];
 
     const filtered = filterStructuresByZoneAndTypes(
       structures,
-      parseGlobalFilters({ departements: "75", types: "CADA" }),
-      now
+      parseGlobalFilters({ departements: "75", types: "CADA" })
     );
 
     expect(filtered.map((structure) => structure.id)).toEqual([1]);
