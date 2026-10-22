@@ -15,6 +15,10 @@ import {
   RappelTaskType,
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
+import {
+  matchesGlobalFilters,
+  ParsedGlobalFilters,
+} from "@/utils/global-filters.util";
 
 import { isStructureInDashboardScope } from "../dashboard.util";
 import {
@@ -136,11 +140,8 @@ const findCurrentCpom = (
 const getEvaluationLabel = (criticite: RappelCriticite): string =>
   criticite === "URGENT" ? "Évaluation à mener" : "Évaluation à lancer";
 
-export type BuildRappelsOptions = {
+export type BuildRappelsOptions = ParsedGlobalFilters & {
   user: SessionUser;
-  departementList: string[];
-  operateurList: string[];
-  typeList: string[];
   now: Date;
 };
 
@@ -149,7 +150,7 @@ export const buildRappels = (
   cpoms: RappelCpom[],
   options: BuildRappelsOptions
 ): DashboardRappel[] => {
-  const { departementList, operateurList, now } = options;
+  const { now } = options;
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
@@ -239,15 +240,10 @@ export const buildRappels = (
   for (const cpom of cpoms) {
     const departements = getCpomDepartementNumeros(cpom);
     if (
-      departementList.length > 0 &&
-      !departements.some((dept) => departementList.includes(dept))
-    ) {
-      continue;
-    }
-    const operateurId = cpom.operateur?.id ?? null;
-    if (
-      operateurList.length > 0 &&
-      (operateurId === null || !operateurList.includes(String(operateurId)))
+      !matchesGlobalFilters(
+        { departements, operateurIds: [cpom.operateur?.id] },
+        options
+      )
     ) {
       continue;
     }

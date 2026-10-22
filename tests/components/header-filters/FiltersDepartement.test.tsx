@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { FiltersDepartement } from "@/app/components/filters/FiltersDepartement";
+import { FiltersDepartement } from "@/components/header-filters/FiltersDepartement";
 
 describe("FiltersDepartement", () => {
   it("ajoute le département cliqué à la sélection", async () => {
@@ -138,5 +138,38 @@ describe("FiltersDepartement", () => {
         "Aucun département ou région ne correspond à votre recherche."
       )
     ).toBeInTheDocument();
+  });
+
+  it("remplace la sélection par le département cliqué en mode zone unique", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <FiltersDepartement
+        departements={["35"]}
+        onChange={onChange}
+        isSingleZone
+      />
+    );
+
+    await user.click(screen.getByLabelText("Finistère (29)"));
+
+    expect(onChange).toHaveBeenCalledWith(["29"]);
+  });
+
+  it("remplace la sélection par la région cliquée en mode zone unique", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <FiltersDepartement
+        departements={["14"]}
+        onChange={onChange}
+        isSingleZone
+      />
+    );
+
+    await user.click(screen.getByText("Bretagne"));
+
+    const [[selection]] = onChange.mock.calls;
+    expect([...selection].sort()).toEqual(["22", "29", "35", "56"]);
   });
 });

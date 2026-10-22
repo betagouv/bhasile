@@ -12,6 +12,7 @@ import {
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
+import { parseGlobalFilters } from "@/utils/global-filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { findRegionIdByName } from "../regions/region.repository";
@@ -25,7 +26,7 @@ import {
 } from "./cpom.repository";
 import {
   buildCpomListItem,
-  filterCpomsByDepartement,
+  filterCpomsByGlobalFilters,
   getCpomDepartements,
   getDatesConvention,
   sortValueForCpomColumn,
@@ -69,12 +70,17 @@ export const getCpoms = cache(
   async ({
     page,
     departements,
+    operateurs,
+    types,
     column,
     direction,
     user,
   }: CpomsQuery): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
     const readableCpoms = await findAllCpoms(getReadableCpomWhere(user));
-    const filtered = filterCpomsByDepartement(readableCpoms, departements);
+    const filtered = filterCpomsByGlobalFilters(
+      readableCpoms,
+      parseGlobalFilters({ departements, operateurs, types })
+    );
     const sorted = sortRows(
       filtered,
       (cpom) => sortValueForCpomColumn(cpom, column ?? "region"),

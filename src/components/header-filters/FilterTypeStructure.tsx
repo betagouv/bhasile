@@ -1,6 +1,7 @@
-import { FiltersTypesCheckbox } from "@/app/components/filters/FiltersTypesCheckbox";
 import { toggleArrayValue } from "@/app/utils/common.util";
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
+
+import { FiltersTypesCheckbox } from "./FiltersTypesCheckbox";
 
 export const FilterTypeStructure = ({ selection, onChange }: Props) => {
   const handleToggle = (structureType: string) => {

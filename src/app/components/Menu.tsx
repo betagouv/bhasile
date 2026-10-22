@@ -1,13 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ReactElement, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { ReactElement, Suspense, useState } from "react";
+
+import {
+  pickGlobalFilters,
+  withGlobalFilters,
+} from "@/utils/global-filters.util";
 
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
 
-export const Menu = (): ReactElement => {
+export const Menu = (): ReactElement => (
+  <Suspense fallback={<MenuContent globalFilters={new URLSearchParams()} />}>
+    <MenuWithGlobalFilters />
+  </Suspense>
+);
+
+const MenuWithGlobalFilters = (): ReactElement => (
+  <MenuContent globalFilters={pickGlobalFilters(useSearchParams())} />
+);
+
+const MenuContent = ({ globalFilters }: Props): ReactElement => {
   const pathname = usePathname();
 
   const [openGroup, setOpenGroup] = useState<MenuGroupId>(
@@ -123,7 +138,7 @@ export const Menu = (): ReactElement => {
                       >
                         <Link
                           className="fr-sidemenu__link"
-                          href={subItem.url}
+                          href={withGlobalFilters(subItem.url, globalFilters)}
                           aria-current={
                             matchesPath(subItem.url) ? "page" : false
                           }
@@ -138,7 +153,7 @@ export const Menu = (): ReactElement => {
             ) : (
               <Link
                 className="fr-sidemenu__link before:content-none"
-                href={menuItem.url}
+                href={withGlobalFilters(menuItem.url, globalFilters)}
                 aria-current={isMenuItemActive(menuItem) ? "page" : false}
               >
                 <div className={`${menuItem.icon} pr-2`} />
@@ -175,3 +190,7 @@ type MenuItem =
       label: string;
       subItems: MenuSubItem[];
     };
+
+type Props = {
+  globalFilters: URLSearchParams;
+};

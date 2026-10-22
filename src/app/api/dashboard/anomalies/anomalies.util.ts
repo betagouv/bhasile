@@ -9,6 +9,7 @@ import {
   DashboardAnomalie,
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
+import { ParsedGlobalFilters } from "@/utils/global-filters.util";
 
 import { isStructureInDashboardScope } from "../dashboard.util";
 import { AnomalieStructure } from "./anomalies.db.type";
@@ -17,11 +18,8 @@ export const isAnomalieActive = (anomalie: {
   isJustified: boolean | null;
 }): boolean => anomalie.isJustified !== true;
 
-export type BuildDashboardAnomaliesOptions = {
+export type BuildDashboardAnomaliesOptions = ParsedGlobalFilters & {
   user: SessionUser;
-  departementList: string[];
-  operateurList: string[];
-  typeList: string[];
   shouldShowIgnored: boolean;
   now: Date;
 };

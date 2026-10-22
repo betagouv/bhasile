@@ -10,7 +10,11 @@ import { filterRegionsWithDepartements } from "@/utils/region.util";
 
 import { FiltersRegion } from "./FiltersRegion";
 
-export const FiltersDepartement = ({ departements, onChange }: Props) => {
+export const FiltersDepartement = ({
+  departements,
+  onChange,
+  isSingleZone = false,
+}: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedRegions, setExpandedRegions] = useState<string[]>([]);
 
@@ -21,6 +25,14 @@ export const FiltersDepartement = ({ departements, onChange }: Props) => {
   const hasNoResult = filteredRegionsWithDepartements.every(
     (regionWithDepartements) => regionWithDepartements.departements.length === 0
   );
+
+  const handleDepartementToggle = (numero: string) => {
+    if (!isSingleZone) {
+      onChange(toggleArrayValue(departements, numero));
+      return;
+    }
+    onChange(departements.includes(numero) ? [] : [numero]);
+  };
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
@@ -56,6 +68,7 @@ export const FiltersDepartement = ({ departements, onChange }: Props) => {
               hidden={listDepartements.length === 0}
               departements={departements}
               onChange={onChange}
+              isSingleZone={isSingleZone}
               expanded={expandedRegions.includes(region.name)}
               onExpandedChange={(isExpanded) =>
                 setExpandedRegions((regions) =>
@@ -77,9 +90,7 @@ export const FiltersDepartement = ({ departements, onChange }: Props) => {
                           value: departement.numero,
                           checked: departements.includes(departement.numero),
                           onChange: () =>
-                            onChange(
-                              toggleArrayValue(departements, departement.numero)
-                            ),
+                            handleDepartementToggle(departement.numero),
                         },
                       },
                     ]}
@@ -107,4 +118,5 @@ export const FiltersDepartement = ({ departements, onChange }: Props) => {
 type Props = {
   departements: string[];
   onChange: (departements: string[]) => void;
+  isSingleZone?: boolean;
 };

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { FilterTypeStructure } from "@/app/components/header-filters/FilterTypeStructure";
+import { FilterTypeStructure } from "@/components/header-filters/FilterTypeStructure";
 
 describe("FilterTypeStructure", () => {
   it("ne coche aucun type quand la sélection est vide", () => {

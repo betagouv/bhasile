@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ReactElement, ReactNode } from "react";
 
-export const StructureCallToActionHeader = ({
+export const CallToActionBanner = ({
   message,
   label,
   href,

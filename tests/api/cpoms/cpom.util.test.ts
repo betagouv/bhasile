@@ -3,12 +3,13 @@ import { describe, expect, it } from "vitest";
 import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import {
   buildCpomListItem,
-  filterCpomsByDepartement,
+  filterCpomsByGlobalFilters,
   getCpomDepartementNumeros,
   shouldEndCpomStructureAtFermeture,
   sortValueForCpomColumn,
 } from "@/app/api/cpoms/cpom.util";
 import { CpomColumn } from "@/types/ListColumn";
+import { parseGlobalFilters } from "@/utils/global-filters.util";
 
 const makeCpom = (overrides: Record<string, unknown>): CpomDbList =>
   ({
@@ -63,7 +64,16 @@ describe("getCpomDepartementNumeros", () => {
   });
 });
 
-describe("filterCpomsByDepartement", () => {
+describe("filterCpomsByGlobalFilters", () => {
+  const filterCpomsByDepartement = (
+    cpomsToFilter: CpomDbList[],
+    departements: string | null
+  ): CpomDbList[] =>
+    filterCpomsByGlobalFilters(
+      cpomsToFilter,
+      parseGlobalFilters({ departements })
+    );
+
   const cpoms = [
     withDepartements(1, ["75"]),
     withDepartements(2, ["92"]),
@@ -112,6 +122,38 @@ describe("filterCpomsByDepartement", () => {
     const corsica = [withDepartements(1, ["2A"]), withDepartements(2, ["2B"])];
     expect(
       filterCpomsByDepartement(corsica, "2A").map((cpom) => cpom.id)
+    ).toEqual([1]);
+  });
+
+  it("garde les cpoms de l'opérateur filtré", () => {
+    const operateurCpoms = [
+      makeCpom({ id: 1, operateurId: 10 }),
+      makeCpom({ id: 2, operateurId: 20 }),
+    ];
+    expect(
+      filterCpomsByGlobalFilters(
+        operateurCpoms,
+        parseGlobalFilters({ operateurs: "20" })
+      ).map((cpom) => cpom.id)
+    ).toEqual([2]);
+  });
+
+  it("garde les cpoms contenant au moins une structure du type filtré", () => {
+    const withTypes = (id: number, types: string[]): CpomDbList =>
+      makeCpom({
+        id,
+        structures: types.map((type) => ({ structure: { type } })),
+      });
+    const typedCpoms = [
+      withTypes(1, ["CADA", "HUDA"]),
+      withTypes(2, ["CPH"]),
+      withTypes(3, []),
+    ];
+    expect(
+      filterCpomsByGlobalFilters(
+        typedCpoms,
+        parseGlobalFilters({ types: "HUDA" })
+      ).map((cpom) => cpom.id)
     ).toEqual([1]);
   });
 });
