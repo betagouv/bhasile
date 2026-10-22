@@ -20,7 +20,6 @@ export const includedStructureWhere = {
   OR: [{ type: null }, { type: { notIn: [...EXCLUDED_STRUCTURE_TYPES] } }],
 } satisfies Prisma.StructureWhereInput;
 
-/** Pendant Prisma de la visibilité des lignes de la liste (`hasForm || bornFromCreation`). */
 export const visibleStructureWhere = (
   now: Date
 ): Prisma.StructureWhereInput => ({
