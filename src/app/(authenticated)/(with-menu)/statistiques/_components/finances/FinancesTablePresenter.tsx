@@ -25,16 +25,21 @@ type VisualizationType = "total" | "autorisees" | "subventionnees";
 
 const sectionsConfig: FinanceSectionConfig[] = [
   {
-    title: "Indicateurs généraux",
+    title: "ETP",
     rows: [
       {
-        label: "Nombre d’ETP prévisionnel",
+        label: "Nombre d’ETP prévisionnel moyen",
         key: "totalETPPrevisionnel",
       },
       {
-        label: "Nombre d’ETP réel",
+        label: "Nombre d’ETP réel moyen",
         key: "totalETPRealise",
       },
+    ],
+  },
+  {
+    title: "Taux d'encadrement",
+    rows: [
       {
         label: "Taux d’encadrement cible moyen",
         key: "tauxEncadrementCible",
@@ -47,6 +52,11 @@ const sectionsConfig: FinanceSectionConfig[] = [
         label: "Taux d’encadrement théorique réel moyen",
         key: "tauxEncadrementTheoriqueRealise",
       },
+    ],
+  },
+  {
+    title: "Coût journalier",
+    rows: [
       {
         label: "Coût journalier cible moyen",
         key: "coutJournalierCible",
