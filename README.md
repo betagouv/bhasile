@@ -26,13 +26,16 @@ Ouvrez [http://localhost:3000](http://localhost:3000) avec votre navigateur pour
 
 ### 🧑 Se connecter avec un rôle
 
-Le seed crée trois agents de test. Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
+Le seed crée trois utilisateurs de test. Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
 
-| Rôle          | Email                                   | Périmètre     |
-| ------------- | --------------------------------------- | ------------- |
-| National      | `national@test.proconnect.gouv.fr`      | Tout          |
-| Régional      | `regional@test.proconnect.gouv.fr`      | Île-de-France |
-| Départemental | `departemental@test.proconnect.gouv.fr` | Paris (75)    |
+| Rôle                    | Email                                             | Périmètre     |
+| ----------------------- | ------------------------------------------------- | ------------- |
+| National                | `national@test.proconnect.gouv.fr`                | Tout          |
+| Régional                | `regional@test.proconnect.gouv.fr`                | Île-de-France |
+| Départemental           | `departemental@test.proconnect.gouv.fr`           | Paris (75)    |
+| Opérateur national      | `operateur-national@test.proconnect.gouv.fr`      | Tout          |
+| Opérateur régional      | `operateur-regional@test.proconnect.gouv.fr`      | Île-de-France |
+| Opérateur départemental | `operateur-departemental@test.proconnect.gouv.fr` | Paris (75)    |
 
 Sur la page intermédiaire, choisissez `eidas1-mfa` et cliquez sur "Se connecter" : l'application exige la double authentification. `eidas2` et `eidas3` passent aussi ; `eidas1` et `eidas0` sont refusés.
 
