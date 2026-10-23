@@ -17,9 +17,9 @@ export const TypesPlacesBlock = ({
   endYear,
 }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
-  const currentYearCompletude = statistiques.places.byYear.find(
+  const currentYearPlaces = statistiques.places.byYear.find(
     (yearItem) => yearItem.year === CURRENT_YEAR
-  )?.completude;
+  );
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -34,24 +34,24 @@ export const TypesPlacesBlock = ({
       <div className="pb-16">
         <h4 className="text-title-blue-france text-lg print:mb-0">
           En {CURRENT_YEAR}{" "}
-          {isYearIncomplete(currentYearCompletude) && (
+          {isYearIncomplete(currentYearPlaces?.completude) && (
             <IncompleteDataIndicator
-              nbStructures={currentYearCompletude?.nbRenseignees || 0}
+              nbStructures={currentYearPlaces?.completude?.nbRenseignees || 0}
               structuresPercentage={getPercentage(
-                currentYearCompletude?.nbRenseignees || 0,
-                currentYearCompletude?.nbAttendues || 1
+                currentYearPlaces?.completude?.nbRenseignees || 0,
+                currentYearPlaces?.completude?.nbAttendues || 1
               )}
             />
           )}
         </h4>
         <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
-          {currentYearCompletude?.nbRenseignees} structures actualisées
+          {currentYearPlaces?.completude?.nbRenseignees} structures actualisées
         </h5>
         <TypePlaceCharts
-          placesAutorisees={statistiques.places.totalPlaces}
-          placesPmr={statistiques.places.pmr}
-          placesLgbt={statistiques.places.lgbt}
-          placesFvvTeh={statistiques.places.fvvTeh}
+          placesAutorisees={currentYearPlaces?.totalPlaces ?? 0}
+          placesPmr={currentYearPlaces?.pmr ?? 0}
+          placesLgbt={currentYearPlaces?.lgbt ?? 0}
+          placesFvvTeh={currentYearPlaces?.fvvTeh ?? 0}
           placesQPV={statistiques.places.qpv}
           placesLogementsSociaux={statistiques.places.logementsSociaux}
         />
