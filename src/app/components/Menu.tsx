@@ -2,55 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { ReactElement } from "react";
 
+import { SessionUser } from "@/types/global";
+
+import { resolveMenuItems } from "../utils/menu.util";
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
 
 export const Menu = (): ReactElement => {
   const pathname = usePathname();
+  const session = useSession();
 
-  const menuItems = [
-    {
-      icon: "ri-speed-up-line",
-      label: "Tableau de bord",
-      url: "/",
-    },
-    {
-      icon: "fr-icon-community-line",
-      label: "Structures d’hébergement",
-      url: "/structures",
-      subItems: [
-        {
-          label: "Voir les structures",
-          url: "/structures",
-        },
-        {
-          label: "Voir les CPOM",
-          url: "/cpoms",
-        },
-      ],
-    },
-    {
-      icon: "fr-icon-user-setting-line",
-      label: "Opérateurs",
-      url: "/operateurs",
-    },
-    {
-      icon: "fr-icon-pie-chart-2-line",
-      label: "Statistiques",
-      url: "/statistiques",
-    },
-    ...(process.env.NEXT_PUBLIC_SHOW_RESSOURCES === "true" //TODO: remove this once the ressources page is ready
-      ? [
-          {
-            icon: "fr-icon-book-shelf-line",
-            label: "Modèles et ressources",
-            url: "/ressources",
-          },
-        ]
-      : []),
-  ];
+  const menuItems = resolveMenuItems(session?.data?.user as SessionUser);
 
   const isMenuItemActive = (
     url: string,

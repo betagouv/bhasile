@@ -95,9 +95,6 @@ async function seed(): Promise<void> {
 
   await seedRegionsAndDepartements(prisma);
 
-  console.log("🧑 Création des rôles et des utilisateurs test...");
-  await seedRolesAndAgents(prisma);
-
   console.log("📋 Création des FormDefinitions...");
   await prisma.formDefinition.create({
     data: createFakeFormTransformation(),
@@ -225,6 +222,9 @@ async function seed(): Promise<void> {
     }
     operateurs.push({ ...operateur, filiale });
   }
+
+  console.log("🧑 Création des rôles et des utilisateurs test...");
+  await seedRolesAndAgents(prisma);
 
   const randomDepartement = (): string =>
     String(faker.number.int({ min: 1, max: 95 })).padStart(2, "0");

@@ -194,13 +194,18 @@ export const protectedApiRoutes: ApiRoute[] = [
   },
 ];
 
+export const OPERATEUR_BASE_PATH = "/operateurs";
+
+export const agentOnlyPages = ["/ressources"];
+
+export const commonPages = ["/", "/structures", "/cpoms", "/statistiques"];
+
+export const operateurPages = [OPERATEUR_BASE_PATH];
+
 export const proConnectProtectedPages = [
-  "/",
-  "/structures",
-  "/operateurs",
-  "/cpoms",
-  "/statistiques",
-  "/ressources",
+  ...commonPages,
+  ...operateurPages,
+  ...agentOnlyPages,
 ];
 
 export const passwordProtectedPages = ["/ajout-structure"];
