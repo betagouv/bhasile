@@ -38,17 +38,17 @@ Douze documents par structure et par an. L'opérateur en produit trois (CA, BP, 
 | 31 octobre N-1     | Dépôt du BP N par l'opérateur                            |
 | après chaque dépôt | Questions-réponses et pièces justificatives              |
 | déc. N-1 → mars N  | Rapport sur le CA (RCA), selon le territoire             |
-| fin N-1 / début N  | DAI (douzièmes provisoires de N)                         |
+| fin N-1            | DAI N, produite avec l'arrêté N-1 (campagne précédente)  |
 | ~mai N             | Publication de la DRL au JO : J0                         |
 | J0 → J48           | Questions-réponses, dialogue de gestion, envoi de la L48 |
 | L48 → +8 jours     | Contradictoire (le silence vaut accord)                  |
-| ≤ J60              | DAB                                                      |
-| sept.-déc. N       | Arrêté de tarification, DAM / échéancier                 |
+| ≤ J60              | DAB (dite aussi « L60 »)                                 |
+| sept.-déc. N       | Arrêté N, puis DAM N, échéancier et DAI N+1              |
 
 La campagne suit **deux parcours parallèles**, qui se rejoignent à la L48 :
 
 - **parcours CA** : dépôt du CA → questions-réponses → RCA ;
-- **parcours BP** : dépôt du BP → questions-réponses → L48 → contradictoire → DAB → arrêté (avec DAI, DAM, échéancier).
+- **parcours BP** : dépôt du BP → questions-réponses → L48 → contradictoire → DAB → arrêté (puis DAM, échéancier, DAI N+1).
 
 La L48 affecte le résultat du CA N-2 et tarife le BP N ; certaines DDETS y joignent le RCA. À un instant donné, une structure a donc **deux campagnes en cours** : en mai 2027, la campagne 2027 a débuté et les agents préparent la L48 et le CA 2026 a déjà été reçu en avril pour la campagne 2028.
 
@@ -94,6 +94,8 @@ La L48 affecte le résultat du CA N-2 et tarife le BP N ; certaines DDETS y joig
 | H15 | **La validation DREETS n'est jamais obligatoire** : selon les documents et les territoires, c'est la DDETS ou la DREETS qui partage, et elles s'organisent entre elles.                                                                                                                                                           | Une règle par type de document dans `TARIFICATION_STEP_DEFINITIONS` (par ex. pas de partage de L48 sans validation).                               | ✅ Validée                                                      |
 | H16 | **Les opérateurs ont des comptes nominatifs à la mise en service**, avec le droit de déposer CA et BP sur la fiche de leurs structures.                                                                                                                                                                                           | Pas de dépôt par l'opérateur ni de première ouverture (H1) : la campagne reste pilotée par les agents.                                             | ✅ Validée                                                      |
 | H17 | **J48 se mesure à la mise à disposition de la L48** : R314-24 I exige qu'elle « parvienne » à l'opérateur au plus tard à J48. La mise à disposition (partage) et la première ouverture sont toutes deux horodatées.                                                                                                               | J48 se mesure à la première ouverture : l'opérateur, en tardant à ouvrir, peut rendre l'envoi tardif.                                              | ⏳ À valider (juriste)                                          |
+| H18 | **Une acceptation expresse clôt le contradictoire** avant la fin des 8 jours : le délai protège l'opérateur, qui peut y renoncer. La DAB peut alors partir plus tôt.                                                                                                                                                              | Le contradictoire court toujours 8 jours ; l'acceptation n'est qu'une information.                                                                 | ⏳ À valider (juriste)                                          |
+| H19 | **La réponse d'un compte opérateur engage l'association**, sans courrier signé.                                                                                                                                                                                                                                                   | Pour contester, joindre un courrier signé (`REPONSE_CONTRADICTOIRE` obligatoire), ou limiter les boutons à certains comptes.                       | ⏳ À valider (juriste)                                          |
 
 ## 4. Design
 
@@ -184,7 +186,7 @@ enum TarificationStepCode { CA RCA BP L48 DAB ARRETE PAIEMENT }
 enum DocumentType         { CA BP RCA L48 REPONSE_CONTRADICTOIRE DAB ARRETE DAI DAM ECHEANCIER PIECE_JUSTIFICATIVE AUTRE }
 ```
 
-**Types d'événements** : `MESSAGE` (texte et/ou documents) ; `DOCUMENT_SHARED` (partage dans le canal partagé d'un document `FINAL` du canal agents) ; relecture (`SUBMITTED_FOR_REVIEW`, `APPROVED`, `CHANGES_REQUESTED`) ; `NOT_APPLICABLE` ; clôture manuelle (`STEP_COMPLETED`, `STEP_REOPENED`) ; `TACIT_APPROVAL` ; miroir (`EXTERNAL_DOCUMENT`, marqué `isBackfill` pour l'amorçage) ; mails (envoyé, échec) ; `PLUGIN_ERROR` ; et les types propres à chaque plugin.
+**Types d'événements** : `MESSAGE` (texte et/ou documents) ; `DOCUMENT_SHARED` (partage dans le canal partagé d'un document `FINAL` du canal agents) ; relecture (`SUBMITTED_FOR_REVIEW`, `APPROVED`, `CHANGES_REQUESTED`) ; `NOT_APPLICABLE` ; clôture manuelle (`STEP_COMPLETED`, `STEP_REOPENED`) ; réponse au contradictoire (`L48_ACCEPTED`, `L48_CONTESTED`) ; miroir (`EXTERNAL_DOCUMENT`, marqué `isBackfill` pour l'amorçage) ; mails (envoyé, échec) ; `PLUGIN_ERROR` ; et les types propres à chaque plugin.
 
 **Paramètres en base** : la date et le lien Légifrance de la DRL par campagne, et la date de mise en service.
 
@@ -208,7 +210,7 @@ Chaque fichier envoyé porte un **type** et un **état**, choisis par l'auteur a
 - **Les documents des agents** passent par `DRAFT` → relecture → `FINAL` → « envoyer à l'opérateur » → `SHARED`. **Valider n'est pas envoyer** : le partage est une action séparée (événement `DOCUMENT_SHARED`, qui pointe vers le même fichier).
 - **Relecture DREETS** : sur un brouillon, la DREETS valide (`APPROVED`) ou demande des modifications (`CHANGES_REQUESTED`, avec la liste) ; la DDETS dépose une nouvelle version. Rien ne bloque : une DDETS peut partager sans validation (H15).
 - **L'interface ne propose que les types pertinents** à ce moment de la campagne et pour cet émetteur (on ne peut pas déposer un BP dans la campagne suivante, ni un arrêté côté opérateur).
-- **L'exercice d'un document se déduit** de son type et de la campagne : le CA d'une campagne N est le CA N-2, son BP est le BP N.
+- **L'exercice d'un document se déduit** de son type et de la campagne : le CA d'une campagne N est le CA N-2, son BP est le BP N, sa DAI est la DAI N+1 (produite avec l'arrêté N, plusieurs par an possibles). L'écran affiche l'année explicitement (« DAI 2028, douzièmes provisoires de 2028 »).
 - **Qui a fait quoi** : chaque fait d'un document (déposé, validé, partagé, ouvert) s'affiche avec son auteur, tiré du journal. La signature se fait hors de Bhasile (parfois par le préfet) : on sait qui a déposé la version signée, pas qui a signé.
 
 ### 4.3 Étapes
@@ -238,9 +240,9 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 
 - **Clôture automatique ou manuelle** (`completion: "AUTO" | "MANUAL"`). Une étape `AUTO` (toutes sauf le paiement) est faite dès qu'un document partagé de la tarification porte son type. Une étape `MANUAL` (le paiement) est faite par un événement `STEP_COMPLETED` (case « clôt l'étape » au moment du partage, ou bouton sans document), annulable par `STEP_REOPENED`. Passer une étape en manuel revient à changer le registre et à afficher la case. Le calcul est rétroactif : si un jour une étape change de mode, le mode sera porté par campagne.
 - **Un document compte pour toutes ses étapes.** L'état se calcule sur les documents partagés de toute la tarification, filtrés par type. Un document est rangé dans l'étape où il est déposé (on ne peut pas savoir si un document `[L48, RCA]` est une L48 qui contient le RCA ou l'inverse) et apparaît dans toutes les étapes dont il porte le type (« déposé dans l'étape L48 »), sans copie : un seul accusé d'ouverture, une seule notification.
-- **L'étape paiement** regroupe les documents de paiement, que chaque territoire produit à sa façon : DAI et avenants, DAM, échéancier. La DAI de janvier y apparaît sans la clore ; l'agent la clôt avec le document définitif. L'échéancier régional unique de certaines régions passe par le plugin régional (§ 5).
+- **L'étape paiement** regroupe les documents issus de l'arrêté N, que chaque territoire produit à sa façon : DAM N, échéancier, DAI N+1 (plusieurs possibles) et avenants. L'agent la clôt quand son territoire a tout produit ; une DAI déposée ensuite ne la rouvre pas. L'échéancier régional unique de certaines régions passe par le plugin régional (§ 5).
 - **Rien ne bloque.** On poste à tout moment, y compris après l'échéance ; une étape peut être faite avant la précédente. Une L48 modificative est simplement une nouvelle L48 partagée : le délai du contradictoire repart de sa première ouverture.
-- **Le contradictoire vit dans l'étape L48** : la réponse de l'opérateur, ou `TACIT_APPROVAL`, posé automatiquement à l'échéance s'il n'y a pas eu de réponse. Il est rattaché à **une** L48 (au plus un par L48) : une L48 modificative rouvre le contradictoire, même après un accord tacite sur la précédente. L'état se calcule toujours sur la dernière L48 partagée.
+- **Le contradictoire vit dans l'étape L48.** L'opérateur répond par **Accepter** (`L48_ACCEPTED`) ou **Contester** (`L48_CONTESTED`, observations obligatoires, courrier `REPONSE_CONTRADICTOIRE` facultatif) : c'est lui qui qualifie sa réponse, ses autres messages n'ont pas valeur de réponse. Une seule réponse par L48 ; une L48 modificative rouvre le contradictoire, même après une acceptation de la précédente. Sans réponse à l'échéance, l'étape affiche « réputé accepté » (R314-24) : un état **calculé** (dernière L48 partagée, première ouverture, réponse, date du jour), jamais écrit en base.
 - **Tarification hors Bhasile** : un agent peut déclarer que la tarification d'une structure se fait hors de l'outil (`StructureTarification.isOutOfBhasile`, motif obligatoire, historique dans `UserAction`). Certaines DDETS garderont des opérateurs hors de l'outil.
 - **Jamais en retard** : une structure couverte par un CPOM pendant l'année N (H14), une tarification hors Bhasile, et le paiement, qui n'a pas d'échéance.
 - **Éligibilité** (règle nationale par structure) : structures autorisées (CADA, CPH ⚠️) ; structures subventionnées : aucune tarification.
@@ -327,12 +329,12 @@ Un plugin est un **module de code**, déclaré par clé, qui se branche sur un *
 
 ### 4.10 Interface
 
-- **Une page par campagne** dans la fiche structure : la frise des étapes sert de navigation ; chaque étape affiche ses documents (versions, états, qui a fait quoi, y compris ceux d'autres étapes qui portent son type) et ses échanges, dans les deux canaux. Les documents utiles de la campagne sont rappelés depuis la fiche structure : ceux de N-2 et N-1, et le rapport d'activité, que l'opérateur dépose sur la fiche structure comme le CA et le BP.
+- **Une page par campagne** dans la fiche structure : la frise des étapes sert de navigation ; chaque étape affiche ses documents (versions, états, qui a fait quoi, y compris ceux d'autres étapes qui portent son type) et ses échanges, dans les deux canaux. Les documents utiles de la campagne sont rappelés depuis la fiche structure : ceux de N-2 et N-1, les rapports d'activité et budgétaire, que l'opérateur dépose sur la fiche structure comme le CA et le BP, et la DAI N, déposée dans l'étape paiement de la campagne précédente.
 - **Un bloc « Tarification » sur le dashboard**, sur le gabarit des blocs existants, filtré comme eux et par campagne. L'opérateur a le même bloc sur son propre dashboard, limité à ses structures. Le tableau de bord agrégé DREETS se branchera sur le même service.
 
 ### 4.11 Mise en service
 
-La campagne 2027 sera à moitié passée hors de Bhasile au lancement : CA 2025, BP 2027, DAI et parfois RCA auront déjà circulé par mail.
+La campagne 2027 sera à moitié passée hors de Bhasile au lancement : CA 2025, BP 2027 et parfois RCA auront déjà circulé par mail. La DAI 2027 relève de la campagne 2026, qui n'existe pas dans Bhasile : elle reste hors de l'outil.
 
 - **Un script d'amorçage** rattache aux tarifications 2027 les documents financiers déjà présents (BP 2027, CA 2025…), par le miroir. Ces événements sont marqués **reprise** (`isBackfill`) : ils n'ont pas valeur probante. Les échanges antérieurs restent hors Bhasile.
 - **Une date de mise en service en base** : une échéance antérieure n'est jamais affichée en retard.
