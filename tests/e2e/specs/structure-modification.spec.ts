@@ -130,6 +130,43 @@ test.describe("Structure modification", () => {
     expect(persisted.dotationDemandee).toBe(newDotationDemandee);
   });
 
+  test("finances : enregistre un document financier déposé dans sa boîte", async ({
+    page,
+    seededStructure,
+  }) => {
+    await seedValidStructureBudgets(seededStructure.id);
+    await seedValidIndicateursFinanciers(seededStructure.id);
+    const modification = new StructureModificationPage(
+      page,
+      seededStructure.id
+    );
+    const year = CURRENT_YEAR - 1;
+    const label = "Budget prévisionnel demandé";
+
+    await modification.goto("finances");
+    await modification.openDocumentsFinanciersYear(year);
+    await modification.uploadDocumentFinancier(label);
+    await modification.submitAndWaitForSave();
+
+    const persisted = await prisma.documentFinancier.findFirst({
+      where: {
+        structureId: seededStructure.id,
+        year,
+        category: "BUDGET_PREVISIONNEL_DEMANDE",
+      },
+      include: { fileUploads: true },
+    });
+    expect(persisted?.fileUploads[0]?.key).toBeTruthy();
+
+    await modification.goto("finances");
+    await modification.openDocumentsFinanciersYear(year);
+    await expect(
+      modification
+        .documentFinancierBox(label)
+        .getByRole("button", { name: "sample.pdf", exact: true })
+    ).toBeVisible();
+  });
+
   test(
     "controle-qualite: adding a controle row persists",
     { tag: "@slow" },

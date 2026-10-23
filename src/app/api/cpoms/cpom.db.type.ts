@@ -19,6 +19,7 @@ export const cpomListInclude = {
     },
   },
   documentsFinanciers: {
+    where: { fileUploads: { some: {} } },
     include: {
       fileUploads: true,
     },
@@ -65,6 +66,7 @@ export const cpomDetailsInclude = {
     },
   },
   documentsFinanciers: {
+    where: { fileUploads: { some: {} } },
     include: {
       fileUploads: true,
     },
