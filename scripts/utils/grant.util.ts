@@ -29,6 +29,37 @@ export const getAgentBaseGrants = (zone: AgentZone): AgentGrant[] => {
   ];
 };
 
+// Pour le moment, on ne donne que des droits de lecture aux opérateurs. A modifier à l'avenir
+export const getOperateurBaseGrants = (zone: AgentZone): AgentGrant[] => {
+  const nationalReadGrant = {
+    role: AccessRole.LECTEUR,
+    scope: GrantScope.NATIONAL,
+  };
+
+  if (zone.scope === GrantScope.NATIONAL) {
+    return [nationalReadGrant];
+  }
+
+  if (zone.scope === GrantScope.REGION) {
+    return [
+      nationalReadGrant,
+      {
+        role: AccessRole.LECTEUR,
+        scope: GrantScope.REGION,
+        regionId: zone.regionId,
+      },
+    ];
+  }
+  return [
+    nationalReadGrant,
+    ...zone.departementNumeros.map((departementNumero) => ({
+      role: AccessRole.LECTEUR,
+      scope: GrantScope.DEPARTEMENT,
+      departementNumero,
+    })),
+  ];
+};
+
 export const isSameGrant = (first: AgentGrant, second: AgentGrant): boolean =>
   first.role === second.role &&
   first.scope === second.scope &&
