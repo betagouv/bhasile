@@ -2,7 +2,6 @@ import { findAllCpoms } from "@/app/api/cpoms/cpom.repository";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { groupRappels } from "@/app/utils/rappel.util";
-import { parseCommaList } from "@/app/utils/string.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import {
   RappelEchelle,
@@ -11,6 +10,7 @@ import {
 } from "@/types/dashboard.type";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
+import { parseGlobalFilters } from "@/utils/global-filters.util";
 
 import { findRappelStructures } from "./rappels.repository";
 import { buildRappels } from "./rappels.util";
@@ -38,9 +38,7 @@ export const getDashboardRappels = async (
 
   const rappels = buildRappels(structures, cpoms, {
     user,
-    departementList: parseCommaList(filters.departements),
-    operateurList: parseCommaList(filters.operateurs),
-    typeList: parseCommaList(filters.type),
+    ...parseGlobalFilters(filters),
     now,
   });
 

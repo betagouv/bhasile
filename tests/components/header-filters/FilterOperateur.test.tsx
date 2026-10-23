@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { FilterOperateur } from "@/app/components/header-filters/FilterOperateur";
 import { OperateurSuggestion } from "@/app/hooks/useOperateurSuggestion";
+import { FilterOperateur } from "@/components/header-filters/FilterOperateur";
 
 const OPERATEURS = [
   { id: "1", key: "1", label: "Adoma", isFiliale: false, hasFiliales: false },

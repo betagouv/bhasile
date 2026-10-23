@@ -6,8 +6,11 @@ import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const FinanceCards = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
-  const currentYear =
-    statistiques.finance.byYear[statistiques.finance.byYear.length - 1];
+  const currentYear = statistiques.finance.byYear.at(-1);
+
+  if (!currentYear) {
+    return <p className="mb-0">Aucune donnée financière disponible.</p>;
+  }
 
   return (
     <div className="grid grid-cols-4 gap-4">

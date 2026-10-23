@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { getFirstParam, SearchParams } from "@/app/utils/search-params.util";
+import { PageHeader } from "@/components/PageHeader";
 import { authOptions } from "@/lib/next-auth/auth";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
@@ -14,7 +15,6 @@ import {
   RAPPELS_BLOCK_HEADER,
   TRANSFORMATIONS_BLOCK_HEADER,
 } from "./_components/dashboardBlocks";
-import { DashboardHeader } from "./_components/DashboardHeader";
 import { InitialisationsActualisationsBlock } from "./_components/InitialisationsActualisationsBlock";
 import { NotificationsBlock } from "./_components/NotificationsBlock";
 import { RappelsBlock } from "./_components/RappelsBlock";
@@ -32,12 +32,12 @@ export default async function DashboardPage({
   const filters: Filters = {
     departements: getFirstParam(params.departements),
     operateurs: getFirstParam(params.operateurs),
-    type: getFirstParam(params.types),
+    types: getFirstParam(params.types),
   };
 
   return (
     <>
-      <DashboardHeader prenom={user?.prenom} />
+      <PageHeader title={`Bienvenue${user?.prenom ? ` ${user.prenom}` : ""}`} />
       <div className="flex flex-col gap-3 max-w-7xl mx-auto p-3">
         <Suspense fallback={null}>
           <NotificationsBlock />

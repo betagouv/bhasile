@@ -6,7 +6,7 @@ export async function getStatistiques({
   departements,
   operateurs,
   types,
-}: GetStatistiquesArgs): Promise<StatistiqueApiRead> {
+}: GetStatistiquesArgs): Promise<StatistiqueApiRead | null> {
   const baseUrl = process.env.NEXT_URL || "";
   const params = new URLSearchParams();
   if (departements) {

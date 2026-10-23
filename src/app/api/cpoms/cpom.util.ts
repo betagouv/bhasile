@@ -1,7 +1,10 @@
 import { type SortKind, type SortValue } from "@/app/utils/list.util";
-import { parseCommaList } from "@/app/utils/string.util";
 import { CpomListItem } from "@/types/cpom.type";
 import { CpomColumn } from "@/types/ListColumn";
+import {
+  matchesGlobalFilters,
+  ParsedGlobalFilters,
+} from "@/utils/global-filters.util";
 
 import {
   type ActeAdministratifDates,
@@ -55,20 +58,24 @@ export const getCpomStructureIdsToEndAtFermeture = (
     )
     .map((cpomStructure) => cpomStructure.id);
 
-export const filterCpomsByDepartement = (
+export const filterCpomsByGlobalFilters = (
   cpoms: CpomDbList[],
-  departements: string | null
-): CpomDbList[] => {
-  const departementList = parseCommaList(departements);
-  if (departementList.length === 0) {
-    return cpoms;
-  }
-  return cpoms.filter((cpom) =>
-    cpom.departements.some((cpomDepartement) =>
-      departementList.includes(cpomDepartement.departement.numero)
+  filters: ParsedGlobalFilters
+): CpomDbList[] =>
+  cpoms.filter((cpom) =>
+    matchesGlobalFilters(
+      {
+        departements: cpom.departements.map(
+          (cpomDepartement) => cpomDepartement.departement.numero
+        ),
+        operateurIds: [cpom.operateurId],
+        types: cpom.structures.map(
+          (cpomStructure) => cpomStructure.structure.type
+        ),
+      },
+      filters
     )
   );
-};
 
 const getSortableTime = (date: Date | null): SortValue =>
   date ? date.getTime() : null;
@@ -125,8 +132,8 @@ export const buildCpomListItem = (cpom: CpomDbList): CpomListItem => {
     structureCount: cpom.structures.length,
     isFinalised: Boolean(
       cpom.actesAdministratifs?.[0]?.fileUploads?.[0]?.key &&
-        dateStart &&
-        dateEnd
+      dateStart &&
+      dateEnd
     ),
   };
 };

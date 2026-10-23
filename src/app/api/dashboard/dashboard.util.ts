@@ -1,5 +1,9 @@
 import { canUpdateStructure } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
+import {
+  matchesGlobalFilters,
+  ParsedGlobalFilters,
+} from "@/utils/global-filters.util";
 
 type ScopedStructure = {
   id: number;
@@ -8,42 +12,21 @@ type ScopedStructure = {
   type: string | null;
 };
 
-type ScopeFilters = {
+type ScopeFilters = ParsedGlobalFilters & {
   user: SessionUser | undefined;
-  departementList: string[];
-  operateurList: string[];
-  typeList: string[];
 };
 
 export const isStructureInDashboardScope = (
   structure: ScopedStructure,
-  { user, departementList, operateurList, typeList }: ScopeFilters
-): boolean => {
-  if (!user || !canUpdateStructure(user, structure)) {
-    return false;
-  }
-
-  if (
-    departementList.length > 0 &&
-    !departementList.includes(structure.departementAdministratif)
-  ) {
-    return false;
-  }
-
-  const operateurId = structure.operateur?.id ?? null;
-  if (
-    operateurList.length > 0 &&
-    (operateurId === null || !operateurList.includes(String(operateurId)))
-  ) {
-    return false;
-  }
-
-  if (
-    typeList.length > 0 &&
-    (structure.type === null || !typeList.includes(structure.type))
-  ) {
-    return false;
-  }
-
-  return true;
-};
+  { user, ...filters }: ScopeFilters
+): boolean =>
+  !!user &&
+  canUpdateStructure(user, structure) &&
+  matchesGlobalFilters(
+    {
+      departements: [structure.departementAdministratif],
+      operateurIds: [structure.operateur?.id],
+      types: [structure.type],
+    },
+    filters
+  );

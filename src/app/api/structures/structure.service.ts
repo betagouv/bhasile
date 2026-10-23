@@ -526,23 +526,3 @@ const dbStructureToApiRead = (
     structureVersions: undefined,
   }) as StructureApiRead;
 };
-
-export const getBoundsPlacesAutorisees = async (
-  user: SessionUser | undefined
-): Promise<{
-  min: number;
-  max: number;
-}> => {
-  const rows = await computeAllStructureRows(getReadableStructureWhere(user));
-  const places = rows
-    .map((row) => row.latestNonNullPlacesAutorisees)
-    .filter(
-      (placesAutorisees): placesAutorisees is number =>
-        placesAutorisees !== null
-    );
-
-  if (places.length === 0) {
-    return { min: 0, max: 0 };
-  }
-  return { min: Math.min(...places), max: Math.max(...places) };
-};

@@ -16,6 +16,7 @@ import {
   InitialisationStatus,
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
+import { ParsedGlobalFilters } from "@/utils/global-filters.util";
 
 import { isStructureInDashboardScope } from "../dashboard.util";
 import { DashboardStructure } from "./initialisations-actualisations.db.type";
@@ -23,7 +24,9 @@ import { DashboardStructure } from "./initialisations-actualisations.db.type";
 export const getInitialisationStatus = (
   structure: {
     forms: { status: boolean; formDefinition: { slug: string } }[];
-    structureVersions: Parameters<typeof isStructureFinalised>[0]["structureVersions"];
+    structureVersions: Parameters<
+      typeof isStructureFinalised
+    >[0]["structureVersions"];
   },
   now: Date
 ): InitialisationStatus => {
@@ -90,11 +93,8 @@ export const getMostUrgentActionUrl = (
   return null;
 };
 
-export type BuildDashboardRowsOptions = {
+export type BuildDashboardRowsOptions = ParsedGlobalFilters & {
   user: SessionUser | undefined;
-  typeList: string[];
-  departementList: string[];
-  operateurList: string[];
   year: number | null;
   now: Date;
 };

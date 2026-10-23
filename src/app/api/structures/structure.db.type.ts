@@ -1,4 +1,10 @@
-import { Form, Prisma, StructureType } from "@/generated/prisma/client";
+import { startOfNextUtcDay } from "@/app/utils/date.util";
+import {
+  Form,
+  Prisma,
+  StructureType,
+  StructureVersionTransformationType,
+} from "@/generated/prisma/client";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/types/structure.type";
 
 import {
@@ -13,6 +19,25 @@ import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 export const includedStructureWhere = {
   OR: [{ type: null }, { type: { notIn: [...EXCLUDED_STRUCTURE_TYPES] } }],
 } satisfies Prisma.StructureWhereInput;
+
+export const visibleStructureWhere = (
+  now: Date
+): Prisma.StructureWhereInput => ({
+  OR: [
+    { forms: { some: {} } },
+    {
+      structureVersions: {
+        some: {
+          effectiveDate: { lt: startOfNextUtcDay(now) },
+          structureVersionTransformation: {
+            type: StructureVersionTransformationType.CREATION,
+            transformation: { form: { status: true } },
+          },
+        },
+      },
+    },
+  ],
+});
 
 export const structureListLightVersionSelect = {
   ...resolvableVersionSelect,
@@ -35,6 +60,7 @@ export const structureListLightSelect = {
   id: true,
   codeBhasile: true,
   type: true,
+  departementAdministratif: true,
   fermetureDate: true,
   operateurId: true,
   operateur: {

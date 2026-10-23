@@ -18,4 +18,3 @@ describe("decimal util", () => {
     expect(decimalToNumber(value)).toBe(0.75);
   });
 });
-

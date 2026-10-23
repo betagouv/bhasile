@@ -4,7 +4,10 @@ import { resolvableVersionSelect } from "../structure-versions/structure-version
 import { includedStructureWhere } from "../structures/structure.db.type";
 
 export const cpomListInclude = {
-  structures: { where: { structure: includedStructureWhere } },
+  structures: {
+    where: { structure: includedStructureWhere },
+    include: { structure: { select: { type: true } } },
+  },
   budgets: true,
   operateur: true,
   region: true,

@@ -12,6 +12,7 @@ import type {
   OperateurListItem,
   OperateurSuggestionItem,
 } from "@/types/operateur.type";
+import { parseGlobalFilters } from "@/utils/global-filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { getContactsApiRead } from "../contacts/contact.util";
@@ -29,7 +30,9 @@ import {
   buildOperateurSuggestionItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
+  filterStructuresByZoneAndTypes,
   groupStructureStatsByOperateur,
+  isOperateurSelected,
 } from "./operateur.util";
 
 // Arguments primitifs obligatoires : cache() compare avec Object.is, un objet
@@ -37,7 +40,10 @@ import {
 export const getOperateurs = cache(
   async (
     page: number | null,
-    search: string | null
+    search: string | null,
+    departements: string | null,
+    operateursFilter: string | null,
+    types: string | null
   ): Promise<{
     operateurs: OperateurListItem[];
     totalOperateurs: number;
@@ -48,16 +54,29 @@ export const getOperateurs = cache(
       findAllOperateurs(),
     ]);
 
+    const globalFilters = parseGlobalFilters({
+      departements,
+      operateurs: operateursFilter,
+      types,
+    });
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
     const filialesByParentId = buildFilialesByParentId(operateurs);
     const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
-      structures,
+      filterStructuresByZoneAndTypes(structures, globalFilters),
       topLevelByOperateurId,
       now
     );
 
     const items = operateurs
-      .filter((operateur) => operateur.parentId === null)
+      .filter(
+        (operateur) =>
+          operateur.parentId === null &&
+          isOperateurSelected(
+            operateur.id,
+            globalFilters.operateurList,
+            topLevelByOperateurId
+          )
+      )
       .flatMap((operateur) => {
         const stats = statsByOperateurId.get(operateur.id);
         if (!stats) {

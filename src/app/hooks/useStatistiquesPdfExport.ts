@@ -5,10 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 import { formatDate } from "@/app/utils/date.util";
 import { getPdfExportPayload } from "@/app/utils/pdf-export.util";
-import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { useOptionalStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const useStatistiquesPdfExport = () => {
-  const { statistiques } = useStatistiquesContext();
+  const { statistiques } = useOptionalStatistiquesContext();
   const searchParams = useSearchParams();
 
   const { triggerExport, isExporting, printRef } = usePdfExport(

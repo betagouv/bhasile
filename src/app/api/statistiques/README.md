@@ -60,6 +60,8 @@ curl -s "http://localhost:3000/api/statistiques" | jq > tmp/statistiques.json
 
 Filtre structures via `findPerimeterStructures` : `type` / `operateurId` / `departementAdministratif`.
 
+Seules les structures **visibles dans la liste `/structures`** entrent dans le périmètre (`visibleStructureWhere`) : au moins un formulaire, ou née d'une création finalisée. Une structure pas encore initialisée n'est pas comptée, comme l'annonce l'encart des statistiques.
+
 **Structures actives (indicateurs globaux)** : `activeStructureIdsNow` sur `StatistiquesContext` - structures ouvertes au jour de référence (`Structure.creationDate` / `fermetureDate`). `context.structures` en est la projection typée.
 
 **Activité par période (séries temporelles)** : index `activeStructureIdsByPeriod` (`month`, `trimester`, `year` -> `Set` d'IDs actifs). Une structure fermée le 05/05 compte sur janvier à mai, pas sur juin.
