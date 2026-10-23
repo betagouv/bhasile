@@ -26,13 +26,16 @@ Ouvrez [http://localhost:3000](http://localhost:3000) avec votre navigateur pour
 
 ### 🧑 Se connecter avec un rôle
 
-Le seed crée trois agents de test. Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
+Le seed crée six utilisateurs de test (trois agents, trois opérateurs). Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
 
-| Rôle          | Email                                   | Périmètre        |
-| ------------- | --------------------------------------- | ---------------- |
-| National      | `national@test.proconnect.gouv.fr`      | Tout, en lecture |
-| Régional      | `regional@test.proconnect.gouv.fr`      | Île-de-France    |
-| Départemental | `departemental@test.proconnect.gouv.fr` | Paris (75)       |
+| Rôle                    | Email                                             | Périmètre                                       |
+| ----------------------- | ------------------------------------------------- | ----------------------------------------------- |
+| National                | `national@test.proconnect.gouv.fr`                | Tout, en lecture                                |
+| Régional                | `regional@test.proconnect.gouv.fr`                | Île-de-France                                   |
+| Départemental           | `departemental@test.proconnect.gouv.fr`           | Paris (75)                                      |
+| Opérateur national      | `operateur-national@test.proconnect.gouv.fr`      | Structures du 1er opérateur, en lecture         |
+| Opérateur régional      | `operateur-regional@test.proconnect.gouv.fr`      | Structures du 1er opérateur en IDF, en lecture  |
+| Opérateur départemental | `operateur-departemental@test.proconnect.gouv.fr` | Structures du 1er opérateur à Paris, en lecture |
 
 Sur la page intermédiaire, choisissez `eidas1-mfa` et cliquez sur "Se connecter" : l'application exige la double authentification. `eidas2` et `eidas3` passent aussi ; `eidas1` et `eidas0` sont refusés.
 

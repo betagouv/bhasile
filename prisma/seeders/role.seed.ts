@@ -16,6 +16,10 @@ export const seedRolesAndAgents = async (
     where: { name: ILE_DE_FRANCE },
     select: { id: true },
   });
+  const operateur = await prisma.operateur.findFirstOrThrow({
+    orderBy: { id: "asc" },
+    select: { id: true },
+  });
 
   const agents: AgentSeed[] = [
     {
@@ -53,6 +57,36 @@ export const seedRolesAndAgents = async (
     },
   ];
 
+  const operateurUsers: OperateurUserSeed[] = [
+    {
+      name: "Jack Opérateur Nation",
+      email: `operateur-national@${TEST_EMAIL_DOMAIN}`,
+      grants: [{ role: AccessRole.LECTEUR, scope: GrantScope.NATIONAL }],
+    },
+    {
+      name: "Jack Opérateur Idf",
+      email: `operateur-regional@${TEST_EMAIL_DOMAIN}`,
+      grants: [
+        {
+          role: AccessRole.LECTEUR,
+          scope: GrantScope.REGION,
+          regionId: region.id,
+        },
+      ],
+    },
+    {
+      name: "Jack Opérateur Paris",
+      email: `operateur-departemental@${TEST_EMAIL_DOMAIN}`,
+      grants: [
+        {
+          role: AccessRole.LECTEUR,
+          scope: GrantScope.DEPARTEMENT,
+          departementNumero: "75",
+        },
+      ],
+    },
+  ];
+
   for (const agent of agents) {
     await prisma.user.create({
       data: {
@@ -70,11 +104,37 @@ export const seedRolesAndAgents = async (
     });
   }
 
+  for (const operateurUser of operateurUsers) {
+    await prisma.user.create({
+      data: {
+        name: operateurUser.name,
+        email: operateurUser.email,
+        isActivated: true,
+        lastConnection: new Date(),
+        operateurId: operateur.id,
+        grants: { createMany: { data: operateurUser.grants } },
+      },
+    });
+  }
+
   console.log(
     `🧑 ${agents.length} agents de test créés : ${agents
       .map((agent) => agent.email)
       .join(", ")}`
   );
+
+  console.log(
+    `🧑 ${operateurUsers.length} utilisateurs opérateurs de test créés : ${operateurUsers
+      .map((operateurUser) => operateurUser.email)
+      .join(", ")}`
+  );
+};
+
+type GrantSeed = {
+  role: AccessRole;
+  scope: GrantScope;
+  regionId?: number;
+  departementNumero?: string;
 };
 
 type AgentSeed = {
@@ -82,11 +142,12 @@ type AgentSeed = {
   email: string;
   perimeter: {
     name: string;
-    grants: {
-      role: AccessRole;
-      scope: GrantScope;
-      regionId?: number;
-      departementNumero?: string;
-    }[];
+    grants: GrantSeed[];
   };
+};
+
+type OperateurUserSeed = {
+  name: string;
+  email: string;
+  grants: GrantSeed[];
 };
