@@ -28,11 +28,11 @@ const sectionsConfig: FinanceSectionConfig[] = [
     title: "ETP",
     rows: [
       {
-        label: "Nombre d’ETP prévisionnel moyen",
+        label: "Nombre d’ETP prévisionnel total",
         key: "totalETPPrevisionnel",
       },
       {
-        label: "Nombre d’ETP réel moyen",
+        label: "Nombre d’ETP réel total",
         key: "totalETPRealise",
       },
     ],

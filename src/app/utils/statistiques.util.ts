@@ -4,13 +4,17 @@ export const isSomeDataIncomplete = (
   statistiques: StatistiqueApiRead
 ): boolean => {
   const isStructuresDataIncomplete = statistiques.structures.byYear.some(
-    (structureYear) => !structureYear.completude?.isComplete
+    (structureYear) =>
+      structureYear.completude != null && !structureYear.completude.isComplete
   );
   const isPlacesDataIncomplete = statistiques.places.byYear.some(
-    (placeYear) => !placeYear.completude?.isComplete
+    (placeYear) =>
+      placeYear.completude != null && !placeYear.completude.isComplete
   );
   const isFinancesDataIncomplete = statistiques.finance.byYear.some(
-    (financeYear) => !financeYear.total.completude?.isComplete
+    (financeYear) =>
+      financeYear.total.completude != null &&
+      !financeYear.total.completude.isComplete
   );
 
   return (

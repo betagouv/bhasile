@@ -2,9 +2,9 @@ import { ReactElement, ReactNode, useMemo } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
 import BarChart from "@/app/components/common/BarChart";
+import { getPercentage } from "@/app/utils/common.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
-import { CURRENT_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CompletudeStat } from "@/schemas/api/statistique.schema";
 
@@ -28,7 +28,6 @@ export const DotationChart = ({
   const yearsWithBudget = useMemo(
     () =>
       years
-        .filter((year) => year < CURRENT_YEAR)
         .map((year) => ({
           year,
           budget: budgets?.find((budget) => budget.year === year),
@@ -61,10 +60,27 @@ export const DotationChart = ({
       return isYearIncomplete(typedBudget?.completude);
     });
 
+    const nbRenseignees = yearsWithBudget.map(
+      (budget) =>
+        (budget.budget as BudgetApiType & { completude?: CompletudeStat })
+          ?.completude?.nbRenseignees || 0
+    );
+
+    const percentages = yearsWithBudget.map((budget) => {
+      const typedBudget = budget.budget as BudgetApiType & {
+        completude?: CompletudeStat;
+      };
+      const nbRenseignees = typedBudget?.completude?.nbRenseignees || 0;
+      const nbAttendues = typedBudget?.completude?.nbAttendues || 1;
+      return getPercentage(nbRenseignees, nbAttendues);
+    });
+
     return {
       labels,
       series,
       incompleteYears,
+      nbRenseignees,
+      percentages,
     };
   }, [yearsWithBudget]);
 
@@ -117,11 +133,11 @@ export const DotationChart = ({
           {getDotationLabel()}
         </h5>
         <ChartLegend
-          label="Dotation demandée par l’opérateur"
+          label="Dotation demandée par l'opérateur"
           color="var(--yellow-moutarde-850-200)"
         />
         <ChartLegend
-          label="Dotation totale accordée par l’État"
+          label="Dotation totale accordée par l'État"
           color="var(--yellow-moutarde-main-679)"
         />
         <h5 className="text-title-blue-france text-sm font-medium mb-2 mt-6">
@@ -144,6 +160,8 @@ export type DotationChartData = {
   labels: string[];
   series: number[][];
   incompleteYears: boolean[];
+  nbRenseignees: number[];
+  percentages: string[];
 };
 
 type Props = {

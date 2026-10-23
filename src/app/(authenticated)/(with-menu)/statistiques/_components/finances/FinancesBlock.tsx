@@ -71,20 +71,13 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
               chartData={chartData}
               label={label}
               index={index}
-              nbStructures={nbStructures}
-              structuresPercentage={structuresPercentage}
             />
           )}
         />
         <ClosedStructuresDisclaimer />
       </div>
       <div className="py-12 break-inside-avoid">
-        <BalanceChart
-          startYear={startYear}
-          endYear={endYear}
-          nbStructures={nbStructures}
-          structuresPercentage={structuresPercentage}
-        />
+        <BalanceChart startYear={startYear} endYear={endYear} />
       </div>
       <FinancesStatsTable startYear={startYear} endYear={endYear} />
     </div>

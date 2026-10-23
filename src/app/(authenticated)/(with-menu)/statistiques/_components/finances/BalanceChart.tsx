@@ -2,21 +2,21 @@ import { ReactElement, useMemo } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
+import { getPercentage } from "@/app/utils/common.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
+import { BudgetApiType } from "@/schemas/api/budget.schema";
+import {
+  CompletudeStat,
+  FinanceByYearScopeStat,
+} from "@/schemas/api/statistique.schema";
 
 import { ClosedStructuresDisclaimer } from "../ClosedStructuresDisclaimer";
 import { FinanceChartLabel } from "./FinanceChartLabel";
 
-export const BalanceChart = ({
-  startYear,
-  endYear,
-  nbStructures,
-  structuresPercentage,
-}: Props): ReactElement => {
+export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
   const { years } =
@@ -70,11 +70,28 @@ export const BalanceChart = ({
       isYearIncomplete(budget.budget?.total.completude)
     );
 
+    const nbRenseignees = yearsWithBudget.map(
+      (budget) =>
+        (budget.budget as BudgetApiType & { completude?: CompletudeStat })
+          ?.completude?.nbRenseignees || 0
+    );
+
+    const percentages = yearsWithBudget.map((budget) => {
+      const typedBudget = budget.budget as BudgetApiType & {
+        completude?: CompletudeStat;
+      };
+      const nbRenseignees = typedBudget?.completude?.nbRenseignees || 0;
+      const nbAttendues = typedBudget?.completude?.nbAttendues || 1;
+      return getPercentage(nbRenseignees, nbAttendues);
+    });
+
     return {
       labels,
       barsSeries: [excedentCumule, deficitCumuleNegatif],
       lineSeries: cumul,
       incompleteYears,
+      nbRenseignees,
+      percentages,
     };
   }, [yearsWithBudget]);
 
@@ -102,8 +119,6 @@ export const BalanceChart = ({
                 chartData={chartData}
                 label={label}
                 index={index}
-                nbStructures={nbStructures}
-                structuresPercentage={structuresPercentage}
               />
             )}
           />
@@ -126,6 +141,4 @@ export const BalanceChart = ({
 type Props = {
   startYear?: number;
   endYear?: number;
-  nbStructures?: number;
-  structuresPercentage?: string;
 };

@@ -9,11 +9,12 @@ export const FinanceChartLabel = ({
   chartData,
   index,
   label,
-  nbStructures,
-  structuresPercentage,
 }: Props): ReactElement => {
   const isIncomplete = chartData.incompleteYears?.[index] ?? false;
   const isExporting = useExportContext();
+
+  const yearlyNbStructures = chartData.nbRenseignees?.[index] || 0;
+  const yearlyPercentage = chartData.percentages?.[index] || "";
 
   return (
     <div className="flex print:block print:text-center items-center gap-1 text-xs text-disabled-grey">
@@ -22,12 +23,12 @@ export const FinanceChartLabel = ({
       {isIncomplete &&
         (isExporting ? (
           <div className="text-[10px]">
-            {nbStructures} structures actualisées
+            {yearlyNbStructures} structures actualisées
           </div>
         ) : (
           <IncompleteDataIndicator
-            nbStructures={nbStructures ?? 0}
-            structuresPercentage={structuresPercentage || ""}
+            nbStructures={yearlyNbStructures}
+            structuresPercentage={yearlyPercentage}
           />
         ))}
     </div>
@@ -38,9 +39,9 @@ type Props = {
   chartData: {
     labels: string[];
     incompleteYears: boolean[];
+    nbRenseignees?: number[];
+    percentages?: string[];
   };
   index: number;
   label: string;
-  nbStructures?: number;
-  structuresPercentage?: string;
 };
