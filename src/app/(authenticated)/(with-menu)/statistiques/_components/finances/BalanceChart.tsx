@@ -70,18 +70,23 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
       isYearIncomplete(budget.budget?.total.completude)
     );
 
-    const nbRenseignees = yearsWithBudget.map(
-      (budget) =>
-        (budget.budget as BudgetApiType & { completude?: CompletudeStat })
-          ?.completude?.nbRenseignees || 0
-    );
+    const nbRenseignees = yearsWithBudget.map((budget) => {
+      const budgetWithCompletude = budget.budget as BudgetApiType & {
+        total: {
+          completude?: CompletudeStat;
+        };
+      };
+      return budgetWithCompletude?.total?.completude?.nbRenseignees || 0;
+    });
 
     const percentages = yearsWithBudget.map((budget) => {
       const typedBudget = budget.budget as BudgetApiType & {
-        completude?: CompletudeStat;
+        total: {
+          completude?: CompletudeStat;
+        };
       };
-      const nbRenseignees = typedBudget?.completude?.nbRenseignees || 0;
-      const nbAttendues = typedBudget?.completude?.nbAttendues || 1;
+      const nbRenseignees = typedBudget?.total?.completude?.nbRenseignees || 0;
+      const nbAttendues = typedBudget?.total?.completude?.nbAttendues || 1;
       return getPercentage(nbRenseignees, nbAttendues);
     });
 

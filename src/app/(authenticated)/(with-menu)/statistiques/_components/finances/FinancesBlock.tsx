@@ -3,7 +3,7 @@
 import { ReactElement } from "react";
 
 import { getPercentage } from "@/app/utils/common.util";
-import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
+import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
@@ -18,7 +18,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const documentsFinanciersOpenYearCompletude =
     statistiques.finance.byYear.find(
-      (yearItem) => yearItem.year === DOCUMENTS_FINANCIERS_OPEN_YEAR
+      (yearItem) => yearItem.year === CURRENT_YEAR
     )?.total.completude;
 
   const nbStructures =
