@@ -14,16 +14,18 @@ import { SessionUser } from "@/types/global";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
-import { CpomDbDetails, CpomDbScope } from "./cpom.db.type";
+import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";
 import {
   createOrUpdateCpom,
   findAllCpoms,
   findCpomScope,
   findOne,
+  findRegionIdByName,
 } from "./cpom.repository";
 import {
   buildCpomListItem,
   filterCpomsByDepartement,
+  getCpomDepartements,
   getDatesConvention,
   sortValueForCpomColumn,
 } from "./cpom.util";
@@ -50,6 +52,11 @@ const getFullCpom = (cpom: ResolvedCpomDetails): CpomApiRead => {
 
   return recursivelySerializeForClient({
     ...cpom,
+    departements: getCpomDepartements(cpom).map((departement) => ({
+      cpomId: cpom.id,
+      departementNumero: departement.numero,
+      departement,
+    })),
     dateStart,
     dateEnd,
   }) as CpomApiRead;
@@ -100,9 +107,24 @@ export const getCpomById = async (
   return getFullCpom(resolvedCpom);
 };
 
-export const saveCpom = async (cpom: CpomApiWrite): Promise<number> => {
-  return createOrUpdateCpom(cpom);
+export const prepareCpomToSave = async (
+  cpom: CpomApiWrite,
+  existingCpom: CpomDbScope | null
+): Promise<CpomToSave> => {
+  const granularity =
+    cpom.granularity ?? existingCpom?.granularity ?? "REGIONALE";
+  return {
+    ...cpom,
+    granularity,
+    regionId: cpom.region
+      ? await findRegionIdByName(cpom.region.name)
+      : undefined,
+    departements: granularity === "REGIONALE" ? [] : cpom.departements,
+  };
 };
+
+export const saveCpom = async (cpom: CpomToSave): Promise<number> =>
+  createOrUpdateCpom(cpom);
 
 export const getCpomScope = (id: number): Promise<CpomDbScope | null> =>
   findCpomScope(id);

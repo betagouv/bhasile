@@ -4,7 +4,7 @@ import {
   resolvableVersionSelect,
   transformationStatusSelect,
 } from "@/app/api/structure-versions/structure-version.db.type";
-import { Prisma } from "@/generated/prisma/client";
+import { CpomGranularity, Prisma } from "@/generated/prisma/client";
 
 const acteDatesSelect = {
   id: true,
@@ -46,6 +46,8 @@ export const rappelStructureSelect = {
           id: true,
           name: true,
           operateur: { select: { name: true } },
+          granularity: true,
+          region: { select: { departements: { select: { numero: true } } } },
           departements: {
             select: { departement: { select: { numero: true } } },
           },
@@ -64,6 +66,8 @@ export type RappelCpom = {
   id: number;
   name: string | null;
   operateur: { id: number; name: string };
+  granularity: CpomGranularity;
+  region: { departements: { numero: string }[] } | null;
   departements: { departement: { numero: string } }[];
   actesAdministratifs: ActeAdministratifDates[];
 };

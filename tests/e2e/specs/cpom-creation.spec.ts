@@ -122,14 +122,14 @@ test.describe("CPOM creation", () => {
     const persisted = await prisma.cpom.findUniqueOrThrow({
       where: { id: cpomId },
       include: {
-        departements: {
-          include: { departement: { select: { numero: true } } },
-        },
+        departements: true,
+        region: { include: { departements: { select: { numero: true } } } },
       },
     });
     expect(persisted.granularity).toBe("REGIONALE");
-    expect(
-      persisted.departements.map((d) => d.departement.numero).sort()
-    ).toEqual(ILE_DE_FRANCE_NUMEROS);
+    expect(persisted.departements).toEqual([]);
+    expect(persisted.region?.departements.map((d) => d.numero).sort()).toEqual(
+      ILE_DE_FRANCE_NUMEROS
+    );
   });
 });

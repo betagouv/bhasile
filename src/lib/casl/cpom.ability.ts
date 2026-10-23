@@ -1,7 +1,7 @@
 import { subject } from "@casl/ability";
 import { accessibleBy } from "@casl/prisma";
 
-import type { Prisma } from "@/generated/prisma/client";
+import type { CpomGranularity, Prisma } from "@/generated/prisma/client";
 import { SessionUser } from "@/types/global";
 
 import { AppAbility, defineAbilityFor, NO_RECORD_WHERE } from "./rules";
@@ -28,6 +28,8 @@ export const canSaveCpom = (
     return false;
   }
   return canAbilityUpdateCpom(ability, {
+    granularity: cpom.granularity ?? existingCpom?.granularity,
+    regionId: cpom.regionId ?? existingCpom?.regionId ?? null,
     departements: cpom.departements ?? existingCpom?.departements ?? [],
     structures: cpom.structures ?? existingCpom?.structures ?? [],
   });
@@ -37,6 +39,8 @@ export const canAbilityUpdateCpom = (ability: AppAbility, cpom: CpomScope) =>
   ability.can("update", subject("Cpom", { ...cpom } as never));
 
 type CpomScope = {
+  granularity?: CpomGranularity;
+  regionId?: number | null;
   departements: { departement?: { numero: string } | null }[];
   structures: { structureId: number }[];
 };
