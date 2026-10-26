@@ -1,5 +1,5 @@
 import * as Chartist from "chartist";
-import { compat } from "chartist/compat"; // ← à importer
+import { compat } from "chartist/compat";
 import { useEffect, useRef } from "react";
 
 import { withCompactAxisY } from "@/app/utils/chart.util";

@@ -1,5 +1,5 @@
 import { SessionUser } from "@/types/global";
 
 export const isOperateurUser = (user: SessionUser): boolean => {
-  return user?.operateurId !== null;
+  return user?.operateurId !== null && user?.operateurId !== undefined;
 };
