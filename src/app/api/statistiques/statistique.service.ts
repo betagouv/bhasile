@@ -88,6 +88,10 @@ export const buildStatistiquesContext = async (
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
+  const readableDepartements = getReadableDepartements(
+    resolvedFilters.departements,
+    getReadableDepartementNumeros(user)
+  );
   const allStructures = await findPerimeterStructures(
     resolvedFilters,
     getReadableStructureWhere(user),
@@ -154,7 +158,7 @@ export const buildStatistiquesContext = async (
     activites,
     rmus,
   ] = await Promise.all([
-    findDepartementsWithPopulation([...(resolvedFilters.departements ?? [])]),
+    findDepartementsWithPopulation([...(readableDepartements ?? [])]),
     findEigs(dnaCodes),
     findEvaluations(allStructureIds),
     findBudgets(allStructureIds),
@@ -162,12 +166,7 @@ export const buildStatistiquesContext = async (
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
     resolvedFilters.operateurIds === null && filters.types === null
-      ? findRmus(
-          getReadableDepartements(
-            resolvedFilters.departements,
-            getReadableDepartementNumeros(user)
-          )
-        )
+      ? findRmus(readableDepartements)
       : Promise.resolve(null),
   ]);
 
