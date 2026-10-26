@@ -2,16 +2,23 @@
 
 import "chartist/dist/index.css";
 
-import { useId, useMemo, useState } from "react";
+import { ReactNode, useId, useMemo, useState } from "react";
 
 import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
 import { useBarLineChart } from "@/app/hooks/useBarLineChart";
 
 import { StackedBarChartTooltip } from "./StackedBarChartTooltip";
 
-export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
-  const id = useId();
-  const chartClass = `stacked-bar-line-${id.replace(/:/g, "-")}`;
+const PADDING_LEFT = 50;
+
+export const StackedBarLineChart = ({
+  data,
+  colors,
+  axisYLabel,
+  renderLabel,
+}: Props) => {
+  const chartId = useId();
+  const chartClass = `stacked-bar-line-${chartId.replace(/:/g, "-")}`;
 
   const [activeTooltip, setActiveTooltip] = useState<TooltipData | null>(null);
 
@@ -33,11 +40,11 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
       ...syncOptions,
       stackBars: false,
       fullWidth: false,
-      axisX: { showGrid: false },
-      axisY: { offset: 50 },
+      axisX: { showGrid: false, showLabel: !renderLabel },
+      axisY: { offset: PADDING_LEFT },
       seriesBarDistance: 0,
     }),
-    [syncOptions]
+    [syncOptions, renderLabel]
   );
 
   const lineOptions = useMemo(
@@ -47,7 +54,7 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
       lineSmooth: false,
       showGridBackground: false,
       axisX: { showGrid: false, showLabel: false },
-      axisY: { offset: 50, showGrid: false, showLabel: false },
+      axisY: { offset: PADDING_LEFT, showGrid: false, showLabel: false },
     }),
     [syncOptions]
   );
@@ -65,8 +72,8 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const containerBounds = event.currentTarget.getBoundingClientRect();
     const cursorX = event.clientX - containerBounds.left;
-    const availableWidth = containerBounds.width - 50;
-    const relativeX = cursorX - 50;
+    const availableWidth = containerBounds.width - PADDING_LEFT;
+    const relativeX = cursorX - PADDING_LEFT;
 
     if (relativeX < 0 || relativeX > availableWidth) {
       setActiveTooltip(null);
@@ -98,6 +105,8 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
     setActiveTooltip(null);
   };
 
+  const totalColumns = data.labels.length;
+
   return (
     <div className={`${chartClass} w-full`}>
       <ChartAxisLabels startLabel={axisYLabel} />
@@ -108,12 +117,39 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
         onMouseLeave={handleMouseLeave}
       >
         <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: PADDING_LEFT,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            pointerEvents: "none",
+          }}
+        >
+          {data.labels.map((_, index) => {
+            const isIncomplete = data.incompleteYears?.[index] ?? false;
+            return (
+              <div
+                key={`background-column-${index}`}
+                style={{
+                  flex: 1,
+                  backgroundColor: isIncomplete
+                    ? "var(--color-background-default-grey-active)"
+                    : "transparent",
+                }}
+              />
+            );
+          })}
+        </div>
+
+        <div
           ref={barChartRef}
           style={{
             position: "absolute",
             top: 0,
-            left: 0,
-            width: "100%",
+            left: PADDING_LEFT,
+            right: 0,
             height: "100%",
           }}
         />
@@ -146,6 +182,30 @@ export const StackedBarLineChart = ({ data, colors, axisYLabel }: Props) => {
           </div>
         )}
       </div>
+      {renderLabel && totalColumns > 0 && (
+        <div
+          style={{
+            display: "flex",
+            paddingLeft: PADDING_LEFT,
+            marginTop: 8,
+          }}
+        >
+          {data.labels.map((label, index) => (
+            <div
+              key={`custom-label-${index}`}
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 4,
+              }}
+            >
+              {renderLabel(label, index)}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -154,6 +214,7 @@ type ChartData = {
   labels: string[];
   barsSeries: number[][];
   lineSeries: number[];
+  incompleteYears?: boolean[];
 };
 
 type ChartColors = {
@@ -161,15 +222,16 @@ type ChartColors = {
   line: string;
 };
 
-type Props = {
-  data: ChartData;
-  colors: ChartColors;
-  axisYLabel?: string;
-};
-
 type TooltipData = {
   yearLabel: string;
   value: number;
   positionX: number;
   positionY: number;
+};
+
+type Props = {
+  data: ChartData;
+  colors: ChartColors;
+  axisYLabel?: string;
+  renderLabel?: (label: string, index: number) => ReactNode;
 };

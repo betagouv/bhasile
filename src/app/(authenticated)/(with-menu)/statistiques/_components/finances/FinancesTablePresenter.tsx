@@ -5,25 +5,41 @@ import { ComponentProps, Fragment, ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
-import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
+import { getPercentage } from "@/app/utils/common.util";
+import {
+  filterDisplayedYears,
+  isYearIncomplete,
+  shouldShowYearAsterisk,
+} from "@/app/utils/statistiques-period.util";
 import { CURRENT_YEAR } from "@/constants";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { FinanceByYearStat } from "@/schemas/api/statistique.schema";
+import {
+  CompletudeStat,
+  FinanceByYearStat,
+} from "@/schemas/api/statistique.schema";
+
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
 type VisualizationType = "total" | "autorisees" | "subventionnees";
 
 const sectionsConfig: FinanceSectionConfig[] = [
   {
-    title: "Indicateurs généraux",
+    title: "ETP",
     rows: [
       {
-        label: "Nombre d’ETP prévisionnel",
+        label: "Nombre d’ETP prévisionnel total",
         key: "totalETPPrevisionnel",
       },
       {
-        label: "Nombre d’ETP réel",
+        label: "Nombre d’ETP réel total",
         key: "totalETPRealise",
       },
+    ],
+  },
+  {
+    title: "Taux d'encadrement",
+    rows: [
       {
         label: "Taux d’encadrement cible moyen",
         key: "tauxEncadrementCible",
@@ -36,6 +52,11 @@ const sectionsConfig: FinanceSectionConfig[] = [
         label: "Taux d’encadrement théorique réel moyen",
         key: "tauxEncadrementTheoriqueRealise",
       },
+    ],
+  },
+  {
+    title: "Coût journalier",
+    rows: [
       {
         label: "Coût journalier cible moyen",
         key: "coutJournalierCible",
@@ -104,6 +125,7 @@ export const FinancesTablePresenter = ({
   endYear,
 }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const isExporting = useExportContext();
 
   const financeYears = filterDisplayedYears(
     statistiques?.finance?.byYear ?? []
@@ -116,6 +138,16 @@ export const FinancesTablePresenter = ({
     }
     return true;
   });
+
+  const completudeByYear = new Map<number, CompletudeStat | undefined>(
+    (statistiques?.finance?.byYear ?? []).map(
+      (yearItem) =>
+        [
+          yearItem.year,
+          yearItem[visualization].completude ?? undefined,
+        ] as const
+    )
+  );
 
   const financeStats = sectionsConfig.map((section) => ({
     title: section.title,
@@ -157,7 +189,12 @@ export const FinancesTablePresenter = ({
 
   return (
     <Table
-      headings={getHeadings(financeYears)}
+      headings={getHeadings(
+        financeYears,
+        completudeByYear,
+        visualization,
+        isExporting
+      )}
       ariaLabelledBy={tableId}
       className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full break-inside-avoid"
       enableBorders
@@ -189,23 +226,34 @@ export const FinancesTablePresenter = ({
                   </>
                 )}
               </td>
-              {row.cells.map((cell, index) => (
-                <td
-                  key={`${row.label}-${index}`}
-                  className="whitespace-nowrap align-middle"
-                >
-                  {row.isBadge &&
-                  cell.raw !== null &&
-                  cell.raw !== undefined ? (
-                    <Badge severity={cell.raw < 0 ? "error" : "success"} noIcon>
-                      {cell.raw < 0 ? "" : "+ "}
-                      {cell.display}
-                    </Badge>
-                  ) : (
-                    <span className="text-sm">{cell.display}</span>
-                  )}
-                </td>
-              ))}
+              {row.cells.map((cell, columnIndex) => {
+                const isIncomplete = isYearIncomplete(
+                  financeYears[columnIndex][visualization].completude
+                );
+
+                return (
+                  <td
+                    key={`${row.label}-${columnIndex}`}
+                    className={`whitespace-nowrap align-middle ${
+                      isIncomplete ? "bg-default-grey-active" : ""
+                    }`}
+                  >
+                    {row.isBadge &&
+                    cell.raw !== null &&
+                    cell.raw !== undefined ? (
+                      <Badge
+                        severity={cell.raw < 0 ? "error" : "success"}
+                        noIcon
+                      >
+                        {cell.raw < 0 ? "" : "+ "}
+                        {cell.display}
+                      </Badge>
+                    ) : (
+                      <span className="text-sm">{cell.display}</span>
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </Fragment>
@@ -214,12 +262,47 @@ export const FinancesTablePresenter = ({
   );
 };
 
-const getHeadings = (financeYears: FinanceByYearStat[]) => {
-  const dates = financeYears.map((yearItem) => (
-    <th scope="col" key={yearItem.year} className="text-center font-bold">
-      {yearItem.year}
-    </th>
-  ));
+const getHeadings = (
+  financeYears: FinanceByYearStat[],
+  completudeByYear: ReadonlyMap<number, CompletudeStat | undefined>,
+  visualization: VisualizationType,
+  isExporting: boolean
+) => {
+  const dates =
+    financeYears.map((yearItem, index) => {
+      const isIncomplete = isYearIncomplete(yearItem[visualization].completude);
+      const completude = completudeByYear.get(yearItem.year);
+      const nbRenseignees = completude?.nbRenseignees ?? 0;
+      const nbAttendues = completude?.nbAttendues ?? 1;
+
+      return (
+        <th
+          scope="col"
+          key={yearItem.year}
+          className={isIncomplete ? "bg-default-grey-active" : undefined}
+        >
+          <div className="inline-flex print:block items-center justify-center gap-1">
+            <span>{yearItem.year}</span>
+            {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
+            {isIncomplete &&
+              (isExporting ? (
+                <div className="text-[10px] font-normal">
+                  {nbRenseignees} structures actualisées
+                </div>
+              ) : (
+                <IncompleteDataIndicator
+                  nbStructures={nbRenseignees}
+                  structuresPercentage={getPercentage(
+                    nbRenseignees,
+                    nbAttendues
+                  )}
+                  align={index === financeYears.length - 1 ? "end" : null}
+                />
+              ))}
+          </div>
+        </th>
+      );
+    }) ?? [];
 
   return [
     <th scope="col" key="heading-label">

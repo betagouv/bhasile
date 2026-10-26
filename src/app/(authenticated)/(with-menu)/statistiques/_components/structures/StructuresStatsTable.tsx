@@ -2,7 +2,11 @@ import { Fragment, ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
-import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
+import {
+  filterDisplayedYears,
+  isYearIncomplete,
+  shouldShowYearAsterisk,
+} from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { StructuresByYearStat } from "@/schemas/api/statistique.schema";
 import { Repartition, RepartitionLabel } from "@/types/adresse.type";
@@ -21,8 +25,14 @@ const BATI_ROWS = [
   Repartition.MIXTE,
 ];
 
+import { getPercentage } from "@/app/utils/common.util";
+import { useExportContext } from "@/contexts/ExportContext";
+
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
+
 export const StructuresStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const isExporting = useExportContext();
 
   const structureYears = filterDisplayedYears(statistiques.structures.byYear);
 
@@ -68,7 +78,7 @@ export const StructuresStatsTable = (): ReactElement => {
         Tableau de données
       </h4>
       <Table
-        headings={getHeadings(structureYears)}
+        headings={getHeadings(structureYears, isExporting)}
         ariaLabelledBy="structure-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
@@ -81,16 +91,24 @@ export const StructuresStatsTable = (): ReactElement => {
               <strong>{structureStat.label}</strong>
               <br />
             </td>
-            {structureStat.value?.map((structureStatItem, index) => (
-              <td
-                key={`${structureStat.label}-${index}`}
-                className="whitespace-nowrap"
-              >
-                <span className="inline-flex items-center gap-6">
-                  <NumberDisplay value={structureStatItem} />
-                </span>
-              </td>
-            ))}
+            {structureStat.value?.map((structureStatItem, columnIndex) => {
+              const isIncomplete = isYearIncomplete(
+                structureYears[columnIndex].completude
+              );
+
+              return (
+                <td
+                  key={`${structureStat.label}-${columnIndex}`}
+                  className={`whitespace-nowrap ${
+                    isIncomplete ? "bg-default-grey-active" : ""
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-6">
+                    <NumberDisplay value={structureStatItem} />
+                  </span>
+                </td>
+              );
+            })}
           </tr>
         ))}
         {structureStats.map((section) => (
@@ -111,16 +129,24 @@ export const StructuresStatsTable = (): ReactElement => {
                   <strong>{structureStat.label}</strong>
                   <br />
                 </td>
-                {structureStat.value?.map((structureStatItem, index) => (
-                  <td
-                    key={`${structureStat.label}-${index}`}
-                    className="whitespace-nowrap"
-                  >
-                    <span className="inline-flex items-center gap-6">
-                      <NumberDisplay value={structureStatItem} />
-                    </span>
-                  </td>
-                ))}
+                {structureStat.value?.map((structureStatItem, columnIndex) => {
+                  const isIncomplete = isYearIncomplete(
+                    structureYears[columnIndex].completude
+                  );
+
+                  return (
+                    <td
+                      key={`${structureStat.label}-${columnIndex}`}
+                      className={`whitespace-nowrap ${
+                        isIncomplete ? "bg-default-grey-active" : ""
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-6">
+                        <NumberDisplay value={structureStatItem} />
+                      </span>
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </Fragment>
@@ -130,12 +156,41 @@ export const StructuresStatsTable = (): ReactElement => {
   );
 };
 
-const getHeadings = (structureYears: StructuresByYearStat[]) => {
+const getHeadings = (
+  structureYears: StructuresByYearStat[],
+  isExporting: boolean
+) => {
   const dates =
-    structureYears.map((yearItem) => {
+    structureYears.map((yearItem, index) => {
+      const isIncomplete = isYearIncomplete(yearItem.completude);
+      const nbRenseignees = yearItem.completude?.nbRenseignees ?? 0;
+      const nbAttendues = yearItem.completude?.nbAttendues ?? 1;
+
       return (
-        <th scope="col" key={yearItem.year}>
-          {yearItem.year}
+        <th
+          scope="col"
+          key={yearItem.year}
+          className={isIncomplete ? "bg-default-grey-active" : undefined}
+        >
+          <div className="inline-flex print:block items-center justify-center gap-1">
+            <span>{yearItem.year}</span>
+            {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
+            {isIncomplete &&
+              (isExporting ? (
+                <div className="text-[10px] font-normal">
+                  {nbRenseignees} structures actualisées
+                </div>
+              ) : (
+                <IncompleteDataIndicator
+                  nbStructures={nbRenseignees}
+                  structuresPercentage={getPercentage(
+                    nbRenseignees,
+                    nbAttendues
+                  )}
+                  align={index === structureYears.length - 1 ? "end" : null}
+                />
+              ))}
+          </div>
         </th>
       );
     }) ?? [];
