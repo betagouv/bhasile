@@ -8,10 +8,19 @@ import { AppAbility, defineAbilityFor, NO_RECORD_WHERE } from "./rules";
 
 export const getReadableCpomWhere = (
   user: SessionUser | undefined
+): Prisma.CpomWhereInput => getCpomWhere(user, "read");
+
+export const getUpdatableCpomWhere = (
+  user: SessionUser | undefined
+): Prisma.CpomWhereInput => getCpomWhere(user, "update");
+
+const getCpomWhere = (
+  user: SessionUser | undefined,
+  action: "read" | "update"
 ): Prisma.CpomWhereInput => {
   const ability = defineAbilityFor(user);
-  return ability.can("read", "Cpom")
-    ? accessibleBy(ability).Cpom
+  return ability.can(action, "Cpom")
+    ? accessibleBy(ability, action).Cpom
     : NO_RECORD_WHERE;
 };
 

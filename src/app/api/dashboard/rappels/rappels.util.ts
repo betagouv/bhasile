@@ -9,7 +9,6 @@ import {
 } from "@/app/api/structures/structure.util";
 import { RAPPEL_TASK_LABEL } from "@/app/utils/rappel.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { canAbilityUpdateCpom, defineAbilityFor } from "@/lib/casl";
 import {
   DashboardRappel,
   RappelCriticite,
@@ -150,8 +149,7 @@ export const buildRappels = (
   cpoms: RappelCpom[],
   options: BuildRappelsOptions
 ): DashboardRappel[] => {
-  const { user, departementList, operateurList, now } = options;
-  const ability = defineAbilityFor(user);
+  const { departementList, operateurList, now } = options;
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
@@ -239,9 +237,6 @@ export const buildRappels = (
   }
 
   for (const cpom of cpoms) {
-    if (!canAbilityUpdateCpom(ability, cpom)) {
-      continue;
-    }
     const departements = getCpomDepartementNumeros(cpom);
     if (
       departementList.length > 0 &&

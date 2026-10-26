@@ -1,7 +1,4 @@
-import {
-  createSessionGrant,
-  createSessionUser,
-} from "tests/test-utils/factories/session-user.factory";
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
 import { ActeAdministratifDates } from "@/app/api/actes-administratifs/acte-administratif.util";
@@ -11,27 +8,14 @@ import {
 } from "@/app/api/dashboard/rappels/rappels.db.type";
 import { buildRappels } from "@/app/api/dashboard/rappels/rappels.util";
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
-import {
-  AccessRole,
-  StructureVersionTransformationType,
-} from "@/generated/prisma/enums";
+import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
 const NOW = new Date("2026-07-10T00:00:00.000Z");
 
-const ILE_DE_FRANCE_ID = 11;
-
-const agent: SessionUser = createSessionUser({
-  grants: [
-    createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
-    createSessionGrant({
-      departementNumeros: ["50", "92", "93"],
-      regionIds: [28, ILE_DE_FRANCE_ID],
-    }),
-  ],
-});
+const agent: SessionUser = createDepartementalAgent(["50", "92", "93"]);
 
 const baseOptions = {
   user: agent,
@@ -129,9 +113,7 @@ const makeCpom = (
   name: "COALLIA",
   operateur: overrides.operateur ?? { id: 2, name: "Coallia" },
   granularity: overrides.region ? "REGIONALE" : "INTERDEPARTEMENTALE",
-  regionId: overrides.region ? ILE_DE_FRANCE_ID : null,
   region: overrides.region ?? null,
-  structures: [],
   departements: (overrides.departementNumeros ?? ["92", "93"]).map(
     (numero) => ({ departement: { numero } })
   ),
@@ -369,16 +351,6 @@ describe("buildRappels — scoping & CPOM", () => {
       actionUrl: "/cpoms/10",
       cpomDepartements: ["92", "93"],
     });
-  });
-
-  it("exclut un CPOM dont aucun département n'est couvert par l'agent", () => {
-    const cpom = makeCpom({
-      departementNumeros: ["75", "78"],
-      actesAdministratifs: [
-        parentActe("CONVENTION", "2020-01-01", "2026-08-01"),
-      ],
-    });
-    expect(buildRappels([], [cpom], baseOptions)).toHaveLength(0);
   });
 
   it("prend les départements d'un CPOM régional dans sa région", () => {

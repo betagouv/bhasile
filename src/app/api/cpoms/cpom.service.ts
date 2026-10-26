@@ -112,8 +112,10 @@ export const prepareCpomToSave = async (
   cpom: CpomApiWrite,
   existingCpom: CpomDbScope | null
 ): Promise<CpomToSave> => {
-  const granularity =
-    cpom.granularity ?? existingCpom?.granularity ?? "REGIONALE";
+  const granularity = cpom.granularity ?? existingCpom?.granularity;
+  if (!granularity) {
+    throw new DomainError("Un CPOM doit avoir une granularité");
+  }
   const regionId = cpom.region?.name
     ? await resolveRegionId(cpom.region.name)
     : (existingCpom?.regionId ?? undefined);

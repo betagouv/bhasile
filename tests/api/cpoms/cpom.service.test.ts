@@ -74,6 +74,12 @@ describe("prepareCpomToSave", () => {
     ).rejects.toThrow("Région introuvable");
   });
 
+  it("rejette un nouveau CPOM sans granularité", async () => {
+    await expect(prepareCpomToSave({ departements }, null)).rejects.toThrow(
+      "Un CPOM doit avoir une granularité"
+    );
+  });
+
   it("rejette un nouveau CPOM régional sans région", async () => {
     await expect(
       prepareCpomToSave(

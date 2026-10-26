@@ -50,20 +50,20 @@ Quels binômes s'appliquent à un user :
 Ce que couvre un binôme :
 
 - **Structures** : national = toutes ; région ou département = celles dont le département de rattachement est couvert ; structure = celle-là.
-- **CPOM** : national = tous ; région ou département = ceux dont au moins un département est couvert, plus les CPOM régionaux de la région concernée ; structure = ceux liés à cette structure. Un CPOM régional n'a pas de ligne `CpomDepartement` : il couvre tous les départements de sa région (`regionId`), et `getCpomDepartements` (`cpoms/cpom.util.ts`) les en déduit pour la liste, la fiche et les rappels CPOM. Les autres payloads (fiche structure, fichiers) gardent les lignes brutes, vides pour un CPOM régional.
+- **CPOM** : national = tous ; région ou département = ceux dont au moins un département est couvert, plus les CPOM régionaux de la région concernée ; structure = ceux liés à cette structure. Un CPOM régional n'a pas de ligne `CpomDepartement` : il couvre tous les départements de sa région (`regionId`), que `getCpomDepartements` (`cpoms/cpom.util.ts`) en déduit pour la liste, la fiche et les rappels CPOM. Un binôme département donne donc aussi la main sur les CPOM régionaux de sa région. Les autres payloads (fiche structure, fichiers) gardent les lignes brutes, vides pour un CPOM régional.
 - **Opérateurs** : un agent éditeur, quel que soit son niveau, modifie tous les opérateurs ; un user opérateur `ADMIN` modifie le sien. La lecture des opérateurs n'est pas filtrée.
 - **User opérateur** : tout est en plus restreint aux structures et CPOM de son opérateur.
 
 Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports, RMU compris : ceux des départements couverts), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404, et sans user la lecture est refusée. Exception : la sélection de structure du formulaire opérateur (mot de passe, sans session) reste non filtrée, via `getFullStructuresForOperateur`. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
 
-Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `casl/rules.ts`) sert à la fois aux règles CASL de lecture et d'écriture et au filtre de droits `getReadableStructureWhere` des statistiques.
+Une seule définition de « ce que couvre un binôme » (`getStructureConditions` / `getCpomConditions` dans `casl/rules.ts`) sert aux règles CASL de lecture et d'écriture. Les filtres Prisma en sont tirés par `accessibleBy` : `getReadableStructureWhere` (listes, carte, statistiques), `getReadableCpomWhere` (liste des CPOM) et `getUpdatableCpomWhere` (rappels CPOM du tableau de bord).
 
 Limites actuelles :
 
 - **`ADMIN` = `EDITEUR`** tant que la gestion des binômes (PR 2) n'existe pas.
 - **Non filtré en lecture** : la fiche opérateur (et la liste de ses structures), les fichiers (`/api/files`, ouverts à toute session), les pages de transformation, la moyenne départementale d'activité, et les vues `reporting` / Metabase (hors application).
 - **Users opérateurs** : les RMU des statistiques ne sont filtrés que par département, pas par opérateur. À fermer avec les statistiques en PR 3.
-- **Niveau structure** : pas d'accès aux transformations ni aux rappels CPOM du tableau de bord, qui restent contrôlés par département.
+- **Niveau structure** : pas d'accès aux transformations du tableau de bord, qui restent contrôlées par département.
 
 Règle à respecter dans `casl/rules.ts` : le code ne compare jamais les rôles entre eux. Tout droit donné à un rôle doit l'être aussi aux rôles supérieurs, sinon la hiérarchie casse.
 
@@ -97,7 +97,7 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
 
 ## Points d'attention
 
-- **CPOM chargé sans ses listes** : la règle CPOM lit `departements`, `structures`, `granularity` et `regionId`. Passer à CASL un CPOM sans `departements` ou `structures` lève une erreur ; sans `granularity` ou `regionId`, la règle régionale refuse en silence.
+- **CPOM chargé sans ses champs de périmètre** : la règle CPOM lit `departements`, `structures`, `granularity` et `regionId` (`cpomScopeSelect`). Un CPOM passé à CASL sans l'un d'eux ne lève pas d'erreur : la condition correspondante ne matche pas et l'accès est refusé en silence.
 - **Pas de contrainte en base sur `Grant`** : Prisma ne modélise pas les CHECK, et on ne veut pas de migration écrite à la main. Une ligne sans propriétaire ou sans cible est donc possible ; elle ne donne aucun droit. La cohérence est vérifiée par le service (PR 2).
 - **Premier binôme personnel d'un agent** : il remplace tous ses droits de base. Il faut recopier ceux à garder, au minimum `LECTEUR national`.
 - **Maisons mères et filiales** (`Operateur.parentId`) : non géré, à traiter plus tard.

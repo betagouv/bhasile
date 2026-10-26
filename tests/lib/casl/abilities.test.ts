@@ -16,16 +16,17 @@ import {
 import {
   canAbilityReadCpom,
   canAbilityReadStructure,
+  canAbilityUpdateDepartement,
   canAccessApp,
   canDeleteFile,
   canSaveCpom,
-  canUpdateDepartement,
   canUpdateOperateur,
   canUpdateStructure,
   defineAbilityFor,
   getReadableCpomWhere,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
+  getUpdatableCpomWhere,
 } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
@@ -186,7 +187,9 @@ describe("Permissions : binôme de niveau structure", () => {
         departementAdministratif: "13",
       })
     ).toBe(false);
-    expect(canUpdateDepartement(structureEditor, "13")).toBe(false);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(structureEditor), "13")
+    ).toBe(false);
   });
 
   it("autorise l'édition des seuls CPOM liés à la structure", () => {
@@ -495,6 +498,26 @@ describe("Permissions : lecture", () => {
     expect(getReadableCpomWhere(createDepartementalAgent(["75"]))).toEqual({});
   });
 
+  it("filtre les CPOM modifiables sur les binômes d'édition seulement", () => {
+    const lecteurNational = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(getUpdatableCpomWhere(createNationalAgent())).toEqual({});
+    expect(getUpdatableCpomWhere(lecteurNational)).toEqual({ id: { in: [] } });
+    expect(getUpdatableCpomWhere(createDepartementalAgent(["75"]))).toEqual({
+      OR: [
+        {
+          departements: {
+            some: { departement: { is: { numero: { in: ["75"] } } } },
+          },
+        },
+      ],
+    });
+  });
+
   it("ne filtre rien pour un superadmin", () => {
     expect(
       getReadableStructureWhere(createSessionUser({ isSuperAdmin: true }))
@@ -597,25 +620,39 @@ describe("Permissions : canAccessApp", () => {
   });
 });
 
-describe("Permissions : canUpdateDepartement", () => {
+describe("Permissions : canAbilityUpdateDepartement", () => {
   const nationalUser = createNationalAgent();
 
   const departementUser = createDepartementalAgent(["50"]);
 
   it("autorise un agent éditeur national sur n'importe quel département, y compris un département undefined", () => {
-    expect(canUpdateDepartement(nationalUser, "50")).toBe(true);
-    expect(canUpdateDepartement(nationalUser, "13")).toBe(true);
-    expect(canUpdateDepartement(nationalUser, undefined)).toBe(true);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(nationalUser), "50")
+    ).toBe(true);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(nationalUser), "13")
+    ).toBe(true);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(nationalUser), undefined)
+    ).toBe(true);
   });
 
   it("autorise un agent départemental uniquement sur son propre département", () => {
-    expect(canUpdateDepartement(departementUser, "50")).toBe(true);
-    expect(canUpdateDepartement(departementUser, "13")).toBe(false);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(departementUser), "50")
+    ).toBe(true);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(departementUser), "13")
+    ).toBe(false);
   });
 
   it("masque les transformations sans département à un agent départemental", () => {
-    expect(canUpdateDepartement(departementUser, undefined)).toBe(false);
-    expect(canUpdateDepartement(departementUser, null)).toBe(false);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(departementUser), undefined)
+    ).toBe(false);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(departementUser), null)
+    ).toBe(false);
   });
 });
 
