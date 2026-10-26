@@ -4,11 +4,14 @@ import {
   formatNumber,
 } from "@/app/utils/number.util";
 
+import { EmptyCell } from "./EmptyCell";
+
 /**
  * Displays a number as formatted French number or currency (EUR).
  * @param value - The number to display as number or currency
  * @param type - The type of the number to display ("number" or "currency")
  * @param showZero - If false, displays "-" for zero/null/undefined values
+ * @param showEmptyCell - If true, displays an EmptyCell (grey dot of tables) for null/undefined values
  * @param className - Optional CSS class for the span
  * @param compact - Optional boolean to display in k or M (ex : 10000 => 10k)
  * @param maximumFractionDigits - Optional maximum number of decimals (ex : 0 => 1 815 873 €)
@@ -21,7 +24,12 @@ export const NumberDisplay = ({
   className,
   compact = false,
   maximumFractionDigits,
+  showEmptyCell = false,
 }: Props) => {
+  if (showEmptyCell && (value === null || value === undefined)) {
+    return <EmptyCell />;
+  }
+
   if (!showZero && (value === 0 || value === null || value === undefined)) {
     return <span className={className}>-</span>;
   }
@@ -42,4 +50,5 @@ type Props = {
   showZero?: boolean;
   compact?: boolean;
   maximumFractionDigits?: number;
+  showEmptyCell?: boolean;
 };

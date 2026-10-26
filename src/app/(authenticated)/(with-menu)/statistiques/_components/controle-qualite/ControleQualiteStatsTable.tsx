@@ -2,7 +2,6 @@
 
 import { Fragment, ReactElement, useState } from "react";
 
-import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import {
@@ -170,9 +169,11 @@ export const ControleQualiteStatsTable = ({
             ? periodItem[row.key as keyof ControleQualitePeriodStat]
             : null;
 
-        return row.format && rawValue !== null && rawValue !== undefined
-          ? row.format(rawValue, periodItem)
-          : rawValue;
+        return row.format && rawValue !== null && rawValue !== undefined ? (
+          row.format(rawValue, periodItem)
+        ) : (
+          <NumberDisplay value={rawValue as number | null} showEmptyCell />
+        );
       });
 
       return {
@@ -230,7 +231,7 @@ export const ControleQualiteStatsTable = ({
                     className="whitespace-nowrap align-middle"
                   >
                     <span className="text-sm">
-                      {(cellValue as string) ?? <EmptyCell />}
+                      {cellValue}
                     </span>
                   </td>
                 ))}

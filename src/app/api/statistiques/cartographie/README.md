@@ -91,13 +91,17 @@ Chaque clé lit un champ de `StatistiqueApiRead` pour l'année demandée
 - **structures** : `total`, `avecCpom` (structures couvertes par un CPOM actif)
 - **places** : `autorisees`, `pmr`, `lgbt`, `fvvTeh`, `qpv`, `logementsSociaux`
 - **finance** : scope `total` uniquement, le filtre `types` structure suffit à
-  restreindre, avec `dotationAccordee`, `etp`, `tauxEncadrement` (ratio),
-  `coutJournalier` (ratio), `resultatNet` (signé "excédents et déficits").
+  restreindre, avec `dotationAccordee`, `etp` (réalisé, sinon prévisionnel),
+  `tauxEncadrement` (taux théorique, ratio), `coutJournalier` (coût théorique,
+  ratio), `resultatNet` (signé "excédents et déficits"). Cf.
+  [finance/README.md](../finance/README.md#cartographie).
 - **controleQualite** : `nbEig`, `tauxEigComportementViolent` (ratio), `moyenneEvaluations` (ratio)
 - **activite** : `placesDna`, `placesIndisponibles`, `placesOccupees`,
   `presencesIndues`. La valeur d'une année est la moyenne (ou médiane) de sa série mensuelle, et l'évolution compare à
 - **rmu** : `referesEngages`, `referesExecutes`. _Somme_ de tous les RMU du périmètre sur l'année. Donnée au niveau département uniquement (voir TODO). `rmus` n'est chargé que sans filtre opérateur/type — avec un tel filtre, la valeur est `null` partout.
 
 Pour les ratios, la valeur d'une région est recalculée à partir des données brutes de tous ses départements, jamais une moyenne des ratios départementaux.
+
+Les indicateurs annuels des blocs structures, places et finance ne comptent, sur une année de campagne, que les structures actualisées (cf. [README racine](../README.md#structures-comptabilisées-par-année)).
 
 Pour tous les indicateurs, une année sans année précédente pour comparer a son indicateur d'évolution à null (il n'est pas inféré depuis une éventuelle année n-2).
