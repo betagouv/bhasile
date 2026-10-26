@@ -1,5 +1,13 @@
 import { type BucketItemStat } from "minio";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import { filterBlocks } from "@/app/utils/ressources.util";
 import { listS3Objects, readS3File, statS3Object } from "@/lib/minio";
@@ -489,6 +497,103 @@ Une introduction orpheline.
 
       // THEN
       expect(suggestionsWithoutResult).toEqual([]);
+    });
+  });
+
+  describe("contenu distant S3 en erreur", () => {
+    const VALID_BLOCK = `${FILES_FRONTMATTER}
+## Actes administratifs
+
+- [Arrêté](/arrete.odt)
+`;
+
+    const mockS3Files = (files: Record<string, string>): void => {
+      vi.mocked(listS3Objects).mockResolvedValue(Object.keys(files));
+      vi.mocked(readS3File).mockImplementation(async (objectKey) => {
+        const content = files[objectKey];
+        if (!content) {
+          throw new Error(`Fichier introuvable sur S3 : ${objectKey}`);
+        }
+        return content;
+      });
+    };
+
+    beforeEach(() => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.mocked(statS3Object).mockResolvedValue({
+        size: 1024,
+      } as BucketItemStat);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("ignore un bloc mal formé et affiche les autres", async () => {
+      // GIVEN
+      mockS3Files({
+        "ressources/01-modeles.md": VALID_BLOCK,
+        "ressources/02-casse.md": "## Sans frontmatter\n",
+      });
+
+      // WHEN
+      const blocks = await readBlocks();
+
+      // THEN
+      expect(blocks.map((block) => block.id)).toEqual(["modeles"]);
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining("ressources/02-casse.md"),
+        expect.any(Error)
+      );
+    });
+
+    it("ignore un bloc qui contient un lien mort", async () => {
+      // GIVEN
+      mockS3Files({
+        "ressources/01-modeles.md": VALID_BLOCK,
+        "ressources/02-ressources.md": `${FILES_FRONTMATTER}
+## Guides
+
+- [Guide](/absent.pdf)
+`,
+      });
+      vi.mocked(statS3Object).mockImplementation(async (objectKey) => {
+        if (objectKey === "ressources/absent.pdf") {
+          throw new Error("File not found");
+        }
+        return { size: 1024 } as BucketItemStat;
+      });
+
+      // WHEN
+      const blocks = await readBlocks();
+
+      // THEN
+      expect(blocks.map((block) => block.id)).toEqual(["modeles"]);
+    });
+
+    it("garde le premier de deux fichiers qui produisent le même bloc", async () => {
+      // GIVEN
+      mockS3Files({
+        "ressources/01-modeles.md": VALID_BLOCK,
+        "ressources/02-modeles.md": VALID_BLOCK.replace("Modèles", "Doublon"),
+      });
+
+      // WHEN
+      const blocks = await readBlocks();
+
+      // THEN
+      expect(blocks.map((block) => block.title)).toEqual(["Modèles"]);
+    });
+
+    it("renvoie une liste vide quand le fichier de suggestions est absent", async () => {
+      // GIVEN
+      mockS3Files({ "ressources/01-modeles.md": VALID_BLOCK });
+
+      // WHEN
+      const suggestions = await readSuggestions();
+
+      // THEN
+      expect(suggestions).toEqual([]);
     });
   });
 });

@@ -13,7 +13,7 @@ import {
   isTransformationVisible,
 } from "@/app/api/transformations/transformation.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { defineAbilityFor } from "@/lib/casl/abilities";
+import { defineAbilityFor } from "@/lib/casl";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   StructureVersionTransformationType,

@@ -7,7 +7,7 @@ import {
   getStructureVersionTransformationOperateur,
 } from "@/app/utils/transformation.util";
 import { STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER } from "@/config/transformation.config";
-import { AppAbility } from "@/lib/casl/abilities";
+import { AppAbility } from "@/lib/casl";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,

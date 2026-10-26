@@ -6,50 +6,37 @@ import { prisma } from "./prisma";
 export const E2E_AGENT_EMAIL = "e2e.agent@bhasile.local";
 export const E2E_AGENT_NAME = "E2E Agent";
 
-const E2E_AGENT_DEPARTEMENT = "75";
-const E2E_AGENT_EMAIL_PATTERN = "^e2e\\.agent@bhasile\\.local$";
+const E2E_AGENT_DEPARTEMENTS = ["75", "92"];
 
 export const seedAgent = async (): Promise<void> => {
-  const departement = await prisma.departement.findUnique({
-    where: { numero: E2E_AGENT_DEPARTEMENT },
+  const departements = await prisma.departement.findMany({
+    where: { numero: { in: E2E_AGENT_DEPARTEMENTS } },
     select: { numero: true },
   });
-  if (!departement) {
+  if (departements.length !== E2E_AGENT_DEPARTEMENTS.length) {
     throw new Error(
-      `Département ${E2E_AGENT_DEPARTEMENT} absent de la base : lancer \`npx prisma db seed\` avant les tests e2e.`
+      `Départements ${E2E_AGENT_DEPARTEMENTS.join(", ")} absents de la base : lancer \`npx prisma db seed\` avant les tests e2e.`
     );
   }
 
-  const emailPattern = await prisma.emailPattern.upsert({
-    where: { pattern: E2E_AGENT_EMAIL_PATTERN },
-    update: {},
-    create: { pattern: E2E_AGENT_EMAIL_PATTERN },
-    select: { id: true },
-  });
-
-  await prisma.grant.deleteMany({
-    where: { emailPatternId: emailPattern.id },
-  });
-  await prisma.grant.create({
-    data: {
-      emailPatternId: emailPattern.id,
-      role: AccessRole.EDITEUR,
-      scope: GrantScope.DEPARTEMENT,
-      departementNumero: departement.numero,
-    },
-  });
-
-  await prisma.user.upsert({
+  const user = await prisma.user.upsert({
     where: { email: E2E_AGENT_EMAIL },
-    update: { emailPatternId: emailPattern.id },
+    update: {},
     create: {
       email: E2E_AGENT_EMAIL,
       name: E2E_AGENT_NAME,
-      emailPatternId: emailPattern.id,
       lastConnection: getNow(),
     },
+    select: { id: true },
   });
-  await prisma.grant.deleteMany({
-    where: { user: { email: E2E_AGENT_EMAIL } },
+
+  await prisma.grant.deleteMany({ where: { userId: user.id } });
+  await prisma.grant.createMany({
+    data: departements.map((departement) => ({
+      userId: user.id,
+      role: AccessRole.EDITEUR,
+      scope: GrantScope.DEPARTEMENT,
+      departementNumero: departement.numero,
+    })),
   });
 };

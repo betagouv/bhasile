@@ -61,3 +61,12 @@ export type CpomDbList = Prisma.CpomGetPayload<{
 export type CpomDbDetails = Prisma.CpomGetPayload<{
   include: typeof cpomDetailsInclude;
 }>;
+
+export const cpomScopeSelect = {
+  structures: { select: { structureId: true } },
+  departements: { select: { departement: { select: { numero: true } } } },
+} satisfies Prisma.CpomSelect;
+
+export type CpomDbScope = Prisma.CpomGetPayload<{
+  select: typeof cpomScopeSelect;
+}>;

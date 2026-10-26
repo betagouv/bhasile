@@ -7,7 +7,7 @@ import {
 } from "@/app/api/anomalies/anomalie.service";
 import { createStructureEvent } from "@/app/api/user-actions/user-action.service";
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { canUpdateStructure } from "@/lib/casl/abilities";
+import { canUpdateStructure } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { anomalieApiUpdateSchema } from "@/schemas/api/anomalie.schema";
 import { SessionUser } from "@/types/global";

@@ -9,6 +9,13 @@ import { AccesRefuse } from "./AccesRefuse";
 
 export default function Login(): ReactElement {
   const searchParams = useSearchParams();
+  const reason = searchParams.get("reason");
+  const error = searchParams.get("error");
+
+  const accesRefuse =
+    searchParams.get("accesRefuse") === "true" ||
+    Boolean(reason) ||
+    Boolean(error);
 
   const login = async (): Promise<void> => {
     signIn("proconnect", {
@@ -19,8 +26,8 @@ export default function Login(): ReactElement {
   return (
     <div className="flex justify-center">
       <div className="flex-col">
-        {searchParams.get("accesRefuse") && <AccesRefuse />}
-        <div className="max-w-[600px] px-25.5 py-14 bg-alt-grey">
+        {accesRefuse && <AccesRefuse reason={reason} error={error} />}
+        <div className="max-w-150 px-25.5 py-14 bg-alt-grey">
           <h2 className="text-2xl">Connexion à Bhasile</h2>
           <p className="text-lg">
             <strong>
