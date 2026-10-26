@@ -4,8 +4,8 @@ import { ReactElement, useEffect } from "react";
 
 import { Section } from "@/app/components/common/Section";
 import { useUserAction } from "@/app/hooks/useUserAction";
-import { isSomeDataIncomplete } from "@/app/utils/statistiques.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { isSomeDataIncomplete } from "@/utils/statistiques.util";
 
 import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";

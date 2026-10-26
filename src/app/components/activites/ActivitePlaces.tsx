@@ -42,8 +42,10 @@ export const ActivitePlaces = ({
           isDonut={true}
           colors={[
             "var(--grey-925-125)",
-            "var(--yellow-moutarde-main-679)",
             "var(--yellow-moutarde-850-200)",
+            caes
+              ? "var(--yellow-moutarde-main-679)"
+              : "var(--yellow-moutarde-850-200)",
           ]}
         >
           <div className="absolute w-22 top-15 left-12 text-sm text-center">

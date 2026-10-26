@@ -2,12 +2,18 @@ import { ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { MultiInformationCard } from "@/app/components/MultiInformationCard";
+import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const FinanceCards = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
-  const currentYear =
-    statistiques.finance.byYear[statistiques.finance.byYear.length - 1];
+  const currentYear = statistiques.finance.byYear.find(
+    (yearItem) => yearItem.year === CURRENT_YEAR
+  );
+
+  if (!currentYear) {
+    return <></>;
+  }
 
   return (
     <div className="grid grid-cols-4 gap-4">

@@ -1,6 +1,7 @@
 import { Fragment, ReactElement, ReactNode } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
+import { PlacesWithPercentage } from "@/app/components/common/PlacesWithPercentage";
 import { Table } from "@/app/components/common/Table";
 import { getPercentage } from "@/app/utils/common.util";
 import { formatPerMille } from "@/app/utils/number.util";
@@ -55,17 +56,17 @@ export const TypesPlacesStatsTable = ({
       rows: [
         {
           label: "Places PMR",
-          value: placeYears.map((yearItem) => yearItem.pmr),
+          getValue: (yearItem: PlacesByYearStat) => yearItem.pmr,
         },
         {
           label: "Places LGBT",
           subLabel: "(labellisées)",
-          value: placeYears.map((yearItem) => yearItem.lgbt),
+          getValue: (yearItem: PlacesByYearStat) => yearItem.lgbt,
         },
         {
           label: "Places FVV/TEH",
           subLabel: "(spécialisées)",
-          value: placeYears.map((yearItem) => yearItem.fvvTeh),
+          getValue: (yearItem: PlacesByYearStat) => yearItem.fvvTeh,
         },
       ],
     },
@@ -132,24 +133,21 @@ export const TypesPlacesStatsTable = ({
                   <br />
                   <span className="text-xs">{structureStat.subLabel}</span>
                 </td>
-                {structureStat.value?.map((structureStatItem, columnIndex) => {
-                  const isIncomplete = isYearIncomplete(
-                    placeYears[columnIndex].completude
-                  );
-
-                  return (
-                    <td
-                      key={`${structureStat.label}-${columnIndex}`}
-                      className={`whitespace-nowrap ${
-                        isIncomplete ? "bg-default-grey-active" : ""
-                      }`}
-                    >
-                      <span className="inline-flex items-center gap-6">
-                        <NumberDisplay value={structureStatItem} />
-                      </span>
-                    </td>
-                  );
-                })}
+                {placeYears.map((yearItem) => (
+                  <td
+                    key={`${structureStat.label}-${yearItem.year}`}
+                    className={`whitespace-nowrap ${
+                      isYearIncomplete(yearItem.completude)
+                        ? "bg-default-grey-active"
+                        : ""
+                    }`}
+                  >
+                    <PlacesWithPercentage
+                      value={structureStat.getValue(yearItem)}
+                      placesAutorisees={yearItem.totalPlaces}
+                    />
+                  </td>
+                ))}
               </tr>
             ))}
           </Fragment>

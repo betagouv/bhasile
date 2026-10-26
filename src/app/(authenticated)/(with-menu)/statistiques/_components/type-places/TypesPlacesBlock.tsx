@@ -44,14 +44,20 @@ export const TypesPlacesBlock = ({
             />
           )}
         </h4>
-        <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
-          {currentYearPlaces?.completude?.nbRenseignees} structures actualisées
-        </h5>
+        {isYearIncomplete(currentYearPlaces?.completude) && (
+          <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
+            {currentYearPlaces?.completude?.nbRenseignees} structures actualisées
+          </h5>
+        )}
         <TypePlaceCharts
           placesAutorisees={currentYearPlaces?.totalPlaces ?? 0}
           placesPmr={currentYearPlaces?.pmr ?? 0}
           placesLgbt={currentYearPlaces?.lgbt ?? 0}
           placesFvvTeh={currentYearPlaces?.fvvTeh ?? 0}
+        />
+        <h4 className="text-title-blue-france text-lg pt-8">À date</h4>
+        <TypePlaceCharts
+          placesAutorisees={statistiques.places.totalPlaces}
           placesQPV={statistiques.places.qpv}
           placesLogementsSociaux={statistiques.places.logementsSociaux}
         />
