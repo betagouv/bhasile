@@ -4,12 +4,16 @@ import { prepareCpomToSave } from "@/app/api/cpoms/cpom.service";
 
 const mockFindRegionIdByName = vi.fn();
 
-vi.mock("@/app/api/cpoms/cpom.repository", () => ({
+vi.mock("@/app/api/cpoms/cpom.repository", () => ({}));
+
+vi.mock("@/app/api/regions/region.repository", () => ({
   findRegionIdByName: (...args: unknown[]) => mockFindRegionIdByName(...args),
 }));
 
 const departements = [{ departement: { numero: "59" } }];
+const operateur = { id: 3, name: "Adoma" };
 const existingCpom = {
+  operateurId: 3,
   granularity: "DEPARTEMENTALE" as const,
   regionId: 7,
   departements,
@@ -25,6 +29,7 @@ describe("prepareCpomToSave", () => {
   it("vide les départements d'un CPOM régional et résout sa région", async () => {
     const cpomToSave = await prepareCpomToSave(
       {
+        operateur,
         granularity: "REGIONALE",
         region: { name: "Hauts-de-France" },
         departements,
@@ -42,7 +47,7 @@ describe("prepareCpomToSave", () => {
 
   it("garde les départements d'un CPOM départemental", async () => {
     const cpomToSave = await prepareCpomToSave(
-      { granularity: "DEPARTEMENTALE", departements },
+      { operateur, granularity: "DEPARTEMENTALE", departements },
       null
     );
 
@@ -65,6 +70,7 @@ describe("prepareCpomToSave", () => {
     await expect(
       prepareCpomToSave(
         {
+          operateur,
           granularity: "REGIONALE",
           region: { name: "Inconnue" },
           departements,
@@ -74,16 +80,33 @@ describe("prepareCpomToSave", () => {
     ).rejects.toThrow("Région introuvable");
   });
 
+  it("rejette un nouveau CPOM sans opérateur", async () => {
+    await expect(
+      prepareCpomToSave({ granularity: "DEPARTEMENTALE", departements }, null)
+    ).rejects.toThrow("Un CPOM doit avoir un opérateur");
+  });
+
+  it("reprend l'opérateur du CPOM existant quand le payload ne le précise pas", async () => {
+    const cpomToSave = await prepareCpomToSave({ departements }, existingCpom);
+
+    expect(cpomToSave.operateurId).toBe(3);
+  });
+
   it("rejette un nouveau CPOM sans granularité", async () => {
-    await expect(prepareCpomToSave({ departements }, null)).rejects.toThrow(
-      "Un CPOM doit avoir une granularité"
-    );
+    await expect(
+      prepareCpomToSave({ operateur, departements }, null)
+    ).rejects.toThrow("Un CPOM doit avoir une granularité");
   });
 
   it("rejette un nouveau CPOM régional sans région", async () => {
     await expect(
       prepareCpomToSave(
-        { granularity: "REGIONALE", region: { name: "" }, departements },
+        {
+          operateur,
+          granularity: "REGIONALE",
+          region: { name: "" },
+          departements,
+        },
         null
       )
     ).rejects.toThrow("Un CPOM régional doit avoir une région");

@@ -14,6 +14,7 @@ import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
+import { findRegionIdByName } from "../regions/region.repository";
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
 import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";
 import {
@@ -21,7 +22,6 @@ import {
   findAllCpoms,
   findCpomScope,
   findOne,
-  findRegionIdByName,
 } from "./cpom.repository";
 import {
   buildCpomListItem,
@@ -112,6 +112,11 @@ export const prepareCpomToSave = async (
   cpom: CpomApiWrite,
   existingCpom: CpomDbScope | null
 ): Promise<CpomToSave> => {
+  const operateurId =
+    cpom.operateur?.id ?? cpom.operateurId ?? existingCpom?.operateurId;
+  if (!operateurId) {
+    throw new DomainError("Un CPOM doit avoir un opérateur");
+  }
   const granularity = cpom.granularity ?? existingCpom?.granularity;
   if (!granularity) {
     throw new DomainError("Un CPOM doit avoir une granularité");
@@ -128,6 +133,7 @@ export const prepareCpomToSave = async (
   }
   return {
     ...cpom,
+    operateurId,
     granularity,
     regionId,
     departements:

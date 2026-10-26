@@ -85,6 +85,7 @@ export type CpomDbDetails = Prisma.CpomGetPayload<{
 }>;
 
 export const cpomScopeSelect = {
+  operateurId: true,
   granularity: true,
   regionId: true,
   structures: { select: { structureId: true } },
@@ -95,4 +96,7 @@ export type CpomDbScope = Prisma.CpomGetPayload<{
   select: typeof cpomScopeSelect;
 }>;
 
-export type CpomToSave = CpomApiWrite & { regionId?: number | null };
+export type CpomToSave = CpomApiWrite & {
+  operateurId: number;
+  regionId?: number | null;
+};

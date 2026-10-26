@@ -38,19 +38,8 @@ export const findCpomScope = (id: number): Promise<CpomDbScope | null> =>
     select: cpomScopeSelect,
   });
 
-export const findRegionIdByName = async (
-  name: string
-): Promise<number | undefined> => {
-  const region = await prisma.region.findFirst({
-    where: { name },
-    select: { id: true },
-  });
-  return region?.id;
-};
-
 export const createOrUpdateCpom = async (cpom: CpomToSave): Promise<number> => {
-  const operateurId = cpom.operateur?.id ?? cpom.operateurId;
-  const { regionId } = cpom;
+  const { operateurId, regionId } = cpom;
   const cpomId = await prisma.$transaction(async (tx) => {
     let cpomId = cpom.id;
     if (cpomId) {
@@ -64,9 +53,6 @@ export const createOrUpdateCpom = async (cpom: CpomToSave): Promise<number> => {
         },
       });
     } else {
-      if (!operateurId) {
-        throw new Error("Operateur ID is required when creating a new CPOM");
-      }
       const upsertedCpom = await tx.cpom.create({
         data: {
           name: cpom.name,

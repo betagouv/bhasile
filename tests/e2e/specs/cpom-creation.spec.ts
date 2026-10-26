@@ -128,8 +128,10 @@ test.describe("CPOM creation", () => {
     });
     expect(persisted.granularity).toBe("REGIONALE");
     expect(persisted.departements).toEqual([]);
-    expect(persisted.region?.departements.map((d) => d.numero).sort()).toEqual(
-      ILE_DE_FRANCE_NUMEROS
-    );
+    expect(
+      persisted.region?.departements
+        .map((departement) => departement.numero)
+        .sort()
+    ).toEqual(ILE_DE_FRANCE_NUMEROS);
   });
 });

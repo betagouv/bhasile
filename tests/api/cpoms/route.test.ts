@@ -26,13 +26,17 @@ vi.mock("@/app/api/cpoms/cpom.repository", () => ({
   createOrUpdateCpom: (...args: unknown[]) => mockCreateOrUpdateCpom(...args),
 }));
 
+vi.mock("@/app/api/regions/region.repository", () => ({
+  findRegionIdByName: vi.fn(),
+}));
+
 vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createCpomEvent: (...args: unknown[]) => mockCreateCpomEvent(...args),
 }));
 
 const payload = {
   granularity: "DEPARTEMENTALE",
-  operateur: { name: "Opérateur Test" },
+  operateur: { id: 3, name: "Opérateur Test" },
 };
 
 const postCpom = (body: object) =>
@@ -48,6 +52,7 @@ describe("POST /api/cpoms", () => {
     vi.clearAllMocks();
     mockGetServerSession.mockResolvedValue({ user: { id: "agent" } });
     mockFindCpomScope.mockResolvedValue({
+      operateurId: 3,
       granularity: "DEPARTEMENTALE",
       regionId: null,
       departements: [],
@@ -68,6 +73,7 @@ describe("POST /api/cpoms", () => {
 
   it("contrôle les droits sur le CPOM existant quand le payload porte un id", async () => {
     const existingCpom = {
+      operateurId: 3,
       granularity: "DEPARTEMENTALE",
       regionId: null,
       departements: [{ departement: { numero: "69" } }],
