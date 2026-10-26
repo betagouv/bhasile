@@ -62,7 +62,7 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay value={currentYear.total.totalETPPrevisionnel} />
+              <NumberDisplay showZero={false} value={currentYear.total.totalETPPrevisionnel} />
             ),
             secondaryInformation: "nombre prévisionnel d'ETP au total",
           },
@@ -70,7 +70,7 @@ export const FinanceCards = (): ReactElement => {
             primaryInformation: (
               <>
                 <span className="text-sm">dont </span>
-                <NumberDisplay
+                <NumberDisplay showZero={false}
                   value={currentYear.autorisees.totalETPPrevisionnel}
                 />
               </>
@@ -81,7 +81,7 @@ export const FinanceCards = (): ReactElement => {
             primaryInformation: (
               <>
                 <span className="text-sm">dont </span>
-                <NumberDisplay
+                <NumberDisplay showZero={false}
                   value={currentYear.subventionnees.totalETPPrevisionnel}
                 />
               </>
@@ -95,8 +95,8 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay
-                value={currentYear.total.tauxEncadrementTheoriquePrevisionnel!}
+              <NumberDisplay showZero={false}
+                value={currentYear.total.tauxEncadrementTheoriquePrevisionnel}
               />
             ),
             secondaryInformation:
@@ -104,9 +104,9 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay
+              <NumberDisplay showZero={false}
                 value={
-                  currentYear.autorisees.tauxEncadrementTheoriquePrevisionnel!
+                  currentYear.autorisees.tauxEncadrementTheoriquePrevisionnel
                 }
               />
             ),
@@ -114,10 +114,10 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay
+              <NumberDisplay showZero={false}
                 value={
                   currentYear.subventionnees
-                    .tauxEncadrementTheoriquePrevisionnel!
+                    .tauxEncadrementTheoriquePrevisionnel
                 }
               />
             ),
@@ -130,7 +130,7 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay
+              <NumberDisplay showZero={false}
                 value={currentYear.total.coutJournalierTheorique}
                 type="currency"
               />
@@ -140,7 +140,7 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay
+              <NumberDisplay showZero={false}
                 value={currentYear.autorisees.coutJournalierTheorique}
                 type="currency"
               />
@@ -149,7 +149,7 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay
+              <NumberDisplay showZero={false}
                 value={currentYear.subventionnees.coutJournalierTheorique}
                 type="currency"
               />
