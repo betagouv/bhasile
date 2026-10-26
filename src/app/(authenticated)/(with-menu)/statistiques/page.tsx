@@ -1,5 +1,6 @@
 import { SearchParams } from "@/app/utils/search-params.util";
 import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
+import { getGlobalFilters } from "@/utils/global-filters.util";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
 import { StatistiquesHeader } from "./_components/StatistiquesHeader";
@@ -10,26 +11,9 @@ export default async function StatistiquesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const awaitedSearchParams = await searchParams;
-
-  const departements =
-    typeof awaitedSearchParams.departements === "string"
-      ? awaitedSearchParams.departements
-      : undefined;
-  const operateurs =
-    typeof awaitedSearchParams.operateurs === "string"
-      ? awaitedSearchParams.operateurs
-      : undefined;
-  const types =
-    typeof awaitedSearchParams.types === "string"
-      ? awaitedSearchParams.types
-      : undefined;
-
-  const statistiques = await getStatistiques({
-    departements,
-    operateurs,
-    types,
-  });
+  const statistiques = await getStatistiques(
+    getGlobalFilters(await searchParams)
+  );
 
   return (
     <StatistiquesProvider entity={statistiques}>

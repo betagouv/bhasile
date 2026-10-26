@@ -29,6 +29,8 @@ export const OPERATEURS_STORAGE_KEY = "operateurs-query";
 export const STRUCTURES_STORAGE_KEY = "structures-query";
 
 export const GLOBAL_FILTERS_COOKIE = "filtres";
+// Zone choisie avant sa réduction en cartographie : posée par le proxy, lue par la modale
+export const INITIAL_ZONE_PARAM = "zoneInitiale";
 
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;

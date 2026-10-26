@@ -1,6 +1,9 @@
 import dayjs from "dayjs";
 
-import { getCpomDepartementNumeros } from "@/app/api/cpoms/cpom.util";
+import {
+  getCpomDepartementNumeros,
+  matchesCpomGlobalFilters,
+} from "@/app/api/cpoms/cpom.util";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   getDatesConvention,
@@ -15,10 +18,7 @@ import {
   RappelTaskType,
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
-import {
-  matchesGlobalFilters,
-  ParsedGlobalFilters,
-} from "@/utils/global-filters.util";
+import { ParsedGlobalFilters } from "@/utils/global-filters.util";
 
 import { isStructureInDashboardScope } from "../dashboard.util";
 import {
@@ -238,15 +238,10 @@ export const buildRappels = (
   }
 
   for (const cpom of cpoms) {
-    const departements = getCpomDepartementNumeros(cpom);
-    if (
-      !matchesGlobalFilters(
-        { departements, operateurIds: [cpom.operateur?.id] },
-        options
-      )
-    ) {
+    if (!matchesCpomGlobalFilters(cpom, options)) {
       continue;
     }
+    const departements = getCpomDepartementNumeros(cpom);
 
     const [, dateEnd] = getDatesConvention(cpom);
     const criticite = getCriticiteForDeadline(

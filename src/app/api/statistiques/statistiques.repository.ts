@@ -37,18 +37,6 @@ import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 const EIG_STATS_MIN_YEAR = 2015;
 
 /** Filiales directes des opérateurs donnés (résolution du filtre `operateurs`, cf. statistique.service). */
-export const findOperateurFiliales = async (
-  parentIds: number[]
-): Promise<{ id: number }[]> => {
-  if (parentIds.length === 0) {
-    return [];
-  }
-  return prisma.operateur.findMany({
-    where: { parentId: { in: parentIds } },
-    select: { id: true },
-  });
-};
-
 export const findPerimeterStructures = async (
   resolved: StatistiquesResolvedPerimeterFilters,
   readableWhere: Prisma.StructureWhereInput,

@@ -5,9 +5,8 @@ import {
   buildOperateurListItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
-  filterStructuresByZoneAndTypes,
+  filterStructuresByGlobalFilters,
   groupStructureStatsByOperateur,
-  isOperateurSelected,
 } from "@/app/api/operateurs/operateur.util";
 import type { OperateurListItem } from "@/types/operateur.type";
 import { StructureType } from "@/types/structure.type";
@@ -240,36 +239,20 @@ describe("filterOperateursBySearch", () => {
   });
 });
 
-describe("filterStructuresByZoneAndTypes", () => {
-  it("garde les structures rattachées à la zone et du type filtrés", () => {
+describe("filterStructuresByGlobalFilters", () => {
+  it("garde les structures rattachées à la zone, de l'opérateur et du type filtrés", () => {
     const structures = [
       makeStructure(1, 1, currentVersion(StructureType.CADA, 10), "75"),
       makeStructure(2, 1, currentVersion(StructureType.HUDA, 10), "75"),
-      makeStructure(3, 2, currentVersion(StructureType.CADA, 10), "92"),
+      makeStructure(3, 2, currentVersion(StructureType.CADA, 10), "75"),
+      makeStructure(4, 1, currentVersion(StructureType.CADA, 10), "92"),
     ];
 
-    const filtered = filterStructuresByZoneAndTypes(
+    const filtered = filterStructuresByGlobalFilters(
       structures,
-      parseGlobalFilters({ departements: "75", types: "CADA" })
+      parseGlobalFilters({ departements: "75", operateurs: "1", types: "CADA" })
     );
 
     expect(filtered.map((structure) => structure.id)).toEqual([1]);
-  });
-});
-
-describe("isOperateurSelected", () => {
-  const topLevelByOperateurId = buildTopLevelOperateurMap([
-    makeOperateur(1, "Groupe", null),
-    makeOperateur(2, "Filiale", null, 1),
-    makeOperateur(3, "Autre", null),
-  ]);
-
-  it("sélectionne tous les opérateurs sans filtre", () => {
-    expect(isOperateurSelected(3, [], topLevelByOperateurId)).toBe(true);
-  });
-
-  it("sélectionne le groupe quand une de ses filiales est filtrée", () => {
-    expect(isOperateurSelected(1, ["2"], topLevelByOperateurId)).toBe(true);
-    expect(isOperateurSelected(3, ["2"], topLevelByOperateurId)).toBe(false);
   });
 });

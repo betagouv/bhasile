@@ -1,3 +1,4 @@
+import { getFirstParam, SearchParams } from "@/app/utils/search-params.util";
 import { parseCommaList } from "@/app/utils/string.util";
 import { GLOBAL_FILTERS_COOKIE } from "@/constants";
 import {
@@ -9,8 +10,24 @@ import {
 export const isGlobalFilterKey = (key: string): key is GlobalFilterKey =>
   (GLOBAL_FILTER_KEYS as readonly string[]).includes(key);
 
-export const hasGlobalFilters = (params: URLSearchParams): boolean =>
-  GLOBAL_FILTER_KEYS.some((key) => params.has(key));
+export const getGlobalFilters = (params: SearchParams): Filters => ({
+  departements: getFirstParam(params.departements),
+  operateurs: getFirstParam(params.operateurs),
+  types: getFirstParam(params.types),
+});
+
+export const toGlobalFiltersSearchParams = (
+  filters: Filters
+): URLSearchParams => {
+  const params = new URLSearchParams();
+  GLOBAL_FILTER_KEYS.forEach((key) => {
+    const value = filters[key];
+    if (value) {
+      params.set(key, value);
+    }
+  });
+  return params;
+};
 
 export const pickGlobalFilters = (
   params: URLSearchParams | null
@@ -25,16 +42,29 @@ export const pickGlobalFilters = (
   return filters;
 };
 
-export const withGlobalFilters = (
-  pathname: string,
-  filters: URLSearchParams
-): string => {
-  const query = filters.toString();
-  return query ? `${pathname}?${query}` : pathname;
+export const omitGlobalFilters = (params: URLSearchParams): URLSearchParams => {
+  const remaining = new URLSearchParams(params);
+  GLOBAL_FILTER_KEYS.forEach((key) => remaining.delete(key));
+  return remaining;
 };
 
-export const persistGlobalFilters = (params: URLSearchParams): void => {
-  const value = encodeURIComponent(pickGlobalFilters(params).toString());
+export const persistGlobalFilter = (
+  key: GlobalFilterKey,
+  values: (string | number)[]
+): void => {
+  const storedValue = document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith(`${GLOBAL_FILTERS_COOKIE}=`))
+    ?.slice(GLOBAL_FILTERS_COOKIE.length + 1);
+  const filters = pickGlobalFilters(
+    new URLSearchParams(decodeURIComponent(storedValue ?? ""))
+  );
+  if (values.length > 0) {
+    filters.set(key, values.join(","));
+  } else {
+    filters.delete(key);
+  }
+  const value = encodeURIComponent(filters.toString());
   document.cookie = `${GLOBAL_FILTERS_COOKIE}=${value}; path=/; samesite=lax`;
 };
 

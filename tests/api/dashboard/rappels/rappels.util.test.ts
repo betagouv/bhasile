@@ -107,6 +107,7 @@ const makeCpom = (
     departementNumeros: string[];
     operateur: { id: number; name: string };
     region: RappelCpom["region"];
+    types: string[];
   }> = {}
 ): RappelCpom => ({
   id: overrides.id ?? 10,
@@ -118,6 +119,9 @@ const makeCpom = (
     (numero) => ({ departement: { numero } })
   ),
   actesAdministratifs: overrides.actesAdministratifs ?? [],
+  structures: (overrides.types ?? ["CADA"]).map((type) => ({
+    structure: { type },
+  })),
 });
 
 const findByTask = (structure: RappelStructure, taskType: string) =>
@@ -364,5 +368,20 @@ describe("buildRappels — scoping & CPOM", () => {
     expect(buildRappels([], [cpom], baseOptions)).toMatchObject([
       { cpomId: 10, cpomDepartements: ["92", "75"] },
     ]);
+  });
+
+  it("applique le filtre Types aux CPOM selon les types de leurs structures", () => {
+    const cpom = makeCpom({
+      types: ["HUDA"],
+      actesAdministratifs: [
+        parentActe("CONVENTION", "2020-01-01", "2026-08-01"),
+      ],
+    });
+    expect(
+      buildRappels([], [cpom], { ...baseOptions, typeList: ["CADA"] })
+    ).toHaveLength(0);
+    expect(
+      buildRappels([], [cpom], { ...baseOptions, typeList: ["HUDA"] })
+    ).toHaveLength(1);
   });
 });

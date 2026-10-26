@@ -12,6 +12,7 @@ import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-d
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
 import { PageHeader } from "@/components/PageHeader";
 import { useOptionalStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { omitGlobalFilters } from "@/utils/global-filters.util";
 
 import { StatistiquesPdfExportDocument } from "./StatistiquesPdfExportDocument";
 
@@ -40,7 +41,7 @@ export const StatistiquesHeader = (): ReactElement => {
   const handleVisualizationChange = (
     newVisualization: "tableaux" | "cartographie"
   ) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = omitGlobalFilters(new URLSearchParams(searchParams));
 
     if (newVisualization === "tableaux") {
       ["granularite", "indicateur", "annee", "region"].forEach((key) =>

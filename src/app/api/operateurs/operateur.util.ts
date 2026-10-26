@@ -56,7 +56,7 @@ export const buildFilialesByParentId = (
   return filialesByParentId;
 };
 
-export const filterStructuresByZoneAndTypes = (
+export const filterStructuresByGlobalFilters = (
   structures: StructureListLight[],
   filters: ParsedGlobalFilters
 ): StructureListLight[] =>
@@ -64,22 +64,11 @@ export const filterStructuresByZoneAndTypes = (
     matchesGlobalFilters(
       {
         departements: [structure.departementAdministratif],
+        operateurIds: [structure.operateurId],
         types: [structure.type],
       },
       filters
     )
-  );
-
-export const isOperateurSelected = (
-  operateurId: number,
-  operateurList: string[],
-  topLevelByOperateurId: Map<number, number>
-): boolean =>
-  operateurList.length === 0 ||
-  operateurList.some(
-    (selectedId) =>
-      (topLevelByOperateurId.get(Number(selectedId)) ?? Number(selectedId)) ===
-      operateurId
   );
 
 export const groupStructureStatsByOperateur = (

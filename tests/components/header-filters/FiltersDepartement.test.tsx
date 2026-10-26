@@ -172,4 +172,20 @@ describe("FiltersDepartement", () => {
     const [[selection]] = onChange.mock.calls;
     expect([...selection].sort()).toEqual(["22", "29", "35", "56"]);
   });
+
+  it("réduit une région entière au département cliqué en mode zone unique", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <FiltersDepartement
+        departements={["22", "29", "35", "56"]}
+        onChange={onChange}
+        isSingleZone
+      />
+    );
+
+    await user.click(screen.getByLabelText("Finistère (29)"));
+
+    expect(onChange).toHaveBeenCalledWith(["29"]);
+  });
 });

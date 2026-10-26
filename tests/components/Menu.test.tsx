@@ -8,11 +8,9 @@ import { BHASILE_CONTACT_EMAIL } from "@/constants";
 vitest.mock("next-auth/react");
 
 const mockPathname = vi.fn();
-const mockUseSearchParams = vi.fn();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname(),
-  useSearchParams: () => mockUseSearchParams(),
 }));
 
 const getGroupButton = (name: string) => screen.getByRole("button", { name });
@@ -21,24 +19,6 @@ describe("Menu", () => {
   beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "true");
     mockPathname.mockReturnValue("/");
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
-  });
-
-  it("reporte les filtres globaux de l'URL dans les liens de navigation", () => {
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams("departements=75&page=2&types=CADA")
-    );
-
-    render(<Menu />);
-
-    expect(screen.getByRole("link", { name: "Statistiques" })).toHaveAttribute(
-      "href",
-      "/statistiques?departements=75&types=CADA"
-    );
-    expect(screen.getByRole("link", { name: "Voir les CPOM" })).toHaveAttribute(
-      "href",
-      "/cpoms?departements=75&types=CADA"
-    );
   });
 
   it("affiche les éléments de l'en-tête au rendu", () => {

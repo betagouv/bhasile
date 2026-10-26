@@ -40,6 +40,7 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
+import { resolveGlobalFilters } from "../operateurs/operateur-filters.service";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import type { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
@@ -192,13 +193,16 @@ const getSortedStructureRows = cache(
     )
 );
 
-const filterAndSortStructureRows = (
+const filterAndSortStructureRows = async (
   rows: StructureListComputedRow[],
   props: SearchProps
-): StructureListComputedRow[] => {
-  const filtered = filterStructureRows(rows, props, {
-    includeNonVisible: Boolean(props.selection),
-  });
+): Promise<StructureListComputedRow[]> => {
+  const filtered = filterStructureRows(
+    rows,
+    props,
+    await resolveGlobalFilters(props),
+    { includeNonVisible: Boolean(props.selection) }
+  );
 
   return sortStructureRows(
     filtered,
@@ -258,7 +262,7 @@ export const getFullStructuresForOperateur = async (
   props: SearchProps
 ): Promise<FullStructures> =>
   buildFullStructures(
-    filterAndSortStructureRows(await computeAllStructureRows({}), props),
+    await filterAndSortStructureRows(await computeAllStructureRows({}), props),
     props
   );
 

@@ -31,7 +31,9 @@ export const FiltersDepartement = ({
       onChange(toggleArrayValue(departements, numero));
       return;
     }
-    onChange(departements.includes(numero) ? [] : [numero]);
+    const isOnlySelection =
+      departements.length === 1 && departements[0] === numero;
+    onChange(isOnlySelection ? [] : [numero]);
   };
 
   const handleSearchChange = (query: string) => {

@@ -44,7 +44,7 @@ import {
 import { UpcomingTransformation } from "@/types/transformation.type";
 import {
   matchesGlobalFilters,
-  parseGlobalFilters,
+  ParsedGlobalFilters,
 } from "@/utils/global-filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
@@ -405,9 +405,9 @@ export const getFermetureHistory = (
 export const filterStructureRows = (
   rows: StructureListComputedRow[],
   filters: SearchProps,
+  globalFilters: ParsedGlobalFilters,
   { includeNonVisible }: { includeNonVisible: boolean }
 ): StructureListComputedRow[] => {
-  const globalFilters = parseGlobalFilters(filters);
   const search = filters.search ? normalizeAccents(filters.search) : null;
 
   return rows.filter((row) => {

@@ -26,10 +26,11 @@ describe("useFilterNavigation", () => {
     document.cookie = `${GLOBAL_FILTERS_COOKIE}=; path=/`;
   });
 
-  it("mémorise les filtres globaux dans le cookie, y compris une sélection vidée", async () => {
-    // GIVEN
+  it("met à jour la seule clé modifiée dans les filtres mémorisés", async () => {
+    // GIVEN — la cartographie affiche une zone réduite, le cookie garde la zone choisie
     const user = userEvent.setup();
-    mockSearchParams = new URLSearchParams("departements=75&types=CADA");
+    document.cookie = `${GLOBAL_FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50&types=CADA")}; path=/`;
+    mockSearchParams = new URLSearchParams("departements=14&types=CADA");
     render(<Filter filterKey="types" values={[]} />);
 
     // WHEN
@@ -37,7 +38,7 @@ describe("useFilterNavigation", () => {
 
     // THEN
     expect(document.cookie).toContain(
-      `${GLOBAL_FILTERS_COOKIE}=${encodeURIComponent("departements=75")}`
+      `${GLOBAL_FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50")}`
     );
   });
 

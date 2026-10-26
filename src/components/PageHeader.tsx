@@ -1,21 +1,19 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import { ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode, Suspense } from "react";
 
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { cn } from "@/app/utils/classname.util";
 import { HeaderFilters } from "@/components/header-filters/HeaderFilters";
-import { GlobalFilterKey } from "@/types/filters.type";
 
 export const PageHeader = ({
   title,
   titleId,
   tabs,
   menuActions = [],
-  hiddenFilters,
   isSingleZone,
   children,
 }: Props): ReactElement => {
@@ -77,11 +75,9 @@ export const PageHeader = ({
               )}
             </div>
           )}
-          <HeaderFilters
-            pageTitle={title}
-            hiddenFilters={hiddenFilters}
-            isSingleZone={isSingleZone}
-          />
+          <Suspense fallback={null}>
+            <HeaderFilters isSingleZone={isSingleZone} />
+          </Suspense>
         </div>
       </div>
       {children}
@@ -97,7 +93,6 @@ type Props = {
   titleId?: string;
   tabs?: ReactNode;
   menuActions?: PageHeaderAction[];
-  hiddenFilters?: GlobalFilterKey[];
   isSingleZone?: boolean;
   children?: ReactNode;
 };

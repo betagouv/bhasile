@@ -1,11 +1,11 @@
 import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
-import { getFirstParam, SearchParams } from "@/app/utils/search-params.util";
+import { SearchParams } from "@/app/utils/search-params.util";
 import { PageHeader } from "@/components/PageHeader";
 import { authOptions } from "@/lib/next-auth/auth";
-import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
+import { getGlobalFilters } from "@/utils/global-filters.util";
 
 import { AnomaliesBlock } from "./_components/AnomaliesBlock";
 import { BlockSkeleton } from "./_components/BlockSkeleton";
@@ -29,11 +29,7 @@ export default async function DashboardPage({
   const user = session?.user as SessionUser | undefined;
   const params = await searchParams;
 
-  const filters: Filters = {
-    departements: getFirstParam(params.departements),
-    operateurs: getFirstParam(params.operateurs),
-    types: getFirstParam(params.types),
-  };
+  const filters = getGlobalFilters(params);
 
   return (
     <>

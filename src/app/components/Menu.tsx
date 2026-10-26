@@ -1,28 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { ReactElement, Suspense, useState } from "react";
-
-import {
-  pickGlobalFilters,
-  withGlobalFilters,
-} from "@/utils/global-filters.util";
+import { usePathname } from "next/navigation";
+import { ReactElement, useState } from "react";
 
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
 
-export const Menu = (): ReactElement => (
-  <Suspense fallback={<MenuContent globalFilters={new URLSearchParams()} />}>
-    <MenuWithGlobalFilters />
-  </Suspense>
-);
-
-const MenuWithGlobalFilters = (): ReactElement => (
-  <MenuContent globalFilters={pickGlobalFilters(useSearchParams())} />
-);
-
-const MenuContent = ({ globalFilters }: Props): ReactElement => {
+export const Menu = (): ReactElement => {
   const pathname = usePathname();
 
   const [openGroup, setOpenGroup] = useState<MenuGroupId>(
@@ -138,7 +123,7 @@ const MenuContent = ({ globalFilters }: Props): ReactElement => {
                       >
                         <Link
                           className="fr-sidemenu__link"
-                          href={withGlobalFilters(subItem.url, globalFilters)}
+                          href={subItem.url}
                           aria-current={
                             matchesPath(subItem.url) ? "page" : false
                           }
@@ -153,7 +138,7 @@ const MenuContent = ({ globalFilters }: Props): ReactElement => {
             ) : (
               <Link
                 className="fr-sidemenu__link before:content-none"
-                href={withGlobalFilters(menuItem.url, globalFilters)}
+                href={menuItem.url}
                 aria-current={isMenuItemActive(menuItem) ? "page" : false}
               >
                 <div className={`${menuItem.icon} pr-2`} />
@@ -190,7 +175,3 @@ type MenuItem =
       label: string;
       subItems: MenuSubItem[];
     };
-
-type Props = {
-  globalFilters: URLSearchParams;
-};

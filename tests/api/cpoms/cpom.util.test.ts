@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import {
   buildCpomListItem,
-  filterCpomsByGlobalFilters,
   getCpomDepartementNumeros,
+  matchesCpomGlobalFilters,
   shouldEndCpomStructureAtFermeture,
   sortValueForCpomColumn,
 } from "@/app/api/cpoms/cpom.util";
@@ -64,15 +64,19 @@ describe("getCpomDepartementNumeros", () => {
   });
 });
 
-describe("filterCpomsByGlobalFilters", () => {
+const filterCpoms = (
+  cpoms: CpomDbList[],
+  filters: Parameters<typeof parseGlobalFilters>[0]
+): CpomDbList[] =>
+  cpoms.filter((cpom) =>
+    matchesCpomGlobalFilters(cpom, parseGlobalFilters(filters))
+  );
+
+describe("matchesCpomGlobalFilters", () => {
   const filterCpomsByDepartement = (
     cpomsToFilter: CpomDbList[],
     departements: string | null
-  ): CpomDbList[] =>
-    filterCpomsByGlobalFilters(
-      cpomsToFilter,
-      parseGlobalFilters({ departements })
-    );
+  ): CpomDbList[] => filterCpoms(cpomsToFilter, { departements });
 
   const cpoms = [
     withDepartements(1, ["75"]),
@@ -127,14 +131,11 @@ describe("filterCpomsByGlobalFilters", () => {
 
   it("garde les cpoms de l'opérateur filtré", () => {
     const operateurCpoms = [
-      makeCpom({ id: 1, operateurId: 10 }),
-      makeCpom({ id: 2, operateurId: 20 }),
+      makeCpom({ id: 1, operateur: { id: 10, name: "A" } }),
+      makeCpom({ id: 2, operateur: { id: 20, name: "B" } }),
     ];
     expect(
-      filterCpomsByGlobalFilters(
-        operateurCpoms,
-        parseGlobalFilters({ operateurs: "20" })
-      ).map((cpom) => cpom.id)
+      filterCpoms(operateurCpoms, { operateurs: "20" }).map((cpom) => cpom.id)
     ).toEqual([2]);
   });
 
@@ -150,10 +151,7 @@ describe("filterCpomsByGlobalFilters", () => {
       withTypes(3, []),
     ];
     expect(
-      filterCpomsByGlobalFilters(
-        typedCpoms,
-        parseGlobalFilters({ types: "HUDA" })
-      ).map((cpom) => cpom.id)
+      filterCpoms(typedCpoms, { types: "HUDA" }).map((cpom) => cpom.id)
     ).toEqual([1]);
   });
 });

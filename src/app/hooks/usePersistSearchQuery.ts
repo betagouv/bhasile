@@ -3,6 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
+import { omitGlobalFilters } from "@/utils/global-filters.util";
+
 export function usePersistSearchQuery(
   targetPath: string,
   storageKey: string
@@ -16,7 +18,7 @@ export function usePersistSearchQuery(
       return;
     }
 
-    const queryString = searchParams.toString();
+    const queryString = omitGlobalFilters(searchParams).toString();
     const stored = sessionStorage.getItem(storageKey) ?? "";
 
     if (!queryString) {

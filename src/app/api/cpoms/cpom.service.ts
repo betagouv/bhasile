@@ -12,9 +12,9 @@ import {
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
-import { parseGlobalFilters } from "@/utils/global-filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
+import { resolveGlobalFilters } from "../operateurs/operateur-filters.service";
 import { findRegionIdByName } from "../regions/region.repository";
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
 import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";
@@ -26,9 +26,9 @@ import {
 } from "./cpom.repository";
 import {
   buildCpomListItem,
-  filterCpomsByGlobalFilters,
   getCpomDepartements,
   getDatesConvention,
+  matchesCpomGlobalFilters,
   sortValueForCpomColumn,
 } from "./cpom.util";
 
@@ -77,9 +77,13 @@ export const getCpoms = cache(
     user,
   }: CpomsQuery): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
     const readableCpoms = await findAllCpoms(getReadableCpomWhere(user));
-    const filtered = filterCpomsByGlobalFilters(
-      readableCpoms,
-      parseGlobalFilters({ departements, operateurs, types })
+    const globalFilters = await resolveGlobalFilters({
+      departements,
+      operateurs,
+      types,
+    });
+    const filtered = readableCpoms.filter((cpom) =>
+      matchesCpomGlobalFilters(cpom, globalFilters)
     );
     const sorted = sortRows(
       filtered,

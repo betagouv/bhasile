@@ -9,6 +9,7 @@ import {
 } from "@/schemas/api/statistique.schema";
 import { SessionUser } from "@/types/global";
 
+import { resolveGlobalFilters } from "../operateurs/operateur-filters.service";
 import { computeActiviteStatistiques } from "./activite/activite.util";
 import { buildLastValidatedCampagneYearByStructureId } from "./completude.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
@@ -32,7 +33,6 @@ import {
   findEvaluations,
   findIdfDepartementNumeros,
   findIndicateursFinanciers,
-  findOperateurFiliales,
   findPerimeterStructures,
   findRmus,
   findStructureActivityDates,
@@ -55,30 +55,9 @@ import {
   getInitialisedStructureIds,
   getTypologieYears,
   indexTimelineByStructureId,
-  parseStatistiquesPerimeterFilters,
-  type StatistiquesResolvedPerimeterFilters,
+  toStatistiquesPerimeterFilters,
 } from "./statistiques.util";
 import { computeStructuresStatistiques } from "./structures/structures.util";
-
-/** Résout les filiales des `operateurs` filtrés (seul point d'accès BDD du filtrage). */
-const resolveStatistiquesPerimeterFilters = async (
-  filters: StatistiquesFilters
-): Promise<StatistiquesResolvedPerimeterFilters> => {
-  const parsed = parseStatistiquesPerimeterFilters(filters);
-  const filiales = await findOperateurFiliales(parsed.operateurIds);
-
-  return {
-    departements: parsed.departements,
-    types: parsed.types,
-    operateurIds:
-      parsed.operateurIds.length > 0
-        ? new Set([
-            ...parsed.operateurIds,
-            ...filiales.map((filiale) => filiale.id),
-          ])
-        : null,
-  };
-};
 
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters,
@@ -87,7 +66,9 @@ export const buildStatistiquesContext = async (
   const now = getNow();
   const referenceYear = now.getUTCFullYear();
 
-  const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
+  const resolvedFilters = toStatistiquesPerimeterFilters(
+    await resolveGlobalFilters(filters)
+  );
   const readableDepartements = getReadableDepartements(
     resolvedFilters.departements,
     getReadableDepartementNumeros(user)

@@ -12,7 +12,6 @@ import type {
   OperateurListItem,
   OperateurSuggestionItem,
 } from "@/types/operateur.type";
-import { parseGlobalFilters } from "@/utils/global-filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { getContactsApiRead } from "../contacts/contact.util";
@@ -30,10 +29,10 @@ import {
   buildOperateurSuggestionItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
-  filterStructuresByZoneAndTypes,
+  filterStructuresByGlobalFilters,
   groupStructureStatsByOperateur,
-  isOperateurSelected,
 } from "./operateur.util";
+import { resolveGlobalFilters } from "./operateur-filters.service";
 
 // Arguments primitifs obligatoires : cache() compare avec Object.is, un objet
 // littéral serait recréé à chaque appel et les Suspense requêteraient deux fois.
@@ -54,29 +53,30 @@ export const getOperateurs = cache(
       findAllOperateurs(),
     ]);
 
-    const globalFilters = parseGlobalFilters({
+    const globalFilters = await resolveGlobalFilters({
       departements,
       operateurs: operateursFilter,
       types,
     });
+    const perimeterStructures = filterStructuresByGlobalFilters(structures, {
+      ...globalFilters,
+      operateurList: [],
+    });
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
     const filialesByParentId = buildFilialesByParentId(operateurs);
-    const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
-      filterStructuresByZoneAndTypes(structures, globalFilters),
+    const { globalPlaces } = groupStructureStatsByOperateur(
+      perimeterStructures,
+      topLevelByOperateurId,
+      now
+    );
+    const { statsByOperateurId } = groupStructureStatsByOperateur(
+      filterStructuresByGlobalFilters(perimeterStructures, globalFilters),
       topLevelByOperateurId,
       now
     );
 
     const items = operateurs
-      .filter(
-        (operateur) =>
-          operateur.parentId === null &&
-          isOperateurSelected(
-            operateur.id,
-            globalFilters.operateurList,
-            topLevelByOperateurId
-          )
-      )
+      .filter((operateur) => operateur.parentId === null)
       .flatMap((operateur) => {
         const stats = statsByOperateurId.get(operateur.id);
         if (!stats) {

@@ -18,6 +18,7 @@ import { STRUCTURES_STORAGE_KEY } from "@/constants";
 import { authOptions } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 import { StructuresQuery } from "@/types/structure-list.type";
+import { getGlobalFilters } from "@/utils/global-filters.util";
 
 import { Toolbar } from "./_components/Toolbar";
 import { VisualizationTabs } from "./_components/VisualizationTabs";
@@ -136,9 +137,7 @@ const buildStructuresQuery = (
     mode: parseMapMode(getFirstParam(params.mode), isClosed),
     search: getFirstParam(params.search),
     page: getPageParam(params, "page"),
-    types: getFirstParam(params.types),
-    departements: getFirstParam(params.departements),
-    operateurs: getFirstParam(params.operateurs),
+    ...getGlobalFilters(params),
     column: parseStructureColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
     isClosed,

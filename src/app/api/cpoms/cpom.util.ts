@@ -73,21 +73,22 @@ export const getCpomStructureIdsToEndAtFermeture = (
     )
     .map((cpomStructure) => cpomStructure.id);
 
-export const filterCpomsByGlobalFilters = (
-  cpoms: CpomDbList[],
+export const matchesCpomGlobalFilters = (
+  cpom: Parameters<typeof getCpomDepartementNumeros>[0] & {
+    operateur: { id: number } | null;
+    structures: { structure: { type: string | null } }[];
+  },
   filters: ParsedGlobalFilters
-): CpomDbList[] =>
-  cpoms.filter((cpom) =>
-    matchesGlobalFilters(
-      {
-        departements: getCpomDepartementNumeros(cpom),
-        operateurIds: [cpom.operateurId],
-        types: cpom.structures.map(
-          (cpomStructure) => cpomStructure.structure.type
-        ),
-      },
-      filters
-    )
+): boolean =>
+  matchesGlobalFilters(
+    {
+      departements: getCpomDepartementNumeros(cpom),
+      operateurIds: [cpom.operateur?.id],
+      types: cpom.structures.map(
+        (cpomStructure) => cpomStructure.structure.type
+      ),
+    },
+    filters
   );
 
 const getSortableTime = (date: Date | null): SortValue =>

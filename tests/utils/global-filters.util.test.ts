@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getGlobalFilters,
   matchesGlobalFilters,
+  omitGlobalFilters,
   parseGlobalFilters,
   pickGlobalFilters,
-  withGlobalFilters,
+  toGlobalFiltersSearchParams,
 } from "@/utils/global-filters.util";
 
 describe("global filters util", () => {
@@ -24,15 +26,31 @@ describe("global filters util", () => {
     });
   });
 
-  describe("withGlobalFilters", () => {
-    it("ajoute les filtres au chemin", () => {
+  describe("getGlobalFilters", () => {
+    it("lit les trois filtres globaux des searchParams d'une page", () => {
       expect(
-        withGlobalFilters("/cpoms", new URLSearchParams("types=CADA"))
-      ).toBe("/cpoms?types=CADA");
+        getGlobalFilters({ departements: "75", types: ["CADA", "HUDA"] })
+      ).toEqual({ departements: "75", operateurs: null, types: "CADA" });
     });
+  });
 
-    it("laisse le chemin intact sans filtre", () => {
-      expect(withGlobalFilters("/cpoms", new URLSearchParams())).toBe("/cpoms");
+  describe("omitGlobalFilters", () => {
+    it("retire les filtres globaux en gardant les autres paramètres", () => {
+      const params = new URLSearchParams("departements=75&page=2&types=CADA");
+
+      expect(omitGlobalFilters(params).toString()).toBe("page=2");
+    });
+  });
+
+  describe("toGlobalFiltersSearchParams", () => {
+    it("n'inclut que les filtres renseignés", () => {
+      expect(
+        toGlobalFiltersSearchParams({
+          departements: "75",
+          operateurs: null,
+          types: "CADA",
+        }).toString()
+      ).toBe("departements=75&types=CADA");
     });
   });
 

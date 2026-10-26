@@ -10,7 +10,7 @@ import {
 } from "@/app/utils/search-params.util";
 import { PageHeader } from "@/components/PageHeader";
 import { OPERATEURS_STORAGE_KEY } from "@/constants";
-import { Filters } from "@/types/filters.type";
+import { getGlobalFilters } from "@/utils/global-filters.util";
 
 import { OperateursContent } from "./OperateursContent";
 import { OperateursCount } from "./OperateursCount";
@@ -24,11 +24,7 @@ export default async function Operateurs({
   const params = await searchParams;
   const page = getPageParam(params, "page");
   const search = getFirstParam(params.search);
-  const filters: Filters = {
-    departements: getFirstParam(params.departements),
-    operateurs: getFirstParam(params.operateurs),
-    types: getFirstParam(params.types),
-  };
+  const filters = getGlobalFilters(params);
 
   return (
     <div className="h-full w-full flex flex-col">

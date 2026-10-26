@@ -33,6 +33,18 @@ export const findBySearchTerm = async (
   );
 };
 
+export const findOperateurFiliales = async (
+  parentIds: number[]
+): Promise<{ id: number }[]> => {
+  if (parentIds.length === 0) {
+    return [];
+  }
+  return prisma.operateur.findMany({
+    where: { parentId: { in: parentIds } },
+    select: { id: true },
+  });
+};
+
 export const findAllOperateurs = (): Promise<OperateurListRow[]> =>
   prisma.operateur.findMany({ select: operateurListSelect });
 

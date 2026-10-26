@@ -32,6 +32,7 @@ import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 import { SearchProps } from "@/types/structure-list.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
+import { parseGlobalFilters } from "@/utils/global-filters.util";
 
 type ActeAdministratifStub = {
   id?: number;
@@ -561,15 +562,22 @@ const emptyFilters: SearchProps = {
   user: undefined,
 };
 
+const filterRows = (
+  rows: StructureListComputedRow[],
+  filters: SearchProps,
+  options: { includeNonVisible: boolean }
+): StructureListComputedRow[] =>
+  filterStructureRows(rows, filters, parseGlobalFilters(filters), options);
+
 describe("filterStructureRows", () => {
   it("masque les lignes non visibles sauf si includeNonVisible est activé", () => {
     const hidden = buildRow({ hasForm: false, bornFromCreation: false });
 
     expect(
-      filterStructureRows([hidden], emptyFilters, { includeNonVisible: false })
+      filterRows([hidden], emptyFilters, { includeNonVisible: false })
     ).toHaveLength(0);
     expect(
-      filterStructureRows([hidden], emptyFilters, { includeNonVisible: true })
+      filterRows([hidden], emptyFilters, { includeNonVisible: true })
     ).toHaveLength(1);
   });
 
@@ -577,7 +585,7 @@ describe("filterStructureRows", () => {
     const row = buildRow({ searchValues: ["Créteil"] });
 
     expect(
-      filterStructureRows(
+      filterRows(
         [row],
         { ...emptyFilters, search: "creteil" },
         { includeNonVisible: false }
@@ -602,7 +610,7 @@ describe("filterStructureRows", () => {
       }),
     ];
     const filterIds = (filters: Partial<SearchProps>) =>
-      filterStructureRows(
+      filterRows(
         rows,
         { ...emptyFilters, ...filters },
         { includeNonVisible: false }
@@ -622,7 +630,7 @@ describe("filterStructureRows", () => {
     ];
 
     expect(
-      filterStructureRows(
+      filterRows(
         rows,
         { ...emptyFilters, operateurName: "Operateur Beta" },
         { includeNonVisible: false }
@@ -637,7 +645,7 @@ describe("filterStructureRows", () => {
     ];
 
     expect(
-      filterStructureRows(
+      filterRows(
         rows,
         { ...emptyFilters, isFinalised: true },
         { includeNonVisible: false }
@@ -653,7 +661,7 @@ describe("filterStructureRows", () => {
     ];
 
     // WHEN
-    const filtered = filterStructureRows(
+    const filtered = filterRows(
       rows,
       { ...emptyFilters, isClosed: true },
       { includeNonVisible: false }
@@ -672,14 +680,14 @@ describe("filterStructureRows", () => {
 
     // WHEN / THEN
     expect(
-      filterStructureRows(
+      filterRows(
         rows,
         { ...emptyFilters, isClosed: false },
         { includeNonVisible: false }
       ).map((row) => row.id)
     ).toEqual([1]);
     expect(
-      filterStructureRows(rows, emptyFilters, {
+      filterRows(rows, emptyFilters, {
         includeNonVisible: false,
       }).map((row) => row.id)
     ).toEqual([1]);

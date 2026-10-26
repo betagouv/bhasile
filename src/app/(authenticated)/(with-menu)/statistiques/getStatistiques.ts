@@ -1,23 +1,14 @@
 import { headers } from "next/headers";
 
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
+import { Filters } from "@/types/filters.type";
+import { toGlobalFiltersSearchParams } from "@/utils/global-filters.util";
 
-export async function getStatistiques({
-  departements,
-  operateurs,
-  types,
-}: GetStatistiquesArgs): Promise<StatistiqueApiRead | null> {
+export async function getStatistiques(
+  filters: Filters
+): Promise<StatistiqueApiRead | null> {
   const baseUrl = process.env.NEXT_URL || "";
-  const params = new URLSearchParams();
-  if (departements) {
-    params.append("departements", departements);
-  }
-  if (operateurs) {
-    params.append("operateurs", operateurs);
-  }
-  if (types) {
-    params.append("types", types);
-  }
+  const params = toGlobalFiltersSearchParams(filters);
 
   const result = await fetch(
     `${baseUrl}/api/statistiques?${params.toString()}`,
@@ -34,9 +25,3 @@ export async function getStatistiques({
   }
   return await result.json();
 }
-
-type GetStatistiquesArgs = {
-  departements?: string;
-  operateurs?: string;
-  types?: string;
-};

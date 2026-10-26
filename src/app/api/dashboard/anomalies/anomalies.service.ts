@@ -1,10 +1,10 @@
+import { resolveGlobalFilters } from "@/app/api/operateurs/operateur-filters.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { AnomalieGroupBy, AnomalieGroupNode } from "@/types/dashboard.type";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
-import { parseGlobalFilters } from "@/utils/global-filters.util";
 
 import { findAnomalieStructures } from "./anomalies.repository";
 import {
@@ -35,7 +35,7 @@ export const getDashboardAnomalies = async (
 
   const anomalies = buildDashboardAnomalies(structures, {
     user,
-    ...parseGlobalFilters(filters),
+    ...(await resolveGlobalFilters(filters)),
     shouldShowIgnored: options.shouldShowIgnored,
     now: getNow(),
   });

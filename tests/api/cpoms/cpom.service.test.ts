@@ -6,6 +6,8 @@ const mockFindRegionIdByName = vi.fn();
 
 vi.mock("@/app/api/cpoms/cpom.repository", () => ({}));
 
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({}));
+
 vi.mock("@/app/api/regions/region.repository", () => ({
   findRegionIdByName: (...args: unknown[]) => mockFindRegionIdByName(...args),
 }));
