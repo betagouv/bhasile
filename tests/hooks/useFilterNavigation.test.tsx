@@ -27,10 +27,10 @@ describe("useFilterNavigation", () => {
   });
 
   it("met à jour la seule clé modifiée dans les filtres mémorisés", async () => {
-    // GIVEN — la cartographie affiche une zone réduite, le cookie garde la zone choisie
+    // GIVEN
     const user = userEvent.setup();
     document.cookie = `${GLOBAL_FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50&types=CADA")}; path=/`;
-    mockSearchParams = new URLSearchParams("departements=14&types=CADA");
+    mockSearchParams = new URLSearchParams("departements=14%2C50&types=CADA");
     render(<Filter filterKey="types" values={[]} />);
 
     // WHEN

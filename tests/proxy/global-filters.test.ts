@@ -75,27 +75,4 @@ describe("globalFiltersProxy", () => {
 
     expect(getLocation(response)).toBe("/?departements=75");
   });
-
-  it("réduit la zone à une seule en cartographie sans toucher au filtre mémorisé", () => {
-    const response = globalFiltersProxy(
-      buildRequest("/statistiques/cartographie", "departements=50,33,14")
-    );
-
-    expect(getLocation(response)).toBe(
-      "/statistiques/cartographie?departements=14&zoneInitiale=50%2C33%2C14"
-    );
-    expect(getStoredFilters(response)).toBe("departements=50%2C33%2C14");
-  });
-
-  it("garde la zone mémorisée quand la cartographie affiche la zone réduite", () => {
-    const response = globalFiltersProxy(
-      buildRequest(
-        "/statistiques/cartographie?departements=14&indicateur=places.pmr",
-        "departements=50,33,14"
-      )
-    );
-
-    expect(getLocation(response)).toBeNull();
-    expect(getStoredFilters(response)).toBe("departements=50%2C33%2C14");
-  });
 });

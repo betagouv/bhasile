@@ -23,7 +23,6 @@ export const FiltersRegion = ({
   hidden,
   departements,
   onChange,
-  isSingleZone,
   expanded,
   onExpandedChange,
   children,
@@ -77,8 +76,6 @@ export const FiltersRegion = ({
             (departement) => getRegionFromDepartement(departement) !== region
           )
         );
-      } else if (isSingleZone) {
-        onChange(getDepartementNumerosForRegion(region));
       } else {
         onChange([
           ...new Set([
@@ -94,7 +91,7 @@ export const FiltersRegion = ({
     return () => {
       wrapper.removeEventListener("click", handleClick, true);
     };
-  }, [checkedStatus, departements, isSingleZone, onChange, region]);
+  }, [checkedStatus, departements, onChange, region]);
 
   const isRegionWithOneDepartement = useMemo(() => {
     return REGIONS_WITH_ONE_DEPARTEMENT.includes(region);
@@ -147,7 +144,6 @@ type Props = {
   hidden: boolean;
   departements: string[];
   onChange: (departements: string[]) => void;
-  isSingleZone: boolean;
   expanded: boolean;
   onExpandedChange: (expanded: boolean) => void;
   children: React.ReactElement;

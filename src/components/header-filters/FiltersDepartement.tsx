@@ -10,11 +10,7 @@ import { filterRegionsWithDepartements } from "@/utils/region.util";
 
 import { FiltersRegion } from "./FiltersRegion";
 
-export const FiltersDepartement = ({
-  departements,
-  onChange,
-  isSingleZone = false,
-}: Props) => {
+export const FiltersDepartement = ({ departements, onChange }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedRegions, setExpandedRegions] = useState<string[]>([]);
 
@@ -25,16 +21,6 @@ export const FiltersDepartement = ({
   const hasNoResult = filteredRegionsWithDepartements.every(
     (regionWithDepartements) => regionWithDepartements.departements.length === 0
   );
-
-  const handleDepartementToggle = (numero: string) => {
-    if (!isSingleZone) {
-      onChange(toggleArrayValue(departements, numero));
-      return;
-    }
-    const isOnlySelection =
-      departements.length === 1 && departements[0] === numero;
-    onChange(isOnlySelection ? [] : [numero]);
-  };
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
@@ -70,7 +56,6 @@ export const FiltersDepartement = ({
               hidden={listDepartements.length === 0}
               departements={departements}
               onChange={onChange}
-              isSingleZone={isSingleZone}
               expanded={expandedRegions.includes(region.name)}
               onExpandedChange={(isExpanded) =>
                 setExpandedRegions((regions) =>
@@ -92,7 +77,9 @@ export const FiltersDepartement = ({
                           value: departement.numero,
                           checked: departements.includes(departement.numero),
                           onChange: () =>
-                            handleDepartementToggle(departement.numero),
+                            onChange(
+                              toggleArrayValue(departements, departement.numero)
+                            ),
                         },
                       },
                     ]}
@@ -120,5 +107,4 @@ export const FiltersDepartement = ({
 type Props = {
   departements: string[];
   onChange: (departements: string[]) => void;
-  isSingleZone?: boolean;
 };

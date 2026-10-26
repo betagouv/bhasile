@@ -14,7 +14,6 @@ export const PageHeader = ({
   titleId,
   tabs,
   menuActions = [],
-  isSingleZone,
   children,
 }: Props): ReactElement => {
   const { headerRef } = useHeaderHeight();
@@ -76,7 +75,7 @@ export const PageHeader = ({
             </div>
           )}
           <Suspense fallback={null}>
-            <HeaderFilters isSingleZone={isSingleZone} />
+            <HeaderFilters />
           </Suspense>
         </div>
       </div>
@@ -93,6 +92,5 @@ type Props = {
   titleId?: string;
   tabs?: ReactNode;
   menuActions?: PageHeaderAction[];
-  isSingleZone?: boolean;
   children?: ReactNode;
 };

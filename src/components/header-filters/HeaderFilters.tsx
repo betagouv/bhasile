@@ -8,9 +8,8 @@ import { FilterDropdown } from "./FilterDropdown";
 import { FilterOperateur } from "./FilterOperateur";
 import { FiltersDepartement } from "./FiltersDepartement";
 import { FilterTypeStructure } from "./FilterTypeStructure";
-import { ZoneReductionModal } from "./ZoneReductionModal";
 
-export const HeaderFilters = ({ isSingleZone = false }: Props) => {
+export const HeaderFilters = () => {
   return (
     <div className="flex">
       <FilterDropdown
@@ -22,7 +21,6 @@ export const HeaderFilters = ({ isSingleZone = false }: Props) => {
           <FiltersDepartement
             departements={selection}
             onChange={setSelection}
-            isSingleZone={isSingleZone}
           />
         )}
       />
@@ -48,12 +46,6 @@ export const HeaderFilters = ({ isSingleZone = false }: Props) => {
           <FilterTypeStructure selection={selection} onChange={setSelection} />
         )}
       />
-
-      {isSingleZone && <ZoneReductionModal />}
     </div>
   );
-};
-
-type Props = {
-  isSingleZone?: boolean;
 };
