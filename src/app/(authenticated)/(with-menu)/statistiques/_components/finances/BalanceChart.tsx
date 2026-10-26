@@ -31,7 +31,9 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
     .filter((year) => year < CURRENT_YEAR)
     .map((year) => ({
       year,
-      budget: statistiques.finance.byYear.find((budget) => budget.year === year),
+      budget: statistiques.finance.byYear.find(
+        (budget) => budget.year === year
+      ),
     }))
     .reverse();
 
