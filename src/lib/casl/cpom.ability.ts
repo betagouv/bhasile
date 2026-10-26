@@ -28,8 +28,8 @@ export const canSaveCpom = (
     return false;
   }
   return canAbilityUpdateCpom(ability, {
-    granularity: cpom.granularity ?? existingCpom?.granularity,
-    regionId: cpom.regionId ?? existingCpom?.regionId ?? null,
+    granularity: cpom.granularity,
+    regionId: cpom.regionId ?? null,
     departements: cpom.departements ?? existingCpom?.departements ?? [],
     structures: cpom.structures ?? existingCpom?.structures ?? [],
   });

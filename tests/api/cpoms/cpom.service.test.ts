@@ -59,6 +59,40 @@ describe("prepareCpomToSave", () => {
     });
   });
 
+  it("rejette un CPOM régional dont la région est introuvable", async () => {
+    mockFindRegionIdByName.mockResolvedValueOnce(undefined);
+
+    await expect(
+      prepareCpomToSave(
+        {
+          granularity: "REGIONALE",
+          region: { name: "Inconnue" },
+          departements,
+        },
+        null
+      )
+    ).rejects.toThrow("Région introuvable");
+  });
+
+  it("rejette un nouveau CPOM régional sans région", async () => {
+    await expect(
+      prepareCpomToSave(
+        { granularity: "REGIONALE", region: { name: "" }, departements },
+        null
+      )
+    ).rejects.toThrow("Un CPOM régional doit avoir une région");
+  });
+
+  it("garde les départements d'un ancien CPOM régional sans région lors d'une modification partielle", async () => {
+    const cpomToSave = await prepareCpomToSave(
+      { name: "CPOM" },
+      { ...existingCpom, granularity: "REGIONALE", regionId: null }
+    );
+
+    expect(mockFindRegionIdByName).not.toHaveBeenCalled();
+    expect(cpomToSave.departements).toBeUndefined();
+  });
+
   it("vide les départements d'un CPOM resté régional même sans granularité dans le payload", async () => {
     const cpomToSave = await prepareCpomToSave(
       { departements },

@@ -18,6 +18,9 @@ const migrateRegionalCpoms = async () => {
     `➡️ CPOM régionaux : passage sur regionId${isDryRun ? " (dry-run, aucune écriture)" : ""}`
   );
 
+  const regions = await prisma.region.findMany({
+    select: { id: true, departements: { select: { numero: true } } },
+  });
   const cpoms = await prisma.cpom.findMany({
     where: { granularity: "REGIONALE", departements: { some: {} } },
     select: {
@@ -31,7 +34,7 @@ const migrateRegionalCpoms = async () => {
     orderBy: { id: "asc" },
   });
 
-  const counts = { migrated: 0, regionFilled: 0, skipped: 0 };
+  const counts = { migrated: 0, regionFilled: 0, widened: 0, skipped: 0 };
 
   for (const cpom of cpoms) {
     const label = `CPOM ${cpom.id} (${cpom.name ?? "sans nom"})`;
@@ -64,6 +67,21 @@ const migrateRegionalCpoms = async () => {
       continue;
     }
 
+    const cpomNumeros = new Set(
+      cpom.departements.map(({ departement }) => departement.numero)
+    );
+    const addedNumeros = (
+      regions.find((region) => region.id === regionId)?.departements ?? []
+    )
+      .map(({ numero }) => numero)
+      .filter((numero) => !cpomNumeros.has(numero));
+    if (addedNumeros.length > 0) {
+      console.log(
+        `  ⚠️ ${label} : périmètre élargi à toute la région (+ ${addedNumeros.join(", ")})`
+      );
+      counts.widened++;
+    }
+
     if (!isDryRun) {
       await prisma.$transaction([
         prisma.cpom.update({ where: { id: cpom.id }, data: { regionId } }),
@@ -77,7 +95,7 @@ const migrateRegionalCpoms = async () => {
   }
 
   console.log(
-    `✅ ${counts.migrated} CPOM migré(s), dont ${counts.regionFilled} avec région déduite ; ${counts.skipped} ignoré(s).`
+    `✅ ${counts.migrated} CPOM migré(s), dont ${counts.regionFilled} avec région déduite et ${counts.widened} au périmètre élargi ; ${counts.skipped} ignoré(s), à corriger à la main.`
   );
 };
 

@@ -1,5 +1,6 @@
 export {
   canAbilityReadCpom,
+  canAbilityUpdateCpom,
   canSaveCpom,
   getReadableCpomWhere,
 } from "./cpom.ability";

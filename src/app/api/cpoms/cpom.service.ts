@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { DomainError } from "@/app/utils/domain-error.util";
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
@@ -113,14 +114,31 @@ export const prepareCpomToSave = async (
 ): Promise<CpomToSave> => {
   const granularity =
     cpom.granularity ?? existingCpom?.granularity ?? "REGIONALE";
+  const regionId = cpom.region?.name
+    ? await resolveRegionId(cpom.region.name)
+    : (existingCpom?.regionId ?? undefined);
+  if (
+    granularity === "REGIONALE" &&
+    !regionId &&
+    existingCpom?.granularity !== "REGIONALE"
+  ) {
+    throw new DomainError("Un CPOM régional doit avoir une région");
+  }
   return {
     ...cpom,
     granularity,
-    regionId: cpom.region
-      ? await findRegionIdByName(cpom.region.name)
-      : undefined,
-    departements: granularity === "REGIONALE" ? [] : cpom.departements,
+    regionId,
+    departements:
+      granularity === "REGIONALE" && regionId ? [] : cpom.departements,
   };
+};
+
+const resolveRegionId = async (name: string): Promise<number> => {
+  const regionId = await findRegionIdByName(name);
+  if (!regionId) {
+    throw new DomainError(`Région introuvable : ${name}`);
+  }
+  return regionId;
 };
 
 export const saveCpom = async (cpom: CpomToSave): Promise<number> =>

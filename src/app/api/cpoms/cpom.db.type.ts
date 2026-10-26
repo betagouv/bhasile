@@ -95,4 +95,4 @@ export type CpomDbScope = Prisma.CpomGetPayload<{
   select: typeof cpomScopeSelect;
 }>;
 
-export type CpomToSave = CpomApiWrite & { regionId?: number };
+export type CpomToSave = CpomApiWrite & { regionId?: number | null };

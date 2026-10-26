@@ -43,6 +43,8 @@ const putCpom = (body: object) =>
 
 describe("PUT /api/cpoms/[id]", () => {
   const cpomScope = {
+    granularity: "DEPARTEMENTALE",
+    regionId: null,
     departements: [{ departement: { numero: "13" } }],
     structures: [],
   };
