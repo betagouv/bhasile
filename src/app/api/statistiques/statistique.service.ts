@@ -9,7 +9,7 @@ import {
 } from "@/schemas/api/statistique.schema";
 import { SessionUser } from "@/types/global";
 
-import { resolveGlobalFilters } from "../operateurs/operateur-filters.service";
+import { resolveGlobalFilters } from "../global-filters/global-filters.service";
 import { computeActiviteStatistiques } from "./activite/activite.util";
 import { buildLastValidatedCampagneYearByStructureId } from "./completude.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";

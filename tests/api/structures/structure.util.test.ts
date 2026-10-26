@@ -536,7 +536,7 @@ const buildRow = (
   type: StructureType.CADA,
   operateurId: 1,
   operateurName: "Operateur Alpha",
-  structureDepartement: "75",
+  attachedDepartement: "75",
   departementAdministratif: "75",
   communeAdministrative: "Paris",
   bati: Repartition.COLLECTIF,
@@ -598,14 +598,14 @@ describe("filterStructureRows", () => {
       buildRow({
         id: 1,
         type: StructureType.CADA,
-        structureDepartement: "75",
+        attachedDepartement: "75",
         departementAdministratif: null,
         operateurId: 1,
       }),
       buildRow({
         id: 2,
         type: StructureType.HUDA,
-        structureDepartement: "92",
+        attachedDepartement: "92",
         operateurId: 2,
       }),
     ];

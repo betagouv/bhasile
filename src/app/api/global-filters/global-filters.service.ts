@@ -6,7 +6,7 @@ import {
   parseGlobalFilters,
 } from "@/utils/global-filters.util";
 
-import { findOperateurFiliales } from "./operateur.repository";
+import { findOperateurFiliales } from "../operateurs/operateur.repository";
 
 const resolveGlobalFiltersCached = cache(
   async (

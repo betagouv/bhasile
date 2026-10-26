@@ -1,4 +1,8 @@
-import { getFirstParam, SearchParams } from "@/app/utils/search-params.util";
+import {
+  getFirstParam,
+  SearchParams,
+  setFilterParam,
+} from "@/app/utils/search-params.util";
 import { parseCommaList } from "@/app/utils/string.util";
 import { GLOBAL_FILTERS_COOKIE } from "@/constants";
 import {
@@ -6,6 +10,9 @@ import {
   GLOBAL_FILTER_KEYS,
   GlobalFilterKey,
 } from "@/types/filters.type";
+
+const parseOperateurIds = (value: string | null | undefined): string[] =>
+  parseCommaList(value).filter((operateurId) => /^\d+$/.test(operateurId));
 
 export const isGlobalFilterKey = (key: string): key is GlobalFilterKey =>
   (GLOBAL_FILTER_KEYS as readonly string[]).includes(key);
@@ -34,7 +41,9 @@ export const pickGlobalFilters = (
 ): URLSearchParams => {
   const filters = new URLSearchParams();
   for (const key of GLOBAL_FILTER_KEYS) {
-    const value = params?.get(key);
+    const rawValue = params?.get(key);
+    const value =
+      key === "operateurs" ? parseOperateurIds(rawValue).join(",") : rawValue;
     if (value) {
       filters.set(key, value);
     }
@@ -59,11 +68,7 @@ export const persistGlobalFilter = (
   const filters = pickGlobalFilters(
     new URLSearchParams(decodeURIComponent(storedValue ?? ""))
   );
-  if (values.length > 0) {
-    filters.set(key, values.join(","));
-  } else {
-    filters.delete(key);
-  }
+  setFilterParam(filters, key, values);
   const value = encodeURIComponent(filters.toString());
   document.cookie = `${GLOBAL_FILTERS_COOKIE}=${value}; path=/; samesite=lax`;
 };
@@ -74,7 +79,7 @@ export const parseGlobalFilters = ({
   types,
 }: Partial<Filters>): ParsedGlobalFilters => ({
   departementList: parseCommaList(departements),
-  operateurList: parseCommaList(operateurs),
+  operateurList: parseOperateurIds(operateurs),
   typeList: parseCommaList(types),
 });
 
@@ -99,6 +104,19 @@ export const matchesGlobalFilters = (
   matchesSomeValue(operateurList, operateurIds) &&
   matchesSomeValue(typeList, types);
 
+export const matchesStructureGlobalFilters = (
+  { departement, operateurId, type }: StructureGlobalFiltersTarget,
+  filters: ParsedGlobalFilters
+): boolean =>
+  matchesGlobalFilters(
+    {
+      departements: [departement],
+      operateurIds: [operateurId],
+      types: [type],
+    },
+    filters
+  );
+
 export type ParsedGlobalFilters = {
   departementList: string[];
   operateurList: string[];
@@ -109,4 +127,10 @@ type GlobalFiltersTarget = {
   departements?: (string | null | undefined)[];
   operateurIds?: (number | null | undefined)[];
   types?: (string | null | undefined)[];
+};
+
+type StructureGlobalFiltersTarget = {
+  departement: string | null;
+  operateurId: number | null | undefined;
+  type: string | null;
 };

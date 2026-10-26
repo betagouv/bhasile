@@ -40,7 +40,7 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
-import { resolveGlobalFilters } from "../operateurs/operateur-filters.service";
+import { resolveGlobalFilters } from "../global-filters/global-filters.service";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import type { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {

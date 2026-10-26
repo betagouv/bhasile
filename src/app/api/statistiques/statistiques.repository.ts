@@ -36,7 +36,6 @@ import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 /** Année plancher des EIG remontés dans les stats (borne haute = année courante). */
 const EIG_STATS_MIN_YEAR = 2015;
 
-/** Filiales directes des opérateurs donnés (résolution du filtre `operateurs`, cf. statistique.service). */
 export const findPerimeterStructures = async (
   resolved: StatistiquesResolvedPerimeterFilters,
   readableWhere: Prisma.StructureWhereInput,

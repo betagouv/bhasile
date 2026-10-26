@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { resolveGlobalFilters } from "@/app/api/operateurs/operateur-filters.service";
+import { resolveGlobalFilters } from "@/app/api/global-filters/global-filters.service";
 
 vi.mock("@/app/api/operateurs/operateur.repository", () => ({
   findOperateurFiliales: async (parentIds: number[]) =>
@@ -26,5 +26,13 @@ describe("resolveGlobalFilters", () => {
     const { operateurList } = await resolveGlobalFilters({ operateurs: "11" });
 
     expect(operateurList).toEqual(["11"]);
+  });
+
+  it("ignore les identifiants d'opérateur non numériques", async () => {
+    const { operateurList } = await resolveGlobalFilters({
+      operateurs: "Coallia",
+    });
+
+    expect(operateurList).toEqual([]);
   });
 });

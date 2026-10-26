@@ -1,5 +1,5 @@
 import { findAllCpoms } from "@/app/api/cpoms/cpom.repository";
-import { resolveGlobalFilters } from "@/app/api/operateurs/operateur-filters.service";
+import { resolveGlobalFilters } from "@/app/api/global-filters/global-filters.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { groupRappels } from "@/app/utils/rappel.util";

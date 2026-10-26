@@ -1,4 +1,4 @@
-import { resolveGlobalFilters } from "@/app/api/operateurs/operateur-filters.service";
+import { resolveGlobalFilters } from "@/app/api/global-filters/global-filters.service";
 import { getOngoingTransformationsForUser } from "@/app/api/transformations/transformation.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";

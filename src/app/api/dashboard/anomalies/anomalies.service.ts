@@ -1,4 +1,4 @@
-import { resolveGlobalFilters } from "@/app/api/operateurs/operateur-filters.service";
+import { resolveGlobalFilters } from "@/app/api/global-filters/global-filters.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";

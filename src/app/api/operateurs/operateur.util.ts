@@ -56,30 +56,27 @@ export const buildFilialesByParentId = (
   return filialesByParentId;
 };
 
-export const filterStructuresByGlobalFilters = (
-  structures: StructureListLight[],
-  filters: ParsedGlobalFilters
-): StructureListLight[] =>
-  structures.filter((structure) =>
-    matchesGlobalFilters(
-      {
-        departements: [structure.departementAdministratif],
-        operateurIds: [structure.operateurId],
-        types: [structure.type],
-      },
-      filters
-    )
-  );
-
 export const groupStructureStatsByOperateur = (
   structures: StructureListLight[],
   topLevelByOperateurId: Map<number, number>,
-  now: Date
+  now: Date,
+  filters: ParsedGlobalFilters
 ): GroupedStructureStats => {
   const statsByOperateurId = new Map<number, OperateurStats>();
   let globalPlaces = 0;
 
   structures.forEach((structure) => {
+    const isInPerimeter = matchesGlobalFilters(
+      {
+        departements: [structure.departementAdministratif],
+        types: [structure.type],
+      },
+      filters
+    );
+    if (!isInPerimeter) {
+      return;
+    }
+
     const currentVersion = resolveCurrentVersion(
       structure.structureVersions,
       now
@@ -87,7 +84,10 @@ export const groupStructureStatsByOperateur = (
     const places = currentVersion?.placesAutorisees ?? 0;
     globalPlaces += places;
 
-    if (structure.operateurId === null) {
+    if (
+      structure.operateurId === null ||
+      !matchesGlobalFilters({ operateurIds: [structure.operateurId] }, filters)
+    ) {
       return;
     }
 

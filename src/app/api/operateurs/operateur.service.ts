@@ -16,6 +16,7 @@ import { recursivelySerializeForClient } from "@/utils-server/serialization.serv
 
 import { getContactsApiRead } from "../contacts/contact.util";
 import { getDownloadLink } from "../files/file.service";
+import { resolveGlobalFilters } from "../global-filters/global-filters.service";
 import { findAllStructures } from "../structures/structure.repository";
 import {
   findAllOperateurs,
@@ -29,10 +30,8 @@ import {
   buildOperateurSuggestionItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
-  filterStructuresByGlobalFilters,
   groupStructureStatsByOperateur,
 } from "./operateur.util";
-import { resolveGlobalFilters } from "./operateur-filters.service";
 
 // Arguments primitifs obligatoires : cache() compare avec Object.is, un objet
 // littéral serait recréé à chaque appel et les Suspense requêteraient deux fois.
@@ -58,21 +57,13 @@ export const getOperateurs = cache(
       operateurs: operateursFilter,
       types,
     });
-    const perimeterStructures = filterStructuresByGlobalFilters(structures, {
-      ...globalFilters,
-      operateurList: [],
-    });
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
     const filialesByParentId = buildFilialesByParentId(operateurs);
-    const { globalPlaces } = groupStructureStatsByOperateur(
-      perimeterStructures,
+    const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
+      structures,
       topLevelByOperateurId,
-      now
-    );
-    const { statsByOperateurId } = groupStructureStatsByOperateur(
-      filterStructuresByGlobalFilters(perimeterStructures, globalFilters),
-      topLevelByOperateurId,
-      now
+      now,
+      globalFilters
     );
 
     const items = operateurs

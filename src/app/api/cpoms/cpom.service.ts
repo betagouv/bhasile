@@ -14,7 +14,7 @@ import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
-import { resolveGlobalFilters } from "../operateurs/operateur-filters.service";
+import { resolveGlobalFilters } from "../global-filters/global-filters.service";
 import { findRegionIdByName } from "../regions/region.repository";
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
 import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";

@@ -43,7 +43,7 @@ import {
 } from "@/types/structure-list.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
 import {
-  matchesGlobalFilters,
+  matchesStructureGlobalFilters,
   ParsedGlobalFilters,
 } from "@/utils/global-filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
@@ -307,7 +307,7 @@ export type StructureListComputedRow = {
   operateurId: number | null;
   operateurName: string | null;
   operateurLabel: string;
-  structureDepartement: string;
+  attachedDepartement: string;
   departementAdministratif: string | null;
   communeAdministrative: string | null;
   bati: Repartition | undefined;
@@ -374,7 +374,7 @@ export const computeStructureListRow = (
     operateurId: structure.operateurId,
     operateurName,
     operateurLabel,
-    structureDepartement: structure.departementAdministratif,
+    attachedDepartement: structure.departementAdministratif,
     departementAdministratif: currentVersion.departementAdministratif,
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
@@ -424,11 +424,11 @@ export const filterStructureRows = (
       return false;
     }
     if (
-      !matchesGlobalFilters(
+      !matchesStructureGlobalFilters(
         {
-          departements: [row.structureDepartement],
-          operateurIds: [row.operateurId],
-          types: [row.type],
+          departement: row.attachedDepartement,
+          operateurId: row.operateurId,
+          type: row.type,
         },
         globalFilters
       )

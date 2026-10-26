@@ -5,7 +5,6 @@ import {
   buildOperateurListItem,
   buildTopLevelOperateurMap,
   filterOperateursBySearch,
-  filterStructuresByGlobalFilters,
   groupStructureStatsByOperateur,
 } from "@/app/api/operateurs/operateur.util";
 import type { OperateurListItem } from "@/types/operateur.type";
@@ -13,6 +12,7 @@ import { StructureType } from "@/types/structure.type";
 import { parseGlobalFilters } from "@/utils/global-filters.util";
 
 const now = new Date("2025-01-01T00:00:00.000Z");
+const noFilters = parseGlobalFilters({});
 
 type StructureFixtureVersion = {
   effectiveDate: Date;
@@ -94,7 +94,8 @@ describe("groupStructureStatsByOperateur", () => {
         makeStructure(4, 2, currentVersion(StructureType.CADA, 30)),
       ],
       identityMap(1, 2),
-      now
+      now,
+      noFilters
     );
 
     const operateurOne = statsByOperateurId.get(1);
@@ -117,7 +118,8 @@ describe("groupStructureStatsByOperateur", () => {
         [1, 1],
         [2, 1],
       ]),
-      now
+      now,
+      noFilters
     );
 
     const parent = statsByOperateurId.get(1);
@@ -143,7 +145,8 @@ describe("groupStructureStatsByOperateur", () => {
         makeStructure(3, null, currentVersion(StructureType.CADA, 40)),
       ],
       identityMap(1),
-      now
+      now,
+      noFilters
     );
 
     const operateurOne = statsByOperateurId.get(1);
@@ -159,7 +162,8 @@ describe("groupStructureStatsByOperateur", () => {
     const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
       [makeStructure(1, 1, currentVersion(StructureType.CADA, null))],
       identityMap(1),
-      now
+      now,
+      noFilters
     );
     expect(statsByOperateurId.get(1)?.totalPlaces).toBe(0);
     expect(globalPlaces).toBe(0);
@@ -239,20 +243,22 @@ describe("filterOperateursBySearch", () => {
   });
 });
 
-describe("filterStructuresByGlobalFilters", () => {
-  it("garde les structures rattachées à la zone, de l'opérateur et du type filtrés", () => {
-    const structures = [
-      makeStructure(1, 1, currentVersion(StructureType.CADA, 10), "75"),
-      makeStructure(2, 1, currentVersion(StructureType.HUDA, 10), "75"),
-      makeStructure(3, 2, currentVersion(StructureType.CADA, 10), "75"),
-      makeStructure(4, 1, currentVersion(StructureType.CADA, 10), "92"),
-    ];
-
-    const filtered = filterStructuresByGlobalFilters(
-      structures,
+describe("groupStructureStatsByOperateur avec filtres globaux", () => {
+  it("compte le parc du périmètre zone/types et les stats des seuls opérateurs filtrés", () => {
+    const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
+      [
+        makeStructure(1, 1, currentVersion(StructureType.CADA, 10), "75"),
+        makeStructure(2, 2, currentVersion(StructureType.CADA, 30), "75"),
+        makeStructure(3, 1, currentVersion(StructureType.HUDA, 50), "75"),
+        makeStructure(4, 1, currentVersion(StructureType.CADA, 70), "92"),
+      ],
+      identityMap(1, 2),
+      now,
       parseGlobalFilters({ departements: "75", operateurs: "1", types: "CADA" })
     );
 
-    expect(filtered.map((structure) => structure.id)).toEqual([1]);
+    expect(globalPlaces).toBe(40);
+    expect(statsByOperateurId.get(1)?.totalPlaces).toBe(10);
+    expect(statsByOperateurId.has(2)).toBe(false);
   });
 });

@@ -21,6 +21,15 @@ describe("global filters util", () => {
       );
     });
 
+    it("écarte les identifiants d'opérateur non numériques", () => {
+      const params = new URLSearchParams("operateurs=Coallia,4");
+
+      expect(pickGlobalFilters(params).get("operateurs")).toBe("4");
+      expect(pickGlobalFilters(new URLSearchParams("operateurs=x")).size).toBe(
+        0
+      );
+    });
+
     it("tolère l'absence de paramètres", () => {
       expect(pickGlobalFilters(null).size).toBe(0);
     });

@@ -1,7 +1,7 @@
 import { canUpdateStructure } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 import {
-  matchesGlobalFilters,
+  matchesStructureGlobalFilters,
   ParsedGlobalFilters,
 } from "@/utils/global-filters.util";
 
@@ -22,11 +22,11 @@ export const isStructureInDashboardScope = (
 ): boolean =>
   !!user &&
   canUpdateStructure(user, structure) &&
-  matchesGlobalFilters(
+  matchesStructureGlobalFilters(
     {
-      departements: [structure.departementAdministratif],
-      operateurIds: [structure.operateur?.id],
-      types: [structure.type],
+      departement: structure.departementAdministratif,
+      operateurId: structure.operateur?.id,
+      type: structure.type,
     },
     filters
   );

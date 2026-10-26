@@ -1,6 +1,9 @@
 import { SearchParams } from "@/app/utils/search-params.util";
 import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
-import { getGlobalFilters } from "@/utils/global-filters.util";
+import {
+  getGlobalFilters,
+  toGlobalFiltersSearchParams,
+} from "@/utils/global-filters.util";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
 import { StatistiquesHeader } from "./_components/StatistiquesHeader";
@@ -11,9 +14,9 @@ export default async function StatistiquesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const statistiques = await getStatistiques(
-    getGlobalFilters(await searchParams)
-  );
+  const filters = getGlobalFilters(await searchParams);
+  const statistiques = await getStatistiques(filters);
+  const hasFilters = toGlobalFiltersSearchParams(filters).size > 0;
 
   return (
     <StatistiquesProvider entity={statistiques}>
@@ -22,7 +25,11 @@ export default async function StatistiquesPage({
         {statistiques ? (
           <StatistiquesContent />
         ) : (
-          <p className="p-16">Aucune structure ne correspond à vos filtres.</p>
+          <p className="p-16">
+            {hasFilters
+              ? "Aucune structure ne correspond à vos filtres."
+              : "Aucune structure dans votre périmètre."}
+          </p>
         )}
       </div>
     </StatistiquesProvider>

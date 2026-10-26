@@ -21,22 +21,28 @@ export const globalFiltersProxy = (request: NextRequest): NextResponse => {
   }
 
   const urlFilters = pickGlobalFilters(searchParams);
-  const filters = pickGlobalFilters(
+  const storedFilters = pickGlobalFilters(
     new URLSearchParams(request.cookies.get(GLOBAL_FILTERS_COOKIE)?.value)
   );
+  const filters = new URLSearchParams(storedFilters);
   urlFilters.forEach((value, key) => filters.set(key, value));
 
   const isUrlUpToDate = GLOBAL_FILTER_KEYS.every(
-    (key) => urlFilters.get(key) === filters.get(key)
+    (key) => (searchParams.get(key) || null) === filters.get(key)
   );
   const response = isUrlUpToDate
     ? NextResponse.next()
     : NextResponse.redirect(buildRedirectUrl(request, filters));
 
-  response.cookies.set(GLOBAL_FILTERS_COOKIE, filters.toString(), {
-    path: "/",
-    sameSite: "lax",
-  });
+  const isPrefetch =
+    request.headers.has("next-router-prefetch") ||
+    request.headers.get("purpose") === "prefetch";
+  if (!isPrefetch && filters.toString() !== storedFilters.toString()) {
+    response.cookies.set(GLOBAL_FILTERS_COOKIE, filters.toString(), {
+      path: "/",
+      sameSite: "lax",
+    });
+  }
   return response;
 };
 
@@ -45,6 +51,13 @@ const buildRedirectUrl = (
   filters: URLSearchParams
 ): URL => {
   const url = request.nextUrl.clone();
-  filters.forEach((value, key) => url.searchParams.set(key, value));
+  GLOBAL_FILTER_KEYS.forEach((key) => {
+    const value = filters.get(key);
+    if (value) {
+      url.searchParams.set(key, value);
+    } else {
+      url.searchParams.delete(key);
+    }
+  });
   return url;
 };
