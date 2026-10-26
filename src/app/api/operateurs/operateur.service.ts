@@ -16,7 +16,7 @@ import { recursivelySerializeForClient } from "@/utils-server/serialization.serv
 
 import { getContactsApiRead } from "../contacts/contact.util";
 import { getDownloadLink } from "../files/file.service";
-import { resolveGlobalFilters } from "../global-filters/global-filters.service";
+import { resolveFilters } from "../filters/filters.service";
 import { findAllStructures } from "../structures/structure.repository";
 import {
   findAllOperateurs,
@@ -52,7 +52,7 @@ export const getOperateurs = cache(
       findAllOperateurs(),
     ]);
 
-    const globalFilters = await resolveGlobalFilters({
+    const filters = await resolveFilters({
       departements,
       operateurs: operateursFilter,
       types,
@@ -63,7 +63,7 @@ export const getOperateurs = cache(
       structures,
       topLevelByOperateurId,
       now,
-      globalFilters
+      filters
     );
 
     const items = operateurs

@@ -23,7 +23,7 @@ import {
   TransformationType,
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
-import { parseGlobalFilters } from "@/utils/global-filters.util";
+import { parseFilters } from "@/utils/filters.util";
 
 import {
   buildTestActivityIndex,
@@ -291,28 +291,25 @@ describe("socle - résolution DNA à date", () => {
 });
 
 describe("toStatistiquesPerimeterFilters", () => {
-  it("retient tous les types non exclus quand aucun filtre de type n'est fourni", () => {
-    const { types } = toStatistiquesPerimeterFilters(parseGlobalFilters({}));
-    expect(types.has(StructureType.CADA)).toBe(true);
-    expect(types.has(StructureType.HUDA)).toBe(true);
-    expect(types.has("PRAHDA")).toBe(false);
+  it("retient tout le parc non exclu quand aucun filtre n'est fourni", () => {
+    const resolved = toStatistiquesPerimeterFilters(parseFilters({}));
+
+    expect(resolved.types.has(StructureType.CADA)).toBe(true);
+    expect(resolved.types.has("PRAHDA")).toBe(false);
+    expect(resolved.departements).toBeNull();
+    expect(resolved.operateurIds).toBeNull();
   });
 
-  it("restreint aux types demandés, exclus retirés", () => {
-    const { types } = toStatistiquesPerimeterFilters(
-      parseGlobalFilters({ types: "CPH,PRAHDA" })
-    );
-    expect([...types]).toEqual([StructureType.CPH]);
-  });
-
-  it("convertit départements et opérateurs en ensembles, null quand absents", () => {
-    const empty = toStatistiquesPerimeterFilters(parseGlobalFilters({}));
-    expect(empty.departements).toBeNull();
-    expect(empty.operateurIds).toBeNull();
-
+  it("restreint aux filtres demandés, types exclus retirés", () => {
     const resolved = toStatistiquesPerimeterFilters(
-      parseGlobalFilters({ departements: "01,02", operateurs: "10,11" })
+      parseFilters({
+        departements: "01,02",
+        operateurs: "10,11",
+        types: "CPH,PRAHDA",
+      })
     );
+
+    expect([...resolved.types]).toEqual([StructureType.CPH]);
     expect(resolved.departements).toEqual(new Set(["01", "02"]));
     expect(resolved.operateurIds).toEqual(new Set([10, 11]));
   });

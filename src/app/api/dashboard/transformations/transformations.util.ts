@@ -19,9 +19,9 @@ import {
 import { isStepNotStarted } from "@/types/form.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 import {
-  matchesGlobalFilters,
-  ParsedGlobalFilters,
-} from "@/utils/global-filters.util";
+  matchesFilters,
+  ParsedFilters,
+} from "@/utils/filters.util";
 
 export const getTransformationStatus = (
   transformation: TransformationApiRead
@@ -118,7 +118,7 @@ export const sortDashboardTransformationRows = (
       )
   );
 
-export type BuildDashboardTransformationRowsOptions = ParsedGlobalFilters & {
+export type BuildDashboardTransformationRowsOptions = ParsedFilters & {
   ability: AppAbility;
 };
 
@@ -145,7 +145,7 @@ export const buildDashboardTransformationRows = (
     const { structureVersionTransformations } = transformation;
 
     if (
-      !matchesGlobalFilters(
+      !matchesFilters(
         {
           departements: structureVersionTransformations.map(
             getStructureVersionTransformationDepartement

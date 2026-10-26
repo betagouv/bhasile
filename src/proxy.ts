@@ -11,10 +11,10 @@ import {
   proConnectProtectedPages,
 } from "./proxy/auth-config";
 import { getApiRouteProtection } from "./proxy/auth-util";
-import { globalFiltersProxy } from "./proxy/global-filters";
+import { filtersProxy } from "./proxy/filters";
 import { SessionUser } from "./types/global";
 
-const proConnectPagesProxy = withAuth(globalFiltersProxy, {
+const proConnectPagesProxy = withAuth(filtersProxy, {
   callbacks: {
     authorized: ({ token }) => {
       return token !== null;

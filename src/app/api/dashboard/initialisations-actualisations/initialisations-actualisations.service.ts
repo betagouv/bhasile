@@ -1,8 +1,8 @@
+import { resolveFilters } from "@/app/api/filters/filters.service";
 import {
   FINALISATION_FORM_SLUG,
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
-import { resolveGlobalFilters } from "@/app/api/global-filters/global-filters.service";
 import { getActualisationYear } from "@/app/api/structures/actualisation.util";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
@@ -29,7 +29,7 @@ export const getInitialisationsActualisations = async (
 
   const rows = buildDashboardRows(structures, {
     user,
-    ...(await resolveGlobalFilters(filters)),
+    ...(await resolveFilters(filters)),
     year,
     now,
   });

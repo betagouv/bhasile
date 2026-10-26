@@ -1,9 +1,9 @@
 import { SearchParams } from "@/app/utils/search-params.util";
 import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
 import {
-  getGlobalFilters,
-  toGlobalFiltersSearchParams,
-} from "@/utils/global-filters.util";
+  getFiltersFromSearchParams,
+  toFiltersSearchParams,
+} from "@/utils/filters.util";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
 import { StatistiquesHeader } from "./_components/StatistiquesHeader";
@@ -14,9 +14,9 @@ export default async function StatistiquesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const filters = getGlobalFilters(await searchParams);
+  const filters = getFiltersFromSearchParams(await searchParams);
   const statistiques = await getStatistiques(filters);
-  const hasFilters = toGlobalFiltersSearchParams(filters).size > 0;
+  const hasFilters = toFiltersSearchParams(filters).size > 0;
 
   return (
     <StatistiquesProvider entity={statistiques}>

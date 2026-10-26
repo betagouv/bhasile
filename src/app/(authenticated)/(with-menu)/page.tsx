@@ -5,7 +5,7 @@ import { SearchParams } from "@/app/utils/search-params.util";
 import { PageHeader } from "@/components/PageHeader";
 import { authOptions } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
-import { getGlobalFilters } from "@/utils/global-filters.util";
+import { getFiltersFromSearchParams } from "@/utils/filters.util";
 
 import { AnomaliesBlock } from "./_components/AnomaliesBlock";
 import { BlockSkeleton } from "./_components/BlockSkeleton";
@@ -29,7 +29,7 @@ export default async function DashboardPage({
   const user = session?.user as SessionUser | undefined;
   const params = await searchParams;
 
-  const filters = getGlobalFilters(params);
+  const filters = getFiltersFromSearchParams(params);
 
   return (
     <>

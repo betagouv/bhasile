@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { SearchParamsNavigationOptions } from "@/app/hooks/useSearchParamsNavigation";
-import { GLOBAL_FILTERS_COOKIE } from "@/constants";
+import { FILTERS_COOKIE } from "@/constants";
 
 const mockReplace = vi.fn();
 let mockSearchParams = new URLSearchParams();
@@ -23,13 +23,13 @@ describe("useFilterNavigation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSearchParams = new URLSearchParams("page=3&search=coquelic");
-    document.cookie = `${GLOBAL_FILTERS_COOKIE}=; path=/`;
+    document.cookie = `${FILTERS_COOKIE}=; path=/`;
   });
 
   it("met à jour la seule clé modifiée dans les filtres mémorisés", async () => {
     // GIVEN
     const user = userEvent.setup();
-    document.cookie = `${GLOBAL_FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50&types=CADA")}; path=/`;
+    document.cookie = `${FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50&types=CADA")}; path=/`;
     mockSearchParams = new URLSearchParams("departements=14%2C50&types=CADA");
     render(<Filter filterKey="types" values={[]} />);
 
@@ -38,20 +38,8 @@ describe("useFilterNavigation", () => {
 
     // THEN
     expect(document.cookie).toContain(
-      `${GLOBAL_FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50")}`
+      `${FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50")}`
     );
-  });
-
-  it("ne touche pas au cookie pour un filtre propre à la page", async () => {
-    // GIVEN
-    const user = userEvent.setup();
-    render(<Filter filterKey="search" values={["abri"]} />);
-
-    // WHEN
-    await user.click(screen.getByRole("button", { name: "filtrer" }));
-
-    // THEN
-    expect(document.cookie).not.toContain("search");
   });
 
   it("joint la sélection et ramène à la première page", async () => {

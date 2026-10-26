@@ -4,12 +4,12 @@ import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import {
   buildCpomListItem,
   getCpomDepartementNumeros,
-  matchesCpomGlobalFilters,
+  matchesCpomFilters,
   shouldEndCpomStructureAtFermeture,
   sortValueForCpomColumn,
 } from "@/app/api/cpoms/cpom.util";
 import { CpomColumn } from "@/types/ListColumn";
-import { parseGlobalFilters } from "@/utils/global-filters.util";
+import { parseFilters } from "@/utils/filters.util";
 
 const makeCpom = (overrides: Record<string, unknown>): CpomDbList =>
   ({
@@ -66,13 +66,11 @@ describe("getCpomDepartementNumeros", () => {
 
 const filterCpoms = (
   cpoms: CpomDbList[],
-  filters: Parameters<typeof parseGlobalFilters>[0]
+  filters: Parameters<typeof parseFilters>[0]
 ): CpomDbList[] =>
-  cpoms.filter((cpom) =>
-    matchesCpomGlobalFilters(cpom, parseGlobalFilters(filters))
-  );
+  cpoms.filter((cpom) => matchesCpomFilters(cpom, parseFilters(filters)));
 
-describe("matchesCpomGlobalFilters", () => {
+describe("matchesCpomFilters", () => {
   const filterCpomsByDepartement = (
     cpomsToFilter: CpomDbList[],
     departements: string | null
@@ -129,29 +127,31 @@ describe("matchesCpomGlobalFilters", () => {
     ).toEqual([1]);
   });
 
-  it("garde les cpoms de l'opérateur filtré", () => {
-    const operateurCpoms = [
-      makeCpom({ id: 1, operateur: { id: 10, name: "A" } }),
-      makeCpom({ id: 2, operateur: { id: 20, name: "B" } }),
-    ];
-    expect(
-      filterCpoms(operateurCpoms, { operateurs: "20" }).map((cpom) => cpom.id)
-    ).toEqual([2]);
-  });
-
-  it("garde les cpoms contenant au moins une structure du type filtré", () => {
-    const withTypes = (id: number, types: string[]): CpomDbList =>
+  it("garde les cpoms de l'opérateur filtré contenant au moins une structure du type filtré", () => {
+    const cpomsWithTypes = [
       makeCpom({
-        id,
-        structures: types.map((type) => ({ structure: { type } })),
-      });
-    const typedCpoms = [
-      withTypes(1, ["CADA", "HUDA"]),
-      withTypes(2, ["CPH"]),
-      withTypes(3, []),
+        id: 1,
+        operateur: { id: 10, name: "A" },
+        structures: [
+          { structure: { type: "CADA" } },
+          { structure: { type: "HUDA" } },
+        ],
+      }),
+      makeCpom({
+        id: 2,
+        operateur: { id: 10, name: "A" },
+        structures: [{ structure: { type: "CPH" } }],
+      }),
+      makeCpom({
+        id: 3,
+        operateur: { id: 20, name: "B" },
+        structures: [{ structure: { type: "HUDA" } }],
+      }),
     ];
     expect(
-      filterCpoms(typedCpoms, { types: "HUDA" }).map((cpom) => cpom.id)
+      filterCpoms(cpomsWithTypes, { operateurs: "10", types: "HUDA" }).map(
+        (cpom) => cpom.id
+      )
     ).toEqual([1]);
   });
 });

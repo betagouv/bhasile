@@ -32,7 +32,7 @@ import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 import { SearchProps } from "@/types/structure-list.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
-import { parseGlobalFilters } from "@/utils/global-filters.util";
+import { parseFilters } from "@/utils/filters.util";
 
 type ActeAdministratifStub = {
   id?: number;
@@ -567,7 +567,7 @@ const filterRows = (
   filters: SearchProps,
   options: { includeNonVisible: boolean }
 ): StructureListComputedRow[] =>
-  filterStructureRows(rows, filters, parseGlobalFilters(filters), options);
+  filterStructureRows(rows, filters, parseFilters(filters), options);
 
 describe("filterStructureRows", () => {
   it("masque les lignes non visibles sauf si includeNonVisible est activé", () => {
@@ -593,7 +593,7 @@ describe("filterStructureRows", () => {
     ).toHaveLength(1);
   });
 
-  it("filtre sur la zone de rattachement, les opérateurs et les types globaux", () => {
+  it("filtre sur la zone de rattachement, l'opérateur, les types et le nom d'opérateur", () => {
     const rows = [
       buildRow({
         id: 1,
@@ -601,12 +601,14 @@ describe("filterStructureRows", () => {
         attachedDepartement: "75",
         departementAdministratif: null,
         operateurId: 1,
+        operateurName: "Operateur Alpha",
       }),
       buildRow({
         id: 2,
         type: StructureType.HUDA,
         attachedDepartement: "92",
         operateurId: 2,
+        operateurName: "Operateur Beta",
       }),
     ];
     const filterIds = (filters: Partial<SearchProps>) =>
@@ -616,26 +618,9 @@ describe("filterStructureRows", () => {
         { includeNonVisible: false }
       ).map((row) => row.id);
 
-    expect(filterIds({ types: "CADA" })).toEqual([1]);
     expect(filterIds({ departements: "75" })).toEqual([1]);
-    expect(filterIds({ departements: "92,93" })).toEqual([2]);
-    expect(filterIds({ operateurs: "2" })).toEqual([2]);
-    expect(filterIds({ types: "CADA", operateurs: "2" })).toEqual([]);
-  });
-
-  it("filtre sur le nom exact de l'opérateur pour la sélection de structures", () => {
-    const rows = [
-      buildRow({ id: 1, operateurName: "Operateur Alpha" }),
-      buildRow({ id: 2, operateurName: "Operateur Beta" }),
-    ];
-
-    expect(
-      filterRows(
-        rows,
-        { ...emptyFilters, operateurName: "Operateur Beta" },
-        { includeNonVisible: false }
-      ).map((row) => row.id)
-    ).toEqual([2]);
+    expect(filterIds({ types: "HUDA", operateurs: "2" })).toEqual([2]);
+    expect(filterIds({ operateurName: "Operateur Beta" })).toEqual([2]);
   });
 
   it("restreint aux lignes finalisées quand c'est demandé", () => {

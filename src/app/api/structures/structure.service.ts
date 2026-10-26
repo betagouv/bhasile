@@ -38,9 +38,9 @@ import {
 import { locateAdresses } from "../adresses/ban.service";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
+import { resolveFilters } from "../filters/filters.service";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
-import { resolveGlobalFilters } from "../global-filters/global-filters.service";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import type { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
@@ -200,7 +200,7 @@ const filterAndSortStructureRows = async (
   const filtered = filterStructureRows(
     rows,
     props,
-    await resolveGlobalFilters(props),
+    await resolveFilters(props),
     { includeNonVisible: Boolean(props.selection) }
   );
 

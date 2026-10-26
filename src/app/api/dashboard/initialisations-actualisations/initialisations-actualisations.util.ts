@@ -16,7 +16,7 @@ import {
   InitialisationStatus,
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
-import { ParsedGlobalFilters } from "@/utils/global-filters.util";
+import { ParsedFilters } from "@/utils/filters.util";
 
 import { isStructureInDashboardScope } from "../dashboard.util";
 import { DashboardStructure } from "./initialisations-actualisations.db.type";
@@ -93,7 +93,7 @@ export const getMostUrgentActionUrl = (
   return null;
 };
 
-export type BuildDashboardRowsOptions = ParsedGlobalFilters & {
+export type BuildDashboardRowsOptions = ParsedFilters & {
   user: SessionUser | undefined;
   year: number | null;
   now: Date;

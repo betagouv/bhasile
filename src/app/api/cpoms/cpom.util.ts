@@ -1,10 +1,7 @@
 import { type SortKind, type SortValue } from "@/app/utils/list.util";
 import { CpomGranularity, CpomListItem } from "@/types/cpom.type";
 import { CpomColumn } from "@/types/ListColumn";
-import {
-  matchesGlobalFilters,
-  ParsedGlobalFilters,
-} from "@/utils/global-filters.util";
+import { matchesFilters, ParsedFilters } from "@/utils/filters.util";
 
 import {
   type ActeAdministratifDates,
@@ -73,14 +70,14 @@ export const getCpomStructureIdsToEndAtFermeture = (
     )
     .map((cpomStructure) => cpomStructure.id);
 
-export const matchesCpomGlobalFilters = (
+export const matchesCpomFilters = (
   cpom: Parameters<typeof getCpomDepartementNumeros>[0] & {
     operateur: { id: number } | null;
     structures: { structure: { type: string | null } }[];
   },
-  filters: ParsedGlobalFilters
+  filters: ParsedFilters
 ): boolean =>
-  matchesGlobalFilters(
+  matchesFilters(
     {
       departements: getCpomDepartementNumeros(cpom),
       operateurIds: [cpom.operateur?.id],

@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 
 import {
   getCpomDepartementNumeros,
-  matchesCpomGlobalFilters,
+  matchesCpomFilters,
 } from "@/app/api/cpoms/cpom.util";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
@@ -18,7 +18,7 @@ import {
   RappelTaskType,
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
-import { ParsedGlobalFilters } from "@/utils/global-filters.util";
+import { ParsedFilters } from "@/utils/filters.util";
 
 import { isStructureInDashboardScope } from "../dashboard.util";
 import {
@@ -140,7 +140,7 @@ const findCurrentCpom = (
 const getEvaluationLabel = (criticite: RappelCriticite): string =>
   criticite === "URGENT" ? "Évaluation à mener" : "Évaluation à lancer";
 
-export type BuildRappelsOptions = ParsedGlobalFilters & {
+export type BuildRappelsOptions = ParsedFilters & {
   user: SessionUser;
   now: Date;
 };
@@ -238,7 +238,7 @@ export const buildRappels = (
   }
 
   for (const cpom of cpoms) {
-    if (!matchesCpomGlobalFilters(cpom, options)) {
+    if (!matchesCpomFilters(cpom, options)) {
       continue;
     }
     const departements = getCpomDepartementNumeros(cpom);

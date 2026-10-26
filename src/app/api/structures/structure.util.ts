@@ -43,9 +43,9 @@ import {
 } from "@/types/structure-list.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
 import {
-  matchesStructureGlobalFilters,
-  ParsedGlobalFilters,
-} from "@/utils/global-filters.util";
+  matchesStructureFilters,
+  ParsedFilters,
+} from "@/utils/filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
@@ -405,7 +405,7 @@ export const getFermetureHistory = (
 export const filterStructureRows = (
   rows: StructureListComputedRow[],
   filters: SearchProps,
-  globalFilters: ParsedGlobalFilters,
+  parsedFilters: ParsedFilters,
   { includeNonVisible }: { includeNonVisible: boolean }
 ): StructureListComputedRow[] => {
   const search = filters.search ? normalizeAccents(filters.search) : null;
@@ -424,13 +424,13 @@ export const filterStructureRows = (
       return false;
     }
     if (
-      !matchesStructureGlobalFilters(
+      !matchesStructureFilters(
         {
           departement: row.attachedDepartement,
           operateurId: row.operateurId,
           type: row.type,
         },
-        globalFilters
+        parsedFilters
       )
     ) {
       return false;

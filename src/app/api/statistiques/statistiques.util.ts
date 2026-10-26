@@ -18,7 +18,7 @@ import {
 } from "@/generated/prisma/client";
 import type { CompletudeStat } from "@/schemas/api/statistique.schema";
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
-import { ParsedGlobalFilters } from "@/utils/global-filters.util";
+import { ParsedFilters } from "@/utils/filters.util";
 
 import { pickVersionBefore } from "../structure-versions/structure-version.util";
 import type { StructureDbList } from "../structures/structure.db.type";
@@ -62,7 +62,7 @@ export const toStatistiquesPerimeterFilters = ({
   departementList,
   operateurList,
   typeList,
-}: ParsedGlobalFilters): StatistiquesResolvedPerimeterFilters => ({
+}: ParsedFilters): StatistiquesResolvedPerimeterFilters => ({
   departements: departementList.length > 0 ? new Set(departementList) : null,
   types: new Set(
     ACCEPTED_STRUCTURE_TYPES.filter(

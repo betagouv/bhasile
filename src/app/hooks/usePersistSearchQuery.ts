@@ -4,9 +4,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 import {
-  omitGlobalFilters,
-  pickGlobalFilters,
-} from "@/utils/global-filters.util";
+  omitFilters,
+  pickFilters,
+} from "@/utils/filters.util";
 
 export function usePersistSearchQuery(
   targetPath: string,
@@ -21,7 +21,7 @@ export function usePersistSearchQuery(
       return;
     }
 
-    const queryString = omitGlobalFilters(searchParams).toString();
+    const queryString = omitFilters(searchParams).toString();
     const stored = sessionStorage.getItem(storageKey) ?? "";
 
     if (!queryString) {
@@ -31,7 +31,7 @@ export function usePersistSearchQuery(
 
       if (isComingFromChildPage && stored) {
         const restored = new URLSearchParams(stored);
-        pickGlobalFilters(searchParams).forEach((value, key) =>
+        pickFilters(searchParams).forEach((value, key) =>
           restored.set(key, value)
         );
         router.replace(`${targetPath}?${restored.toString()}`);

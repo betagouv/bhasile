@@ -9,7 +9,7 @@ import {
 } from "@/schemas/api/statistique.schema";
 import { SessionUser } from "@/types/global";
 
-import { resolveGlobalFilters } from "../global-filters/global-filters.service";
+import { resolveFilters } from "../filters/filters.service";
 import { computeActiviteStatistiques } from "./activite/activite.util";
 import { buildLastValidatedCampagneYearByStructureId } from "./completude.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
@@ -67,7 +67,7 @@ export const buildStatistiquesContext = async (
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = toStatistiquesPerimeterFilters(
-    await resolveGlobalFilters(filters)
+    await resolveFilters(filters)
   );
   const readableDepartements = getReadableDepartements(
     resolvedFilters.departements,

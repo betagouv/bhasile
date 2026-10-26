@@ -9,10 +9,10 @@ import {
 } from "@/app/api/operateurs/operateur.util";
 import type { OperateurListItem } from "@/types/operateur.type";
 import { StructureType } from "@/types/structure.type";
-import { parseGlobalFilters } from "@/utils/global-filters.util";
+import { parseFilters } from "@/utils/filters.util";
 
 const now = new Date("2025-01-01T00:00:00.000Z");
-const noFilters = parseGlobalFilters({});
+const noFilters = parseFilters({});
 
 type StructureFixtureVersion = {
   effectiveDate: Date;
@@ -254,7 +254,7 @@ describe("groupStructureStatsByOperateur avec filtres globaux", () => {
       ],
       identityMap(1, 2),
       now,
-      parseGlobalFilters({ departements: "75", operateurs: "1", types: "CADA" })
+      parseFilters({ departements: "75", operateurs: "1", types: "CADA" })
     );
 
     expect(globalPlaces).toBe(40);

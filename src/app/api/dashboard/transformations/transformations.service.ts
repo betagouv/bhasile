@@ -1,4 +1,4 @@
-import { resolveGlobalFilters } from "@/app/api/global-filters/global-filters.service";
+import { resolveFilters } from "@/app/api/filters/filters.service";
 import { getOngoingTransformationsForUser } from "@/app/api/transformations/transformation.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
@@ -22,7 +22,7 @@ export const getDashboardTransformations = async (
 
   const rows = buildDashboardTransformationRows(transformations, {
     ability: defineAbilityFor(user),
-    ...(await resolveGlobalFilters(filters)),
+    ...(await resolveFilters(filters)),
   });
 
   return paginateWithTotal(rows, page, MIDDLE_PAGE_SIZE);

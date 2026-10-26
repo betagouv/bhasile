@@ -4,9 +4,9 @@ import { useCallback } from "react";
 
 import { setFilterParam } from "@/app/utils/search-params.util";
 import {
-  isGlobalFilterKey,
-  persistGlobalFilter,
-} from "@/utils/global-filters.util";
+  isFilterKey,
+  persistFilter,
+} from "@/utils/filters.util";
 
 import {
   SearchParamsNavigationOptions,
@@ -18,8 +18,8 @@ export const useFilterNavigation = (): NavigateWithFilter => {
 
   return useCallback(
     (key, values, options) => {
-      if (isGlobalFilterKey(key)) {
-        persistGlobalFilter(key, values);
+      if (isFilterKey(key)) {
+        persistFilter(key, values);
       }
       navigateWithParams(
         (params) => setFilterParam(params, key, values),

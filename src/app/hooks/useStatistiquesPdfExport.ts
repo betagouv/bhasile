@@ -6,7 +6,7 @@ import { usePdfExport } from "@/app/hooks/usePdfExport";
 import { formatDate } from "@/app/utils/date.util";
 import { getPdfExportPayload } from "@/app/utils/pdf-export.util";
 import { useOptionalStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { pickGlobalFilters } from "@/utils/global-filters.util";
+import { pickFilters } from "@/utils/filters.util";
 
 export const useStatistiquesPdfExport = () => {
   const { statistiques } = useOptionalStatistiquesContext();
@@ -16,7 +16,7 @@ export const useStatistiquesPdfExport = () => {
     `Statistiques ${formatDate(new Date())}`
   );
 
-  const globalFilters = pickGlobalFilters(searchParams);
+  const filters = pickFilters(searchParams);
 
   const exportPayload = getPdfExportPayload({
     typePlacesYears: statistiques?.places?.byYear?.map((place) => place.year),
@@ -31,8 +31,8 @@ export const useStatistiquesPdfExport = () => {
     isExporting,
     printRef,
     exportPayload,
-    departements: globalFilters.get("departements"),
-    operateurs: globalFilters.get("operateurs"),
-    types: globalFilters.get("types"),
+    departements: filters.get("departements"),
+    operateurs: filters.get("operateurs"),
+    types: filters.get("types"),
   };
 };

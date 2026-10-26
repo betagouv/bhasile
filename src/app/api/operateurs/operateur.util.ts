@@ -6,9 +6,9 @@ import type {
   OperateurSuggestionItem,
 } from "@/types/operateur.type";
 import {
-  matchesGlobalFilters,
-  ParsedGlobalFilters,
-} from "@/utils/global-filters.util";
+  matchesFilters,
+  ParsedFilters,
+} from "@/utils/filters.util";
 
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { StructureListLight } from "../structures/structure.db.type";
@@ -60,13 +60,13 @@ export const groupStructureStatsByOperateur = (
   structures: StructureListLight[],
   topLevelByOperateurId: Map<number, number>,
   now: Date,
-  filters: ParsedGlobalFilters
+  filters: ParsedFilters
 ): GroupedStructureStats => {
   const statsByOperateurId = new Map<number, OperateurStats>();
   let globalPlaces = 0;
 
   structures.forEach((structure) => {
-    const isInPerimeter = matchesGlobalFilters(
+    const isInPerimeter = matchesFilters(
       {
         departements: [structure.departementAdministratif],
         types: [structure.type],
@@ -86,7 +86,7 @@ export const groupStructureStatsByOperateur = (
 
     if (
       structure.operateurId === null ||
-      !matchesGlobalFilters({ operateurIds: [structure.operateurId] }, filters)
+      !matchesFilters({ operateurIds: [structure.operateurId] }, filters)
     ) {
       return;
     }

@@ -1,4 +1,4 @@
-import { resolveGlobalFilters } from "@/app/api/global-filters/global-filters.service";
+import { resolveFilters } from "@/app/api/filters/filters.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
@@ -35,7 +35,7 @@ export const getDashboardAnomalies = async (
 
   const anomalies = buildDashboardAnomalies(structures, {
     user,
-    ...(await resolveGlobalFilters(filters)),
+    ...(await resolveFilters(filters)),
     shouldShowIgnored: options.shouldShowIgnored,
     now: getNow(),
   });

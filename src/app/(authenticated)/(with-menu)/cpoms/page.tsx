@@ -13,7 +13,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { authOptions } from "@/lib/next-auth/auth";
 import { CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
-import { getGlobalFilters } from "@/utils/global-filters.util";
+import { getFiltersFromSearchParams } from "@/utils/filters.util";
 
 import { CpomsContent } from "./CpomsContent";
 import { CpomsCount } from "./CpomsCount";
@@ -28,7 +28,7 @@ export default async function Cpoms({
   const session = await getServerSession(authOptions);
   const query: CpomsQuery = {
     page: getPageParam(params, "page"),
-    ...getGlobalFilters(params),
+    ...getFiltersFromSearchParams(params),
     column: parseCpomColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
     user: session?.user as SessionUser | undefined,

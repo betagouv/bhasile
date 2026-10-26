@@ -11,9 +11,9 @@ import {
 } from "@/schemas/api/statistique-cartographie.schema";
 import { Filters } from "@/types/filters.type";
 import {
-  getGlobalFilters,
-  toGlobalFiltersSearchParams,
-} from "@/utils/global-filters.util";
+  getFiltersFromSearchParams,
+  toFiltersSearchParams,
+} from "@/utils/filters.util";
 
 import { StatistiquesCartographie } from "../_components/StatistiquesCartographie";
 import { StatistiquesHeader } from "../_components/StatistiquesHeader";
@@ -33,7 +33,7 @@ async function getStatistiquesCartographie({
   annee,
 }: GetStatistiquesCartographieArgs): Promise<CartographieApiRead> {
   const baseUrl = process.env.NEXT_URL || "";
-  const params = toGlobalFiltersSearchParams(filters);
+  const params = toFiltersSearchParams(filters);
 
   params.append("granularite", granularite);
   params.append("indicateur", indicateur);
@@ -61,7 +61,7 @@ export default async function CartographiePage({
   searchParams: Promise<SearchParams>;
 }) {
   const awaitedSearchParams = await searchParams;
-  const filters = getGlobalFilters(awaitedSearchParams);
+  const filters = getFiltersFromSearchParams(awaitedSearchParams);
 
   const granularite =
     typeof awaitedSearchParams.granularite === "string"

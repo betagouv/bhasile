@@ -1,5 +1,5 @@
 import { findAllCpoms } from "@/app/api/cpoms/cpom.repository";
-import { resolveGlobalFilters } from "@/app/api/global-filters/global-filters.service";
+import { resolveFilters } from "@/app/api/filters/filters.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { groupRappels } from "@/app/utils/rappel.util";
@@ -39,7 +39,7 @@ export const getDashboardRappels = async (
 
   const rappels = buildRappels(structures, cpoms, {
     user,
-    ...(await resolveGlobalFilters(filters)),
+    ...(await resolveFilters(filters)),
     now,
   });
 
