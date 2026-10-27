@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
@@ -10,16 +10,29 @@ import { MenuFooter } from "./MenuFooter";
 export const Menu = (): ReactElement => {
   const pathname = usePathname();
 
-  const menuItems = [
+  const [openGroup, setOpenGroup] = useState<MenuGroupId>(
+    getDefaultOpenGroup(pathname)
+  );
+  const [previousPathname, setPreviousPathname] = useState(pathname);
+  if (previousPathname !== pathname) {
+    setPreviousPathname(pathname);
+    setOpenGroup(getDefaultOpenGroup(pathname));
+  }
+
+  const toggleGroup = (groupId: MenuGroupId): void => {
+    setOpenGroup(openGroup === groupId ? "structures" : groupId);
+  };
+
+  const menuItems: MenuItem[] = [
     {
       icon: "ri-speed-up-line",
       label: "Tableau de bord",
       url: "/",
     },
     {
+      id: "structures",
       icon: "fr-icon-community-line",
-      label: "Structures d’hébergement",
-      url: "/structures",
+      label: "Structures et opérateurs",
       subItems: [
         {
           label: "Voir les structures",
@@ -29,12 +42,11 @@ export const Menu = (): ReactElement => {
           label: "Voir les CPOM",
           url: "/cpoms",
         },
+        {
+          label: "Voir les opérateurs",
+          url: "/operateurs",
+        },
       ],
-    },
-    {
-      icon: "fr-icon-user-setting-line",
-      label: "Opérateurs",
-      url: "/operateurs",
     },
     {
       icon: "fr-icon-pie-chart-2-line",
@@ -50,35 +62,34 @@ export const Menu = (): ReactElement => {
           },
         ]
       : []),
+    ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
+      ? [
+          {
+            id: "parametres" as const,
+            icon: "fr-icon-settings-5-line",
+            label: "Paramètres",
+            subItems: [
+              {
+                label: "Gérer les accès",
+                url: "/parametres/acces",
+              },
+              {
+                label: "Voir mon compte",
+                url: "/parametres/compte",
+              },
+            ],
+          },
+        ]
+      : []),
   ];
 
-  const isMenuItemActive = (
-    url: string,
-    subItems?: { url: string }[]
-  ): boolean => {
-    const matchesPath = (candidate: string): boolean =>
-      candidate === "/"
-        ? pathname === "/"
-        : Boolean(pathname?.includes(candidate));
-    return (
-      matchesPath(url) ||
-      Boolean(subItems?.some((subItem) => matchesPath(subItem.url)))
-    );
-  };
+  const matchesPath = (url: string): boolean =>
+    url === "/" ? pathname === "/" : Boolean(pathname?.includes(url));
 
-  const getActiveClass = (
-    url: string,
-    subItems?: { url: string }[]
-  ): string => {
-    return isMenuItemActive(url, subItems) ? "fr-sidemenu__item--active" : "";
-  };
-
-  const getAriaCurrent = (
-    url: string,
-    subItems?: { url: string }[]
-  ): "page" | boolean => {
-    return isMenuItemActive(url, subItems) ? "page" : false;
-  };
+  const isMenuItemActive = (menuItem: MenuItem): boolean =>
+    "subItems" in menuItem
+      ? menuItem.subItems.some((subItem) => matchesPath(subItem.url))
+      : matchesPath(menuItem.url);
 
   return (
     <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey shrink-0">
@@ -89,34 +100,50 @@ export const Menu = (): ReactElement => {
       <ul className="fr-sidemenu__list p-4">
         {menuItems.map((menuItem) => (
           <li
-            className={`fr-sidemenu__item before:content-none ${getActiveClass(menuItem.url, menuItem.subItems)}`}
+            className={`fr-sidemenu__item before:content-none ${isMenuItemActive(menuItem) ? "fr-sidemenu__item--active" : ""}`}
             key={menuItem.label}
           >
-            <Link
-              className="fr-sidemenu__link before:content-none"
-              href={menuItem.url}
-              aria-current={getAriaCurrent(menuItem.url, menuItem.subItems)}
-            >
-              <div className={`${menuItem.icon} pr-2`} />
-              <div>{menuItem.label}</div>
-            </Link>
-            {menuItem.subItems && (
-              <ul className="fr-sidemenu__list">
-                {menuItem.subItems.map((subItem) => (
-                  <li
-                    className={`fr-sidemenu__item ${getActiveClass(subItem.url)}`}
-                    key={subItem.label}
-                  >
-                    <Link
-                      className="fr-sidemenu__link"
-                      href={subItem.url}
-                      aria-current={getAriaCurrent(subItem.url)}
-                    >
-                      {subItem.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            {"subItems" in menuItem ? (
+              <>
+                <button
+                  type="button"
+                  className={`fr-sidemenu__btn before:content-none aria-expanded:bg-transparent ${isMenuItemActive(menuItem) ? "text-active-blue-france font-bold" : ""}`}
+                  aria-expanded={openGroup === menuItem.id}
+                  onClick={() => toggleGroup(menuItem.id)}
+                >
+                  <div className={`${menuItem.icon} pr-2`} />
+                  <div>{menuItem.label}</div>
+                </button>
+                {openGroup === menuItem.id && (
+                  <ul className="fr-sidemenu__list">
+                    {menuItem.subItems.map((subItem) => (
+                      <li
+                        className={`fr-sidemenu__item ${matchesPath(subItem.url) ? "fr-sidemenu__item--active" : ""}`}
+                        key={subItem.label}
+                      >
+                        <Link
+                          className="fr-sidemenu__link"
+                          href={subItem.url}
+                          aria-current={
+                            matchesPath(subItem.url) ? "page" : false
+                          }
+                        >
+                          {subItem.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            ) : (
+              <Link
+                className="fr-sidemenu__link before:content-none"
+                href={menuItem.url}
+                aria-current={isMenuItemActive(menuItem) ? "page" : false}
+              >
+                <div className={`${menuItem.icon} pr-2`} />
+                <div>{menuItem.label}</div>
+              </Link>
             )}
           </li>
         ))}
@@ -125,3 +152,26 @@ export const Menu = (): ReactElement => {
     </nav>
   );
 };
+
+const getDefaultOpenGroup = (pathname: string | null): MenuGroupId =>
+  pathname?.startsWith("/parametres") ? "parametres" : "structures";
+
+type MenuGroupId = "structures" | "parametres";
+
+type MenuSubItem = {
+  label: string;
+  url: string;
+};
+
+type MenuItem =
+  | {
+      icon: string;
+      label: string;
+      url: string;
+    }
+  | {
+      id: MenuGroupId;
+      icon: string;
+      label: string;
+      subItems: MenuSubItem[];
+    };
