@@ -20,8 +20,8 @@ Cette RFC propose :
 | ---------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **Échanges**     | `Conversation`                 | Le fil chronologique des messages d'une tarification (une structure, une campagne), dans un canal.                                      |
 | **Canal**        | `Visibility { SHARED AGENTS }` | Le canal **partagé** réunit l'opérateur et les agents ; le canal **agents** réunit la DDETS et la DREETS. Un canal = une conversation.  |
-| **Message**      | `Message`                      | Un texte, avec ou sans pièces jointes. Jamais modifié ni retiré.                                                                        |
-| **Pièce jointe** | `FileUpload.messageId`         | Un fichier joint à un message. Sans effet juridique (§ 4.3).                                                                            |
+| **Message**      | `Message`                      | Un texte, avec ou sans pièces jointes.                                                                                                  |
+| **Pièce jointe** | `FileUpload.messageId`         | Un fichier joint à un message.                                                                                                          |
 | **Tag**          | `tagKey`                       | Étiquette choisie par un agent pour classer un message (par ex. « L48 »). La liste des tags est fournie par la tarification.            |
 | **Phase**        | —                              | Le tag effectif d'un message : son tag s'il en a un, sinon la phase déduite de sa date et des ancres.                                   |
 | **Ancre**        | `ConversationAnchor`           | Repère daté fourni par la tarification (« Envoi de la L48 »), affiché dans le sommaire et dans le fil. Une ancre peut ouvrir une phase. |
@@ -35,9 +35,7 @@ Une campagne de tarification fait circuler une douzaine de documents et des diza
 - quand un agent ou un contact opérateur part, ses échanges partent avec lui ;
 - il n'existe aucune trace commune de qui a envoyé quoi, à qui, et quand.
 
-Les échanges sont **tripartites** : la DDETS mène, la DREETS suit et relit, l'opérateur répond et dépose. Une structure a toujours **deux campagnes en cours** (en mai N, la campagne N bat son plein et le CA de la campagne N+1 vient d'arriver) : deux tarifications, donc deux jeux de conversations.
-
-Deux décisions cadrent cette RFC : un **fil unique et chronologique** par tarification, séparé de la navigation dans les documents (réunion de design du 26/10), et le **découpage du chantier** en deux, campagne et documents d'un côté, messagerie agnostique de l'autre (27/10).
+Les échanges sont **tripartites** : la DDETS mène, la DREETS suit et relit, l'opérateur répond et dépose.
 
 ## 3. Objectifs, non-objectifs et hypothèses
 
@@ -51,11 +49,9 @@ Deux décisions cadrent cette RFC : un **fil unique et chronologique** par tarif
 
 **Non-objectifs**
 
-- **Envoyer un document officiel** (L48, DAB, arrêté…) : c'est le rôle de la gestion des documents. Une pièce jointe n'a aucun effet juridique.
-- **Modifier ou retirer un message** : une erreur se corrige par un nouveau message.
+- **Envoyer un document officiel** (L48, DAB, arrêté…) : c'est le rôle de la gestion des documents (§ 4.3).
 - **Répondre sous un message**, à la manière des threads de Slack (§ 5).
 - **Marquer un message comme non lu.**
-- **L'accès des agents nationaux.**
 
 **Hypothèses**
 
@@ -135,27 +131,24 @@ enum Visibility          { SHARED AGENTS }
 enum AuthorLevel         { DEPARTEMENT REGION OPERATEUR }
 ```
 
-`TarificationCampaign` et `StructureTarification` appartiennent à la gestion des documents (RFC 02), qui les complète (DRL, tarification hors Bhasile, étapes). La messagerie en a besoin pour exister : leur squelette est livré avec elle.
+`TarificationCampaign` et `StructureTarification` appartiennent à la gestion des documents (RFC 02), qui les complète (DRL, tarification hors Bhasile, étapes). La messagerie en a besoin pour exister : leur squelette est livré avec elle. La conversation pointe vers sa tarification ; la structure et la campagne s'obtiennent par jointure.
 
 ### 4.2 Campagnes et conversations
 
-- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur la date du jour (heure de Paris), sans cron.
-- **Lecture seule** : après le 31 décembre N, plus aucun message ni changement de tag ; la lecture reste possible, et les lectures restent enregistrées.
-- **Une conversation par tarification et par canal**, au plus deux par tarification (unicité `(structureTarificationId, visibility)`). La visibilité appartient à la conversation, pas au message : l'accès se vérifie une fois, sur la conversation, et la conversation agents n'existe tout simplement pas pour l'opérateur. Aucune requête ne peut faire fuiter le canal agents en oubliant un filtre.
+- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule : plus aucun message ni changement de tag, mais la lecture reste possible et les lectures restent enregistrées. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur la date du jour (heure de Paris), sans cron.
+- **Une conversation par tarification et par canal**, au plus deux par tarification (unicité `(structureTarificationId, visibility)`). La visibilité appartient à la conversation, pas au message (§ 4.5).
 - **Création à la volée** : la campagne, la tarification et la conversation sont créées au premier message (création idempotente sur leurs clés uniques). Une campagne ouverte sans message n'existe qu'à l'écran.
-- **La conversation pointe vers sa tarification** : la structure et la campagne s'obtiennent par jointure. Le code de la messagerie ne lit aucun autre champ de la tarification.
 
 ### 4.3 Messages
 
-- **Un message est immuable** : ni modification, ni suppression, ni retrait. Une erreur, y compris un message posté dans le mauvais canal, se corrige par un nouveau message. Le mail de notification ne contient pas le texte (§ 4.7) : un message posté par erreur dans le canal partagé n'est lu que si l'opérateur ouvre la conversation.
+- **Un message est immuable** : ni modification, ni suppression, ni retrait. Une erreur, y compris un message posté dans le mauvais canal, se corrige par un nouveau message (le mail de notification ne contient pas le texte, § 4.7).
 - **Une pièce jointe n'a aucun effet juridique** : elle ne fait courir aucun délai et n'apparaît pas comme un document de la tarification. Un document officiel (L48, DAB, arrêté) s'envoie depuis la gestion des documents, qui le date, le trace et l'affiche dans le fil comme ancre. Pas d'accusé d'ouverture sur les pièces jointes. L'aide en ligne et la formation le rappellent.
 - **Un message n'a jamais valeur d'acte** : répondre au contradictoire, accepter ou contester une L48, se fait depuis la gestion des documents.
 - **Tags** :
-  - réservés aux agents, dans les deux canaux, y compris sur les messages de l'opérateur ;
+  - réservés aux agents, dans les deux canaux, y compris sur les messages de l'opérateur : un message de l'opérateur tagué « L48 » ressemblerait à une réponse au contradictoire, qui ne passe que par la gestion des documents ;
   - choisis à l'écriture ou modifiés ensuite, sur place : le tag est un classement, pas une preuve ; texte, auteur, dates et pièces jointes restent intouchables ;
   - stockés **seulement s'ils sont choisis** : par défaut, la phase d'un message se déduit de sa date (la dernière ancre qui ouvre une phase avant le message) ;
   - phase effective = `tagKey ?? phase déduite de la date`. Une phase déduite suit les corrections de la tarification (un document retiré déplace ses ancres) ; un tag choisi ne bouge plus.
-- **Pourquoi les tags sont réservés aux agents** : un message de l'opérateur tagué « L48 » ressemblerait à une réponse au contradictoire, qui ne passe que par la gestion des documents.
 
 ### 4.4 Contrat avec la tarification
 
@@ -184,10 +177,9 @@ type ConversationContext = {
 
 - **Accès à une conversation = droit d'édition sur sa structure** (`canUpdateStructure`), hors grants `NATIONAL` : aujourd'hui, `canUpdateStructure` est vrai pour un éditeur national, il faut l'exclure explicitement. Lire et écrire relèvent du même droit ; les `LECTEUR` n'ont pas accès.
 - **Fermé par défaut.** La messagerie ne reprend **pas** la règle de lecture actuelle de Bhasile, ouverte à tous (`docs/permissions.md`).
-- **Opérateur** : la conversation partagée de ses structures, jamais la conversation agents.
+- **Opérateur** : la conversation partagée de ses structures. La conversation agents n'existe pas pour lui : l'accès se vérifie une fois, sur la conversation, et aucune requête ne peut faire fuiter le canal agents en oubliant un filtre.
 - **DREETS** : les deux conversations des structures de sa région.
 - **Agents nationaux** : aucun accès. Ils n'interviennent pas dans les échanges, et les services territoriaux préfèrent qu'ils n'y aient pas accès.
-- **Rien ne laisse deviner le canal agents à l'opérateur** : compteurs de non-lus, suivi et notifications ne portent, pour lui, que sur les conversations auxquelles il a accès.
 
 ### 4.6 Lectures, non-lus et temps réel
 
@@ -249,7 +241,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 - **Un fil chronologique** : on écrit toujours à la suite ; « Écrivez un message ».
 - **Un sommaire** : les ancres de la tarification et les pièces jointes, pour sauter à un moment du fil ; un filtre par phase.
 - **Pièces jointes** affichées dans le fil, sous leur message ; elles n'apparaissent pas dans la navigation dans les documents.
-- **Sélecteur de tag** à l'écriture, pour les agents, prérempli avec la phase en cours ; le client n'envoie `tagKey` que si l'agent l'a changé.
+- **Sélecteur de tag** à l'écriture, pour les agents, prérempli avec la phase en cours.
 
 ### 4.10 Mise en service
 
@@ -267,11 +259,3 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 | Recherche par mot-clé dans les échanges                                   | Recherche plein texte PostgreSQL sur le texte des messages.               |
 | Temps réel poussé                                                         | SSE + `LISTEN/NOTIFY`, sans changer le modèle.                            |
 | Horodatage qualifié (si besoin réglementaire)                             | Tâche quotidienne : empreintes du jour horodatées par un tiers qualifié.  |
-
-## 6. Questions ouvertes
-
-- **Juriste** : durée de conservation des logs transactionnels Brevo. Si elle est plus courte que les délais de recours, prévoir un export régulier des traces d'envoi.
-- **À trancher en PR** :
-  - formats risqués déposés par des tiers (tableurs à macros) et antivirus ;
-  - transaction du wipe des seeders (les triggers imposent qu'il tienne dans une seule transaction) ;
-  - `AuthorLevel` d'un superadmin qui écrit un message.
