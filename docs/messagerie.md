@@ -239,8 +239,8 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 
 | Brique                           | Où                                                                                                                                     | État    |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Modèle et squelette tarification | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                               | à faire |
-| Messagerie (agnostique)          | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                         | à faire |
+| Modèle et squelette tarification | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                               | fait    |
+| Messagerie (agnostique)          | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                         | fait    |
 | Branchement tarification         | `src/app/api/tarifications/` : tags (`tarification.constants.ts`), fenêtre de campagne (`tarification.util.ts`), droits et participant | à faire |
 | Routes                           | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]` | à faire |
 | Droits                           | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                | à faire |
