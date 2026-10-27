@@ -1,20 +1,17 @@
 # Messagerie tripartite
 
+Les échanges entre l'opérateur d'une structure, la DDETS et la DREETS pendant une campagne de tarification. Elle remplace les mails, garde l'historique et fait preuve.
+
 Le chantier de la tarification est découpé en deux :
 
-- **la campagne et la gestion des documents** ([RFC 02](rfc-02-tarification.md)) : étapes, documents typés, échéances, contradictoire, plugins ;
-- **la messagerie** (cette RFC) : les échanges entre l'opérateur d'une structure, la DDETS et la DREETS, qui remplacent les mails, gardent l'historique et font preuve.
+- **la messagerie** (ce document) ;
+- **la campagne et la gestion des documents** : étapes, documents typés, échéances, contradictoire, plugins.
 
 La messagerie est **agnostique** : elle ne connaît ni les étapes ni les documents. La tarification lui fournit ce qu'elle doit afficher (tags, ancres). Ce découpage suit l'interface, où les échanges vivent dans un panneau à part, et permet de livrer et de tester la messagerie en premier.
 
-Cette RFC propose :
+Les décisions et leurs alternatives écartées sont dans l'[ancienne RFC](rfc/campagne-tarification/rfc-01-socle-messagerie.md), conservée pour l'historique. Ce document décrit ce qui est construit et se met à jour dans la même PR que le code.
 
-- **une conversation par tarification et par canal** : le canal **partagé** (opérateur, DDETS, DREETS) et le canal **agents** (DDETS, DREETS) sont deux conversations distinctes ;
-- **un journal réduit aux messages, en ajout seul** : un message n'est jamais modifié ni retiré ; chaque lecture et chaque notification laisse une trace ;
-- **un contrat avec la tarification** : elle fournit ses tags et ses ancres (les repères du sommaire), la messagerie les affiche sans les comprendre ;
-- **un socle commun** (ajout seul, notifications par mail, fichiers, preuve), décrit ici et réutilisé par la gestion des documents.
-
-## 1. Vocabulaire
+## Vocabulaire
 
 | Terme            | Dans le code                   | Définition                                                                                                                              |
 | ---------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -27,7 +24,7 @@ Cette RFC propose :
 | **Ancre**        | `ConversationAnchor`           | Repère daté fourni par la tarification (« Envoi de la L48 »), affiché dans le sommaire et dans le fil. Une ancre peut ouvrir une phase. |
 | **Lu**           | `MessageReceipt`               | Première lecture d'un message par un utilisateur. Un fait, conservé.                                                                    |
 
-## 2. Contexte
+## Contexte
 
 Une campagne de tarification fait circuler une douzaine de documents et des dizaines de messages par structure et par an. Aujourd'hui, tout passe par mail :
 
@@ -37,46 +34,32 @@ Une campagne de tarification fait circuler une douzaine de documents et des diza
 
 Les échanges sont **tripartites** : la DDETS mène, la DREETS suit et relit, l'opérateur répond et dépose.
 
-## 3. Objectifs, non-objectifs et hypothèses
+**Hors périmètre** :
 
-**Objectifs**
+- **envoyer un document officiel** (L48, DAB, arrêté…) : c'est le rôle de la gestion des documents (voir [Messages](#messages)) ;
+- **répondre sous un message**, à la manière des threads de Slack (voir [Évolutions possibles](#évolutions-possibles)) ;
+- **marquer un message comme non lu**.
 
-1. Un lieu unique d'échange par tarification, lisible dans l'ordre chronologique.
-2. Les échanges font preuve : horodatés, en ajout seul, avec la trace des lectures et des notifications.
-3. La DREETS voit les échanges de son périmètre.
-4. La gestion des documents (étapes, gabarits, plugins) évolue sans toucher à la messagerie.
-5. L'historique reste consultable des années après (archives publiques, § 4.8).
+## Postulats
 
-**Non-objectifs**
+Le design repose sur ces constats. S'ils deviennent faux, la colonne de droite dit quoi revoir.
 
-- **Envoyer un document officiel** (L48, DAB, arrêté…) : c'est le rôle de la gestion des documents (§ 4.3).
-- **Répondre sous un message**, à la manière des threads de Slack (§ 5).
-- **Marquer un message comme non lu.**
+| Postulat                                                                                                                                                                                                           | Si ça devient faux                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| **Une structure ne change jamais d'opérateur.**                                                                                                                                                                    | Le code le permet aujourd'hui : l'ancien opérateur garderait l'accès aux conversations. Décider ce que voit le repreneur. |
+| **Le volume reste faible** (quelques milliers de messages par jour au pic, quelques dizaines par conversation).                                                                                                    | Le polling coûte plus cher : passer aux SSE (voir [Lectures et temps réel](#lectures-non-lus-et-temps-réel)).             |
+| **Les fichiers ne sont pas confidentiels, seuls les messages le sont** : côté agents, même règle d'accès que la fiche structure ; côté opérateur, les pièces jointes du canal partagé de ses structures seulement. | Ajouter une règle d'accès par conversation pour les agents aussi.                                                         |
+| **Les opérateurs ont des comptes nominatifs à la mise en service** (chantier accès opérateur).                                                                                                                     | Seul le canal agents sert ; le canal partagé attend les comptes.                                                          |
 
-**Hypothèses**
-
-Les numéros entre parenthèses renvoient à l'ancienne RFC du socle messagerie.
-
-| #           | Hypothèse                                                                                                                                                                                                          | Si c'est faux                                                                                                             | Statut     |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| H1 (ex-H6)  | **Une structure ne change jamais d'opérateur.**                                                                                                                                                                    | Le code le permet aujourd'hui : l'ancien opérateur garderait l'accès aux conversations. Décider ce que voit le repreneur. | ✅ Validée |
-| H2 (ex-H10) | **Le volume reste faible** (quelques milliers de messages par jour au pic).                                                                                                                                        | Le polling (§ 4.6) coûte plus cher : passer aux SSE.                                                                      | ✅ Validée |
-| H3 (ex-H12) | **Les fichiers ne sont pas confidentiels, seuls les messages le sont** : côté agents, même règle d'accès que la fiche structure ; côté opérateur, les pièces jointes du canal partagé de ses structures seulement. | Ajouter une règle d'accès par conversation pour les agents aussi.                                                         | ✅ Validée |
-| H4 (ex-H16) | **Les opérateurs ont des comptes nominatifs à la mise en service** (chantier accès opérateur).                                                                                                                     | Seul le canal agents sert ; le canal partagé attend les comptes.                                                          | ✅ Validée |
-
-## 4. Design
-
-### 4.1 Modèle de données
-
-Esquisse (noms définitifs en PR) :
+## Modèle de données
 
 ```prisma
-model TarificationCampaign {     // squelette, complété par la RFC 02
+model TarificationCampaign {     // squelette, complété par la gestion des documents
   id   Int @id @default(autoincrement())
   year Int @unique
 }
 
-model StructureTarification {    // une structure × une campagne ; squelette, complété par la RFC 02
+model StructureTarification {    // une structure × une campagne ; squelette, complété par la gestion des documents
   id            Int            @id @default(autoincrement())
   structureId   Int            // onDelete: Restrict
   campaignId    Int            // onDelete: Restrict
@@ -97,12 +80,12 @@ model Message {                  // ajout seul, sauf tagKey
   id             Int          @id @default(autoincrement())
   conversationId Int          // onDelete: Restrict
   authorId       Int
-  authorLevel    AuthorLevel  // tiré du Grant.scope de l'auteur à l'écriture ; le plus large l'emporte
+  authorLevel    AuthorLevel  // tiré des grants de l'auteur à l'écriture ; le plus large l'emporte
   text           String
   tagKey         String?      // choisi par un agent ; seule colonne modifiable
   createdAt      DateTime     @default(now()) // horodatage serveur, fait foi
   attachments    FileUpload[]
-  @@index([conversationId, createdAt])
+  @@index([conversationId, id])
 }
 
 model MessageReceipt {           // « lu », ajout seul
@@ -127,22 +110,26 @@ model StructureSubscription {    // suivi d'une structure (messagerie et tarific
 
 model FileUpload { /* existant */ messageId Int? /* onDelete: Restrict */ sha256 String? }
 
-enum Visibility          { SHARED AGENTS }
-enum AuthorLevel         { DEPARTEMENT REGION OPERATEUR }
+enum Visibility  { SHARED AGENTS }
+enum AuthorLevel { DEPARTEMENT REGION OPERATEUR }
 ```
 
-`TarificationCampaign` et `StructureTarification` appartiennent à la gestion des documents (RFC 02), qui les complète (DRL, tarification hors Bhasile, étapes). La messagerie en a besoin pour exister : leur squelette est livré avec elle. La conversation pointe vers sa tarification ; la structure et la campagne s'obtiennent par jointure.
+`TarificationCampaign` et `StructureTarification` appartiennent à la gestion des documents, qui les complète (DRL, tarification hors Bhasile, étapes). La messagerie en a besoin pour exister : leur squelette est livré avec elle. La conversation pointe vers sa tarification ; la structure et la campagne s'obtiennent par jointure.
 
-### 4.2 Campagnes et conversations
+`Message` n'a pas de `updatedAt` : seul `tagKey` change, et c'est un classement, pas une preuve.
+
+## Campagnes et conversations
 
 - **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule : plus aucun message ni changement de tag, mais la lecture reste possible et les lectures restent enregistrées. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur la date du jour (heure de Paris), sans cron.
-- **Une conversation par tarification et par canal**, au plus deux par tarification (unicité `(structureTarificationId, visibility)`). La visibilité appartient à la conversation, pas au message (§ 4.5).
-- **Création à la volée** : la campagne, la tarification et la conversation sont créées au premier message (création idempotente sur leurs clés uniques). Une campagne ouverte sans message n'existe qu'à l'écran.
+- **Une conversation par tarification et par canal**, au plus deux par tarification (unicité `(structureTarificationId, visibility)`). La visibilité appartient à la conversation, pas au message : l'accès se vérifie une fois, sur la conversation, et aucune requête ne peut faire fuiter le canal agents en oubliant un filtre.
+- **Création à la volée** : la tarification et la conversation sont créées au premier message (création idempotente sur leurs clés uniques). Une campagne ouverte sans message n'existe qu'à l'écran.
 
-### 4.3 Messages
+## Messages
 
-- **Un message est immuable** : ni modification, ni suppression, ni retrait. Une erreur, y compris un message posté dans le mauvais canal, se corrige par un nouveau message (le mail de notification ne contient pas le texte, § 4.7).
+- **Un message est immuable** : ni modification, ni suppression, ni retrait. Une erreur, y compris un message posté dans le mauvais canal, se corrige par un nouveau message (le mail de notification ne contient pas le texte, voir [Notifications](#notifications)).
+- **Contenu** : texte de 10 000 caractères au plus, vide seulement s'il y a des pièces jointes ; 20 pièces jointes au plus.
 - **Une pièce jointe n'a aucun effet juridique** : elle ne fait courir aucun délai et n'apparaît pas comme un document de la tarification. Un document officiel (L48, DAB, arrêté) s'envoie depuis la gestion des documents, qui le date, le trace et l'affiche dans le fil comme ancre. Pas d'accusé d'ouverture sur les pièces jointes. L'aide en ligne et la formation le rappellent.
+- **Rattachement des pièces jointes** : le fichier est d'abord envoyé (`POST /api/files`), puis le message référence sa clé. Le rattachement se fait dans la même transaction que la création du message, et seulement pour un fichier orphelin : un fichier déjà rattaché ailleurs fait échouer l'envoi.
 - **Un message n'a jamais valeur d'acte** : répondre au contradictoire, accepter ou contester une L48, se fait depuis la gestion des documents.
 - **Tags** :
   - réservés aux agents, dans les deux canaux, y compris sur les messages de l'opérateur : un message de l'opérateur tagué « L48 » ressemblerait à une réponse au contradictoire, qui ne passe que par la gestion des documents ;
@@ -150,9 +137,9 @@ enum AuthorLevel         { DEPARTEMENT REGION OPERATEUR }
   - stockés **seulement s'ils sont choisis** : par défaut, la phase d'un message se déduit de sa date (la dernière ancre qui ouvre une phase avant le message) ;
   - phase effective = `tagKey ?? phase déduite de la date`. Une phase déduite suit les corrections de la tarification (un document retiré déplace ses ancres) ; un tag choisi ne bouge plus.
 
-### 4.4 Contrat avec la tarification
+## Contrat avec la tarification
 
-La messagerie définit ce qu'elle attend ; la tarification le fournit :
+La messagerie définit ce qu'elle attend (`src/types/conversation.type.ts`) ; la tarification le fournit :
 
 ```ts
 type ConversationTag = { key: string; label: string };
@@ -171,24 +158,26 @@ type ConversationContext = {
 - **Côté écran**, le composant de messagerie reçoit le contexte en props, calculé par la page de la tarification.
 - **Côté serveur**, la tarification passe la liste des tags au service de la messagerie, qui vérifie qu'un `tagKey` en fait partie.
 - **La dépendance va dans un seul sens** : la tarification importe la messagerie, jamais l'inverse. La messagerie connaît le contrat (« il y a des tags et des ancres »), pas son contenu (« L48 », « procédure contradictoire »).
-- Les ancres (réception du CA et du BP, envoi et ouverture des documents) sont décrites dans la RFC 02.
+- Les ancres (réception du CA et du BP, envoi et ouverture des documents) relèvent de la gestion des documents. Tant qu'elle n'existe pas, la liste des ancres est vide et seuls les tags choisis classent les messages.
 
-### 4.5 Droits et visibilité
+## Droits et visibilité
 
-- **Accès à une conversation = droit d'édition sur sa structure** (`canUpdateStructure`), hors grants `NATIONAL` : aujourd'hui, `canUpdateStructure` est vrai pour un éditeur national, il faut l'exclure explicitement. Lire et écrire relèvent du même droit ; les `LECTEUR` n'ont pas accès.
-- **Fermé par défaut.** La messagerie ne reprend **pas** la règle de lecture actuelle de Bhasile, ouverte à tous (`docs/permissions.md`).
-- **Opérateur** : la conversation partagée de ses structures. La conversation agents n'existe pas pour lui : l'accès se vérifie une fois, sur la conversation, et aucune requête ne peut faire fuiter le canal agents en oubliant un filtre.
+- **Accès à une conversation = droit d'édition sur sa structure** (`canUpdateStructure`), hors grants `NATIONAL` : `canUpdateStructure` est vrai pour un éditeur national, `canAccessTarification` l'exclut explicitement. Lire et écrire relèvent du même droit ; les `LECTEUR` n'ont pas accès.
+- **Fermé par défaut.** La messagerie ne reprend **pas** la règle de lecture de Bhasile, ouverte à tous (voir [Permissions](permissions.md)).
+- **Opérateur** : la conversation partagée de ses structures. La conversation agents n'existe pas pour lui (`canReadConversation`).
 - **DREETS** : les deux conversations des structures de sa région.
 - **Superadmins** : lecture seule, partout. Ils n'écrivent jamais et leurs lectures ne laissent pas d'accusé : aucun message de l'équipe technique n'entre dans le journal d'une tarification. Les tests d'écriture se font en staging.
 - **Agents nationaux** : aucun accès. Ils n'interviennent pas dans les échanges, et les services territoriaux préfèrent qu'ils n'y aient pas accès.
 
-### 4.6 Lectures, non-lus et temps réel
+## Lectures, non-lus et temps réel
 
 - **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand ; restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
 - **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La messagerie expose un compteur par structure, que le bloc tarification du dashboard affiche.
-- **Temps réel** : tant que le panneau des échanges est ouvert, le client relit toute la conversation toutes les 10 à 15 secondes et remplace sa liste. Un curseur sur l'identifiant pourrait sauter un message (les identifiants sont attribués à l'insertion, pas au commit) ; une conversation compte quelques dizaines de messages, relire tout reste léger. Pas de websocket ni de SSE en V1 : en prod, l'application tourne sur plusieurs conteneurs, et pousser un message à tous les clients demanderait un canal de diffusion entre instances (`LISTEN/NOTIFY`). Le polling n'en a pas besoin, la base sert de point commun. Le passage aux SSE ne changerait pas le modèle.
+- **Temps réel** : tant que le panneau des échanges est ouvert, le client relit toute la conversation toutes les 10 à 15 secondes et remplace sa liste.
+  - Pas de curseur sur l'identifiant : il pourrait sauter un message, car les identifiants sont attribués à l'insertion, pas au commit. Une conversation compte quelques dizaines de messages, relire tout reste léger.
+  - Pas de websocket ni de SSE : en prod, l'application tourne sur plusieurs conteneurs, et pousser un message à tous les clients demanderait un canal de diffusion entre instances (`LISTEN/NOTIFY`). Le polling n'en a pas besoin, la base sert de point commun. Le passage aux SSE ne changerait pas le modèle.
 
-### 4.7 Notifications
+## Notifications
 
 - **Le mail est une notification, jamais un contenu** : un lien vers la conversation, la structure, la campagne et le niveau de l'auteur ; ni texte, ni pièce jointe. Un mail se transfère, et les boîtes sont limitées.
 - **Notifiés par défaut, sauf l'auteur**, selon le `Grant.scope` en base (la session ne distingue pas région et département) :
@@ -206,25 +195,25 @@ type ConversationContext = {
 - **Envoi sans file de tâches** : un message sans `MessageNotification` est un message à notifier. Après le commit, le serveur calcule les destinataires, envoie les mails, puis écrit la trace (même vide si personne n'était à notifier). Un cron reprend les messages restés sans trace ; au-delà de 24 h, il abandonne et remonte une alerte (Sentry). Si le serveur s'arrête au milieu d'un envoi, la reprise peut renvoyer un mail en double : sans gravité pour une notification.
 - **Brevo transactionnel, à construire** : Brevo ne sert aujourd'hui qu'à synchroniser les contacts. L'identifiant Brevo de chaque mail est conservé (une trace chez un tiers). Les rebonds (contact parti, boîte supprimée) arrivent par webhook et sont tracés, en ajout seul, à côté du message, visibles des agents.
 
-### 4.8 Socle commun
+## Socle commun
 
-Ces règles valent pour la messagerie et pour la gestion des documents ; la RFC 02 y renvoie.
+Ces règles valent pour la messagerie et pour la gestion des documents, qui y renvoie.
 
 **Intégrité**
 
 - **Ajout seul** : les repositories des journaux n'exposent ni `update` ni `delete` ; une correction est un nouvel enregistrement.
-- **Triggers PostgreSQL** contre les modifications (`UPDATE`, `DELETE`, `TRUNCATE`), dans une PR dédiée avant la mise en service, quand les journaux deviennent une preuve : eux seuls couvrent aussi les scripts ponctuels et les requêtes manuelles. Ils protègent contre les accidents, pas contre un administrateur de la base. Sur `Message`, le trigger refuse tout `UPDATE` qui touche autre chose que `tagKey` (comparaison de `to_jsonb(NEW) - 'tagKey'` et `to_jsonb(OLD) - 'tagKey'`, qui reste juste quand on ajoute une colonne). Le wipe des seeders (`prisma/utils/wipe.ts`, dev et préprod) lève explicitement la protection pour sa session.
+- **Triggers PostgreSQL** contre les modifications (`UPDATE`, `DELETE`, `TRUNCATE`), posés avant la mise en service, quand les journaux deviennent une preuve : eux seuls couvrent aussi les scripts ponctuels et les requêtes manuelles. Ils protègent contre les accidents, pas contre un administrateur de la base. Sur `Message`, le trigger refuse tout `UPDATE` qui touche autre chose que `tagKey` (comparaison de `to_jsonb(NEW) - 'tagKey'` et `to_jsonb(OLD) - 'tagKey'`, qui reste juste quand on ajoute une colonne). Le wipe des seeders (`prisma/utils/wipe.ts`, dev et préprod) lève explicitement la protection pour sa session.
 - **Aucune cascade** n'atteint un message, une trace ou un fichier. Une structure qui a des échanges ne peut plus être supprimée : c'est voulu (archives), et aucun écran ne supprime de structure aujourd'hui.
 
 **Fichiers**
 
 - **Empreinte SHA-256** de chaque fichier, calculée à l'upload.
-- **Formats** : ajout de `.docx`, `.odt`, `.pptx` aux formats acceptés (PDF, tableurs, images), dans toute l'application : une seule liste, plus simple qu'une liste par contexte. Limite de 30 Mo inchangée ; au-delà de 50 Mo environ, il faudra un upload direct vers S3 par URL signée (le serveur charge aujourd'hui le fichier en mémoire).
-- **Accès** : la règle est à construire, pas à reprendre. Aujourd'hui, `authorizeFileAccess` (`src/app/api/files/file.service.ts`) laisse toute session lire tout fichier rattaché, et `getPrincipal` classe toute session comme agent. Pour les fichiers des échanges : lecture selon l'accès à la conversation (§ 4.5), suppression jamais. `isOrphan` doit reconnaître `messageId`, sinon un fichier de message serait considéré comme orphelin, donc lisible et supprimable par tous.
+- **Formats** : `.docx`, `.odt` et `.pptx` s'ajoutent aux formats acceptés (PDF, tableurs, images), dans toute l'application : une seule liste, plus simple qu'une liste par contexte. Limite de 30 Mo inchangée ; au-delà de 50 Mo environ, il faudra un upload direct vers S3 par URL signée (le serveur charge aujourd'hui le fichier en mémoire).
+- **Accès** : un fichier de message se lit selon l'accès à sa conversation (voir [Droits et visibilité](#droits-et-visibilité)) et ne se supprime jamais. `isOrphan` reconnaît `messageId` : sans ça, un fichier de message serait considéré comme orphelin, donc lisible et supprimable par tous.
 
 **Preuve**
 
-Un **faisceau d'indices** : journal en ajout seul, horodatage serveur, empreinte des fichiers, accusés de lecture, trace des mails chez un tiers (Brevo). Ce n'est **pas** un horodatage qualifié eIDAS ; s'il devient un besoin réglementaire, le pattern de Démarches Numériques (empreintes du jour horodatées chaque nuit par un tiers qualifié) se branchera en plus (§ 5).
+Un **faisceau d'indices** : journal en ajout seul, horodatage serveur, empreinte des fichiers, accusés de lecture, trace des mails chez un tiers (Brevo). Ce n'est **pas** un horodatage qualifié eIDAS ; s'il devient un besoin réglementaire, le pattern de Démarches Numériques (empreintes du jour horodatées chaque nuit par un tiers qualifié) se branchera en plus.
 
 **Conservation**
 
@@ -232,10 +221,12 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule (§ 4.5).
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : la reprise des notifications se recette en préprod.
 
-### 4.9 Interface
+## Interface
+
+La messagerie est livrée avant la gestion des documents, avec une page minimale de tarification : le sélecteur de campagne et le panneau « Échanges », sans documents.
 
 - **Un panneau « Échanges »** à part, ouvert depuis l'écran de la tarification (un bouton flottant, par-dessus la navigation dans les documents).
 - **Deux onglets** : « Tout le monde » (conversation partagée) et « Services de l'État seulement » (conversation agents), absent pour l'opérateur.
@@ -244,12 +235,22 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 - **Pièces jointes** affichées dans le fil, sous leur message ; elles n'apparaissent pas dans la navigation dans les documents.
 - **Sélecteur de tag** à l'écriture, pour les agents, prérempli avec la phase en cours.
 
-### 4.10 Mise en service
+## Implémentation
 
-- La messagerie est livrée avant la gestion des documents. Elle est livrée avec le squelette de la tarification (§ 4.1) et une page minimale dans la fiche structure : le sélecteur de campagne et le panneau « Échanges », sans documents.
-- Tests avec des opérateurs sur la staging dès décembre (échanges et pièces jointes), avant ceux de la gestion des documents.
+| Brique                           | Où                                                                                                                                     | État    |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Modèle et squelette tarification | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                               | fait    |
+| Messagerie (agnostique)          | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                         | fait    |
+| Branchement tarification         | `src/app/api/tarifications/` : tags (`tarification.constants.ts`), fenêtre de campagne (`tarification.util.ts`), droits et participant | fait    |
+| Routes                           | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]` | fait    |
+| Droits                           | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                | fait    |
+| Pièces jointes                   | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                        | fait    |
+| Interface                        | page de tarification et panneau « Échanges »                                                                                           | à faire |
+| Notifications                    | `MessageNotification`, `StructureSubscription`, Brevo transactionnel, cron de reprise, webhook des rebonds, compteur de non-lus        | à faire |
+| Triggers d'ajout seul            | migration dédiée                                                                                                                       | à faire |
+| Empreinte SHA-256                | `FileUpload.sha256`                                                                                                                    | à faire |
 
-## 5. Évolutions possibles
+## Évolutions possibles
 
 | Évolution                                                                 | Comment                                                                   |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
