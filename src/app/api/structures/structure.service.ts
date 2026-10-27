@@ -15,6 +15,7 @@ import {
   canAbilityReadStructure,
   defineAbilityFor,
   getReadableStructureWhere,
+  isAgent,
 } from "@/lib/casl";
 import {
   StructureAgentUpdateApiType,
@@ -82,6 +83,7 @@ import {
   getReadableAdresses,
   getReadableNotes,
   getTypeBati,
+  hideAgentOnlyFields,
   isStructureClosed,
   isStructureFinalised,
   isStructureInCpom,
@@ -300,7 +302,9 @@ const buildFullStructures = async (
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);
       }
-      return structure;
+      return props.user && !isAgent(props.user)
+        ? hideAgentOnlyFields(structure)
+        : structure;
     })
     .filter(
       (structure): structure is StructureApiRead => structure !== undefined
@@ -352,7 +356,7 @@ export const getFullStructure = async (
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
 
-  return structure;
+  return isAgent(user) ? structure : hideAgentOnlyFields(structure);
 };
 
 export const getStructureForOperateur = async (

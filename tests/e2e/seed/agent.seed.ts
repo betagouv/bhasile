@@ -21,10 +21,11 @@ export const seedAgent = async (): Promise<void> => {
 
   const user = await prisma.user.upsert({
     where: { email: E2E_AGENT_EMAIL },
-    update: {},
+    update: { isAgent: true },
     create: {
       email: E2E_AGENT_EMAIL,
       name: E2E_AGENT_NAME,
+      isAgent: true,
       lastConnection: getNow(),
     },
     select: { id: true },

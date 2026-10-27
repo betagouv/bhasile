@@ -21,6 +21,7 @@ export const createSessionUser = (
   email: "agent@gouv.fr",
   operateurId: null,
   isSuperAdmin: false,
+  isAgent: (overrides.operateurId ?? null) === null,
   grants: [],
   ...overrides,
 });

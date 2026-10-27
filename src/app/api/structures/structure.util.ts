@@ -68,6 +68,23 @@ const typesPublic: Record<string, PublicType> = {
   "personnes isolées": PublicType.PERSONNES_ISOLEES,
 };
 
+export const hideAgentOnlyFields = (
+  structure: StructureApiRead
+): StructureApiRead => ({
+  ...structure,
+  notes: null,
+  controles: [],
+  evaluations: [],
+  evenementsIndesirablesGraves: [],
+  anomalies: [],
+  cpomStructures: [],
+  isInCpom: false,
+  isInCpomPerYear: {},
+  history: structure.history?.filter(
+    (event) => event.kind !== "CPOM_ENTRY" && event.kind !== "CPOM_EXIT"
+  ),
+});
+
 export const getReadableNotes = (
   structure: StructureApiRead,
   user?: SessionUser

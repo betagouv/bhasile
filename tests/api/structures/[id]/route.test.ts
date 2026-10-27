@@ -32,6 +32,7 @@ vi.mock("@/lib/casl", () => ({
   canAbilityReadStructure: () => true,
   canAccessApp: (...args: unknown[]) => mockCanAccessApp(...args),
   defineAbilityFor: () => ({}),
+  isAgent: () => true,
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
