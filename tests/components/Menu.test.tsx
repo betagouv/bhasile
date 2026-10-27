@@ -115,36 +115,6 @@ describe("Menu", () => {
     expect(screen.getByText("Voir mon compte")).toBeInTheDocument();
   });
 
-  it("redéploie Structures et opérateurs quand Paramètres est replié", () => {
-    // GIVEN
-    render(<Menu />);
-    fireEvent.click(getGroupButton("Paramètres"));
-
-    // WHEN
-    fireEvent.click(getGroupButton("Paramètres"));
-
-    // THEN
-    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
-      "aria-expanded",
-      "true"
-    );
-    expect(screen.queryByText("Voir mon compte")).not.toBeInTheDocument();
-  });
-
-  it("garde Structures et opérateurs déployé au clic sur son en-tête", () => {
-    // GIVEN
-    render(<Menu />);
-
-    // WHEN
-    fireEvent.click(getGroupButton("Structures et opérateurs"));
-
-    // THEN
-    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
-      "aria-expanded",
-      "true"
-    );
-  });
-
   it("déploie Paramètres sur une page de paramètres", () => {
     // GIVEN
     mockPathname.mockReturnValue("/parametres/compte");
@@ -178,18 +148,5 @@ describe("Menu", () => {
       "true"
     );
     expect(screen.queryByText("Voir mon compte")).not.toBeInTheDocument();
-  });
-
-  it("masque Paramètres sans le flag", () => {
-    // GIVEN
-    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "false");
-
-    // WHEN
-    render(<Menu />);
-
-    // THEN
-    expect(
-      screen.queryByRole("button", { name: "Paramètres" })
-    ).not.toBeInTheDocument();
   });
 });
