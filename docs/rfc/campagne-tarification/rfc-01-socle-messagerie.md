@@ -1,6 +1,6 @@
 # Socle messagerie de la campagne de tarification
 
-> ⚠️ **RFC obsolète, conservée pour l'historique.** Depuis le 27/10, le chantier est découpé en deux RFC : [Messagerie tripartite](rfc-01-messagerie-tripartite.md) et Tarification, campagne et gestion des documents (`rfc-02-tarification.md`, en cours de rédaction). Ce document reflète l'état des décisions au 23/10 et n'est plus mis à jour.
+> ⚠️ **RFC obsolète, conservée pour l'historique.** Depuis le 27/10, le chantier est découpé en deux : la [messagerie tripartite](../../messagerie.md) et la tarification, campagne et gestion des documents. Ce document reflète l'état des décisions au 23/10 et n'est plus mis à jour.
 
 Le chantier fait passer dans Bhasile toute la campagne annuelle de tarification des CADA/CPH, du dépôt du CA et du BP par l'opérateur jusqu'aux documents de paiement (DAI, DAM, échéancier). Il repose sur **deux socles**, développés en parallèle et tous deux nécessaires aux briques suivantes :
 
