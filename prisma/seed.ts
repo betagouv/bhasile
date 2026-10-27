@@ -15,6 +15,7 @@ import {
   getFakeTarifsJournaliersCibles,
   getFakeTauxEncadrementCibles,
 } from "./seeders/cible-financiere.seed";
+import { createFakeConversations } from "./seeders/conversation.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
 import { seedRegionsAndDepartements } from "./seeders/departements.seed";
 import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
@@ -355,6 +356,8 @@ async function seed(): Promise<void> {
 
   await createFakeCpoms(prisma);
   logHeap("CPOM");
+
+  await createFakeConversations(prisma, CURRENT_YEAR);
 
   console.log("📣 Seed des notifications");
   const notificationsToCreate = createNotificationsList();

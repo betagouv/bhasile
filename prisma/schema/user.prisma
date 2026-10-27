@@ -1,17 +1,19 @@
 model User {
-  id                  Int           @id @default(autoincrement())
+  id                  Int              @id @default(autoincrement())
   name                String?
-  email               String        @unique
+  email               String           @unique
   lastConnection      DateTime?
   userActions         UserAction[]
-  emailPattern        EmailPattern? @relation(fields: [emailPatternId], references: [id])
+  emailPattern        EmailPattern?    @relation(fields: [emailPatternId], references: [id])
   emailPatternId      Int?
-  operateur           Operateur?    @relation(fields: [operateurId], references: [id], onDelete: Restrict)
+  operateur           Operateur?       @relation(fields: [operateurId], references: [id], onDelete: Restrict)
   operateurId         Int?
-  isSuperAdmin        Boolean       @default(false)
+  isSuperAdmin        Boolean          @default(false)
   grants              Grant[]
   notes               Note[]
   anomaliesJustifiees Anomalie[]
+  messages            Message[]
+  messageReceipts     MessageReceipt[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
