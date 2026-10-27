@@ -1,5 +1,7 @@
 # Socle messagerie de la campagne de tarification
 
+> ⚠️ **RFC obsolète, conservée pour l'historique.** Depuis le 27/10, le chantier est découpé en deux RFC : [Messagerie tripartite](rfc-01-messagerie-tripartite.md) et Tarification, campagne et gestion des documents (`rfc-02-tarification.md`, en cours de rédaction). Ce document reflète l'état des décisions au 23/10 et n'est plus mis à jour.
+
 Le chantier fait passer dans Bhasile toute la campagne annuelle de tarification des CADA/CPH, du dépôt du CA et du BP par l'opérateur jusqu'aux documents de paiement (DAI, DAM, échéancier). Il repose sur **deux socles**, développés en parallèle et tous deux nécessaires aux briques suivantes :
 
 - le socle **messagerie** (cette RFC) : où et comment opérateurs, DDETS et DREETS échangent messages et documents tout au long d'une campagne, et en gardent l'historique (archivage) ;
@@ -8,8 +10,8 @@ Le chantier fait passer dans Bhasile toute la campagne annuelle de tarification 
 Cette RFC propose :
 
 - **une tarification par structure et par campagne, découpée en étapes** (CA, RCA, BP, L48, DAB, arrêté, paiement), chacune avec ses échanges dans deux canaux : un canal **partagé** avec l'opérateur et un canal **agents** (DDETS et DREETS) ;
-- **des documents typés** : chaque fichier envoyé dit ce qu'il est (CA, BP, RCA, L48, pièce justificative…) et dans quel état il est (brouillon, version finale, partagé). L'**état** de chaque étape se calcule à partir de ces documents ;
-- **un journal d'événements en ajout seul** : messages, documents, lectures et notifications sont des événements horodatés, jamais modifiés ni supprimés, qui forment la preuve ;
+- **des documents typés** : chaque fichier envoyé dit ce qu'il est (CA, BP, RCA, L48, pièce justificative…) et dans quel état il est (brouillon, version finale, partagé). L'**état** de chaque étape se calcule à partir de ces documents et des déclarations des agents (sans objet, clôture manuelle) ;
+- **un journal d'événements en ajout seul** : messages, documents, partages et envois de mails sont des événements horodatés, et chaque lecture laisse un accusé : rien n'est jamais modifié ni supprimé, et l'ensemble forme la preuve ;
 - **un outil descriptif, jamais prescriptif** : les échéances sont affichées et les retards signalés, mais rien n'est jamais bloqué. Le respect des délais reste de la responsabilité des agents et des opérateurs, pas de l'outil ;
 - **des plugins** : des modules de code qui se branchent sur les événements et les types de documents. C'est par là qu'arriveront l'extraction des chiffres, l'analyse IA et la génération des documents.
 
@@ -30,20 +32,20 @@ Cette RFC propose :
 
 ## 2. Contexte
 
-Douze documents par structure et par an. L'opérateur en produit trois (CA, BP, réponse au contradictoire) ; tous les autres reprennent ses chiffres. Une campagne N couvre **l'analyse du CA N-2 et la tarification du BP N**, soit environ 15 mois :
+Douze documents par structure et par an. L'opérateur en produit cinq (CA et rapport d'activité, BP et rapport budgétaire, réponse au contradictoire) ; tous les autres reprennent ses chiffres. Une campagne N couvre **l'analyse du CA N-2 et la tarification du BP N**, soit environ 20 mois, du dépôt du CA (avril N-1) aux documents de paiement (fin N) :
 
-| Quand              | Quoi                                                     |
-| ------------------ | -------------------------------------------------------- |
-| 30 avril N-1       | Dépôt du CA N-2 par l'opérateur                          |
-| 31 octobre N-1     | Dépôt du BP N par l'opérateur                            |
-| après chaque dépôt | Questions-réponses et pièces justificatives              |
-| déc. N-1 → mars N  | Rapport sur le CA (RCA), selon le territoire             |
-| fin N-1            | DAI N, produite avec l'arrêté N-1 (campagne précédente)  |
-| ~mai N             | Publication de la DRL au JO : J0                         |
-| J0 → J48           | Questions-réponses, dialogue de gestion, envoi de la L48 |
-| L48 → +8 jours     | Contradictoire (le silence vaut accord)                  |
-| ≤ J60              | DAB (dite aussi « L60 »)                                 |
-| sept.-déc. N       | Arrêté N, puis DAM N, échéancier et DAI N+1              |
+| Quand                              | Quoi                                                     |
+| ---------------------------------- | -------------------------------------------------------- |
+| 30 avril N-1                       | Dépôt du CA N-2 par l'opérateur                          |
+| 31 octobre N-1                     | Dépôt du BP N par l'opérateur                            |
+| après chaque dépôt                 | Questions-réponses et pièces justificatives              |
+| déc. N-1 → mars N                  | Rapport sur le CA (RCA), selon le territoire             |
+| fin N-1                            | DAI N, produite avec l'arrêté N-1 (campagne précédente)  |
+| ~mai N                             | Publication de la DRL au JO : J0                         |
+| J0 → J48                           | Questions-réponses, dialogue de gestion, envoi de la L48 |
+| 1re ouverture de la L48 → +8 jours | Contradictoire (le silence vaut accord)                  |
+| ≤ J60                              | DAB (dite aussi « L60 »)                                 |
+| sept.-déc. N                       | Arrêté N, puis DAM N, échéancier et DAI N+1              |
 
 La campagne suit **deux parcours parallèles**, qui se rejoignent à la L48 :
 
@@ -87,12 +89,12 @@ La L48 affecte le résultat du CA N-2 et tarife le BP N ; certaines DDETS y joig
 | H8  | **Le déroulé de la campagne est national** ; chaque DREETS peut seulement préciser un calendrier indicatif (§ 5).                                                                                                                                                                                                                 | Ajouter des règles par territoire.                                                                                                                 | ✅ Validée                                                      |
 | H9  | **Un document peut porter plusieurs types** (par ex. une L48 qui contient le RCA). L'agent peut aussi déclarer l'étape RCA sans objet : les deux pratiques coexistent.                                                                                                                                                            | Un document = un type ; le RCA intégré à la L48 se déclare uniquement par « sans objet ».                                                          | ✅ Validée                                                      |
 | H10 | **Le volume reste faible** (quelques milliers d'événements par jour au pic).                                                                                                                                                                                                                                                      | Passer à pg-boss plus tôt.                                                                                                                         | ✅ Validée                                                      |
-| H11 | **Les dépendances externes** (cadre normalisé, atelier gabarits de novembre) **ne concernent que les plugins.**                                                                                                                                                                                                                   | Seuls les plugins concernés sont retardés.                                                                                                         | ✅ Validée                                                      |
+| H11 | **Les dépendances externes** (cadre normalisé, sessions sur les gabarits fin novembre) **ne concernent que les plugins.**                                                                                                                                                                                                         | Seuls les plugins concernés sont retardés.                                                                                                         | ✅ Validée                                                      |
 | H12 | **Les fichiers ne sont pas confidentiels, seuls les messages le sont** : côté agents, même règle d'accès que la fiche structure ; côté opérateur, ses structures seulement.                                                                                                                                                       | Ajouter une règle d'accès par visibilité pour les fichiers.                                                                                        | ✅ Validée                                                      |
 | H13 | **Les échéances État (J48, J60) ne sont visibles que des agents.** Demande de PDL et d'IdF, qui fixent à leurs opérateurs des délais internes plus courts.                                                                                                                                                                        | Les afficher aussi à l'opérateur, par transparence : simple règle d'affichage, sans impact sur le modèle.                                          | ❌ Infirmée : toutes les échéances sont affichées à l'opérateur |
 | H14 | **Les structures sous CPOM ont les mêmes étapes** : l'agent déclare sans objet ce que son territoire ne pratique pas, et leurs étapes ne passent jamais en retard. Le sujet CPOM reste à reprendre (en théorie, pas de campagne ; en pratique, certains territoires demandent une comptabilité par structure).                    | Une tarification rattachée au CPOM plutôt qu'à la structure (deux colonnes exclusives) : ajout possible sans toucher aux tarifications existantes. | ⏳ À reprendre                                                  |
 | H15 | **La validation DREETS n'est jamais obligatoire** : selon les documents et les territoires, c'est la DDETS ou la DREETS qui partage, et elles s'organisent entre elles.                                                                                                                                                           | Une règle par type de document dans `TARIFICATION_STEP_DEFINITIONS` (par ex. pas de partage de L48 sans validation).                               | ✅ Validée                                                      |
-| H16 | **Les opérateurs ont des comptes nominatifs à la mise en service**, avec le droit de déposer CA et BP sur la fiche de leurs structures.                                                                                                                                                                                           | Pas de dépôt par l'opérateur ni de première ouverture (H1) : la campagne reste pilotée par les agents.                                             | ✅ Validée                                                      |
+| H16 | **Les opérateurs ont des comptes nominatifs à la mise en service**, avec le droit de déposer CA, BP et leurs rapports sur la fiche de leurs structures.                                                                                                                                                                           | Pas de dépôt par l'opérateur ni de première ouverture (H1) : la campagne reste pilotée par les agents.                                             | ✅ Validée                                                      |
 | H17 | **J48 se mesure à la mise à disposition de la L48** : R314-24 I exige qu'elle « parvienne » à l'opérateur au plus tard à J48. La mise à disposition (partage) et la première ouverture sont toutes deux horodatées.                                                                                                               | J48 se mesure à la première ouverture : l'opérateur, en tardant à ouvrir, peut rendre l'envoi tardif.                                              | ⏳ À valider (juriste)                                          |
 | H18 | **Une acceptation expresse clôt le contradictoire** avant la fin des 8 jours : le délai protège l'opérateur, qui peut y renoncer. La DAB peut alors partir plus tôt.                                                                                                                                                              | Le contradictoire court toujours 8 jours ; l'acceptation n'est qu'une information.                                                                 | ⏳ À valider (juriste)                                          |
 | H19 | **La réponse d'un compte opérateur engage l'association**, sans courrier signé.                                                                                                                                                                                                                                                   | Pour contester, joindre un courrier signé (`REPONSE_CONTRADICTOIRE` obligatoire), ou limiter les boutons à certains comptes.                       | ⏳ À valider (juriste)                                          |
@@ -245,7 +247,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 - **Le contradictoire vit dans l'étape L48.** L'opérateur répond par **Accepter** (`L48_ACCEPTED`) ou **Contester** (`L48_CONTESTED`, observations obligatoires, courrier `REPONSE_CONTRADICTOIRE` facultatif) : c'est lui qui qualifie sa réponse, ses autres messages n'ont pas valeur de réponse. Une seule réponse par L48 ; une L48 modificative rouvre le contradictoire, même après une acceptation de la précédente. Sans réponse à l'échéance, l'étape affiche « réputé accepté » (R314-24) : un état **calculé** (dernière L48 partagée, première ouverture, réponse, date du jour), jamais écrit en base.
 - **Tarification hors Bhasile** : un agent peut déclarer que la tarification d'une structure se fait hors de l'outil (`StructureTarification.isOutOfBhasile`, motif obligatoire, historique dans `UserAction`). Certaines DDETS garderont des opérateurs hors de l'outil.
 - **Jamais en retard** : une structure couverte par un CPOM pendant l'année N (H14), une tarification hors Bhasile, et le paiement, qui n'a pas d'échéance.
-- **Éligibilité** (règle nationale par structure) : structures autorisées (CADA, CPH ⚠️) ; structures subventionnées : aucune tarification.
+- **Éligibilité** (règle nationale par structure) : structures autorisées (CADA, CPH ⚠️ : transmission des CPH par le SI DIHAL depuis l'arrêté du 21/04/2026, à vérifier) ; structures subventionnées : aucune tarification.
 
 ### 4.4 Droits et visibilité
 
@@ -264,11 +266,11 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 - **Deux types de notification** : le mail, et les notifications dans l'outil (« non lu », « à traiter » sur le tableau de bord). Celles de l'outil se calculent à partir des accusés de lecture, sans rien stocker de plus ; le suivi d'une structure (`TarificationSubscription`) ne règle que les mails.
 - **Notifiés par défaut, sauf l'auteur**, selon le `Grant.scope` en base (la session ne distingue pas région et département) :
 
-  | Scope du grant                         | Notifié par défaut                                                                 |
-  | -------------------------------------- | ---------------------------------------------------------------------------------- |
-  | `DEPARTEMENT` ou `STRUCTURE` (éditeur) | Tout mouvement, dans les deux canaux : c'est la DDETS qui mène la campagne         |
-  | `REGION`                               | Uniquement les actions attendues : une relecture demandée (`SUBMITTED_FOR_REVIEW`) |
-  | Opérateur                              | Tout mouvement du canal partagé                                                    |
+  | Scope du grant                               | Notifié par défaut                                                                 |
+  | -------------------------------------------- | ---------------------------------------------------------------------------------- |
+  | `DEPARTEMENT` ou `STRUCTURE` (agent éditeur) | Tout mouvement, dans les deux canaux : c'est la DDETS qui mène la campagne         |
+  | `REGION`                                     | Uniquement les actions attendues : une relecture demandée (`SUBMITTED_FOR_REVIEW`) |
+  | Opérateur                                    | Tout mouvement du canal partagé                                                    |
 
 - **Une action n'est attendue que sur demande explicite**, jamais déduite de l'état d'un document : selon les territoires, ce n'est pas le même service qui partage (H15).
 - **Chacun peut suivre ou ne plus suivre une structure** (`TarificationSubscription`, qui ne stocke que les écarts au défaut). Une DREETS peut ainsi suivre une structure sensible ; un agent de DDETS, ne plus suivre celles qu'un collègue gère.
@@ -323,8 +325,8 @@ Un plugin est un **module de code**, déclaré par clé, qui se branche sur un *
 
 - **Uniquement les échéances réglementaires**, nationales, calculées : dates fixes (dépôts), J48 et J60 (depuis la DRL), contradictoire (depuis la première ouverture de la L48).
 - **Chaque échéance indique à qui elle s'impose**, et toutes sont visibles de tous, opérateur compris (H13) : la date de la DRL est publique de toute façon.
-- **Jours calendaires, sans report** (H5), comptés en heure de Paris.
-- **La DRL est saisie par un admin national**, avec son lien Légifrance, chaque année (directement en base pour l'instant, puis dans le back office de pérennisation).
+- **Jours calendaires, sans report** (H5), comptés en heure de Paris. Le jour de l'événement ne compte pas : J1 est le lendemain (de la publication de la DRL, de la première ouverture de la L48).
+- **La DRL est saisie par un admin national**, avec son lien Légifrance, chaque année (directement en base par un dev pour 2027, puis dans le back office de pérennisation).
 - **Les calendriers internes des DREETS** (« envoyez-nous tout à J45 ») ne sont pas des échéances : ils relèvent d'un plugin d'affichage (§ 5).
 
 ### 4.10 Interface
@@ -347,11 +349,12 @@ La campagne 2027 sera à moitié passée hors de Bhasile au lancement : CA 2025,
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
 | Calendrier régional de la DREETS                       | Plugin : texte libre par région et par campagne, saisi par la DREETS, affiché dans le canal agents, sans contrôle     |
 | Relances avant échéance                                | Plugin mail + états calculés des étapes                                                                               |
+| Échéancier régional unique                             | Plugin régional : un document pour plusieurs structures, hors du modèle « une tarification = une structure »          |
 | Vérification du cadre normalisé au dépôt               | Plugin sur un `CA` / `BP` partagé ; verdict en événement d'information, dans l'étape                                  |
 | Extraction des chiffres                                | Plugin (pg-boss) sur un `CA` / `BP` partagé ; écrit dans le registre des montants (socle donnée)                      |
 | Pré-analyse (écarts N-1, ratios)                       | Plugin de lecture du registre ; résultat dans le canal agents                                                         |
 | Agent IA (Albert API)                                  | Plugin (pg-boss) ; sorties structurées par compte, dans le canal agents                                               |
-| Pré-rédaction RCA / L48, génération DAB / arrêté / DAM | Plugins de génération ; gabarits par territoire (atelier de novembre) ; brouillon posté dans le canal agents          |
+| Pré-rédaction RCA / L48, génération DAB / arrêté / DAM | Plugins de génération ; gabarits par territoire (sessions de fin novembre) ; brouillon posté dans le canal agents     |
 | Horodatage qualifié (si besoin réglementaire)          | Plugin quotidien : empreintes des événements du jour, horodatées par un tiers qualifié (pattern Démarches Numériques) |
 | Tableau de bord DREETS agrégé                          | Même service que le bloc dashboard                                                                                    |
 | Références entre documents de la campagne              | `payload.referencedDocumentIds` : citer un document d'une autre étape, sans migration                                 |
