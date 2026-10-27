@@ -33,7 +33,6 @@ export const findBySearchTerm = async (
   );
 };
 
-/** Filiales directes des opérateurs donnés (résolution du filtre `operateurs`, cf. filters.service). */
 export const findOperateurFiliales = async (
   parentIds: number[]
 ): Promise<{ id: number }[]> => {

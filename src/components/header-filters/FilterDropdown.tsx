@@ -57,15 +57,16 @@ export const FilterDropdown = ({
                     href: "#",
                   }}
                   small
-                  className="pointer-none"
+                  className="pointer-none max-w-full"
+                  title={summaryLabel}
                 >
-                  {summaryLabel}
+                  <span className="truncate">{summaryLabel}</span>
                 </Tag>
               ) : (
                 placeholder
               )}
             </div>
-            <span className="fr-icon-arrow-down-s-line" />
+            <span className="fr-icon-arrow-down-s-line shrink-0" />
           </div>
         </div>
       </button>
