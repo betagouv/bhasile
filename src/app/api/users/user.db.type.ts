@@ -11,6 +11,7 @@ export const grantSelect = {
 } satisfies Prisma.GrantSelect;
 
 export const userWithGrantsSelect = {
+  id: true,
   operateurId: true,
   isSuperAdmin: true,
   grants: { select: grantSelect },

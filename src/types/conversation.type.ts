@@ -11,3 +11,7 @@ export type ConversationContext = {
   tags: ConversationTag[];
   anchors: ConversationAnchor[];
 };
+
+export const ConversationVisibility = ["SHARED", "AGENTS"] as const;
+
+export type ConversationVisibility = (typeof ConversationVisibility)[number];

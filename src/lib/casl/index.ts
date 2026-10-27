@@ -14,3 +14,7 @@ export {
   getReadableDepartementNumeros,
   getReadableStructureWhere,
 } from "./structure.ability";
+export {
+  canAccessTarification,
+  canReadConversation,
+} from "./tarification.ability";

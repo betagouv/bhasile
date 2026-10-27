@@ -1,6 +1,4 @@
 import { DomainError } from "@/app/utils/domain-error.util";
-import { canUpdateStructure } from "@/lib/casl";
-import { SessionUser } from "@/types/global";
 
 const PARIS_YEAR_FORMAT = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Europe/Paris",
@@ -25,16 +23,13 @@ export const assertCampaignOpen = (year: number, now: Date): void => {
   }
 };
 
-// Les grants nationaux n'ouvrent pas la tarification, même en édition
-export const canAccessTarification = (
-  user: SessionUser,
-  structure: {
-    id: number;
-    departementAdministratif: string;
-    operateurId: number | null;
+export const assertCanWrite = (participant: {
+  isSuperAdmin: boolean;
+}): void => {
+  if (participant.isSuperAdmin) {
+    throw new DomainError(
+      "Les superadmins consultent les échanges sans y écrire",
+      403
+    );
   }
-): boolean =>
-  canUpdateStructure(
-    { ...user, grants: user.grants.filter((grant) => !grant.isNational) },
-    structure
-  );
+};

@@ -5,18 +5,46 @@ import {
   markMessagesAsRead,
   postMessage,
 } from "@/app/api/conversations/conversation.service";
+import { getAuthorLevel } from "@/app/api/conversations/conversation.util";
+import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
+import { getEffectiveGrants } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
+import { canAccessTarification } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
 import {
   findMessageTarification,
+  findStructureScope,
   findStructureTarification,
   upsertStructureTarification,
 } from "./tarification.repository";
-import { assertCampaignOpen, canAccessTarification } from "./tarification.util";
+import { assertCampaignOpen, assertCanWrite } from "./tarification.util";
+
+export const getTarificationParticipant = async (
+  user: SessionUser,
+  structureId: number
+): Promise<TarificationParticipant> => {
+  const structure = await findStructureScope(structureId);
+  if (!structure) {
+    throw new DomainError("Structure introuvable", 404);
+  }
+  return resolveParticipant(user, structure);
+};
+
+export const getTarificationReader = async (
+  user: SessionUser,
+  structureId: number
+): Promise<TarificationReader> => {
+  const structure = await findStructureScope(structureId);
+  if (!structure) {
+    throw new DomainError("Structure introuvable", 404);
+  }
+  assertCanAccessTarification(user, structure);
+  return { isOperateur: user.operateurId !== null };
+};
 
 export const postTarificationMessage = async (
   {
@@ -26,6 +54,7 @@ export const postTarificationMessage = async (
     author,
     text,
     tagKey,
+    fileKeys,
   }: {
     structureId: number;
     year: number;
@@ -33,9 +62,11 @@ export const postTarificationMessage = async (
     author: TarificationParticipant;
     text: string;
     tagKey: string | null;
+    fileKeys: string[];
   },
   now: Date = getNow()
 ): Promise<MessageDb> => {
+  assertCanWrite(author);
   assertCampaignOpen(year, now);
   const tarification = await upsertStructureTarification(structureId, year);
   return postMessage(
@@ -45,6 +76,7 @@ export const postTarificationMessage = async (
       author,
       text,
       tagKey,
+      fileKeys,
     },
     TARIFICATION_CONVERSATION_TAGS
   );
@@ -54,12 +86,12 @@ export const getTarificationMessages = async ({
   structureId,
   year,
   visibility,
-  readerLevel,
+  reader,
 }: {
   structureId: number;
   year: number;
   visibility: Visibility;
-  readerLevel: AuthorLevel;
+  reader: TarificationReader;
 }): Promise<MessageDb[]> => {
   const tarification = await findStructureTarification(structureId, year);
   if (!tarification) {
@@ -68,7 +100,7 @@ export const getTarificationMessages = async ({
   return getMessages({
     structureTarificationId: tarification.id,
     visibility,
-    readerLevel,
+    isOperateurReader: reader.isOperateur,
   });
 };
 
@@ -84,7 +116,10 @@ export const markTarificationMessagesAsRead = async ({
   visibility: Visibility;
   reader: TarificationParticipant;
   messageIds: number[];
-}) => {
+}): Promise<{ count: number }> => {
+  if (reader.isSuperAdmin) {
+    return { count: 0 };
+  }
   const tarification = await findStructureTarification(structureId, year);
   if (!tarification) {
     return { count: 0 };
@@ -101,12 +136,8 @@ export const changeTarificationMessageTag = async (
   {
     messageId,
     tagKey,
-    editor,
-  }: {
-    messageId: number;
-    tagKey: string | null;
-    editor: { user: SessionUser; level: AuthorLevel };
-  },
+    user,
+  }: { messageId: number; tagKey: string | null; user: SessionUser },
   now: Date = getNow()
 ): Promise<MessageDb> => {
   const message = await findMessageTarification(messageId);
@@ -114,12 +145,8 @@ export const changeTarificationMessageTag = async (
     throw new DomainError("Message introuvable", 404);
   }
   const { structure, campaign } = message.conversation.structureTarification;
-  if (!canAccessTarification(editor.user, structure)) {
-    throw new DomainError(
-      "Accès refusé à la tarification de la structure",
-      403
-    );
-  }
+  const editor = await resolveParticipant(user, structure);
+  assertCanWrite(editor);
   assertCampaignOpen(campaign.year, now);
   return changeMessageTag(
     { messageId, tagKey, editorLevel: editor.level },
@@ -127,4 +154,47 @@ export const changeTarificationMessageTag = async (
   );
 };
 
-type TarificationParticipant = { id: number; level: AuthorLevel };
+const resolveParticipant = async (
+  user: SessionUser,
+  structure: TarificationStructureScope
+): Promise<TarificationParticipant> => {
+  assertCanAccessTarification(user, structure);
+  const databaseUser = await getUserWithGrantsByEmail({ email: user.email });
+  if (!databaseUser) {
+    throw new DomainError("Utilisateur inconnu", 401);
+  }
+  return {
+    id: databaseUser.id,
+    level: getAuthorLevel({
+      operateurId: databaseUser.operateurId,
+      grants: getEffectiveGrants(databaseUser),
+    }),
+    isSuperAdmin: databaseUser.isSuperAdmin,
+  };
+};
+
+const assertCanAccessTarification = (
+  user: SessionUser,
+  structure: TarificationStructureScope
+): void => {
+  if (!canAccessTarification(user, structure)) {
+    throw new DomainError(
+      "Accès refusé à la tarification de la structure",
+      403
+    );
+  }
+};
+
+type TarificationStructureScope = {
+  id: number;
+  departementAdministratif: string;
+  operateurId: number | null;
+};
+
+export type TarificationReader = { isOperateur: boolean };
+
+export type TarificationParticipant = {
+  id: number;
+  level: AuthorLevel;
+  isSuperAdmin: boolean;
+};

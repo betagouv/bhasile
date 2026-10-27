@@ -1,12 +1,7 @@
-import {
-  createDepartementalAgent,
-  createNationalAgent,
-} from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
 import {
   assertCampaignOpen,
-  canAccessTarification,
   getOpenCampaignYears,
   isCampaignOpen,
 } from "@/app/api/tarifications/tarification.util";
@@ -44,31 +39,5 @@ describe("assertCampaignOpen", () => {
     expect(() =>
       assertCampaignOpen(2026, new Date("2027-01-01T10:00:00.000Z"))
     ).toThrow("lecture seule");
-  });
-});
-
-describe("canAccessTarification", () => {
-  const parisStructure = {
-    id: 1,
-    departementAdministratif: "75",
-    operateurId: null,
-  };
-
-  it("ouvre la tarification à un agent éditeur du département", () => {
-    expect(
-      canAccessTarification(createDepartementalAgent(["75"]), parisStructure)
-    ).toBe(true);
-  });
-
-  it("la ferme à un agent d'un autre département", () => {
-    expect(
-      canAccessTarification(createDepartementalAgent(["50"]), parisStructure)
-    ).toBe(false);
-  });
-
-  it("la ferme à un agent national, même éditeur", () => {
-    expect(canAccessTarification(createNationalAgent(), parisStructure)).toBe(
-      false
-    );
   });
 });

@@ -179,13 +179,14 @@ type ConversationContext = {
 - **Fermé par défaut.** La messagerie ne reprend **pas** la règle de lecture actuelle de Bhasile, ouverte à tous (`docs/permissions.md`).
 - **Opérateur** : la conversation partagée de ses structures. La conversation agents n'existe pas pour lui : l'accès se vérifie une fois, sur la conversation, et aucune requête ne peut faire fuiter le canal agents en oubliant un filtre.
 - **DREETS** : les deux conversations des structures de sa région.
+- **Superadmins** : lecture seule, partout. Ils n'écrivent jamais et leurs lectures ne laissent pas d'accusé : aucun message de l'équipe technique n'entre dans le journal d'une tarification. Les tests d'écriture se font en staging.
 - **Agents nationaux** : aucun accès. Ils n'interviennent pas dans les échanges, et les services territoriaux préfèrent qu'ils n'y aient pas accès.
 
 ### 4.6 Lectures, non-lus et temps réel
 
 - **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand ; restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
 - **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La messagerie expose un compteur par structure, que le bloc tarification du dashboard affiche.
-- **Temps réel** : tant que le panneau des échanges est ouvert, le client demande les messages postérieurs au dernier reçu toutes les 10 à 15 secondes. Pas de websocket ni de SSE en V1 : en prod, l'application tourne sur plusieurs conteneurs, et pousser un message à tous les clients demanderait un canal de diffusion entre instances (`LISTEN/NOTIFY`). Le polling n'en a pas besoin, la base sert de point commun. Le passage aux SSE ne changerait pas le modèle.
+- **Temps réel** : tant que le panneau des échanges est ouvert, le client relit toute la conversation toutes les 10 à 15 secondes et remplace sa liste. Un curseur sur l'identifiant pourrait sauter un message (les identifiants sont attribués à l'insertion, pas au commit) ; une conversation compte quelques dizaines de messages, relire tout reste léger. Pas de websocket ni de SSE en V1 : en prod, l'application tourne sur plusieurs conteneurs, et pousser un message à tous les clients demanderait un canal de diffusion entre instances (`LISTEN/NOTIFY`). Le polling n'en a pas besoin, la base sert de point commun. Le passage aux SSE ne changerait pas le modèle.
 
 ### 4.7 Notifications
 
@@ -218,7 +219,7 @@ Ces règles valent pour la messagerie et pour la gestion des documents ; la RFC 
 **Fichiers**
 
 - **Empreinte SHA-256** de chaque fichier, calculée à l'upload.
-- **Formats** : ajout de `.docx`, `.odt`, `.pptx` aux formats acceptés (PDF, tableurs, images) pour les pièces jointes et les fichiers de la tarification ; les autres contextes gardent leurs formats. Limite de 30 Mo inchangée ; au-delà de 50 Mo environ, il faudra un upload direct vers S3 par URL signée (le serveur charge aujourd'hui le fichier en mémoire).
+- **Formats** : ajout de `.docx`, `.odt`, `.pptx` aux formats acceptés (PDF, tableurs, images), dans toute l'application : une seule liste, plus simple qu'une liste par contexte. Limite de 30 Mo inchangée ; au-delà de 50 Mo environ, il faudra un upload direct vers S3 par URL signée (le serveur charge aujourd'hui le fichier en mémoire).
 - **Accès** : la règle est à construire, pas à reprendre. Aujourd'hui, `authorizeFileAccess` (`src/app/api/files/file.service.ts`) laisse toute session lire tout fichier rattaché, et `getPrincipal` classe toute session comme agent. Pour les fichiers des échanges : lecture selon l'accès à la conversation (§ 4.5), suppression jamais. `isOrphan` doit reconnaître `messageId`, sinon un fichier de message serait considéré comme orphelin, donc lisible et supprimable par tous.
 
 **Preuve**
@@ -231,7 +232,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule (§ 4.5).
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : la reprise des notifications se recette en préprod.
 
 ### 4.9 Interface

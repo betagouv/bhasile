@@ -91,10 +91,17 @@ export const SPREADSHEET_MIME_TYPES = [
   "application/vnd.ms-excel.sheet.macroenabled.12",
   "text/csv",
 ];
+const TEXT_DOCUMENT_MIME_TYPES = [
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.oasis.opendocument.text",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+];
+
 export const ALLOWED_MIME_TYPES = [
   "application/pdf",
   ...IMAGE_MIME_TYPES,
   ...SPREADSHEET_MIME_TYPES,
+  ...TEXT_DOCUMENT_MIME_TYPES,
 ];
 
 export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo

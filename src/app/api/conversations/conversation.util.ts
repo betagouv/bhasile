@@ -25,10 +25,10 @@ export const getAuthorLevel = ({
 };
 
 export const assertCanAccessVisibility = (
-  level: AuthorLevel,
+  isOperateur: boolean,
   visibility: Visibility
 ): void => {
-  if (level === AuthorLevel.OPERATEUR && visibility === Visibility.AGENTS) {
+  if (isOperateur && visibility === Visibility.AGENTS) {
     throw new DomainError(
       "Les échanges entre agents ne sont pas accessibles à l'opérateur",
       403

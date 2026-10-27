@@ -48,3 +48,9 @@ export const findMessageTarification = (messageId: number) =>
       },
     },
   });
+
+export const findStructureScope = (structureId: number) =>
+  prisma.structure.findUnique({
+    where: { id: structureId },
+    select: { id: true, departementAdministratif: true, operateurId: true },
+  });

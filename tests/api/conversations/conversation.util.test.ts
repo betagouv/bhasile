@@ -59,17 +59,17 @@ describe("getAuthorLevel", () => {
 
 describe("assertCanAccessVisibility", () => {
   it("refuse la conversation agents à l'opérateur", () => {
-    expect(() =>
-      assertCanAccessVisibility(AuthorLevel.OPERATEUR, Visibility.AGENTS)
-    ).toThrow("pas accessibles à l'opérateur");
+    expect(() => assertCanAccessVisibility(true, Visibility.AGENTS)).toThrow(
+      "pas accessibles à l'opérateur"
+    );
   });
 
   it("ouvre la conversation partagée à l'opérateur et les deux aux agents", () => {
     expect(() =>
-      assertCanAccessVisibility(AuthorLevel.OPERATEUR, Visibility.SHARED)
+      assertCanAccessVisibility(true, Visibility.SHARED)
     ).not.toThrow();
     expect(() =>
-      assertCanAccessVisibility(AuthorLevel.DEPARTEMENT, Visibility.AGENTS)
+      assertCanAccessVisibility(false, Visibility.AGENTS)
     ).not.toThrow();
   });
 });
