@@ -74,6 +74,6 @@ describe("GET /api/structures/stats", () => {
       minPlacesAutorisees: 10,
     });
     expect(mockfindAllStructures).toHaveBeenCalledTimes(1);
-    expect(mockfindAllStructures).toHaveBeenCalledWith({ OR: [{}] });
+    expect(mockfindAllStructures).toHaveBeenCalledWith({});
   });
 });

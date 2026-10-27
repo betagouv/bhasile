@@ -6,7 +6,7 @@ import {
   parseSortDirection,
   parseStructureColumn,
 } from "@/app/utils/search-params.util";
-import { canAccessApp } from "@/lib/casl/abilities";
+import { canAccessApp } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";

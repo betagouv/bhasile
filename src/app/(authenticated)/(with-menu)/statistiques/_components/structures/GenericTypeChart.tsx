@@ -1,17 +1,11 @@
 "use client";
 
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
-import { ReactElement, useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
 
 import { useExportContext } from "@/contexts/ExportContext";
 
 import { TypeChartPresenter } from "./TypeChartPresenter";
-
-type Props = {
-  title: string;
-  colors: string[];
-  typeAccessor: "structureTypes" | "structureBatis";
-};
 
 export const GenericTypeChart = ({
   title,
@@ -87,4 +81,10 @@ export const GenericTypeChart = ({
       />
     </div>
   );
+};
+
+type Props = {
+  title: ReactNode;
+  colors: string[];
+  typeAccessor: "structureTypes" | "structureBatis";
 };

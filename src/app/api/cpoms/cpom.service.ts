@@ -7,15 +7,20 @@ import {
   canAbilityReadCpom,
   defineAbilityFor,
   getReadableCpomWhere,
-} from "@/lib/casl/abilities";
+} from "@/lib/casl";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
-import { CpomDbDetails } from "./cpom.db.type";
-import { createOrUpdateCpom, findAllCpoms, findOne } from "./cpom.repository";
+import { CpomDbDetails, CpomDbScope } from "./cpom.db.type";
+import {
+  createOrUpdateCpom,
+  findAllCpoms,
+  findCpomScope,
+  findOne,
+} from "./cpom.repository";
 import {
   buildCpomListItem,
   filterCpomsByDepartement,
@@ -98,3 +103,6 @@ export const getCpomById = async (
 export const saveCpom = async (cpom: CpomApiWrite): Promise<number> => {
   return createOrUpdateCpom(cpom);
 };
+
+export const getCpomScope = (id: number): Promise<CpomDbScope | null> =>
+  findCpomScope(id);

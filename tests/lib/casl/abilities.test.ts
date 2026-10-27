@@ -14,12 +14,15 @@ import {
   canAbilityReadStructure,
   canAccessApp,
   canDeleteFile,
+  canSaveCpom,
   canUpdateDepartement,
+  canUpdateOperateur,
   canUpdateStructure,
   defineAbilityFor,
+  getReadableCpomWhere,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
-} from "@/lib/casl/abilities";
+} from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
 describe("Permissions : canUpdateStructure", () => {
@@ -264,19 +267,92 @@ describe("Permissions : CPOM et opérateurs", () => {
   });
 });
 
-const buildCpom = ({
+describe("Permissions : canSaveCpom", () => {
+  const agent13 = createDepartementalAgent(["13"]);
+  const scope = (departementNumeros: string[]) =>
+    buildCpomScope({ departementNumeros });
+
+  it.each([
+    {
+      cas: "crée un CPOM de son département",
+      payload: scope(["13"]),
+      existing: null,
+      expected: true,
+    },
+    {
+      cas: "crée un CPOM hors de son périmètre",
+      payload: scope(["69"]),
+      existing: null,
+      expected: false,
+    },
+    {
+      cas: "rattache à son département un CPOM existant hors périmètre",
+      payload: scope(["13"]),
+      existing: scope(["69"]),
+      expected: false,
+    },
+    {
+      cas: "sort un CPOM de son périmètre",
+      payload: scope(["69"]),
+      existing: scope(["13"]),
+      expected: false,
+    },
+    {
+      cas: "modifie un CPOM de son département sans renvoyer son périmètre",
+      payload: {},
+      existing: scope(["13"]),
+      expected: true,
+    },
+    {
+      cas: "modifie un CPOM hors périmètre sans renvoyer son périmètre",
+      payload: {},
+      existing: scope(["69"]),
+      expected: false,
+    },
+  ])(
+    "renvoie $expected quand l'agent $cas",
+    ({ payload, existing, expected }) => {
+      expect(canSaveCpom(agent13, payload, existing)).toBe(expected);
+    }
+  );
+});
+
+describe("Permissions : canUpdateOperateur", () => {
+  it("autorise un éditeur, refuse un lecteur et limite un admin opérateur au sien", () => {
+    const lecteur = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+    const operateurAdmin = createSessionUser({
+      operateurId: 7,
+      grants: [
+        createSessionGrant({ role: AccessRole.ADMIN, isNational: true }),
+      ],
+    });
+
+    expect(canUpdateOperateur(createDepartementalAgent(["13"]), 7)).toBe(true);
+    expect(canUpdateOperateur(lecteur, 7)).toBe(false);
+    expect(canUpdateOperateur(operateurAdmin, 7)).toBe(true);
+    expect(canUpdateOperateur(operateurAdmin, 8)).toBe(false);
+  });
+});
+
+const buildCpomScope = ({
   departementNumeros = [],
   structureIds = [],
 }: {
   departementNumeros?: string[];
   structureIds?: number[];
-}) =>
-  subject("Cpom", {
-    departements: departementNumeros.map((numero) => ({
-      departement: { numero },
-    })),
-    structures: structureIds.map((structureId) => ({ structureId })),
-  } as never);
+}) => ({
+  departements: departementNumeros.map((numero) => ({
+    departement: { numero },
+  })),
+  structures: structureIds.map((structureId) => ({ structureId })),
+});
+
+const buildCpom = (scope: Parameters<typeof buildCpomScope>[0]) =>
+  subject("Cpom", buildCpomScope(scope) as never);
 
 const buildOperateur = (id: number) => subject("Operateur", { id } as never);
 
@@ -348,6 +424,18 @@ describe("Permissions : lecture", () => {
     expect(getReadableStructureWhere(createSessionUser())).toEqual({
       id: { in: [] },
     });
+  });
+
+  it("ne filtre rien pour un agent qui lit au niveau national", () => {
+    const lecteurNational = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(getReadableStructureWhere(lecteurNational)).toEqual({});
+    expect(getReadableCpomWhere(lecteurNational)).toEqual({});
+    expect(getReadableCpomWhere(createDepartementalAgent(["75"]))).toEqual({});
   });
 
   it("ne filtre rien pour un superadmin", () => {

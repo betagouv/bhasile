@@ -1,4 +1,6 @@
+import { buildCiblesFinancieresLookup } from "@/app/api/statistiques/finance/finance-theorique.util";
 import type {
+  CiblesFinancieresLookup,
   StatistiqueDbAdresse,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
@@ -13,6 +15,7 @@ import {
   buildStatistiquesActivityContext,
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
+  indexTimelineByStructureId,
 } from "@/app/api/statistiques/statistiques.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
@@ -159,6 +162,17 @@ export const buildTestActiveStructureIdsByPeriod = (
 ): StatistiquesContext["activeStructureIdsByPeriod"] =>
   buildTestActivityIndex(structureIds, options).activeStructureIdsByPeriod;
 
+export const buildTestCiblesFinancieres = (
+  inputs: Partial<Parameters<typeof buildCiblesFinancieresLookup>[0]> = {}
+): CiblesFinancieresLookup =>
+  buildCiblesFinancieresLookup({
+    tarifsJournaliersCibles: [],
+    tauxEncadrementCibles: [],
+    idfDepartementNumeros: new Set(),
+    cadaFromHudaStructureIds: new Set(),
+    ...inputs,
+  });
+
 export const buildTestStatistiquesContext = (
   partial: Pick<
     StatistiquesContext,
@@ -169,18 +183,26 @@ export const buildTestStatistiquesContext = (
         StatistiquesContext,
         | "cpomLinks"
         | "dnaLinks"
-        | "structureVersionTimeline"
         | "allStructures"
         | "activeStructureIdsNow"
         | "activeStructureIdsByPeriod"
         | "eigs"
         | "evaluations"
         | "budgets"
+        | "cpomBudgetByKey"
         | "indicateurs"
         | "activites"
         | "rmus"
+        | "initialisedStructureIds"
+        | "openingDateByStructureId"
+        | "closureDateByStructureId"
+        | "actualisationFormDefinitions"
+        | "lastValidatedCampagneYearByStructureId"
+        | "ciblesFinancieres"
       >
-    >
+    > & {
+    structureVersionTimeline?: StatistiqueDbStructureVersionTimeline[];
+  }
 ): StatistiquesContext => {
   const structures = partial.structures;
   const allStructures = partial.allStructures ?? structures;
@@ -204,9 +226,10 @@ export const buildTestStatistiquesContext = (
     );
 
   const dnaLinks = partial.dnaLinks ?? [];
-  const structureVersionTimeline =
+  const timelineByStructureId = indexTimelineByStructureId(
     partial.structureVersionTimeline ??
-    buildTestStructureVersionTimeline(allStructureIds);
+    buildTestStructureVersionTimeline(allStructureIds)
+  );
 
   return {
     structures,
@@ -220,14 +243,24 @@ export const buildTestStatistiquesContext = (
     departements: partial.departements,
     cpomLinks: partial.cpomLinks ?? [],
     dnaLinks,
-    structureVersionTimeline,
+    timelineByStructureId,
     resolveDnaStructureIds: buildDnaStructureIdsResolver(
       dnaLinks,
-      structureVersionTimeline
+      timelineByStructureId
     ),
     budgets: partial.budgets ?? [],
+    cpomBudgetByKey: partial.cpomBudgetByKey ?? new Map(),
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],
     rmus: partial.rmus !== undefined ? partial.rmus : [],
+    initialisedStructureIds:
+      partial.initialisedStructureIds ?? new Set(allStructureIds),
+    openingDateByStructureId: partial.openingDateByStructureId ?? new Map(),
+    closureDateByStructureId: partial.closureDateByStructureId ?? new Map(),
+    actualisationFormDefinitions: partial.actualisationFormDefinitions ?? [],
+    lastValidatedCampagneYearByStructureId:
+      partial.lastValidatedCampagneYearByStructureId ?? new Map(),
+    ciblesFinancieres:
+      partial.ciblesFinancieres ?? buildTestCiblesFinancieres(),
   };
 };

@@ -27,7 +27,7 @@ vi.mock("@/app/api/anomalies/anomalie.service", () => ({
 
 const mockCanAccessApp = vi.fn().mockReturnValue(true);
 
-vi.mock("@/lib/casl/abilities", () => ({
+vi.mock("@/lib/casl", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
   canAbilityReadStructure: () => true,
   canAccessApp: (...args: unknown[]) => mockCanAccessApp(...args),

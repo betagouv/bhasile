@@ -72,6 +72,8 @@ export const AUTORISEE_OPEN_YEAR =
 export const SUBVENTIONNEE_OPEN_YEAR =
   Number(process.env.NEXT_PUBLIC_SUBVENTIONNEE_OPEN_YEAR) || 2024;
 
+export const STATS_ACCOUNTED_CLOSED_MAX_YEAR = 2024;
+
 export const MAX_EXPORT_ITEMS = 10;
 
 const IMAGE_MIME_TYPES = [
@@ -742,3 +744,5 @@ export const REGIONS: Region[] = [
   { code: "FR-974", name: "La Réunion", show: true },
   { code: "FR-976", name: "Mayotte", show: true },
 ];
+
+export const CODE_REGION_IDF = "FR-IDF";

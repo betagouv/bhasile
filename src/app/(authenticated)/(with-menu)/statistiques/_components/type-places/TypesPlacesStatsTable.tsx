@@ -3,16 +3,25 @@ import { Fragment, ReactElement, ReactNode } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { PlacesWithPercentage } from "@/app/components/common/PlacesWithPercentage";
 import { Table } from "@/app/components/common/Table";
+import { getPercentage } from "@/app/utils/common.util";
 import { formatPerMille } from "@/app/utils/number.util";
-import { filterDisplayedYears } from "@/app/utils/statistiques-period.util";
+import {
+  filterDisplayedYears,
+  isYearIncomplete,
+  shouldShowYearAsterisk,
+} from "@/app/utils/statistiques-period.util";
+import { useExportContext } from "@/contexts/ExportContext";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { PlacesByYearStat } from "@/schemas/api/statistique.schema";
+
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 
 export const TypesPlacesStatsTable = ({
   startYear,
   endYear,
 }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const isExporting = useExportContext();
 
   const placeYears = filterDisplayedYears(statistiques.places.byYear).filter(
     (yearItem) => {
@@ -72,7 +81,7 @@ export const TypesPlacesStatsTable = ({
         Tableau de données
       </h4>
       <Table
-        headings={getHeadings(placeYears)}
+        headings={getHeadings(placeYears, isExporting)}
         ariaLabelledBy="type-places-stats-table"
         className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
         enableBorders
@@ -85,16 +94,24 @@ export const TypesPlacesStatsTable = ({
               <strong>{structureStat.label}</strong>
               <br />
             </td>
-            {structureStat.value?.map((structureStatItem, index) => (
-              <td
-                key={`${structureStat.label}-${index}`}
-                className="whitespace-nowrap"
-              >
-                <span className="inline-flex items-center gap-6">
-                  <span>{structureStatItem}</span>
-                </span>
-              </td>
-            ))}
+            {structureStat.value?.map((structureStatItem, columnIndex) => {
+              const isIncomplete = isYearIncomplete(
+                placeYears[columnIndex].completude
+              );
+
+              return (
+                <td
+                  key={`${structureStat.label}-${columnIndex}`}
+                  className={`whitespace-nowrap ${
+                    isIncomplete ? "bg-default-grey-active" : ""
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-6">
+                    <span>{structureStatItem}</span>
+                  </span>
+                </td>
+              );
+            })}
           </tr>
         ))}
         {typePlacesStats.map((section) => (
@@ -119,7 +136,11 @@ export const TypesPlacesStatsTable = ({
                 {placeYears.map((yearItem) => (
                   <td
                     key={`${structureStat.label}-${yearItem.year}`}
-                    className="whitespace-nowrap"
+                    className={`whitespace-nowrap ${
+                      isYearIncomplete(yearItem.completude)
+                        ? "bg-default-grey-active"
+                        : ""
+                    }`}
                   >
                     <PlacesWithPercentage
                       value={structureStat.getValue(yearItem)}
@@ -136,12 +157,40 @@ export const TypesPlacesStatsTable = ({
   );
 };
 
-const getHeadings = (placeYears: PlacesByYearStat[]) => {
+const getHeadings = (placeYears: PlacesByYearStat[], isExporting: boolean) => {
   const dates =
-    placeYears.map((yearItem) => {
+    placeYears.map((yearItem, index) => {
+      const isIncomplete = isYearIncomplete(yearItem.completude);
+      const nbRenseignees = yearItem.completude?.nbRenseignees ?? 0;
+      const nbAttendues = yearItem.completude?.nbAttendues ?? 1;
+
       return (
-        <th scope="col" key={yearItem.year}>
-          {yearItem.year}
+        <th
+          scope="col"
+          key={yearItem.year}
+          className={isIncomplete ? "bg-default-grey-active" : undefined}
+        >
+          <div className="inline-flex print:block items-center justify-center gap-1">
+            <span>
+              {yearItem.year}
+              {shouldShowYearAsterisk(yearItem.year) && <span>*</span>}
+            </span>
+            {isIncomplete &&
+              (isExporting ? (
+                <div className="text-[10px] font-normal">
+                  {nbRenseignees} structures actualisées
+                </div>
+              ) : (
+                <IncompleteDataIndicator
+                  nbStructures={nbRenseignees}
+                  structuresPercentage={getPercentage(
+                    nbRenseignees,
+                    nbAttendues
+                  )}
+                  align={index === placeYears.length - 1 ? "end" : null}
+                />
+              ))}
+          </div>
         </th>
       );
     }) ?? [];

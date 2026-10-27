@@ -1,9 +1,17 @@
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
 import BarChart from "@/app/components/common/BarChart";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
+import { CompletudeStat } from "@/schemas/api/statistique.schema";
+import { getCompletudeChartData } from "@/utils/statistiques.util";
+
+const CHART_OPTIONS = {
+  seriesBarDistance: 10,
+  axisY: { offset: 50 },
+  axisX: { showGrid: false },
+};
 
 export const DotationChart = ({
   budgets,
@@ -11,6 +19,8 @@ export const DotationChart = ({
   hideStructureTypeLabels = false,
   startYear,
   endYear,
+  showIncompleteYears = false,
+  renderLabel,
 }: Props): ReactElement => {
   const { years } =
     startYear && endYear
@@ -21,39 +31,26 @@ export const DotationChart = ({
       : getYearRange();
 
   const yearsWithBudget = years
-    .map((year) => {
-      return {
-        year,
-        budget: budgets?.find((budget) => budget.year === year),
-      };
-    })
+    .map((year) => ({
+      year,
+      budget: budgets?.find((budget) => budget.year === year),
+    }))
     .reverse();
 
-  const getPropertySerie = (propertyName: keyof BudgetApiType): number[] => {
-    return (
-      yearsWithBudget.map((budget) => Number(budget.budget?.[propertyName])) ||
-      []
-    );
-  };
+  const getPropertySerie = (propertyName: keyof BudgetApiType): number[] =>
+    yearsWithBudget.map((budget) => Number(budget.budget?.[propertyName] ?? 0));
 
-  const getChartData = () => {
-    const labels = yearsWithBudget.map((budget) => budget.year);
-    const series = [
+  const chartData = {
+    labels: yearsWithBudget.map((budget) => budget.year.toString()),
+    series: [
       getPropertySerie("dotationDemandee"),
       getPropertySerie("dotationAccordee"),
       getPropertySerie("totalProduits"),
       getPropertySerie("totalCharges"),
-    ];
-    return {
-      labels,
-      series,
-    };
-  };
-
-  const options = {
-    seriesBarDistance: 10,
-    axisY: { offset: 50 },
-    axisX: { showGrid: false },
+    ],
+    ...getCompletudeChartData(
+      yearsWithBudget.map((budget) => budget.budget?.completude)
+    ),
   };
 
   const getDotationLabel = (): string => {
@@ -78,9 +75,17 @@ export const DotationChart = ({
     <div className="grid grid-cols-3 gap-10">
       <div className="col-span-2">
         <BarChart
-          data={getChartData()}
-          options={options}
+          data={chartData}
+          options={CHART_OPTIONS}
           axisYLabel="Montant (€)"
+          incompleteYears={
+            showIncompleteYears ? chartData.incompleteYears : undefined
+          }
+          renderLabel={
+            renderLabel
+              ? (label, index) => renderLabel(label, index, chartData)
+              : undefined
+          }
         />
       </div>
       <div className="break-inside-avoid">
@@ -111,10 +116,24 @@ export const DotationChart = ({
   );
 };
 
+export type DotationChartData = {
+  labels: string[];
+  series: number[][];
+  incompleteYears: boolean[];
+  nbRenseignees: number[];
+  percentages: string[];
+};
+
 type Props = {
-  budgets: BudgetApiType[] | undefined;
+  budgets: (BudgetApiType & { completude?: CompletudeStat | null })[] | undefined;
   isAutorisee: boolean;
   hideStructureTypeLabels?: boolean;
   startYear?: number;
   endYear?: number;
+  showIncompleteYears?: boolean;
+  renderLabel?: (
+    label: string,
+    index: number,
+    chartData: DotationChartData
+  ) => ReactNode;
 };

@@ -8,7 +8,11 @@ import type {
   StatistiquesContext,
 } from "@/app/api/statistiques/statistiques.db.type";
 
-import { buildTestActivityIndex, testStructure } from "../test-helpers";
+import {
+  buildTestActivityIndex,
+  buildTestCiblesFinancieres,
+  testStructure,
+} from "../test-helpers";
 
 const mockBuildStatistiquesContext = vi.fn();
 const mockFindAllDepartementsWithRegion = vi.fn();
@@ -58,6 +62,14 @@ const buildContext = (
     allStructures: structures,
     activeStructureIdsNow,
     activeStructureIdsByPeriod,
+    actualisationFormDefinitions: [],
+    lastValidatedCampagneYearByStructureId: new Map(),
+    initialisedStructureIds: new Set(
+      structures.map((structure) => structure.id)
+    ),
+    openingDateByStructureId: new Map(),
+    closureDateByStructureId: new Map(),
+    ciblesFinancieres: buildTestCiblesFinancieres(),
     eigs: [],
     evaluations: [],
     typologies: structures.map((structure) => ({
@@ -72,16 +84,10 @@ const buildContext = (
     adresses: [],
     cpomLinks: [],
     dnaLinks: [],
-    structureVersionTimeline: structures.map((structure) => ({
-      id: structure.id,
-      structureId: structure.id,
-      effectiveDate: new Date("2000-01-01"),
-      placesAutorisees: null,
-      type: structure.type,
-      departementAdministratif: structure.departementAdministratif,
-    })),
+    timelineByStructureId: new Map(),
     departements: [],
     budgets: [],
+    cpomBudgetByKey: new Map(),
     indicateurs: [],
     activites: [],
     rmus: [],

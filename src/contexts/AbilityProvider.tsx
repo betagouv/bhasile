@@ -4,7 +4,7 @@ import { AbilityProvider } from "@casl/react";
 import { useSession } from "next-auth/react";
 import { PropsWithChildren } from "react";
 
-import { defineAbilityFor } from "@/lib/casl/abilities";
+import { defineAbilityFor } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
 export function AppAbilityProvider({ children }: PropsWithChildren) {
