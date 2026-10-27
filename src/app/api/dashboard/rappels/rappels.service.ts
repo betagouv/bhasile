@@ -4,6 +4,7 @@ import { getNow } from "@/app/utils/now.util";
 import { groupRappels } from "@/app/utils/rappel.util";
 import { parseCommaList } from "@/app/utils/string.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
+import { getUpdatableCpomWhere } from "@/lib/casl";
 import {
   RappelEchelle,
   RappelGroupBy,
@@ -33,7 +34,7 @@ export const getDashboardRappels = async (
   const now = getNow();
   const [structures, cpoms] = await Promise.all([
     findRappelStructures(),
-    findAllCpoms({}),
+    findAllCpoms(getUpdatableCpomWhere(user)),
   ]);
 
   const rappels = buildRappels(structures, cpoms, {

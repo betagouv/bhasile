@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+import { getCpomDepartementNumeros } from "@/app/api/cpoms/cpom.util";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   getDatesConvention,
@@ -8,7 +9,6 @@ import {
 } from "@/app/api/structures/structure.util";
 import { RAPPEL_TASK_LABEL } from "@/app/utils/rappel.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { canUpdateDepartement } from "@/lib/casl";
 import {
   DashboardRappel,
   RappelCriticite,
@@ -126,9 +126,7 @@ const findCurrentCpom = (
       return {
         id: cpom.id,
         label: cpom.name ?? cpom.operateur?.name ?? null,
-        departements: cpom.departements.map(
-          (cpomDepartement) => cpomDepartement.departement.numero
-        ),
+        departements: getCpomDepartementNumeros(cpom),
       };
     }
   }
@@ -151,7 +149,7 @@ export const buildRappels = (
   cpoms: RappelCpom[],
   options: BuildRappelsOptions
 ): DashboardRappel[] => {
-  const { user, departementList, operateurList, now } = options;
+  const { departementList, operateurList, now } = options;
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
@@ -239,12 +237,7 @@ export const buildRappels = (
   }
 
   for (const cpom of cpoms) {
-    const departements = cpom.departements.map(
-      (cpomDepartement) => cpomDepartement.departement.numero
-    );
-    if (!departements.some((dept) => canUpdateDepartement(user, dept))) {
-      continue;
-    }
+    const departements = getCpomDepartementNumeros(cpom);
     if (
       departementList.length > 0 &&
       !departements.some((dept) => departementList.includes(dept))

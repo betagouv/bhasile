@@ -4,6 +4,7 @@ import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import {
   buildCpomListItem,
   filterCpomsByDepartement,
+  getCpomDepartementNumeros,
   shouldEndCpomStructureAtFermeture,
   sortValueForCpomColumn,
 } from "@/app/api/cpoms/cpom.util";
@@ -27,6 +28,40 @@ const withDepartements = (id: number, numeros: string[]): CpomDbList =>
     id,
     departements: numeros.map((numero) => ({ departement: { numero } })),
   });
+
+describe("getCpomDepartementNumeros", () => {
+  const region = { departements: [{ numero: "59" }, { numero: "62" }] };
+
+  it("prend les départements de la région pour un CPOM régional", () => {
+    expect(
+      getCpomDepartementNumeros({
+        granularity: "REGIONALE",
+        region,
+        departements: [{ departement: { numero: "75" } }],
+      })
+    ).toEqual(["59", "62"]);
+  });
+
+  it("prend les départements stockés pour un CPOM (inter)départemental", () => {
+    expect(
+      getCpomDepartementNumeros({
+        granularity: "INTERDEPARTEMENTALE",
+        region,
+        departements: [{ departement: { numero: "59" } }],
+      })
+    ).toEqual(["59"]);
+  });
+
+  it("se rabat sur les départements stockés pour un CPOM régional sans région", () => {
+    expect(
+      getCpomDepartementNumeros({
+        granularity: "REGIONALE",
+        region: null,
+        departements: [{ departement: { numero: "75" } }],
+      })
+    ).toEqual(["75"]);
+  });
+});
 
 describe("filterCpomsByDepartement", () => {
   const cpoms = [
@@ -53,10 +88,24 @@ describe("filterCpomsByDepartement", () => {
   });
 
   it("utilise une appartenance exacte, pas une sous-chaîne (71 ne doit pas correspondre à 971)", () => {
-    const domCpoms = [withDepartements(1, ["971"]), withDepartements(2, ["71"])];
+    const domCpoms = [
+      withDepartements(1, ["971"]),
+      withDepartements(2, ["71"]),
+    ];
     expect(
       filterCpomsByDepartement(domCpoms, "71").map((cpom) => cpom.id)
     ).toEqual([2]);
+  });
+
+  it("filtre un CPOM régional sur les départements de sa région", () => {
+    const regional = makeCpom({
+      id: 4,
+      granularity: "REGIONALE",
+      region: { name: "Hauts-de-France", departements: [{ numero: "59" }] },
+    });
+    expect(
+      filterCpomsByDepartement([regional], "59").map((cpom) => cpom.id)
+    ).toEqual([4]);
   });
 
   it("distingue les codes corses 2A et 2B", () => {
@@ -146,9 +195,10 @@ describe("sortValueForCpomColumn", () => {
 
   it("retombe sur une valeur texte nulle pour une colonne inconnue", () => {
     const cpom = makeCpom({});
-    expect(
-      sortValueForCpomColumn(cpom, "unknown" as CpomColumn)
-    ).toEqual({ value: null, kind: "text" });
+    expect(sortValueForCpomColumn(cpom, "unknown" as CpomColumn)).toEqual({
+      value: null,
+      kind: "text",
+    });
   });
 });
 
