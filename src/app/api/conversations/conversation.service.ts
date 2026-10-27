@@ -50,20 +50,17 @@ export const postMessage = async (
   });
 };
 
-export const getMessages = (
-  {
-    structureTarificationId,
-    visibility,
-    readerLevel,
-  }: {
-    structureTarificationId: number;
-    visibility: Visibility;
-    readerLevel: AuthorLevel;
-  },
-  afterMessageId = 0
-): Promise<MessageDb[]> => {
+export const getMessages = ({
+  structureTarificationId,
+  visibility,
+  readerLevel,
+}: {
+  structureTarificationId: number;
+  visibility: Visibility;
+  readerLevel: AuthorLevel;
+}): Promise<MessageDb[]> => {
   assertCanAccessVisibility(readerLevel, visibility);
-  return findMessages(structureTarificationId, visibility, afterMessageId);
+  return findMessages(structureTarificationId, visibility);
 };
 
 export const changeMessageTag = (

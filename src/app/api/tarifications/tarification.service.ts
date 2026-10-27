@@ -50,28 +50,26 @@ export const postTarificationMessage = async (
   );
 };
 
-export const getTarificationMessages = async (
-  {
-    structureId,
-    year,
-    visibility,
-    readerLevel,
-  }: {
-    structureId: number;
-    year: number;
-    visibility: Visibility;
-    readerLevel: AuthorLevel;
-  },
-  afterMessageId = 0
-): Promise<MessageDb[]> => {
+export const getTarificationMessages = async ({
+  structureId,
+  year,
+  visibility,
+  readerLevel,
+}: {
+  structureId: number;
+  year: number;
+  visibility: Visibility;
+  readerLevel: AuthorLevel;
+}): Promise<MessageDb[]> => {
   const tarification = await findStructureTarification(structureId, year);
   if (!tarification) {
     return [];
   }
-  return getMessages(
-    { structureTarificationId: tarification.id, visibility, readerLevel },
-    afterMessageId
-  );
+  return getMessages({
+    structureTarificationId: tarification.id,
+    visibility,
+    readerLevel,
+  });
 };
 
 export const markTarificationMessagesAsRead = async ({

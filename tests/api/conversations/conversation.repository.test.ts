@@ -89,33 +89,22 @@ describe("conversation.repository db integration", () => {
     expect(agents.id).not.toBe(first.id);
   });
 
-  it("ne renvoie que les messages du canal demandé, postérieurs au dernier reçu, dans l'ordre", async () => {
+  it("ne renvoie que les messages du canal demandé, dans l'ordre", async () => {
     const firstShared = await postMessage(Visibility.SHARED, "premier");
     const internal = await postMessage(Visibility.AGENTS, "interne");
     const secondShared = await postMessage(Visibility.SHARED, "second");
     const postedIds = [firstShared.id, internal.id, secondShared.id];
 
-    const allShared = await findMessages(
+    const sharedMessages = await findMessages(
       structureTarificationId,
-      Visibility.SHARED,
-      0
-    );
-    const afterFirst = await findMessages(
-      structureTarificationId,
-      Visibility.SHARED,
-      firstShared.id
+      Visibility.SHARED
     );
 
     expect(
-      allShared
+      sharedMessages
         .filter((message) => postedIds.includes(message.id))
         .map((message) => message.text)
     ).toEqual(["premier", "second"]);
-    expect(
-      afterFirst
-        .filter((message) => postedIds.includes(message.id))
-        .map((message) => message.id)
-    ).toEqual([secondShared.id]);
   });
 
   it("enregistre une seule lecture par message et par utilisateur", async () => {

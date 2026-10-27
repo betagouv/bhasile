@@ -32,14 +32,10 @@ type MessageCreateData = {
 
 export const findMessages = (
   structureTarificationId: number,
-  visibility: Visibility,
-  afterMessageId: number
+  visibility: Visibility
 ): Promise<MessageDb[]> =>
   prisma.message.findMany({
-    where: {
-      id: { gt: afterMessageId },
-      conversation: { structureTarificationId, visibility },
-    },
+    where: { conversation: { structureTarificationId, visibility } },
     orderBy: { id: "asc" },
     select: messageSelect,
   });
