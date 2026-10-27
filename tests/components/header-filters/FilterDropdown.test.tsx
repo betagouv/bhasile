@@ -73,22 +73,27 @@ describe("FilterDropdown", () => {
     expect(screen.getByText("Options pour aucun")).toBeInTheDocument();
   });
 
-  it("décoche « Tous » et transmet la sélection quand un filtre est appliqué", async () => {
+  it("décoche « Tous » sans filtrer puis le recoche à la fermeture", async () => {
     const user = userEvent.setup();
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams("departements=75,92")
-    );
     renderDropdown();
 
     await user.click(screen.getByRole("button", { name: /Zone/ }));
+    await user.click(screen.getByRole("checkbox", { name: "Toute la France" }));
 
     expect(
       screen.getByRole("checkbox", { name: "Toute la France" })
     ).not.toBeChecked();
-    expect(screen.getByText("Options pour 75/92")).toBeInTheDocument();
+    expect(mockReplace).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: /Zone/ }));
+    await user.click(screen.getByRole("button", { name: /Zone/ }));
+
+    expect(
+      screen.getByRole("checkbox", { name: "Toute la France" })
+    ).toBeChecked();
   });
 
-  it("supprime le filtre au clic sur « Tous »", async () => {
+  it("recoche « Tous » et supprime le filtre depuis une sélection partielle", async () => {
     const user = userEvent.setup();
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("departements=75&operateurs=3")

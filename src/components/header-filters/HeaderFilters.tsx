@@ -2,6 +2,8 @@
 
 import { formatPlural } from "@/app/utils/string.util";
 import { buildZoneSummary } from "@/app/utils/zone.util";
+import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
+import { filterRegionsWithDepartements } from "@/utils/region.util";
 import { buildTypesSummary } from "@/utils/structure-type.util";
 
 import { FilterDropdown } from "./FilterDropdown";
@@ -17,10 +19,12 @@ export const HeaderFilters = () => {
         placeholder="Toute la France"
         filterId="departements"
         getSummaryLabel={buildZoneSummary}
-        renderOptions={({ selection, setSelection }) => (
+        renderOptions={({ getCheckedValues, setCheckedValues }) => (
           <FiltersDepartement
-            departements={selection}
-            onChange={setSelection}
+            departements={getCheckedValues(ALL_DEPARTEMENTS)}
+            onChange={(departements) =>
+              setCheckedValues(departements, ALL_DEPARTEMENTS)
+            }
           />
         )}
       />
@@ -32,8 +36,8 @@ export const HeaderFilters = () => {
         getSummaryLabel={(operateurIds) =>
           formatPlural(operateurIds.length, "opérateur")
         }
-        renderOptions={({ selection, toggleValue }) => (
-          <FilterOperateur selection={selection} onToggle={toggleValue} />
+        renderOptions={(filterSelection) => (
+          <FilterOperateur filterSelection={filterSelection} />
         )}
       />
 
@@ -42,10 +46,19 @@ export const HeaderFilters = () => {
         placeholder="Tous les types"
         filterId="types"
         getSummaryLabel={buildTypesSummary}
-        renderOptions={({ selection, setSelection }) => (
-          <FilterTypeStructure selection={selection} onChange={setSelection} />
+        renderOptions={({ getCheckedValues, setCheckedValues }) => (
+          <FilterTypeStructure
+            selection={getCheckedValues(ACCEPTED_STRUCTURE_TYPES)}
+            onChange={(types) =>
+              setCheckedValues(types, ACCEPTED_STRUCTURE_TYPES)
+            }
+          />
         )}
       />
     </div>
   );
 };
+
+const ALL_DEPARTEMENTS = filterRegionsWithDepartements("").flatMap(
+  ({ departements }) => departements.map(({ numero }) => numero)
+);

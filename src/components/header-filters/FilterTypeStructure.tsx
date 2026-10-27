@@ -4,15 +4,6 @@ import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
 import { FiltersTypesCheckbox } from "./FiltersTypesCheckbox";
 
 export const FilterTypeStructure = ({ selection, onChange }: Props) => {
-  const handleToggle = (structureType: string) => {
-    const nextSelection = toggleArrayValue(selection, structureType);
-    onChange(
-      nextSelection.length === ACCEPTED_STRUCTURE_TYPES.length
-        ? []
-        : nextSelection
-    );
-  };
-
   return (
     <div className="p-6 flex flex-col gap-2">
       {ACCEPTED_STRUCTURE_TYPES.map((structureType) => (
@@ -21,7 +12,7 @@ export const FilterTypeStructure = ({ selection, onChange }: Props) => {
           label={structureType}
           value={structureType}
           checked={selection.includes(structureType)}
-          onChange={() => handleToggle(structureType)}
+          onChange={() => onChange(toggleArrayValue(selection, structureType))}
         />
       ))}
     </div>

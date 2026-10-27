@@ -28,19 +28,4 @@ describe("FilterTypeStructure", () => {
 
     expect(onChange).toHaveBeenCalledWith(["CADA", "HUDA"]);
   });
-
-  it("retire le filtre quand tous les types finissent cochés", async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    render(
-      <FilterTypeStructure
-        selection={["CADA", "CAES", "CPH"]}
-        onChange={onChange}
-      />
-    );
-
-    await user.click(screen.getByLabelText("HUDA"));
-
-    expect(onChange).toHaveBeenCalledWith([]);
-  });
 });
