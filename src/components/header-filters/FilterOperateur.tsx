@@ -8,9 +8,11 @@ import {
   OperateurSuggestion,
   useOperateurSuggestion,
 } from "@/app/hooks/useOperateurSuggestion";
+import { toggleArrayValue } from "@/app/utils/common.util";
 import { matchesSearchQuery } from "@/app/utils/string.util";
+import { FilterSelection } from "@/hooks/useFilterSelection";
 
-export const FilterOperateur = ({ selection, onToggle }: Props) => {
+export const FilterOperateur = ({ filterSelection }: Props) => {
   const [allOperateurs, setAllOperateurs] = useState<OperateurSuggestion[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { getAllOperateurs } = useOperateurSuggestion();
@@ -22,6 +24,9 @@ export const FilterOperateur = ({ selection, onToggle }: Props) => {
     };
     fetchOperateurs();
   }, [getAllOperateurs]);
+
+  const allOperateurIds = allOperateurs.map(({ id }) => String(id));
+  const checkedOperateurIds = filterSelection.getCheckedValues(allOperateurIds);
 
   const filteredOperateurs = useMemo(() => {
     return allOperateurs.filter((operateur) =>
@@ -61,8 +66,12 @@ export const FilterOperateur = ({ selection, onToggle }: Props) => {
               nativeInputProps: {
                 name: `operateur-${operateur.id}`,
                 value: String(operateur.id),
-                checked: selection.includes(String(operateur.id)),
-                onChange: () => onToggle(String(operateur.id)),
+                checked: checkedOperateurIds.includes(String(operateur.id)),
+                onChange: () =>
+                  filterSelection.setCheckedValues(
+                    toggleArrayValue(checkedOperateurIds, String(operateur.id)),
+                    allOperateurIds
+                  ),
               },
             },
           ]}
@@ -88,6 +97,5 @@ const getRelationLabel = (operateur: OperateurSuggestion): string | null => {
 };
 
 type Props = {
-  selection: string[];
-  onToggle: (operateurId: string) => void;
+  filterSelection: FilterSelection;
 };

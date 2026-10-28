@@ -10,6 +10,10 @@ const mockFindCpomScope = vi.fn();
 const mockCreateOrUpdateCpom = vi.fn();
 const mockCreateCpomEvent = vi.fn();
 
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({
+  findOperateurFiliales: vi.fn(async () => []),
+}));
+
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
 }));
@@ -28,6 +32,10 @@ vi.mock("@/app/api/cpoms/cpom.repository", () => ({
   createOrUpdateCpom: (...args: unknown[]) => mockCreateOrUpdateCpom(...args),
 }));
 
+vi.mock("@/app/api/regions/region.repository", () => ({
+  findRegionIdByName: vi.fn(),
+}));
+
 vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createCpomEvent: (...args: unknown[]) => mockCreateCpomEvent(...args),
 }));
@@ -43,6 +51,9 @@ const putCpom = (body: object) =>
 
 describe("PUT /api/cpoms/[id]", () => {
   const cpomScope = {
+    operateurId: 3,
+    granularity: "DEPARTEMENTALE",
+    regionId: null,
     departements: [{ departement: { numero: "13" } }],
     structures: [],
   };

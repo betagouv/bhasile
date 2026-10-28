@@ -19,6 +19,10 @@ const mockCreateUserAction = vi.fn();
 const mockGetServerSession = vi.fn();
 const mockFilterStructureRows = vi.fn((...args: unknown[]) => args[0]);
 
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({
+  findOperateurFiliales: vi.fn(async () => []),
+}));
+
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
 }));
@@ -98,6 +102,7 @@ describe("GET /api/structures", () => {
     expect(mockFilterStructureRows).toHaveBeenCalledWith(
       [],
       expect.objectContaining({ isClosed: true, isFinalised: true }),
+      expect.anything(),
       expect.anything()
     );
   });
@@ -158,6 +163,7 @@ describe("GET /api/structures", () => {
     expect(mockFilterStructureRows).toHaveBeenCalledWith(
       [],
       expect.objectContaining({ isClosed: false, isFinalised: false }),
+      expect.anything(),
       expect.anything()
     );
   });

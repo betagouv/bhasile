@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { ReactElement } from "react";
 
+import { clearStoredFilters } from "@/utils/filters.util";
+
 import { AccesRefuse } from "./AccesRefuse";
 
 export default function Login(): ReactElement {
@@ -18,6 +20,7 @@ export default function Login(): ReactElement {
     Boolean(error);
 
   const login = async (): Promise<void> => {
+    clearStoredFilters();
     signIn("proconnect", {
       callbackUrl: process.env.NEXT_PUBLIC_URL,
     });

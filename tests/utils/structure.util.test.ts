@@ -80,7 +80,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 1, adresses: [] });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
+      const typeBati = getTypeBati(
+        structure as unknown as ResolvedStructureDetails
+      );
 
       // THEN
       expect(typeBati).toBeUndefined();
@@ -94,7 +96,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 2, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
+      const typeBati = getTypeBati(
+        structure as unknown as ResolvedStructureDetails
+      );
 
       // THEN
       expect(typeBati).toBe(Repartition.COLLECTIF);
@@ -108,7 +112,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 3, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
+      const typeBati = getTypeBati(
+        structure as unknown as ResolvedStructureDetails
+      );
 
       // THEN
       expect(typeBati).toBe(Repartition.DIFFUS);
@@ -121,7 +127,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 4, adresses });
 
       // WHEN
-      const typeBati = getTypeBati(structure as unknown as ResolvedStructureDetails);
+      const typeBati = getTypeBati(
+        structure as unknown as ResolvedStructureDetails
+      );
 
       // THEN
       expect(typeBati).toBe(Repartition.MIXTE);

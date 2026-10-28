@@ -13,6 +13,7 @@ export const toSessionGrant = (grant: GrantDb): SessionGrant => ({
   role: grant.role,
   isNational: grant.scope === GrantScope.NATIONAL,
   departementNumeros: getDepartementNumeros(grant),
+  regionIds: getRegionIds(grant),
   structureIds:
     grant.scope === GrantScope.STRUCTURE && grant.structure
       ? [grant.structure.id]
@@ -25,6 +26,16 @@ const getDepartementNumeros = (grant: GrantDb): string[] => {
   }
   if (grant.scope === GrantScope.DEPARTEMENT && grant.departement) {
     return [grant.departement.numero];
+  }
+  return [];
+};
+
+const getRegionIds = (grant: GrantDb): number[] => {
+  if (grant.scope === GrantScope.REGION && grant.region) {
+    return [grant.region.id];
+  }
+  if (grant.scope === GrantScope.DEPARTEMENT && grant.departement?.regionId) {
+    return [grant.departement.regionId];
   }
   return [];
 };

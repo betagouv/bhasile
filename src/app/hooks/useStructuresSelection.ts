@@ -26,13 +26,13 @@ export const useStructuresSelection = ({
       const params = new URLSearchParams();
 
       if (operateurName) {
-        params.append("operateurs", operateurName);
+        params.append("operateurName", operateurName);
       }
       if (departements && departements.length > 0) {
         params.append("departements", departements);
       }
       if (types && types.length > 0) {
-        params.append("type", types);
+        params.append("types", types);
       }
       params.append("selection", "true");
       if (finalisedOnly) {
