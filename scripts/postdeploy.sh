@@ -12,3 +12,6 @@ if [ "${SKIP_POSTDEPLOY:-}" = "1" ] && [ "${IS_PRODUCTION:-}" != "true" ]; then
 fi
 
 yarn delete-views && yarn prisma:deploy && yarn apply-views
+
+# Temporaire : à retirer une fois la mise en prod de isAgent passée
+npx tsx scripts/one-off-scripts/20261027-mark-existing-agents.ts

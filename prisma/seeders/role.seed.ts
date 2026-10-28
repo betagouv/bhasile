@@ -36,7 +36,7 @@ export const seedRolesAndAgents = async (
   ];
 
   const emailPattern = await prisma.emailPattern.create({
-    data: { pattern: TEST_EMAIL_PATTERN },
+    data: { pattern: TEST_EMAIL_PATTERN, isAgent: true },
     select: { id: true },
   });
 

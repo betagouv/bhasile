@@ -15,9 +15,19 @@ const run = async () => {
     const users = await prisma.user.findMany({
       where: {
         operateurId: null,
-        OR: [
-          { grants: { some: {} } },
-          { emailPattern: { grants: { some: {} } } },
+        AND: [
+          {
+            OR: [
+              { isAgent: true },
+              { isAgent: null, emailPattern: { isAgent: true } },
+            ],
+          },
+          {
+            OR: [
+              { grants: { some: {} } },
+              { emailPattern: { grants: { some: {} } } },
+            ],
+          },
         ],
       },
       select: {
