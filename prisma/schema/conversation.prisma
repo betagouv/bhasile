@@ -11,7 +11,7 @@ model Conversation {
   @@schema("public")
 }
 
-// Ajout seul
+// Ajout seul : jamais modifié ni supprimé, sauf tagKey (voir docs/messagerie.md)
 model Message {
   id             Int              @id @default(autoincrement())
   conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Restrict)

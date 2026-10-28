@@ -4,6 +4,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
+import { cn, INCOMPLETE_CHECKBOX_CLASSNAME } from "@/app/utils/classname.util";
 import {
   FilterSelection,
   useFilterSelection,
@@ -19,22 +20,30 @@ export const FilterDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const filterSelection = useFilterSelection(filterId);
-  const { selection, setSelection } = filterSelection;
-  const isAllSelected = selection.length === 0;
-  const summaryLabel = isAllSelected ? undefined : getSummaryLabel(selection);
+  const { selection, status, toggleAll, resetCleared } = filterSelection;
+  const summaryLabel =
+    selection.length === 0 ? undefined : getSummaryLabel(selection);
+
+  const close = () => {
+    setIsOpen(false);
+    resetCleared();
+  };
 
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        close();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  });
 
   return (
     <div
@@ -42,7 +51,7 @@ export const FilterDropdown = ({
       className="w-50 border-l border-default-grey relative"
     >
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => (isOpen ? close() : setIsOpen(true))}
         className="w-full text-left text-sm "
       >
         <div className="mx-5 my-3">
@@ -57,35 +66,41 @@ export const FilterDropdown = ({
                     href: "#",
                   }}
                   small
-                  className="pointer-none"
+                  className="pointer-none max-w-full"
+                  title={summaryLabel}
                 >
-                  {summaryLabel}
+                  <span className="truncate">{summaryLabel}</span>
                 </Tag>
               ) : (
                 placeholder
               )}
             </div>
-            <span className="fr-icon-arrow-down-s-line" />
+            <span className="fr-icon-arrow-down-s-line shrink-0" />
           </div>
         </div>
       </button>
 
       {isOpen && (
         <div className="absolute left-0 right-0 bg-white border border-default-grey overflow-y-auto shadow p-2 rounded-xs size-max max-h-[50vh] max-w-75">
-          <Checkbox
-            options={[
-              {
-                label: placeholder,
-                nativeInputProps: {
-                  name: `${filterId}-all`,
-                  checked: isAllSelected,
-                  onChange: () => setSelection([]),
+          <div className="border-b border-default-grey pl-6 pr-3 pt-3 pb-3">
+            <Checkbox
+              options={[
+                {
+                  label: placeholder,
+                  nativeInputProps: {
+                    name: `${filterId}-all`,
+                    checked: status !== "none",
+                    onChange: toggleAll,
+                  },
                 },
-              },
-            ]}
-            className="border-b border-default-grey px-4 pt-3 pb-1 [&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0"
-            small
-          />
+              ]}
+              className={cn(
+                "mb-0 [&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0",
+                status === "some" && INCOMPLETE_CHECKBOX_CLASSNAME
+              )}
+              small
+            />
+          </div>
           {renderOptions(filterSelection)}
         </div>
       )}

@@ -1,13 +1,21 @@
 import { Prisma } from "@/generated/prisma/client";
+import { CpomApiWrite } from "@/schemas/api/cpom.schema";
 
 import { resolvableVersionSelect } from "../structure-versions/structure-version.db.type";
 import { includedStructureWhere } from "../structures/structure.db.type";
 
+const regionWithDepartementsInclude = {
+  include: { departements: true },
+} satisfies Prisma.RegionDefaultArgs;
+
 export const cpomListInclude = {
-  structures: { where: { structure: includedStructureWhere } },
+  structures: {
+    where: { structure: includedStructureWhere },
+    include: { structure: { select: { type: true } } },
+  },
   budgets: true,
   operateur: true,
-  region: true,
+  region: regionWithDepartementsInclude,
   departements: {
     include: {
       departement: true,
@@ -53,7 +61,7 @@ export const cpomDetailsInclude = {
   },
   budgets: true,
   operateur: true,
-  region: true,
+  region: regionWithDepartementsInclude,
   departements: {
     include: {
       departement: true,
@@ -80,6 +88,9 @@ export type CpomDbDetails = Prisma.CpomGetPayload<{
 }>;
 
 export const cpomScopeSelect = {
+  operateurId: true,
+  granularity: true,
+  regionId: true,
   structures: { select: { structureId: true } },
   departements: { select: { departement: { select: { numero: true } } } },
 } satisfies Prisma.CpomSelect;
@@ -87,3 +98,8 @@ export const cpomScopeSelect = {
 export type CpomDbScope = Prisma.CpomGetPayload<{
   select: typeof cpomScopeSelect;
 }>;
+
+export type CpomToSave = CpomApiWrite & {
+  operateurId: number;
+  regionId?: number | null;
+};

@@ -86,7 +86,6 @@ export const StructureHeaderActions = ({
       </div>
     );
   }
-  console.log("isTarificationAccessible", isTarificationAccessible);
 
   if (structure.isClosed && structure.fermetureDate) {
     return (

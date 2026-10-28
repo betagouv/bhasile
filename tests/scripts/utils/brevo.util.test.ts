@@ -16,7 +16,7 @@ const departementGrant = (numero: string, name: string, role?: AccessRole) =>
   buildGrant({
     ...(role ? { role } : {}),
     scope: GrantScope.DEPARTEMENT,
-    departement: { numero, name },
+    departement: { numero, name, regionId: null },
   });
 
 const nationalReadGrant = buildGrant({ role: AccessRole.LECTEUR });
@@ -63,6 +63,7 @@ describe("brevo util", () => {
           buildGrant({
             scope: GrantScope.REGION,
             region: {
+              id: 3,
               name: "Bretagne",
               departements: [
                 { numero: "35" },

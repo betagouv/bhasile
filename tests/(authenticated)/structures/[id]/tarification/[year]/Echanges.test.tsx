@@ -182,6 +182,57 @@ describe("Echanges", () => {
     expect(readCalls.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("affiche un message générique et garde le texte quand le réseau coupe", async () => {
+    mockFetch.mockImplementation(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        throw new TypeError("Failed to fetch");
+      }
+      return new Response(JSON.stringify([]), { status: 200 });
+    });
+    renderEchanges();
+    await screen.findByText("Aucun message pour l’instant.");
+
+    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
+      target: { value: "Le BP est déposé" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
+
+    expect(
+      await screen.findByText("Le message n’a pas pu être envoyé.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Failed to fetch")).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Écrivez un message")).toHaveValue(
+      "Le BP est déposé"
+    );
+  });
+
+  it("affiche le message du serveur quand il refuse l'envoi", async () => {
+    mockFetch.mockImplementation(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        return new Response(
+          JSON.stringify({
+            error: "Un message ne peut pas dépasser 10 000 caractères",
+          }),
+          { status: 400 }
+        );
+      }
+      return new Response(JSON.stringify([]), { status: 200 });
+    });
+    renderEchanges();
+    await screen.findByText("Aucun message pour l’instant.");
+
+    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
+      target: { value: "Très long" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
+
+    expect(
+      await screen.findByText(
+        "Un message ne peut pas dépasser 10 000 caractères"
+      )
+    ).toBeInTheDocument();
+  });
+
   it("accuse la lecture des seuls messages d'autrui pas encore lus", async () => {
     answerWith([
       buildMessage({ id: 1 }),
@@ -258,6 +309,39 @@ describe("Echanges", () => {
         scroll: true,
       })
     );
+  });
+
+  it("garde le brouillon de chaque canal quand on change d'onglet", async () => {
+    answerWith([]);
+    const buildEchanges = () => (
+      <FetchStateProvider>
+        <Echanges
+          structureId={42}
+          year={2026}
+          currentUserId={CURRENT_USER_ID}
+          isOperateur={false}
+          isSuperAdmin={false}
+          isCampaignOpen
+        />
+      </FetchStateProvider>
+    );
+    const { rerender } = render(buildEchanges());
+    await screen.findByText("Aucun message pour l’instant.");
+    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
+      target: { value: "Réponse en cours" },
+    });
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
+    rerender(buildEchanges());
+    expect(
+      await screen.findByPlaceholderText("Écrivez un message")
+    ).toHaveValue("");
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    rerender(buildEchanges());
+    expect(
+      await screen.findByPlaceholderText("Écrivez un message")
+    ).toHaveValue("Réponse en cours");
   });
 
   it("ne montre que le canal partagé à l'opérateur, même si l'URL demande le canal agents", async () => {

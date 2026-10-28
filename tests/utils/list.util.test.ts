@@ -101,7 +101,10 @@ describe("sortRows", () => {
 });
 
 describe("paginateRows", () => {
-  const rows = Array.from({ length: DEFAULT_PAGE_SIZE * 2 + 5 }, (_, index) => index);
+  const rows = Array.from(
+    { length: DEFAULT_PAGE_SIZE * 2 + 5 },
+    (_, index) => index
+  );
 
   it("renvoie la première page", () => {
     const page = paginateRows(rows, 0);

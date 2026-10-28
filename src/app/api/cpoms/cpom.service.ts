@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { DomainError } from "@/app/utils/domain-error.util";
 import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
@@ -13,8 +14,10 @@ import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
+import { resolveFilters } from "../filters/filters.service";
+import { findRegionIdByName } from "../regions/region.repository";
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
-import { CpomDbDetails, CpomDbScope } from "./cpom.db.type";
+import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";
 import {
   createOrUpdateCpom,
   findAllCpoms,
@@ -23,8 +26,9 @@ import {
 } from "./cpom.repository";
 import {
   buildCpomListItem,
-  filterCpomsByDepartement,
+  getCpomDepartements,
   getDatesConvention,
+  matchesCpomFilters,
   sortValueForCpomColumn,
 } from "./cpom.util";
 
@@ -50,6 +54,11 @@ const getFullCpom = (cpom: ResolvedCpomDetails): CpomApiRead => {
 
   return recursivelySerializeForClient({
     ...cpom,
+    departements: getCpomDepartements(cpom).map((departement) => ({
+      cpomId: cpom.id,
+      departementNumero: departement.numero,
+      departement,
+    })),
     dateStart,
     dateEnd,
   }) as CpomApiRead;
@@ -61,12 +70,21 @@ export const getCpoms = cache(
   async ({
     page,
     departements,
+    operateurs,
+    types,
     column,
     direction,
     user,
   }: CpomsQuery): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
     const readableCpoms = await findAllCpoms(getReadableCpomWhere(user));
-    const filtered = filterCpomsByDepartement(readableCpoms, departements);
+    const filters = await resolveFilters({
+      departements,
+      operateurs,
+      types,
+    });
+    const filtered = readableCpoms.filter((cpom) =>
+      matchesCpomFilters(cpom, filters)
+    );
     const sorted = sortRows(
       filtered,
       (cpom) => sortValueForCpomColumn(cpom, column ?? "region"),
@@ -100,9 +118,49 @@ export const getCpomById = async (
   return getFullCpom(resolvedCpom);
 };
 
-export const saveCpom = async (cpom: CpomApiWrite): Promise<number> => {
-  return createOrUpdateCpom(cpom);
+export const prepareCpomToSave = async (
+  cpom: CpomApiWrite,
+  existingCpom: CpomDbScope | null
+): Promise<CpomToSave> => {
+  const operateurId =
+    cpom.operateur?.id ?? cpom.operateurId ?? existingCpom?.operateurId;
+  if (!operateurId) {
+    throw new DomainError("Un CPOM doit avoir un opérateur");
+  }
+  const granularity = cpom.granularity ?? existingCpom?.granularity;
+  if (!granularity) {
+    throw new DomainError("Un CPOM doit avoir une granularité");
+  }
+  const regionId = cpom.region?.name
+    ? await resolveRegionId(cpom.region.name)
+    : (existingCpom?.regionId ?? undefined);
+  if (
+    granularity === "REGIONALE" &&
+    !regionId &&
+    existingCpom?.granularity !== "REGIONALE"
+  ) {
+    throw new DomainError("Un CPOM régional doit avoir une région");
+  }
+  return {
+    ...cpom,
+    operateurId,
+    granularity,
+    regionId,
+    departements:
+      granularity === "REGIONALE" && regionId ? [] : cpom.departements,
+  };
 };
+
+const resolveRegionId = async (name: string): Promise<number> => {
+  const regionId = await findRegionIdByName(name);
+  if (!regionId) {
+    throw new DomainError(`Région introuvable : ${name}`);
+  }
+  return regionId;
+};
+
+export const saveCpom = async (cpom: CpomToSave): Promise<number> =>
+  createOrUpdateCpom(cpom);
 
 export const getCpomScope = (id: number): Promise<CpomDbScope | null> =>
   findCpomScope(id);

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { FilterTypeStructure } from "@/app/components/header-filters/FilterTypeStructure";
+import { FilterTypeStructure } from "@/components/header-filters/FilterTypeStructure";
 
 describe("FilterTypeStructure", () => {
   it("ne coche aucun type quand la sélection est vide", () => {
@@ -27,20 +27,5 @@ describe("FilterTypeStructure", () => {
     await user.click(screen.getByLabelText("HUDA"));
 
     expect(onChange).toHaveBeenCalledWith(["CADA", "HUDA"]);
-  });
-
-  it("retire le filtre quand tous les types finissent cochés", async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    render(
-      <FilterTypeStructure
-        selection={["CADA", "CAES", "CPH"]}
-        onChange={onChange}
-      />
-    );
-
-    await user.click(screen.getByLabelText("HUDA"));
-
-    expect(onChange).toHaveBeenCalledWith([]);
   });
 });
