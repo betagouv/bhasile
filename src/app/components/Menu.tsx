@@ -10,17 +10,13 @@ import { MenuFooter } from "./MenuFooter";
 export const Menu = (): ReactElement => {
   const pathname = usePathname();
 
-  const [openGroup, setOpenGroup] = useState<MenuGroupId>(
+  const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(
     getDefaultOpenGroup(pathname)
   );
   const [previousPathname, setPreviousPathname] = useState(pathname);
-  if (previousPathname !== pathname) {
-    setPreviousPathname(pathname);
-    setOpenGroup(getDefaultOpenGroup(pathname));
-  }
 
   const toggleGroup = (groupId: MenuGroupId): void => {
-    setOpenGroup(openGroup === groupId ? "structures" : groupId);
+    setOpenGroup(openGroup === groupId ? null : groupId);
   };
 
   const menuItems: MenuItem[] = [
@@ -90,6 +86,16 @@ export const Menu = (): ReactElement => {
     "subItems" in menuItem
       ? menuItem.subItems.some((subItem) => matchesPath(subItem.url))
       : matchesPath(menuItem.url);
+
+  if (previousPathname !== pathname) {
+    setPreviousPathname(pathname);
+    const activeGroup = menuItems.find(
+      (menuItem) => "subItems" in menuItem && isMenuItemActive(menuItem)
+    );
+    if (activeGroup && "id" in activeGroup) {
+      setOpenGroup(activeGroup.id);
+    }
+  }
 
   return (
     <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey shrink-0">
