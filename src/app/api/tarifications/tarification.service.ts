@@ -9,7 +9,6 @@ import { getAuthorLevel } from "@/app/api/conversations/conversation.util";
 import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
 import { getEffectiveGrants } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { getNow } from "@/app/utils/now.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
 import { canAccessTarification } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
@@ -46,28 +45,25 @@ export const getTarificationReader = async (
   return { isOperateur: user.operateurId !== null };
 };
 
-export const postTarificationMessage = async (
-  {
-    structureId,
-    year,
-    visibility,
-    author,
-    text,
-    tagKey,
-    fileKeys,
-  }: {
-    structureId: number;
-    year: number;
-    visibility: Visibility;
-    author: TarificationParticipant;
-    text: string;
-    tagKey: string | null;
-    fileKeys: string[];
-  },
-  now: Date = getNow()
-): Promise<MessageDb> => {
+export const postTarificationMessage = async ({
+  structureId,
+  year,
+  visibility,
+  author,
+  text,
+  tagKey,
+  fileKeys,
+}: {
+  structureId: number;
+  year: number;
+  visibility: Visibility;
+  author: TarificationParticipant;
+  text: string;
+  tagKey: string | null;
+  fileKeys: string[];
+}): Promise<MessageDb> => {
   assertCanWrite(author);
-  assertCampaignOpen(year, now);
+  assertCampaignOpen(year);
   const tarification = await upsertStructureTarification(structureId, year);
   return postMessage(
     {
@@ -132,14 +128,15 @@ export const markTarificationMessagesAsRead = async ({
   });
 };
 
-export const changeTarificationMessageTag = async (
-  {
-    messageId,
-    tagKey,
-    user,
-  }: { messageId: number; tagKey: string | null; user: SessionUser },
-  now: Date = getNow()
-): Promise<MessageDb> => {
+export const changeTarificationMessageTag = async ({
+  messageId,
+  tagKey,
+  user,
+}: {
+  messageId: number;
+  tagKey: string | null;
+  user: SessionUser;
+}): Promise<MessageDb> => {
   const message = await findMessageTarification(messageId);
   if (!message) {
     throw new DomainError("Message introuvable", 404);
@@ -147,7 +144,7 @@ export const changeTarificationMessageTag = async (
   const { structure, campaign } = message.conversation.structureTarification;
   const editor = await resolveParticipant(user, structure);
   assertCanWrite(editor);
-  assertCampaignOpen(campaign.year, now);
+  assertCampaignOpen(campaign.year);
   return changeMessageTag(
     { messageId, tagKey, editorLevel: editor.level },
     TARIFICATION_CONVERSATION_TAGS
