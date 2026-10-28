@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveMenuItems } from "@/app/utils/menu.util";
 import { SessionUser } from "@/types/global";
+import { MenuLink, resolveMenuItems } from "@/utils/menu.util";
 
 describe("menu.util", () => {
   describe("resolveMenuItems", () => {
@@ -34,7 +34,7 @@ describe("menu.util", () => {
       // THEN
       expect(menuItems).toHaveLength(1);
       expect(menuItems[0].label).toBe("Opérateur");
-      expect(menuItems[0].url).toBe("/operateurs/42");
+      expect((menuItems[0] as MenuLink).url).toBe("/operateurs/42");
     });
   });
 });

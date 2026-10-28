@@ -1,6 +1,5 @@
+import { isOperateurUser } from "@/lib/casl/rules";
 import { SessionUser } from "@/types/global";
-
-import { isOperateurUser } from "./session.util";
 
 export type MenuGroupId = "structures" | "parametres";
 

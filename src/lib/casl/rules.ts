@@ -157,3 +157,7 @@ export const canAccessApp = (user: SessionUser): boolean =>
   user.isSuperAdmin || (user.grants?.length ?? 0) > 0;
 
 export const NO_RECORD_WHERE = { id: { in: [] } };
+
+export const isOperateurUser = (user: SessionUser): boolean => {
+  return user?.operateurId !== null && user?.operateurId !== undefined;
+};
