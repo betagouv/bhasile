@@ -40,10 +40,8 @@ const defineRulesFor = (user?: SessionUser) => {
 
   if (user.isSuperAdmin) {
     builder.can("manage", "all");
-  } else if (user.operateurId === null) {
+  } else if (isAgent(user)) {
     defineAgentRules(builder, user);
-  } else if (typeof user.operateurId === "number") {
-    defineOperateurRules(builder, user, user.operateurId);
   }
 
   return builder.rules;
@@ -63,12 +61,10 @@ const defineReadRules = (
       toRuleConditions({ ...conditions, ...operateurCondition })
     );
   }
-  for (const conditions of user.grants.flatMap(getCpomConditions)) {
-    can(
-      "read",
-      "Cpom",
-      toRuleConditions({ ...conditions, ...operateurCondition })
-    );
+  if (isAgent(user)) {
+    for (const conditions of user.grants.flatMap(getCpomConditions)) {
+      can("read", "Cpom", toRuleConditions(conditions));
+    }
   }
   can("read", "Operateur");
 };
@@ -92,16 +88,6 @@ const defineAgentRules = (
     can("update", "Cpom", toRuleConditions(conditions));
   }
   can("update", "Operateur");
-};
-
-const defineOperateurRules = (
-  { can }: AbilityBuilder<AppAbility>,
-  user: SessionUser,
-  operateurId: number
-) => {
-  if (user.grants.some((grant) => grant.role === AccessRole.ADMIN)) {
-    can("update", "Operateur", { id: operateurId });
-  }
 };
 
 // Prisma traduit `OR: [{}]` par « aucune ligne » : une règle sans restriction
@@ -163,6 +149,9 @@ const getCpomConditions = ({
       : []),
   ];
 };
+
+export const isAgent = (user: SessionUser | undefined): boolean =>
+  user?.isAgent === true;
 
 export const canAccessApp = (user: SessionUser): boolean =>
   user.isSuperAdmin || (user.grants?.length ?? 0) > 0;

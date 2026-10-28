@@ -53,13 +53,13 @@ export const postMessage = async (
 export const getMessages = ({
   structureTarificationId,
   visibility,
-  isOperateurReader,
+  isAgentReader,
 }: {
   structureTarificationId: number;
   visibility: Visibility;
-  isOperateurReader: boolean;
+  isAgentReader: boolean;
 }): Promise<MessageDb[]> => {
-  assertCanAccessVisibility(isOperateurReader, visibility);
+  assertCanAccessVisibility(isAgentReader, visibility);
   return findMessages(structureTarificationId, visibility);
 };
 
@@ -89,7 +89,7 @@ export const markMessagesAsRead = async ({
   reader: ConversationParticipant;
   messageIds: number[];
 }) => {
-  assertCanAccessVisibility(reader.level === AuthorLevel.OPERATEUR, visibility);
+  assertCanAccessVisibility(reader.level !== AuthorLevel.OPERATEUR, visibility);
   const conversationMessageIds = await findConversationMessageIds(
     structureTarificationId,
     visibility,
