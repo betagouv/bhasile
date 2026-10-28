@@ -1,7 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { StructureType } from "@/generated/prisma/client";
 import { useFilterSelection } from "@/hooks/useFilterSelection";
+import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
 
 const mockReplace = vi.fn();
 const mockUseSearchParams = vi.fn();
@@ -14,8 +16,6 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ setFetchState: vi.fn() }),
 }));
-
-const ALL_TYPES = ["CADA", "CAES", "CPH", "HUDA"];
 
 describe("useFilterSelection", () => {
   beforeEach(() => {
@@ -35,14 +35,19 @@ describe("useFilterSelection", () => {
     const { result } = renderHook(() => useFilterSelection("types"));
 
     expect(result.current.status).toBe("all");
-    expect(result.current.getCheckedValues(ALL_TYPES)).toEqual(ALL_TYPES);
+    expect(result.current.getCheckedValues(ACCEPTED_STRUCTURE_TYPES)).toEqual(
+      ACCEPTED_STRUCTURE_TYPES
+    );
   });
 
   it("filtre sur les valeurs restantes quand on en décoche une depuis « tout »", () => {
     const { result } = renderHook(() => useFilterSelection("types"));
 
     act(() =>
-      result.current.setCheckedValues(["CADA", "CAES", "CPH"], ALL_TYPES)
+      result.current.setCheckedValues(
+        [StructureType.CADA, StructureType.CAES, StructureType.CPH],
+        ACCEPTED_STRUCTURE_TYPES
+      )
     );
 
     expect(mockReplace).toHaveBeenCalledWith("?types=CADA%2CCAES%2CCPH", {
@@ -56,7 +61,12 @@ describe("useFilterSelection", () => {
     );
     const { result } = renderHook(() => useFilterSelection("types"));
 
-    act(() => result.current.setCheckedValues(ALL_TYPES, ALL_TYPES));
+    act(() =>
+      result.current.setCheckedValues(
+        ACCEPTED_STRUCTURE_TYPES,
+        ACCEPTED_STRUCTURE_TYPES
+      )
+    );
 
     expect(mockReplace).toHaveBeenCalledWith("?", { scroll: false });
   });
@@ -67,7 +77,9 @@ describe("useFilterSelection", () => {
     act(() => result.current.toggleAll());
 
     expect(result.current.status).toBe("none");
-    expect(result.current.getCheckedValues(ALL_TYPES)).toEqual([]);
+    expect(result.current.getCheckedValues(ACCEPTED_STRUCTURE_TYPES)).toEqual(
+      []
+    );
     expect(mockReplace).not.toHaveBeenCalled();
 
     act(() => result.current.resetCleared());
