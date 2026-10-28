@@ -1,7 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
-  CpomApiWrite,
   CpomDepartementApiType,
   CpomStructureApiWrite,
 } from "@/schemas/api/cpom.schema";
@@ -17,6 +16,7 @@ import {
   cpomDetailsInclude,
   cpomListInclude,
   cpomScopeSelect,
+  CpomToSave,
 } from "./cpom.db.type";
 
 export const findAllCpoms = (
@@ -38,20 +38,9 @@ export const findCpomScope = (id: number): Promise<CpomDbScope | null> =>
     select: cpomScopeSelect,
   });
 
-export const createOrUpdateCpom = async (
-  cpom: CpomApiWrite
-): Promise<number> => {
-  const operateurId = cpom.operateur?.id ?? cpom.operateurId;
+export const createOrUpdateCpom = async (cpom: CpomToSave): Promise<number> => {
+  const { operateurId, regionId } = cpom;
   const cpomId = await prisma.$transaction(async (tx) => {
-    let regionId: number | undefined;
-
-    if (cpom.region) {
-      const region = await tx.region.findFirst({
-        where: { name: cpom.region?.name },
-      });
-      regionId = region?.id;
-    }
-
     let cpomId = cpom.id;
     if (cpomId) {
       await tx.cpom.update({
@@ -64,9 +53,6 @@ export const createOrUpdateCpom = async (
         },
       });
     } else {
-      if (!operateurId) {
-        throw new Error("Operateur ID is required when creating a new CPOM");
-      }
       const upsertedCpom = await tx.cpom.create({
         data: {
           name: cpom.name,

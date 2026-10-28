@@ -221,7 +221,10 @@ describe("getActesCategoriesToDisplay", () => {
 
   it("inclut une catégorie transférée absente de la config structure", () => {
     expect(
-      getActesCategoriesToDisplay([acte("ARRETE_EXTENSION"), acte("CONVENTION")])
+      getActesCategoriesToDisplay([
+        acte("ARRETE_EXTENSION"),
+        acte("CONVENTION"),
+      ])
     ).toContain("ARRETE_EXTENSION");
   });
 

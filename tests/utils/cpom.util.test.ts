@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { getCpomActesScopes, getCpomDefaultValues } from "@/app/utils/cpom.util";
+import {
+  getCpomActesScopes,
+  getCpomDefaultValues,
+} from "@/app/utils/cpom.util";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 

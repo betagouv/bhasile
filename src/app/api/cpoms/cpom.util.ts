@@ -1,13 +1,28 @@
 import { type SortKind, type SortValue } from "@/app/utils/list.util";
-import { parseCommaList } from "@/app/utils/string.util";
-import { CpomListItem } from "@/types/cpom.type";
+import { CpomGranularity, CpomListItem } from "@/types/cpom.type";
 import { CpomColumn } from "@/types/ListColumn";
+import { matchesFilters, ParsedFilters } from "@/utils/filters.util";
 
 import {
   type ActeAdministratifDates,
   getDatesOfCurrentActeAdministratif,
 } from "../actes-administratifs/acte-administratif.util";
 import { CpomDbList } from "./cpom.db.type";
+
+// Un CPOM régional couvre tous les départements de sa région : ils ne sont pas
+// stockés dans CpomDepartement, réservé aux CPOM (inter)départementaux.
+export const getCpomDepartements = <D extends { numero: string }>(cpom: {
+  granularity: CpomGranularity;
+  region: { departements: D[] } | null;
+  departements: { departement: D }[];
+}): D[] =>
+  cpom.granularity === "REGIONALE" && cpom.region
+    ? cpom.region.departements
+    : cpom.departements.map(({ departement }) => departement);
+
+export const getCpomDepartementNumeros = (
+  cpom: Parameters<typeof getCpomDepartements>[0]
+): string[] => getCpomDepartements(cpom).map(({ numero }) => numero);
 
 export const getDatesConvention = (cpom?: {
   actesAdministratifs: ActeAdministratifDates[];
@@ -55,20 +70,23 @@ export const getCpomStructureIdsToEndAtFermeture = (
     )
     .map((cpomStructure) => cpomStructure.id);
 
-export const filterCpomsByDepartement = (
-  cpoms: CpomDbList[],
-  departements: string | null
-): CpomDbList[] => {
-  const departementList = parseCommaList(departements);
-  if (departementList.length === 0) {
-    return cpoms;
-  }
-  return cpoms.filter((cpom) =>
-    cpom.departements.some((cpomDepartement) =>
-      departementList.includes(cpomDepartement.departement.numero)
-    )
+export const matchesCpomFilters = (
+  cpom: Parameters<typeof getCpomDepartementNumeros>[0] & {
+    operateur: { id: number } | null;
+    structures: { structure: { type: string | null } }[];
+  },
+  filters: ParsedFilters
+): boolean =>
+  matchesFilters(
+    {
+      departements: getCpomDepartementNumeros(cpom),
+      operateurIds: [cpom.operateur?.id],
+      types: cpom.structures.map(
+        (cpomStructure) => cpomStructure.structure.type
+      ),
+    },
+    filters
   );
-};
 
 const getSortableTime = (date: Date | null): SortValue =>
   date ? date.getTime() : null;
@@ -88,10 +106,7 @@ export const sortValueForCpomColumn = (
       return { value: cpom.region?.name ?? null, kind: "text" };
     case "departements":
       return {
-        value: cpom.departements
-          .map((cpomDepartement) => cpomDepartement.departement.numero)
-          .sort()
-          .join(", "),
+        value: getCpomDepartementNumeros(cpom).sort().join(", "),
         kind: "text",
       };
     case "dateStart":
@@ -117,16 +132,14 @@ export const buildCpomListItem = (cpom: CpomDbList): CpomListItem => {
     operateurName: cpom.operateur.name,
     granularity: cpom.granularity,
     regionName: cpom.region?.name,
-    departementNumeros: cpom.departements.map(
-      (cpomDepartement) => cpomDepartement.departement.numero
-    ),
+    departementNumeros: getCpomDepartementNumeros(cpom),
     dateStart: dateStart?.toISOString(),
     dateEnd: dateEnd?.toISOString(),
     structureCount: cpom.structures.length,
     isFinalised: Boolean(
       cpom.actesAdministratifs?.[0]?.fileUploads?.[0]?.key &&
-        dateStart &&
-        dateEnd
+      dateStart &&
+      dateEnd
     ),
   };
 };

@@ -357,6 +357,7 @@ async function seed(): Promise<void> {
   await createFakeCpoms(prisma);
   logHeap("CPOM");
 
+  console.log("💬 Création des échanges de tarification...");
   await createFakeConversations(prisma, CURRENT_YEAR);
 
   console.log("📣 Seed des notifications");

@@ -1,10 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { startTransition, useOptimistic } from "react";
+import { startTransition, useOptimistic, useState } from "react";
 
 import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
-import { toggleArrayValue } from "@/app/utils/common.util";
 import { parseCommaList } from "@/app/utils/string.util";
 
 export const useFilterSelection = (filterId: string): FilterSelection => {
@@ -13,6 +12,15 @@ export const useFilterSelection = (filterId: string): FilterSelection => {
   const [selection, setOptimisticSelection] = useOptimistic(
     parseCommaList(searchParams.get(filterId))
   );
+  const [isCleared, setIsCleared] = useState(false);
+
+  const getStatus = (): FilterStatus => {
+    if (isCleared) {
+      return "none";
+    }
+    return selection.length === 0 ? "all" : "some";
+  };
+  const status = getStatus();
 
   const setSelection = (nextSelection: string[]) => {
     if (selection.length === 0 && nextSelection.length === 0) {
@@ -24,15 +32,45 @@ export const useFilterSelection = (filterId: string): FilterSelection => {
     });
   };
 
-  const toggleValue = (value: string) => {
-    setSelection(toggleArrayValue(selection, value));
+  const getCheckedValues = (allValues: string[]): string[] => {
+    if (status === "all") {
+      return allValues;
+    }
+    return status === "none" ? [] : selection;
   };
 
-  return { selection, setSelection, toggleValue };
+  const setCheckedValues = (checkedValues: string[], allValues: string[]) => {
+    const isEverythingChecked = allValues.every((value) =>
+      checkedValues.includes(value)
+    );
+    setIsCleared(checkedValues.length === 0);
+    setSelection(isEverythingChecked ? [] : checkedValues);
+  };
+
+  const toggleAll = () => {
+    setIsCleared(status === "all");
+    setSelection([]);
+  };
+
+  const resetCleared = () => setIsCleared(false);
+
+  return {
+    selection,
+    status,
+    getCheckedValues,
+    setCheckedValues,
+    toggleAll,
+    resetCleared,
+  };
 };
+
+export type FilterStatus = "all" | "some" | "none";
 
 export type FilterSelection = {
   selection: string[];
-  setSelection: (nextSelection: string[]) => void;
-  toggleValue: (value: string) => void;
+  status: FilterStatus;
+  getCheckedValues: (allValues: string[]) => string[];
+  setCheckedValues: (checkedValues: string[], allValues: string[]) => void;
+  toggleAll: () => void;
+  resetCleared: () => void;
 };

@@ -5,6 +5,7 @@ import { ReactElement, useEffect, useRef } from "react";
 
 import Loader from "@/app/components/ui/Loader";
 import { useConversationMessages } from "@/hooks/useConversationMessages";
+import { MessageDraft } from "@/hooks/useMessageDraft";
 import {
   ConversationTag,
   ConversationVisibility,
@@ -23,6 +24,7 @@ export const Conversation = ({
   isCampaignOpen,
   tags,
   canTag,
+  draft,
 }: Props): ReactElement => {
   const {
     messages,
@@ -139,6 +141,7 @@ export const Conversation = ({
         <MessageComposer
           tags={tags}
           canTag={canTagMessages}
+          draft={draft}
           onSend={postMessage}
         />
       )}
@@ -157,4 +160,5 @@ type Props = {
   isCampaignOpen: boolean;
   tags: ConversationTag[];
   canTag: boolean;
+  draft: MessageDraft;
 };

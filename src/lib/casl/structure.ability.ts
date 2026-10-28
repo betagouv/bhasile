@@ -47,12 +47,6 @@ export const canAbilityUpdateDepartement = (
   departementAdministratif?: string | null
 ) => canAbilityUpdateStructure(ability, { departementAdministratif });
 
-export const canUpdateDepartement = (
-  user: SessionUser,
-  departementAdministratif?: string | null
-) =>
-  canAbilityUpdateDepartement(defineAbilityFor(user), departementAdministratif);
-
 const canAbilityUpdateStructure = (
   ability: AppAbility,
   { id, departementAdministratif }: StructureScope
@@ -62,7 +56,7 @@ const canAbilityUpdateStructure = (
     subject("Structure", { id, departementAdministratif } as Structure)
   );
 
-type StructureScope = {
+export type StructureScope = {
   id?: number;
   departementAdministratif?: string | null;
   operateurId?: number | null;

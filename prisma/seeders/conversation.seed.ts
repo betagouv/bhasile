@@ -6,8 +6,6 @@ import {
   Visibility,
 } from "@/generated/prisma/client";
 
-const SEEDED_STRUCTURES_COUNT = 10;
-
 export const createFakeConversations = async (
   prisma: PrismaClient,
   campaignYear: number
@@ -25,8 +23,11 @@ export const createFakeConversations = async (
   const structures = await prisma.structure.findMany({
     where: { departementAdministratif: "75" },
     select: { id: true },
-    take: SEEDED_STRUCTURES_COUNT,
+    orderBy: { id: "asc" },
   });
+  console.log(
+    `   Structures avec échanges : ${structures.map((structure) => structure.id).join(", ")}`
+  );
   const campaign = await prisma.tarificationCampaign.create({
     data: { year: campaignYear },
   });

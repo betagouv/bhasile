@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { AuthorLevel } from "@/generated/prisma/enums";
 import { ConversationVisibility } from "@/types/conversation.type";
 
-export const MESSAGE_MAX_LENGTH = 10_000;
+const MESSAGE_MAX_LENGTH = 10_000;
 const MESSAGE_MAX_ATTACHMENTS = 20;
 const MESSAGE_RECEIPTS_MAX_COUNT = 500;
 
@@ -13,7 +13,9 @@ const messageIdSchema = z.number().int().positive();
 export const messageApiCreateSchema = z
   .object({
     visibility: visibilitySchema,
-    text: z.string().trim().max(MESSAGE_MAX_LENGTH),
+    text: z.string().trim().max(MESSAGE_MAX_LENGTH, {
+      error: "Un message ne peut pas dépasser 10 000 caractères",
+    }),
     tagKey: z.string().min(1).nullish().default(null),
     fileKeys: z
       .array(z.string().min(1))

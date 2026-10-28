@@ -64,11 +64,10 @@ export type CommunePoints = {
 export type SearchProps = {
   search: string | null;
   page: number | null;
-  type: string | null;
-  bati: string | null;
-  placesAutorisees: string | null;
+  types: string | null;
   departements: string | null;
   operateurs: string | null;
+  operateurName?: string | null;
   column?: StructureColumn | null;
   direction?: "asc" | "desc" | null;
   selection?: boolean;

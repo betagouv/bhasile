@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
+import { useMessageDraft } from "@/hooks/useMessageDraft";
 import {
   ConversationTag,
   ConversationVisibility,
@@ -23,12 +24,15 @@ export const Echanges = ({
 }: Props): ReactElement => {
   const searchParams = useSearchParams();
   const navigateWithParams = useSearchParamsNavigation();
+  const sharedDraft = useMessageDraft();
+  const agentsDraft = useMessageDraft();
 
   const isAgentsChannel =
     !isOperateur && searchParams.get(CHANNEL_PARAM) === AGENTS_CHANNEL;
   const visibility: ConversationVisibility = isAgentsChannel
     ? "AGENTS"
     : "SHARED";
+  const draft = isAgentsChannel ? agentsDraft : sharedDraft;
 
   const handleTabChange = (tabId: string) => {
     navigateWithParams((params) =>
@@ -49,6 +53,7 @@ export const Echanges = ({
       isCampaignOpen={isCampaignOpen}
       tags={tags}
       canTag={!isOperateur}
+      draft={draft}
     />
   );
 

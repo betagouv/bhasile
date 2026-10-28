@@ -4,9 +4,10 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { ChangeEvent, FormEvent, ReactElement, useRef, useState } from "react";
 
+import { ApiError } from "@/app/utils/api-error.util";
 import { ALLOWED_MIME_TYPES } from "@/constants";
 import { useMessageAttachments } from "@/hooks/useMessageAttachments";
-import { MESSAGE_MAX_LENGTH } from "@/schemas/api/message.schema";
+import { MessageDraft } from "@/hooks/useMessageDraft";
 import { ConversationTag } from "@/types/conversation.type";
 
 import { AttachmentChip } from "./AttachmentChip";
@@ -15,9 +16,10 @@ import { TagSelect } from "./TagSelect";
 export const MessageComposer = ({
   tags,
   canTag,
+  draft,
   onSend,
 }: Props): ReactElement => {
-  const [text, setText] = useState("");
+  const { text, setText } = draft;
   const [tagKey, setTagKey] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,12 +51,12 @@ export const MessageComposer = ({
     setErrorMessage(null);
     try {
       await onSend({ text, fileKeys, tagKey });
-      setText("");
+      draft.clear();
       setTagKey(null);
       clearAttachments();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error
+        error instanceof ApiError
           ? error.message
           : "Le message n’a pas pu être envoyé."
       );
@@ -74,7 +76,6 @@ export const MessageComposer = ({
         nativeTextAreaProps={{
           value: text,
           rows: 3,
-          maxLength: MESSAGE_MAX_LENGTH,
           readOnly: isSending,
           placeholder: "Écrivez un message",
           onChange: (event) => setText(event.target.value),
@@ -135,6 +136,7 @@ export const MessageComposer = ({
 type Props = {
   tags: ConversationTag[];
   canTag: boolean;
+  draft: MessageDraft;
   onSend: (message: {
     text: string;
     fileKeys: string[];

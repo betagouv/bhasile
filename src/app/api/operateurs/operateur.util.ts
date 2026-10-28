@@ -5,13 +5,14 @@ import type {
   OperateurListItem,
   OperateurSuggestionItem,
 } from "@/types/operateur.type";
+import {
+  matchesFilters,
+  ParsedFilters,
+} from "@/utils/filters.util";
 
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { StructureListLight } from "../structures/structure.db.type";
-import {
-  OperateurListRow,
-  OperateurSuggestionRow,
-} from "./operateur.db.type";
+import { OperateurListRow, OperateurSuggestionRow } from "./operateur.db.type";
 
 type OperateurStats = {
   nbStructures: number;
@@ -58,12 +59,24 @@ export const buildFilialesByParentId = (
 export const groupStructureStatsByOperateur = (
   structures: StructureListLight[],
   topLevelByOperateurId: Map<number, number>,
-  now: Date
+  now: Date,
+  filters: ParsedFilters
 ): GroupedStructureStats => {
   const statsByOperateurId = new Map<number, OperateurStats>();
   let globalPlaces = 0;
 
   structures.forEach((structure) => {
+    const isInPerimeter = matchesFilters(
+      {
+        departements: [structure.departementAdministratif],
+        types: [structure.type],
+      },
+      filters
+    );
+    if (!isInPerimeter) {
+      return;
+    }
+
     const currentVersion = resolveCurrentVersion(
       structure.structureVersions,
       now
@@ -71,13 +84,15 @@ export const groupStructureStatsByOperateur = (
     const places = currentVersion?.placesAutorisees ?? 0;
     globalPlaces += places;
 
-    if (structure.operateurId === null) {
+    if (
+      structure.operateurId === null ||
+      !matchesFilters({ operateurIds: [structure.operateurId] }, filters)
+    ) {
       return;
     }
 
     const topLevelId =
-      topLevelByOperateurId.get(structure.operateurId) ??
-      structure.operateurId;
+      topLevelByOperateurId.get(structure.operateurId) ?? structure.operateurId;
 
     const stats = statsByOperateurId.get(topLevelId) ?? {
       nbStructures: 0,
@@ -106,9 +121,7 @@ export const buildOperateurListItem = (
   nbStructures: stats.nbStructures,
   totalPlaces: stats.totalPlaces,
   pourcentageParc:
-    globalPlaces > 0
-      ? roundTo((stats.totalPlaces / globalPlaces) * 100, 2)
-      : 0,
+    globalPlaces > 0 ? roundTo((stats.totalPlaces / globalPlaces) * 100, 2) : 0,
   structureTypes: [...stats.structureTypes].sort(),
   filiales,
   logo: { key: operateur.logo?.key ?? null },

@@ -1,12 +1,20 @@
+import type { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+
+const structureScopeSelect = {
+  id: true,
+  departementAdministratif: true,
+  operateurId: true,
+} satisfies Prisma.StructureSelect;
 
 export const upsertStructureTarification = async (
   structureId: number,
   year: number
 ) => {
+  // `update` non vide : sinon Prisma émule l'upsert (SELECT puis INSERT, P2002 sur deux premiers appels simultanés) au lieu d'un INSERT … ON CONFLICT
   const campaign = await prisma.tarificationCampaign.upsert({
     where: { year },
-    update: {},
+    update: { year },
     create: { year },
     select: { id: true },
   });
@@ -14,7 +22,7 @@ export const upsertStructureTarification = async (
     where: {
       structureId_campaignId: { structureId, campaignId: campaign.id },
     },
-    update: {},
+    update: { campaignId: campaign.id },
     create: { structureId, campaignId: campaign.id },
     select: { id: true },
   });
@@ -40,13 +48,7 @@ export const findMessageTarification = (messageId: number) =>
         select: {
           structureTarification: {
             select: {
-              structure: {
-                select: {
-                  id: true,
-                  departementAdministratif: true,
-                  operateurId: true,
-                },
-              },
+              structure: { select: structureScopeSelect },
               campaign: { select: { year: true } },
             },
           },
@@ -58,10 +60,5 @@ export const findMessageTarification = (messageId: number) =>
 export const findStructureScope = (structureId: number) =>
   prisma.structure.findUnique({
     where: { id: structureId },
-    select: {
-      id: true,
-      codeBhasile: true,
-      departementAdministratif: true,
-      operateurId: true,
-    },
+    select: { ...structureScopeSelect, codeBhasile: true },
   });

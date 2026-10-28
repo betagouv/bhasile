@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { FiltersDepartement } from "@/app/components/filters/FiltersDepartement";
+import { FiltersDepartement } from "@/components/header-filters/FiltersDepartement";
 
 describe("FiltersDepartement", () => {
   it("ajoute le département cliqué à la sélection", async () => {

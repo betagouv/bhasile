@@ -1,12 +1,12 @@
 import { Visibility } from "@/generated/prisma/enums";
 import { SessionUser } from "@/types/global";
 
-import { canUpdateStructure } from "./structure.ability";
+import { canUpdateStructure, type StructureScope } from "./structure.ability";
 
 // Les grants nationaux n'ouvrent pas la tarification, même en édition
 export const canAccessTarification = (
   user: SessionUser,
-  structure: TarificationStructureScope
+  structure: StructureScope
 ): boolean => {
   if (!user.isSuperAdmin && !isMessagerieEnabled()) {
     return false;
@@ -21,7 +21,7 @@ export const canReadConversation = (
   user: SessionUser,
   conversation: {
     visibility: Visibility;
-    structureTarification: { structure: TarificationStructureScope };
+    structureTarification: { structure: StructureScope };
   }
 ): boolean => {
   const isOperateurUser = user.operateurId !== null;
@@ -37,9 +37,3 @@ export const canReadConversation = (
 // Avant la mise en service, seuls les superadmins voient les échanges : variable absente = fermé
 const isMessagerieEnabled = (): boolean =>
   process.env.MESSAGERIE_ENABLED === "true";
-
-type TarificationStructureScope = {
-  id: number;
-  departementAdministratif: string;
-  operateurId: number | null;
-};
