@@ -12,6 +12,7 @@ import {
 } from "./conversation.repository";
 import {
   assertCanAccessVisibility,
+  assertCanPostMessage,
   assertCanTag,
   assertTagKnown,
 } from "./conversation.util";
@@ -34,11 +35,7 @@ export const postMessage = async (
   },
   tags: ConversationTag[]
 ): Promise<MessageDb> => {
-  assertCanAccessVisibility(author.level === AuthorLevel.OPERATEUR, visibility);
-  if (tagKey !== null) {
-    assertCanTag(author.level);
-    assertTagKnown(tagKey, tags);
-  }
+  assertCanPostMessage({ level: author.level, visibility, tagKey }, tags);
   const conversation = await upsertConversation(
     structureTarificationId,
     visibility

@@ -5,7 +5,10 @@ import {
   markMessagesAsRead,
   postMessage,
 } from "@/app/api/conversations/conversation.service";
-import { getAuthorLevel } from "@/app/api/conversations/conversation.util";
+import {
+  assertCanPostMessage,
+  getAuthorLevel,
+} from "@/app/api/conversations/conversation.util";
 import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
 import { getEffectiveGrants } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
@@ -64,6 +67,10 @@ export const postTarificationMessage = async ({
 }): Promise<MessageDb> => {
   assertCanWrite(author);
   assertCampaignOpen(year);
+  assertCanPostMessage(
+    { level: author.level, visibility, tagKey },
+    TARIFICATION_CONVERSATION_TAGS
+  );
   const tarification = await upsertStructureTarification(structureId, year);
   return postMessage(
     {
