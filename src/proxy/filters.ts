@@ -11,7 +11,6 @@ export const filtersPages = [
   "/operateurs",
   "/statistiques",
   "/statistiques/cartographie",
-  "/ressources",
 ];
 
 export const filtersProxy = (request: NextRequest): NextResponse => {

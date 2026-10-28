@@ -14,6 +14,7 @@ export const PageHeader = ({
   titleId,
   tabs,
   menuActions = [],
+  withFilters = true,
   children,
 }: Props): ReactElement => {
   const { headerRef } = useHeaderHeight();
@@ -74,9 +75,11 @@ export const PageHeader = ({
               )}
             </div>
           )}
-          <Suspense fallback={null}>
-            <HeaderFilters />
-          </Suspense>
+          {withFilters && (
+            <Suspense fallback={null}>
+              <HeaderFilters />
+            </Suspense>
+          )}
         </div>
       </div>
       {children}
@@ -92,5 +95,6 @@ type Props = {
   titleId?: string;
   tabs?: ReactNode;
   menuActions?: PageHeaderAction[];
+  withFilters?: boolean;
   children?: ReactNode;
 };

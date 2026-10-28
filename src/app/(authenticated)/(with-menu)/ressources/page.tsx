@@ -8,7 +8,7 @@ import { RessourcesSkeleton } from "./_components/RessourcesSkeleton";
 export default function Ressources(): ReactElement {
   return (
     <div className="h-full w-full flex flex-col">
-      <PageHeader title="Modèles et ressources" />
+      <PageHeader title="Modèles et ressources" withFilters={false} />
       <Suspense fallback={<RessourcesSkeleton />}>
         <ResourcesBlockList />
       </Suspense>
