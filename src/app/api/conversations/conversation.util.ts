@@ -36,6 +36,21 @@ export const assertCanAccessVisibility = (
   }
 };
 
+export const assertCanPostMessage = (
+  {
+    level,
+    visibility,
+    tagKey,
+  }: { level: AuthorLevel; visibility: Visibility; tagKey: string | null },
+  tags: ConversationTag[]
+): void => {
+  assertCanAccessVisibility(level, visibility);
+  if (tagKey !== null) {
+    assertCanTag(level);
+    assertTagKnown(tagKey, tags);
+  }
+};
+
 export const assertCanTag = (authorLevel: AuthorLevel): void => {
   if (authorLevel === AuthorLevel.OPERATEUR) {
     throw new DomainError("Seuls les agents peuvent étiqueter un message", 403);

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assertCanAccessVisibility,
+  assertCanPostMessage,
   assertCanTag,
   assertTagKnown,
   getAuthorLevel,
@@ -71,6 +72,36 @@ describe("assertCanAccessVisibility", () => {
     expect(() =>
       assertCanAccessVisibility(AuthorLevel.DEPARTEMENT, Visibility.AGENTS)
     ).not.toThrow();
+  });
+});
+
+describe("assertCanPostMessage", () => {
+  const tags = [{ key: "L48", label: "L48" }];
+
+  it("accepte un message d'agent étiqueté avec une étiquette connue", () => {
+    expect(() =>
+      assertCanPostMessage(
+        {
+          level: AuthorLevel.DEPARTEMENT,
+          visibility: Visibility.AGENTS,
+          tagKey: "L48",
+        },
+        tags
+      )
+    ).not.toThrow();
+  });
+
+  it("refuse qu'un opérateur étiquette son message", () => {
+    expect(() =>
+      assertCanPostMessage(
+        {
+          level: AuthorLevel.OPERATEUR,
+          visibility: Visibility.SHARED,
+          tagKey: "L48",
+        },
+        tags
+      )
+    ).toThrow("Seuls les agents");
   });
 });
 

@@ -5,6 +5,7 @@ import {
   markMessagesAsRead,
   postMessage,
 } from "@/app/api/conversations/conversation.service";
+import { assertCanPostMessage } from "@/app/api/conversations/conversation.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
 import { SessionUser } from "@/types/global";
@@ -33,6 +34,10 @@ export const postTarificationMessage = async ({
   tagKey: string | null;
 }): Promise<MessageDb> => {
   assertCampaignOpen(year);
+  assertCanPostMessage(
+    { level: author.level, visibility, tagKey },
+    TARIFICATION_CONVERSATION_TAGS
+  );
   const tarification = await upsertStructureTarification(structureId, year);
   return postMessage(
     {
