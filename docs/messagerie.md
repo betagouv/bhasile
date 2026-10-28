@@ -243,10 +243,13 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
   - Retirer une pièce jointe supprime le fichier ; un fichier retiré pendant son envoi est supprimé à son arrivée. Une saisie abandonnée laisse des fichiers orphelins (voir [Évolutions possibles](#évolutions-possibles)).
   - Un envoi refusé garde le texte et les pièces jointes ; un envoi accepté les vide sans supprimer les fichiers, désormais rattachés.
 - **Lecture seule** affichée en bandeau, à la place de la saisie : campagne close, ou superadmin.
+- **Tags** : liste fournie par la tarification (`getTarificationOverview`), passée en props jusqu'aux composants de la messagerie. L'interface est en attente de la maquette.
+  - Pour un agent sur une campagne ouverte : un sélecteur « Tag » à l'écriture (vide par défaut, vidé après l'envoi) et un sélecteur sur chaque message. Un seul changement à la fois par message. Forme provisoire, à revoir avec les maquettes définitives : chaque sélecteur s'appelle « Tag », sans dire de quel message (accessibilité).
+  - Pour les autres (opérateur, superadmin, campagne close) : le tag en lecture seule, rien pour un message sans tag.
+  - Modification affichée tout de suite, puis fil relu depuis le serveur, que la modification réussisse ou non ; un échec affiche le message du serveur sous le sélecteur.
 
 **À venir**
 
-- **Tags** : sélecteur à l'écriture et modification sur place, pour les agents ; badge sur le message.
 - **Avec la gestion des documents** : le panneau « Échanges » passe en surcouche, ouvert par un bouton flottant, par-dessus la navigation dans les documents ; le sommaire (ancres et pièces jointes, pour sauter à un moment du fil) et le filtre par phase arrivent avec les ancres ; le sélecteur de tag est prérempli avec la phase en cours.
 
 ## Implémentation
@@ -262,7 +265,7 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 | Porte de mise en service         | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                      | fait    |
 | Interface : page et fil          | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                        | fait    |
 | Interface : pièces jointes       | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                            | fait    |
-| Interface : tags                 | sélecteur, badge, modification                                                                                                         | à faire |
+| Interface : tags                 | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                     | fait    |
 | Notifications                    | `MessageNotification`, `StructureSubscription`, Brevo transactionnel, cron de reprise, webhook des rebonds, compteur de non-lus        | à faire |
 | Triggers d'ajout seul            | migration dédiée                                                                                                                       | à faire |
 | Empreinte SHA-256                | `FileUpload.sha256`                                                                                                                    | à faire |

@@ -61,6 +61,7 @@ export default async function TarificationPage({
           isOperateur={overview.isOperateur}
           isSuperAdmin={overview.participant.isSuperAdmin}
           isCampaignOpen={isCampaignOpen(year)}
+          tags={overview.tags}
         />
       </div>
     </main>

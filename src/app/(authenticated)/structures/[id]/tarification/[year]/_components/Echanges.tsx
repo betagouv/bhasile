@@ -5,7 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
-import { ConversationVisibility } from "@/types/conversation.type";
+import {
+  ConversationTag,
+  ConversationVisibility,
+} from "@/types/conversation.type";
 
 import { Conversation } from "./Conversation";
 
@@ -16,6 +19,7 @@ export const Echanges = ({
   isOperateur,
   isSuperAdmin,
   isCampaignOpen,
+  tags,
 }: Props): ReactElement => {
   const searchParams = useSearchParams();
   const navigateWithParams = useSearchParamsNavigation();
@@ -43,6 +47,8 @@ export const Echanges = ({
       currentUserId={currentUserId}
       isSuperAdmin={isSuperAdmin}
       isCampaignOpen={isCampaignOpen}
+      tags={tags}
+      canTag={!isOperateur}
     />
   );
 
@@ -78,4 +84,5 @@ type Props = {
   isOperateur: boolean;
   isSuperAdmin: boolean;
   isCampaignOpen: boolean;
+  tags: ConversationTag[];
 };

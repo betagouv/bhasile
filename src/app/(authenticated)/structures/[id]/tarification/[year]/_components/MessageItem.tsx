@@ -2,10 +2,17 @@ import { Fragment, ReactElement } from "react";
 
 import { AuthorLevel } from "@/generated/prisma/enums";
 import { MessageApiRead } from "@/schemas/api/message.schema";
+import { ConversationTag } from "@/types/conversation.type";
 
 import { MessageAttachment } from "./MessageAttachment";
+import { MessageTag } from "./MessageTag";
 
-export const MessageItem = ({ message }: Props): ReactElement => (
+export const MessageItem = ({
+  message,
+  tags,
+  canTag,
+  onTagChange,
+}: Props): ReactElement => (
   <li className="bg-white p-4 rounded border border-solid border-default-grey">
     <p className="text-sm mb-1">
       <strong>{message.author.name ?? "Utilisateur"}</strong>
@@ -16,6 +23,12 @@ export const MessageItem = ({ message }: Props): ReactElement => (
         {formatMessageDate(message.createdAt)}
       </time>
     </p>
+    <MessageTag
+      tagKey={message.tagKey}
+      tags={tags}
+      canTag={canTag}
+      onTagChange={onTagChange}
+    />
     {message.text && <p className="whitespace-pre-wrap mb-0">{message.text}</p>}
     {message.attachments.length > 0 && (
       <ul
@@ -60,4 +73,7 @@ const formatMessageDate = (isoDate: string): string =>
 
 type Props = {
   message: MessageApiRead;
+  tags: ConversationTag[];
+  canTag: boolean;
+  onTagChange: (tagKey: string | null) => Promise<void>;
 };

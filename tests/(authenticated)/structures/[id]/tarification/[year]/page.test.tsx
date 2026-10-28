@@ -56,6 +56,7 @@ const overview = {
   participant: { id: 3, level: "DEPARTEMENT", isSuperAdmin: false },
   isOperateur: false,
   campaignYears: [2027, 2026, 2024],
+  tags: [{ key: "L48", label: "L48 et procédure contradictoire" }],
 };
 
 const renderPage = async (id: string, year: string) =>
@@ -80,6 +81,7 @@ describe("TarificationPage", () => {
         year: 2026,
         currentUserId: 3,
         isCampaignOpen: true,
+        tags: overview.tags,
       })
     );
   });

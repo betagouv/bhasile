@@ -11,6 +11,7 @@ import { getEffectiveGrants } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
 import { canAccessTarification } from "@/lib/casl";
+import type { ConversationTag } from "@/types/conversation.type";
 import { SessionUser } from "@/types/global";
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
@@ -67,6 +68,7 @@ export const getTarificationOverview = async (
     campaignYears: getSelectableCampaignYears(
       tarifications.map((tarification) => tarification.campaign.year)
     ),
+    tags: TARIFICATION_CONVERSATION_TAGS,
   };
 };
 
@@ -220,6 +222,7 @@ export type TarificationOverview = {
   participant: TarificationParticipant;
   isOperateur: boolean;
   campaignYears: number[];
+  tags: ConversationTag[];
 };
 
 export type TarificationParticipant = {
