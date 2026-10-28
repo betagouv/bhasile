@@ -19,6 +19,7 @@ describe("toSessionGrant", () => {
       role: AccessRole.ADMIN,
       isNational: true,
       departementNumeros: [],
+      regionIds: [],
       structureIds: [],
     });
   });
@@ -27,6 +28,7 @@ describe("toSessionGrant", () => {
     const grant = buildGrant({
       scope: GrantScope.REGION,
       region: {
+        id: 3,
         name: "Bretagne",
         departements: [{ numero: "29" }, { numero: "35" }],
       },
@@ -35,6 +37,7 @@ describe("toSessionGrant", () => {
     expect(toSessionGrant(grant)).toMatchObject({
       isNational: false,
       departementNumeros: ["29", "35"],
+      regionIds: [3],
       structureIds: [],
     });
   });
@@ -42,10 +45,13 @@ describe("toSessionGrant", () => {
   it("résout un binôme départemental en un seul département", () => {
     const grant = buildGrant({
       scope: GrantScope.DEPARTEMENT,
-      departement: { numero: "75", name: "Paris" },
+      departement: { numero: "75", name: "Paris", regionId: 8 },
     });
 
-    expect(toSessionGrant(grant).departementNumeros).toEqual(["75"]);
+    expect(toSessionGrant(grant)).toMatchObject({
+      departementNumeros: ["75"],
+      regionIds: [8],
+    });
   });
 
   it("résout un binôme structure en une seule structure", () => {

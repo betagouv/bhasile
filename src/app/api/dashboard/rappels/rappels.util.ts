@@ -1,5 +1,9 @@
 import dayjs from "dayjs";
 
+import {
+  getCpomDepartementNumeros,
+  matchesCpomFilters,
+} from "@/app/api/cpoms/cpom.util";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   getDatesConvention,
@@ -8,13 +12,13 @@ import {
 } from "@/app/api/structures/structure.util";
 import { RAPPEL_TASK_LABEL } from "@/app/utils/rappel.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { canUpdateDepartement } from "@/lib/casl";
 import {
   DashboardRappel,
   RappelCriticite,
   RappelTaskType,
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
+import { ParsedFilters } from "@/utils/filters.util";
 
 import { isStructureInDashboardScope } from "../dashboard.util";
 import {
@@ -126,9 +130,7 @@ const findCurrentCpom = (
       return {
         id: cpom.id,
         label: cpom.name ?? cpom.operateur?.name ?? null,
-        departements: cpom.departements.map(
-          (cpomDepartement) => cpomDepartement.departement.numero
-        ),
+        departements: getCpomDepartementNumeros(cpom),
       };
     }
   }
@@ -138,11 +140,8 @@ const findCurrentCpom = (
 const getEvaluationLabel = (criticite: RappelCriticite): string =>
   criticite === "URGENT" ? "Évaluation à mener" : "Évaluation à lancer";
 
-export type BuildRappelsOptions = {
+export type BuildRappelsOptions = ParsedFilters & {
   user: SessionUser;
-  departementList: string[];
-  operateurList: string[];
-  typeList: string[];
   now: Date;
 };
 
@@ -151,7 +150,7 @@ export const buildRappels = (
   cpoms: RappelCpom[],
   options: BuildRappelsOptions
 ): DashboardRappel[] => {
-  const { user, departementList, operateurList, now } = options;
+  const { now } = options;
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
@@ -239,25 +238,10 @@ export const buildRappels = (
   }
 
   for (const cpom of cpoms) {
-    const departements = cpom.departements.map(
-      (cpomDepartement) => cpomDepartement.departement.numero
-    );
-    if (!departements.some((dept) => canUpdateDepartement(user, dept))) {
+    if (!matchesCpomFilters(cpom, options)) {
       continue;
     }
-    if (
-      departementList.length > 0 &&
-      !departements.some((dept) => departementList.includes(dept))
-    ) {
-      continue;
-    }
-    const operateurId = cpom.operateur?.id ?? null;
-    if (
-      operateurList.length > 0 &&
-      (operateurId === null || !operateurList.includes(String(operateurId)))
-    ) {
-      continue;
-    }
+    const departements = getCpomDepartementNumeros(cpom);
 
     const [, dateEnd] = getDatesConvention(cpom);
     const criticite = getCriticiteForDeadline(
