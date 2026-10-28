@@ -64,8 +64,8 @@ const replaceEmailPatternGrants = async (
 ) => {
   const emailPattern = await prisma.emailPattern.upsert({
     where: { pattern },
-    update: {},
-    create: { pattern },
+    update: { isAgent: true },
+    create: { pattern, isAgent: true },
     select: { id: true },
   });
 
