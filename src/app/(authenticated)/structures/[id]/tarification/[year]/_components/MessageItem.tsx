@@ -3,6 +3,8 @@ import { Fragment, ReactElement } from "react";
 import { AuthorLevel } from "@/generated/prisma/enums";
 import { MessageApiRead } from "@/schemas/api/message.schema";
 
+import { MessageAttachment } from "./MessageAttachment";
+
 export const MessageItem = ({ message }: Props): ReactElement => (
   <li className="bg-white p-4 rounded border border-solid border-default-grey">
     <p className="text-sm mb-1">
@@ -14,7 +16,17 @@ export const MessageItem = ({ message }: Props): ReactElement => (
         {formatMessageDate(message.createdAt)}
       </time>
     </p>
-    <p className="whitespace-pre-wrap mb-0">{message.text}</p>
+    {message.text && <p className="whitespace-pre-wrap mb-0">{message.text}</p>}
+    {message.attachments.length > 0 && (
+      <ul
+        aria-label="Pièces jointes du message"
+        className="list-none p-0 mt-2 mb-0 flex flex-col gap-1"
+      >
+        {message.attachments.map((attachment) => (
+          <MessageAttachment key={attachment.id} attachment={attachment} />
+        ))}
+      </ul>
+    )}
     {message.receipts.length > 0 && (
       <p className="text-xs text-mention-grey mt-2 mb-0">
         Lu par{" "}
