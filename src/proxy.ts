@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { withAuth } from "next-auth/middleware";
 
-import { isOperateurUser } from "./app/utils/session.util";
 import { canAccessApp } from "./lib/casl";
+import { isOperateurUser } from "./lib/casl/rules";
 import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,

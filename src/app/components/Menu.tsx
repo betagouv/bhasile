@@ -6,13 +6,13 @@ import { useSession } from "next-auth/react";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 
 import { SessionUser } from "@/types/global";
-
 import {
   MenuGroup,
   MenuGroupId,
   MenuItem,
   resolveMenuItems,
-} from "../utils/menu.util";
+} from "@/utils/menu.util";
+
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
 
