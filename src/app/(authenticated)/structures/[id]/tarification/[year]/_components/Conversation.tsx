@@ -5,6 +5,7 @@ import { ReactElement, useEffect, useRef } from "react";
 
 import Loader from "@/app/components/ui/Loader";
 import { useConversationMessages } from "@/hooks/useConversationMessages";
+import { MessageDraft } from "@/hooks/useMessageDraft";
 import { ConversationVisibility } from "@/types/conversation.type";
 
 import { MessageComposer } from "./MessageComposer";
@@ -18,6 +19,7 @@ export const Conversation = ({
   currentUserId,
   isSuperAdmin,
   isCampaignOpen,
+  draft,
 }: Props): ReactElement => {
   const { messages, hasLoadingError, hasLostAccess, postMessage, markAsRead } =
     useConversationMessages({ structureId, year, visibility });
@@ -118,7 +120,7 @@ export const Conversation = ({
       {isReadOnly ? (
         <ReadOnlyNotice year={year} isCampaignOpen={isCampaignOpen} />
       ) : (
-        <MessageComposer onSend={postMessage} />
+        <MessageComposer draft={draft} onSend={postMessage} />
       )}
     </div>
   );
@@ -133,4 +135,5 @@ type Props = {
   currentUserId: number;
   isSuperAdmin: boolean;
   isCampaignOpen: boolean;
+  draft: MessageDraft;
 };
