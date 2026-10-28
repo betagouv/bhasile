@@ -13,6 +13,10 @@ const mockCreateStructureEvent = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
 const mockGetAdressesApiRead = vi.fn();
 
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({
+  findOperateurFiliales: vi.fn(async () => []),
+}));
+
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
 }));

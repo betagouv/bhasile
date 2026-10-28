@@ -23,11 +23,10 @@ export async function GET(request: NextRequest) {
   const search = request.nextUrl.searchParams.get("search");
   const pageParam = Number(request.nextUrl.searchParams.get("page"));
   const page = Number.isInteger(pageParam) ? pageParam : null;
-  const type = request.nextUrl.searchParams.get("type");
-  const bati = request.nextUrl.searchParams.get("bati");
-  const placesAutorisees = request.nextUrl.searchParams.get("places");
+  const types = request.nextUrl.searchParams.get("types");
   const departements = request.nextUrl.searchParams.get("departements");
   const operateurs = request.nextUrl.searchParams.get("operateurs");
+  const operateurName = request.nextUrl.searchParams.get("operateurName");
   const column = parseStructureColumn(
     request.nextUrl.searchParams.get("column")
   );
@@ -41,13 +40,12 @@ export async function GET(request: NextRequest) {
   const searchProps = {
     search,
     page,
-    type,
-    bati,
-    placesAutorisees,
+    types,
     departements,
     column,
     direction,
     operateurs,
+    operateurName,
     selection,
     isFinalised,
     isClosed,

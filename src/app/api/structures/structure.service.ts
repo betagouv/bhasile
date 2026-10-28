@@ -38,6 +38,7 @@ import {
 import { locateAdresses } from "../adresses/ban.service";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
+import { resolveFilters } from "../filters/filters.service";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
@@ -192,13 +193,16 @@ const getSortedStructureRows = cache(
     )
 );
 
-const filterAndSortStructureRows = (
+const filterAndSortStructureRows = async (
   rows: StructureListComputedRow[],
   props: SearchProps
-): StructureListComputedRow[] => {
-  const filtered = filterStructureRows(rows, props, {
-    includeNonVisible: Boolean(props.selection),
-  });
+): Promise<StructureListComputedRow[]> => {
+  const filtered = filterStructureRows(
+    rows,
+    props,
+    await resolveFilters(props),
+    { includeNonVisible: Boolean(props.selection) }
+  );
 
   return sortStructureRows(
     filtered,
@@ -258,7 +262,7 @@ export const getFullStructuresForOperateur = async (
   props: SearchProps
 ): Promise<FullStructures> =>
   buildFullStructures(
-    filterAndSortStructureRows(await computeAllStructureRows({}), props),
+    await filterAndSortStructureRows(await computeAllStructureRows({}), props),
     props
   );
 
@@ -525,24 +529,4 @@ const dbStructureToApiRead = (
     isCurrentVersionFromTransformation,
     structureVersions: undefined,
   }) as StructureApiRead;
-};
-
-export const getBoundsPlacesAutorisees = async (
-  user: SessionUser | undefined
-): Promise<{
-  min: number;
-  max: number;
-}> => {
-  const rows = await computeAllStructureRows(getReadableStructureWhere(user));
-  const places = rows
-    .map((row) => row.latestNonNullPlacesAutorisees)
-    .filter(
-      (placesAutorisees): placesAutorisees is number =>
-        placesAutorisees !== null
-    );
-
-  if (places.length === 0) {
-    return { min: 0, max: 0 };
-  }
-  return { min: Math.min(...places), max: Math.max(...places) };
 };

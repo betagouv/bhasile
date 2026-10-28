@@ -1,5 +1,6 @@
 // Remplir la table EvenementIndesirableGrave avec les EIG venant de l'API de Démarche Numérique
-// Usage: yarn script eig-fetch
+// Usage: yarn script eig-fetch [all]
+// all : récupère tous les dossiers au lieu des 7 derniers jours
 
 import "dotenv/config";
 
@@ -7,6 +8,7 @@ import { createPrismaClient } from "@/prisma-client";
 
 import {
   cleanDate,
+  DEFAULT_WINDOW_TO_FETCH_DAYS,
   DNDossierNode,
   DNField,
   DNFieldDescriptor,
@@ -18,6 +20,8 @@ import {
 const prisma = createPrismaClient();
 
 const EIG_DEMARCHE_NUMBER = 98768;
+
+const shouldFetchAll = process.argv[2] === "all";
 
 type EIGDossierNode = DNDossierNode & { champs: DNField[] };
 
@@ -56,6 +60,7 @@ const getEIGsFromDN = async (): Promise<EIGDossierNode[]> => {
     demarcheNumber: EIG_DEMARCHE_NUMBER,
     champsFragment: FIELD_FRAGMENT,
     label: "EIGs",
+    windowToFetchDays: shouldFetchAll ? null : DEFAULT_WINDOW_TO_FETCH_DAYS,
   });
 
   return dossiers.filter(isIn303);
