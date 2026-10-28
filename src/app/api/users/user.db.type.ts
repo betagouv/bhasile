@@ -18,8 +18,9 @@ export const userWithGrantsSelect = {
   id: true,
   operateurId: true,
   isSuperAdmin: true,
+  isAgent: true,
   grants: { select: grantSelect },
-  emailPattern: { select: { grants: { select: grantSelect } } },
+  emailPattern: { select: { isAgent: true, grants: { select: grantSelect } } },
 } satisfies Prisma.UserSelect;
 
 export type GrantDb = Prisma.GrantGetPayload<{

@@ -27,6 +27,7 @@ import {
   getReadableDepartementNumeros,
   getReadableStructureWhere,
   getUpdatableCpomWhere,
+  isAgent,
 } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
@@ -295,25 +296,13 @@ describe("Permissions : CPOM et opérateurs", () => {
     ).toBe(true);
   });
 
-  it("autorise un admin opérateur à modifier son seul opérateur", () => {
+  it("refuse à un user opérateur, même admin, de modifier son opérateur", () => {
     const ability = defineAbilityFor(
       createSessionUser({
         operateurId: 7,
         grants: [
           createSessionGrant({ role: AccessRole.ADMIN, isNational: true }),
         ],
-      })
-    );
-
-    expect(ability.can("update", buildOperateur(7))).toBe(true);
-    expect(ability.can("update", buildOperateur(8))).toBe(false);
-  });
-
-  it("refuse à un éditeur opérateur de modifier son opérateur", () => {
-    const ability = defineAbilityFor(
-      createSessionUser({
-        operateurId: 7,
-        grants: [createSessionGrant({ isNational: true })],
       })
     );
 
@@ -372,7 +361,7 @@ describe("Permissions : canSaveCpom", () => {
 });
 
 describe("Permissions : canUpdateOperateur", () => {
-  it("autorise un éditeur, refuse un lecteur et limite un admin opérateur au sien", () => {
+  it("autorise un agent éditeur, refuse un lecteur et un admin opérateur", () => {
     const lecteur = createSessionUser({
       grants: [
         createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
@@ -387,8 +376,7 @@ describe("Permissions : canUpdateOperateur", () => {
 
     expect(canUpdateOperateur(createDepartementalAgent(["13"]), 7)).toBe(true);
     expect(canUpdateOperateur(lecteur, 7)).toBe(false);
-    expect(canUpdateOperateur(operateurAdmin, 7)).toBe(true);
-    expect(canUpdateOperateur(operateurAdmin, 8)).toBe(false);
+    expect(canUpdateOperateur(operateurAdmin, 7)).toBe(false);
   });
 });
 
@@ -588,6 +576,49 @@ describe("Permissions : lecture", () => {
     expect(getReadableStructureWhere(user)).toEqual({
       OR: [{ operateurId: 7 }],
     });
+  });
+});
+
+describe("Permissions : contact non agent", () => {
+  const contact = createSessionUser({
+    isAgent: false,
+    grants: [
+      createSessionGrant({ role: AccessRole.LECTEUR, structureIds: [12] }),
+    ],
+  });
+
+  it("lit la seule structure dont il est contact, sans pouvoir la modifier", () => {
+    const ability = defineAbilityFor(contact);
+
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 12,
+        departementAdministratif: "83",
+      })
+    ).toBe(true);
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 13,
+        departementAdministratif: "83",
+      })
+    ).toBe(false);
+    expect(
+      canUpdateStructure(contact, { id: 12, departementAdministratif: "83" })
+    ).toBe(false);
+  });
+
+  it("ne lit aucun CPOM, même lié à sa structure", () => {
+    expect(
+      canAbilityReadCpom(defineAbilityFor(contact), {
+        departements: [],
+        structures: [{ structureId: 12 }],
+      })
+    ).toBe(false);
+  });
+
+  it("accède à l'application grâce à ses droits de contact", () => {
+    expect(canAccessApp(contact)).toBe(true);
+    expect(isAgent(contact)).toBe(false);
   });
 });
 

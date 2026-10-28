@@ -31,7 +31,7 @@ vi.mock("@/app/api/tarifications/tarification.service", () => ({
 }));
 
 const participant = { id: 3, level: "DEPARTEMENT", isSuperAdmin: false };
-const reader = { isOperateur: false };
+const reader = { isAgent: true };
 const params = Promise.resolve({ structureId: "42", year: "2027" });
 
 const buildGetRequest = (visibility: string): NextRequest =>
