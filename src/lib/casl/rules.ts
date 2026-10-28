@@ -8,7 +8,7 @@ import type {
   Structure,
   User,
 } from "@/generated/prisma/client";
-import { AccessRole } from "@/generated/prisma/enums";
+import { AccessRole, CpomGranularity } from "@/generated/prisma/enums";
 import { SessionGrant, SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -131,6 +131,7 @@ const getStructureConditions = ({
 const getCpomConditions = ({
   isNational,
   departementNumeros,
+  regionIds,
   structureIds,
 }: SessionGrant): Prisma.CpomWhereInput[] => {
   if (isNational) {
@@ -146,6 +147,14 @@ const getCpomConditions = ({
                 departement: { is: { numero: { in: departementNumeros } } },
               },
             },
+          },
+        ]
+      : []),
+    ...(regionIds.length > 0
+      ? [
+          {
+            granularity: CpomGranularity.REGIONALE,
+            regionId: { in: regionIds },
           },
         ]
       : []),

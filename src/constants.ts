@@ -28,6 +28,8 @@ export const LIST_NAVIGATION_KEY = "list-navigation";
 export const OPERATEURS_STORAGE_KEY = "operateurs-query";
 export const STRUCTURES_STORAGE_KEY = "structures-query";
 
+export const FILTERS_COOKIE = "filtres";
+
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 

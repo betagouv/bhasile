@@ -102,9 +102,9 @@ describe("getEveryColumn", () => {
 
 describe("isYearRealisee / isYearPrevisionnelle", () => {
   it("rejette un réalisé sur l'année courante, non close", () => {
-    expect(isYearRealisee([rempli(CURRENT_YEAR, "REALISE")], CURRENT_YEAR)).toBe(
-      false
-    );
+    expect(
+      isYearRealisee([rempli(CURRENT_YEAR, "REALISE")], CURRENT_YEAR)
+    ).toBe(false);
   });
 
   it("détecte un réalisé complet", () => {

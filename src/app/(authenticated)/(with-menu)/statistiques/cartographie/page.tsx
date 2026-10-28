@@ -9,40 +9,31 @@ import {
   DEFAULT_CARTOGRAPHIE_GRANULARITE,
   DEFAULT_CARTOGRAPHIE_INDICATEUR,
 } from "@/schemas/api/statistique-cartographie.schema";
+import { Filters } from "@/types/filters.type";
+import {
+  getFiltersFromSearchParams,
+  toFiltersSearchParams,
+} from "@/utils/filters.util";
 
 import { StatistiquesCartographie } from "../_components/StatistiquesCartographie";
 import { StatistiquesHeader } from "../_components/StatistiquesHeader";
 import { getStatistiques } from "../getStatistiques";
 
 type GetStatistiquesCartographieArgs = {
-  departements?: string;
-  operateurs?: string;
-  types?: string;
+  filters: Filters;
   granularite: string;
   indicateur: string;
   annee: string;
 };
 
 async function getStatistiquesCartographie({
-  departements,
-  operateurs,
-  types,
+  filters,
   granularite,
   indicateur,
   annee,
 }: GetStatistiquesCartographieArgs): Promise<CartographieApiRead> {
   const baseUrl = process.env.NEXT_URL || "";
-  const params = new URLSearchParams();
-
-  if (departements) {
-    params.append("departements", departements);
-  }
-  if (operateurs) {
-    params.append("operateurs", operateurs);
-  }
-  if (types) {
-    params.append("types", types);
-  }
+  const params = toFiltersSearchParams(filters);
 
   params.append("granularite", granularite);
   params.append("indicateur", indicateur);
@@ -70,19 +61,7 @@ export default async function CartographiePage({
   searchParams: Promise<SearchParams>;
 }) {
   const awaitedSearchParams = await searchParams;
-
-  const departements =
-    typeof awaitedSearchParams.departements === "string"
-      ? awaitedSearchParams.departements
-      : undefined;
-  const operateurs =
-    typeof awaitedSearchParams.operateurs === "string"
-      ? awaitedSearchParams.operateurs
-      : undefined;
-  const types =
-    typeof awaitedSearchParams.types === "string"
-      ? awaitedSearchParams.types
-      : undefined;
+  const filters = getFiltersFromSearchParams(awaitedSearchParams);
 
   const granularite =
     typeof awaitedSearchParams.granularite === "string"
@@ -101,18 +80,12 @@ export default async function CartographiePage({
 
   const [statistiquesCartographie, statistiques] = await Promise.all([
     getStatistiquesCartographie({
-      departements,
-      operateurs,
-      types,
+      filters,
       granularite,
       indicateur,
       annee,
     }),
-    getStatistiques({
-      departements,
-      operateurs,
-      types,
-    }),
+    getStatistiques(filters),
   ]);
 
   return (

@@ -5,7 +5,9 @@ import { buildZoneSummary } from "@/app/utils/zone.util";
 describe("zone util", () => {
   describe("buildZoneSummary", () => {
     it("affiche le nom de la région quand tous ses départements sont sélectionnés", () => {
-      expect(buildZoneSummary(["14", "27", "50", "61", "76"])).toBe("Normandie");
+      expect(buildZoneSummary(["14", "27", "50", "61", "76"])).toBe(
+        "Normandie"
+      );
     });
 
     it("affiche les noms des départements quand la région est partielle", () => {
@@ -18,24 +20,14 @@ describe("zone util", () => {
     });
 
     it("place les régions complètes avant les départements isolés", () => {
-      expect(
-        buildZoneSummary(["14", "27", "50", "61", "76", "29", "35"])
-      ).toBe("Normandie +2");
+      expect(buildZoneSummary(["14", "27", "50", "61", "76", "29", "35"])).toBe(
+        "Normandie +2"
+      );
     });
 
     it("trie les régions complètes par ordre alphabétique", () => {
       expect(
-        buildZoneSummary([
-          "14",
-          "27",
-          "50",
-          "61",
-          "76",
-          "22",
-          "29",
-          "35",
-          "56",
-        ])
+        buildZoneSummary(["14", "27", "50", "61", "76", "22", "29", "35", "56"])
       ).toBe("Bretagne +1");
     });
 
