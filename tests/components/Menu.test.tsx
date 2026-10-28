@@ -115,6 +115,23 @@ describe("Menu", () => {
     expect(screen.getByText("Voir mon compte")).toBeInTheDocument();
   });
 
+  it("replie puis redéploie Structures et opérateurs au clic", () => {
+    // GIVEN
+    render(<Menu />);
+
+    // WHEN
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // THEN
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+
+    // WHEN
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // THEN
+    expect(screen.getByText("Voir les structures")).toBeInTheDocument();
+  });
+
   it("déploie Paramètres sur une page de paramètres", () => {
     // GIVEN
     mockPathname.mockReturnValue("/parametres/compte");
@@ -133,13 +150,30 @@ describe("Menu", () => {
     ).toHaveAttribute("aria-current", "page");
   });
 
-  it("redéploie Structures et opérateurs en quittant les paramètres", () => {
+  it("garde Structures et opérateurs replié en changeant de page", () => {
+    // GIVEN
+    const { rerender } = render(<Menu />);
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // WHEN
+    mockPathname.mockReturnValue("/statistiques");
+    rerender(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+  });
+
+  it("déploie le groupe de la page visitée en changeant de page", () => {
     // GIVEN
     mockPathname.mockReturnValue("/parametres/compte");
     const { rerender } = render(<Menu />);
 
     // WHEN
-    mockPathname.mockReturnValue("/statistiques");
+    mockPathname.mockReturnValue("/cpoms");
     rerender(<Menu />);
 
     // THEN

@@ -14,6 +14,7 @@ import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
+import { resolveFilters } from "../filters/filters.service";
 import { findRegionIdByName } from "../regions/region.repository";
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
 import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";
@@ -25,9 +26,9 @@ import {
 } from "./cpom.repository";
 import {
   buildCpomListItem,
-  filterCpomsByDepartement,
   getCpomDepartements,
   getDatesConvention,
+  matchesCpomFilters,
   sortValueForCpomColumn,
 } from "./cpom.util";
 
@@ -69,12 +70,21 @@ export const getCpoms = cache(
   async ({
     page,
     departements,
+    operateurs,
+    types,
     column,
     direction,
     user,
   }: CpomsQuery): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
     const readableCpoms = await findAllCpoms(getReadableCpomWhere(user));
-    const filtered = filterCpomsByDepartement(readableCpoms, departements);
+    const filters = await resolveFilters({
+      departements,
+      operateurs,
+      types,
+    });
+    const filtered = readableCpoms.filter((cpom) =>
+      matchesCpomFilters(cpom, filters)
+    );
     const sorted = sortRows(
       filtered,
       (cpom) => sortValueForCpomColumn(cpom, column ?? "region"),

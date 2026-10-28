@@ -1142,9 +1142,7 @@ describe("structure.repository db integration", () => {
     const baseSearch: SearchProps = {
       search: null,
       page: null,
-      type: null,
-      bati: null,
-      placesAutorisees: null,
+      types: null,
       departements: null,
       operateurs: null,
       column: null,
@@ -1281,7 +1279,7 @@ describe("structure.repository db integration", () => {
       // AND: filtering by the resolved type includes it
       const byType = await listStructures({
         search: structure.codeBhasile,
-        type: StructureType.CADA,
+        types: StructureType.CADA,
       });
       expect(
         byType.some(
@@ -1293,7 +1291,7 @@ describe("structure.repository db integration", () => {
       // AND: filtering by another type excludes it
       const byOtherType = await listStructures({
         search: structure.codeBhasile,
-        type: StructureType.HUDA,
+        types: StructureType.HUDA,
       });
       expect(
         byOtherType.some(
@@ -1378,9 +1376,7 @@ describe("structure.repository db integration", () => {
     const baseSearch: SearchProps = {
       search: null,
       page: null,
-      type: null,
-      bati: null,
-      placesAutorisees: null,
+      types: null,
       departements: null,
       operateurs: null,
       column: null,

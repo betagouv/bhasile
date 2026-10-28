@@ -9,7 +9,10 @@ const regionWithDepartementsInclude = {
 } satisfies Prisma.RegionDefaultArgs;
 
 export const cpomListInclude = {
-  structures: { where: { structure: includedStructureWhere } },
+  structures: {
+    where: { structure: includedStructureWhere },
+    include: { structure: { select: { type: true } } },
+  },
   budgets: true,
   operateur: true,
   region: regionWithDepartementsInclude,

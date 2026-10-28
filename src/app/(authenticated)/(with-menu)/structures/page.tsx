@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
@@ -13,10 +12,13 @@ import {
   parseStructureColumn,
   SearchParams,
 } from "@/app/utils/search-params.util";
+import { CallToActionBanner } from "@/components/CallToActionBanner";
+import { PageHeader } from "@/components/PageHeader";
 import { STRUCTURES_STORAGE_KEY } from "@/constants";
 import { authOptions } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 import { StructuresQuery } from "@/types/structure-list.type";
+import { getFiltersFromSearchParams } from "@/utils/filters.util";
 
 import { Toolbar } from "./_components/Toolbar";
 import { VisualizationTabs } from "./_components/VisualizationTabs";
@@ -52,33 +54,23 @@ export default async function Structures({
         targetPath="/structures"
         storageKey={STRUCTURES_STORAGE_KEY}
       />
-      <div className="flex justify-between items-center px-6 border-b border-b-border-default-grey min-h-[4.35rem] sticky top-0 bg-lifted-grey z-10">
-        <div className="flex items-center">
-          <h2
-            className="text-title-blue-france fr-h5 mb-0 pr-4"
-            id="structures-titre"
-          >
-            Structures d’hébergement
-          </h2>
-          <VisualizationTabs vue={query.vue} />
-        </div>
-        <div className="flex items-center gap-4">
-          <Link
-            className="fr-btn fr-btn--secondary flex gap-2"
-            href="/structures/transformation/type?type=huda"
-          >
-            <span className="fr-icon-arrow-left-right-line fr-icon--sm" />
-            Transformer HUDA en CADA
-          </Link>
-          <Link
-            className="fr-btn fr-btn--secondary flex gap-2"
-            href="/structures/transformation/type?type=creation"
-          >
-            <span className="fr-icon-add-line fr-icon--sm" />
-            Créer une structure
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        title="Structures"
+        titleId="structures-titre"
+        tabs={<VisualizationTabs vue={query.vue} />}
+        menuActions={[
+          {
+            label: "Créer une structure",
+            href: "/structures/transformation/type?type=creation",
+          },
+        ]}
+      >
+        <CallToActionBanner
+          message="Vous pouvez dès à présent renseigner les transformations actées des structures HUDA en CADA."
+          label="Transformer HUDA en CADA"
+          href="/structures/transformation/type?type=huda"
+        />
+      </PageHeader>
 
       {query.vue === "tableau" ? (
         <>
@@ -145,11 +137,7 @@ const buildStructuresQuery = (
     mode: parseMapMode(getFirstParam(params.mode), isClosed),
     search: getFirstParam(params.search),
     page: getPageParam(params, "page"),
-    type: getFirstParam(params.type),
-    bati: getFirstParam(params.bati),
-    placesAutorisees: getFirstParam(params.places),
-    departements: getFirstParam(params.departements),
-    operateurs: getFirstParam(params.operateurs),
+    ...getFiltersFromSearchParams(params),
     column: parseStructureColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
     isClosed,

@@ -3,12 +3,13 @@ import { describe, expect, it } from "vitest";
 import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import {
   buildCpomListItem,
-  filterCpomsByDepartement,
   getCpomDepartementNumeros,
+  matchesCpomFilters,
   shouldEndCpomStructureAtFermeture,
   sortValueForCpomColumn,
 } from "@/app/api/cpoms/cpom.util";
 import { CpomColumn } from "@/types/ListColumn";
+import { parseFilters } from "@/utils/filters.util";
 
 const makeCpom = (overrides: Record<string, unknown>): CpomDbList =>
   ({
@@ -63,7 +64,18 @@ describe("getCpomDepartementNumeros", () => {
   });
 });
 
-describe("filterCpomsByDepartement", () => {
+const filterCpoms = (
+  cpoms: CpomDbList[],
+  filters: Parameters<typeof parseFilters>[0]
+): CpomDbList[] =>
+  cpoms.filter((cpom) => matchesCpomFilters(cpom, parseFilters(filters)));
+
+describe("matchesCpomFilters", () => {
+  const filterCpomsByDepartement = (
+    cpomsToFilter: CpomDbList[],
+    departements: string | null
+  ): CpomDbList[] => filterCpoms(cpomsToFilter, { departements });
+
   const cpoms = [
     withDepartements(1, ["75"]),
     withDepartements(2, ["92"]),
@@ -112,6 +124,34 @@ describe("filterCpomsByDepartement", () => {
     const corsica = [withDepartements(1, ["2A"]), withDepartements(2, ["2B"])];
     expect(
       filterCpomsByDepartement(corsica, "2A").map((cpom) => cpom.id)
+    ).toEqual([1]);
+  });
+
+  it("garde les cpoms de l'opérateur filtré contenant au moins une structure du type filtré", () => {
+    const cpomsWithTypes = [
+      makeCpom({
+        id: 1,
+        operateur: { id: 10, name: "A" },
+        structures: [
+          { structure: { type: "CADA" } },
+          { structure: { type: "HUDA" } },
+        ],
+      }),
+      makeCpom({
+        id: 2,
+        operateur: { id: 10, name: "A" },
+        structures: [{ structure: { type: "CPH" } }],
+      }),
+      makeCpom({
+        id: 3,
+        operateur: { id: 20, name: "B" },
+        structures: [{ structure: { type: "HUDA" } }],
+      }),
+    ];
+    expect(
+      filterCpoms(cpomsWithTypes, { operateurs: "10", types: "HUDA" }).map(
+        (cpom) => cpom.id
+      )
     ).toEqual([1]);
   });
 });

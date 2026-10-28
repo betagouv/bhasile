@@ -1,6 +1,9 @@
 import dayjs from "dayjs";
 
-import { getCpomDepartementNumeros } from "@/app/api/cpoms/cpom.util";
+import {
+  getCpomDepartementNumeros,
+  matchesCpomFilters,
+} from "@/app/api/cpoms/cpom.util";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   getDatesConvention,
@@ -15,6 +18,7 @@ import {
   RappelTaskType,
 } from "@/types/dashboard.type";
 import { SessionUser } from "@/types/global";
+import { ParsedFilters } from "@/utils/filters.util";
 
 import { isStructureInDashboardScope } from "../dashboard.util";
 import {
@@ -136,11 +140,8 @@ const findCurrentCpom = (
 const getEvaluationLabel = (criticite: RappelCriticite): string =>
   criticite === "URGENT" ? "Évaluation à mener" : "Évaluation à lancer";
 
-export type BuildRappelsOptions = {
+export type BuildRappelsOptions = ParsedFilters & {
   user: SessionUser;
-  departementList: string[];
-  operateurList: string[];
-  typeList: string[];
   now: Date;
 };
 
@@ -149,7 +150,7 @@ export const buildRappels = (
   cpoms: RappelCpom[],
   options: BuildRappelsOptions
 ): DashboardRappel[] => {
-  const { departementList, operateurList, now } = options;
+  const { now } = options;
   const rappels: DashboardRappel[] = [];
 
   for (const structure of structures) {
@@ -237,20 +238,10 @@ export const buildRappels = (
   }
 
   for (const cpom of cpoms) {
+    if (!matchesCpomFilters(cpom, options)) {
+      continue;
+    }
     const departements = getCpomDepartementNumeros(cpom);
-    if (
-      departementList.length > 0 &&
-      !departements.some((dept) => departementList.includes(dept))
-    ) {
-      continue;
-    }
-    const operateurId = cpom.operateur?.id ?? null;
-    if (
-      operateurList.length > 0 &&
-      (operateurId === null || !operateurList.includes(String(operateurId)))
-    ) {
-      continue;
-    }
 
     const [, dateEnd] = getDatesConvention(cpom);
     const criticite = getCriticiteForDeadline(

@@ -4,7 +4,7 @@ import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { useEffect, useMemo, useRef } from "react";
 
-import { cn } from "@/app/utils/classname.util";
+import { cn, INCOMPLETE_CHECKBOX_CLASSNAME } from "@/app/utils/classname.util";
 import {
   getDepartementNumerosForRegion,
   getRegionFromDepartement,
@@ -126,8 +126,7 @@ export const FiltersRegion = ({
             ]}
             className={cn(
               "[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 [&_label]:text-title-blue-france",
-              checkedStatus === "incomplete" &&
-                "[&>label:before]:bg-none [&:before]:content-[''] [&:before]:absolute [&:before]:z-10 [&:before]:top-1/2 [&:before]:-translate-y-1/2 [&:before]:left-1 [&:before]:w-2 [&:before]:h-[1px] [&:before]:bg-white"
+              checkedStatus === "incomplete" && INCOMPLETE_CHECKBOX_CLASSNAME
             )}
             small
           />

@@ -1,8 +1,8 @@
 import { findAllCpoms } from "@/app/api/cpoms/cpom.repository";
+import { resolveFilters } from "@/app/api/filters/filters.service";
 import { paginateWithTotal } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { groupRappels } from "@/app/utils/rappel.util";
-import { parseCommaList } from "@/app/utils/string.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { getUpdatableCpomWhere } from "@/lib/casl";
 import {
@@ -39,9 +39,7 @@ export const getDashboardRappels = async (
 
   const rappels = buildRappels(structures, cpoms, {
     user,
-    departementList: parseCommaList(filters.departements),
-    operateurList: parseCommaList(filters.operateurs),
-    typeList: parseCommaList(filters.type),
+    ...(await resolveFilters(filters)),
     now,
   });
 

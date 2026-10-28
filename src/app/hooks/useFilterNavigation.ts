@@ -3,6 +3,10 @@
 import { useCallback } from "react";
 
 import { setFilterParam } from "@/app/utils/search-params.util";
+import {
+  isFilterKey,
+  persistFilter,
+} from "@/utils/filters.util";
 
 import {
   SearchParamsNavigationOptions,
@@ -13,11 +17,15 @@ export const useFilterNavigation = (): NavigateWithFilter => {
   const navigateWithParams = useSearchParamsNavigation();
 
   return useCallback(
-    (key, values, options) =>
+    (key, values, options) => {
+      if (isFilterKey(key)) {
+        persistFilter(key, values);
+      }
       navigateWithParams(
         (params) => setFilterParam(params, key, values),
         options
-      ),
+      );
+    },
     [navigateWithParams]
   );
 };

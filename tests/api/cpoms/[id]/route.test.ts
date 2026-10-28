@@ -10,6 +10,10 @@ const mockFindCpomScope = vi.fn();
 const mockCreateOrUpdateCpom = vi.fn();
 const mockCreateCpomEvent = vi.fn();
 
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({
+  findOperateurFiliales: vi.fn(async () => []),
+}));
+
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
 }));

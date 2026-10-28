@@ -69,5 +69,6 @@ export type RappelCpom = {
   granularity: CpomGranularity;
   region: { departements: { numero: string }[] } | null;
   departements: { departement: { numero: string } }[];
+  structures: { structure: { type: string | null } }[];
   actesAdministratifs: ActeAdministratifDates[];
 };
