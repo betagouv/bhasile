@@ -9,6 +9,7 @@ model User {
   operateur           Operateur?       @relation(fields: [operateurId], references: [id], onDelete: Restrict)
   operateurId         Int?
   isSuperAdmin        Boolean          @default(false)
+  isAgent             Boolean?
   grants              Grant[]
   notes               Note[]
   anomaliesJustifiees Anomalie[]
@@ -43,6 +44,7 @@ model UserAction {
 model EmailPattern {
   id      Int     @id @default(autoincrement())
   pattern String  @unique
+  isAgent Boolean @default(false)
   users   User[]
   grants  Grant[]
 

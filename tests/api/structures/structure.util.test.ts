@@ -20,6 +20,7 @@ import {
   getFermetureHistory,
   getReadableAdresses,
   getReadableNotes,
+  hideAgentOnlyFields,
   isBornFromCreation,
   isStructureClosed,
   isStructureFinalised,
@@ -931,5 +932,40 @@ describe("buildCommunePoints", () => {
     ]);
     expect(nonRepresentedStructuresCount).toBe(3);
     expect(nonLocalisedPlaces).toBe(6);
+  });
+});
+
+describe("hideAgentOnlyFields", () => {
+  it("masque les données réservées aux agents et garde le reste de la fiche", () => {
+    const structure = {
+      id: 1,
+      nom: "Centre",
+      notes: "note interne",
+      controles: [{ id: 1 }],
+      evaluations: [{ id: 1 }],
+      evenementsIndesirablesGraves: [{ id: 1 }],
+      anomalies: [{ code: "A" }],
+      cpomStructures: [{ id: 1 }],
+      isInCpom: true,
+      isInCpomPerYear: { 2026: true },
+      history: [
+        { kind: "CPOM_ENTRY", date: "2026-01-01" },
+        { kind: "FERMETURE", date: "2026-06-01" },
+      ],
+    } as unknown as StructureApiRead;
+
+    expect(hideAgentOnlyFields(structure)).toEqual({
+      id: 1,
+      nom: "Centre",
+      notes: null,
+      controles: [],
+      evaluations: [],
+      evenementsIndesirablesGraves: [],
+      anomalies: [],
+      cpomStructures: [],
+      isInCpom: false,
+      isInCpomPerYear: {},
+      history: [{ kind: "FERMETURE", date: "2026-06-01" }],
+    });
   });
 });

@@ -46,5 +46,6 @@ export type SessionUser = {
   email: string;
   operateurId: number | null;
   isSuperAdmin: boolean;
+  isAgent: boolean;
   grants: SessionGrant[];
 };
