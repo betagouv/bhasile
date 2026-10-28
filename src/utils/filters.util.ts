@@ -73,6 +73,10 @@ export const persistFilter = (
   document.cookie = `${FILTERS_COOKIE}=${value}; path=/; samesite=lax`;
 };
 
+export const clearStoredFilters = (): void => {
+  document.cookie = `${FILTERS_COOKIE}=; path=/; max-age=0`;
+};
+
 export const parseFilters = ({
   departements,
   operateurs,
