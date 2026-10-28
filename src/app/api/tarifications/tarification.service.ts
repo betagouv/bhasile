@@ -13,7 +13,7 @@ import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
 import { getEffectiveGrants } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
-import { canAccessTarification } from "@/lib/casl";
+import { canAccessTarification, type StructureScope } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
@@ -29,10 +29,7 @@ export const getTarificationParticipant = async (
   user: SessionUser,
   structureId: number
 ): Promise<TarificationParticipant> => {
-  const structure = await findStructureScope(structureId);
-  if (!structure) {
-    throw new DomainError("Structure introuvable", 404);
-  }
+  const structure = await findStructureScopeOrThrow(structureId);
   return resolveParticipant(user, structure);
 };
 
@@ -40,10 +37,7 @@ export const getTarificationReader = async (
   user: SessionUser,
   structureId: number
 ): Promise<TarificationReader> => {
-  const structure = await findStructureScope(structureId);
-  if (!structure) {
-    throw new DomainError("Structure introuvable", 404);
-  }
+  const structure = await findStructureScopeOrThrow(structureId);
   assertCanAccessTarification(user, structure);
   return { isOperateur: user.operateurId !== null };
 };
@@ -160,7 +154,7 @@ export const changeTarificationMessageTag = async ({
 
 const resolveParticipant = async (
   user: SessionUser,
-  structure: TarificationStructureScope
+  structure: StructureScope
 ): Promise<TarificationParticipant> => {
   assertCanAccessTarification(user, structure);
   const databaseUser = await getUserWithGrantsByEmail({ email: user.email });
@@ -179,7 +173,7 @@ const resolveParticipant = async (
 
 const assertCanAccessTarification = (
   user: SessionUser,
-  structure: TarificationStructureScope
+  structure: StructureScope
 ): void => {
   if (!canAccessTarification(user, structure)) {
     throw new DomainError(
@@ -189,10 +183,14 @@ const assertCanAccessTarification = (
   }
 };
 
-type TarificationStructureScope = {
-  id: number;
-  departementAdministratif: string;
-  operateurId: number | null;
+const findStructureScopeOrThrow = async (
+  structureId: number
+): Promise<StructureScope> => {
+  const structure = await findStructureScope(structureId);
+  if (!structure) {
+    throw new DomainError("Structure introuvable", 404);
+  }
+  return structure;
 };
 
 export type TarificationReader = { isOperateur: boolean };

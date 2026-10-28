@@ -182,13 +182,17 @@ describe("conversation.repository db integration", () => {
   it("refuse une pièce jointe déjà rattachée, sans créer le message", async () => {
     const file = await createAttachment();
     const first = await postMessageWithFiles([file.key]);
-    const messageCountBefore = await prisma.message.count();
+    const countConversationMessages = () =>
+      prisma.message.count({
+        where: { conversation: { structureTarificationId } },
+      });
+    const messageCountBefore = await countConversationMessages();
 
     await expect(postMessageWithFiles([file.key])).rejects.toThrow(
       "déjà rattachée"
     );
 
-    expect(await prisma.message.count()).toBe(messageCountBefore);
+    expect(await countConversationMessages()).toBe(messageCountBefore);
     expect(
       await prisma.fileUpload.findUnique({ where: { key: file.key } })
     ).toMatchObject({ messageId: first.id });

@@ -1,12 +1,12 @@
 import { Visibility } from "@/generated/prisma/enums";
 import { SessionUser } from "@/types/global";
 
-import { canUpdateStructure } from "./structure.ability";
+import { canUpdateStructure, type StructureScope } from "./structure.ability";
 
 // Les grants nationaux n'ouvrent pas la tarification, même en édition
 export const canAccessTarification = (
   user: SessionUser,
-  structure: TarificationStructureScope
+  structure: StructureScope
 ): boolean =>
   canUpdateStructure(
     { ...user, grants: user.grants.filter((grant) => !grant.isNational) },
@@ -17,7 +17,7 @@ export const canReadConversation = (
   user: SessionUser,
   conversation: {
     visibility: Visibility;
-    structureTarification: { structure: TarificationStructureScope };
+    structureTarification: { structure: StructureScope };
   }
 ): boolean => {
   const isOperateurUser = user.operateurId !== null;
@@ -28,10 +28,4 @@ export const canReadConversation = (
     user,
     conversation.structureTarification.structure
   );
-};
-
-type TarificationStructureScope = {
-  id: number;
-  departementAdministratif: string;
-  operateurId: number | null;
 };
