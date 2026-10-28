@@ -15,7 +15,7 @@ export const upsertConversation = (
         visibility,
       },
     },
-    update: {},
+    update: { visibility },
     create: { structureTarificationId, visibility },
     select: { id: true },
   });

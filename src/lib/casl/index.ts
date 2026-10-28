@@ -13,6 +13,7 @@ export {
   canUpdateStructure,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
+  type StructureScope,
 } from "./structure.ability";
 export {
   canAccessTarification,
