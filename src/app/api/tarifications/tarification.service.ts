@@ -9,7 +9,7 @@ import { getAuthorLevel } from "@/app/api/conversations/conversation.util";
 import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
 import { getEffectiveGrants } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
+import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
 import { canAccessTarification } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
@@ -18,9 +18,14 @@ import {
   findMessageTarification,
   findStructureScope,
   findStructureTarification,
+  findStructureTarificationCampaigns,
   upsertStructureTarification,
 } from "./tarification.repository";
-import { assertCampaignOpen, assertCanWrite } from "./tarification.util";
+import {
+  assertCampaignOpen,
+  assertCanWrite,
+  getSelectableCampaignYears,
+} from "./tarification.util";
 
 export const getTarificationParticipant = async (
   user: SessionUser,
@@ -43,6 +48,26 @@ export const getTarificationReader = async (
   }
   assertCanAccessTarification(user, structure);
   return { isOperateur: user.operateurId !== null };
+};
+
+export const getTarificationOverview = async (
+  user: SessionUser,
+  structureId: number
+): Promise<TarificationOverview> => {
+  const structure = await findStructureScope(structureId);
+  if (!structure) {
+    throw new DomainError("Structure introuvable", 404);
+  }
+  const participant = await resolveParticipant(user, structure);
+  const tarifications = await findStructureTarificationCampaigns(structureId);
+  return {
+    codeBhasile: structure.codeBhasile,
+    participant,
+    isOperateur: participant.level === AuthorLevel.OPERATEUR,
+    campaignYears: getSelectableCampaignYears(
+      tarifications.map((tarification) => tarification.campaign.year)
+    ),
+  };
 };
 
 export const postTarificationMessage = async ({
@@ -189,6 +214,13 @@ type TarificationStructureScope = {
 };
 
 export type TarificationReader = { isOperateur: boolean };
+
+export type TarificationOverview = {
+  codeBhasile: string;
+  participant: TarificationParticipant;
+  isOperateur: boolean;
+  campaignYears: number[];
+};
 
 export type TarificationParticipant = {
   id: number;

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   assertCampaignOpen,
   getOpenCampaignYears,
+  getSelectableCampaignYears,
   isCampaignOpen,
 } from "@/app/api/tarifications/tarification.util";
 
@@ -17,6 +18,18 @@ vi.mock("@/constants", async () => {
 describe("getOpenCampaignYears", () => {
   it("ouvre la campagne de l'année et celle de l'année suivante", () => {
     expect(getOpenCampaignYears()).toEqual([2027, 2028]);
+  });
+});
+
+describe("getSelectableCampaignYears", () => {
+  it("propose les campagnes ouvertes et les campagnes passées qui ont des échanges, de la plus récente à la plus ancienne", () => {
+    expect(getSelectableCampaignYears([2025, 2027])).toEqual([
+      2028, 2027, 2025,
+    ]);
+  });
+
+  it("propose seulement les campagnes ouvertes sans échange passé", () => {
+    expect(getSelectableCampaignYears([])).toEqual([2028, 2027]);
   });
 });
 

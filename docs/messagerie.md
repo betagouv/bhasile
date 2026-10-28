@@ -171,9 +171,12 @@ type ConversationContext = {
 
 ## Lectures, non-lus et temps réel
 
-- **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand ; restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
+- **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand : la lecture d'une conversation renvoie les accusés de chaque message. Restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
+- **Accusé envoyé par l'écran** : le client n'envoie que les messages d'autrui sans accusé à son nom, et seulement quand ils sont affichés (onglet visible). Les superadmins n'en envoient jamais.
 - **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La messagerie expose un compteur par structure, que le bloc tarification du dashboard affiche.
-- **Temps réel** : tant que le panneau des échanges est ouvert, le client relit toute la conversation toutes les 10 à 15 secondes et remplace sa liste.
+- **Temps réel** : tant que les échanges sont affichés, le client relit toute la conversation toutes les 10 secondes et remplace sa liste (`src/hooks/useConversationMessages.ts`).
+  - La requête suivante ne part que 10 secondes après la réponse de la précédente (`setTimeout` chaîné) : un serveur lent n'accumule pas de requêtes.
+  - Pause quand l'onglet du navigateur est caché, relecture immédiate au retour et après chaque envoi.
   - Pas de curseur sur l'identifiant : il pourrait sauter un message, car les identifiants sont attribués à l'insertion, pas au commit. Une conversation compte quelques dizaines de messages, relire tout reste léger.
   - Pas de websocket ni de SSE : en prod, l'application tourne sur plusieurs conteneurs, et pousser un message à tous les clients demanderait un canal de diffusion entre instances (`LISTEN/NOTIFY`). Le polling n'en a pas besoin, la base sert de point commun. Le passage aux SSE ne changerait pas le modèle.
 
@@ -221,19 +224,27 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : la reprise des notifications se recette en préprod.
 
 ## Interface
 
-La messagerie est livrée avant la gestion des documents, avec une page minimale de tarification : le sélecteur de campagne et le panneau « Échanges », sans documents.
+La messagerie est livrée avant la gestion des documents, avec une page minimale de tarification, sans documents.
 
-- **Un panneau « Échanges »** à part, ouvert depuis l'écran de la tarification (un bouton flottant, par-dessus la navigation dans les documents).
-- **Deux onglets** : « Tout le monde » (conversation partagée) et « Services de l'État seulement » (conversation agents), absent pour l'opérateur.
-- **Un fil chronologique** : on écrit toujours à la suite ; « Écrivez un message ».
-- **Un sommaire** : les ancres de la tarification et les pièces jointes, pour sauter à un moment du fil ; un filtre par phase.
-- **Pièces jointes** affichées dans le fil, sous leur message ; elles n'apparaissent pas dans la navigation dans les documents.
-- **Sélecteur de tag** à l'écriture, pour les agents, prérempli avec la phase en cours.
+**Livré**
+
+- **Page** `/structures/[id]/tarification/[year]`, hors navigation principale. `/structures/[id]/tarification` redirige vers la campagne de l'année en cours. Le bouton « Tarification » de l'en-tête de la fiche n'apparaît qu'à qui a accès.
+- **Sélecteur de campagne** : les campagnes ouvertes et les campagnes passées qui ont une tarification, de la plus récente à la plus ancienne. Une autre année donne une page introuvable.
+- **Deux onglets** : « Tout le monde » (conversation partagée) et « Services de l'État seulement » (conversation agents), absent pour l'opérateur. L'onglet est dans l'URL (`?canal=agents`), pour que les liens des mails ouvrent le bon canal ; un opérateur est toujours ramené au canal partagé.
+- **Un fil chronologique** : auteur, niveau (DDETS, DREETS, Opérateur), date et heure de Paris, « Lu par » ; on écrit toujours à la suite (« Écrivez un message »). Texte brut, retours à la ligne conservés.
+- **Envoi sans affichage optimiste** : le message n'apparaît qu'une fois accepté par le serveur. Le journal fait preuve : il n'affiche jamais un message que le serveur aurait refusé.
+- **Lecture seule** affichée en bandeau, à la place de la saisie : campagne close, ou superadmin.
+
+**À venir**
+
+- **Pièces jointes** : bouton « Joindre » (plusieurs fichiers), envoi de chaque fichier dès qu'il est choisi, puis rattachement par clé à l'envoi du message ; affichées dans le fil, sous leur message ; elles n'apparaissent pas dans la navigation dans les documents.
+- **Tags** : sélecteur à l'écriture et modification sur place, pour les agents ; badge sur le message.
+- **Avec la gestion des documents** : le panneau « Échanges » passe en surcouche, ouvert par un bouton flottant, par-dessus la navigation dans les documents ; le sommaire (ancres et pièces jointes, pour sauter à un moment du fil) et le filtre par phase arrivent avec les ancres ; le sélecteur de tag est prérempli avec la phase en cours.
 
 ## Implémentation
 
@@ -245,19 +256,23 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 | Routes                           | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]` | fait    |
 | Droits                           | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                | fait    |
 | Pièces jointes                   | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                        | fait    |
-| Interface                        | page de tarification et panneau « Échanges »                                                                                           | à faire |
+| Porte de mise en service         | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                      | fait    |
+| Interface : page et fil          | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                        | fait    |
+| Interface : pièces jointes       | saisie et affichage dans le fil                                                                                                        | à faire |
+| Interface : tags                 | sélecteur, badge, modification                                                                                                         | à faire |
 | Notifications                    | `MessageNotification`, `StructureSubscription`, Brevo transactionnel, cron de reprise, webhook des rebonds, compteur de non-lus        | à faire |
 | Triggers d'ajout seul            | migration dédiée                                                                                                                       | à faire |
 | Empreinte SHA-256                | `FileUpload.sha256`                                                                                                                    | à faire |
 
 ## Évolutions possibles
 
-| Évolution                                                                 | Comment                                                                   |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Répondre directement sous un message, hors du flux de la conversation     | À concevoir le jour venu.                                                 |
-| Date de réponse attendue sur un message (« réponse attendue avant le … ») | Colonne nullable sur `Message`, indicateur dans le bloc dashboard.        |
-| Regroupement des mails (un résumé plutôt que cinq mails en une minute)    | Le cron regroupe par destinataire les messages encore sans trace d'envoi. |
-| Marquer comme non lu                                                      | Préférence modifiable, à part des accusés de lecture.                     |
-| Recherche par mot-clé dans les échanges                                   | Recherche plein texte PostgreSQL sur le texte des messages.               |
-| Temps réel poussé                                                         | SSE + `LISTEN/NOTIFY`, sans changer le modèle.                            |
-| Horodatage qualifié (si besoin réglementaire)                             | Tâche quotidienne : empreintes du jour horodatées par un tiers qualifié.  |
+| Évolution                                                                        | Comment                                                                      |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Répondre directement sous un message, hors du flux de la conversation            | À concevoir le jour venu.                                                    |
+| Date de réponse attendue sur un message (« réponse attendue avant le … »)        | Colonne nullable sur `Message`, indicateur dans le bloc dashboard.           |
+| Regroupement des mails (un résumé plutôt que cinq mails en une minute)           | Le cron regroupe par destinataire les messages encore sans trace d'envoi.    |
+| Marquer comme non lu                                                             | Préférence modifiable, à part des accusés de lecture.                        |
+| Recherche par mot-clé dans les échanges                                          | Recherche plein texte PostgreSQL sur le texte des messages.                  |
+| Ménage des fichiers orphelins (envoyés puis abandonnés avant l'envoi du message) | Tâche périodique : supprimer les fichiers sans rattachement de plus de 24 h. |
+| Temps réel poussé                                                                | SSE + `LISTEN/NOTIFY`, sans changer le modèle.                               |
+| Horodatage qualifié (si besoin réglementaire)                                    | Tâche quotidienne : empreintes du jour horodatées par un tiers qualifié.     |

@@ -7,6 +7,13 @@ export const getOpenCampaignYears = (): number[] => [
   CURRENT_YEAR + 1,
 ];
 
+export const getSelectableCampaignYears = (
+  tarificationYears: number[]
+): number[] =>
+  [...new Set([...getOpenCampaignYears(), ...tarificationYears])].sort(
+    (firstYear, secondYear) => secondYear - firstYear
+  );
+
 export const isCampaignOpen = (year: number): boolean =>
   getOpenCampaignYears().includes(year);
 

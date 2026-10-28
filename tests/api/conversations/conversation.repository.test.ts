@@ -123,6 +123,22 @@ describe("conversation.repository db integration", () => {
     ).toBe(1);
   });
 
+  it("renvoie les lectures de chaque message avec leur lecteur", async () => {
+    const message = await postMessage(Visibility.SHARED, "lu par l'auteur");
+    await createMessageReceipts(authorId, [message.id]);
+
+    const messages = await findMessages(
+      structureTarificationId,
+      Visibility.SHARED
+    );
+
+    expect(
+      messages
+        .find((foundMessage) => foundMessage.id === message.id)
+        ?.receipts.map((receipt) => receipt.user.id)
+    ).toEqual([authorId]);
+  });
+
   it("ne garde que les identifiants des messages de la conversation demandée", async () => {
     const shared = await postMessage(Visibility.SHARED, "partagé");
     const internal = await postMessage(Visibility.AGENTS, "interne");

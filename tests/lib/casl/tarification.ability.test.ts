@@ -4,7 +4,7 @@ import {
   createSessionGrant,
   createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Visibility } from "@/generated/prisma/enums";
 import { canAccessTarification, canReadConversation } from "@/lib/casl";
@@ -32,6 +32,31 @@ describe("canAccessTarification", () => {
     expect(canAccessTarification(createNationalAgent(), parisStructure)).toBe(
       false
     );
+  });
+
+  describe("avant la mise en service", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it("la ferme aux agents tant que la messagerie n'est pas activée", () => {
+      vi.stubEnv("MESSAGERIE_ENABLED", "");
+
+      expect(
+        canAccessTarification(createDepartementalAgent(["75"]), parisStructure)
+      ).toBe(false);
+    });
+
+    it("la laisse ouverte aux superadmins", () => {
+      vi.stubEnv("MESSAGERIE_ENABLED", "");
+
+      expect(
+        canAccessTarification(
+          createSessionUser({ isSuperAdmin: true }),
+          parisStructure
+        )
+      ).toBe(true);
+    });
   });
 });
 

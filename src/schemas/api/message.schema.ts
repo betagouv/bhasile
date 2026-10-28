@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import type { AuthorLevel } from "@/generated/prisma/enums";
 import { ConversationVisibility } from "@/types/conversation.type";
 
 export const MESSAGE_MAX_LENGTH = 10_000;
@@ -26,6 +27,25 @@ export const messageApiCreateSchema = z
 
 export type MessageApiCreate = z.infer<typeof messageApiCreateSchema>;
 export type MessageApiCreateClient = z.input<typeof messageApiCreateSchema>;
+
+export type MessageApiRead = {
+  id: number;
+  text: string;
+  tagKey: string | null;
+  authorLevel: AuthorLevel;
+  createdAt: string;
+  author: MessageUserApiRead;
+  receipts: { createdAt: string; user: MessageUserApiRead }[];
+  attachments: {
+    id: number;
+    key: string;
+    originalName: string;
+    mimeType: string;
+    fileSize: number;
+  }[];
+};
+
+type MessageUserApiRead = { id: number; name: string | null };
 
 export const messageApiUpdateSchema = z.object({
   tagKey: z.string().min(1).nullable(),
