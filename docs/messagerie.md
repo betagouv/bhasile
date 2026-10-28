@@ -108,7 +108,7 @@ model StructureSubscription {    // suivi d'une structure (messagerie et tarific
   @@id([structureId, userId])
 }
 
-model FileUpload { /* existant */ messageId Int? /* onDelete: Restrict */ sha256 String? }
+model FileUpload { /* existant */ messageId Int? /* onDelete: Restrict */ }
 
 enum Visibility  { SHARED AGENTS }
 enum AuthorLevel { DEPARTEMENT REGION OPERATEUR }
@@ -205,18 +205,18 @@ Ces règles valent pour la messagerie et pour la gestion des documents, qui y re
 **Intégrité**
 
 - **Ajout seul** : les repositories des journaux n'exposent ni `update` ni `delete` ; une correction est un nouvel enregistrement.
-- **Triggers PostgreSQL** contre les modifications (`UPDATE`, `DELETE`, `TRUNCATE`), posés avant la mise en service, quand les journaux deviennent une preuve : eux seuls couvrent aussi les scripts ponctuels et les requêtes manuelles. Ils protègent contre les accidents, pas contre un administrateur de la base. Sur `Message`, le trigger refuse tout `UPDATE` qui touche autre chose que `tagKey` (comparaison de `to_jsonb(NEW) - 'tagKey'` et `to_jsonb(OLD) - 'tagKey'`, qui reste juste quand on ajoute une colonne). Le wipe des seeders (`prisma/utils/wipe.ts`, dev et préprod) lève explicitement la protection pour sa session.
+- **Pas de triggers PostgreSQL** pour l'instant : ce n'est pas un prérequis de la mise en service. L'ajout seul tient à l'application (repositories, FK `Restrict`) ; il ne couvre ni les scripts ponctuels ni les requêtes manuelles (voir [Évolutions possibles](#évolutions-possibles)).
 - **Aucune cascade** n'atteint un message, une trace ou un fichier. Une structure qui a des échanges ne peut plus être supprimée : c'est voulu (archives), et aucun écran ne supprime de structure aujourd'hui.
 
 **Fichiers**
 
-- **Empreinte SHA-256** de chaque fichier, calculée à l'upload.
+- **Empreinte SHA-256** des documents de la tarification, calculée à l'upload (voir la RFC 02) ; les pièces jointes des messages n'en ont pas besoin : ce ne sont pas des dépôts officiels, le contradictoire ne passe que par la gestion des documents.
 - **Formats** : `.docx`, `.odt` et `.pptx` s'ajoutent aux formats acceptés (PDF, tableurs, images), dans toute l'application : une seule liste, plus simple qu'une liste par contexte. Limite de 30 Mo inchangée ; au-delà de 50 Mo environ, il faudra un upload direct vers S3 par URL signée (le serveur charge aujourd'hui le fichier en mémoire).
 - **Accès** : un fichier de message se lit selon l'accès à sa conversation (voir [Droits et visibilité](#droits-et-visibilité)) et ne se supprime jamais. `isOrphan` reconnaît `messageId` : sans ça, un fichier de message serait considéré comme orphelin, donc lisible et supprimable par tous.
 
 **Preuve**
 
-Un **faisceau d'indices** : journal en ajout seul, horodatage serveur, empreinte des fichiers, accusés de lecture, trace des mails chez un tiers (Brevo). Ce n'est **pas** un horodatage qualifié eIDAS ; s'il devient un besoin réglementaire, le pattern de Démarches Numériques (empreintes du jour horodatées chaque nuit par un tiers qualifié) se branchera en plus.
+Un **faisceau d'indices** : journal en ajout seul, horodatage serveur, empreinte des documents de la tarification, accusés de lecture, trace des mails chez un tiers (Brevo). Ce n'est **pas** un horodatage qualifié eIDAS ; s'il devient un besoin réglementaire, le pattern de Démarches Numériques (empreintes du jour horodatées chaque nuit par un tiers qualifié) se branchera en plus.
 
 **Conservation**
 
@@ -267,18 +267,17 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 | Interface : pièces jointes       | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                            | fait    |
 | Interface : tags                 | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                     | fait    |
 | Notifications                    | `MessageNotification`, `StructureSubscription`, Brevo transactionnel, cron de reprise, webhook des rebonds, compteur de non-lus        | à faire |
-| Triggers d'ajout seul            | migration dédiée                                                                                                                       | à faire |
-| Empreinte SHA-256                | `FileUpload.sha256`                                                                                                                    | à faire |
 
 ## Évolutions possibles
 
-| Évolution                                                                        | Comment                                                                      |
-| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Répondre directement sous un message, hors du flux de la conversation            | À concevoir le jour venu.                                                    |
-| Date de réponse attendue sur un message (« réponse attendue avant le … »)        | Colonne nullable sur `Message`, indicateur dans le bloc dashboard.           |
-| Regroupement des mails (un résumé plutôt que cinq mails en une minute)           | Le cron regroupe par destinataire les messages encore sans trace d'envoi.    |
-| Marquer comme non lu                                                             | Préférence modifiable, à part des accusés de lecture.                        |
-| Recherche par mot-clé dans les échanges                                          | Recherche plein texte PostgreSQL sur le texte des messages.                  |
-| Ménage des fichiers orphelins (envoyés puis abandonnés avant l'envoi du message) | Tâche périodique : supprimer les fichiers sans rattachement de plus de 24 h. |
-| Temps réel poussé                                                                | SSE + `LISTEN/NOTIFY`, sans changer le modèle.                               |
-| Horodatage qualifié (si besoin réglementaire)                                    | Tâche quotidienne : empreintes du jour horodatées par un tiers qualifié.     |
+| Évolution                                                                                                                  | Comment                                                                                                                                                                                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Répondre directement sous un message, hors du flux de la conversation                                                      | À concevoir le jour venu.                                                                                                                                                                                                                                                                                  |
+| Date de réponse attendue sur un message (« réponse attendue avant le … »)                                                  | Colonne nullable sur `Message`, indicateur dans le bloc dashboard.                                                                                                                                                                                                                                         |
+| Regroupement des mails (un résumé plutôt que cinq mails en une minute)                                                     | Le cron regroupe par destinataire les messages encore sans trace d'envoi.                                                                                                                                                                                                                                  |
+| Marquer comme non lu                                                                                                       | Préférence modifiable, à part des accusés de lecture.                                                                                                                                                                                                                                                      |
+| Recherche par mot-clé dans les échanges                                                                                    | Recherche plein texte PostgreSQL sur le texte des messages.                                                                                                                                                                                                                                                |
+| Ménage des fichiers orphelins (envoyés puis abandonnés avant l'envoi du message)                                           | Tâche périodique : supprimer les fichiers sans rattachement de plus de 24 h.                                                                                                                                                                                                                               |
+| Temps réel poussé                                                                                                          | SSE + `LISTEN/NOTIFY`, sans changer le modèle.                                                                                                                                                                                                                                                             |
+| Triggers d'ajout seul (`UPDATE`, `DELETE`, `TRUNCATE`), si les journaux doivent résister aux scripts et requêtes manuelles | Migration écrite à la main : `BEFORE UPDATE OR DELETE` par ligne et `BEFORE TRUNCATE` par instruction. Sur `Message`, refuser tout `UPDATE` qui touche autre chose que `tagKey` (`to_jsonb(NEW) - 'tagKey'` comparé à `to_jsonb(OLD) - 'tagKey'`). Le wipe des seeders lève la protection pour sa session. |
+| Horodatage qualifié (si besoin réglementaire)                                                                              | Tâche quotidienne : empreintes du jour horodatées par un tiers qualifié.                                                                                                                                                                                                                                   |
