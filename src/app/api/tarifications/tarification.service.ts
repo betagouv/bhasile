@@ -6,7 +6,6 @@ import {
   postMessage,
 } from "@/app/api/conversations/conversation.service";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { getNow } from "@/app/utils/now.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
 import { SessionUser } from "@/types/global";
 
@@ -18,25 +17,22 @@ import {
 } from "./tarification.repository";
 import { assertCampaignOpen, canAccessTarification } from "./tarification.util";
 
-export const postTarificationMessage = async (
-  {
-    structureId,
-    year,
-    visibility,
-    author,
-    text,
-    tagKey,
-  }: {
-    structureId: number;
-    year: number;
-    visibility: Visibility;
-    author: TarificationParticipant;
-    text: string;
-    tagKey: string | null;
-  },
-  now: Date = getNow()
-): Promise<MessageDb> => {
-  assertCampaignOpen(year, now);
+export const postTarificationMessage = async ({
+  structureId,
+  year,
+  visibility,
+  author,
+  text,
+  tagKey,
+}: {
+  structureId: number;
+  year: number;
+  visibility: Visibility;
+  author: TarificationParticipant;
+  text: string;
+  tagKey: string | null;
+}): Promise<MessageDb> => {
+  assertCampaignOpen(year);
   const tarification = await upsertStructureTarification(structureId, year);
   return postMessage(
     {
@@ -97,18 +93,15 @@ export const markTarificationMessagesAsRead = async ({
   });
 };
 
-export const changeTarificationMessageTag = async (
-  {
-    messageId,
-    tagKey,
-    editor,
-  }: {
-    messageId: number;
-    tagKey: string | null;
-    editor: { user: SessionUser; level: AuthorLevel };
-  },
-  now: Date = getNow()
-): Promise<MessageDb> => {
+export const changeTarificationMessageTag = async ({
+  messageId,
+  tagKey,
+  editor,
+}: {
+  messageId: number;
+  tagKey: string | null;
+  editor: { user: SessionUser; level: AuthorLevel };
+}): Promise<MessageDb> => {
   const message = await findMessageTarification(messageId);
   if (!message) {
     throw new DomainError("Message introuvable", 404);
@@ -120,7 +113,7 @@ export const changeTarificationMessageTag = async (
       403
     );
   }
-  assertCampaignOpen(campaign.year, now);
+  assertCampaignOpen(campaign.year);
   return changeMessageTag(
     { messageId, tagKey, editorLevel: editor.level },
     TARIFICATION_CONVERSATION_TAGS
