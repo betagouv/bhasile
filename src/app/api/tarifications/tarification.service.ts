@@ -10,10 +10,14 @@ import {
   getAuthorLevel,
 } from "@/app/api/conversations/conversation.util";
 import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
-import { getEffectiveGrants } from "@/app/api/users/user.util";
+import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
-import { canAccessTarification, type StructureScope } from "@/lib/casl";
+import {
+  canAccessTarification,
+  isAgent,
+  type StructureScope,
+} from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
@@ -39,7 +43,7 @@ export const getTarificationReader = async (
 ): Promise<TarificationReader> => {
   const structure = await findStructureScopeOrThrow(structureId);
   assertCanAccessTarification(user, structure);
-  return { isOperateur: user.operateurId !== null };
+  return { isAgent: isAgent(user) };
 };
 
 export const postTarificationMessage = async ({
@@ -97,7 +101,7 @@ export const getTarificationMessages = async ({
   return getMessages({
     structureTarificationId: tarification.id,
     visibility,
-    isOperateurReader: reader.isOperateur,
+    isAgentReader: reader.isAgent,
   });
 };
 
@@ -164,8 +168,8 @@ const resolveParticipant = async (
   return {
     id: databaseUser.id,
     level: getAuthorLevel({
-      operateurId: databaseUser.operateurId,
-      grants: getEffectiveGrants(databaseUser),
+      isAgent: isAgentUser(databaseUser),
+      grants: getAssignedGrants(databaseUser),
     }),
     isSuperAdmin: databaseUser.isSuperAdmin,
   };
@@ -193,7 +197,7 @@ const findStructureScopeOrThrow = async (
   return structure;
 };
 
-export type TarificationReader = { isOperateur: boolean };
+export type TarificationReader = { isAgent: boolean };
 
 export type TarificationParticipant = {
   id: number;
