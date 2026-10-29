@@ -37,7 +37,6 @@ export const computeStructureJoursPlaces = (
   versions: StatistiqueDbStructureVersionTimeline[],
   placesTypologie: number | null,
   now: Date,
-  // Nouveaux paramètres pour le calcul de etpCible (optionnels pour compatibilité)
   ciblesFinancieres?: CiblesFinancieresLookup,
   structureType?: string | null
 ): StructureJoursPlaces & { etpCible: number | null } | null => {
@@ -90,8 +89,7 @@ export const computeStructureJoursPlaces = (
   let etpCibleTotal = 0;
   
   const isExtendedContext = (ctx: JoursPlacesContext | JoursPlacesContextExtended): 
-    ctx is JoursPlacesContextExtended => 
-    'structureVersionTransformations' in ctx;
+    ctx is JoursPlacesContextExtended => 'structureVersionTransformations' in ctx;
   
   for (let index = 0; index < boundaries.length - 1; index += 1) {
     const currentVersion = pickVersionBefore(
@@ -150,9 +148,8 @@ type CiblesFinancieresInputs = {
 const toCibleKey = (
   structureType: string | null,
   year: number,
-  isIdf: boolean,
-  isFromHuda = false
-): string => `${structureType}|${year}|${isIdf}|${isFromHuda}`;
+  isIdf: boolean
+): string => `${structureType}|${year}|${isIdf}`;
 
 const toTauxByTypeKey = (structureType: string): string => structureType;
 
