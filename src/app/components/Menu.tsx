@@ -31,14 +31,16 @@ const findActiveGroupId = (
   return activeGroup?.id ?? null;
 };
 
-export const Menu = (): ReactElement => {
+export const Menu = (): ReactElement | null => {
   const pathname = usePathname();
-  const { data: sessionData } = useSession();
+  const { data: sessionData, status } = useSession();
 
-  const menuItems = useMemo(
-    () => resolveMenuItems(sessionData?.user as SessionUser),
-    [sessionData?.user]
-  );
+  const menuItems = useMemo(() => {
+    if (status === "loading") {
+      return [];
+    }
+    return resolveMenuItems(sessionData?.user as SessionUser);
+  }, [status, sessionData?.user]);
 
   const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(() =>
     findActiveGroupId(menuItems, pathname)
@@ -59,6 +61,17 @@ export const Menu = (): ReactElement => {
     "subItems" in menuItem
       ? menuItem.subItems.some((subItem) => matchesPath(pathname, subItem.url))
       : matchesPath(pathname, menuItem.url);
+
+  if (status === "loading") {
+    return (
+      <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey shrink-0">
+        <div className="border-b border-default-grey min-h-[4.35rem] grid">
+          <Logo />
+        </div>
+        <MenuFooter />
+      </nav>
+    );
+  }
 
   return (
     <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey shrink-0">

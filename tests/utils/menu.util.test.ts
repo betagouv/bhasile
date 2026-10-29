@@ -5,11 +5,12 @@ import { MenuLink, resolveMenuItems } from "@/utils/menu.util";
 
 describe("menu.util", () => {
   describe("resolveMenuItems", () => {
-    it("doit retourner les menus agents pour un utilisateur standard", () => {
+    it("doit retourner les menus agents pour un utilisateur agent", () => {
       // GIVEN
       const agentUser: Partial<SessionUser> = {
         email: "agent@example.com",
         name: "Jean Agent",
+        isAgent: true,
       };
 
       // WHEN
@@ -25,6 +26,7 @@ describe("menu.util", () => {
       const operateurUser: Partial<SessionUser> = {
         email: "operateur@example.com",
         name: "Marie Opérateur",
+        isAgent: false,
         operateurId: 42,
       };
 

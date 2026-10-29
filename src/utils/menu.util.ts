@@ -1,4 +1,4 @@
-import { isOperateurUser } from "@/lib/casl/rules";
+import { isAgent } from "@/lib/casl/rules";
 import { SessionUser } from "@/types/global";
 
 export type MenuGroupId = "structures" | "parametres";
@@ -32,7 +32,7 @@ const agentMenuItems: MenuItem[] = [
   {
     id: "structures",
     icon: "fr-icon-community-line",
-    label: "Structures d’hébergement",
+    label: "Structures et opérateurs",
     subItems: [
       {
         label: "Voir les structures",
@@ -42,12 +42,11 @@ const agentMenuItems: MenuItem[] = [
         label: "Voir les CPOM",
         url: "/cpoms",
       },
+      {
+        label: "Voir les opérateurs",
+        url: "/operateurs",
+      },
     ],
-  },
-  {
-    icon: "fr-icon-user-setting-line",
-    label: "Opérateurs",
-    url: "/operateurs",
   },
   {
     icon: "fr-icon-pie-chart-2-line",
@@ -84,17 +83,54 @@ const agentMenuItems: MenuItem[] = [
     : []),
 ];
 
-// TODO : ajouter les autres élements dans de prochaines PR
 const getOperateurMenuItems = (operateurId: number | null): MenuItem[] => [
   {
-    icon: "fr-icon-user-setting-line",
-    label: "Opérateur",
-    url: `/operateurs/${operateurId}`,
+    icon: "ri-speed-up-line",
+    label: "Tableau de bord",
+    url: "/",
   },
+  {
+    id: "structures",
+    icon: "fr-icon-community-line",
+    label: "Structures et opérateur",
+    subItems: [
+      {
+        label: "Voir les structures",
+        url: "/structures",
+      },
+      {
+        label: "Voir les CPOM",
+        url: "/cpoms",
+      },
+      {
+        label: "Voir l’opérateur",
+        url: `/operateurs/${operateurId}`,
+      },
+    ],
+  },
+  ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
+    ? [
+        {
+          id: "parametres" as const,
+          icon: "fr-icon-settings-5-line",
+          label: "Paramètres",
+          subItems: [
+            {
+              label: "Gérer les accès",
+              url: "/parametres/acces",
+            },
+            {
+              label: "Voir mon compte",
+              url: "/parametres/compte",
+            },
+          ],
+        },
+      ]
+    : []),
 ];
 
 export const resolveMenuItems = (user?: SessionUser | null): MenuItem[] => {
-  if (!user || !isOperateurUser(user)) {
+  if (!user || isAgent(user)) {
     return agentMenuItems;
   }
   return getOperateurMenuItems(user.operateurId ?? null);

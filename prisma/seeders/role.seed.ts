@@ -87,6 +87,7 @@ export const seedRolesAndAgents = async (
           createMany: { data: getOperateurBaseGrants(operateurUser.zone) },
         },
         operateurId: operateurUser.operateurId,
+        isAgent: false,
       },
     });
   }
