@@ -105,7 +105,7 @@ model MessageNotificationRecipient { // un message signalé dans un mail accept�
   messageId      Int
   userId         Int
   email          String
-  brevoMessageId String   // un mail regroupe plusieurs messages ; relie un rebond (webhook) à ses messages
+  brevoMessageId String   // un mail regroupe plusieurs messages ; retrouve le mail dans les logs Brevo
   createdAt      DateTime @default(now())
   @@id([messageId, userId])
 }
@@ -278,7 +278,7 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 | Interface : pièces jointes       | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                                                           | fait    |
 | Interface : tags                 | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                                                    | fait    |
 | Notifications : envoi            | `src/lib/brevo.ts`, `sendMessageDigests` (conversation.service), `notifyPendingTarificationMessages` et `getMessageRecipients` (tarification), cron `notify-messages` | fait    |
-| Notifications : rebonds          | Webhook Brevo, trace en ajout seul                                                                                                                                    | à faire |
+| Notifications : rebonds          | Consultables dans Brevo ; webhook quand un écran devra les montrer                                                                                                    | reporté |
 | Suivi et compteur de non-lus     | `StructureSubscription`, bloc tarification du dashboard (avec la tarification)                                                                                        | à faire |
 
 ## Évolutions possibles
