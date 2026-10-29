@@ -61,6 +61,7 @@ type BuildTestStructureVersionTimelineEntry = {
   structureVersionId?: number;
   effectiveDate?: Date;
   placesAutorisees?: number | null;
+  structureVersionTransformationId?: number | null;
 };
 
 export const buildTestStructureVersionTimeline = (
@@ -78,6 +79,7 @@ export const buildTestStructureVersionTimeline = (
     structureId: entry.structureId,
     effectiveDate: entry.effectiveDate ?? defaultEffectiveDate,
     placesAutorisees: entry.placesAutorisees ?? null,
+    structureVersionTransformationId: entry.structureVersionTransformationId ?? null,
   }));
 };
 
@@ -199,6 +201,7 @@ export const buildTestStatistiquesContext = (
         | "actualisationFormDefinitions"
         | "lastValidatedCampagneYearByStructureId"
         | "ciblesFinancieres"
+        | "structureVersionTransformations"
       >
     > & {
     structureVersionTimeline?: StatistiqueDbStructureVersionTimeline[];
@@ -262,5 +265,7 @@ export const buildTestStatistiquesContext = (
       partial.lastValidatedCampagneYearByStructureId ?? new Map(),
     ciblesFinancieres:
       partial.ciblesFinancieres ?? buildTestCiblesFinancieres(),
+    structureVersionTransformations:
+      partial.structureVersionTransformations ?? new Map(),
   };
 };

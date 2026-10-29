@@ -22,21 +22,25 @@ type JoursPlacesContext = Pick<
   "openingDateByStructureId" | "closureDateByStructureId"
 >;
 
-/**
- * Jours d'ouverture et jours x places d'une structure sur une année, bornés par
- * ses dates d'ouverture et de fermeture. À partir de `PLACES_VERSIONED_FROM_YEAR`,
- * les places suivent les versions de la structure (une transformation en cours
- * d'année découpe l'année) ; avant, le millésime de typologie vaut pour l'année.
- * L'année en cours est comptée en entier, avec les versions effectives à `now`.
- */
+type JoursPlacesContextExtended = JoursPlacesContext & {
+  structureVersionTransformations: Map<
+    number,
+    { transformationId: number; type: string }
+  >;
+};
+
+/** Jours d'ouverture et jours x places d'une structure sur une année. */
 export const computeStructureJoursPlaces = (
-  context: JoursPlacesContext,
+  context: JoursPlacesContext | JoursPlacesContextExtended,
   structureId: number,
   year: number,
   versions: StatistiqueDbStructureVersionTimeline[],
   placesTypologie: number | null,
-  now: Date
-): StructureJoursPlaces | null => {
+  now: Date,
+  // Nouveaux paramètres pour le calcul de etpCible (optionnels pour compatibilité)
+  ciblesFinancieres?: CiblesFinancieresLookup,
+  structureType?: string | null
+): StructureJoursPlaces & { etpCible: number | null } | null => {
   const bounds = getStructureOpenBounds(
     context,
     structureId,
@@ -54,7 +58,14 @@ export const computeStructureJoursPlaces = (
       return null;
     }
     const jours = countDaysBetween(bounds.start, bounds.end);
-    return { jours, joursPlaces: jours * placesTypologie };
+    const joursPlaces = jours * placesTypologie;
+    const etpCible = ciblesFinancieres && structureType
+      ? (() => {
+          const taux = ciblesFinancieres.getTauxByType(structureType);
+          return taux !== null ? (jours * placesTypologie) / taux : null;
+        })()
+      : null;
+    return { jours, joursPlaces, etpCible };
   }
 
   const nowCutoff = startOfNextUtcDay(now).getTime();
@@ -76,23 +87,58 @@ export const computeStructureJoursPlaces = (
 
   let jours = 0;
   let joursPlaces = 0;
+  let etpCibleTotal = 0;
+  
+  const isExtendedContext = (ctx: JoursPlacesContext | JoursPlacesContextExtended): 
+    ctx is JoursPlacesContextExtended => 
+    'structureVersionTransformations' in ctx;
+  
   for (let index = 0; index < boundaries.length - 1; index += 1) {
-    const places = pickVersionBefore(
+    const currentVersion = pickVersionBefore(
       effectiveVersions,
       startOfNextUtcDay(new Date(boundaries[index])).getTime()
-    )?.placesAutorisees;
+    );
+    
+    if (currentVersion == null) {
+      continue;
+    }
+    
+    const places = currentVersion.placesAutorisees;
     if (places == null) {
       continue;
     }
+    
     const segmentJours = countDaysBetween(
       new Date(boundaries[index]),
       new Date(boundaries[index + 1])
     );
+    
     jours += segmentJours;
     joursPlaces += segmentJours * places;
+    
+    if (ciblesFinancieres && structureType) {
+      let tauxApplicable = ciblesFinancieres.getTauxByType(structureType);
+      
+      if (isExtendedContext(context) && currentVersion.structureVersionTransformationId) {
+        const svt = context.structureVersionTransformations.get(
+          currentVersion.structureVersionTransformationId
+        );
+        if (svt?.type?.startsWith("TRANSFO_HUDA")) {
+          tauxApplicable = ciblesFinancieres.getTauxByType("HUDA");
+        }
+      }
+      
+      if (tauxApplicable != null) {
+        etpCibleTotal += (places * segmentJours) / tauxApplicable;
+      }
+    }
   }
 
-  return jours > 0 ? { jours, joursPlaces } : null;
+  const etpCible = jours > 0 && etpCibleTotal > 0 
+    ? etpCibleTotal / jours 
+    : null;
+    
+  return { jours, joursPlaces, etpCible };
 };
 
 type CiblesFinancieresInputs = {
@@ -109,7 +155,9 @@ const toCibleKey = (
   isFromHuda = false
 ): string => `${structureType}|${year}|${isIdf}|${isFromHuda}`;
 
-/** Cibles par structure : selon son type, l'année, son zonage IDF et, pour le taux, son origine HUDA. */
+const toTauxByTypeKey = (structureType: string): string => structureType;
+
+/** Cibles financières par structure. */
 export const buildCiblesFinancieresLookup = (
   inputs: CiblesFinancieresInputs
 ): CiblesFinancieresLookup => {
@@ -119,14 +167,16 @@ export const buildCiblesFinancieresLookup = (
       cible.tarifCible,
     ])
   );
+  const tauxByType = new Map<string, number>(
+    inputs.tauxEncadrementCibles.reduce((acc, cible) => {
+      const key = toTauxByTypeKey(cible.structureType);
+      if (!acc.has(key)) acc.set(key, cible.tauxCible);
+      return acc;
+    }, new Map<string, number>())
+  );
   const tauxByKey = new Map(
     inputs.tauxEncadrementCibles.map((cible) => [
-      toCibleKey(
-        cible.structureType,
-        cible.year,
-        cible.isIdf,
-        cible.isFromHuda
-      ),
+      toCibleKey(cible.structureType, cible.year, cible.isIdf, cible.isFromHuda),
       cible.tauxCible,
     ])
   );
@@ -135,16 +185,11 @@ export const buildCiblesFinancieresLookup = (
 
   return {
     getTarifJournalierCible: (structure, year) =>
-      tarifByKey.get(toCibleKey(structure.type, year, isIdf(structure))) ??
-      null,
+      tarifByKey.get(toCibleKey(structure.type, year, isIdf(structure))) ?? null,
     getTauxEncadrementCible: (structure, year) =>
-      tauxByKey.get(
-        toCibleKey(
-          structure.type,
-          year,
-          isIdf(structure),
-          inputs.cadaFromHudaStructureIds.has(structure.id)
-        )
-      ) ?? null,
+      (structure.type ? tauxByType.get(toTauxByTypeKey(structure.type)) : null) ??
+      tauxByKey.get(toCibleKey(structure.type, year, isIdf(structure), inputs.cadaFromHudaStructureIds.has(structure.id))) ?? null,
+    getTauxByType: (structureType: string | null) =>
+      structureType ? tauxByType.get(toTauxByTypeKey(structureType)) ?? null : null,
   };
 };

@@ -175,6 +175,8 @@ type StructureFinanceIndicateurs = {
   tauxPrevisionnel: number | null;
   tauxRealise: number | null;
   tauxCible: number | null;
+  etpCible: number | null;
+  joursPlaces: number | null;
   coutTheorique: number | null;
   coutCible: number | null;
 };
@@ -253,14 +255,19 @@ const computeFinanceYearData = (
     ])
   );
 
+  // Le contexte inclut déjà structureVersionTransformations depuis buildStatistiquesContext
+  const extendedContext = context;
+
   const indicateurs = structures.map((structure) => {
     const joursPlaces = computeStructureJoursPlaces(
-      context,
+      extendedContext,
       structure.id,
       year,
       context.timelineByStructureId.get(structure.id) ?? [],
       typologieMap.get(structure.id)?.placesAutorisees ?? null,
-      now
+      now,
+      context.ciblesFinancieres,
+      structure.type ?? undefined
     );
     const placesMoyennes = divideOrNull(
       joursPlaces?.joursPlaces,
@@ -277,11 +284,12 @@ const computeFinanceYearData = (
       tauxPrevisionnel: divideOrNull(placesMoyennes, etpPrevisionnel),
       tauxRealise: divideOrNull(placesMoyennes, etpRealise),
       tauxCible: context.ciblesFinancieres.getTauxEncadrementCible(structure, year),
+      etpCible: joursPlaces?.etpCible ?? null,
+      joursPlaces: joursPlaces?.joursPlaces ?? null,
       coutTheorique: divideOrNull(
         dotationByStructureId.get(structure.id) || null,
         joursPlaces?.joursPlaces
       ),
-      // TODO : coût cible non renvoyé par l'API, à supprimer si l'abandon est confirmé
       coutCible: context.ciblesFinancieres.getTarifJournalierCible(structure, year),
     };
   });
@@ -332,11 +340,19 @@ const aggregateFinanceScope = (
       sumValues(indicateurs.map((indicateur) => indicateur[field]))
     );
 
+  // Taux moyen = Total Places / Total ETP cibles
+  const totalPlaces = sumValues(indicateurs.map((i) => i.joursPlaces));
+  const totalETPCible = sumValues(indicateurs.map((i) => i.etpCible));
+  const tauxEncadrementCibleValue = 
+    totalPlaces !== null && totalETPCible !== null && totalETPCible > 0
+    ? roundStatsNumber(totalPlaces / totalETPCible)
+    : null;
+
   return {
     completude: scoped.completude,
     totalETPPrevisionnel: sum("etpPrevisionnel"),
     totalETPRealise: sum("etpRealise"),
-    tauxEncadrementCible: aggregate("tauxCible"),
+    tauxEncadrementCible: tauxEncadrementCibleValue,
     tauxEncadrementTheoriquePrevisionnel: aggregate("tauxPrevisionnel"),
     tauxEncadrementTheoriqueRealise: aggregate("tauxRealise"),
     coutJournalierTheorique: aggregate("coutTheorique"),

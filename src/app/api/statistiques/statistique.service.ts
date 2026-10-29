@@ -40,6 +40,7 @@ import {
   findStructureInitialisations,
   findStructureTypologies,
   findStructureVersionTimeline,
+  findStructureVersionTransformations,
   findTarifsJournaliersCibles,
   findTauxEncadrementCibles,
   findValidatedActualisationForms,
@@ -138,6 +139,7 @@ export const buildStatistiquesContext = async (
     indicateurs,
     activites,
     rmus,
+    structureVersionTransformations,
   ] = await Promise.all([
     findDepartementsWithPopulation([...(readableDepartements ?? [])]),
     findEigs(dnaCodes),
@@ -149,6 +151,7 @@ export const buildStatistiquesContext = async (
     resolvedFilters.operateurIds === null && filters.types === null
       ? findRmus(readableDepartements)
       : Promise.resolve(null),
+    findStructureVersionTransformations(),
   ]);
 
   const activeStructureIdsNow = buildActivityIndex(
@@ -159,9 +162,9 @@ export const buildStatistiquesContext = async (
       typologieYears: getTypologieYears(resolvedTypologies),
       referenceYear,
       periodDates: [
-        ...eigs.map((eig) => eig.evenementDate),
-        ...evaluations.map((evaluation) => evaluation.date),
-        ...activites.map((activite) => activite.date),
+        ...eigs.map((eig: { evenementDate: Date }) => eig.evenementDate),
+        ...evaluations.map((evaluation: { date: Date | null }) => evaluation.date).filter((d): d is Date => d !== null),
+        ...activites.map((activite: { date: Date }) => activite.date),
       ],
       financeYears: collectDistinctYears(budgets, cpomBudgets, indicateurs),
     }
@@ -205,6 +208,9 @@ export const buildStatistiquesContext = async (
     indicateurs,
     activites,
     rmus,
+    structureVersionTransformations: new Map(
+      structureVersionTransformations.map((svt: { id: number; transformationId: number; type: string }) => [svt.id, svt])
+    ),
     resolveDnaStructureIds: buildDnaStructureIdsResolver(
       dnaLinks,
       timelineByStructureId

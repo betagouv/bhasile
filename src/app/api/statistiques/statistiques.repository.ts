@@ -26,6 +26,7 @@ import type {
   StatistiqueDbStructureActivity,
   StatistiqueDbStructureInitialisation,
   StatistiqueDbStructureVersionTimeline,
+  StatistiqueDbStructureVersionTransformation,
   StatistiqueDbTarifJournalierCible,
   StatistiqueDbTauxEncadrementCible,
   StatistiqueDbTypologie,
@@ -285,12 +286,25 @@ export const findStructureVersionTimeline = async (
       structureId: true,
       effectiveDate: true,
       placesAutorisees: true,
+      structureVersionTransformationId: true,
     },
     orderBy: [
       { structureId: "asc" },
       { effectiveDate: "desc" },
       { id: "desc" },
     ],
+  });
+};
+
+export const findStructureVersionTransformations = async (): Promise<
+  StatistiqueDbStructureVersionTransformation[]
+> => {
+  return prisma.structureVersionTransformation.findMany({
+    select: {
+      id: true,
+      transformationId: true,
+      type: true,
+    },
   });
 };
 

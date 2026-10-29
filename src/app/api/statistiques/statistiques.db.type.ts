@@ -133,6 +133,7 @@ export type StatistiqueDbStructureVersionTimeline = {
   structureId: number | null;
   effectiveDate: Date | null;
   placesAutorisees: number | null;
+  structureVersionTransformationId: number | null;
 };
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
@@ -197,6 +198,7 @@ export type CiblesFinancieresLookup = {
     structure: StatistiqueDbStructure,
     year: number
   ) => number | null;
+  getTauxByType: (structureType: string) => number | null;
 };
 
 export type StatistiqueDbBudgetAgg = {
@@ -257,6 +259,12 @@ export type StatistiquesActiveStructureIdsByPeriod = Record<
   Map<string, Set<number>>
 >;
 
+export type StatistiqueDbStructureVersionTransformation = {
+  id: number;
+  transformationId: number;
+  type: string;
+};
+
 export type StatistiquesContext = {
   /** Structures ouvertes à la date de référence (indicateurs globaux). */
   structures: StatistiqueDbStructure[];
@@ -283,6 +291,8 @@ export type StatistiquesContext = {
   dnaLinks: StatistiqueDbDnaLink[];
   /** Versions de chaque structure, indexées une fois par structure. */
   timelineByStructureId: Map<number, StatistiqueDbStructureVersionTimeline[]>;
+  /** Transformations des versions de structure, indexées par id de version. */
+  structureVersionTransformations: Map<number, StatistiqueDbStructureVersionTransformation>;
   departements: StatistiqueDbDepartement[];
   budgets: StatistiqueDbBudget[];
   /** Budgets CPOM saisis, par CPOM, année et type de structure (cf. `indexCpomBudgets`). */
