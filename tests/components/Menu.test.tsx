@@ -1,11 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import client from "next-auth/react";
-import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
+import { useSession } from "next-auth/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Menu } from "@/app/components/Menu";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
-vitest.mock("next-auth/react");
+vi.mock("next-auth/react", () => ({
+  useSession: vi.fn(),
+}));
 
 const mockPathname = vi.fn();
 
@@ -29,13 +31,15 @@ describe("Menu", () => {
       user: { email: "test@example.com", name: "John Doe" },
     };
 
-    (client.useSession as Mock).mockReturnValueOnce({
+    vi.mocked(useSession).mockReturnValue({
       data: mockSession,
       status: "authenticated",
+      update: vi.fn(),
     });
 
     // WHEN
     render(<Menu />);
+    fireEvent.click(getGroupButton("Structures d’hébergement"));
 
     // THEN
     const logo = screen.getByRole("link", {
@@ -95,9 +99,10 @@ describe("Menu", () => {
       user: { email: "test@example.com", name: "John Doe" },
     };
 
-    (client.useSession as Mock).mockReturnValueOnce({
+    vi.mocked(useSession).mockReturnValue({
       data: mockSession,
       status: "authenticated",
+      update: vi.fn(),
     });
 
     mockPathname.mockReturnValue("/structures");
@@ -106,7 +111,7 @@ describe("Menu", () => {
     render(<Menu />);
 
     // THEN
-    expect(getGroupButton("Structures d'hébergement")).toHaveAttribute(
+    expect(getGroupButton("Structures d’hébergement")).toHaveAttribute(
       "aria-expanded",
       "true"
     );
@@ -120,9 +125,10 @@ describe("Menu", () => {
       user: { email: "test@example.com", name: "John Doe" },
     };
 
-    (client.useSession as Mock).mockReturnValueOnce({
+    vi.mocked(useSession).mockReturnValue({
       data: mockSession,
       status: "authenticated",
+      update: vi.fn(),
     });
 
     mockPathname.mockReturnValue("/structures");
@@ -130,7 +136,7 @@ describe("Menu", () => {
     render(<Menu />);
 
     // WHEN
-    fireEvent.click(getGroupButton("Structures d'hébergement"));
+    fireEvent.click(getGroupButton("Structures d’hébergement"));
 
     // THEN
     expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
@@ -143,9 +149,10 @@ describe("Menu", () => {
       user: { email: "test@example.com", name: "John Doe" },
     };
 
-    (client.useSession as Mock).mockReturnValueOnce({
+    vi.mocked(useSession).mockReturnValue({
       data: mockSession,
       status: "authenticated",
+      update: vi.fn(),
     });
 
     mockPathname.mockReturnValue("/structures");
@@ -153,10 +160,10 @@ describe("Menu", () => {
     render(<Menu />);
 
     // WHEN - premier clic
-    fireEvent.click(getGroupButton("Structures d'hébergement"));
+    fireEvent.click(getGroupButton("Structures d’hébergement"));
 
     // WHEN - second clic
-    fireEvent.click(getGroupButton("Structures d'hébergement"));
+    fireEvent.click(getGroupButton("Structures d’hébergement"));
 
     // THEN
     expect(screen.getByText("Voir les structures")).toBeInTheDocument();
@@ -169,9 +176,10 @@ describe("Menu", () => {
       user: { email: "test@example.com", name: "John Doe" },
     };
 
-    (client.useSession as Mock).mockReturnValueOnce({
+    vi.mocked(useSession).mockReturnValue({
       data: mockSession,
       status: "authenticated",
+      update: vi.fn(),
     });
 
     mockPathname.mockReturnValue("/structures");
@@ -182,7 +190,7 @@ describe("Menu", () => {
     rerender(<Menu />);
 
     // THEN
-    expect(getGroupButton("Structures d'hébergement")).toHaveAttribute(
+    expect(getGroupButton("Structures d’hébergement")).toHaveAttribute(
       "aria-expanded",
       "true"
     );
@@ -195,25 +203,26 @@ describe("Menu", () => {
       user: { email: "test@example.com", name: "John Doe" },
     };
 
-    (client.useSession as Mock).mockReturnValueOnce({
+    vi.mocked(useSession).mockReturnValue({
       data: mockSession,
       status: "authenticated",
+      update: vi.fn(),
     });
 
     mockPathname.mockReturnValue("/structures");
     const { rerender } = render(<Menu />);
 
     // WHEN - on ouvre le groupe
-    fireEvent.click(getGroupButton("Structures d'hébergement"));
+    fireEvent.click(getGroupButton("Structures d’hébergement"));
 
     // WHEN - on change de page
     mockPathname.mockReturnValue("/operateurs");
     rerender(<Menu />);
 
     // THEN - le groupe devrait se refermer car pas actif sur /operateurs
-    expect(getGroupButton("Structures d'hébergement")).toHaveAttribute(
+    expect(getGroupButton("Structures d’hébergement")).toHaveAttribute(
       "aria-expanded",
-      "true"
+      "false"
     );
     // Note: le groupe reste ouvert si la nouvelle page est dans ses subItems
     // Ici /operateurs n'est PAS dans les subItems de Structures, donc ça devrait se refermer
@@ -231,11 +240,11 @@ describe("Menu", () => {
       },
     };
 
-    (client.useSession as Mock).mockReturnValueOnce({
+    vi.mocked(useSession).mockReturnValue({
       data: mockSession,
       status: "authenticated",
+      update: vi.fn(),
     });
-
     // WHEN
     render(<Menu />);
 
