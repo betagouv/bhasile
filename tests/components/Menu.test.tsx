@@ -28,7 +28,7 @@ describe("Menu", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
-      user: { email: "test@example.com", name: "John Doe" },
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
     };
 
     vi.mocked(useSession).mockReturnValue({
@@ -96,7 +96,7 @@ describe("Menu", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
-      user: { email: "test@example.com", name: "John Doe" },
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
     };
 
     vi.mocked(useSession).mockReturnValue({
@@ -122,7 +122,7 @@ describe("Menu", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
-      user: { email: "test@example.com", name: "John Doe" },
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
     };
 
     vi.mocked(useSession).mockReturnValue({
@@ -146,7 +146,7 @@ describe("Menu", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
-      user: { email: "test@example.com", name: "John Doe" },
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
     };
 
     vi.mocked(useSession).mockReturnValue({
@@ -173,7 +173,7 @@ describe("Menu", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
-      user: { email: "test@example.com", name: "John Doe" },
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
     };
 
     vi.mocked(useSession).mockReturnValue({
@@ -200,7 +200,7 @@ describe("Menu", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
-      user: { email: "test@example.com", name: "John Doe" },
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
     };
 
     vi.mocked(useSession).mockReturnValue({
@@ -212,21 +212,18 @@ describe("Menu", () => {
     mockPathname.mockReturnValue("/structures");
     const { rerender } = render(<Menu />);
 
-    // WHEN - on ouvre le groupe
+    // WHEN
     fireEvent.click(getGroupButton("Structures d’hébergement"));
 
-    // WHEN - on change de page
+    // WHEN
     mockPathname.mockReturnValue("/operateurs");
     rerender(<Menu />);
 
-    // THEN - le groupe devrait se refermer car pas actif sur /operateurs
+    // THEN
     expect(getGroupButton("Structures d’hébergement")).toHaveAttribute(
       "aria-expanded",
       "false"
     );
-    // Note: le groupe reste ouvert si la nouvelle page est dans ses subItems
-    // Ici /operateurs n'est PAS dans les subItems de Structures, donc ça devrait se refermer
-    // Mais selon notre implémentation avec findActiveGroupId, /operateurs ne déclenche pas d'ouverture
   });
 
   it("affiche les éléments spécifiques pour un utilisateur opérateur au rendu", () => {
@@ -237,6 +234,7 @@ describe("Menu", () => {
         email: "operateur@example.com",
         name: "Jane Operator",
         operateurId: 10,
+        isAgent: false,
       },
     };
 
@@ -252,7 +250,6 @@ describe("Menu", () => {
     const operateurLink = screen.getByRole("link", { name: "Opérateur" });
     expect(operateurLink).toHaveAttribute("href", "/operateurs/10");
 
-    // L'opérateur ne devrait pas voir les liens agent
     expect(screen.queryByText("Tableau de bord")).not.toBeInTheDocument();
     expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
     expect(screen.queryByText("Opérateurs")).not.toBeInTheDocument();

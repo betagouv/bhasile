@@ -9,7 +9,14 @@ import type {
   User,
 } from "@/generated/prisma/client";
 import { AccessRole, CpomGranularity } from "@/generated/prisma/enums";
-import { SessionGrant, SessionPermissions } from "@/types/global";
+import {
+  agentOnlyPages,
+  commonPages,
+  OPERATEUR_BASE_PATH,
+  operateurPages,
+} from "@/proxy/auth-config";
+import { matchesPath } from "@/proxy/auth-util";
+import { SessionGrant, SessionPermissions, SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
   [
@@ -29,6 +36,35 @@ export type AppAbility = PureAbility<
 
 export const defineAbilityFor = (user?: SessionPermissions) => {
   return createPrismaAbility(defineRulesFor(user));
+};
+
+export const canAccessPage = (
+  user: SessionUser | undefined,
+  pathname: string
+): boolean => {
+  if (!user) {
+    return false;
+  }
+
+  const isOperateur = !isAgent(user);
+  const isAgentUser = isAgent(user);
+
+  if (agentOnlyPages.some((base) => matchesPath(pathname, base))) {
+    return isAgentUser;
+  }
+
+  if (operateurPages.some((base) => matchesPath(pathname, base))) {
+    if (isOperateur && user.operateurId) {
+      return pathname === `${OPERATEUR_BASE_PATH}/${user.operateurId}`;
+    }
+    return isAgentUser;
+  }
+
+  if (commonPages.some((base) => matchesPath(pathname, base))) {
+    return true;
+  }
+
+  return false;
 };
 
 const defineRulesFor = (user?: SessionPermissions) => {
@@ -160,7 +196,3 @@ export const canAccessApp = (user: SessionPermissions): boolean =>
   user.isSuperAdmin || (user.grants?.length ?? 0) > 0;
 
 export const NO_RECORD_WHERE = { id: { in: [] } };
-
-export const isOperateurUser = (user: SessionUser): boolean => {
-  return user?.operateurId !== null && user?.operateurId !== undefined;
-};
