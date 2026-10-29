@@ -1,36 +1,90 @@
 # `finance`
 
-## TODO (hors transfo)
-
-Valider le comportement fallback de `REALISE` vers `PREVISIONNEL`
-
 ## Millésimes
 
-Union des années présentes dans `Budget` ou `IndicateurFinancier`.
+Union des années présentes dans `Budget` (structures et CPOM) ou `IndicateurFinancier`, jusqu'à l'année en cours : un budget CPOM saisi pour une année future (convention en cours) ne crée pas de colonne.
 
 Le front choisit l'année affichée dans `byYear`.
 
 ## `byYear` (par scope)
 
-Budgets et indicateurs sont agrégés **indépendamment** pour chaque année : structures actives du scope ayant respectivement un budget ou un indicateur sur l'année.
+Structures comptabilisées sur l'année (cf. [README racine](../README.md#structures-comptabilisées-par-année)) appartenant au scope. Chaque scope porte son propre `completude` (structures du scope attendues et comptabilisées). Les années de campagne commencent un an plus tôt que dans les autres blocs (2024 avec la campagne 2026), cf. « Décalage finance » du README racine.
 
-| Champ                                                                   | Calcul                                                                                   |
-| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges` | Sommes (`Budget`, structures actives)                                                    |
-| `totalETP`                                                              | Somme (indicateurs résolus, structures actives)                                          |
-| `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus), arrondi 1 décimale (`roundStatsNumber`)        |
-| `resultatNet`                                                           | `totalProduits - totalCharges` (agrégat scope) ; égal à `excedentCumule - deficitCumule` |
-| `excedentCumule`                                                        | Somme des RN **positifs** par structure sur l'année                                      |
-| `deficitCumule`                                                         | Valeur absolue de la somme des RN négatifs par structure sur l'année                     |
+| Champ                                                                     | Calcul                                                                                              |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges`   | Sommes (`Budget`)                                                                                   |
+| `resultatNet`                                                             | `totalProduits - totalCharges` (agrégat scope) ; égal à `excedentCumule - deficitCumule`            |
+| `excedentCumule`                                                          | Somme des RN **positifs** par structure sur l'année                                                 |
+| `deficitCumule`                                                           | Valeur absolue de la somme des RN négatifs par structure sur l'année                                |
+| `totalETPPrevisionnel`, `totalETPRealise`                                 | Somme des ETP saisis (`IndicateurFinancier` `PREVISIONNEL` / `REALISE`), `null` si aucun            |
+| `tauxEncadrementTheoriquePrevisionnel`, `tauxEncadrementTheoriqueRealise` | Par structure : places moyennes de l'année / ETP (prévisionnel ou réalisé), puis moyenne ou médiane |
+| `tauxEncadrementCible`                                                    | Par structure : cible de son type, places venues d'un HUDA au taux HUDA, puis moyenne ou médiane    |
+| `coutJournalierTheorique`                                                 | Par structure : dotation accordée / jours x places, puis moyenne ou médiane                         |
 
-Par scope et par année (pas de cumul multi-années). Année absente dans un scope -> zéros.
+Par scope et par année (pas de cumul multi-années). Année absente dans un scope -> zéros pour les montants, `null` pour les indicateurs. Arrondi 1 décimale (`roundStatsNumber`).
 
-## Indicateurs financiers (`ETP`, `tauxEncadrement`, `coutJournalier`)
+## Budgets des structures sous CPOM
 
-Par structure et par année, **par champ** :
+Chaque structure saisit son budget à son échelle, et chaque CPOM a en plus son budget global, une ligne par année et par type de structure. Pour ne pas compter deux fois (`buildBudgetEntries`) :
 
-1. valeur `REALISE` si renseignée ;
-2. sinon repli `PREVISIONNEL`.
+- une structure **sous CPOM sur l'année** (`isCpomLinkActiveInYear`, cf. [structures](../structures/README.md#cpom-actif)) est comptée via la ligne de budget du CPOM de son type, **à la place** de son propre budget ;
+- le budget du CPOM est compté **une fois et en entier**, même si le périmètre ou le filtre sur les structures actualisées ne retient qu'une partie de ses structures (même logique que « CPOM complets ou partiels ») : les montants peuvent donc dépasser le périmètre filtré, à signaler par une infobulle ;
+- sans ligne de budget CPOM pour l'année et le type, ou avec une ligne à zéro (le formulaire CPOM enregistre une ligne par année même non saisie), repli sur le budget de la structure ;
+- `excedentCumule` / `deficitCumule` : un résultat par ligne de budget CPOM, un par structure hors CPOM ;
+- le coût théorique reste calculé avec la dotation propre de chaque structure, puisqu'il se calcule structure par structure.
+- depuis #1717, les indicateurs financiers (ETP) d'une structure ne sont plus obligatoires les années où elle est sous CPOM, et le CPOM n'en porte pas. Une structure sous CPOM sans ETP saisi sort donc des sommes d'ETP et des taux d'encadrement théoriques de l'année : ces indicateurs peuvent être partiels sur les périmètres qui comptent des CPOM.
+
+Les vues SQL de reporting (`scripts/views/002_structures_aggregate.sql`, `006_reporting_global.sql`) suivent le même principe pour la dotation du parc (budget du CPOM, sinon budget de la structure), avec trois différences : le CPOM y est « en cours » au jour près et non à l'année, le repli se déclenche si le CPOM n'a aucun budget toutes années confondues, et la dotation retenue est la dotation accordée, à défaut la demandée, du dernier millésime.
+
+## Indicateurs généraux : choix retenus (octobre 2026) et raisons
+
+- **Le taux d'encadrement et le coût journalier saisis par les opérateurs ne sont plus affichés.** Ils restent demandés dans les formulaires et stockés (`IndicateurFinancier.tauxEncadrement` / `coutJournalier`) : on récolte tout sur 2026 avant de décider de déprécier les champs. Les stats affichent à la place une valeur **théorique** recalculée et une **cible**.
+- **ETP : seule donnée saisie conservée**, en deux valeurs distinctes (prévisionnel, réalisé) sans repli de l'une sur l'autre : le repli mélangeait deux états dans un même chiffre sans que l'agent puisse le voir.
+- **Taux d'encadrement en places par ETP** (et non ETP par place) : même unité que la donnée saisie jusqu'ici et que les seuils d'anomalies (`TAUX_ENCADREMENT_*`). La cible est donc un taux, pas un nombre d'ETP : définie par type de structure, elle ne dépend pas de sa taille.
+- **Coût journalier cible abandonné** : le calcul par structure reste dans `computeFinanceYearData`, mais l'API ne le renvoie plus. À supprimer si l'abandon est confirmé.
+- **Agrégation par structure, puis moyenne ou médiane** (paramètre `aggregation`), pour le théorique comme pour les cibles : théorique et cible restent comparables sur un périmètre qui mélange les types. Ce n'est pas un ratio des sommes du périmètre.
+
+### Jours x places (`computeStructureJoursPlaces`)
+
+Base commune au coût théorique (dénominateur) et au taux théorique (places moyennes = jours x places / jours) :
+
+- bornés par l'ouverture et la fermeture de la structure dans l'année ;
+- à partir de `PLACES_VERSIONED_FROM_YEAR`, les places suivent les `StructureVersion` : une transformation en cours d'année découpe l'année en segments ;
+- avant, le millésime `StructureTypologie.placesAutorisees` vaut pour toute l'année ;
+- l'année en cours est comptée **en entier** avec les versions effectives à ce jour, car la dotation accordée est annuelle ;
+- dotation accordée absente ou nulle, ou places inconnues : pas de valeur pour la structure, elle n'entre pas dans la moyenne.
+
+### Cibles
+
+| Table                              | Clé                                        | Valeur                           |
+| ---------------------------------- | ------------------------------------------ | -------------------------------- |
+| `reporting.tarif_journalier_cible` | `structure_type`, `year`, `belongs_to_idf` | `tarif_cible` (€ / place / jour) |
+| `reporting.taux_encadrement_cible` | `structure_type`                           | `taux_cible` (places par ETP)    |
+
+- Remplissage manuel. Une combinaison absente de la table (notamment une année pour le tarif) donne une cible `null`, sans reprise de l'année précédente.
+- `belongs_to_idf` : département administratif de la structure dans la région `FR-IDF`.
+- Taux cible : une seule valeur par type, sans année ni zonage. Les tarifs, eux, restent par année et zonage.
+- Les tarifs saisis avant l'ajout de la colonne `year` ont été rattachés à 2026 par la migration.
+- Les anomalies (`COUT_JOURNALIER_GT_TARIF_CIBLE`) lisent encore le tarif cible dans la variable d'environnement `TARIF_JOURNALIER_CIBLE`, pas dans cette table : alignement à faire.
+
+#### Places venues d'un HUDA (`computeTauxEncadrementCible`)
+
+Les places d'un CADA issues d'une transformation HUDA vers CADA (`TRANSFO_HUDA_*_VERS_CADA_EXISTANT` ou `_NOUVEAU`, pas la remise en concurrence) restent au taux cible HUDA, sans limite de durée :
+
+- places venues d'un HUDA : gain de places de chaque version de la structure liée à une telle transformation (toutes les places pour un CADA créé), conservé dans les versions suivantes ;
+- **choix métier provisoire, à challenger** : quand la structure perd des places, ses places venues d'un HUDA baissent dans la même proportion (arrondi à la place). Une extension classique n'en ajoute pas ;
+- taux de la structure = places moyennes / ETP cibles moyens, soit `jours x places / (jours x places CADA / taux CADA + jours x places HUDA / taux HUDA)`. Le numérateur reprend les places moyennes du taux théorique pour rester comparable ;
+- sans places venues d'un HUDA, le taux est celui du type, même si les places de la structure sont inconnues ; avec, il faut aussi un taux HUDA, sinon pas de cible.
+
+Exemple : CADA de 1 501 places (taux 15) qui reçoit 106 places de HUDA (taux 25) au 1er juillet 2026. ETP cibles 2026 : 1 501 / 15 + 106 / 25 x 184 / 365 ≈ 102,2. Le taux 2026 vaut 1 554,4 places moyennes / 102,2 ≈ 15,2.
+
+## Cartographie
+
+`computeFinanceTotalValuesForYears` n'expose qu'un état par indicateur : `etp` et `tauxEncadrement` prennent le réalisé, à défaut le prévisionnel, résolu structure par structure ; `coutJournalier` est le coût théorique. Le budget global d'un CPOM y est compté en entier dans chaque zone qui contient une de ses structures.
+
+## Calcul
+
+Par année : `computeFinanceYearData` calcule une fois les budgets et les indicateurs par structure, puis `aggregateFinanceScope` les agrège pour chaque scope.
 
 ## Scopes
 
@@ -42,4 +96,4 @@ Par structure et par année, **par champ** :
 
 ## Sources
 
-`Budget`, `IndicateurFinancier` (`REALISE` + `PREVISIONNEL` en repli).
+`Budget` (structures et CPOM), `CpomStructure`, `IndicateurFinancier` (ETP), `StructureVersion` et `StructureTypologie` (places), `reporting.tarif_journalier_cible`, `reporting.taux_encadrement_cible`.

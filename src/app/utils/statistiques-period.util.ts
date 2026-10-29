@@ -1,7 +1,12 @@
 import dayjs from "dayjs";
 
 import { TimePeriod } from "@/app/components/common/TimePeriodSelector";
-import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import {
+  CURRENT_YEAR,
+  START_YEAR,
+  STATS_ACCOUNTED_CLOSED_MAX_YEAR,
+} from "@/constants";
+import { CompletudeStat } from "@/schemas/api/statistique.schema";
 
 import { getYearFromDate } from "./date.util";
 
@@ -81,4 +86,19 @@ export const getLastDisplayedPeriods = <T extends { date: string | Date }>(
         new Date(secondPeriod.date).getTime()
     )
     .slice(-MAX_DISPLAYED_TIME_PERIODS);
+};
+
+export const isYearIncomplete = (
+  completude?: CompletudeStat | null
+): boolean => {
+  if (!completude) {
+    return false;
+  }
+
+  return !completude.isComplete;
+};
+
+export const shouldShowYearAsterisk = (year: number | string): boolean => {
+  const yearNumber = typeof year === "string" ? parseInt(year, 10) : year;
+  return yearNumber <= STATS_ACCOUNTED_CLOSED_MAX_YEAR;
 };

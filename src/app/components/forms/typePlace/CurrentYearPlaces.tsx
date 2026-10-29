@@ -49,8 +49,7 @@ export const CurrentYearPlaces = ({
   );
   const hasIncoherence =
     isTouched &&
-    (direction === "contradiction" ||
-      (direction === "unchanged" && isDirty));
+    (direction === "contradiction" || (direction === "unchanged" && isDirty));
 
   return (
     <fieldset className="flex flex-col gap-6">
@@ -130,7 +129,7 @@ const getLegend = (formKind: FormKind, year: number): string => {
   if (isTransformationSurStructureExistante(formKind)) {
     return `Veuillez renseigner les nombres de places suivants à la suite de ${getTransformationNounAvecArticle(
       formKind
-    )}, tels que prévu dans la nouvelle convention.`;
+    )}, tels que prévus dans la nouvelle convention.`;
   }
   return `Types de place (tels que prévus dans la convention ${year})`;
 };

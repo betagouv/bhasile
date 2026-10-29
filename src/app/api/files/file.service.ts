@@ -7,7 +7,7 @@ import {
   MAX_FILE_SIZE,
 } from "@/constants";
 import { FileUpload } from "@/generated/prisma/client";
-import { canDeleteFile } from "@/lib/casl/abilities";
+import { canDeleteFile } from "@/lib/casl";
 import { checkBucket, getMinioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
@@ -114,8 +114,7 @@ export const validateUpload = (
 
 export const getKeysFromIncomingDocumentsOrActes = (
   documentsFinanciersOrActes:
-    | DocumentFinancierApiType[]
-    | ActeAdministratifApiType[]
+    DocumentFinancierApiType[] | ActeAdministratifApiType[]
 ): Set<string> => {
   const keys = new Set<string>();
   for (const doc of documentsFinanciersOrActes) {

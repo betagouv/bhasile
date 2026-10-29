@@ -10,7 +10,13 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Structure } from "@/generated/prisma/client";
+import { Prisma, Structure } from "@/generated/prisma/client";
+import {
+  canAbilityReadStructure,
+  defineAbilityFor,
+  getReadableStructureWhere,
+  isAgent,
+} from "@/lib/casl";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
@@ -33,6 +39,7 @@ import {
 import { locateAdresses } from "../adresses/ban.service";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
+import { resolveFilters } from "../filters/filters.service";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
@@ -77,6 +84,7 @@ import {
   getReadableAdresses,
   getReadableNotes,
   getTypeBati,
+  hideAgentOnlyFields,
   isStructureClosed,
   isStructureFinalised,
   isStructureInCpom,
@@ -150,50 +158,60 @@ const updateStructureAndRecomputeAnomalies = async (
 
 const getRequestNow = cache((): Date => getNow());
 
-const computeAllStructureRows = cache(
-  async (): Promise<StructureListComputedRow[]> => {
-    const now = getRequestNow();
-    const structures = await findAllStructures();
-    const currentVersions = structures.map((structure) =>
-      resolveCurrentVersion(structure.structureVersions, now)
-    );
-    const versionsAdresses = await findStructureVersionAdresses(
-      currentVersions.flatMap((version) => (version ? [version.id] : []))
-    );
-    const adressesByVersionId = new Map(
-      versionsAdresses.map((version) => [version.id, version.adresses])
-    );
+const computeAllStructureRows = async (
+  where: Prisma.StructureWhereInput
+): Promise<StructureListComputedRow[]> => {
+  const now = getRequestNow();
+  const structures = await findAllStructures(where);
+  const currentVersions = structures.map((structure) =>
+    resolveCurrentVersion(structure.structureVersions, now)
+  );
+  const versionsAdresses = await findStructureVersionAdresses(
+    currentVersions.flatMap((version) => (version ? [version.id] : []))
+  );
+  const adressesByVersionId = new Map(
+    versionsAdresses.map((version) => [version.id, version.adresses])
+  );
 
-    return structures
-      .map((structure, index) =>
-        computeStructureListRow(
-          structure,
-          currentVersions[index],
-          now,
-          adressesByVersionId.get(currentVersions[index]?.id ?? 0) ?? []
-        )
+  return structures
+    .map((structure, index) =>
+      computeStructureListRow(
+        structure,
+        currentVersions[index],
+        now,
+        adressesByVersionId.get(currentVersions[index]?.id ?? 0) ?? []
       )
-      .filter((row): row is StructureListComputedRow => row !== null);
-  }
-);
+    )
+    .filter((row): row is StructureListComputedRow => row !== null);
+};
 
 // Mémoïsé sur la référence de props : la page construit une seule query et la
 // passe à chaque Suspense, donc compteur, tableau et carte partagent le cache
 const getSortedStructureRows = cache(
-  async (props: SearchProps): Promise<StructureListComputedRow[]> => {
-    const rows = await computeAllStructureRows();
-
-    const filtered = filterStructureRows(rows, props, {
-      includeNonVisible: Boolean(props.selection),
-    });
-
-    return sortStructureRows(
-      filtered,
-      props.column ?? "departementAdministratif",
-      props.direction ?? "asc"
-    );
-  }
+  async (props: SearchProps): Promise<StructureListComputedRow[]> =>
+    filterAndSortStructureRows(
+      await computeAllStructureRows(getReadableStructureWhere(props.user)),
+      props
+    )
 );
+
+const filterAndSortStructureRows = async (
+  rows: StructureListComputedRow[],
+  props: SearchProps
+): Promise<StructureListComputedRow[]> => {
+  const filtered = filterStructureRows(
+    rows,
+    props,
+    await resolveFilters(props),
+    { includeNonVisible: Boolean(props.selection) }
+  );
+
+  return sortStructureRows(
+    filtered,
+    props.column ?? "departementAdministratif",
+    props.direction ?? "asc"
+  );
+};
 
 export const getStructuresTotal = async (props: SearchProps): Promise<number> =>
   (await getSortedStructureRows(props)).length;
@@ -238,14 +256,23 @@ export const getStructureListItems = async (
 };
 
 export const getFullStructures = async (
-  props: SearchProps,
-  user?: SessionUser
-): Promise<{
-  structures: StructureApiRead[];
-  totalStructures: number;
-}> => {
+  props: SearchProps
+): Promise<FullStructures> =>
+  buildFullStructures(await getSortedStructureRows(props), props);
+
+export const getFullStructuresForOperateur = async (
+  props: SearchProps
+): Promise<FullStructures> =>
+  buildFullStructures(
+    await filterAndSortStructureRows(await computeAllStructureRows({}), props),
+    props
+  );
+
+const buildFullStructures = async (
+  sorted: StructureListComputedRow[],
+  props: SearchProps
+): Promise<FullStructures> => {
   const now = getRequestNow();
-  const sorted = await getSortedStructureRows(props);
 
   const { total: totalStructures, rows: pageRows } = props.selection
     ? { total: sorted.length, rows: sorted }
@@ -274,18 +301,25 @@ export const getFullStructures = async (
         simple: true,
       });
       structure.currentPlaces.placesAutorisees = row.placesAutorisees ?? 0;
-      structure.adresses = getReadableAdresses(structure, user);
+      structure.adresses = getReadableAdresses(structure, props.user);
       structure.notes = null;
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);
       }
-      return structure;
+      return props.user && !isAgent(props.user)
+        ? hideAgentOnlyFields(structure)
+        : structure;
     })
     .filter(
       (structure): structure is StructureApiRead => structure !== undefined
     );
 
   return { structures, totalStructures };
+};
+
+type FullStructures = {
+  structures: StructureApiRead[];
+  totalStructures: number;
 };
 
 export const getResolvedStructure = async (
@@ -308,12 +342,15 @@ export const getResolvedStructure = async (
 
 export const getFullStructure = async (
   id: number,
-  user?: SessionUser
+  user: SessionUser | undefined
 ): Promise<StructureApiRead | null> => {
   const now = getNow();
   const resolvedDbStructure = await getResolvedStructure(id, now);
 
-  if (!resolvedDbStructure) {
+  if (
+    !resolvedDbStructure ||
+    !canAbilityReadStructure(defineAbilityFor(user), resolvedDbStructure)
+  ) {
     return null;
   }
 
@@ -323,7 +360,7 @@ export const getFullStructure = async (
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
 
-  return structure;
+  return isAgent(user) ? structure : hideAgentOnlyFields(structure);
 };
 
 export const getStructureForOperateur = async (
@@ -496,22 +533,4 @@ const dbStructureToApiRead = (
     isCurrentVersionFromTransformation,
     structureVersions: undefined,
   }) as StructureApiRead;
-};
-
-export const getBoundsPlacesAutorisees = async (): Promise<{
-  min: number;
-  max: number;
-}> => {
-  const rows = await computeAllStructureRows();
-  const places = rows
-    .map((row) => row.latestNonNullPlacesAutorisees)
-    .filter(
-      (placesAutorisees): placesAutorisees is number =>
-        placesAutorisees !== null
-    );
-
-  if (places.length === 0) {
-    return { min: 0, max: 0 };
-  }
-  return { min: Math.min(...places), max: Math.max(...places) };
 };

@@ -1,3 +1,4 @@
+import { createNationalAgent } from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CartographieDbDepartement } from "@/app/api/statistiques/cartographie/cartographie.db.type";
@@ -7,7 +8,11 @@ import type {
   StatistiquesContext,
 } from "@/app/api/statistiques/statistiques.db.type";
 
-import { buildTestActivityIndex, testStructure } from "../test-helpers";
+import {
+  buildTestActivityIndex,
+  buildTestCiblesFinancieres,
+  testStructure,
+} from "../test-helpers";
 
 const mockBuildStatistiquesContext = vi.fn();
 const mockFindAllDepartementsWithRegion = vi.fn();
@@ -57,6 +62,14 @@ const buildContext = (
     allStructures: structures,
     activeStructureIdsNow,
     activeStructureIdsByPeriod,
+    actualisationFormDefinitions: [],
+    lastValidatedCampagneYearByStructureId: new Map(),
+    initialisedStructureIds: new Set(
+      structures.map((structure) => structure.id)
+    ),
+    openingDateByStructureId: new Map(),
+    closureDateByStructureId: new Map(),
+    ciblesFinancieres: buildTestCiblesFinancieres(),
     eigs: [],
     evaluations: [],
     typologies: structures.map((structure) => ({
@@ -71,22 +84,18 @@ const buildContext = (
     adresses: [],
     cpomLinks: [],
     dnaLinks: [],
-    structureVersionTimeline: structures.map((structure) => ({
-      id: structure.id,
-      structureId: structure.id,
-      effectiveDate: new Date("2000-01-01"),
-      placesAutorisees: null,
-      type: structure.type,
-      departementAdministratif: structure.departementAdministratif,
-    })),
+    timelineByStructureId: new Map(),
     departements: [],
     budgets: [],
+    cpomBudgetByKey: new Map(),
     indicateurs: [],
     activites: [],
     rmus: [],
     resolveDnaStructureIds: () => [],
   };
 };
+
+const NATIONAL_AGENT = createNationalAgent();
 
 describe("getCartographieStatistiques", () => {
   beforeEach(() => {
@@ -99,15 +108,18 @@ describe("getCartographieStatistiques", () => {
       buildContext([testStructure(1, "01"), testStructure(2, "75")])
     );
 
-    const result = await getCartographieStatistiques({
-      granularite: "departement",
-      indicateur: "places.autorisees",
-      annee: 2025,
-      departements: null,
-      operateurs: null,
-      types: null,
-      aggregation: "moyenne",
-    });
+    const result = await getCartographieStatistiques(
+      {
+        granularite: "departement",
+        indicateur: "places.autorisees",
+        annee: 2025,
+        departements: null,
+        operateurs: null,
+        types: null,
+        aggregation: "moyenne",
+      },
+      NATIONAL_AGENT
+    );
 
     expect(result.zones).toContainEqual(
       expect.objectContaining({ code: "01", value: 10 })
@@ -126,15 +138,18 @@ describe("getCartographieStatistiques", () => {
       buildContext([testStructure(1, "01"), testStructure(2, "38")])
     );
 
-    const result = await getCartographieStatistiques({
-      granularite: "region",
-      indicateur: "places.autorisees",
-      annee: 2025,
-      departements: null,
-      operateurs: null,
-      types: null,
-      aggregation: "moyenne",
-    });
+    const result = await getCartographieStatistiques(
+      {
+        granularite: "region",
+        indicateur: "places.autorisees",
+        annee: 2025,
+        departements: null,
+        operateurs: null,
+        types: null,
+        aggregation: "moyenne",
+      },
+      NATIONAL_AGENT
+    );
 
     expect(result.zones).toContainEqual(
       expect.objectContaining({ code: "ARA", value: 20 })
@@ -149,19 +164,23 @@ describe("getCartographieStatistiques", () => {
       buildContext([testStructure(1, "01")])
     );
 
-    const result = await getCartographieStatistiques({
-      granularite: "departement",
-      indicateur: "places.autorisees",
-      annee: 2025,
-      departements: "01,38",
-      operateurs: null,
-      types: null,
-      aggregation: "moyenne",
-    });
+    const result = await getCartographieStatistiques(
+      {
+        granularite: "departement",
+        indicateur: "places.autorisees",
+        annee: 2025,
+        departements: "01,38",
+        operateurs: null,
+        types: null,
+        aggregation: "moyenne",
+      },
+      NATIONAL_AGENT
+    );
 
     expect(result.zones.map((zone) => zone.code).sort()).toEqual(["01", "38"]);
     expect(mockBuildStatistiquesContext).toHaveBeenCalledWith(
-      expect.objectContaining({ departements: "01,38" })
+      expect.objectContaining({ departements: "01,38" }),
+      NATIONAL_AGENT
     );
   });
 
@@ -179,15 +198,18 @@ describe("getCartographieStatistiques", () => {
       ],
     });
 
-    const result = await getCartographieStatistiques({
-      granularite: "departement",
-      indicateur: "rmu.referesEngages",
-      annee: 2025,
-      departements: null,
-      operateurs: null,
-      types: null,
-      aggregation: "moyenne",
-    });
+    const result = await getCartographieStatistiques(
+      {
+        granularite: "departement",
+        indicateur: "rmu.referesEngages",
+        annee: 2025,
+        departements: null,
+        operateurs: null,
+        types: null,
+        aggregation: "moyenne",
+      },
+      NATIONAL_AGENT
+    );
 
     // 38 n'a aucune structure mais porte le RMU.
     expect(result.zones).toContainEqual(
@@ -202,15 +224,18 @@ describe("getCartographieStatistiques", () => {
   it("aucune structure dans tout le périmètre (buildStatistiquesContext -> null) : toutes les zones à value null", async () => {
     mockBuildStatistiquesContext.mockResolvedValue(null);
 
-    const result = await getCartographieStatistiques({
-      granularite: "departement",
-      indicateur: "places.autorisees",
-      annee: 2025,
-      departements: null,
-      operateurs: null,
-      types: "CAES",
-      aggregation: "moyenne",
-    });
+    const result = await getCartographieStatistiques(
+      {
+        granularite: "departement",
+        indicateur: "places.autorisees",
+        annee: 2025,
+        departements: null,
+        operateurs: null,
+        types: "CAES",
+        aggregation: "moyenne",
+      },
+      NATIONAL_AGENT
+    );
 
     expect(result.zones).toHaveLength(3);
     expect(result.zones.every((zone) => zone.value === null)).toBe(true);

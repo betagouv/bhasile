@@ -1,31 +1,48 @@
 import { getNow } from "@/app/utils/now.util";
 import {
+  getReadableDepartementNumeros,
+  getReadableStructureWhere,
+} from "@/lib/casl";
+import {
   StatistiqueApiRead,
   StatistiquesFilters,
 } from "@/schemas/api/statistique.schema";
+import { SessionUser } from "@/types/global";
 
+import { resolveFilters } from "../filters/filters.service";
 import { computeActiviteStatistiques } from "./activite/activite.util";
+import { buildLastValidatedCampagneYearByStructureId } from "./completude.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
-import { computeFinanceStatistiques } from "./finance/finance.util";
+import {
+  computeFinanceStatistiques,
+  indexCpomBudgets,
+} from "./finance/finance.util";
+import { buildCiblesFinancieresLookup } from "./finance/finance-theorique.util";
 import { computePlacesStatistiques } from "./places/places.util";
 import { computeRmuStatistiques } from "./rmu/rmu.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findActivites,
+  findActualisationFormDefinitions,
   findBudgets,
+  findCpomBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinks,
   findEigs,
   findEvaluations,
+  findIdfDepartementNumeros,
   findIndicateursFinanciers,
-  findOperateurFiliales,
   findPerimeterStructures,
   findRmus,
   findStructureActivityDates,
   findStructureAdresses,
+  findStructureInitialisations,
   findStructureTypologies,
   findStructureVersionTimeline,
+  findTarifsJournaliersCibles,
+  findTauxEncadrementCibles,
+  findValidatedActualisationForms,
 } from "./statistiques.repository";
 import {
   applyVersionedPlacesToTypologies,
@@ -34,40 +51,32 @@ import {
   buildStatistiquesActivityContext,
   collectDistinctYears,
   createEmptyActiveStructureIdsByPeriod,
+  getInitialisedStructureIds,
   getTypologieYears,
-  parseStatistiquesPerimeterFilters,
-  type StatistiquesResolvedPerimeterFilters,
+  indexTimelineByStructureId,
+  toStatistiquesPerimeterFilters,
 } from "./statistiques.util";
 import { computeStructuresStatistiques } from "./structures/structures.util";
 
-/** Résout les filiales des `operateurs` filtrés (seul point d'accès BDD du filtrage). */
-const resolveStatistiquesPerimeterFilters = async (
-  filters: StatistiquesFilters
-): Promise<StatistiquesResolvedPerimeterFilters> => {
-  const parsed = parseStatistiquesPerimeterFilters(filters);
-  const filiales = await findOperateurFiliales(parsed.operateurIds);
-
-  return {
-    departements: parsed.departements,
-    types: parsed.types,
-    operateurIds:
-      parsed.operateurIds.length > 0
-        ? new Set([
-            ...parsed.operateurIds,
-            ...filiales.map((filiale) => filiale.id),
-          ])
-        : null,
-  };
-};
-
 export const buildStatistiquesContext = async (
-  filters: StatistiquesFilters
+  filters: StatistiquesFilters,
+  user: SessionUser
 ): Promise<StatistiquesContext | null> => {
   const now = getNow();
   const referenceYear = now.getUTCFullYear();
 
-  const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
-  const allStructures = await findPerimeterStructures(resolvedFilters, now);
+  const resolvedFilters = toStatistiquesPerimeterFilters(
+    await resolveFilters(filters)
+  );
+  const readableDepartements = getReadableDepartements(
+    resolvedFilters.departements,
+    getReadableDepartementNumeros(user)
+  );
+  const allStructures = await findPerimeterStructures(
+    resolvedFilters,
+    getReadableStructureWhere(user),
+    now
+  );
   const allStructureIds = allStructures.map((structure) => structure.id);
   if (allStructureIds.length === 0) {
     return null;
@@ -81,18 +90,38 @@ export const buildStatistiquesContext = async (
     structureActivityDates
   );
 
-  const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
-    await Promise.all([
-      findStructureTypologies(allStructureIds),
-      findStructureAdresses(allStructureIds),
-      findCpomStructures(allStructureIds),
-      findDnaLinks(allStructureIds),
-      findStructureVersionTimeline(allStructureIds),
-    ]);
+  const [
+    typologies,
+    adresses,
+    cpomLinks,
+    dnaLinks,
+    structureVersionTimeline,
+    structureInitialisations,
+    actualisationFormDefinitions,
+    validatedActualisations,
+    idfDepartementNumeros,
+    tarifsJournaliersCibles,
+    tauxEncadrementCibles,
+  ] = await Promise.all([
+    findStructureTypologies(allStructureIds),
+    findStructureAdresses(allStructureIds),
+    findCpomStructures(allStructureIds),
+    findDnaLinks(allStructureIds),
+    findStructureVersionTimeline(allStructureIds),
+    findStructureInitialisations(allStructureIds),
+    findActualisationFormDefinitions(),
+    findValidatedActualisationForms(allStructureIds),
+    findIdfDepartementNumeros(),
+    findTarifsJournaliersCibles(),
+    findTauxEncadrementCibles(),
+  ]);
 
+  const timelineByStructureId = indexTimelineByStructureId(
+    structureVersionTimeline
+  );
   const resolvedTypologies = applyVersionedPlacesToTypologies(
     typologies.filter((typologie) => typologie.year <= referenceYear),
-    structureVersionTimeline,
+    timelineByStructureId,
     now
   );
 
@@ -104,24 +133,20 @@ export const buildStatistiquesContext = async (
     eigs,
     evaluations,
     budgets,
+    cpomBudgets,
     indicateurs,
     activites,
     rmus,
   ] = await Promise.all([
-    findDepartementsWithPopulation([
-      ...new Set(
-        allStructures
-          .map((structure) => structure.departementAdministratif)
-          .filter((departement): departement is string => departement !== null)
-      ),
-    ]),
+    findDepartementsWithPopulation([...(readableDepartements ?? [])]),
     findEigs(dnaCodes),
     findEvaluations(allStructureIds),
     findBudgets(allStructureIds),
+    findCpomBudgets([...new Set(cpomLinks.map((link) => link.cpomId))]),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
     resolvedFilters.operateurIds === null && filters.types === null
-      ? findRmus(resolvedFilters.departements)
+      ? findRmus(readableDepartements)
       : Promise.resolve(null),
   ]);
 
@@ -137,7 +162,7 @@ export const buildStatistiquesContext = async (
         ...evaluations.map((evaluation) => evaluation.date),
         ...activites.map((activite) => activite.date),
       ],
-      financeYears: collectDistinctYears(budgets, indicateurs),
+      financeYears: collectDistinctYears(budgets, cpomBudgets, indicateurs),
     }
   );
   const structures = allStructures.filter((structure) =>
@@ -149,29 +174,59 @@ export const buildStatistiquesContext = async (
     allStructures,
     activeStructureIdsNow,
     activeStructureIdsByPeriod,
+    initialisedStructureIds: getInitialisedStructureIds(
+      structureInitialisations,
+      now
+    ),
+    openingDateByStructureId: activityContext.openingDateByStructureId,
+    closureDateByStructureId: activityContext.closureDateByStructureId,
+    actualisationFormDefinitions,
+    lastValidatedCampagneYearByStructureId:
+      buildLastValidatedCampagneYearByStructureId(validatedActualisations),
+    ciblesFinancieres: buildCiblesFinancieresLookup({
+      tarifsJournaliersCibles,
+      tauxEncadrementCibles,
+      idfDepartementNumeros: new Set(idfDepartementNumeros),
+    }),
     eigs,
     evaluations,
     typologies: resolvedTypologies,
     adresses,
     cpomLinks,
     dnaLinks,
-    structureVersionTimeline,
+    timelineByStructureId,
     departements,
     budgets,
+    cpomBudgetByKey: indexCpomBudgets(cpomBudgets),
     indicateurs,
     activites,
     rmus,
     resolveDnaStructureIds: buildDnaStructureIdsResolver(
       dnaLinks,
-      structureVersionTimeline
+      timelineByStructureId
     ),
   };
 };
 
+const getReadableDepartements = (
+  filteredDepartements: Set<string> | null,
+  readableDepartements: Set<string> | null
+): Set<string> | null => {
+  if (!filteredDepartements || !readableDepartements) {
+    return filteredDepartements ?? readableDepartements;
+  }
+  return new Set(
+    [...filteredDepartements].filter((departement) =>
+      readableDepartements.has(departement)
+    )
+  );
+};
+
 export const getStatistiques = async (
-  filters: StatistiquesFilters
+  filters: StatistiquesFilters,
+  user: SessionUser
 ): Promise<StatistiqueApiRead | null> => {
-  const context = await buildStatistiquesContext(filters);
+  const context = await buildStatistiquesContext(filters, user);
   if (!context) {
     return null;
   }

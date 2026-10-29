@@ -130,7 +130,7 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 
 ## Authentification
 
-- **ProConnect** : agents DREETS/DDETS uniquement, donne accès au dashboard
+- **ProConnect** : tout compte peut se connecter ; l'accès au dashboard demande au moins un binôme (voir [Permissions](docs/permissions.md))
 - **Mot de passe** : opérateurs, accès limité au formulaire `/ajout-structure`
 
 ## Documentation détaillée

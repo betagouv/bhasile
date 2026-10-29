@@ -2,9 +2,13 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, POST } from "@/app/api/structures/route";
-import { UserActionCategory } from "@/generated/prisma/enums";
+import { AccessRole, UserActionCategory } from "@/generated/prisma/enums";
 import { PublicType } from "@/types/structure.type";
 
+import {
+  createSessionGrant,
+  createSessionUser,
+} from "../../test-utils/factories/session-user.factory";
 import { createStructure } from "../../test-utils/structure.factory";
 
 const mockfindAllStructures = vi.fn();
@@ -14,6 +18,10 @@ const mockGetAdresseAdministrativeCoordinates = vi.fn();
 const mockCreateUserAction = vi.fn();
 const mockGetServerSession = vi.fn();
 const mockFilterStructureRows = vi.fn((...args: unknown[]) => args[0]);
+
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({
+  findOperateurFiliales: vi.fn(async () => []),
+}));
 
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
@@ -94,8 +102,54 @@ describe("GET /api/structures", () => {
     expect(mockFilterStructureRows).toHaveBeenCalledWith(
       [],
       expect.objectContaining({ isClosed: true, isFinalised: true }),
+      expect.anything(),
       expect.anything()
     );
+  });
+
+  it("limite la liste aux structures lisibles par l'utilisateur connecté", async () => {
+    mockGetServerSession.mockResolvedValueOnce({
+      user: createSessionUser({
+        grants: [
+          createSessionGrant({
+            role: AccessRole.LECTEUR,
+            departementNumeros: ["83"],
+          }),
+        ],
+      }),
+    });
+    mockfindAllStructures.mockResolvedValueOnce([]);
+    mockFindStructuresByIds.mockResolvedValueOnce([]);
+
+    await GET(new NextRequest("http://localhost/api/structures"));
+
+    expect(mockfindAllStructures).toHaveBeenCalledWith({
+      OR: [{ departementAdministratif: { in: ["83"] } }],
+    });
+  });
+
+  it("ne filtre pas la sélection du formulaire opérateur, sans session", async () => {
+    mockGetServerSession.mockResolvedValueOnce(null);
+    mockfindAllStructures.mockResolvedValueOnce([]);
+    mockFindStructuresByIds.mockResolvedValueOnce([]);
+
+    await GET(
+      new NextRequest("http://localhost/api/structures?selection=true")
+    );
+
+    expect(mockfindAllStructures).toHaveBeenCalledWith({});
+  });
+
+  it("ne filtre pas la sélection pour une session sans binôme, venue par le mot de passe", async () => {
+    mockGetServerSession.mockResolvedValueOnce({ user: createSessionUser() });
+    mockfindAllStructures.mockResolvedValueOnce([]);
+    mockFindStructuresByIds.mockResolvedValueOnce([]);
+
+    await GET(
+      new NextRequest("http://localhost/api/structures?selection=true")
+    );
+
+    expect(mockfindAllStructures).toHaveBeenCalledWith({});
   });
 
   it("laisse les filtres closed et finalised à faux quand les query params sont absents", async () => {
@@ -109,6 +163,7 @@ describe("GET /api/structures", () => {
     expect(mockFilterStructureRows).toHaveBeenCalledWith(
       [],
       expect.objectContaining({ isClosed: false, isFinalised: false }),
+      expect.anything(),
       expect.anything()
     );
   });

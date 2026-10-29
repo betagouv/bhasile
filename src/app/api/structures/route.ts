@@ -6,6 +6,7 @@ import {
   parseSortDirection,
   parseStructureColumn,
 } from "@/app/utils/search-params.util";
+import { canAccessApp } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
@@ -13,6 +14,7 @@ import { SessionUser } from "@/types/global";
 import { createStructureEvent } from "../user-actions/user-action.service";
 import {
   getFullStructures,
+  getFullStructuresForOperateur,
   updateStructureOperateur,
 } from "./structure.service";
 
@@ -21,11 +23,10 @@ export async function GET(request: NextRequest) {
   const search = request.nextUrl.searchParams.get("search");
   const pageParam = Number(request.nextUrl.searchParams.get("page"));
   const page = Number.isInteger(pageParam) ? pageParam : null;
-  const type = request.nextUrl.searchParams.get("type");
-  const bati = request.nextUrl.searchParams.get("bati");
-  const placesAutorisees = request.nextUrl.searchParams.get("places");
+  const types = request.nextUrl.searchParams.get("types");
   const departements = request.nextUrl.searchParams.get("departements");
   const operateurs = request.nextUrl.searchParams.get("operateurs");
+  const operateurName = request.nextUrl.searchParams.get("operateurName");
   const column = parseStructureColumn(
     request.nextUrl.searchParams.get("column")
   );
@@ -39,22 +40,22 @@ export async function GET(request: NextRequest) {
   const searchProps = {
     search,
     page,
-    type,
-    bati,
-    placesAutorisees,
+    types,
     departements,
     column,
     direction,
     operateurs,
+    operateurName,
     selection,
     isFinalised,
     isClosed,
+    user: session?.user as SessionUser | undefined,
   };
 
-  const { structures, totalStructures } = await getFullStructures(
-    searchProps,
-    session?.user as SessionUser | undefined
-  );
+  const { structures, totalStructures } =
+    searchProps.user && canAccessApp(searchProps.user)
+      ? await getFullStructures(searchProps)
+      : await getFullStructuresForOperateur(searchProps);
 
   return NextResponse.json({ structures, totalStructures });
 }

@@ -1,6 +1,7 @@
 import type { StructureType } from "@/generated/prisma/client";
 
 import type { Repartition } from "./adresse.type";
+import type { SessionUser } from "./global";
 import type { StructureColumn } from "./ListColumn";
 
 export type StructureCommune = {
@@ -63,16 +64,16 @@ export type CommunePoints = {
 export type SearchProps = {
   search: string | null;
   page: number | null;
-  type: string | null;
-  bati: string | null;
-  placesAutorisees: string | null;
+  types: string | null;
   departements: string | null;
   operateurs: string | null;
+  operateurName?: string | null;
   column?: StructureColumn | null;
   direction?: "asc" | "desc" | null;
   selection?: boolean;
   isFinalised?: boolean;
   isClosed?: boolean;
+  user: SessionUser | undefined;
 };
 
 export type StructuresQuery = SearchProps & {

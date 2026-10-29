@@ -11,11 +11,8 @@ import {
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
-import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
-import {
-  getMostRecentMillesime,
-  getPlacesByCommunes,
-} from "@/app/utils/structure.util";
+import { normalizeAccents } from "@/app/utils/string.util";
+import { getPlacesByCommunes } from "@/app/utils/structure.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
@@ -23,7 +20,7 @@ import {
   StructureType,
   StructureVersionTransformationType,
 } from "@/generated/prisma/client";
-import { canUpdateStructure } from "@/lib/casl/abilities";
+import { canUpdateStructure } from "@/lib/casl";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import {
   StructureAgentUpdateApiType,
@@ -45,6 +42,10 @@ import {
   StructureListItem,
 } from "@/types/structure-list.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
+import {
+  matchesStructureFilters,
+  ParsedFilters,
+} from "@/utils/filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
@@ -67,6 +68,23 @@ const typesPublic: Record<string, PublicType> = {
   famille: PublicType.FAMILLE,
   "personnes isolées": PublicType.PERSONNES_ISOLEES,
 };
+
+export const hideAgentOnlyFields = (
+  structure: StructureApiRead
+): StructureApiRead => ({
+  ...structure,
+  notes: null,
+  controles: [],
+  evaluations: [],
+  evenementsIndesirablesGraves: [],
+  anomalies: [],
+  cpomStructures: [],
+  isInCpom: false,
+  isInCpomPerYear: {},
+  history: structure.history?.filter(
+    (event) => event.kind !== "CPOM_ENTRY" && event.kind !== "CPOM_EXIT"
+  ),
+});
 
 export const getReadableNotes = (
   structure: StructureApiRead,
@@ -303,13 +321,14 @@ export type StructureListComputedRow = {
   hasForm: boolean;
   isFinalised: boolean;
   type: StructureType | null;
+  operateurId: number | null;
   operateurName: string | null;
   operateurLabel: string;
+  attachedDepartement: string;
   departementAdministratif: string | null;
   communeAdministrative: string | null;
   bati: Repartition | undefined;
   placesAutorisees: number | null;
-  latestNonNullPlacesAutorisees: number | null;
   finConvention: Date | null;
   latitude: StructureListLightVersion["latitude"];
   longitude: StructureListLightVersion["longitude"];
@@ -369,21 +388,14 @@ export const computeStructureListRow = (
     hasForm: structure.forms.length > 0,
     isFinalised: isStructureFinalised(structure, now),
     type: structure.type,
+    operateurId: structure.operateurId,
     operateurName,
     operateurLabel,
+    attachedDepartement: structure.departementAdministratif,
     departementAdministratif: currentVersion.departementAdministratif,
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
     placesAutorisees: currentVersion.placesAutorisees ?? null,
-    latestNonNullPlacesAutorisees:
-      currentVersion.placesAutorisees ??
-      getMostRecentMillesime(
-        structure.structureTypologies.filter(
-          (typologie) => typologie.placesAutorisees != null
-        ),
-        { currentYear: now.getFullYear() }
-      )?.placesAutorisees ??
-      null,
     finConvention: getDatesConvention(structure)[1],
     latitude: currentVersion.latitude,
     longitude: currentVersion.longitude,
@@ -407,34 +419,13 @@ export const getFermetureHistory = (
       ]
     : [];
 
-const parsePlacesRange = (
-  value: string | null | undefined
-): [number | null, number | null] => {
-  if (!value) {
-    return [null, null];
-  }
-  const [minString, maxString] = value.split(",");
-  const min = minString ? Number(minString) : null;
-  const max = maxString ? Number(maxString) : null;
-  if (min === null || max === null || Number.isNaN(min) || Number.isNaN(max)) {
-    return [null, null];
-  }
-  return [min, max];
-};
-
 export const filterStructureRows = (
   rows: StructureListComputedRow[],
   filters: SearchProps,
+  parsedFilters: ParsedFilters,
   { includeNonVisible }: { includeNonVisible: boolean }
 ): StructureListComputedRow[] => {
-  const typeList = parseCommaList(filters.type);
-  const departementList = parseCommaList(filters.departements);
-  const operateurList = parseCommaList(filters.operateurs);
-  const batiList = parseCommaList(filters.bati).map((value) =>
-    value.toUpperCase()
-  );
   const search = filters.search ? normalizeAccents(filters.search) : null;
-  const [placesMin, placesMax] = parsePlacesRange(filters.placesAutorisees);
 
   return rows.filter((row) => {
     if (!includeNonVisible && !row.hasForm && !row.bornFromCreation) {
@@ -449,35 +440,19 @@ export const filterStructureRows = (
     if (filters.isFinalised && !row.isFinalised) {
       return false;
     }
-    if (typeList.length > 0 && (!row.type || !typeList.includes(row.type))) {
-      return false;
-    }
     if (
-      departementList.length > 0 &&
-      (!row.departementAdministratif ||
-        !departementList.includes(row.departementAdministratif))
+      !matchesStructureFilters(
+        {
+          departement: row.attachedDepartement,
+          operateurId: row.operateurId,
+          type: row.type,
+        },
+        parsedFilters
+      )
     ) {
       return false;
     }
-    if (
-      operateurList.length > 0 &&
-      (!row.operateurName || !operateurList.includes(row.operateurName))
-    ) {
-      return false;
-    }
-    if (
-      batiList.length > 0 &&
-      (!row.bati || !batiList.includes(row.bati.toUpperCase()))
-    ) {
-      return false;
-    }
-    if (
-      placesMin !== null &&
-      placesMax !== null &&
-      (row.placesAutorisees === null ||
-        row.placesAutorisees < placesMin ||
-        row.placesAutorisees > placesMax)
-    ) {
+    if (filters.operateurName && row.operateurName !== filters.operateurName) {
       return false;
     }
     if (

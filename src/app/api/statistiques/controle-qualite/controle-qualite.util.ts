@@ -3,7 +3,7 @@ import {
   toTrimesterKey,
   toYearKey,
 } from "@/app/utils/date.util";
-import { NumericAggregation } from "@/app/utils/math.util";
+import { NumericAggregation, sumValues } from "@/app/utils/math.util";
 import {
   ControleQualitePeriodStat,
   StatistiqueApiRead,
@@ -14,13 +14,17 @@ import type {
   StatistiquesPeriodGranularity,
 } from "../statistiques.db.type";
 import {
-  computeTotalPlaces,
+  countDaysBetween,
   filterByTwelveMonthWindow,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
+  getStructureOpenBounds,
+  getTwelveMonthWindow,
   groupByPeriodKey,
+  isStructureOpenAt,
   lookupActiveStructureIds,
   monthKeyToDate,
+  resolveDnaEventStructureIds,
   trimesterKeyToDate,
   yearKeyToDate,
 } from "../statistiques.util";
@@ -104,30 +108,64 @@ export const computeControleQualiteStatistiques = (
   context: StatistiquesContext,
   aggregation: NumericAggregation
 ): StatistiqueApiRead["controleQualite"] => {
-  const { structures, typologies, eigs, evaluations } = context;
+  const { allStructures, typologies, eigs, evaluations } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const structuresWithTypologie = filterStructuresWithTypologie(
-    structures,
+    allStructures,
     typologieMap
   );
-  const activeStructureIds = new Set(
+  const structureIdsWithTypologie = new Set(
     structuresWithTypologie.map((structure) => structure.id)
   );
-  const totalPlaces = computeTotalPlaces(structuresWithTypologie, typologieMap);
+  const window = getTwelveMonthWindow();
 
-  // TODO: confirmer métier - fenêtre glissante 12 mois vs année civile (ex. 2026).
+  // Une structure compte au numérateur et au dénominateur tant qu'elle est
+  // ouverte : ses places sont pondérées par sa durée d'ouverture sur la fenêtre.
+  const placesMoyennes =
+    sumValues(
+      structuresWithTypologie.map((structure) => {
+        const bounds = getStructureOpenBounds(
+          context,
+          structure.id,
+          window.start,
+          window.end
+        );
+        const places = typologieMap.get(structure.id)?.placesAutorisees;
+        return bounds && places != null
+          ? (places * countDaysBetween(bounds.start, bounds.end)) /
+              countDaysBetween(window.start, window.end)
+          : null;
+      })
+    ) ?? 0;
+
   const recentEigs = filterByTwelveMonthWindow(
     eigs,
     (eig) => eig.evenementDate
+  ).filter(
+    (eig) =>
+      eig.dnaCode !== null &&
+      resolveDnaEventStructureIds(
+      context.resolveDnaStructureIds,
+      eig.dnaCode,
+      eig.evenementDate,
+      structureIdsWithTypologie
+    ).some((structureId) =>
+      isStructureOpenAt(context, structureId, eig.evenementDate)
+    )
   );
   const recentEvaluations = filterByTwelveMonthWindow(
-    filterEvaluationsInScope(evaluations, activeStructureIds),
+    evaluations,
     (evaluation) => evaluation.date
+  ).filter(
+    (evaluation) =>
+      evaluation.structureId !== null &&
+      evaluation.date !== null &&
+      isStructureOpenAt(context, evaluation.structureId, evaluation.date)
   );
 
   return {
     eig: {
-      ...computeEigRates(recentEigs, totalPlaces),
+      ...computeEigRates(recentEigs, placesMoyennes),
       ...computeEvaluationGlobalSummary(recentEvaluations, aggregation),
     },
     byMonth: computePeriodSeries(context, aggregation, {

@@ -11,15 +11,24 @@ import { sumValues } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { StructureType } from "@/generated/prisma/client";
-import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
+import type { CompletudeStat } from "@/schemas/api/statistique.schema";
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
+import { ParsedFilters } from "@/utils/filters.util";
 
 import { pickVersionBefore } from "../structure-versions/structure-version.util";
+import type { StructureDbList } from "../structures/structure.db.type";
+import {
+  isStructureFinalised,
+  isStructureInCpom,
+} from "../structures/structure.util";
+import { resolveStructuresForYear } from "./completude.util";
 import type {
   DnaStructureIdsResolver,
+  StatistiqueDbCpomStructure,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
+  StatistiqueDbStructureInitialisation,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
@@ -28,6 +37,7 @@ import type {
   StatistiquesContext,
   StatistiquesPeriodGranularity,
   StatistiquesTypologieYearContext,
+  StatistiquesYearContext,
 } from "./statistiques.db.type";
 
 export const createEmptyActiveStructureIdsByPeriod =
@@ -43,34 +53,20 @@ export type StatistiquesResolvedPerimeterFilters = {
   operateurIds: Set<number> | null;
 };
 
-/** Filtres parsés mais pas encore résolus : les filiales des `operateurIds` ne sont pas encore ajoutées (accès BDD, cf. service). */
-export type StatistiquesParsedPerimeterFilters = {
-  departements: Set<string> | null;
-  types: Set<StructureType>;
-  operateurIds: number[];
-};
-
-export const parseStatistiquesPerimeterFilters = (
-  filters: StatistiquesFilters
-): StatistiquesParsedPerimeterFilters => {
-  const depList = filters.departements?.split(",").filter(Boolean) ?? [];
-  const requestedTypes = new Set(
-    filters.types?.split(",").filter(Boolean) ?? []
-  );
-  const types = new Set(
+export const toStatistiquesPerimeterFilters = ({
+  departementList,
+  operateurList,
+  typeList,
+}: ParsedFilters): StatistiquesResolvedPerimeterFilters => ({
+  departements: departementList.length > 0 ? new Set(departementList) : null,
+  types: new Set(
     ACCEPTED_STRUCTURE_TYPES.filter(
-      (type) => requestedTypes.size === 0 || requestedTypes.has(type)
+      (type) => typeList.length === 0 || typeList.includes(type)
     )
-  );
-  const operateurIds =
-    filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
-
-  return {
-    departements: depList.length > 0 ? new Set(depList) : null,
-    types,
-    operateurIds,
-  };
-};
+  ),
+  operateurIds:
+    operateurList.length > 0 ? new Set(operateurList.map(Number)) : null,
+});
 
 const yearFromDate = (
   date: Date | string | null | undefined
@@ -113,20 +109,13 @@ const isStructureActiveInPeriod = (
   periodStart: Date,
   periodEnd: Date,
   activityContext: StatistiquesActivityContext
-): boolean => {
-  const openingDate = activityContext.openingDateByStructureId.get(structureId);
-  if (openingDate != null && openingDate >= periodEnd) {
-    return false;
-  }
-
-  const closureDate =
-    activityContext.closureDateByStructureId.get(structureId) ?? null;
-  if (closureDate != null && closureDate < periodStart) {
-    return false;
-  }
-
-  return true;
-};
+): boolean =>
+  getStructureOpenBounds(
+    activityContext,
+    structureId,
+    periodStart,
+    periodEnd
+  ) !== null;
 
 export const parseTrimesterKey = (
   trimesterKey: string
@@ -182,29 +171,77 @@ export const getPeriodBounds = (
   }
 };
 
+export const getTwelveMonthWindow = (): { start: Date; end: Date } => {
+  const today = startOfUtcDay();
+  const twelveMonthsAgo = new Date(today);
+  twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - 12);
+
+  return {
+    start: monthKeyToDate(toMonthKey(twelveMonthsAgo)),
+    end: startOfNextUtcDay(today),
+  };
+};
+
 export const filterByTwelveMonthWindow = <Item>(
   items: Item[],
   getDate: (item: Item) => Date | string | null | undefined
 ): Item[] => {
-  const twelveMonthsAgo = startOfUtcDay();
-  twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - 12);
-  const cutoff = toMonthKey(twelveMonthsAgo);
+  const { start } = getTwelveMonthWindow();
 
   return items.filter((item) => {
     const date = getDate(item);
-    if (date == null) {
-      return false;
-    }
-    return toMonthKey(new Date(date)) >= cutoff;
+    return date != null && new Date(date) >= start;
   });
 };
 
-type StructureVersionTimelineIndex = Map<
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+type StructureOpenDatesContext = Pick<
+  StatistiquesContext,
+  "openingDateByStructureId" | "closureDateByStructureId"
+>;
+
+export const getStructureOpenBounds = (
+  context: StructureOpenDatesContext,
+  structureId: number,
+  start: Date,
+  end: Date
+): { start: Date; end: Date } | null => {
+  const openingDate = context.openingDateByStructureId.get(structureId);
+  const closureDate = context.closureDateByStructureId.get(structureId);
+  const openStart = openingDate
+    ? Math.max(start.getTime(), startOfUtcDay(openingDate).getTime())
+    : start.getTime();
+  const openEnd = closureDate
+    ? Math.min(end.getTime(), startOfNextUtcDay(closureDate).getTime())
+    : end.getTime();
+
+  return openEnd > openStart
+    ? { start: new Date(openStart), end: new Date(openEnd) }
+    : null;
+};
+
+export const countDaysBetween = (start: Date, end: Date): number =>
+  Math.round((end.getTime() - start.getTime()) / DAY_IN_MS);
+
+export const isStructureOpenAt = (
+  context: StructureOpenDatesContext,
+  structureId: number,
+  date: Date
+): boolean =>
+  getStructureOpenBounds(
+    context,
+    structureId,
+    startOfUtcDay(date),
+    startOfNextUtcDay(date)
+  ) !== null;
+
+export type StructureVersionTimelineIndex = Map<
   number,
   StatistiqueDbStructureVersionTimeline[]
 >;
 
-const indexTimelineByStructureId = (
+export const indexTimelineByStructureId = (
   timeline: StatistiqueDbStructureVersionTimeline[]
 ): StructureVersionTimelineIndex => {
   const timelineByStructureId: StructureVersionTimelineIndex = new Map();
@@ -231,17 +268,6 @@ const pickEffectiveVersionFromIndex = (
     startOfNextUtcDay(date).getTime()
   );
 
-/* Version effective d'une structure à date : version la plus récente dont la date d'effet est inf à `date`, sinon version socle. */
-export const getEffectiveStructureVersionAtDate = (
-  structureId: number,
-  date: Date,
-  timeline: StatistiqueDbStructureVersionTimeline[]
-): StatistiqueDbStructureVersionTimeline | null =>
-  pickVersionBefore(
-    timeline.filter((version) => version.structureId === structureId),
-    startOfNextUtcDay(date).getTime()
-  );
-
 /**
  * Résolveur `dnaCode → structures` pré-indexé et mémoïsé par `(dnaCode, date)`.
  * Construit une fois par requête : la cartographie découpe le contexte par zone
@@ -250,7 +276,7 @@ export const getEffectiveStructureVersionAtDate = (
  */
 export const buildDnaStructureIdsResolver = (
   dnaLinks: StatistiqueDbDnaLink[],
-  timeline: StatistiqueDbStructureVersionTimeline[]
+  timelineByStructureId: StructureVersionTimelineIndex
 ): DnaStructureIdsResolver => {
   const linksByCode = new Map<
     string,
@@ -264,8 +290,6 @@ export const buildDnaStructureIdsResolver = (
     links.push({ ...link, structureId: link.structureId });
     linksByCode.set(link.dna.code, links);
   }
-
-  const timelineByStructureId = indexTimelineByStructureId(timeline);
 
   // Clé au jour UTC : la résolution ne dépend que de `startOfNextUtcDay(date)`.
   const cache = new Map<string, number[]>();
@@ -308,11 +332,9 @@ export const resolveDnaEventStructureIds = (
 
 export const applyVersionedPlacesToTypologies = (
   typologies: StatistiqueDbTypologie[],
-  timeline: StatistiqueDbStructureVersionTimeline[],
+  timelineByStructureId: StructureVersionTimelineIndex,
   now: Date
 ): StatistiqueDbTypologie[] => {
-  const timelineByStructureId = indexTimelineByStructureId(timeline);
-
   return typologies.map((typologie) => {
     if (
       typologie.structureId === null ||
@@ -347,11 +369,10 @@ export const filterByEffectiveVersionAtDate = <
   rows: Row[],
   structureIds: Iterable<number>,
   date: Date,
-  timeline: StatistiqueDbStructureVersionTimeline[],
+  timelineByStructureId: StructureVersionTimelineIndex,
   now: Date = getNow()
 ): Row[] => {
   const cappedDate = date < now ? date : now;
-  const timelineByStructureId = indexTimelineByStructureId(timeline);
   const effectiveVersionIdByStructureId = new Map<number, number>();
 
   for (const structureId of structureIds) {
@@ -678,27 +699,73 @@ export const getTypologieYears = (
     (yearA, yearB) => yearA - yearB
   );
 
-export const mapTypologieYears = <Entry extends { year: number }>(
-  allStructures: StatistiqueDbStructure[],
-  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
-  typologies: StatistiqueDbTypologie[],
+export const getInitialisedStructureIds = (
+  initialisations: StatistiqueDbStructureInitialisation[],
+  now: Date
+): Set<number> =>
+  new Set(
+    initialisations
+      .filter((structure) => isStructureFinalised(structure, now))
+      .map((structure) => structure.id)
+  );
+
+/** Règle unique « sous CPOM sur l'année » : celle des formulaires (`isStructureInCpom`). */
+export const isCpomLinkActiveInYear = (
+  link: StatistiqueDbCpomStructure,
+  year: number
+): boolean =>
+  isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year);
+
+export const filterInitialisedStructures = (
+  structures: StatistiqueDbStructure[],
+  context: Pick<StatistiquesContext, "initialisedStructureIds">
+): StatistiqueDbStructure[] =>
+  structures.filter((structure) =>
+    context.initialisedStructureIds.has(structure.id)
+  );
+
+export const getInitialisedStructuresActiveInYear = (
+  context: StatistiquesYearContext,
+  year: number
+): StatistiqueDbStructure[] =>
+  filterInitialisedStructures(
+    structuresActiveInPeriod(
+      context.allStructures,
+      context.activeStructureIdsByPeriod,
+      "year",
+      String(year)
+    ),
+    context
+  );
+
+/** Structures comptabilisées sur une année (cf. `resolveStructuresForYear`). */
+export const resolveCountedStructuresForYear = (
+  context: StatistiquesYearContext,
+  year: number
+): ReturnType<typeof resolveStructuresForYear> =>
+  resolveStructuresForYear(
+    context,
+    getInitialisedStructuresActiveInYear(context, year),
+    year
+  );
+
+export const mapTypologieYears = <
+  Entry extends { year: number; completude: CompletudeStat | null },
+>(
+  context: StatistiquesTypologieYearContext,
   buildEntry: (
     year: number,
-    structuresForYear: StatistiqueDbStructure[]
-  ) => Omit<Entry, "year">
+    structuresForYear: StatistiqueDbStructure[],
+    completude: CompletudeStat | null
+  ) => Omit<Entry, "year" | "completude">
 ): Entry[] =>
-  getTypologieYears(typologies).map((year) => ({
-    year,
-    ...buildEntry(
-      year,
-      structuresActiveInPeriod(
-        allStructures,
-        activeStructureIdsByPeriod,
-        "year",
-        String(year)
-      )
-    ),
-  })) as Entry[];
+  getTypologieYears(context.typologies).map((year) => {
+    const { structures, completude } = resolveCountedStructuresForYear(
+      context,
+      year
+    );
+    return { year, completude, ...buildEntry(year, structures, completude) };
+  }) as Entry[];
 
 export const filterStructuresWithTypologie = (
   structures: StatistiqueDbStructure[],
@@ -719,11 +786,9 @@ export const resolveStructuresWithTypologieForYear = (
   }
 
   const typologieMap = getTypologieMapForExactYear(context.typologies, year);
-  const structuresForYear = structuresActiveInPeriod(
-    context.allStructures,
-    context.activeStructureIdsByPeriod,
-    "year",
-    String(year)
+  const { structures: structuresForYear } = resolveCountedStructuresForYear(
+    context,
+    year
   );
 
   return {

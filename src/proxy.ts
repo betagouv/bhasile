@@ -2,15 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { withAuth } from "next-auth/middleware";
 
+import { canAccessApp } from "./lib/casl";
 import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,
   passwordProtectedPages,
+  pendingAccessPage,
   proConnectProtectedPages,
 } from "./proxy/auth-config";
 import { getApiRouteProtection } from "./proxy/auth-util";
+import { filtersProxy } from "./proxy/filters";
+import { SessionUser } from "./types/global";
 
-const proConnectPagesProxy = withAuth(() => NextResponse.next(), {
+const proConnectPagesProxy = withAuth(filtersProxy, {
   callbacks: {
     authorized: ({ token }) => {
       return token !== null;
@@ -44,7 +48,8 @@ const protectApiWithAuth = async (
 ): Promise<NextResponse | null> => {
   const protection = getApiRouteProtection(request, request.nextUrl.pathname);
   const session = await getServerSession(authOptions);
-  const hasProconnectSession = !!session?.user;
+  const hasProconnectSession =
+    !!session?.user && canAccessApp(session.user as SessionUser);
   const passwordCookie = request.cookies.get("mot-de-passe");
   const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
     (password) => password.trim()
@@ -76,6 +81,10 @@ export async function proxy(request: NextRequest) {
   );
 
   if (isProtected) {
+    const session = await getServerSession(authOptions);
+    if (session?.user && !canAccessApp(session.user as SessionUser)) {
+      return NextResponse.redirect(new URL(pendingAccessPage, request.url));
+    }
     return (proConnectPagesProxy as (request: NextRequest) => NextResponse)(
       request
     );

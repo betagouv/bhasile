@@ -15,7 +15,7 @@ vi.mock("next-auth", () => ({
 
 vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
 
-vi.mock("@/lib/casl/abilities", () => ({
+vi.mock("@/lib/casl", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
 }));
 

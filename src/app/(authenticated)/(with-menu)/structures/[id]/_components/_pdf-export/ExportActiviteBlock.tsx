@@ -57,6 +57,7 @@ export const ExportActiviteBlock = ({
           </h4>
           <div className="flex pt-10 pb-10">
             <ActivitePlaces
+              placesDisponibles={structure.activites?.[0].placesDisponibles}
               placesAutorisees={filteredActivites[0]?.placesEnregistreesDna}
               placesIndisponibles={filteredActivites[0]?.placesIndisponibles}
             />

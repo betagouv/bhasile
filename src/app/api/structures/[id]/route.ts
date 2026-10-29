@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { canUpdateStructure } from "@/lib/casl/abilities";
+import { canAccessApp, canUpdateStructure } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureAgentUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
@@ -18,7 +18,8 @@ import {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    const isAuthenticated = !!session?.user;
+    const isAuthenticated =
+      !!session?.user && canAccessApp(session.user as SessionUser);
 
     const id = request.nextUrl.pathname.split("/").pop();
     const structure = isAuthenticated

@@ -9,7 +9,7 @@ import {
   buildTransformationSummary,
   getTransformationStatus,
 } from "@/app/api/dashboard/transformations/transformations.util";
-import { defineAbilityFor } from "@/lib/casl/abilities";
+import { defineAbilityFor } from "@/lib/casl";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,

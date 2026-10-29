@@ -1,0 +1,149 @@
+"use client";
+
+import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import { useEffect, useMemo, useRef } from "react";
+
+import { cn, INCOMPLETE_CHECKBOX_CLASSNAME } from "@/app/utils/classname.util";
+import {
+  getDepartementNumerosForRegion,
+  getRegionFromDepartement,
+} from "@/utils/region.util";
+
+const REGIONS_WITH_ONE_DEPARTEMENT = [
+  "Guadeloupe",
+  "Martinique",
+  "Guyane",
+  "La Réunion",
+  "Mayotte",
+];
+
+export const FiltersRegion = ({
+  region,
+  hidden,
+  departements,
+  onChange,
+  expanded,
+  onExpandedChange,
+  children,
+}: Props) => {
+  const checkedStatus = useMemo(() => {
+    const numOfDepartementsInRegion =
+      getDepartementNumerosForRegion(region).length;
+    const numOfDepartementsChecked = departements.filter(
+      (departement) => getRegionFromDepartement(departement) === region
+    ).length;
+
+    if (numOfDepartementsChecked === numOfDepartementsInRegion) {
+      return "checked";
+    }
+    if (numOfDepartementsChecked > 0) {
+      return "incomplete";
+    }
+    return "unchecked";
+  }, [departements, region]);
+
+  const checkboxWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const wrapper = checkboxWrapperRef.current;
+    if (!wrapper) {
+      return;
+    }
+
+    const handleClick = (event: MouseEvent) => {
+      // We need to stop the propagation of the native event
+      // to avoid opening the accordion when clicking on the checkbox
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      const target = event.target as HTMLElement;
+      if (target.tagName !== "LABEL" && target.tagName !== "INPUT") {
+        return;
+      }
+      // React never sees this click, so it can't restore the controlled
+      // input: the native toggle must not diverge from the rendered state.
+      const shouldSelectRegion = checkedStatus !== "checked";
+      if (target instanceof HTMLInputElement) {
+        target.checked = shouldSelectRegion;
+      } else {
+        event.preventDefault();
+      }
+
+      if (!shouldSelectRegion) {
+        onChange(
+          departements.filter(
+            (departement) => getRegionFromDepartement(departement) !== region
+          )
+        );
+      } else {
+        onChange([
+          ...new Set([
+            ...departements,
+            ...getDepartementNumerosForRegion(region),
+          ]),
+        ]);
+      }
+    };
+
+    wrapper.addEventListener("click", handleClick, true);
+
+    return () => {
+      wrapper.removeEventListener("click", handleClick, true);
+    };
+  }, [checkedStatus, departements, onChange, region]);
+
+  const isRegionWithOneDepartement = useMemo(() => {
+    return REGIONS_WITH_ONE_DEPARTEMENT.includes(region);
+  }, [region]);
+
+  return (
+    <Accordion
+      expanded={expanded}
+      onExpandedChange={onExpandedChange}
+      className={cn(
+        "[&:before]:content-none",
+        hidden && "hidden",
+        "[&>h3>button]:py-1.5 [&>h3>button]:px-6 [&>h3>button]:min-h-0 [&>h3>button]:bg-transparent!",
+        "[&>div]:py-0 [&>div]:px-6",
+        isRegionWithOneDepartement && "[&>h3>button:after]:content-none"
+      )}
+      label={
+        <div ref={checkboxWrapperRef}>
+          <Checkbox
+            options={[
+              {
+                label: region,
+                nativeInputProps: {
+                  name: "structure-region",
+                  value: region,
+                  checked: checkedStatus !== "unchecked",
+                  onChange: (event) => {
+                    console.log(event.target.value); // It is never fired because of the stopPropagation
+                  },
+                },
+              },
+            ]}
+            className={cn(
+              "[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 [&_label]:text-title-blue-france",
+              checkedStatus === "incomplete" && INCOMPLETE_CHECKBOX_CLASSNAME
+            )}
+            small
+          />
+        </div>
+      }
+    >
+      <div className="ml-3">{!isRegionWithOneDepartement && children}</div>
+    </Accordion>
+  );
+};
+
+type Props = {
+  region: string;
+  hidden: boolean;
+  departements: string[];
+  onChange: (departements: string[]) => void;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+  children: React.ReactElement;
+};

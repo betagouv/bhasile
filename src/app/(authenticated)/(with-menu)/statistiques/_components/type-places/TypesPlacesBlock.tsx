@@ -2,12 +2,14 @@
 
 import { ReactElement } from "react";
 
-import { InformationCard } from "@/app/components/InformationCard";
-import { formatPerMille } from "@/app/utils/number.util";
+import { getPercentage } from "@/app/utils/common.util";
+import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
+import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
 import { AnnualDataNote } from "../AnnualDataNote";
+import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";
 
 export const TypesPlacesBlock = ({
@@ -15,6 +17,9 @@ export const TypesPlacesBlock = ({
   endYear,
 }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const currentYearPlaces = statistiques.places.byYear.find(
+    (yearItem) => yearItem.year === CURRENT_YEAR
+  );
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -26,29 +31,33 @@ export const TypesPlacesBlock = ({
           </h3>
         </div>
       </div>
-      <div className="flex pb-16">
-        <div className="pr-4">
-          <InformationCard
-            primaryInformation={statistiques.places.totalPlaces}
-            secondaryInformation="places autorisées"
-          />
-        </div>
-        <div>
-          <InformationCard
-            primaryInformation={formatPerMille(
-              statistiques.places.tauxEquipement
-            )}
-            secondaryInformation="taux d'équipement"
-            tertiaryInformation="nombre de places divisé par le nombre d'habitants"
-          />
-        </div>
-      </div>
       <div className="pb-16">
+        <h4 className="text-title-blue-france text-lg print:mb-0">
+          En {CURRENT_YEAR}{" "}
+          {isYearIncomplete(currentYearPlaces?.completude) && (
+            <IncompleteDataIndicator
+              nbStructures={currentYearPlaces?.completude?.nbRenseignees || 0}
+              structuresPercentage={getPercentage(
+                currentYearPlaces?.completude?.nbRenseignees || 0,
+                currentYearPlaces?.completude?.nbAttendues || 1
+              )}
+            />
+          )}
+        </h4>
+        {isYearIncomplete(currentYearPlaces?.completude) && (
+          <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
+            {currentYearPlaces?.completude?.nbRenseignees} structures actualisées
+          </h5>
+        )}
+        <TypePlaceCharts
+          placesAutorisees={currentYearPlaces?.totalPlaces ?? 0}
+          placesPmr={currentYearPlaces?.pmr ?? 0}
+          placesLgbt={currentYearPlaces?.lgbt ?? 0}
+          placesFvvTeh={currentYearPlaces?.fvvTeh ?? 0}
+        />
+        <h4 className="text-title-blue-france text-lg pt-8">À date</h4>
         <TypePlaceCharts
           placesAutorisees={statistiques.places.totalPlaces}
-          placesPmr={statistiques.places.pmr}
-          placesLgbt={statistiques.places.lgbt}
-          placesFvvTeh={statistiques.places.fvvTeh}
           placesQPV={statistiques.places.qpv}
           placesLogementsSociaux={statistiques.places.logementsSociaux}
         />

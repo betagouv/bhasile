@@ -35,6 +35,7 @@ export type SessionGrant = {
   role: AccessRole;
   isNational: boolean;
   departementNumeros: string[];
+  regionIds: number[];
   structureIds: number[];
 };
 
@@ -45,5 +46,6 @@ export type SessionUser = {
   email: string;
   operateurId: number | null;
   isSuperAdmin: boolean;
+  isAgent: boolean;
   grants: SessionGrant[];
 };

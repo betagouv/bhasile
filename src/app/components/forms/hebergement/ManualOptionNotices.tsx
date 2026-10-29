@@ -14,9 +14,9 @@ export const ManualOptionNotices = () => {
         description={
           <>
             Concernant les particularités, les logements sociaux correspondent
-            aux logement loués à un bailleur social. Vous pouvez vérifier si une
-            adresse est dans un Quartier Prioritaire de la politique de la Ville
-            (QPV){" "}
+            aux logements loués à un bailleur social. Vous pouvez vérifier si
+            une adresse est dans un Quartier Prioritaire de la politique de la
+            Ville (QPV){" "}
             <a
               target="_blank"
               rel="noopener noreferrer"

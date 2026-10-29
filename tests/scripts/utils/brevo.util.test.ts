@@ -16,7 +16,7 @@ const departementGrant = (numero: string, name: string, role?: AccessRole) =>
   buildGrant({
     ...(role ? { role } : {}),
     scope: GrantScope.DEPARTEMENT,
-    departement: { numero, name },
+    departement: { numero, name, regionId: null },
   });
 
 const nationalReadGrant = buildGrant({ role: AccessRole.LECTEUR });
@@ -63,6 +63,7 @@ describe("brevo util", () => {
           buildGrant({
             scope: GrantScope.REGION,
             region: {
+              id: 3,
               name: "Bretagne",
               departements: [
                 { numero: "35" },
@@ -100,6 +101,14 @@ describe("brevo util", () => {
     // THEN
     expect(contact.attributes.PERIMETRE).toBe("Finistère");
     expect(contact.attributes.DEPARTEMENT).toBe("29");
+  });
+
+  it("laisse la date de dernière connexion vide pour un utilisateur jamais connecté", () => {
+    // WHEN
+    const contact = toBrevoContact({ ...baseUser, lastConnection: null });
+
+    // THEN
+    expect(contact.attributes.LAST_LOGIN).toBe("");
   });
 
   it("laisse le périmètre vide quand aucun binôme n'est rattaché", () => {

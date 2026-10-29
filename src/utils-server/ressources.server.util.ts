@@ -76,42 +76,51 @@ export const readBlocks = async (): Promise<Block[]> => {
       })
     );
 
-  const blocks = await Promise.all(
+  const parsedBlocks = await Promise.all(
     matchingKeys.map(async (objectKey) => {
       const fileName = path.basename(objectKey);
-      const content = await readS3File(
-        objectKey,
-        process.env.DOCS_BUCKET_NAME!
-      );
-      const blockId = slugify(
-        fileName.replace(/^\d+-/, "").replace(/\.md$/, "")
-      );
-      return parseBlock(content, blockId, measureS3File);
+      try {
+        const content = await readS3File(
+          objectKey,
+          process.env.DOCS_BUCKET_NAME!
+        );
+        const blockId = slugify(
+          fileName.replace(/^\d+-/, "").replace(/\.md$/, "")
+        );
+        return await parseBlock(content, blockId, measureS3File);
+      } catch (error) {
+        console.error(`Bloc ressources « ${objectKey} » ignoré :`, error);
+        return null;
+      }
     })
   );
 
-  const duplicateId = findDuplicateId(blocks.map((block) => block.id));
-  if (duplicateId) {
-    throw new Error(
-      `Deux fichiers de contenu produisent le même bloc « ${duplicateId} » : leurs noms ne diffèrent que par le préfixe numérique.`
-    );
-  }
-
-  return blocks;
+  const seenIds = new Set<string>();
+  return parsedBlocks.filter((block): block is FilesBlock => {
+    if (!block) {
+      return false;
+    }
+    if (seenIds.has(block.id)) {
+      console.error(
+        `Bloc ressources « ${block.id} » ignoré : un autre fichier produit déjà ce bloc, leurs noms ne diffèrent que par le préfixe numérique.`
+      );
+      return false;
+    }
+    seenIds.add(block.id);
+    return true;
+  });
 };
 
 export const readSuggestions = async (): Promise<string[]> => {
   if (!process.env.DOCS_BUCKET_NAME) {
     throw new Error("Impossible de lire les fichiers ressources");
   }
-  const suggestionsKey = SUGGESTIONS_FILE;
   let content: string;
   try {
-    content = await readS3File(suggestionsKey, process.env.DOCS_BUCKET_NAME!);
+    content = await readS3File(SUGGESTIONS_FILE, process.env.DOCS_BUCKET_NAME!);
   } catch (error) {
-    throw new Error(
-      `Impossible de retrouver les suggestions de recherche. ${error}`
-    );
+    console.error("Suggestions de recherche ignorées :", error);
+    return [];
   }
 
   return content

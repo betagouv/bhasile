@@ -1,6 +1,6 @@
+import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
-  CpomApiWrite,
   CpomDepartementApiType,
   CpomStructureApiWrite,
 } from "@/schemas/api/cpom.schema";
@@ -12,12 +12,17 @@ import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/docum
 import {
   CpomDbDetails,
   CpomDbList,
+  CpomDbScope,
   cpomDetailsInclude,
   cpomListInclude,
+  cpomScopeSelect,
+  CpomToSave,
 } from "./cpom.db.type";
 
-export const findAllCpoms = (): Promise<CpomDbList[]> =>
-  prisma.cpom.findMany({ include: cpomListInclude });
+export const findAllCpoms = (
+  where: Prisma.CpomWhereInput
+): Promise<CpomDbList[]> =>
+  prisma.cpom.findMany({ where, include: cpomListInclude });
 
 export const findOne = async (id: number): Promise<CpomDbDetails | null> => {
   const cpom = await prisma.cpom.findFirst({
@@ -27,20 +32,15 @@ export const findOne = async (id: number): Promise<CpomDbDetails | null> => {
   return cpom;
 };
 
-export const createOrUpdateCpom = async (
-  cpom: CpomApiWrite
-): Promise<number> => {
-  const operateurId = cpom.operateur?.id ?? cpom.operateurId;
+export const findCpomScope = (id: number): Promise<CpomDbScope | null> =>
+  prisma.cpom.findUnique({
+    where: { id },
+    select: cpomScopeSelect,
+  });
+
+export const createOrUpdateCpom = async (cpom: CpomToSave): Promise<number> => {
+  const { operateurId, regionId } = cpom;
   const cpomId = await prisma.$transaction(async (tx) => {
-    let regionId: number | undefined;
-
-    if (cpom.region) {
-      const region = await tx.region.findFirst({
-        where: { name: cpom.region?.name },
-      });
-      regionId = region?.id;
-    }
-
     let cpomId = cpom.id;
     if (cpomId) {
       await tx.cpom.update({
@@ -53,9 +53,6 @@ export const createOrUpdateCpom = async (
         },
       });
     } else {
-      if (!operateurId) {
-        throw new Error("Operateur ID is required when creating a new CPOM");
-      }
       const upsertedCpom = await tx.cpom.create({
         data: {
           name: cpom.name,
