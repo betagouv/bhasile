@@ -74,9 +74,6 @@ export type StatistiqueDbTarifJournalierCible = {
 
 export type StatistiqueDbTauxEncadrementCible = {
   structureType: StructureType;
-  year: number;
-  isIdf: boolean;
-  isFromHuda: boolean;
   tauxCible: number;
 };
 
