@@ -1,8 +1,14 @@
 import { Session, User } from "next-auth";
 
+import { getContactStructureIds } from "@/app/api/contacts/contact.service";
 import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
-import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
-import { SessionUser } from "@/types/global";
+import {
+  getAssignedGrants,
+  isAgentUser,
+  toContactGrant,
+  toSessionGrant,
+} from "@/app/api/users/user.util";
+import { SessionGrant, SessionUser } from "@/types/global";
 
 export type ProConnectUser = User & {
   id: string;
@@ -15,22 +21,36 @@ export type ProConnectUser = User & {
 export const getPermissionsFromSession = async (
   session: Session
 ): Promise<SessionPermissions> => {
-  const databaseUser = await getUserWithGrantsByEmail({
-    email: session.user?.email,
-  });
+  const email = session.user?.email;
+  const databaseUser = await getUserWithGrantsByEmail({ email });
 
-  if (!databaseUser) {
-    return { operateurId: null, isSuperAdmin: false, grants: [] };
+  if (!databaseUser || !email) {
+    return {
+      operateurId: null,
+      isSuperAdmin: false,
+      isAgent: false,
+      grants: [],
+    };
   }
 
+  const isAgent = isAgentUser(databaseUser);
   return {
     operateurId: databaseUser.operateurId,
     isSuperAdmin: databaseUser.isSuperAdmin,
-    grants: getEffectiveGrants(databaseUser).map(toSessionGrant),
+    isAgent,
+    grants: [
+      ...getAssignedGrants(databaseUser).map(toSessionGrant),
+      ...(isAgent ? [] : await getContactGrants(email)),
+    ],
   };
 };
 
+const getContactGrants = async (email: string): Promise<SessionGrant[]> =>
+  process.env.CONTACT_ACCESS_ENABLED === "true"
+    ? (await getContactStructureIds(email)).map(toContactGrant)
+    : [];
+
 type SessionPermissions = Pick<
   SessionUser,
-  "operateurId" | "isSuperAdmin" | "grants"
+  "operateurId" | "isSuperAdmin" | "isAgent" | "grants"
 >;

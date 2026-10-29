@@ -7,6 +7,7 @@ export const createSessionGrant = (
   role: AccessRole.EDITEUR,
   isNational: false,
   departementNumeros: [],
+  regionIds: [],
   structureIds: [],
   ...overrides,
 });
@@ -20,6 +21,7 @@ export const createSessionUser = (
   email: "agent@gouv.fr",
   operateurId: null,
   isSuperAdmin: false,
+  isAgent: (overrides.operateurId ?? null) === null,
   grants: [],
   ...overrides,
 });

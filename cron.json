@@ -2,19 +2,19 @@
   "jobs": [
     {
       "command": "0 5 * * 1-5 yarn cronify eig-fetch; yarn cronify transfo-huda-cada-fetch; yarn cronify recompute-anomalies",
-      "size": "S"
+      "size": "M"
     },
     {
       "command": "30 5 * * 1 yarn cronify clean-old-user-actions",
-      "size": "S"
+      "size": "M"
     },
     {
       "command": "0 6 1 * * yarn cronify fill-monthly-reporting",
-      "size": "S"
+      "size": "M"
     },
     {
       "command": "0 4 * * * yarn cronify brevo-push-users",
-      "size": "S"
+      "size": "M"
     }
   ]
 }

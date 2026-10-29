@@ -59,7 +59,6 @@ const financeHeadersMap = {
   tauxEncadrementTheoriquePrevisionnel:
     "Taux d’encadrement théorique prévisionnel moyen",
   tauxEncadrementTheoriqueRealise: "Taux d’encadrement théorique réel moyen",
-  coutJournalierCible: "Coût journalier cible moyen",
   coutJournalierTheorique: "Coût journalier théorique moyen",
   dotationDemandee: "Dotation demandée",
   dotationAccordee: "Dotation accordée",

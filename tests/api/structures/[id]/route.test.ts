@@ -13,6 +13,10 @@ const mockCreateStructureEvent = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
 const mockGetAdressesApiRead = vi.fn();
 
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({
+  findOperateurFiliales: vi.fn(async () => []),
+}));
+
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
 }));
@@ -32,6 +36,7 @@ vi.mock("@/lib/casl", () => ({
   canAbilityReadStructure: () => true,
   canAccessApp: (...args: unknown[]) => mockCanAccessApp(...args),
   defineAbilityFor: () => ({}),
+  isAgent: () => true,
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({

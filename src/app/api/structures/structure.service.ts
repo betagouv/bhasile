@@ -15,6 +15,7 @@ import {
   canAbilityReadStructure,
   defineAbilityFor,
   getReadableStructureWhere,
+  isAgent,
 } from "@/lib/casl";
 import {
   StructureAgentUpdateApiType,
@@ -38,6 +39,7 @@ import {
 import { locateAdresses } from "../adresses/ban.service";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
+import { resolveFilters } from "../filters/filters.service";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { getActualisationFormSlug } from "../forms/form.constants";
 import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
@@ -82,6 +84,7 @@ import {
   getReadableAdresses,
   getReadableNotes,
   getTypeBati,
+  hideAgentOnlyFields,
   isStructureClosed,
   isStructureFinalised,
   isStructureInCpom,
@@ -192,13 +195,16 @@ const getSortedStructureRows = cache(
     )
 );
 
-const filterAndSortStructureRows = (
+const filterAndSortStructureRows = async (
   rows: StructureListComputedRow[],
   props: SearchProps
-): StructureListComputedRow[] => {
-  const filtered = filterStructureRows(rows, props, {
-    includeNonVisible: Boolean(props.selection),
-  });
+): Promise<StructureListComputedRow[]> => {
+  const filtered = filterStructureRows(
+    rows,
+    props,
+    await resolveFilters(props),
+    { includeNonVisible: Boolean(props.selection) }
+  );
 
   return sortStructureRows(
     filtered,
@@ -258,7 +264,7 @@ export const getFullStructuresForOperateur = async (
   props: SearchProps
 ): Promise<FullStructures> =>
   buildFullStructures(
-    filterAndSortStructureRows(await computeAllStructureRows({}), props),
+    await filterAndSortStructureRows(await computeAllStructureRows({}), props),
     props
   );
 
@@ -300,7 +306,9 @@ const buildFullStructures = async (
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);
       }
-      return structure;
+      return props.user && !isAgent(props.user)
+        ? hideAgentOnlyFields(structure)
+        : structure;
     })
     .filter(
       (structure): structure is StructureApiRead => structure !== undefined
@@ -352,7 +360,7 @@ export const getFullStructure = async (
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
 
-  return structure;
+  return isAgent(user) ? structure : hideAgentOnlyFields(structure);
 };
 
 export const getStructureForOperateur = async (
@@ -525,24 +533,4 @@ const dbStructureToApiRead = (
     isCurrentVersionFromTransformation,
     structureVersions: undefined,
   }) as StructureApiRead;
-};
-
-export const getBoundsPlacesAutorisees = async (
-  user: SessionUser | undefined
-): Promise<{
-  min: number;
-  max: number;
-}> => {
-  const rows = await computeAllStructureRows(getReadableStructureWhere(user));
-  const places = rows
-    .map((row) => row.latestNonNullPlacesAutorisees)
-    .filter(
-      (placesAutorisees): placesAutorisees is number =>
-        placesAutorisees !== null
-    );
-
-  if (places.length === 0) {
-    return { min: 0, max: 0 };
-  }
-  return { min: Math.min(...places), max: Math.max(...places) };
 };

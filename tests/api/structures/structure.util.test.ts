@@ -21,6 +21,7 @@ import {
   getFermetureHistory,
   getReadableAdresses,
   getReadableNotes,
+  hideAgentOnlyFields,
   isBornFromCreation,
   isStructureClosed,
   isStructureFinalised,
@@ -34,6 +35,7 @@ import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 import { SearchProps } from "@/types/structure-list.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
+import { parseFilters } from "@/utils/filters.util";
 
 type ActeAdministratifStub = {
   id?: number;
@@ -244,27 +246,6 @@ describe("computeStructureListRow", () => {
     );
 
     expect(row?.placesAutorisees).toBe(null);
-  });
-
-  it("latestNonNullPlacesAutorisees retombe sur la place la plus récente non nulle des typologies quand la version n'en porte pas", () => {
-    const version = buildVersion({ placesAutorisees: null });
-    const row = computeStructureListRow(
-      buildLightStructure(
-        {
-          structureTypologies: [
-            { year: 2025, placesAutorisees: null },
-            { year: 2024, placesAutorisees: 30 },
-            { year: 2023, placesAutorisees: 20 },
-          ] as unknown as StructureListLight["structureTypologies"],
-        },
-        version
-      ),
-      version,
-      now
-    );
-
-    expect(row?.placesAutorisees).toBe(null);
-    expect(row?.latestNonNullPlacesAutorisees).toBe(30);
   });
 
   it("marque une fermeture finalisée comme fermée avec sa date et son motif", () => {
@@ -637,12 +618,13 @@ const buildRow = (
   hasForm: true,
   isFinalised: false,
   type: StructureType.CADA,
+  operateurId: 1,
   operateurName: "Operateur Alpha",
+  attachedDepartement: "75",
   departementAdministratif: "75",
   communeAdministrative: "Paris",
   bati: Repartition.COLLECTIF,
   placesAutorisees: 10,
-  latestNonNullPlacesAutorisees: 10,
   finConvention: null,
   latitude: null,
   longitude: null,
@@ -658,23 +640,28 @@ const buildRow = (
 const emptyFilters: SearchProps = {
   search: null,
   page: null,
-  type: null,
-  bati: null,
-  placesAutorisees: null,
+  types: null,
   departements: null,
   operateurs: null,
   user: undefined,
 };
+
+const filterRows = (
+  rows: StructureListComputedRow[],
+  filters: SearchProps,
+  options: { includeNonVisible: boolean }
+): StructureListComputedRow[] =>
+  filterStructureRows(rows, filters, parseFilters(filters), options);
 
 describe("filterStructureRows", () => {
   it("masque les lignes non visibles sauf si includeNonVisible est activé", () => {
     const hidden = buildRow({ hasForm: false, bornFromCreation: false });
 
     expect(
-      filterStructureRows([hidden], emptyFilters, { includeNonVisible: false })
+      filterRows([hidden], emptyFilters, { includeNonVisible: false })
     ).toHaveLength(0);
     expect(
-      filterStructureRows([hidden], emptyFilters, { includeNonVisible: true })
+      filterRows([hidden], emptyFilters, { includeNonVisible: true })
     ).toHaveLength(1);
   });
 
@@ -682,7 +669,7 @@ describe("filterStructureRows", () => {
     const row = buildRow({ searchValues: ["Créteil"] });
 
     expect(
-      filterStructureRows(
+      filterRows(
         [row],
         { ...emptyFilters, search: "creteil" },
         { includeNonVisible: false }
@@ -690,33 +677,34 @@ describe("filterStructureRows", () => {
     ).toHaveLength(1);
   });
 
-  it("filtre sur le type, l'intervalle de places et le bâti", () => {
+  it("filtre sur la zone de rattachement, l'opérateur, les types et le nom d'opérateur", () => {
     const rows = [
-      buildRow({ id: 1, type: StructureType.CADA, placesAutorisees: 10 }),
-      buildRow({ id: 2, type: StructureType.HUDA, placesAutorisees: 100 }),
+      buildRow({
+        id: 1,
+        type: StructureType.CADA,
+        attachedDepartement: "75",
+        departementAdministratif: null,
+        operateurId: 1,
+        operateurName: "Operateur Alpha",
+      }),
+      buildRow({
+        id: 2,
+        type: StructureType.HUDA,
+        attachedDepartement: "92",
+        operateurId: 2,
+        operateurName: "Operateur Beta",
+      }),
     ];
+    const filterIds = (filters: Partial<SearchProps>) =>
+      filterRows(
+        rows,
+        { ...emptyFilters, ...filters },
+        { includeNonVisible: false }
+      ).map((row) => row.id);
 
-    expect(
-      filterStructureRows(
-        rows,
-        { ...emptyFilters, type: "CADA" },
-        { includeNonVisible: false }
-      )
-    ).toHaveLength(1);
-    expect(
-      filterStructureRows(
-        rows,
-        { ...emptyFilters, placesAutorisees: "0,50" },
-        { includeNonVisible: false }
-      )
-    ).toHaveLength(1);
-    expect(
-      filterStructureRows(
-        rows,
-        { ...emptyFilters, bati: "diffus" },
-        { includeNonVisible: false }
-      )
-    ).toHaveLength(0);
+    expect(filterIds({ departements: "75" })).toEqual([1]);
+    expect(filterIds({ types: "HUDA", operateurs: "2" })).toEqual([2]);
+    expect(filterIds({ operateurName: "Operateur Beta" })).toEqual([2]);
   });
 
   it("restreint aux lignes finalisées quand c'est demandé", () => {
@@ -726,7 +714,7 @@ describe("filterStructureRows", () => {
     ];
 
     expect(
-      filterStructureRows(
+      filterRows(
         rows,
         { ...emptyFilters, isFinalised: true },
         { includeNonVisible: false }
@@ -742,7 +730,7 @@ describe("filterStructureRows", () => {
     ];
 
     // WHEN
-    const filtered = filterStructureRows(
+    const filtered = filterRows(
       rows,
       { ...emptyFilters, isClosed: true },
       { includeNonVisible: false }
@@ -761,14 +749,14 @@ describe("filterStructureRows", () => {
 
     // WHEN / THEN
     expect(
-      filterStructureRows(
+      filterRows(
         rows,
         { ...emptyFilters, isClosed: false },
         { includeNonVisible: false }
       ).map((row) => row.id)
     ).toEqual([1]);
     expect(
-      filterStructureRows(rows, emptyFilters, {
+      filterRows(rows, emptyFilters, {
         includeNonVisible: false,
       }).map((row) => row.id)
     ).toEqual([1]);
@@ -1027,5 +1015,40 @@ describe("buildCommunePoints", () => {
     ]);
     expect(nonRepresentedStructuresCount).toBe(3);
     expect(nonLocalisedPlaces).toBe(6);
+  });
+});
+
+describe("hideAgentOnlyFields", () => {
+  it("masque les données réservées aux agents et garde le reste de la fiche", () => {
+    const structure = {
+      id: 1,
+      nom: "Centre",
+      notes: "note interne",
+      controles: [{ id: 1 }],
+      evaluations: [{ id: 1 }],
+      evenementsIndesirablesGraves: [{ id: 1 }],
+      anomalies: [{ code: "A" }],
+      cpomStructures: [{ id: 1 }],
+      isInCpom: true,
+      isInCpomPerYear: { 2026: true },
+      history: [
+        { kind: "CPOM_ENTRY", date: "2026-01-01" },
+        { kind: "FERMETURE", date: "2026-06-01" },
+      ],
+    } as unknown as StructureApiRead;
+
+    expect(hideAgentOnlyFields(structure)).toEqual({
+      id: 1,
+      nom: "Centre",
+      notes: null,
+      controles: [],
+      evaluations: [],
+      evenementsIndesirablesGraves: [],
+      anomalies: [],
+      cpomStructures: [],
+      isInCpom: false,
+      isInCpomPerYear: {},
+      history: [{ kind: "FERMETURE", date: "2026-06-01" }],
+    });
   });
 });

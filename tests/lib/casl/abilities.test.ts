@@ -8,20 +8,26 @@ import {
 import { describe, expect, it } from "vitest";
 
 import type { FileWithParents } from "@/app/api/files/file.db.type";
-import { AccessRole, Structure } from "@/generated/prisma/client";
+import {
+  AccessRole,
+  CpomGranularity,
+  Structure,
+} from "@/generated/prisma/client";
 import {
   canAbilityReadCpom,
   canAbilityReadStructure,
+  canAbilityUpdateDepartement,
   canAccessApp,
   canDeleteFile,
   canSaveCpom,
-  canUpdateDepartement,
   canUpdateOperateur,
   canUpdateStructure,
   defineAbilityFor,
   getReadableCpomWhere,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
+  getUpdatableCpomWhere,
+  isAgent,
 } from "@/lib/casl";
 import { SessionUser } from "@/types/global";
 
@@ -182,7 +188,9 @@ describe("Permissions : binôme de niveau structure", () => {
         departementAdministratif: "13",
       })
     ).toBe(false);
-    expect(canUpdateDepartement(structureEditor, "13")).toBe(false);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(structureEditor), "13")
+    ).toBe(false);
   });
 
   it("autorise l'édition des seuls CPOM liés à la structure", () => {
@@ -190,6 +198,53 @@ describe("Permissions : binôme de niveau structure", () => {
 
     expect(ability.can("update", buildCpom({ structureIds: [2] }))).toBe(true);
     expect(ability.can("update", buildCpom({ structureIds: [3] }))).toBe(false);
+  });
+});
+
+describe("Permissions : CPOM régionaux", () => {
+  const agent59 = createSessionUser({
+    grants: [
+      createSessionGrant({ departementNumeros: ["59"], regionIds: [7] }),
+    ],
+  });
+
+  it("couvre les CPOM régionaux de la région d'un binôme départemental ou régional", () => {
+    const ability = defineAbilityFor(agent59);
+
+    expect(
+      ability.can(
+        "update",
+        buildCpom({ granularity: "REGIONALE", regionId: 7 })
+      )
+    ).toBe(true);
+    expect(
+      ability.can(
+        "update",
+        buildCpom({ granularity: "REGIONALE", regionId: 8 })
+      )
+    ).toBe(false);
+  });
+
+  it("ne couvre pas un CPOM départemental d'un autre département de la même région", () => {
+    expect(
+      defineAbilityFor(agent59).can(
+        "update",
+        buildCpom({
+          granularity: "DEPARTEMENTALE",
+          regionId: 7,
+          departementNumeros: ["62"],
+        })
+      )
+    ).toBe(false);
+  });
+
+  it("contrôle la sauvegarde d'un CPOM régional sur sa région", () => {
+    const regional = (regionId: number) =>
+      buildCpomScope({ granularity: "REGIONALE", regionId });
+
+    expect(canSaveCpom(agent59, regional(7), null)).toBe(true);
+    expect(canSaveCpom(agent59, regional(8), null)).toBe(false);
+    expect(canSaveCpom(agent59, regional(8), regional(7))).toBe(false);
   });
 });
 
@@ -241,25 +296,13 @@ describe("Permissions : CPOM et opérateurs", () => {
     ).toBe(true);
   });
 
-  it("autorise un admin opérateur à modifier son seul opérateur", () => {
+  it("refuse à un user opérateur, même admin, de modifier son opérateur", () => {
     const ability = defineAbilityFor(
       createSessionUser({
         operateurId: 7,
         grants: [
           createSessionGrant({ role: AccessRole.ADMIN, isNational: true }),
         ],
-      })
-    );
-
-    expect(ability.can("update", buildOperateur(7))).toBe(true);
-    expect(ability.can("update", buildOperateur(8))).toBe(false);
-  });
-
-  it("refuse à un éditeur opérateur de modifier son opérateur", () => {
-    const ability = defineAbilityFor(
-      createSessionUser({
-        operateurId: 7,
-        grants: [createSessionGrant({ isNational: true })],
       })
     );
 
@@ -318,7 +361,7 @@ describe("Permissions : canSaveCpom", () => {
 });
 
 describe("Permissions : canUpdateOperateur", () => {
-  it("autorise un éditeur, refuse un lecteur et limite un admin opérateur au sien", () => {
+  it("autorise un agent éditeur, refuse un lecteur et un admin opérateur", () => {
     const lecteur = createSessionUser({
       grants: [
         createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
@@ -333,18 +376,23 @@ describe("Permissions : canUpdateOperateur", () => {
 
     expect(canUpdateOperateur(createDepartementalAgent(["13"]), 7)).toBe(true);
     expect(canUpdateOperateur(lecteur, 7)).toBe(false);
-    expect(canUpdateOperateur(operateurAdmin, 7)).toBe(true);
-    expect(canUpdateOperateur(operateurAdmin, 8)).toBe(false);
+    expect(canUpdateOperateur(operateurAdmin, 7)).toBe(false);
   });
 });
 
 const buildCpomScope = ({
+  granularity,
+  regionId,
   departementNumeros = [],
   structureIds = [],
 }: {
+  granularity?: CpomGranularity;
+  regionId?: number;
   departementNumeros?: string[];
   structureIds?: number[];
 }) => ({
+  granularity,
+  regionId,
   departements: departementNumeros.map((numero) => ({
     departement: { numero },
   })),
@@ -438,6 +486,26 @@ describe("Permissions : lecture", () => {
     expect(getReadableCpomWhere(createDepartementalAgent(["75"]))).toEqual({});
   });
 
+  it("filtre les CPOM modifiables sur les binômes d'édition seulement", () => {
+    const lecteurNational = createSessionUser({
+      grants: [
+        createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+      ],
+    });
+
+    expect(getUpdatableCpomWhere(createNationalAgent())).toEqual({});
+    expect(getUpdatableCpomWhere(lecteurNational)).toEqual({ id: { in: [] } });
+    expect(getUpdatableCpomWhere(createDepartementalAgent(["75"]))).toEqual({
+      OR: [
+        {
+          departements: {
+            some: { departement: { is: { numero: { in: ["75"] } } } },
+          },
+        },
+      ],
+    });
+  });
+
   it("ne filtre rien pour un superadmin", () => {
     expect(
       getReadableStructureWhere(createSessionUser({ isSuperAdmin: true }))
@@ -511,6 +579,49 @@ describe("Permissions : lecture", () => {
   });
 });
 
+describe("Permissions : contact non agent", () => {
+  const contact = createSessionUser({
+    isAgent: false,
+    grants: [
+      createSessionGrant({ role: AccessRole.LECTEUR, structureIds: [12] }),
+    ],
+  });
+
+  it("lit la seule structure dont il est contact, sans pouvoir la modifier", () => {
+    const ability = defineAbilityFor(contact);
+
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 12,
+        departementAdministratif: "83",
+      })
+    ).toBe(true);
+    expect(
+      canAbilityReadStructure(ability, {
+        id: 13,
+        departementAdministratif: "83",
+      })
+    ).toBe(false);
+    expect(
+      canUpdateStructure(contact, { id: 12, departementAdministratif: "83" })
+    ).toBe(false);
+  });
+
+  it("ne lit aucun CPOM, même lié à sa structure", () => {
+    expect(
+      canAbilityReadCpom(defineAbilityFor(contact), {
+        departements: [],
+        structures: [{ structureId: 12 }],
+      })
+    ).toBe(false);
+  });
+
+  it("accède à l'application grâce à ses droits de contact", () => {
+    expect(canAccessApp(contact)).toBe(true);
+    expect(isAgent(contact)).toBe(false);
+  });
+});
+
 describe("Permissions : canAccessApp", () => {
   it("refuse l'accès à un utilisateur sans aucun binôme de droits", () => {
     expect(canAccessApp(createSessionUser())).toBe(false);
@@ -540,25 +651,39 @@ describe("Permissions : canAccessApp", () => {
   });
 });
 
-describe("Permissions : canUpdateDepartement", () => {
+describe("Permissions : canAbilityUpdateDepartement", () => {
   const nationalUser = createNationalAgent();
 
   const departementUser = createDepartementalAgent(["50"]);
 
   it("autorise un agent éditeur national sur n'importe quel département, y compris un département undefined", () => {
-    expect(canUpdateDepartement(nationalUser, "50")).toBe(true);
-    expect(canUpdateDepartement(nationalUser, "13")).toBe(true);
-    expect(canUpdateDepartement(nationalUser, undefined)).toBe(true);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(nationalUser), "50")
+    ).toBe(true);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(nationalUser), "13")
+    ).toBe(true);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(nationalUser), undefined)
+    ).toBe(true);
   });
 
   it("autorise un agent départemental uniquement sur son propre département", () => {
-    expect(canUpdateDepartement(departementUser, "50")).toBe(true);
-    expect(canUpdateDepartement(departementUser, "13")).toBe(false);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(departementUser), "50")
+    ).toBe(true);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(departementUser), "13")
+    ).toBe(false);
   });
 
   it("masque les transformations sans département à un agent départemental", () => {
-    expect(canUpdateDepartement(departementUser, undefined)).toBe(false);
-    expect(canUpdateDepartement(departementUser, null)).toBe(false);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(departementUser), undefined)
+    ).toBe(false);
+    expect(
+      canAbilityUpdateDepartement(defineAbilityFor(departementUser), null)
+    ).toBe(false);
   });
 });
 

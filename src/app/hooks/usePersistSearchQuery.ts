@@ -3,6 +3,11 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
+import {
+  omitFilters,
+  pickFilters,
+} from "@/utils/filters.util";
+
 export function usePersistSearchQuery(
   targetPath: string,
   storageKey: string
@@ -16,7 +21,7 @@ export function usePersistSearchQuery(
       return;
     }
 
-    const queryString = searchParams.toString();
+    const queryString = omitFilters(searchParams).toString();
     const stored = sessionStorage.getItem(storageKey) ?? "";
 
     if (!queryString) {
@@ -25,7 +30,11 @@ export function usePersistSearchQuery(
         referrer && new URL(referrer).pathname.startsWith(`${targetPath}/`);
 
       if (isComingFromChildPage && stored) {
-        router.replace(`${targetPath}?${stored}`);
+        const restored = new URLSearchParams(stored);
+        pickFilters(searchParams).forEach((value, key) =>
+          restored.set(key, value)
+        );
+        router.replace(`${targetPath}?${restored.toString()}`);
         return;
       }
 

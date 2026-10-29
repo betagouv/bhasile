@@ -8,21 +8,21 @@ import {
   applyVersionedPlacesToTypologies,
   buildDnaStructureIdsResolver,
   filterByActiveStructureId,
-  getCadaFromHudaStructureIds,
   getInitialisedStructureIds,
   indexTimelineByStructureId,
   lookupActiveStructureIds,
   mapTypologieYears,
-  parseStatistiquesPerimeterFilters,
   resolveDnaEventStructureIds,
   sliceStatistiquesContext,
   structuresActiveInPeriod,
+  toStatistiquesPerimeterFilters,
 } from "@/app/api/statistiques/statistiques.util";
 import {
   StructureVersionTransformationType,
   TransformationType,
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
+import { parseFilters } from "@/utils/filters.util";
 
 import {
   buildTestActivityIndex,
@@ -162,34 +162,34 @@ describe("socle - périmètre général vs séries temporelles", () => {
 
   it("construit le byYear via mapTypologieYears sur le périmètre annuel", () => {
     const typologies = [
-        {
-          id: 1,
-          structureId: 1,
-          year: 2025,
-          placesAutorisees: 10,
-          pmr: 0,
-          lgbt: 0,
-          fvvTeh: 0,
-        },
-        {
-          id: 2,
-          structureId: 2,
-          year: 2025,
-          placesAutorisees: 20,
-          pmr: 0,
-          lgbt: 0,
-          fvvTeh: 0,
-        },
-        {
-          id: 3,
-          structureId: 3,
-          year: 2025,
-          placesAutorisees: 30,
-          pmr: 0,
-          lgbt: 0,
-          fvvTeh: 0,
-        },
-      ];
+      {
+        id: 1,
+        structureId: 1,
+        year: 2025,
+        placesAutorisees: 10,
+        pmr: 0,
+        lgbt: 0,
+        fvvTeh: 0,
+      },
+      {
+        id: 2,
+        structureId: 2,
+        year: 2025,
+        placesAutorisees: 20,
+        pmr: 0,
+        lgbt: 0,
+        fvvTeh: 0,
+      },
+      {
+        id: 3,
+        structureId: 3,
+        year: 2025,
+        placesAutorisees: 30,
+        pmr: 0,
+        lgbt: 0,
+        fvvTeh: 0,
+      },
+    ];
     const byYear = mapTypologieYears(
       buildTestStatistiquesContext({
         structures: allStructures,
@@ -240,12 +240,12 @@ describe("socle - résolution DNA à date", () => {
   );
 
   it("rattache un DNA à la structure dont la version effective porte le lien", () => {
-    expect(resolveDnaStructureIds("DNA-SHARED", new Date("2024-06-01"))).toEqual(
-      [1]
-    );
-    expect(resolveDnaStructureIds("DNA-SHARED", new Date("2025-06-01"))).toEqual(
-      [2]
-    );
+    expect(
+      resolveDnaStructureIds("DNA-SHARED", new Date("2024-06-01"))
+    ).toEqual([1]);
+    expect(
+      resolveDnaStructureIds("DNA-SHARED", new Date("2025-06-01"))
+    ).toEqual([2]);
     expect(resolveDnaStructureIds("DNA-OLD", new Date("2025-06-01"))).toEqual(
       []
     );
@@ -289,44 +289,28 @@ describe("socle - résolution DNA à date", () => {
   });
 });
 
-describe("parseStatistiquesPerimeterFilters - résolution des filtres scalaires", () => {
-  const filters = (
-    overrides: Partial<{
-      departements: string | null;
-      operateurs: string | null;
-      types: string | null;
-    }> = {}
-  ) => ({
-    departements: overrides.departements ?? null,
-    operateurs: overrides.operateurs ?? null,
-    types: overrides.types ?? null,
-    aggregation: "moyenne" as const,
+describe("toStatistiquesPerimeterFilters", () => {
+  it("retient tout le parc non exclu quand aucun filtre n'est fourni", () => {
+    const resolved = toStatistiquesPerimeterFilters(parseFilters({}));
+
+    expect(resolved.types.has(StructureType.CADA)).toBe(true);
+    expect(resolved.types.has("PRAHDA")).toBe(false);
+    expect(resolved.departements).toBeNull();
+    expect(resolved.operateurIds).toBeNull();
   });
 
-  it("retient tous les types non exclus quand aucun filtre de type n'est fourni", () => {
-    const { types } = parseStatistiquesPerimeterFilters(filters());
-    expect(types.has(StructureType.CADA)).toBe(true);
-    expect(types.has(StructureType.HUDA)).toBe(true);
-    expect(types.has("PRAHDA")).toBe(false);
-  });
-
-  it("restreint aux types demandés, exclus retirés", () => {
-    const { types } = parseStatistiquesPerimeterFilters(
-      filters({ types: "CPH,PRAHDA" })
+  it("restreint aux filtres demandés, types exclus retirés", () => {
+    const resolved = toStatistiquesPerimeterFilters(
+      parseFilters({
+        departements: "01,02",
+        operateurs: "10,11",
+        types: "CPH,PRAHDA",
+      })
     );
-    expect([...types]).toEqual([StructureType.CPH]);
-  });
 
-  it("parse départements et opérateurs, null quand absents", () => {
-    const empty = parseStatistiquesPerimeterFilters(filters());
-    expect(empty.departements).toBeNull();
-    expect(empty.operateurIds).toEqual([]);
-
-    const parsed = parseStatistiquesPerimeterFilters(
-      filters({ departements: "01,02", operateurs: "10,11" })
-    );
-    expect(parsed.departements).toEqual(new Set(["01", "02"]));
-    expect(parsed.operateurIds).toEqual([10, 11]);
+    expect([...resolved.types]).toEqual([StructureType.CPH]);
+    expect(resolved.departements).toEqual(new Set(["01", "02"]));
+    expect(resolved.operateurIds).toEqual(new Set([10, 11]));
   });
 });
 
@@ -357,8 +341,16 @@ describe("filterByActiveStructureId", () => {
 });
 
 describe("sliceStatistiquesContext - restriction à une zone", () => {
-  const structure1 = { id: 1, type: StructureType.CADA, departementAdministratif: "01" };
-  const structure2 = { id: 2, type: StructureType.CADA, departementAdministratif: "02" };
+  const structure1 = {
+    id: 1,
+    type: StructureType.CADA,
+    departementAdministratif: "01",
+  };
+  const structure2 = {
+    id: 2,
+    type: StructureType.CADA,
+    departementAdministratif: "02",
+  };
 
   const { activeStructureIdsNow, activeStructureIdsByPeriod } =
     buildTestActivityIndex([1, 2], {
@@ -395,9 +387,9 @@ describe("sliceStatistiquesContext - restriction à une zone", () => {
   });
 
   it("restreint chaque Set de activeStructureIdsByPeriod à la zone, sans perdre les clés de période", () => {
-    expect([...sliced.activeStructureIdsByPeriod.year.keys()]).toEqual(
-      [...context.activeStructureIdsByPeriod.year.keys()]
-    );
+    expect([...sliced.activeStructureIdsByPeriod.year.keys()]).toEqual([
+      ...context.activeStructureIdsByPeriod.year.keys(),
+    ]);
     for (const ids of sliced.activeStructureIdsByPeriod.year.values()) {
       expect(ids).toEqual(new Set([1]));
     }
@@ -466,16 +458,13 @@ describe("applyVersionedPlacesToTypologies", () => {
   });
 });
 
-describe("socle - structures initialisées et CADA issus de HUDA", () => {
+describe("socle - structures initialisées", () => {
   const now = new Date("2026-10-01T12:00:00.000Z");
   const finalisationForm = (status: boolean) => ({
     status,
     formDefinition: { slug: "finalisation-v1" },
   });
-  const creationVersion = (
-    type: TransformationType,
-    isFinalised: boolean
-  ) => ({
+  const creationVersion = (type: TransformationType, isFinalised: boolean) => ({
     effectiveDate: new Date("2026-03-01T00:00:00.000Z"),
     structureVersionTransformation: {
       type: StructureVersionTransformationType.CREATION,
@@ -518,9 +507,5 @@ describe("socle - structures initialisées et CADA issus de HUDA", () => {
     expect(getInitialisedStructureIds(initialisations, now)).toEqual(
       new Set([1, 3, 4])
     );
-  });
-
-  it("ne retient comme CADA issus de HUDA que les créations HUDA vers CADA finalisées", () => {
-    expect(getCadaFromHudaStructureIds(initialisations)).toEqual(new Set([3]));
   });
 });

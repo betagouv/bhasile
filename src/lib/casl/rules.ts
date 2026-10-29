@@ -8,7 +8,7 @@ import type {
   Structure,
   User,
 } from "@/generated/prisma/client";
-import { AccessRole } from "@/generated/prisma/enums";
+import { AccessRole, CpomGranularity } from "@/generated/prisma/enums";
 import { SessionGrant, SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -40,10 +40,8 @@ const defineRulesFor = (user?: SessionUser) => {
 
   if (user.isSuperAdmin) {
     builder.can("manage", "all");
-  } else if (user.operateurId === null) {
+  } else if (isAgent(user)) {
     defineAgentRules(builder, user);
-  } else if (typeof user.operateurId === "number") {
-    defineOperateurRules(builder, user, user.operateurId);
   }
 
   return builder.rules;
@@ -63,12 +61,10 @@ const defineReadRules = (
       toRuleConditions({ ...conditions, ...operateurCondition })
     );
   }
-  for (const conditions of user.grants.flatMap(getCpomConditions)) {
-    can(
-      "read",
-      "Cpom",
-      toRuleConditions({ ...conditions, ...operateurCondition })
-    );
+  if (isAgent(user)) {
+    for (const conditions of user.grants.flatMap(getCpomConditions)) {
+      can("read", "Cpom", toRuleConditions(conditions));
+    }
   }
   can("read", "Operateur");
 };
@@ -92,16 +88,6 @@ const defineAgentRules = (
     can("update", "Cpom", toRuleConditions(conditions));
   }
   can("update", "Operateur");
-};
-
-const defineOperateurRules = (
-  { can }: AbilityBuilder<AppAbility>,
-  user: SessionUser,
-  operateurId: number
-) => {
-  if (user.grants.some((grant) => grant.role === AccessRole.ADMIN)) {
-    can("update", "Operateur", { id: operateurId });
-  }
 };
 
 // Prisma traduit `OR: [{}]` par « aucune ligne » : une règle sans restriction
@@ -131,6 +117,7 @@ const getStructureConditions = ({
 const getCpomConditions = ({
   isNational,
   departementNumeros,
+  regionIds,
   structureIds,
 }: SessionGrant): Prisma.CpomWhereInput[] => {
   if (isNational) {
@@ -149,11 +136,22 @@ const getCpomConditions = ({
           },
         ]
       : []),
+    ...(regionIds.length > 0
+      ? [
+          {
+            granularity: CpomGranularity.REGIONALE,
+            regionId: { in: regionIds },
+          },
+        ]
+      : []),
     ...(structureIds.length > 0
       ? [{ structures: { some: { structureId: { in: structureIds } } } }]
       : []),
   ];
 };
+
+export const isAgent = (user: SessionUser | undefined): boolean =>
+  user?.isAgent === true;
 
 export const canAccessApp = (user: SessionUser): boolean =>
   user.isSuperAdmin || (user.grants?.length ?? 0) > 0;

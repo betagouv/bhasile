@@ -36,19 +36,6 @@ import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.util";
 /** Année plancher des EIG remontés dans les stats (borne haute = année courante). */
 const EIG_STATS_MIN_YEAR = 2015;
 
-/** Filiales directes des opérateurs donnés (résolution du filtre `operateurs`, cf. statistique.service). */
-export const findOperateurFiliales = async (
-  parentIds: number[]
-): Promise<{ id: number }[]> => {
-  if (parentIds.length === 0) {
-    return [];
-  }
-  return prisma.operateur.findMany({
-    where: { parentId: { in: parentIds } },
-    select: { id: true },
-  });
-};
-
 export const findPerimeterStructures = async (
   resolved: StatistiquesResolvedPerimeterFilters,
   readableWhere: Prisma.StructureWhereInput,
@@ -187,9 +174,6 @@ export const findTauxEncadrementCibles = async (): Promise<
 
   return cibles.map((cible) => ({
     structureType: cible.structure_type,
-    year: cible.year,
-    isIdf: cible.belongs_to_idf,
-    isFromHuda: cible.comes_from_huda,
     tauxCible: cible.taux_cible.toNumber(),
   }));
 };
@@ -298,6 +282,9 @@ export const findStructureVersionTimeline = async (
       structureId: true,
       effectiveDate: true,
       placesAutorisees: true,
+      structureVersionTransformation: {
+        select: { transformation: { select: { type: true } } },
+      },
     },
     orderBy: [
       { structureId: "asc" },

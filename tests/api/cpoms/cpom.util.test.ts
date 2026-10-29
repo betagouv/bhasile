@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
 import {
   buildCpomListItem,
-  filterCpomsByDepartement,
+  getCpomDepartementNumeros,
+  matchesCpomFilters,
   shouldEndCpomStructureAtFermeture,
   sortValueForCpomColumn,
 } from "@/app/api/cpoms/cpom.util";
 import { CpomColumn } from "@/types/ListColumn";
+import { parseFilters } from "@/utils/filters.util";
 
 const makeCpom = (overrides: Record<string, unknown>): CpomDbList =>
   ({
@@ -28,7 +30,52 @@ const withDepartements = (id: number, numeros: string[]): CpomDbList =>
     departements: numeros.map((numero) => ({ departement: { numero } })),
   });
 
-describe("filterCpomsByDepartement", () => {
+describe("getCpomDepartementNumeros", () => {
+  const region = { departements: [{ numero: "59" }, { numero: "62" }] };
+
+  it("prend les départements de la région pour un CPOM régional", () => {
+    expect(
+      getCpomDepartementNumeros({
+        granularity: "REGIONALE",
+        region,
+        departements: [{ departement: { numero: "75" } }],
+      })
+    ).toEqual(["59", "62"]);
+  });
+
+  it("prend les départements stockés pour un CPOM (inter)départemental", () => {
+    expect(
+      getCpomDepartementNumeros({
+        granularity: "INTERDEPARTEMENTALE",
+        region,
+        departements: [{ departement: { numero: "59" } }],
+      })
+    ).toEqual(["59"]);
+  });
+
+  it("se rabat sur les départements stockés pour un CPOM régional sans région", () => {
+    expect(
+      getCpomDepartementNumeros({
+        granularity: "REGIONALE",
+        region: null,
+        departements: [{ departement: { numero: "75" } }],
+      })
+    ).toEqual(["75"]);
+  });
+});
+
+const filterCpoms = (
+  cpoms: CpomDbList[],
+  filters: Parameters<typeof parseFilters>[0]
+): CpomDbList[] =>
+  cpoms.filter((cpom) => matchesCpomFilters(cpom, parseFilters(filters)));
+
+describe("matchesCpomFilters", () => {
+  const filterCpomsByDepartement = (
+    cpomsToFilter: CpomDbList[],
+    departements: string | null
+  ): CpomDbList[] => filterCpoms(cpomsToFilter, { departements });
+
   const cpoms = [
     withDepartements(1, ["75"]),
     withDepartements(2, ["92"]),
@@ -53,16 +100,58 @@ describe("filterCpomsByDepartement", () => {
   });
 
   it("utilise une appartenance exacte, pas une sous-chaîne (71 ne doit pas correspondre à 971)", () => {
-    const domCpoms = [withDepartements(1, ["971"]), withDepartements(2, ["71"])];
+    const domCpoms = [
+      withDepartements(1, ["971"]),
+      withDepartements(2, ["71"]),
+    ];
     expect(
       filterCpomsByDepartement(domCpoms, "71").map((cpom) => cpom.id)
     ).toEqual([2]);
+  });
+
+  it("filtre un CPOM régional sur les départements de sa région", () => {
+    const regional = makeCpom({
+      id: 4,
+      granularity: "REGIONALE",
+      region: { name: "Hauts-de-France", departements: [{ numero: "59" }] },
+    });
+    expect(
+      filterCpomsByDepartement([regional], "59").map((cpom) => cpom.id)
+    ).toEqual([4]);
   });
 
   it("distingue les codes corses 2A et 2B", () => {
     const corsica = [withDepartements(1, ["2A"]), withDepartements(2, ["2B"])];
     expect(
       filterCpomsByDepartement(corsica, "2A").map((cpom) => cpom.id)
+    ).toEqual([1]);
+  });
+
+  it("garde les cpoms de l'opérateur filtré contenant au moins une structure du type filtré", () => {
+    const cpomsWithTypes = [
+      makeCpom({
+        id: 1,
+        operateur: { id: 10, name: "A" },
+        structures: [
+          { structure: { type: "CADA" } },
+          { structure: { type: "HUDA" } },
+        ],
+      }),
+      makeCpom({
+        id: 2,
+        operateur: { id: 10, name: "A" },
+        structures: [{ structure: { type: "CPH" } }],
+      }),
+      makeCpom({
+        id: 3,
+        operateur: { id: 20, name: "B" },
+        structures: [{ structure: { type: "HUDA" } }],
+      }),
+    ];
+    expect(
+      filterCpoms(cpomsWithTypes, { operateurs: "10", types: "HUDA" }).map(
+        (cpom) => cpom.id
+      )
     ).toEqual([1]);
   });
 });
@@ -146,9 +235,10 @@ describe("sortValueForCpomColumn", () => {
 
   it("retombe sur une valeur texte nulle pour une colonne inconnue", () => {
     const cpom = makeCpom({});
-    expect(
-      sortValueForCpomColumn(cpom, "unknown" as CpomColumn)
-    ).toEqual({ value: null, kind: "text" });
+    expect(sortValueForCpomColumn(cpom, "unknown" as CpomColumn)).toEqual({
+      value: null,
+      kind: "text",
+    });
   });
 });
 

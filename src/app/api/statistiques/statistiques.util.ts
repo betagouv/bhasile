@@ -9,18 +9,11 @@ import {
 } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
-import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
-import {
-  StructureType,
-  StructureVersionTransformationType,
-  TransformationType,
-} from "@/generated/prisma/client";
-import type {
-  CompletudeStat,
-  StatistiquesFilters,
-} from "@/schemas/api/statistique.schema";
+import { StructureType } from "@/generated/prisma/client";
+import type { CompletudeStat } from "@/schemas/api/statistique.schema";
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
+import { ParsedFilters } from "@/utils/filters.util";
 
 import { pickVersionBefore } from "../structure-versions/structure-version.util";
 import type { StructureDbList } from "../structures/structure.db.type";
@@ -60,34 +53,20 @@ export type StatistiquesResolvedPerimeterFilters = {
   operateurIds: Set<number> | null;
 };
 
-/** Filtres parsés mais pas encore résolus : les filiales des `operateurIds` ne sont pas encore ajoutées (accès BDD, cf. service). */
-export type StatistiquesParsedPerimeterFilters = {
-  departements: Set<string> | null;
-  types: Set<StructureType>;
-  operateurIds: number[];
-};
-
-export const parseStatistiquesPerimeterFilters = (
-  filters: StatistiquesFilters
-): StatistiquesParsedPerimeterFilters => {
-  const depList = filters.departements?.split(",").filter(Boolean) ?? [];
-  const requestedTypes = new Set(
-    filters.types?.split(",").filter(Boolean) ?? []
-  );
-  const types = new Set(
+export const toStatistiquesPerimeterFilters = ({
+  departementList,
+  operateurList,
+  typeList,
+}: ParsedFilters): StatistiquesResolvedPerimeterFilters => ({
+  departements: departementList.length > 0 ? new Set(departementList) : null,
+  types: new Set(
     ACCEPTED_STRUCTURE_TYPES.filter(
-      (type) => requestedTypes.size === 0 || requestedTypes.has(type)
+      (type) => typeList.length === 0 || typeList.includes(type)
     )
-  );
-  const operateurIds =
-    filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
-
-  return {
-    departements: depList.length > 0 ? new Set(depList) : null,
-    types,
-    operateurIds,
-  };
-};
+  ),
+  operateurIds:
+    operateurList.length > 0 ? new Set(operateurList.map(Number)) : null,
+});
 
 const yearFromDate = (
   date: Date | string | null | undefined
@@ -131,8 +110,12 @@ const isStructureActiveInPeriod = (
   periodEnd: Date,
   activityContext: StatistiquesActivityContext
 ): boolean =>
-  getStructureOpenBounds(activityContext, structureId, periodStart, periodEnd) !==
-  null;
+  getStructureOpenBounds(
+    activityContext,
+    structureId,
+    periodStart,
+    periodEnd
+  ) !== null;
 
 export const parseTrimesterKey = (
   trimesterKey: string
@@ -308,7 +291,6 @@ export const buildDnaStructureIdsResolver = (
     linksByCode.set(link.dna.code, links);
   }
 
-
   // Clé au jour UTC : la résolution ne dépend que de `startOfNextUtcDay(date)`.
   const cache = new Map<string, number[]>();
 
@@ -353,7 +335,6 @@ export const applyVersionedPlacesToTypologies = (
   timelineByStructureId: StructureVersionTimelineIndex,
   now: Date
 ): StatistiqueDbTypologie[] => {
-
   return typologies.map((typologie) => {
     if (
       typologie.structureId === null ||
@@ -725,33 +706,6 @@ export const getInitialisedStructureIds = (
   new Set(
     initialisations
       .filter((structure) => isStructureFinalised(structure, now))
-      .map((structure) => structure.id)
-  );
-
-const HUDA_VERS_NOUVEAU_CADA_TRANSFORMATION_TYPES: TransformationType[] = [
-  TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
-  TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
-];
-
-/** CADA créés par une transformation HUDA vers CADA finalisée. */
-export const getCadaFromHudaStructureIds = (
-  initialisations: StatistiqueDbStructureInitialisation[]
-): Set<number> =>
-  new Set(
-    initialisations
-      .filter((structure) =>
-        structure.structureVersions.some(
-          ({ structureVersionTransformation }) =>
-            structureVersionTransformation?.type ===
-              StructureVersionTransformationType.CREATION &&
-            isTransformationFinalised(
-              structureVersionTransformation.transformation
-            ) &&
-            HUDA_VERS_NOUVEAU_CADA_TRANSFORMATION_TYPES.includes(
-              structureVersionTransformation.transformation.type
-            )
-        )
-      )
       .map((structure) => structure.id)
   );
 

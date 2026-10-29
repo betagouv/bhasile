@@ -1,9 +1,7 @@
-import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
-import { Filters } from "@/app/components/filters/Filters";
 import {
   getFirstParam,
   getPageParam,
@@ -11,9 +9,11 @@ import {
   parseSortDirection,
   SearchParams,
 } from "@/app/utils/search-params.util";
+import { PageHeader } from "@/components/PageHeader";
 import { authOptions } from "@/lib/next-auth/auth";
 import { CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
+import { getFiltersFromSearchParams } from "@/utils/filters.util";
 
 import { CpomsContent } from "./CpomsContent";
 import { CpomsCount } from "./CpomsCount";
@@ -28,7 +28,7 @@ export default async function Cpoms({
   const session = await getServerSession(authOptions);
   const query: CpomsQuery = {
     page: getPageParam(params, "page"),
-    departements: getFirstParam(params.departements),
+    ...getFiltersFromSearchParams(params),
     column: parseCpomColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
     user: session?.user as SessionUser | undefined,
@@ -36,19 +36,14 @@ export default async function Cpoms({
 
   return (
     <div className="h-full w-full flex flex-col">
-      <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-10">
-        <h2 className="text-title-blue-france fr-h5 mr-4 mb-0" id="cpoms-titre">
-          CPOM
-        </h2>
-        <Link
-          href="/cpoms/ajout/01-identification"
-          className="fr-btn fr-btn--secondary"
-        >
-          <span className="fr-icon-add-line fr-icon--sm" /> Créer un CPOM
-        </Link>
-      </div>
+      <PageHeader
+        title="CPOM"
+        titleId="cpoms-titre"
+        menuActions={[
+          { label: "Créer un CPOM", href: "/cpoms/ajout/01-identification" },
+        ]}
+      />
       <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
-        <Filters showFilters={false} showLocation={true} />
         <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
           <Suspense fallback={<div className="pl-3 min-w-24" />}>
             <CpomsCount query={query} />

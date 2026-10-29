@@ -58,6 +58,7 @@ export const structureListLightSelect = {
   id: true,
   codeBhasile: true,
   type: true,
+  departementAdministratif: true,
   fermetureDate: true,
   operateurId: true,
   operateur: {

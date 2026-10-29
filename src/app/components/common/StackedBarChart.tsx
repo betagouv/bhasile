@@ -1,12 +1,14 @@
 "use client";
 
-import "chartist/dist/index.css";
+import "chartist/styles.css";
 
 import * as Chartist from "chartist";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { ChartAxisLabels } from "@/app/components/common/ChartAxisLabels";
 import { withCompactAxisY } from "@/app/utils/chart.util";
+
+const AXIS_Y_OFFSET = 40;
 
 export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
   const barChartRef = useRef<HTMLDivElement>(null);
@@ -27,8 +29,7 @@ export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
 
     const handleBeforePrint = () => {
       if (barChartRef.current?.parentElement) {
-        const printWidth = barChartRef.current.parentElement.offsetWidth * 0.95;
-        setContainerWidth(printWidth);
+        setContainerWidth(barChartRef.current.parentElement.offsetWidth * 0.95);
       }
     };
 
@@ -40,45 +41,43 @@ export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
     };
   }, []);
 
+  const chartStyle = useMemo(
+    () =>
+      ({
+        "--ct-bar-width": "30px",
+        ...Object.fromEntries(
+          colors.map((color, index) => [
+            `--ct-series-${String.fromCharCode(97 + index)}`,
+            color,
+          ])
+        ),
+      }) as React.CSSProperties,
+    [colors]
+  );
+
   useEffect(() => {
     let barChart: Chartist.BarChart | null = null;
 
     if (barChartRef.current && containerWidth > 0) {
-      const barData = {
-        labels: data.labels,
-        series: data.series,
-      };
-
       const barOptions: Chartist.BarChartOptions = {
         height: "340px",
         width: containerWidth,
         stackBars: true,
         axisX: { showGrid: false },
-        axisY: { offset: 40 },
+        axisY: { offset: AXIS_Y_OFFSET },
       };
 
       barChart = new Chartist.BarChart(
         barChartRef.current,
-        barData,
+        { labels: data.labels, series: data.series },
         withCompactAxisY(barOptions)
       );
-
-      barChart.on("draw", function (ctx) {
-        if (ctx.type === "bar") {
-          const seriesColor = colors[ctx.seriesIndex];
-          ctx.element.attr({
-            style: `stroke: ${seriesColor} !important; stroke-width: 30px;`,
-          });
-        }
-      });
     }
 
     return () => {
-      if (barChart) {
-        barChart.detach();
-      }
+      barChart?.detach();
     };
-  }, [data, colors, containerWidth]);
+  }, [data, containerWidth]);
 
   return (
     <div className={`${chartClass} w-full`}>
@@ -88,6 +87,7 @@ export const StackedBarChart = ({ data, colors, axisYLabel }: Props) => {
         style={{
           width: "100%",
           height: 340,
+          ...chartStyle,
         }}
       />
     </div>
