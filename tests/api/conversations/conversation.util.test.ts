@@ -15,10 +15,10 @@ import {
 } from "@/generated/prisma/enums";
 
 describe("getAuthorLevel", () => {
-  it("classe un utilisateur rattaché à un opérateur comme opérateur", () => {
+  it("classe un non-agent au niveau opérateur, le plus restreint", () => {
     expect(
       getAuthorLevel({
-        operateurId: 12,
+        isAgent: false,
         grants: [{ scope: GrantScope.STRUCTURE, role: AccessRole.EDITEUR }],
       })
     ).toBe(AuthorLevel.OPERATEUR);
@@ -27,7 +27,7 @@ describe("getAuthorLevel", () => {
   it("retient le niveau régional quand un des grants d'édition est régional", () => {
     expect(
       getAuthorLevel({
-        operateurId: null,
+        isAgent: true,
         grants: [
           { scope: GrantScope.DEPARTEMENT, role: AccessRole.EDITEUR },
           { scope: GrantScope.REGION, role: AccessRole.EDITEUR },
@@ -39,7 +39,7 @@ describe("getAuthorLevel", () => {
   it("ignore un grant régional en lecture seule", () => {
     expect(
       getAuthorLevel({
-        operateurId: null,
+        isAgent: true,
         grants: [
           { scope: GrantScope.DEPARTEMENT, role: AccessRole.EDITEUR },
           { scope: GrantScope.REGION, role: AccessRole.LECTEUR },
@@ -51,7 +51,7 @@ describe("getAuthorLevel", () => {
   it("classe un agent départemental ou structure comme département", () => {
     expect(
       getAuthorLevel({
-        operateurId: null,
+        isAgent: true,
         grants: [{ scope: GrantScope.STRUCTURE, role: AccessRole.EDITEUR }],
       })
     ).toBe(AuthorLevel.DEPARTEMENT);
@@ -59,18 +59,18 @@ describe("getAuthorLevel", () => {
 });
 
 describe("assertCanAccessVisibility", () => {
-  it("refuse la conversation agents à l'opérateur", () => {
-    expect(() => assertCanAccessVisibility(true, Visibility.AGENTS)).toThrow(
-      "pas accessibles à l'opérateur"
+  it("refuse la conversation agents à un non-agent", () => {
+    expect(() => assertCanAccessVisibility(false, Visibility.AGENTS)).toThrow(
+      "réservés aux agents"
     );
   });
 
-  it("ouvre la conversation partagée à l'opérateur et les deux aux agents", () => {
+  it("ouvre la conversation partagée à un non-agent et les deux aux agents", () => {
     expect(() =>
-      assertCanAccessVisibility(true, Visibility.SHARED)
+      assertCanAccessVisibility(false, Visibility.SHARED)
     ).not.toThrow();
     expect(() =>
-      assertCanAccessVisibility(false, Visibility.AGENTS)
+      assertCanAccessVisibility(true, Visibility.AGENTS)
     ).not.toThrow();
   });
 });

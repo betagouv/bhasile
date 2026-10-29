@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { GrantDb } from "@/app/api/users/user.db.type";
-import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
+import {
+  getAssignedGrants,
+  getEffectiveGrants,
+  isAgentUser,
+  toContactGrant,
+  toSessionGrant,
+} from "@/app/api/users/user.util";
 import { AccessRole, GrantScope } from "@/generated/prisma/client";
 
 const buildGrant = (overrides: Partial<GrantDb> = {}): GrantDb => ({
@@ -102,5 +108,101 @@ describe("getEffectiveGrants", () => {
 
   it("ne renvoie rien sans binôme ni pattern", () => {
     expect(getEffectiveGrants({ grants: [], emailPattern: null })).toEqual([]);
+  });
+});
+
+describe("isAgentUser", () => {
+  const buildUser = (
+    overrides: Partial<Parameters<typeof isAgentUser>[0]> = {}
+  ) => ({
+    isSuperAdmin: false,
+    isAgent: null,
+    operateurId: null,
+    emailPattern: null,
+    ...overrides,
+  });
+
+  it("reprend le statut du pattern d'email quand celui du user n'est pas renseigné", () => {
+    expect(isAgentUser(buildUser({ emailPattern: { isAgent: true } }))).toBe(
+      true
+    );
+    expect(isAgentUser(buildUser({ emailPattern: { isAgent: false } }))).toBe(
+      false
+    );
+  });
+
+  it("fait primer le statut du user sur celui de son pattern", () => {
+    expect(
+      isAgentUser(
+        buildUser({ isAgent: false, emailPattern: { isAgent: true } })
+      )
+    ).toBe(false);
+    expect(isAgentUser(buildUser({ isAgent: true }))).toBe(true);
+  });
+
+  it("ne considère pas comme agent un user sans statut ni pattern", () => {
+    expect(isAgentUser(buildUser())).toBe(false);
+  });
+
+  it("ne considère jamais comme agent un user rattaché à un opérateur", () => {
+    expect(isAgentUser(buildUser({ isAgent: true, operateurId: 3 }))).toBe(
+      false
+    );
+  });
+
+  it("considère un superadmin comme agent", () => {
+    expect(isAgentUser(buildUser({ isSuperAdmin: true }))).toBe(true);
+  });
+});
+
+describe("getAssignedGrants", () => {
+  const grant = buildGrant({ role: AccessRole.LECTEUR });
+
+  it("applique les binômes d'un agent", () => {
+    expect(
+      getAssignedGrants({
+        isSuperAdmin: false,
+        isAgent: true,
+        operateurId: null,
+        grants: [grant],
+        emailPattern: null,
+      })
+    ).toEqual([grant]);
+  });
+
+  it("applique les binômes d'un user rattaché à un opérateur", () => {
+    expect(
+      getAssignedGrants({
+        isSuperAdmin: false,
+        isAgent: false,
+        operateurId: 3,
+        grants: [grant],
+        emailPattern: null,
+      })
+    ).toEqual([grant]);
+  });
+
+  it("ignore les binômes d'un user ni agent ni rattaché à un opérateur", () => {
+    expect(
+      getAssignedGrants({
+        isSuperAdmin: false,
+        isAgent: null,
+        operateurId: null,
+        grants: [grant],
+        emailPattern: { isAgent: false, grants: [grant] },
+      })
+    ).toEqual([]);
+  });
+});
+
+describe("toContactGrant", () => {
+  it("donne la lecture seule sur la structure", () => {
+    expect(toContactGrant(12)).toEqual({
+      role: AccessRole.LECTEUR,
+      isNational: false,
+      departementNumeros: [],
+      regionIds: [],
+      structureIds: [12],
+    });
   });
 });

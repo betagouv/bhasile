@@ -6,7 +6,6 @@ import { ChangeEvent, FormEvent, ReactElement, useRef, useState } from "react";
 
 import { ApiError } from "@/app/utils/api-error.util";
 import { ALLOWED_MIME_TYPES } from "@/constants";
-import { useMessageAttachments } from "@/hooks/useMessageAttachments";
 import { MessageDraft } from "@/hooks/useMessageDraft";
 import { ConversationTag } from "@/types/conversation.type";
 
@@ -27,11 +26,10 @@ export const MessageComposer = ({
     attachments,
     addFiles,
     removeAttachment,
-    clearAttachments,
     fileKeys,
     isUploading,
     hasUploadError,
-  } = useMessageAttachments();
+  } = draft.attachments;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const hasContent = text.trim().length > 0 || fileKeys.length > 0;
@@ -53,7 +51,6 @@ export const MessageComposer = ({
       await onSend({ text, fileKeys, tagKey });
       draft.clear();
       setTagKey(null);
-      clearAttachments();
     } catch (error) {
       setErrorMessage(
         error instanceof ApiError
