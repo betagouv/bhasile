@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { ApiError } from "@/app/utils/api-error.util";
+import { MAX_FILE_SIZE } from "@/constants";
+import { MESSAGE_MAX_ATTACHMENTS } from "@/schemas/api/message.schema";
 
 export const useMessageAttachments = (): MessageAttachments => {
   const { uploadFile, deleteFile } = useFileUpload();
@@ -45,14 +47,19 @@ export const useMessageAttachments = (): MessageAttachments => {
   };
 
   const addFiles = (files: File[]) => {
-    const drafts: AttachmentDraft[] = files.map((file) => ({
+    const remainingSlots = MESSAGE_MAX_ATTACHMENTS - attachments.length;
+    const drafts: AttachmentDraft[] = files.map((file, index) => ({
       id: crypto.randomUUID(),
       name: file.name,
       size: file.size,
-      status: "uploading",
+      ...getInitialState(file, index >= remainingSlots),
     }));
     setAttachments((current) => [...current, ...drafts]);
-    drafts.forEach((draft, index) => uploadAttachment(draft.id, files[index]));
+    drafts.forEach((draft, index) => {
+      if (draft.status === "uploading") {
+        uploadAttachment(draft.id, files[index]);
+      }
+    });
   };
 
   const removeAttachment = (id: string) => {
@@ -85,6 +92,25 @@ export const useMessageAttachments = (): MessageAttachments => {
       (attachment) => attachment.status === "error"
     ),
   };
+};
+
+const getInitialState = (
+  file: File,
+  isOverAttachmentLimit: boolean
+): AttachmentState => {
+  if (isOverAttachmentLimit) {
+    return {
+      status: "error",
+      errorMessage: `${MESSAGE_MAX_ATTACHMENTS} pièces jointes maximum par message.`,
+    };
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return {
+      status: "error",
+      errorMessage: `Fichier trop volumineux (${MAX_FILE_SIZE / 1024 / 1024} Mo maximum).`,
+    };
+  }
+  return { status: "uploading" };
 };
 
 type AttachmentState =

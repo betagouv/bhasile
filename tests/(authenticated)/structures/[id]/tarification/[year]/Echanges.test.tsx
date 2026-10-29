@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Echanges } from "@/app/(authenticated)/structures/[id]/tarification/[year]/_components/Echanges";
+import { MAX_FILE_SIZE } from "@/constants";
 import { FetchStateProvider } from "@/contexts/FetchStateContext";
 import { MessageApiRead } from "@/schemas/api/message.schema";
 
@@ -466,6 +467,43 @@ describe("Echanges", () => {
       expect(screen.queryByText("gros.pdf")).not.toBeInTheDocument();
       expect(getSendButton()).toBeEnabled();
       expect(getDeletedFileUrls()).toEqual([]);
+    });
+
+    it("refuse sans l'envoyer un fichier trop volumineux", async () => {
+      answerWithFiles();
+      renderEchanges();
+      await screen.findByText("Aucun message pour l’instant.");
+
+      const tooLargeFile = buildFile("scan.pdf");
+      Object.defineProperty(tooLargeFile, "size", {
+        value: MAX_FILE_SIZE + 1,
+      });
+      attachFiles(tooLargeFile);
+
+      expect(
+        await screen.findByText("Fichier trop volumineux (30 Mo maximum).")
+      ).toBeInTheDocument();
+      expect(getUploadCount()).toBe(0);
+      expect(getSendButton()).toBeDisabled();
+    });
+
+    it("refuse sans les envoyer les pièces jointes au-delà de 20, en comptant celles déjà jointes", async () => {
+      answerWithFiles();
+      renderEchanges();
+      await screen.findByText("Aucun message pour l’instant.");
+
+      attachFiles(
+        ...Array.from({ length: 19 }, (_, position) =>
+          buildFile(`piece-${position}.pdf`)
+        )
+      );
+      attachFiles(buildFile("derniere.pdf"), buildFile("en-trop.pdf"));
+
+      expect(
+        await screen.findByText("20 pièces jointes maximum par message.")
+      ).toBeInTheDocument();
+      await waitFor(() => expect(getUploadCount()).toBe(20));
+      expect(getSendButton()).toBeDisabled();
     });
 
     it("bloque l'envoi tant qu'un fichier est en cours d'envoi", async () => {
