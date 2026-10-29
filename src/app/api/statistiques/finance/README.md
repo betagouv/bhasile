@@ -76,7 +76,7 @@ Les places d'un CADA issues d'une transformation HUDA vers CADA (`TRANSFO_HUDA_*
 - taux de la structure = places moyennes / ETP cibles moyens, soit `jours x places / (jours x places CADA / taux CADA + jours x places HUDA / taux HUDA)`. Le numérateur reprend les places moyennes du taux théorique pour rester comparable ;
 - sans places venues d'un HUDA, le taux est celui du type, même si les places de la structure sont inconnues ; avec, il faut aussi un taux HUDA, sinon pas de cible.
 
-Exemple : CADA de 1 501 places (taux 15) qui reçoit 106 places de HUDA (taux 25) au 1er juillet 2026. ETP cibles 2026 : 1 501 / 15 + 106 / 25 x 184 / 365 ≈ 102,2. Le taux 2026 vaut 1 554,4 places moyennes / 102,2 ≈ 15,2 (et non 1 607 / 102,2 ≈ 15,7, qui rapporterait la capacité de fin d'année à des ETP proratisés). En 2027 : 1 607 / 104,3 ≈ 15,4.
+Exemple : CADA de 1 501 places (taux 15) qui reçoit 106 places de HUDA (taux 25) au 1er juillet 2026. ETP cibles 2026 : 1 501 / 15 + 106 / 25 x 184 / 365 ≈ 102,2. Le taux 2026 vaut 1 554,4 places moyennes / 102,2 ≈ 15,2.
 
 ## Cartographie
 
