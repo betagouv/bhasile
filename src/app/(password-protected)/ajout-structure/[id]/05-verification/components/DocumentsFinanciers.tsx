@@ -8,6 +8,7 @@ import {
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getYearRange } from "@/app/utils/date.util";
+import { hasDocumentFile } from "@/app/utils/document-financier.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
@@ -50,7 +51,7 @@ export const DocumentsFinanciers = (): ReactElement => {
         (documentFinancier) =>
           documentFinancier.category === document.value &&
           documentFinancier.year === year &&
-          documentFinancier.fileUploads?.[0]?.key
+          hasDocumentFile(documentFinancier)
       );
       return !hasDocument;
     });

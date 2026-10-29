@@ -65,11 +65,16 @@ export default function ModificationFinanceForm() {
         onSubmit={onSubmit}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <DocumentsFinanciers className="mb-6" hasAccordion />
         <IndicateursFinanciers />
         <hr />
-
         <BudgetTables />
+        <hr />
+        <div>
+          <h2 className="text-xl font-bold mb-8 text-title-blue-france">
+            Documents administratifs et financiers transmis par l’opérateur
+          </h2>
+          <DocumentsFinanciers className="mb-6" hasAccordion />
+        </div>
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/structures/${structure.id}`}

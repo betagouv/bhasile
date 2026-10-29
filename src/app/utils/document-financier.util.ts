@@ -2,6 +2,10 @@ import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
+export const hasDocumentFile = (documentFinancier?: {
+  fileUploads?: { key?: string }[];
+}): boolean => Boolean(documentFinancier?.fileUploads?.[0]?.key);
+
 export const getCpomInheritedDocumentsFinanciers = (
   structure: StructureApiRead
 ): DocumentFinancierApiType[] =>
@@ -16,9 +20,7 @@ export const getCpomInheritedDocumentsFinanciers = (
 export const getCpomCoveredDocumentsFinanciers = (
   structure: StructureApiRead
 ): DocumentFinancierApiType[] =>
-  getCpomInheritedDocumentsFinanciers(structure).filter((documentFinancier) =>
-    Boolean(documentFinancier.fileUploads?.[0]?.key)
-  );
+  getCpomInheritedDocumentsFinanciers(structure).filter(hasDocumentFile);
 
 export const isDocumentCoveredByCpom = (
   coveredDocumentsFinanciers: DocumentFinancierApiType[],
