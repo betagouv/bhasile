@@ -6,7 +6,6 @@ import { ChangeEvent, FormEvent, ReactElement, useRef, useState } from "react";
 
 import { ApiError } from "@/app/utils/api-error.util";
 import { ALLOWED_MIME_TYPES } from "@/constants";
-import { useMessageAttachments } from "@/hooks/useMessageAttachments";
 import { MessageDraft } from "@/hooks/useMessageDraft";
 
 import { AttachmentChip } from "./AttachmentChip";
@@ -19,11 +18,10 @@ export const MessageComposer = ({ draft, onSend }: Props): ReactElement => {
     attachments,
     addFiles,
     removeAttachment,
-    clearAttachments,
     fileKeys,
     isUploading,
     hasUploadError,
-  } = useMessageAttachments();
+  } = draft.attachments;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const hasContent = text.trim().length > 0 || fileKeys.length > 0;
@@ -44,7 +42,6 @@ export const MessageComposer = ({ draft, onSend }: Props): ReactElement => {
     try {
       await onSend({ text, fileKeys });
       draft.clear();
-      clearAttachments();
     } catch (error) {
       setErrorMessage(
         error instanceof ApiError

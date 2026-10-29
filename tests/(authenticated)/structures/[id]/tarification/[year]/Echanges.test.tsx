@@ -312,8 +312,8 @@ describe("Echanges", () => {
     );
   });
 
-  it("garde le brouillon de chaque canal quand on change d'onglet", async () => {
-    answerWith([]);
+  it("garde le texte et les pièces jointes de chaque canal quand on change d'onglet", async () => {
+    answerWithFiles();
     const buildEchanges = () => (
       <FetchStateProvider>
         <Echanges
@@ -331,18 +331,22 @@ describe("Echanges", () => {
     fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
       target: { value: "Réponse en cours" },
     });
+    attachFiles(buildFile("budget.pdf"));
+    expect(await screen.findByText("budget.pdf")).toBeInTheDocument();
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
     rerender(buildEchanges());
     expect(
       await screen.findByPlaceholderText("Écrivez un message")
     ).toHaveValue("");
+    expect(screen.queryByText("budget.pdf")).not.toBeInTheDocument();
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
     rerender(buildEchanges());
     expect(
       await screen.findByPlaceholderText("Écrivez un message")
     ).toHaveValue("Réponse en cours");
+    expect(screen.getByText("budget.pdf")).toBeInTheDocument();
   });
 
   it("ne montre que le canal partagé à l'opérateur, même si l'URL demande le canal agents", async () => {
