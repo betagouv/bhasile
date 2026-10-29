@@ -91,7 +91,6 @@ const buildContext = (
     indicateurs: [],
     activites: [],
     rmus: [],
-    structureVersionTransformations: new Map(),
     resolveDnaStructureIds: () => [],
   };
 };

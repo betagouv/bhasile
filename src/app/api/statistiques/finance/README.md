@@ -18,7 +18,7 @@ Structures comptabilisées sur l'année (cf. [README racine](../README.md#struct
 | `deficitCumule`                                                           | Valeur absolue de la somme des RN négatifs par structure sur l'année                                |
 | `totalETPPrevisionnel`, `totalETPRealise`                                 | Somme des ETP saisis (`IndicateurFinancier` `PREVISIONNEL` / `REALISE`), `null` si aucun            |
 | `tauxEncadrementTheoriquePrevisionnel`, `tauxEncadrementTheoriqueRealise` | Par structure : places moyennes de l'année / ETP (prévisionnel ou réalisé), puis moyenne ou médiane |
-| `tauxEncadrementCible`                                                    | Par structure : cible de `reporting.taux_encadrement_cible`, puis moyenne ou médiane                |
+| `tauxEncadrementCible`                                                    | Par structure : cible de son type, places venues d'un HUDA au taux HUDA, puis moyenne ou médiane    |
 | `coutJournalierTheorique`                                                 | Par structure : dotation accordée / jours x places, puis moyenne ou médiane                         |
 
 Par scope et par année (pas de cumul multi-années). Année absente dans un scope -> zéros pour les montants, `null` pour les indicateurs. Arrondi 1 décimale (`roundStatsNumber`).
@@ -40,7 +40,7 @@ Les vues SQL de reporting (`scripts/views/002_structures_aggregate.sql`, `006_re
 
 - **Le taux d'encadrement et le coût journalier saisis par les opérateurs ne sont plus affichés.** Ils restent demandés dans les formulaires et stockés (`IndicateurFinancier.tauxEncadrement` / `coutJournalier`) : on récolte tout sur 2026 avant de décider de déprécier les champs. Les stats affichent à la place une valeur **théorique** recalculée et une **cible**.
 - **ETP : seule donnée saisie conservée**, en deux valeurs distinctes (prévisionnel, réalisé) sans repli de l'une sur l'autre : le repli mélangeait deux états dans un même chiffre sans que l'agent puisse le voir.
-- **Taux d'encadrement en places par ETP** (et non ETP par place) : même unité que la donnée saisie jusqu'ici et que les seuils d'anomalies (`TAUX_ENCADREMENT_*`). La cible est donc un taux, pas un nombre d'ETP : définie par type, année et zonage, elle ne peut pas dépendre de la taille de la structure.
+- **Taux d'encadrement en places par ETP** (et non ETP par place) : même unité que la donnée saisie jusqu'ici et que les seuils d'anomalies (`TAUX_ENCADREMENT_*`). La cible est donc un taux, pas un nombre d'ETP : définie par type de structure, elle ne dépend pas de sa taille.
 - **Coût journalier cible abandonné** : le calcul par structure reste dans `computeFinanceYearData`, mais l'API ne le renvoie plus. À supprimer si l'abandon est confirmé.
 - **Agrégation par structure, puis moyenne ou médiane** (paramètre `aggregation`), pour le théorique comme pour les cibles : théorique et cible restent comparables sur un périmètre qui mélange les types. Ce n'est pas un ratio des sommes du périmètre.
 
@@ -56,16 +56,27 @@ Base commune au coût théorique (dénominateur) et au taux théorique (places m
 
 ### Cibles
 
-| Table                              | Clé                                                           | Valeur                           |
-| ---------------------------------- | ------------------------------------------------------------- | -------------------------------- |
-| `reporting.tarif_journalier_cible` | `structure_type`, `year`, `belongs_to_idf`                    | `tarif_cible` (€ / place / jour) |
-| `reporting.taux_encadrement_cible` | `structure_type`, `year`, `belongs_to_idf`, `comes_from_huda` | `taux_cible` (places par ETP)    |
+| Table                              | Clé                                        | Valeur                           |
+| ---------------------------------- | ------------------------------------------ | -------------------------------- |
+| `reporting.tarif_journalier_cible` | `structure_type`, `year`, `belongs_to_idf` | `tarif_cible` (€ / place / jour) |
+| `reporting.taux_encadrement_cible` | `structure_type`                           | `taux_cible` (places par ETP)    |
 
-- Remplissage manuel. Une combinaison absente de la table (notamment une année) donne une cible `null`, sans reprise de l'année précédente.
+- Remplissage manuel. Une combinaison absente de la table (notamment une année pour le tarif) donne une cible `null`, sans reprise de l'année précédente.
 - `belongs_to_idf` : département administratif de la structure dans la région `FR-IDF`.
-- `comes_from_huda` : CADA **créé** par une transformation HUDA vers CADA (`TRANSFO_HUDA_*_VERS_CADA_NOUVEAU`), dès sa création et sans limite de durée. Un CADA existant qui absorbe des places de HUDA garde la cible CADA classique : il reste majoritairement un CADA historique.
+- Taux cible : une seule valeur par type, sans année ni zonage. Les tarifs, eux, restent par année et zonage.
 - Les tarifs saisis avant l'ajout de la colonne `year` ont été rattachés à 2026 par la migration.
 - Les anomalies (`COUT_JOURNALIER_GT_TARIF_CIBLE`) lisent encore le tarif cible dans la variable d'environnement `TARIF_JOURNALIER_CIBLE`, pas dans cette table : alignement à faire.
+
+#### Places venues d'un HUDA (`computeTauxEncadrementCible`)
+
+Les places d'un CADA issues d'une transformation HUDA vers CADA (`TRANSFO_HUDA_*_VERS_CADA_EXISTANT` ou `_NOUVEAU`, pas la remise en concurrence) restent au taux cible HUDA, sans limite de durée :
+
+- places venues d'un HUDA : gain de places de chaque version de la structure liée à une telle transformation (toutes les places pour un CADA créé), conservé dans les versions suivantes ;
+- **choix métier provisoire, à challenger** : quand la structure perd des places, ses places venues d'un HUDA baissent dans la même proportion (arrondi à la place). Une extension classique n'en ajoute pas ;
+- taux de la structure = places moyennes / ETP cibles moyens, soit `jours x places / (jours x places CADA / taux CADA + jours x places HUDA / taux HUDA)`. Le numérateur reprend les places moyennes du taux théorique pour rester comparable ;
+- sans places venues d'un HUDA, le taux est celui du type, même si les places de la structure sont inconnues ; avec, il faut aussi un taux HUDA, sinon pas de cible.
+
+Exemple : CADA de 1 501 places (taux 15) qui reçoit 106 places de HUDA (taux 25) au 1er juillet 2026. ETP cibles 2026 : 1 501 / 15 + 106 / 25 x 184 / 365 ≈ 102,2. Le taux 2026 vaut 1 554,4 places moyennes / 102,2 ≈ 15,2 (et non 1 607 / 102,2 ≈ 15,7, qui rapporterait la capacité de fin d'année à des ETP proratisés). En 2027 : 1 607 / 104,3 ≈ 15,4.
 
 ## Cartographie
 

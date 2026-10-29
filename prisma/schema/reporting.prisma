@@ -13,10 +13,10 @@ model TarifJournalierCible {
   @@schema("reporting")
 }
 
-// Taux d'encadrement cibles (places par ETP) par type de structure (1 valeur par type)
+// Taux d'encadrement cibles (places par ETP) par type de structure (remplissage manuel)
 model TauxEncadrementCible {
   id             Int           @id @default(autoincrement())
-  structure_type StructureType
+  structure_type StructureType @unique
   taux_cible     Decimal
 
   @@map("taux_encadrement_cible")

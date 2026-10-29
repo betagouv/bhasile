@@ -36,7 +36,10 @@ import {
   getTypologieMapForExactYear,
   isCpomLinkActiveInYear,
 } from "../statistiques.util";
-import { computeStructureJoursPlaces } from "./finance-theorique.util";
+import {
+  computeStructureJoursPlaces,
+  computeTauxEncadrementCible,
+} from "./finance-theorique.util";
 
 type FinanceScope = keyof Omit<FinanceByYearStat, "year">;
 
@@ -175,8 +178,6 @@ type StructureFinanceIndicateurs = {
   tauxPrevisionnel: number | null;
   tauxRealise: number | null;
   tauxCible: number | null;
-  etpCible: number | null;
-  joursPlaces: number | null;
   coutTheorique: number | null;
   coutCible: number | null;
 };
@@ -255,19 +256,14 @@ const computeFinanceYearData = (
     ])
   );
 
-  // Le contexte inclut déjà structureVersionTransformations depuis buildStatistiquesContext
-  const extendedContext = context;
-
   const indicateurs = structures.map((structure) => {
     const joursPlaces = computeStructureJoursPlaces(
-      extendedContext,
+      context,
       structure.id,
       year,
       context.timelineByStructureId.get(structure.id) ?? [],
       typologieMap.get(structure.id)?.placesAutorisees ?? null,
-      now,
-      context.ciblesFinancieres,
-      structure.type ?? undefined
+      now
     );
     const placesMoyennes = divideOrNull(
       joursPlaces?.joursPlaces,
@@ -283,14 +279,19 @@ const computeFinanceYearData = (
       etpRealise,
       tauxPrevisionnel: divideOrNull(placesMoyennes, etpPrevisionnel),
       tauxRealise: divideOrNull(placesMoyennes, etpRealise),
-      tauxCible: context.ciblesFinancieres.getTauxEncadrementCible(structure),
-      etpCible: joursPlaces?.etpCible ?? null,
-      joursPlaces: joursPlaces?.joursPlaces ?? null,
+      tauxCible: computeTauxEncadrementCible(
+        context.ciblesFinancieres,
+        structure.type,
+        joursPlaces
+      ),
       coutTheorique: divideOrNull(
         dotationByStructureId.get(structure.id) || null,
         joursPlaces?.joursPlaces
       ),
-      coutCible: context.ciblesFinancieres.getTarifJournalierCible(structure, year),
+      coutCible: context.ciblesFinancieres.getTarifJournalierCible(
+        structure,
+        year
+      ),
     };
   });
 
@@ -340,19 +341,11 @@ const aggregateFinanceScope = (
       sumValues(indicateurs.map((indicateur) => indicateur[field]))
     );
 
-  // Taux moyen = Total Places / Total ETP cibles
-  const totalPlaces = sumValues(indicateurs.map((i) => i.joursPlaces));
-  const totalETPCible = sumValues(indicateurs.map((i) => i.etpCible));
-  const tauxEncadrementCibleValue = 
-    totalPlaces !== null && totalETPCible !== null && totalETPCible > 0
-    ? roundStatsNumber(totalPlaces / totalETPCible)
-    : null;
-
   return {
     completude: scoped.completude,
     totalETPPrevisionnel: sum("etpPrevisionnel"),
     totalETPRealise: sum("etpRealise"),
-    tauxEncadrementCible: tauxEncadrementCibleValue,
+    tauxEncadrementCible: aggregate("tauxCible"),
     tauxEncadrementTheoriquePrevisionnel: aggregate("tauxPrevisionnel"),
     tauxEncadrementTheoriqueRealise: aggregate("tauxRealise"),
     coutJournalierTheorique: aggregate("coutTheorique"),

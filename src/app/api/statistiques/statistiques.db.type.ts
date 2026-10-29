@@ -1,4 +1,8 @@
-import { Prisma, StructureType } from "@/generated/prisma/client";
+import {
+  Prisma,
+  StructureType,
+  TransformationType,
+} from "@/generated/prisma/client";
 
 export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   select: {
@@ -130,7 +134,9 @@ export type StatistiqueDbStructureVersionTimeline = {
   structureId: number | null;
   effectiveDate: Date | null;
   placesAutorisees: number | null;
-  structureVersionTransformationId: number | null;
+  structureVersionTransformation: {
+    transformation: { type: TransformationType };
+  } | null;
 };
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
@@ -191,8 +197,9 @@ export type CiblesFinancieresLookup = {
     structure: StatistiqueDbStructure,
     year: number
   ) => number | null;
-  getTauxEncadrementCible: (structure: StatistiqueDbStructure) => number | null;
-  getTauxByType: (structureType: string | null) => number | null;
+  getTauxEncadrementCible: (
+    structureType: StructureType | null
+  ) => number | null;
 };
 
 export type StatistiqueDbBudgetAgg = {
@@ -253,12 +260,6 @@ export type StatistiquesActiveStructureIdsByPeriod = Record<
   Map<string, Set<number>>
 >;
 
-export type StatistiqueDbStructureVersionTransformation = {
-  id: number;
-  transformationId: number;
-  type: string;
-};
-
 export type StatistiquesContext = {
   /** Structures ouvertes à la date de référence (indicateurs globaux). */
   structures: StatistiqueDbStructure[];
@@ -285,8 +286,6 @@ export type StatistiquesContext = {
   dnaLinks: StatistiqueDbDnaLink[];
   /** Versions de chaque structure, indexées une fois par structure. */
   timelineByStructureId: Map<number, StatistiqueDbStructureVersionTimeline[]>;
-  /** Transformations des versions de structure, indexées par id de version. */
-  structureVersionTransformations: Map<number, StatistiqueDbStructureVersionTransformation>;
   departements: StatistiqueDbDepartement[];
   budgets: StatistiqueDbBudget[];
   /** Budgets CPOM saisis, par CPOM, année et type de structure (cf. `indexCpomBudgets`). */

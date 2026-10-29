@@ -19,6 +19,7 @@ import {
 } from "@/app/api/statistiques/statistiques.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
+import { TransformationType } from "@/types/transformation.type";
 
 export const testStructure = (
   id: number,
@@ -61,7 +62,7 @@ type BuildTestStructureVersionTimelineEntry = {
   structureVersionId?: number;
   effectiveDate?: Date;
   placesAutorisees?: number | null;
-  structureVersionTransformationId?: number | null;
+  transformationType?: TransformationType;
 };
 
 export const buildTestStructureVersionTimeline = (
@@ -79,7 +80,9 @@ export const buildTestStructureVersionTimeline = (
     structureId: entry.structureId,
     effectiveDate: entry.effectiveDate ?? defaultEffectiveDate,
     placesAutorisees: entry.placesAutorisees ?? null,
-    structureVersionTransformationId: entry.structureVersionTransformationId ?? null,
+    structureVersionTransformation: entry.transformationType
+      ? { transformation: { type: entry.transformationType } }
+      : null,
   }));
 };
 
@@ -200,11 +203,10 @@ export const buildTestStatistiquesContext = (
         | "actualisationFormDefinitions"
         | "lastValidatedCampagneYearByStructureId"
         | "ciblesFinancieres"
-        | "structureVersionTransformations"
       >
     > & {
-    structureVersionTimeline?: StatistiqueDbStructureVersionTimeline[];
-  }
+      structureVersionTimeline?: StatistiqueDbStructureVersionTimeline[];
+    }
 ): StatistiquesContext => {
   const structures = partial.structures;
   const allStructures = partial.allStructures ?? structures;
@@ -230,7 +232,7 @@ export const buildTestStatistiquesContext = (
   const dnaLinks = partial.dnaLinks ?? [];
   const timelineByStructureId = indexTimelineByStructureId(
     partial.structureVersionTimeline ??
-    buildTestStructureVersionTimeline(allStructureIds)
+      buildTestStructureVersionTimeline(allStructureIds)
   );
 
   return {
@@ -264,7 +266,5 @@ export const buildTestStatistiquesContext = (
       partial.lastValidatedCampagneYearByStructureId ?? new Map(),
     ciblesFinancieres:
       partial.ciblesFinancieres ?? buildTestCiblesFinancieres(),
-    structureVersionTransformations:
-      partial.structureVersionTransformations ?? new Map(),
   };
 };
