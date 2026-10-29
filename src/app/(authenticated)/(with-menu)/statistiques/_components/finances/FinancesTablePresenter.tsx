@@ -58,11 +58,6 @@ const sectionsConfig: FinanceSectionConfig[] = [
     title: "Coût journalier",
     rows: [
       {
-        label: "Coût journalier cible moyen",
-        key: "coutJournalierCible",
-        type: "currency",
-      },
-      {
         label: "Coût journalier théorique moyen",
         key: "coutJournalierTheorique",
         type: "currency",
