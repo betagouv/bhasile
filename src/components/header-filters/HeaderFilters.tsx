@@ -1,7 +1,11 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import { formatPlural } from "@/app/utils/string.util";
 import { buildZoneSummary } from "@/app/utils/zone.util";
+import { isAgent } from "@/lib/casl";
+import { SessionUser } from "@/types/global";
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
 import { filterRegionsWithDepartements } from "@/utils/region.util";
 import { buildTypesSummary } from "@/utils/structure-type.util";
@@ -12,6 +16,12 @@ import { FiltersDepartement } from "./FiltersDepartement";
 import { FilterTypeStructure } from "./FilterTypeStructure";
 
 export const HeaderFilters = () => {
+  const { data, status } = useSession();
+
+  if (status === "loading") {
+    return null;
+  }
+
   return (
     <div className="flex">
       <FilterDropdown
@@ -29,17 +39,19 @@ export const HeaderFilters = () => {
         )}
       />
 
-      <FilterDropdown
-        label="Opérateurs"
-        placeholder="Tous les opérateurs"
-        filterId="operateurs"
-        getSummaryLabel={(operateurIds) =>
-          formatPlural(operateurIds.length, "opérateur")
-        }
-        renderOptions={(filterSelection) => (
-          <FilterOperateur filterSelection={filterSelection} />
-        )}
-      />
+      {isAgent(data?.user as SessionUser) && (
+        <FilterDropdown
+          label="Opérateurs"
+          placeholder="Tous les opérateurs"
+          filterId="operateurs"
+          getSummaryLabel={(operateurIds) =>
+            formatPlural(operateurIds.length, "opérateur")
+          }
+          renderOptions={(filterSelection) => (
+            <FilterOperateur filterSelection={filterSelection} />
+          )}
+        />
+      )}
 
       <FilterDropdown
         label="Types structure"

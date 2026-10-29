@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { withAuth } from "next-auth/middleware";
 
 import { canAccessApp } from "./lib/casl";
-import { isOperateurUser } from "./lib/casl/rules";
+import { canAccessPage } from "./lib/casl/rules";
 import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,
@@ -11,11 +11,7 @@ import {
   pendingAccessPage,
   proConnectProtectedPages,
 } from "./proxy/auth-config";
-import {
-  getApiRouteProtection,
-  isPathAllowedForUser,
-  matchesPath,
-} from "./proxy/auth-util";
+import { getApiRouteProtection, matchesPath } from "./proxy/auth-util";
 import { filtersProxy } from "./proxy/filters";
 import { SessionUser } from "./types/global";
 
@@ -95,8 +91,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL(pendingAccessPage, request.url));
       }
 
-      const isOperateur = isOperateurUser(user);
-      if (!isPathAllowedForUser(pathname, user.operateurId!, isOperateur)) {
+      if (!canAccessPage(user, pathname)) {
         return NextResponse.redirect(new URL("/", request.url));
       }
     }
