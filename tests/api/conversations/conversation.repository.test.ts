@@ -4,9 +4,13 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   createMessage,
+  createMessageNotifications,
   createMessageReceipts,
+  createNotificationRecipients,
   findConversationMessageIds,
   findMessages,
+  findNotifiedOrReadPairs,
+  findPendingMessageIds,
   updateMessageTagKey,
   upsertConversation,
 } from "@/app/api/conversations/conversation.repository";
@@ -45,6 +49,12 @@ describe("conversation.repository db integration", () => {
       where: { message: { conversation: conversationWhere } },
     });
     await prisma.messageReceipt.deleteMany({
+      where: { message: { conversation: conversationWhere } },
+    });
+    await prisma.messageNotificationRecipient.deleteMany({
+      where: { message: { conversation: conversationWhere } },
+    });
+    await prisma.messageNotification.deleteMany({
       where: { message: { conversation: conversationWhere } },
     });
     await prisma.message.deleteMany({
@@ -212,5 +222,45 @@ describe("conversation.repository db integration", () => {
     expect(
       await prisma.fileUpload.findUnique({ where: { key: file.key } })
     ).toMatchObject({ messageId: first.id });
+  });
+
+  it("renvoie les messages sans trace de notification créés avant la date donnée", async () => {
+    const pending = await postMessage(Visibility.SHARED, "À notifier");
+    const notified = await postMessage(Visibility.SHARED, "Déjà notifié");
+    await createMessageNotifications([notified.id], null);
+
+    const pendingIds = await findPendingMessageIds(new Date(Date.now() + 1000));
+
+    expect(pendingIds).toContain(pending.id);
+    expect(pendingIds).not.toContain(notified.id);
+    expect(await findPendingMessageIds(new Date(0))).not.toContain(pending.id);
+  });
+
+  it("trace un même mail pour plusieurs messages et le retrouve avec les lectures", async () => {
+    const first = await postMessage(Visibility.SHARED, "Premier");
+    const second = await postMessage(Visibility.SHARED, "Second");
+    const read = await postMessage(Visibility.SHARED, "Lu");
+    const pending = await postMessage(Visibility.SHARED, "À signaler");
+    const brevoMessageId = `<${randomUUID()}>`;
+    await createNotificationRecipients(
+      [first, second].map((message) => ({
+        messageId: message.id,
+        userId: authorId,
+        email: "agent@test.fr",
+        brevoMessageId,
+      }))
+    );
+    await createMessageReceipts(authorId, [read.id]);
+
+    const pairs = await findNotifiedOrReadPairs([
+      first.id,
+      second.id,
+      read.id,
+      pending.id,
+    ]);
+
+    expect(pairs.map((pair) => pair.messageId).sort()).toEqual(
+      [first.id, second.id, read.id].sort()
+    );
   });
 });

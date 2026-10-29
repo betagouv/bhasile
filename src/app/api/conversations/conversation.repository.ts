@@ -99,3 +99,54 @@ export const createMessageReceipts = (userId: number, messageIds: number[]) =>
     data: messageIds.map((messageId) => ({ messageId, userId })),
     skipDuplicates: true,
   });
+
+export const findPendingMessageIds = async (
+  createdBefore: Date
+): Promise<number[]> => {
+  const messages = await prisma.message.findMany({
+    where: { notification: null, createdAt: { lt: createdBefore } },
+    orderBy: { id: "asc" },
+    select: { id: true },
+  });
+  return messages.map((message) => message.id);
+};
+
+export const createMessageNotifications = (
+  messageIds: number[],
+  abandonedAt: Date | null
+) =>
+  prisma.messageNotification.createMany({
+    data: messageIds.map((messageId) => ({ messageId, abandonedAt })),
+    skipDuplicates: true,
+  });
+
+export const findNotifiedOrReadPairs = async (
+  messageIds: number[]
+): Promise<MessageUser[]> => {
+  const [notifiedPairs, readPairs] = await Promise.all([
+    prisma.messageNotificationRecipient.findMany({
+      where: { messageId: { in: messageIds } },
+      select: { messageId: true, userId: true },
+    }),
+    prisma.messageReceipt.findMany({
+      where: { messageId: { in: messageIds } },
+      select: { messageId: true, userId: true },
+    }),
+  ]);
+  return [...notifiedPairs, ...readPairs];
+};
+
+export const createNotificationRecipients = (
+  data: {
+    messageId: number;
+    userId: number;
+    email: string;
+    brevoMessageId: string;
+  }[]
+) =>
+  prisma.messageNotificationRecipient.createMany({
+    data,
+    skipDuplicates: true,
+  });
+
+type MessageUser = { messageId: number; userId: number };

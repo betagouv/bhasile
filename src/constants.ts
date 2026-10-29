@@ -1,4 +1,5 @@
 import { getNow } from "./app/utils/now.util";
+import type { AuthorLevel, Visibility } from "./generated/prisma/enums";
 import { Departement, Region } from "./types/departement.type";
 
 export type LatLngTuple = [number, number];
@@ -107,6 +108,17 @@ export const ALLOWED_MIME_TYPES = [
 ];
 
 export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo
+
+export const AUTHOR_LEVEL_LABELS: Record<AuthorLevel, string> = {
+  DEPARTEMENT: "DDETS",
+  REGION: "DREETS",
+  OPERATEUR: "Opérateur",
+};
+
+export const VISIBILITY_LABELS: Record<Visibility, string> = {
+  SHARED: "Tout le monde",
+  AGENTS: "Services de l’État seulement",
+};
 
 export const MODELE_DIFFUS_LINK = "/adresses-diffus.xlsx";
 export const MODELE_MIXTE_LINK = "/adresses-mixte.xlsx";

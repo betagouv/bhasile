@@ -13,20 +13,23 @@ model Conversation {
 
 // Ajout seul : jamais modifié ni supprimé, sauf tagKey (voir docs/messagerie.md)
 model Message {
-  id             Int              @id @default(autoincrement())
-  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  id             Int                            @id @default(autoincrement())
+  conversation   Conversation                   @relation(fields: [conversationId], references: [id], onDelete: Restrict)
   conversationId Int
-  author         User             @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  author         User                           @relation(fields: [authorId], references: [id], onDelete: Restrict)
   authorId       Int
   authorLevel    AuthorLevel
   text           String
   tagKey         String?
   receipts       MessageReceipt[]
   attachments    FileUpload[]
+  notification   MessageNotification?
+  notifiedUsers  MessageNotificationRecipient[]
 
   createdAt DateTime @default(now())
 
   @@index([conversationId, id])
+  @@index([createdAt])
   @@schema("public")
 }
 
@@ -40,6 +43,32 @@ model MessageReceipt {
 
   @@id([messageId, userId])
   @@index([userId])
+  @@schema("public")
+}
+
+// Traitement des notifications d'un message terminé (même sans destinataire) ; son absence = message à notifier
+model MessageNotification {
+  message     Message   @relation(fields: [messageId], references: [id], onDelete: Restrict)
+  messageId   Int       @id
+  abandonedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@schema("public")
+}
+
+// Un message signalé à un destinataire dans un mail accepté par Brevo ; un mail regroupe plusieurs messages
+model MessageNotificationRecipient {
+  message        Message @relation(fields: [messageId], references: [id], onDelete: Restrict)
+  messageId      Int
+  user           User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId         Int
+  email          String
+  brevoMessageId String
+
+  createdAt DateTime @default(now())
+
+  @@id([messageId, userId])
   @@schema("public")
 }
 

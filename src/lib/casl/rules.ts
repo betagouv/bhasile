@@ -95,7 +95,10 @@ const defineAgentRules = (
 const toRuleConditions = <T extends object>(conditions: T): T | undefined =>
   Object.keys(conditions).length > 0 ? conditions : undefined;
 
-const EDITING_ROLES: AccessRole[] = [AccessRole.EDITEUR, AccessRole.ADMIN];
+export const EDITING_ROLES: AccessRole[] = [
+  AccessRole.EDITEUR,
+  AccessRole.ADMIN,
+];
 
 const getStructureConditions = ({
   isNational,

@@ -1,5 +1,10 @@
+import type { GrantDb, UserWithGrants } from "@/app/api/users/user.db.type";
+import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { CURRENT_YEAR } from "@/constants";
+import { CURRENT_YEAR, VISIBILITY_LABELS } from "@/constants";
+import { GrantScope, Visibility } from "@/generated/prisma/enums";
+import { EDITING_ROLES } from "@/lib/casl";
+import type { NotificationRecipient } from "@/types/conversation.type";
 
 // La campagne N est ouverte du 1er janvier N-1 au 31 décembre N
 export const getOpenCampaignYears = (): number[] => [
@@ -35,4 +40,60 @@ export const assertCanWrite = (participant: {
       403
     );
   }
+};
+
+// REGION exclu : la DDETS mène les échanges. Opérateurs exclus tant qu'ils n'ont pas accès à la messagerie
+export const getMessageRecipients = (
+  users: (UserWithGrants & { email: string })[],
+  {
+    structure,
+    authorId,
+  }: {
+    structure: { id: number; departementAdministratif: string };
+    authorId: number;
+  }
+): NotificationRecipient[] =>
+  users
+    .filter(
+      (user) =>
+        user.id !== authorId &&
+        !user.isSuperAdmin &&
+        isAgentUser(user) &&
+        getAssignedGrants(user).some((grant) =>
+          isNotifyingGrant(grant, structure)
+        )
+    )
+    .map((user) => ({ userId: user.id, email: user.email }));
+
+export const buildNotificationParams = ({
+  structure,
+  year,
+  visibility,
+}: {
+  structure: { id: number; codeBhasile: string };
+  year: number;
+  visibility: Visibility;
+}): Record<string, string> => {
+  const channelQuery = visibility === Visibility.AGENTS ? "?canal=agents" : "";
+  return {
+    structure: structure.codeBhasile,
+    campagne: String(year),
+    canal: VISIBILITY_LABELS[visibility],
+    lien: `${process.env.NEXT_URL}/structures/${structure.id}/tarification/${year}${channelQuery}`,
+  };
+};
+
+const isNotifyingGrant = (
+  grant: GrantDb,
+  structure: { id: number; departementAdministratif: string }
+): boolean => {
+  if (!EDITING_ROLES.includes(grant.role)) {
+    return false;
+  }
+  if (grant.scope === GrantScope.DEPARTEMENT) {
+    return grant.departement?.numero === structure.departementAdministratif;
+  }
+  return (
+    grant.scope === GrantScope.STRUCTURE && grant.structure?.id === structure.id
+  );
 };
