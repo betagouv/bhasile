@@ -4,6 +4,7 @@ import { subject } from "@casl/ability";
 import { useAbility } from "@casl/react";
 
 import { StructureApiRead } from "@/schemas/api/structure.schema";
+import { StructurePermissionSubject } from "@/types/structure.type";
 
 export const useCanUpdateStructure = (structure: StructureApiRead): boolean => {
   const ability = useAbility();
@@ -11,15 +12,19 @@ export const useCanUpdateStructure = (structure: StructureApiRead): boolean => {
   return ability.can("update", subject("Structure", structure));
 };
 
-export const useCanUpdateStructures = (): ((structure: {
-  id: number;
-  departementAdministratif?: string;
-}) => boolean) => {
+export const useCanUpdateStructures = (): ((
+  structure: StructurePermissionSubject
+) => boolean) => useCanOnStructures("update");
+
+export const useCanReadStructures = (): ((
+  structure: StructurePermissionSubject
+) => boolean) => useCanOnStructures("read");
+
+const useCanOnStructures = (
+  action: "read" | "update"
+): ((structure: StructurePermissionSubject) => boolean) => {
   const ability = useAbility();
 
-  return ({ id, departementAdministratif }) =>
-    ability.can(
-      "update",
-      subject("Structure", { id, departementAdministratif } as StructureApiRead)
-    );
+  return (structure) =>
+    ability.can(action, subject("Structure", structure as StructureApiRead));
 };

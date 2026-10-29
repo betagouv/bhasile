@@ -3,6 +3,7 @@ import { ReactElement } from "react";
 
 import { formatPlural } from "@/app/utils/string.util";
 import { CommuneMapPoint, CommuneStructure } from "@/types/structure-list.type";
+import { getStructureHref } from "@/utils/structure-link.util";
 
 export const CommunePopupContent = ({ commune }: Props): ReactElement => (
   <div className="w-md max-w-[80vw]">
@@ -48,11 +49,6 @@ export const CommunePopupContent = ({ commune }: Props): ReactElement => (
 type Props = {
   commune: CommuneMapPoint;
 };
-
-const getStructureHref = (structure: CommuneStructure): string =>
-  structure.isFinalised
-    ? `/structures/${structure.id}`
-    : `/structures/${structure.id}/finalisation/01-identification`;
 
 const getStructureSubtitle = (structure: CommuneStructure): string =>
   [

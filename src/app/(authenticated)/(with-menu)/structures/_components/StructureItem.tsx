@@ -9,6 +9,7 @@ import {
   StructureCommune,
   StructureListItem,
 } from "@/types/structure-list.type";
+import { hasStructureFiche } from "@/utils/structure-link.util";
 
 import { TypeBatiBadge } from "./TypeBatiBadge";
 
@@ -62,7 +63,7 @@ export const StructureItem = ({
         </>
       )}
       <td>
-        {isClosed || structure.isFinalised ? (
+        {hasStructureFiche({ isFinalised: structure.isFinalised, isClosed }) ? (
           <Link
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
             title={`Détails de la structure ${structure.codeBhasile}`}

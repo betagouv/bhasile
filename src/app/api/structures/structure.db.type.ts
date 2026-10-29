@@ -21,7 +21,7 @@ export const cpomLinkedStructureSelect = {
   departementAdministratif: true,
   fermetureDate: true,
   operateur: {
-    select: { name: true },
+    select: { id: true, name: true },
   },
   forms: {
     select: { status: true, formDefinition: { select: { slug: true } } },

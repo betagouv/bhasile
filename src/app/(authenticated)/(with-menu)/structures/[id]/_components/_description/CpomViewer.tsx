@@ -3,15 +3,19 @@
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 
-import { useCanUpdateStructures } from "@/app/hooks/useCanUpdateStructure";
+import {
+  useCanReadStructures,
+  useCanUpdateStructures,
+} from "@/app/hooks/useCanUpdateStructure";
 import { getCurrentCpomStructure } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
-import { getCpomStructureLink } from "@/utils/cpom-structure-link.util";
+import { getCpomStructureLink } from "@/utils/structure-link.util";
 
 export const CpomViewer = (): ReactElement => {
   const [showCpom, setShowCpom] = useState(false);
 
   const { structure } = useStructureContext();
+  const canReadStructure = useCanReadStructures();
   const canUpdateStructure = useCanUpdateStructures();
 
   const currentCpomStructure = getCurrentCpomStructure(structure);
@@ -38,10 +42,10 @@ export const CpomViewer = (): ReactElement => {
             if (!structure.structure) {
               return null;
             }
-            const link = getCpomStructureLink(
-              structure.structure,
-              canUpdateStructure
-            );
+            const link = getCpomStructureLink(structure.structure, {
+              canReadStructure,
+              canUpdateStructure,
+            });
             return (
               <div key={structure.id} className="flex gap-2 items-center">
                 <span className="flex gap-2 my-2">
@@ -54,7 +58,7 @@ export const CpomViewer = (): ReactElement => {
                 </span>
                 {link && (
                   <Link
-                    className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
+                    className={`fr-btn fr-btn--tertiary-no-outline ${link.isFinalisation ? "fr-icon-edit-line" : "fr-icon-arrow-right-s-line"}`}
                     title={link.title}
                     aria-label={link.title}
                     href={link.href}

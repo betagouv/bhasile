@@ -586,14 +586,15 @@ export const resolveCpomLinkedStructureFields = <
     return cpomStructure;
   }
   const { forms, fermetureDate, ...structure } = cpomStructure.structure;
-  const isBorn = isBornFromCreation(structure.structureVersions, now);
   return {
     ...cpomStructure,
     structure: {
       ...resolveCurrentVersionFields(structure, now),
-      isFinalised: isFinalisationFormValidated(forms) || isBorn,
+      isFinalised: isStructureFinalised(cpomStructure.structure, now),
       isClosed: isStructureClosed({ fermetureDate }, now),
-      isVisible: forms.length > 0 || isBorn,
+      isVisible:
+        forms.length > 0 ||
+        isBornFromCreation(structure.structureVersions, now),
     },
   };
 };
