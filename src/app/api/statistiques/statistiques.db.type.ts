@@ -191,11 +191,8 @@ export type CiblesFinancieresLookup = {
     structure: StatistiqueDbStructure,
     year: number
   ) => number | null;
-  getTauxEncadrementCible: (
-    structure: StatistiqueDbStructure,
-    year: number
-  ) => number | null;
-  getTauxByType: (structureType: string) => number | null;
+  getTauxEncadrementCible: (structure: StatistiqueDbStructure) => number | null;
+  getTauxByType: (structureType: string | null) => number | null;
 };
 
 export type StatistiqueDbBudgetAgg = {

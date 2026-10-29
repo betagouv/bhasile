@@ -52,7 +52,6 @@ import {
   buildStatistiquesActivityContext,
   collectDistinctYears,
   createEmptyActiveStructureIdsByPeriod,
-  getCadaFromHudaStructureIds,
   getInitialisedStructureIds,
   getTypologieYears,
   indexTimelineByStructureId,
@@ -191,9 +190,6 @@ export const buildStatistiquesContext = async (
       tarifsJournaliersCibles,
       tauxEncadrementCibles,
       idfDepartementNumeros: new Set(idfDepartementNumeros),
-      cadaFromHudaStructureIds: getCadaFromHudaStructureIds(
-        structureInitialisations
-      ),
     }),
     eigs,
     evaluations,

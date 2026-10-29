@@ -283,7 +283,7 @@ const computeFinanceYearData = (
       etpRealise,
       tauxPrevisionnel: divideOrNull(placesMoyennes, etpPrevisionnel),
       tauxRealise: divideOrNull(placesMoyennes, etpRealise),
-      tauxCible: context.ciblesFinancieres.getTauxEncadrementCible(structure, year),
+      tauxCible: context.ciblesFinancieres.getTauxEncadrementCible(structure),
       etpCible: joursPlaces?.etpCible ?? null,
       joursPlaces: joursPlaces?.joursPlaces ?? null,
       coutTheorique: divideOrNull(

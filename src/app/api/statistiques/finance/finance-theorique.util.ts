@@ -145,7 +145,6 @@ type CiblesFinancieresInputs = {
   tarifsJournaliersCibles: StatistiqueDbTarifJournalierCible[];
   tauxEncadrementCibles: StatistiqueDbTauxEncadrementCible[];
   idfDepartementNumeros: Set<string>;
-  cadaFromHudaStructureIds: Set<number>;
 };
 
 const toCibleKey = (
@@ -170,25 +169,20 @@ export const buildCiblesFinancieresLookup = (
   const tauxByType = new Map<string, number>(
     inputs.tauxEncadrementCibles.reduce((acc, cible) => {
       const key = toTauxByTypeKey(cible.structureType);
-      if (!acc.has(key)) acc.set(key, cible.tauxCible);
+      if (!acc.has(key)) {
+        acc.set(key, cible.tauxCible);
+      }
       return acc;
     }, new Map<string, number>())
-  );
-  const tauxByKey = new Map(
-    inputs.tauxEncadrementCibles.map((cible) => [
-      toCibleKey(cible.structureType, cible.year, cible.isIdf, cible.isFromHuda),
-      cible.tauxCible,
-    ])
   );
   const isIdf = (structure: StatistiqueDbStructure): boolean =>
     inputs.idfDepartementNumeros.has(structure.departementAdministratif);
 
   return {
-    getTarifJournalierCible: (structure, year) =>
+    getTarifJournalierCible: (structure: StatistiqueDbStructure, year: number) =>
       tarifByKey.get(toCibleKey(structure.type, year, isIdf(structure))) ?? null,
-    getTauxEncadrementCible: (structure, year) =>
-      (structure.type ? tauxByType.get(toTauxByTypeKey(structure.type)) : null) ??
-      tauxByKey.get(toCibleKey(structure.type, year, isIdf(structure), inputs.cadaFromHudaStructureIds.has(structure.id))) ?? null,
+    getTauxEncadrementCible: (structure: StatistiqueDbStructure) =>
+      structure.type ? tauxByType.get(toTauxByTypeKey(structure.type)) ?? null : null,
     getTauxByType: (structureType: string | null) =>
       structureType ? tauxByType.get(toTauxByTypeKey(structureType)) ?? null : null,
   };

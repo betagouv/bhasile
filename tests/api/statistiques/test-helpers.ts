@@ -171,7 +171,6 @@ export const buildTestCiblesFinancieres = (
     tarifsJournaliersCibles: [],
     tauxEncadrementCibles: [],
     idfDepartementNumeros: new Set(),
-    cadaFromHudaStructureIds: new Set(),
     ...inputs,
   });
 

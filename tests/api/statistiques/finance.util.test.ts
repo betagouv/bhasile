@@ -94,16 +94,8 @@ const cibleTarif = (year: number, isIdf: boolean, tarifCible: number) => ({
   tarifCible,
 });
 
-const cibleTaux = (
-  year: number,
-  isIdf: boolean,
-  isFromHuda: boolean,
-  tauxCible: number
-) => ({
-  structureType: StructureType.CADA,
-  year,
-  isIdf,
-  isFromHuda,
+const cibleTaux = (structureType: StructureType, tauxCible: number) => ({
+  structureType,
   tauxCible,
 });
 
@@ -313,16 +305,13 @@ describe("finance - indicateurs théoriques", () => {
       }),
       ciblesFinancieres: buildTestCiblesFinancieres({
         idfDepartementNumeros: new Set(["75"]),
-        cadaFromHudaStructureIds: new Set([3]),
         tarifsJournaliersCibles: [
           cibleTarif(2024, true, 30),
           cibleTarif(2024, false, 20),
           cibleTarif(2023, false, 1),
         ],
         tauxEncadrementCibles: [
-          cibleTaux(2024, true, false, 12),
-          cibleTaux(2024, false, false, 15),
-          cibleTaux(2024, false, true, 21),
+          cibleTaux(StructureType.CADA, 12),
         ],
       }),
     };
@@ -710,16 +699,10 @@ describe("tauxEncadrementCible with HUDA to CADA transformations", () => {
       tauxEncadrementCibles: [
         {
           structureType: StructureType.CADA,
-          year: 2026,
-          isIdf: false,
-          isFromHuda: false,
           tauxCible: 15,
         },
         {
           structureType: StructureType.HUDA,
-          year: 2026,
-          isIdf: false,
-          isFromHuda: false,
           tauxCible: 25,
         },
       ],
@@ -824,16 +807,10 @@ describe("tauxEncadrementCible with HUDA to CADA transformations", () => {
       tauxEncadrementCibles: [
         {
           structureType: StructureType.CADA,
-          year: 2026,
-          isIdf: false,
-          isFromHuda: false,
           tauxCible: 15,
         },
         {
           structureType: StructureType.HUDA,
-          year: 2026,
-          isIdf: false,
-          isFromHuda: false,
           tauxCible: 25,
         },
       ],
