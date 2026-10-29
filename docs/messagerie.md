@@ -44,12 +44,12 @@ Les échanges sont **tripartites** : la DDETS mène, la DREETS suit et relit, l'
 
 Le design repose sur ces constats. S'ils deviennent faux, la colonne de droite dit quoi revoir.
 
-| Postulat                                                                                                                                                                                                           | Si ça devient faux                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| **Une structure ne change jamais d'opérateur.**                                                                                                                                                                    | Le code le permet aujourd'hui : l'ancien opérateur garderait l'accès aux conversations. Décider ce que voit le repreneur. |
-| **Le volume reste faible** (quelques milliers de messages par jour au pic, quelques dizaines par conversation).                                                                                                    | Le polling coûte plus cher : passer aux SSE (voir [Lectures et temps réel](#lectures-non-lus-et-temps-réel)).             |
-| **Les fichiers ne sont pas confidentiels, seuls les messages le sont** : côté agents, même règle d'accès que la fiche structure ; côté opérateur, les pièces jointes du canal partagé de ses structures seulement. | Ajouter une règle d'accès par conversation pour les agents aussi.                                                         |
-| **Les opérateurs ont des comptes nominatifs à la mise en service** (chantier accès opérateur).                                                                                                                     | Seul le canal agents sert ; le canal partagé attend les comptes.                                                          |
+| Postulat                                                                                                                                                 | Si ça devient faux                                                                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Une structure ne change jamais d'opérateur.**                                                                                                          | Le code le permet aujourd'hui : l'ancien opérateur garderait l'accès aux conversations. Décider ce que voit le repreneur.                      |
+| **Le volume reste faible** (quelques milliers de messages par jour au pic, quelques dizaines par conversation).                                          | Le polling coûte plus cher : passer aux SSE (voir [Lectures et temps réel](#lectures-non-lus-et-temps-réel)).                                  |
+| **Les pièces jointes sont aussi confidentielles que les messages** : un fichier de message se lit selon l'accès à sa conversation, canal agents compris. | Pour les montrer plus largement (depuis la fiche structure par exemple), élargir la règle de lecture des fichiers de message ; sans migration. |
+| **Les opérateurs ont des comptes nominatifs à la mise en service** (chantier accès opérateur).                                                           | Seul le canal agents sert ; le canal partagé attend les comptes.                                                                               |
 
 ## Modèle de données
 
@@ -155,7 +155,7 @@ type ConversationContext = {
 };
 ```
 
-- **Côté écran**, le composant de messagerie reçoit le contexte en props, calculé par la page de la tarification.
+- **Côté écran**, le composant de messagerie reçoit les tags en props, calculés par la page de la tarification.
 - **Côté serveur**, la tarification passe la liste des tags au service de la messagerie, qui vérifie qu'un `tagKey` en fait partie.
 - **La dépendance va dans un seul sens** : la tarification importe la messagerie, jamais l'inverse. La messagerie connaît le contrat (« il y a des tags et des ancres »), pas son contenu (« L48 », « procédure contradictoire »).
 - Les ancres (réception du CA et du BP, envoi et ouverture des documents) relèvent de la gestion des documents. Tant qu'elle n'existe pas, la liste des ancres est vide et seuls les tags choisis classent les messages.
@@ -175,7 +175,7 @@ type ConversationContext = {
 - **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La messagerie expose un compteur par structure, que le bloc tarification du dashboard affiche.
 - **Temps réel** : tant que le panneau des échanges est ouvert, le client relit toute la conversation toutes les 10 à 15 secondes et remplace sa liste.
   - Pas de curseur sur l'identifiant : il pourrait sauter un message, car les identifiants sont attribués à l'insertion, pas au commit. Une conversation compte quelques dizaines de messages, relire tout reste léger.
-  - Pas de websocket ni de SSE : en prod, l'application tourne sur plusieurs conteneurs, et pousser un message à tous les clients demanderait un canal de diffusion entre instances (`LISTEN/NOTIFY`). Le polling n'en a pas besoin, la base sert de point commun. Le passage aux SSE ne changerait pas le modèle.
+  - Pas de websocket ni de SSE : en prod, l'application tourne sur deux conteneurs pendant un déploiement (plus si on la dimensionne à la hausse), et pousser un message à tous les clients demanderait un canal de diffusion entre instances (`LISTEN/NOTIFY`). Le polling n'en a pas besoin, la base sert de point commun. Le passage aux SSE ne changerait pas le modèle.
 
 ## Notifications
 
@@ -203,13 +203,13 @@ Ces règles valent pour la messagerie et pour la gestion des documents, qui y re
 
 - **Ajout seul** : les repositories des journaux n'exposent ni `update` ni `delete` ; une correction est un nouvel enregistrement.
 - **Triggers PostgreSQL** contre les modifications (`UPDATE`, `DELETE`, `TRUNCATE`), posés avant la mise en service, quand les journaux deviennent une preuve : eux seuls couvrent aussi les scripts ponctuels et les requêtes manuelles. Ils protègent contre les accidents, pas contre un administrateur de la base. Sur `Message`, le trigger refuse tout `UPDATE` qui touche autre chose que `tagKey` (comparaison de `to_jsonb(NEW) - 'tagKey'` et `to_jsonb(OLD) - 'tagKey'`, qui reste juste quand on ajoute une colonne). Le wipe des seeders (`prisma/utils/wipe.ts`, dev et préprod) lève explicitement la protection pour sa session.
-- **Aucune cascade** n'atteint un message, une trace ou un fichier. Une structure qui a des échanges ne peut plus être supprimée : c'est voulu (archives), et aucun écran ne supprime de structure aujourd'hui.
+- **Aucune cascade** n'atteint un message ou une trace. Un fichier de message non plus, sauf requête forgée par un agent éditeur qui rattacherait sa clé à un autre parent (évaluation, contrôle, acte, document financier, logo), dont la suppression emporte le fichier : risque accepté, l'objet S3 reste. Une structure qui a des échanges ne peut plus être supprimée : c'est voulu (archives), et aucun écran ne supprime de structure aujourd'hui.
 
 **Fichiers**
 
 - **Empreinte SHA-256** de chaque fichier, calculée à l'upload.
 - **Formats** : `.docx`, `.odt` et `.pptx` s'ajoutent aux formats acceptés (PDF, tableurs, images), dans toute l'application : une seule liste, plus simple qu'une liste par contexte. Limite de 30 Mo inchangée ; au-delà de 50 Mo environ, il faudra un upload direct vers S3 par URL signée (le serveur charge aujourd'hui le fichier en mémoire).
-- **Accès** : un fichier de message se lit selon l'accès à sa conversation (voir [Droits et visibilité](#droits-et-visibilité)) et ne se supprime jamais. `isOrphan` reconnaît `messageId` : sans ça, un fichier de message serait considéré comme orphelin, donc lisible et supprimable par tous.
+- **Accès** : un fichier de message se lit selon l'accès à sa conversation (voir [Droits et visibilité](#droits-et-visibilité)) et ne se supprime jamais par l'application (voir l'exception des cascades ci-dessus). `isOrphan` reconnaît `messageId` : sans ça, un fichier de message serait considéré comme orphelin, donc lisible et supprimable par tous.
 
 **Preuve**
 
