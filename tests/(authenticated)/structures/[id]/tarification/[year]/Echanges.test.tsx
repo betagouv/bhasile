@@ -147,6 +147,9 @@ const getPatchCalls = () =>
 const getReadCount = () =>
   mockFetch.mock.calls.filter(([, init]) => init?.method === undefined).length;
 
+const getComposerTagSelect = () =>
+  screen.getByRole("combobox", { name: "Tag" });
+
 const findMessageTagSelect = async () =>
   within(await screen.findByRole("list", { name: "Messages" })).getByRole(
     "combobox",
@@ -366,7 +369,7 @@ describe("Echanges", () => {
     );
   });
 
-  it("garde le texte et les pièces jointes de chaque canal quand on change d'onglet", async () => {
+  it("garde le texte, les pièces jointes et le tag de chaque canal quand on change d'onglet", async () => {
     answerWithFiles();
     const buildEchanges = () => (
       <FetchStateProvider>
@@ -388,6 +391,7 @@ describe("Echanges", () => {
     });
     attachFiles(buildFile("budget.pdf"));
     expect(await screen.findByText("budget.pdf")).toBeInTheDocument();
+    fireEvent.change(getComposerTagSelect(), { target: { value: "RCA" } });
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
     rerender(buildEchanges());
@@ -395,6 +399,7 @@ describe("Echanges", () => {
       await screen.findByPlaceholderText("Écrivez un message")
     ).toHaveValue("");
     expect(screen.queryByText("budget.pdf")).not.toBeInTheDocument();
+    expect(getComposerTagSelect()).toHaveValue("");
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
     rerender(buildEchanges());
@@ -402,6 +407,7 @@ describe("Echanges", () => {
       await screen.findByPlaceholderText("Écrivez un message")
     ).toHaveValue("Réponse en cours");
     expect(screen.getByText("budget.pdf")).toBeInTheDocument();
+    expect(getComposerTagSelect()).toHaveValue("RCA");
   });
 
   it("ne montre que le canal partagé à l'opérateur, même si l'URL demande le canal agents", async () => {

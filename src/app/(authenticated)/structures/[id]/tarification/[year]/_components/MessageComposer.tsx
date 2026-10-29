@@ -18,8 +18,7 @@ export const MessageComposer = ({
   draft,
   onSend,
 }: Props): ReactElement => {
-  const { text, setText } = draft;
-  const [tagKey, setTagKey] = useState<string | null>(null);
+  const { text, setText, tagKey, setTagKey } = draft;
   const [isSending, setIsSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const {
@@ -50,7 +49,6 @@ export const MessageComposer = ({
     try {
       await onSend({ text, fileKeys, tagKey });
       draft.clear();
-      setTagKey(null);
     } catch (error) {
       setErrorMessage(
         error instanceof ApiError
