@@ -316,7 +316,6 @@ describe("finance - indicateurs théoriques", () => {
 
     const year2024 = computeFinanceStatistiques(context, "moyenne").byYear[0];
 
-    expect(year2024.total.coutJournalierCible).toBe(23.3);
     expect(year2024.total.tauxEncadrementCible).toBe(16);
   });
 
@@ -333,7 +332,6 @@ describe("finance - indicateurs théoriques", () => {
 
     const year2024 = computeFinanceStatistiques(context, "moyenne").byYear[0];
 
-    expect(year2024.total.coutJournalierCible).toBeNull();
     expect(year2024.total.tauxEncadrementCible).toBeNull();
   });
 });

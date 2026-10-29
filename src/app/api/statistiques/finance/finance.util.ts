@@ -281,6 +281,7 @@ const computeFinanceYearData = (
         dotationByStructureId.get(structure.id) || null,
         joursPlaces?.joursPlaces
       ),
+      // TODO : coût cible non renvoyé par l'API, à supprimer si l'abandon est confirmé
       coutCible: context.ciblesFinancieres.getTarifJournalierCible(structure, year),
     };
   });
@@ -338,7 +339,6 @@ const aggregateFinanceScope = (
     tauxEncadrementCible: aggregate("tauxCible"),
     tauxEncadrementTheoriquePrevisionnel: aggregate("tauxPrevisionnel"),
     tauxEncadrementTheoriqueRealise: aggregate("tauxRealise"),
-    coutJournalierCible: aggregate("coutCible"),
     coutJournalierTheorique: aggregate("coutTheorique"),
     ...sumBudgetsForYear(
       yearData.budgets.filter((budget) =>
