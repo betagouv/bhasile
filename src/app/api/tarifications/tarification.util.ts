@@ -1,10 +1,15 @@
-import type { GrantDb, UserWithGrants } from "@/app/api/users/user.db.type";
-import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
+import type { UserWithGrants } from "@/app/api/users/user.db.type";
+import {
+  getAssignedGrants,
+  isAgentUser,
+  toSessionGrant,
+} from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { CURRENT_YEAR, VISIBILITY_LABELS } from "@/constants";
 import { GrantScope, Visibility } from "@/generated/prisma/enums";
-import { EDITING_ROLES } from "@/lib/casl";
+import { canAccessTarification } from "@/lib/casl";
 import type { NotificationRecipient } from "@/types/conversation.type";
+import type { SessionPermissions } from "@/types/global";
 
 // La campagne N est ouverte du 1er janvier N-1 au 31 décembre N
 export const getOpenCampaignYears = (): number[] => [
@@ -59,9 +64,7 @@ export const getMessageRecipients = (
         user.id !== authorId &&
         !user.isSuperAdmin &&
         isAgentUser(user) &&
-        getAssignedGrants(user).some((grant) =>
-          isNotifyingGrant(grant, structure)
-        )
+        canAccessTarification(toRecipientPermissions(user), structure)
     )
     .map((user) => ({ userId: user.id, email: user.email }));
 
@@ -74,6 +77,11 @@ export const buildNotificationParams = ({
   year: number;
   visibility: Visibility;
 }): Record<string, string> => {
+  if (!process.env.NEXT_URL) {
+    throw new Error(
+      "NEXT_URL manquant : impossible de construire le lien du mail"
+    );
+  }
   const channelQuery = visibility === Visibility.AGENTS ? "?canal=agents" : "";
   return {
     structure: structure.codeBhasile,
@@ -83,17 +91,11 @@ export const buildNotificationParams = ({
   };
 };
 
-const isNotifyingGrant = (
-  grant: GrantDb,
-  structure: { id: number; departementAdministratif: string }
-): boolean => {
-  if (!EDITING_ROLES.includes(grant.role)) {
-    return false;
-  }
-  if (grant.scope === GrantScope.DEPARTEMENT) {
-    return grant.departement?.numero === structure.departementAdministratif;
-  }
-  return (
-    grant.scope === GrantScope.STRUCTURE && grant.structure?.id === structure.id
-  );
-};
+const toRecipientPermissions = (user: UserWithGrants): SessionPermissions => ({
+  operateurId: user.operateurId,
+  isSuperAdmin: false,
+  isAgent: true,
+  grants: getAssignedGrants(user)
+    .filter((grant) => grant.scope !== GrantScope.REGION)
+    .map(toSessionGrant),
+});

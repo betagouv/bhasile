@@ -2,7 +2,7 @@ import { subject } from "@casl/ability";
 import { accessibleBy } from "@casl/prisma";
 
 import type { Prisma, Structure } from "@/generated/prisma/client";
-import { SessionUser } from "@/types/global";
+import { SessionPermissions, SessionUser } from "@/types/global";
 
 import { AppAbility, defineAbilityFor, NO_RECORD_WHERE } from "./rules";
 
@@ -38,7 +38,7 @@ export const canAbilityReadStructure = (
   );
 
 export const canUpdateStructure = (
-  user: SessionUser,
+  user: SessionPermissions,
   structure?: StructureScope | null
 ) => canAbilityUpdateStructure(defineAbilityFor(user), structure ?? {});
 

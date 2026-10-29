@@ -16,8 +16,9 @@ import {
   createNotificationRecipients,
   findConversationMessageIds,
   findMessages,
-  findNotifiedOrReadPairs,
+  findNotifiedPairs,
   findPendingMessageIds,
+  findReadPairs,
   updateMessageTagKey,
   upsertConversation,
 } from "./conversation.repository";
@@ -116,12 +117,15 @@ export const sendMessageDigests = async (
   pendingMessages: PendingMessageNotification[]
 ): Promise<{ sentCount: number; failedCount: number }> => {
   const templateId = getMessageTemplateId();
-  const digests = buildDigests(
-    pendingMessages,
-    await findNotifiedOrReadPairs(
-      pendingMessages.map((message) => message.messageId)
-    )
-  );
+  const messageIds = pendingMessages.map((message) => message.messageId);
+  const [notifiedPairs, readPairs] = await Promise.all([
+    findNotifiedPairs(messageIds),
+    findReadPairs(messageIds),
+  ]);
+  const digests = buildDigests(pendingMessages, [
+    ...notifiedPairs,
+    ...readPairs,
+  ]);
   const failedUserIds = new Set<number>();
   for (const digest of digests) {
     try {

@@ -9,8 +9,9 @@ import {
   createNotificationRecipients,
   findConversationMessageIds,
   findMessages,
-  findNotifiedOrReadPairs,
+  findNotifiedPairs,
   findPendingMessageIds,
+  findReadPairs,
   updateMessageTagKey,
   upsertConversation,
 } from "@/app/api/conversations/conversation.repository";
@@ -236,7 +237,7 @@ describe("conversation.repository db integration", () => {
     expect(await findPendingMessageIds(new Date(0))).not.toContain(pending.id);
   });
 
-  it("trace un même mail pour plusieurs messages et le retrouve avec les lectures", async () => {
+  it("trace un même mail pour plusieurs messages et distingue les signalements des lectures", async () => {
     const first = await postMessage(Visibility.SHARED, "Premier");
     const second = await postMessage(Visibility.SHARED, "Second");
     const read = await postMessage(Visibility.SHARED, "Lu");
@@ -252,15 +253,13 @@ describe("conversation.repository db integration", () => {
     );
     await createMessageReceipts(authorId, [read.id]);
 
-    const pairs = await findNotifiedOrReadPairs([
-      first.id,
-      second.id,
-      read.id,
-      pending.id,
-    ]);
+    const messageIds = [first.id, second.id, read.id, pending.id];
+    const notifiedPairs = await findNotifiedPairs(messageIds);
+    const readPairs = await findReadPairs(messageIds);
 
-    expect(pairs.map((pair) => pair.messageId).sort()).toEqual(
-      [first.id, second.id, read.id].sort()
+    expect(notifiedPairs.map((pair) => pair.messageId).sort()).toEqual(
+      [first.id, second.id].sort()
     );
+    expect(readPairs.map((pair) => pair.messageId)).toEqual([read.id]);
   });
 });

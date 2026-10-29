@@ -18,7 +18,8 @@ const mockFindStructureScope = vi.fn();
 const mockGetUserWithGrantsByEmail = vi.fn();
 const mockFindPendingMessageContexts = vi.fn();
 const mockFindUsersWithGrantsOnStructure = vi.fn();
-const mockFindNotifiedOrReadPairs = vi.fn();
+const mockFindNotifiedPairs = vi.fn();
+const mockFindReadPairs = vi.fn();
 const mockCreateNotificationRecipients = vi.fn();
 const mockCreateMessageNotifications = vi.fn();
 const mockFindPendingMessageIds = vi.fn();
@@ -41,8 +42,8 @@ vi.mock("@/app/api/conversations/conversation.repository", () => ({
   findConversationMessageIds: vi.fn(),
   updateMessageTagKey: vi.fn(),
   createMessageReceipts: vi.fn(),
-  findNotifiedOrReadPairs: (...args: unknown[]) =>
-    mockFindNotifiedOrReadPairs(...args),
+  findNotifiedPairs: (...args: unknown[]) => mockFindNotifiedPairs(...args),
+  findReadPairs: (...args: unknown[]) => mockFindReadPairs(...args),
   createNotificationRecipients: (...args: unknown[]) =>
     mockCreateNotificationRecipients(...args),
   createMessageNotifications: (...args: unknown[]) =>
@@ -216,6 +217,7 @@ describe("notifyPendingTarificationMessages", () => {
     vi.stubEnv("BREVO_API_KEY", "cle-brevo");
     vi.stubEnv("BREVO_MESSAGE_TEMPLATE_ID", "12");
     vi.stubEnv("NEXT_URL", "https://bhasile.test");
+    vi.stubEnv("MESSAGERIE_ENABLED", "true");
     global.fetch = mockFetch;
     mockFindPendingMessageIds.mockResolvedValue([]);
     mockFindPendingMessageContexts.mockResolvedValue([
@@ -243,7 +245,8 @@ describe("notifyPendingTarificationMessages", () => {
       buildAgent(2),
       buildAgent(3),
     ]);
-    mockFindNotifiedOrReadPairs.mockResolvedValue([]);
+    mockFindNotifiedPairs.mockResolvedValue([]);
+    mockFindReadPairs.mockResolvedValue([]);
     answerBrevo();
   });
 
@@ -304,11 +307,11 @@ describe("notifyPendingTarificationMessages", () => {
   });
 
   it("ne signale pas un message que le destinataire a déjà lu ou dont il a déjà été notifié", async () => {
-    mockFindNotifiedOrReadPairs.mockResolvedValue([
+    mockFindNotifiedPairs.mockResolvedValue([
       { messageId: 9, userId: 2 },
       { messageId: 11, userId: 2 },
-      { messageId: 10, userId: 3 },
     ]);
+    mockFindReadPairs.mockResolvedValue([{ messageId: 10, userId: 3 }]);
 
     await notifyPendingTarificationMessages();
 

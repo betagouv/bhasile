@@ -2,7 +2,7 @@ model Conversation {
   id                      Int                   @id @default(autoincrement())
   structureTarification   StructureTarification @relation(fields: [structureTarificationId], references: [id], onDelete: Restrict)
   structureTarificationId Int
-  visibility              Visibility
+  visibility              Visibility // fixée à la création
   messages                Message[]
 
   createdAt DateTime @default(now())
@@ -18,7 +18,7 @@ model Message {
   conversationId Int
   author         User                           @relation(fields: [authorId], references: [id], onDelete: Restrict)
   authorId       Int
-  authorLevel    AuthorLevel
+  authorLevel    AuthorLevel // tiré des grants de l'auteur à l'écriture ; le plus large l'emporte
   text           String
   tagKey         String?
   receipts       MessageReceipt[]
@@ -26,13 +26,14 @@ model Message {
   notification   MessageNotification?
   notifiedUsers  MessageNotificationRecipient[]
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) // horodatage serveur, fait foi
 
   @@index([conversationId, id])
   @@index([createdAt])
   @@schema("public")
 }
 
+// Première lecture d'un message par un utilisateur ; ajout seul
 model MessageReceipt {
   message   Message @relation(fields: [messageId], references: [id], onDelete: Restrict)
   messageId Int
@@ -50,7 +51,7 @@ model MessageReceipt {
 model MessageNotification {
   message     Message   @relation(fields: [messageId], references: [id], onDelete: Restrict)
   messageId   Int       @id
-  abandonedAt DateTime?
+  abandonedAt DateTime? // reprise abandonnée après 3 jours
 
   createdAt DateTime @default(now())
 
@@ -64,7 +65,7 @@ model MessageNotificationRecipient {
   user           User    @relation(fields: [userId], references: [id], onDelete: Restrict)
   userId         Int
   email          String
-  brevoMessageId String
+  brevoMessageId String // retrouve le mail dans les logs Brevo
 
   createdAt DateTime @default(now())
 

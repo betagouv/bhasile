@@ -1,7 +1,29 @@
 import { randomUUID } from "node:crypto";
 
-const BREVO_SEND_EMAIL_URL = "https://api.brevo.com/v3/smtp/email";
+const BREVO_API_URL = "https://api.brevo.com/v3";
 const BREVO_TIMEOUT_MS = 10_000;
+
+export const postToBrevo = async (
+  path: string,
+  body: unknown
+): Promise<Response> => {
+  const response = await fetch(`${BREVO_API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "api-key": process.env.BREVO_API_KEY!,
+      "content-type": "application/json",
+      accept: "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Brevo a refusé ${path} (${response.status}) : ${await response.text()}`
+    );
+  }
+  return response;
+};
 
 export const sendTemplateEmail = async ({
   to,
@@ -11,25 +33,11 @@ export const sendTemplateEmail = async ({
   if (!process.env.BREVO_API_KEY || templateId === null) {
     return logTemplateEmail({ to, templateId, params });
   }
-  const response = await fetch(BREVO_SEND_EMAIL_URL, {
-    method: "POST",
-    headers: {
-      "api-key": process.env.BREVO_API_KEY!,
-      "content-type": "application/json",
-      accept: "application/json",
-    },
-    body: JSON.stringify({
-      templateId,
-      to: [{ email: to }],
-      params,
-    }),
-    signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
+  const response = await postToBrevo("/smtp/email", {
+    templateId,
+    to: [{ email: to }],
+    params,
   });
-  if (!response.ok) {
-    throw new Error(
-      `Envoi Brevo refusé (${response.status}) : ${await response.text()}`
-    );
-  }
   const { messageId } = (await response.json()) as { messageId: string };
   return messageId;
 };

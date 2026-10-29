@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   assertCampaignOpen,
@@ -57,6 +57,12 @@ describe("assertCampaignOpen", () => {
 
 describe("getMessageRecipients", () => {
   const structure = { id: 42, departementAdministratif: "35" };
+  beforeEach(() => {
+    vi.stubEnv("MESSAGERIE_ENABLED", "true");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
   const buildGrant = (overrides: Partial<GrantDb>): GrantDb => ({
     role: AccessRole.EDITEUR,
     scope: GrantScope.DEPARTEMENT,
@@ -177,6 +183,12 @@ describe("getMessageRecipients", () => {
     ).toEqual([2]);
   });
 
+  it("ne notifie personne tant que la messagerie est fermée", () => {
+    vi.stubEnv("MESSAGERIE_ENABLED", "");
+
+    expect(getRecipientIds([buildUser(2)])).toEqual([]);
+  });
+
   it("ne notifie ni les superadmins, ni les utilisateurs d'un opérateur, ni les non-agents", () => {
     const users = [
       buildUser(2, { isSuperAdmin: true }),
@@ -220,5 +232,17 @@ describe("buildNotificationParams", () => {
         visibility: Visibility.SHARED,
       }).lien
     ).toBe("https://bhasile.test/structures/42/tarification/2027");
+  });
+
+  it("échoue sans NEXT_URL plutôt que d'envoyer un lien cassé", () => {
+    vi.stubEnv("NEXT_URL", "");
+
+    expect(() =>
+      buildNotificationParams({
+        structure: { id: 42, codeBhasile: "C42" },
+        year: 2027,
+        visibility: Visibility.SHARED,
+      })
+    ).toThrow("NEXT_URL");
   });
 });

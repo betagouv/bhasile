@@ -53,74 +53,12 @@ Le design repose sur ces constats. S'ils deviennent faux, la colonne de droite d
 
 ## Modèle de données
 
-```prisma
-model TarificationCampaign {     // squelette, complété par la gestion des documents
-  id   Int @id @default(autoincrement())
-  year Int @unique
-}
-
-model StructureTarification {    // une structure × une campagne ; squelette, complété par la gestion des documents
-  id            Int            @id @default(autoincrement())
-  structureId   Int            // onDelete: Restrict
-  campaignId    Int            // onDelete: Restrict
-  conversations Conversation[]
-  @@unique([structureId, campaignId])
-}
-
-model Conversation {             // une tarification × un canal
-  id                      Int        @id @default(autoincrement())
-  structureTarificationId Int        // onDelete: Restrict
-  visibility              Visibility // fixée à la création
-  createdAt               DateTime   @default(now())
-  messages                Message[]
-  @@unique([structureTarificationId, visibility])
-}
-
-model Message {                  // ajout seul, sauf tagKey
-  id             Int          @id @default(autoincrement())
-  conversationId Int          // onDelete: Restrict
-  authorId       Int
-  authorLevel    AuthorLevel  // tiré des grants de l'auteur à l'écriture ; le plus large l'emporte
-  text           String
-  tagKey         String?      // choisi par un agent ; seule colonne modifiable
-  createdAt      DateTime     @default(now()) // horodatage serveur, fait foi
-  attachments    FileUpload[]
-  @@index([conversationId, id])
-}
-
-model MessageReceipt {           // « lu », ajout seul
-  messageId Int
-  userId    Int
-  createdAt DateTime @default(now())
-  @@id([messageId, userId])
-}
-
-model MessageNotification {      // notifications du message traitées (même sans destinataire) ; son absence = message à notifier
-  messageId   Int       @id
-  abandonedAt DateTime? // reprise abandonnée après 3 jours
-  createdAt   DateTime  @default(now())
-}
-
-model MessageNotificationRecipient { // un message signalé dans un mail accepté par Brevo
-  messageId      Int
-  userId         Int
-  email          String
-  brevoMessageId String   // un mail regroupe plusieurs messages ; retrouve le mail dans les logs Brevo
-  createdAt      DateTime @default(now())
-  @@id([messageId, userId])
-}
-
-model StructureSubscription {    // à venir avec la tarification : suivi d'une structure, écarts au défaut uniquement
-  structureId  Int
-  userId       Int
-  isSubscribed Boolean
-  @@id([structureId, userId])
-}
-
-model FileUpload { /* existant */ messageId Int? /* onDelete: Restrict */ }
-
-enum Visibility  { SHARED AGENTS }
-enum AuthorLevel { DEPARTEMENT REGION OPERATEUR }
+```
+TarificationCampaign 1─N StructureTarification 1─2 Conversation 1─N Message
+                                                                     ├─ MessageReceipt                (lu, par utilisateur)
+                                                                     ├─ MessageNotification           (notifications traitées)
+                                                                     ├─ MessageNotificationRecipient  (signalé par mail, par utilisateur)
+                                                                     └─ FileUpload.messageId          (pièces jointes)
 ```
 
 `TarificationCampaign` et `StructureTarification` appartiennent à la gestion des documents, qui les complète (DRL, tarification hors Bhasile, étapes). La messagerie en a besoin pour exister : leur squelette est livré avec elle. La conversation pointe vers sa tarification ; la structure et la campagne s'obtiennent par jointure.
@@ -235,7 +173,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : l'envoi des notifications se recette en préprod.
 
 ## Interface

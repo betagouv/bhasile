@@ -9,7 +9,7 @@ import type {
   User,
 } from "@/generated/prisma/client";
 import { AccessRole, CpomGranularity } from "@/generated/prisma/enums";
-import { SessionGrant, SessionUser } from "@/types/global";
+import { SessionGrant, SessionPermissions } from "@/types/global";
 
 export type AppAbility = PureAbility<
   [
@@ -27,11 +27,11 @@ export type AppAbility = PureAbility<
   PrismaQuery
 >;
 
-export const defineAbilityFor = (user?: SessionUser) => {
+export const defineAbilityFor = (user?: SessionPermissions) => {
   return createPrismaAbility(defineRulesFor(user));
 };
 
-const defineRulesFor = (user?: SessionUser) => {
+const defineRulesFor = (user?: SessionPermissions) => {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
   if (!user || !canAccessApp(user)) {
     return builder.rules;
@@ -49,7 +49,7 @@ const defineRulesFor = (user?: SessionUser) => {
 
 const defineReadRules = (
   { can }: AbilityBuilder<AppAbility>,
-  user: SessionUser
+  user: SessionPermissions
 ) => {
   const operateurCondition =
     user.operateurId === null ? {} : { operateurId: user.operateurId };
@@ -71,7 +71,7 @@ const defineReadRules = (
 
 const defineAgentRules = (
   { can }: AbilityBuilder<AppAbility>,
-  user: SessionUser
+  user: SessionPermissions
 ) => {
   const editingGrants = user.grants.filter((grant) =>
     EDITING_ROLES.includes(grant.role)
@@ -153,10 +153,10 @@ const getCpomConditions = ({
   ];
 };
 
-export const isAgent = (user: SessionUser | undefined): boolean =>
+export const isAgent = (user: SessionPermissions | undefined): boolean =>
   user?.isAgent === true;
 
-export const canAccessApp = (user: SessionUser): boolean =>
+export const canAccessApp = (user: SessionPermissions): boolean =>
   user.isSuperAdmin || (user.grants?.length ?? 0) > 0;
 
 export const NO_RECORD_WHERE = { id: { in: [] } };
