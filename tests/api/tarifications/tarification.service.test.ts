@@ -363,15 +363,43 @@ describe("notifyPendingTarificationMessages", () => {
     expect(mockCreateMessageNotifications).toHaveBeenCalledWith([9], null);
   });
 
-  it("n'envoie, ne trace ni n'abandonne rien sans template Brevo configuré", async () => {
+  it("journalise les mails au lieu de les envoyer sans template Brevo, et trace les messages", async () => {
+    const consoleLog = vi
+      .spyOn(console, "log")
+      .mockImplementation(() => undefined);
     vi.stubEnv("BREVO_MESSAGE_TEMPLATE_ID", "");
-    mockFindPendingMessageIds.mockResolvedValue([1, 2]);
 
     const summary = await notifyPendingTarificationMessages();
 
     expect(mockFetch).not.toHaveBeenCalled();
-    expect(mockCreateMessageNotifications).not.toHaveBeenCalled();
-    expect(summary.abandonedCount).toBe(0);
+    expect(consoleLog).toHaveBeenCalledWith(
+      "✉️ Mail journalisé, non envoyé :",
+      expect.stringContaining("agent3@paris.gouv.fr")
+    );
+    expect(mockCreateNotificationRecipients).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          brevoMessageId: expect.stringMatching(/^log-/),
+        }),
+      ])
+    );
+    expect(mockCreateMessageNotifications).toHaveBeenCalledWith(
+      [9, 10, 11],
+      null
+    );
+    expect(summary.sentCount).toBe(3);
+  });
+
+  it("fait échouer l'envoi en production sans clé Brevo", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubEnv("BREVO_API_KEY", "");
+    vi.stubEnv("IS_PRODUCTION", "true");
+
+    const summary = await notifyPendingTarificationMessages();
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockCreateMessageNotifications).toHaveBeenCalledWith([], null);
+    expect(summary.failedCount).toBe(3);
   });
 
   it("abandonne les messages en attente depuis plus de 3 jours avant d'envoyer", async () => {

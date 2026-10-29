@@ -19,7 +19,7 @@ Sans rapport avec le modèle `Notification`, qui porte les bandeaux affichés da
 - **Client** : `sendTemplateEmail` (`src/lib/brevo.ts`), un appel `POST /v3/smtp/email` **par destinataire**, avec un timeout de 10 s. Un appel groupé ne garantit pas l'ordre des identifiants renvoyés, et une seule adresse refusée y bloquerait tous les autres destinataires.
 - **Template** : le texte, la mise en page et l'expéditeur vivent dans Brevo, un template par type de mail, son identifiant en variable d'environnement. La feature calcule les paramètres, dont les liens, dans le code, où ils sont testés ; une liste se parcourt dans le template (`{% for conversation in params.conversations %}`).
 - **Trace chez un tiers** : l'identifiant Brevo de chaque mail accepté est conservé ; c'est lui qui reliera un rebond (webhook) aux événements que le mail signalait.
-- **Activation** : sans `BREVO_API_KEY` ou sans l'identifiant du template, rien n'est envoyé, tracé ni abandonné. Hors prod, l'envoi est réel : les comptes du seed (`@test.proconnect.gouv.fr`) n'ont pas de boîte ; pour recetter, y mettre des adresses d'équipe.
+- **Mode journal** : sans `BREVO_API_KEY` ou sans l'identifiant du template, le mail est journalisé (`console.log`) au lieu d'être envoyé, et tracé avec un faux identifiant `log-…` : tout le chemin se recette en local. En prod, une configuration incomplète fait échouer l'envoi, donc le cron. Avec la clé, l'envoi est réel partout : les comptes du seed (`@test.proconnect.gouv.fr`) n'ont pas de boîte, et leurs rebonds abîment la réputation du domaine expéditeur ; pour recetter, y mettre des adresses d'équipe.
 
 ## Envoi et reprise
 
@@ -35,8 +35,8 @@ Sans rapport avec le modèle `Notification`, qui porte les bandeaux affichés da
 
 ## Variables d'environnement
 
-| Variable                    | Rôle                                                |
-| --------------------------- | --------------------------------------------------- |
-| `BREVO_API_KEY`             | Clé API Brevo (aussi utilisée pour les contacts)    |
-| `BREVO_MESSAGE_TEMPLATE_ID` | Template des notifications de message ; vide = rien |
-| `NEXT_URL`                  | Base des liens des mails                            |
+| Variable                    | Rôle                                                   |
+| --------------------------- | ------------------------------------------------------ |
+| `BREVO_API_KEY`             | Clé API Brevo (aussi utilisée pour les contacts)       |
+| `BREVO_MESSAGE_TEMPLATE_ID` | Template des notifications de message ; vide = journal |
+| `NEXT_URL`                  | Base des liens des mails                               |

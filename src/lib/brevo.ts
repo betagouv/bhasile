@@ -1,14 +1,16 @@
+import { randomUUID } from "node:crypto";
+
 const BREVO_SEND_EMAIL_URL = "https://api.brevo.com/v3/smtp/email";
 const BREVO_TIMEOUT_MS = 10_000;
-
-export const isBrevoConfigured = (): boolean =>
-  Boolean(process.env.BREVO_API_KEY);
 
 export const sendTemplateEmail = async ({
   to,
   templateId,
   params,
 }: TemplateEmail): Promise<string> => {
+  if (!process.env.BREVO_API_KEY || templateId === null) {
+    return logTemplateEmail({ to, templateId, params });
+  }
   const response = await fetch(BREVO_SEND_EMAIL_URL, {
     method: "POST",
     headers: {
@@ -32,8 +34,19 @@ export const sendTemplateEmail = async ({
   return messageId;
 };
 
+// Hors prod, une configuration incomplète journalise le mail : tout le chemin (regroupement, trace, reprise) s'exécute
+const logTemplateEmail = (email: TemplateEmail): string => {
+  if (process.env.IS_PRODUCTION === "true") {
+    throw new Error(
+      "Envoi Brevo impossible : BREVO_API_KEY ou identifiant du template manquant"
+    );
+  }
+  console.log("✉️ Mail journalisé, non envoyé :", JSON.stringify(email));
+  return `log-${randomUUID()}`;
+};
+
 type TemplateEmail = {
   to: string;
-  templateId: number;
+  templateId: number | null;
   params: Record<string, unknown>;
 };

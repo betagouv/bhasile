@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 
 import { getNow } from "@/app/utils/now.util";
 import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
-import { isBrevoConfigured, sendTemplateEmail } from "@/lib/brevo";
+import { sendTemplateEmail } from "@/lib/brevo";
 import type {
   ConversationTag,
   PendingMessageNotification,
@@ -116,9 +116,6 @@ export const sendMessageDigests = async (
   pendingMessages: PendingMessageNotification[]
 ): Promise<{ sentCount: number; failedCount: number }> => {
   const templateId = getMessageTemplateId();
-  if (templateId === null) {
-    return { sentCount: 0, failedCount: 0 };
-  }
   const digests = buildDigests(
     pendingMessages,
     await findNotifiedOrReadPairs(
@@ -167,9 +164,6 @@ export const sendMessageDigests = async (
 };
 
 export const abandonStaleNotifications = async (): Promise<number> => {
-  if (getMessageTemplateId() === null) {
-    return 0;
-  }
   const now = getNow();
   const staleMessageIds = await findPendingMessageIds(
     dayjs(now).subtract(NOTIFICATION_ABANDON_DAYS, "day").toDate()
@@ -178,9 +172,7 @@ export const abandonStaleNotifications = async (): Promise<number> => {
   return staleMessageIds.length;
 };
 
-const getMessageTemplateId = (): number | null => {
-  const templateId = Number(process.env.BREVO_MESSAGE_TEMPLATE_ID);
-  return isBrevoConfigured() && templateId > 0 ? templateId : null;
-};
+const getMessageTemplateId = (): number | null =>
+  Number(process.env.BREVO_MESSAGE_TEMPLATE_ID) || null;
 
 type ConversationParticipant = { id: number; level: AuthorLevel };
