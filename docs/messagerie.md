@@ -5,7 +5,7 @@ Les échanges entre l'opérateur d'une structure, la DDETS et la DREETS pendant 
 Le chantier de la tarification est découpé en deux :
 
 - **la messagerie** (ce document) ;
-- **la campagne et la gestion des documents** : étapes, documents typés, échéances, contradictoire, plugins.
+- **la campagne et la gestion des documents** ([Tarification](tarification.md)) : étapes, documents typés, échéances, contradictoire.
 
 La messagerie est **agnostique** : elle ne connaît ni les étapes ni les documents. La tarification lui fournit ce qu'elle doit afficher (tags, ancres). Ce découpage suit l'interface, où les échanges vivent dans un panneau à part, et permet de livrer et de tester la messagerie en premier.
 
@@ -141,7 +141,7 @@ Le mécanisme (Brevo, mail groupé par cron, trace, reprise, abandon) est décri
   | Agent, grant `REGION`                             | Non                                      | Non                 |
   | Utilisateur de l'opérateur                        | Oui, une fois qu'il a accès (pas encore) | —                   |
 
-  La DREETS n'est notifiée que des actions attendues d'elle, qui relèvent de la gestion des documents (une relecture demandée). C'est la DDETS qui mène les échanges.
+  La DREETS n'est notifiée que des actions attendues d'elle, qui relèvent de la tarification (une contestation de la L48, voir [Tarification](tarification.md#notifications)). C'est la DDETS qui mène les échanges.
 
 - **Superadmins** : jamais notifiés (lecture seule).
 - **Regroupement** : deux passages par jour (voir [Emails](email.md#envoi-et-reprise)). Un agent qui suit 50 structures reçoit au plus deux mails par jour, chacun limité aux messages arrivés depuis le précédent ; un message lu à l'écran avant le passage n'est pas signalé.
@@ -159,7 +159,7 @@ Ces règles valent pour la messagerie et pour la gestion des documents, qui y re
 
 **Fichiers**
 
-- **Empreinte SHA-256** des documents de la tarification, calculée à l'upload (voir la RFC 02) ; les pièces jointes des messages n'en ont pas besoin : ce ne sont pas des dépôts officiels, le contradictoire ne passe que par la gestion des documents.
+- **Empreinte SHA-256** des documents de la tarification, calculée à l'upload (voir [Tarification](tarification.md#documents)) ; les pièces jointes des messages n'en ont pas besoin : ce ne sont pas des dépôts officiels, le contradictoire ne passe que par la gestion des documents.
 - **Formats** : `.docx`, `.odt` et `.pptx` s'ajoutent aux formats acceptés (PDF, tableurs, images), dans toute l'application : une seule liste, plus simple qu'une liste par contexte. Limite de 30 Mo inchangée ; au-delà de 50 Mo environ, il faudra un upload direct vers S3 par URL signée (le serveur charge aujourd'hui le fichier en mémoire).
 - **Accès** : un fichier de message se lit selon l'accès à sa conversation (voir [Droits et visibilité](#droits-et-visibilité)) et ne se supprime jamais par l'application (voir l'exception des cascades ci-dessus). `isOrphan` reconnaît `messageId` : sans ça, un fichier de message serait considéré comme orphelin, donc lisible et supprimable par tous.
 

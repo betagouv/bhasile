@@ -21,7 +21,12 @@ export const createFakeDocumentsFinanciers = (
   count: number
 ): Omit<
   DocumentFinancierWithFileUploads,
-  "id" | "structureDnaCode" | "cpomId" | "structureId" | "granularity"
+  | "id"
+  | "structureDnaCode"
+  | "cpomId"
+  | "structureId"
+  | "granularity"
+  | "sourceTarificationDocumentId"
 >[] => {
   const documentTypes = isStructureAutorisee(structureType)
     ? structureAutoriseesDocuments

@@ -1,6 +1,8 @@
 model TarificationCampaign {
   id                     Int                     @id @default(autoincrement())
   year                   Int                     @unique
+  drlPublishedAt         DateTime?               @db.Date // date civile ; null = pas encore saisie, donc ni J48 ni J60
+  drlUrl                 String? // lien Légifrance
   structureTarifications StructureTarification[]
 
   createdAt DateTime @default(now())
@@ -9,16 +11,150 @@ model TarificationCampaign {
 }
 
 model StructureTarification {
-  id            Int                  @id @default(autoincrement())
-  structure     Structure            @relation(fields: [structureId], references: [id], onDelete: Restrict)
+  id            Int                    @id @default(autoincrement())
+  structure     Structure              @relation(fields: [structureId], references: [id], onDelete: Restrict)
   structureId   Int
-  campaign      TarificationCampaign @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  campaign      TarificationCampaign   @relation(fields: [campaignId], references: [id], onDelete: Restrict)
   campaignId    Int
   conversations Conversation[]
+  documents     TarificationDocument[]
+  events        TarificationEvent[]
 
   createdAt DateTime @default(now())
 
   @@unique([structureId, campaignId])
   @@index([campaignId])
+  @@schema("public")
+}
+
+// Une version déposée, jamais modifiée ; sa date et son auteur sont ceux de son événement DOCUMENT_DEPOSITED
+model TarificationDocument {
+  id                      Int                           @id @default(autoincrement())
+  structureTarification   StructureTarification         @relation(fields: [structureTarificationId], references: [id], onDelete: Restrict)
+  structureTarificationId Int
+  fileUpload              FileUpload                    @relation(fields: [fileUploadId], references: [id], onDelete: Restrict)
+  fileUploadId            Int                           @unique
+  types                   TarificationDocumentType[]
+  status                  TarificationDocumentStatus
+  events                  TarificationEvent[]
+  openings                TarificationDocumentOpening[]
+  documentFinancierCopies DocumentFinancier[]
+  acteAdministratifCopies ActeAdministratif[]
+
+  @@index([structureTarificationId])
+  @@schema("public")
+}
+
+// Journal en ajout seul ; les colonnes requises par type sont fixées par le registre des types d'événements
+model TarificationEvent {
+  id                      Int                                      @id @default(autoincrement())
+  structureTarification   StructureTarification                    @relation(fields: [structureTarificationId], references: [id], onDelete: Restrict)
+  structureTarificationId Int
+  type                    TarificationEventType
+  author                  User?                                    @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  authorId                Int? // null = système (script de reprise)
+  authorLevel             AuthorLevel?
+  document                TarificationDocument?                    @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  documentId              Int?
+  stepCode                TarificationStepCode?
+  text                    String?
+  notification            TarificationEventNotification?
+  notifiedUsers           TarificationEventNotificationRecipient[]
+
+  createdAt DateTime @default(now()) // horodatage serveur, fait foi
+
+  @@index([structureTarificationId, id])
+  @@index([documentId])
+  @@index([createdAt])
+  @@schema("public")
+}
+
+// Première délivrance d'un lien vers le fichier à un utilisateur de l'opérateur ; celle de la L48 fait courir le contradictoire
+model TarificationDocumentOpening {
+  document   TarificationDocument @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  documentId Int
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId     Int
+
+  createdAt DateTime @default(now())
+
+  @@id([documentId, userId])
+  @@index([userId])
+  @@schema("public")
+}
+
+// Traitement des notifications d'un événement terminé (même sans destinataire) ; son absence = événement à notifier
+model TarificationEventNotification {
+  event       TarificationEvent @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  eventId     Int               @id
+  abandonedAt DateTime? // reprise abandonnée après 3 jours
+
+  createdAt DateTime @default(now())
+
+  @@schema("public")
+}
+
+// Un événement signalé à un destinataire dans un mail accepté par Brevo ; un mail regroupe messages et événements
+model TarificationEventNotificationRecipient {
+  event          TarificationEvent @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  eventId        Int
+  user           User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId         Int
+  email          String
+  brevoMessageId String // retrouve le mail dans les logs Brevo
+
+  createdAt DateTime @default(now())
+
+  @@id([eventId, userId])
+  @@schema("public")
+}
+
+enum TarificationDocumentType {
+  CA
+  RAPPORT_ACTIVITE
+  BP
+  RAPPORT_BUDGETAIRE
+  RCA
+  L48
+  REPONSE_CONTRADICTOIRE
+  DAB
+  ARRETE
+  DAM
+  ECHEANCIER
+  DAI
+  PIECE_JUSTIFICATIVE
+  AUTRE
+
+  @@schema("public")
+}
+
+enum TarificationDocumentStatus {
+  DRAFT
+  FINAL
+  SHARED
+
+  @@schema("public")
+}
+
+enum TarificationStepCode {
+  RCA
+  L48
+  DAB
+  ARRETE
+
+  @@schema("public")
+}
+
+enum TarificationEventType {
+  DOCUMENT_DEPOSITED
+  DOCUMENT_SHARED
+  APPROVED
+  CHANGES_REQUESTED
+  DOCUMENT_WITHDRAWN
+  STEP_MARKED_NOT_APPLICABLE
+  L48_ACCEPTED
+  L48_CONTESTED
+  OUT_OF_BHASILE_DECLARED
+
   @@schema("public")
 }
