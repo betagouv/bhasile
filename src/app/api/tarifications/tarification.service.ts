@@ -12,7 +12,7 @@ import {
 import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
 import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
+import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
 import {
   canAccessTarification,
   isAgent,
@@ -25,9 +25,13 @@ import {
   findMessageTarification,
   findStructureScope,
   findStructureTarification,
+  findStructureTarificationCampaigns,
   upsertStructureTarification,
 } from "./tarification.repository";
-import { assertCampaignOpen } from "./tarification.util";
+import {
+  assertCampaignOpen,
+  getSelectableCampaignYears,
+} from "./tarification.util";
 
 export const getTarificationParticipant = async (
   user: SessionUser,
@@ -44,6 +48,23 @@ export const getTarificationReader = async (
   const structure = await findStructureScopeOrThrow(structureId);
   assertCanAccessTarification(user, structure);
   return { isAgent: isAgent(user) };
+};
+
+export const getTarificationOverview = async (
+  user: SessionUser,
+  structureId: number
+): Promise<TarificationOverview> => {
+  const structure = await findStructureScopeOrThrow(structureId);
+  const participant = await resolveParticipant(user, structure);
+  const tarifications = await findStructureTarificationCampaigns(structureId);
+  return {
+    codeBhasile: structure.codeBhasile,
+    participant,
+    isOperateur: participant.level === AuthorLevel.OPERATEUR,
+    campaignYears: getSelectableCampaignYears(
+      tarifications.map((tarification) => tarification.campaign.year)
+    ),
+  };
 };
 
 export const postTarificationMessage = async ({
@@ -181,9 +202,7 @@ const assertCanAccessTarification = (
   }
 };
 
-const findStructureScopeOrThrow = async (
-  structureId: number
-): Promise<StructureScope> => {
+const findStructureScopeOrThrow = async (structureId: number) => {
   const structure = await findStructureScope(structureId);
   if (!structure) {
     throw new DomainError("Structure introuvable", 404);
@@ -192,6 +211,13 @@ const findStructureScopeOrThrow = async (
 };
 
 export type TarificationReader = { isAgent: boolean };
+
+export type TarificationOverview = {
+  codeBhasile: string;
+  participant: TarificationParticipant;
+  isOperateur: boolean;
+  campaignYears: number[];
+};
 
 export type TarificationParticipant = {
   id: number;

@@ -34,6 +34,12 @@ export const findStructureTarification = (structureId: number, year: number) =>
     select: { id: true },
   });
 
+export const findStructureTarificationCampaigns = (structureId: number) =>
+  prisma.structureTarification.findMany({
+    where: { structureId },
+    select: { campaign: { select: { year: true } } },
+  });
+
 export const findMessageTarification = (messageId: number) =>
   prisma.message.findUnique({
     where: { id: messageId },
@@ -54,5 +60,5 @@ export const findMessageTarification = (messageId: number) =>
 export const findStructureScope = (structureId: number) =>
   prisma.structure.findUnique({
     where: { id: structureId },
-    select: structureScopeSelect,
+    select: { ...structureScopeSelect, codeBhasile: true },
   });

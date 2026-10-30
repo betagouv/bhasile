@@ -7,6 +7,10 @@ export const messageSelect = {
   authorLevel: true,
   createdAt: true,
   author: { select: { id: true, name: true } },
+  receipts: {
+    select: { createdAt: true, user: { select: { id: true, name: true } } },
+    orderBy: { createdAt: "asc" },
+  },
   attachments: {
     select: {
       id: true,

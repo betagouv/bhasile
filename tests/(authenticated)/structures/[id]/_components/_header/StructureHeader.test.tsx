@@ -46,7 +46,10 @@ describe("StructureHeader", () => {
   it("ramène à la liste des structures par défaut", () => {
     renderWithStructurePageProviders(
       buildClosedStructure(),
-      <StructureHeader actualisationYear={null} />
+      <StructureHeader
+        actualisationYear={null}
+        isTarificationAccessible={false}
+      />
     );
 
     expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
@@ -60,7 +63,10 @@ describe("StructureHeader", () => {
 
     renderWithStructurePageProviders(
       buildClosedStructure(),
-      <StructureHeader actualisationYear={null} />
+      <StructureHeader
+        actualisationYear={null}
+        isTarificationAccessible={false}
+      />
     );
 
     expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
@@ -76,7 +82,10 @@ describe("StructureHeader", () => {
     // WHEN
     renderWithStructurePageProviders(
       structure,
-      <StructureHeader actualisationYear={null} />
+      <StructureHeader
+        actualisationYear={null}
+        isTarificationAccessible={false}
+      />
     );
 
     // THEN
@@ -95,7 +104,10 @@ describe("StructureHeader", () => {
       structure,
       <SessionProvider>
         <AppAbilityProvider>
-          <StructureHeader actualisationYear={null} />
+          <StructureHeader
+            actualisationYear={null}
+            isTarificationAccessible={false}
+          />
         </AppAbilityProvider>
       </SessionProvider>
     );
@@ -118,7 +130,10 @@ describe("StructureHeader", () => {
       structure,
       <SessionProvider>
         <AppAbilityProvider>
-          <StructureHeader actualisationYear={ACTUALISATION_YEAR} />
+          <StructureHeader
+            actualisationYear={ACTUALISATION_YEAR}
+            isTarificationAccessible={false}
+          />
         </AppAbilityProvider>
       </SessionProvider>
     );
@@ -137,12 +152,62 @@ describe("StructureHeader", () => {
     // WHEN
     renderWithStructurePageProviders(
       structure,
-      <StructureHeader actualisationYear={ACTUALISATION_YEAR} />
+      <StructureHeader
+        actualisationYear={ACTUALISATION_YEAR}
+        isTarificationAccessible={false}
+      />
     );
 
     // THEN
     expect(
       screen.queryByText(/campagne d’actualisation/)
     ).not.toBeInTheDocument();
+  });
+
+  it("affiche le lien vers la tarification quand elle est accessible", () => {
+    renderWithStructurePageProviders(
+      buildStructure(),
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader actualisationYear={null} isTarificationAccessible />
+        </AppAbilityProvider>
+      </SessionProvider>
+    );
+
+    expect(screen.getByRole("link", { name: "Tarification" })).toHaveAttribute(
+      "href",
+      "/structures/42/tarification"
+    );
+  });
+
+  it("masque le lien vers la tarification sinon", () => {
+    renderWithStructurePageProviders(
+      buildStructure(),
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader
+            actualisationYear={null}
+            isTarificationAccessible={false}
+          />
+        </AppAbilityProvider>
+      </SessionProvider>
+    );
+
+    expect(
+      screen.queryByRole("link", { name: "Tarification" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("garde le lien vers la tarification sur une structure fermée", () => {
+    renderWithStructurePageProviders(
+      buildClosedStructure(),
+      <StructureHeader actualisationYear={null} isTarificationAccessible />
+    );
+
+    expect(screen.getByText(/Fermée le/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Tarification" })).toHaveAttribute(
+      "href",
+      "/structures/42/tarification"
+    );
   });
 });

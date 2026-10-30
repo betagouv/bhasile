@@ -6,7 +6,10 @@ import { ReactElement } from "react";
 
 import { FermetureBadge } from "@/app/components/structures/FermetureBadge";
 import { UpcomingTransformationBadge } from "@/app/components/structures/UpcomingTransformationBadge";
-import { ACTUALISATION_SAVE_KEY, useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
+import {
+  ACTUALISATION_SAVE_KEY,
+  useActualisationFormHandling,
+} from "@/app/hooks/useActualisationFormHandling";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { isActualisationReadyToValidate } from "@/app/utils/actualisation-form.util";
 import { useStructureContext } from "@/contexts/StructureContext";
@@ -18,11 +21,14 @@ import {
   finalisationSuccessModal,
 } from "./StructureHeaderModals";
 import { StructureMenu } from "./StructureMenu";
+import { TarificationLink } from "./TarificationLink";
 
 export const StructureHeaderActions = ({
   actualisationYear,
+  isTarificationAccessible,
 }: {
   actualisationYear: number | null;
+  isTarificationAccessible: boolean;
 }): ReactElement => {
   const { structure } = useStructureContext();
   const pathname = usePathname();
@@ -82,7 +88,14 @@ export const StructureHeaderActions = ({
   }
 
   if (structure.isClosed && structure.fermetureDate) {
-    return <FermetureBadge fermetureDate={structure.fermetureDate} />;
+    return (
+      <div className="flex items-center gap-2">
+        <FermetureBadge fermetureDate={structure.fermetureDate} />
+        {isTarificationAccessible && (
+          <TarificationLink structureId={structure.id} />
+        )}
+      </div>
+    );
   }
 
   return (
@@ -95,6 +108,9 @@ export const StructureHeaderActions = ({
           />
         ))}
       </div>
+      {isTarificationAccessible && (
+        <TarificationLink structureId={structure.id} />
+      )}
       <StructureMenu structureId={structure.id} />
     </div>
   );
