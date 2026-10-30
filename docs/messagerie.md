@@ -166,7 +166,7 @@ type ConversationContext = {
 - **Fermé par défaut.** La messagerie ne reprend **pas** la règle de lecture de Bhasile, ouverte à tous (voir [Permissions](permissions.md)).
 - **Opérateur** : la conversation partagée de ses structures. La conversation agents n'existe pas pour lui (`canReadConversation`).
 - **DREETS** : les deux conversations des structures de sa région.
-- **Superadmins** : lecture seule, partout. Ils n'écrivent jamais et leurs lectures ne laissent pas d'accusé : aucun message de l'équipe technique n'entre dans le journal d'une tarification. Les tests d'écriture se font en staging.
+- **Superadmins** : les deux conversations de toutes les structures, en lecture et en écriture, comme un agent. Sans grant régional, ils signent au niveau départemental.
 - **Agents nationaux** : aucun accès. Ils n'interviennent pas dans les échanges, et les services territoriaux préfèrent qu'ils n'y aient pas accès.
 
 ## Lectures, non-lus et temps réel
@@ -221,7 +221,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : la reprise des notifications se recette en préprod.
 
 ## Interface

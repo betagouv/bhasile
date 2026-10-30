@@ -18,14 +18,3 @@ export const assertCampaignOpen = (year: number): void => {
     );
   }
 };
-
-export const assertCanWrite = (participant: {
-  isSuperAdmin: boolean;
-}): void => {
-  if (participant.isSuperAdmin) {
-    throw new DomainError(
-      "Les superadmins consultent les échanges sans y écrire",
-      403
-    );
-  }
-};
