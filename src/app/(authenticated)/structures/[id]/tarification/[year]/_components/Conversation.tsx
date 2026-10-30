@@ -6,7 +6,10 @@ import { ReactElement, useEffect, useRef } from "react";
 import Loader from "@/app/components/ui/Loader";
 import { useConversationMessages } from "@/hooks/useConversationMessages";
 import { MessageDraft } from "@/hooks/useMessageDraft";
-import { ConversationVisibility } from "@/types/conversation.type";
+import {
+  ConversationTag,
+  ConversationVisibility,
+} from "@/types/conversation.type";
 
 import { MessageComposer } from "./MessageComposer";
 import { MessageItem } from "./MessageItem";
@@ -18,10 +21,19 @@ export const Conversation = ({
   visibility,
   currentUserId,
   isCampaignOpen,
+  tags,
+  canTag,
   draft,
 }: Props): ReactElement => {
-  const { messages, hasLoadingError, hasLostAccess, postMessage, markAsRead } =
-    useConversationMessages({ structureId, year, visibility });
+  const {
+    messages,
+    hasLoadingError,
+    hasLostAccess,
+    postMessage,
+    markAsRead,
+    changeTag,
+  } = useConversationMessages({ structureId, year, visibility });
+  const canTagMessages = canTag && isCampaignOpen;
 
   const requestedReceiptIdsRef = useRef(new Set<number>());
   const listRef = useRef<HTMLOListElement>(null);
@@ -111,14 +123,25 @@ export const Conversation = ({
           className="max-h-[60vh] overflow-y-auto list-none p-0 m-0 flex flex-col gap-3"
         >
           {messages.map((message) => (
-            <MessageItem key={message.id} message={message} />
+            <MessageItem
+              key={message.id}
+              message={message}
+              tags={tags}
+              canTag={canTagMessages}
+              onTagChange={(tagKey) => changeTag(message.id, tagKey)}
+            />
           ))}
         </ol>
       )}
       {!isCampaignOpen ? (
         <ReadOnlyNotice year={year} />
       ) : (
-        <MessageComposer draft={draft} onSend={postMessage} />
+        <MessageComposer
+          tags={tags}
+          canTag={canTagMessages}
+          draft={draft}
+          onSend={postMessage}
+        />
       )}
     </div>
   );
@@ -132,5 +155,7 @@ type Props = {
   visibility: ConversationVisibility;
   currentUserId: number;
   isCampaignOpen: boolean;
+  tags: ConversationTag[];
+  canTag: boolean;
   draft: MessageDraft;
 };

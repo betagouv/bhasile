@@ -7,11 +7,18 @@ import { ChangeEvent, FormEvent, ReactElement, useRef, useState } from "react";
 import { ApiError } from "@/app/utils/api-error.util";
 import { ALLOWED_MIME_TYPES } from "@/constants";
 import { MessageDraft } from "@/hooks/useMessageDraft";
+import { ConversationTag } from "@/types/conversation.type";
 
 import { AttachmentChip } from "./AttachmentChip";
+import { TagSelect } from "./TagSelect";
 
-export const MessageComposer = ({ draft, onSend }: Props): ReactElement => {
-  const { text, setText } = draft;
+export const MessageComposer = ({
+  tags,
+  canTag,
+  draft,
+  onSend,
+}: Props): ReactElement => {
+  const { text, setText, tagKey, setTagKey } = draft;
   const [isSending, setIsSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const {
@@ -40,7 +47,7 @@ export const MessageComposer = ({ draft, onSend }: Props): ReactElement => {
     setIsSending(true);
     setErrorMessage(null);
     try {
-      await onSend({ text, fileKeys });
+      await onSend({ text, fileKeys, tagKey });
       draft.clear();
     } catch (error) {
       setErrorMessage(
@@ -84,7 +91,7 @@ export const MessageComposer = ({ draft, onSend }: Props): ReactElement => {
           ))}
         </ul>
       )}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-end justify-between gap-2">
         <input
           ref={fileInputRef}
           type="file"
@@ -94,15 +101,25 @@ export const MessageComposer = ({ draft, onSend }: Props): ReactElement => {
           aria-label="Fichiers à joindre"
           onChange={handleFileChange}
         />
-        <Button
-          type="button"
-          priority="secondary"
-          iconId="fr-icon-attachment-line"
-          disabled={isSending}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          Joindre des fichiers
-        </Button>
+        <div className="flex items-end gap-2">
+          <Button
+            type="button"
+            priority="secondary"
+            iconId="fr-icon-attachment-line"
+            disabled={isSending}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Joindre des fichiers
+          </Button>
+          {canTag && (
+            <TagSelect
+              tags={tags}
+              value={tagKey}
+              isDisabled={isSending}
+              onChange={setTagKey}
+            />
+          )}
+        </div>
         <Button type="submit" disabled={!canSend}>
           Envoyer
         </Button>
@@ -112,6 +129,12 @@ export const MessageComposer = ({ draft, onSend }: Props): ReactElement => {
 };
 
 type Props = {
+  tags: ConversationTag[];
+  canTag: boolean;
   draft: MessageDraft;
-  onSend: (message: { text: string; fileKeys: string[] }) => Promise<void>;
+  onSend: (message: {
+    text: string;
+    fileKeys: string[];
+    tagKey: string | null;
+  }) => Promise<void>;
 };

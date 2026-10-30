@@ -60,6 +60,7 @@ export default async function TarificationPage({
           currentUserId={overview.participant.id}
           isOperateur={overview.isOperateur}
           isCampaignOpen={isCampaignOpen(year)}
+          tags={overview.tags}
         />
       </div>
     </main>

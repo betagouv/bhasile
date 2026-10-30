@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Echanges } from "@/app/(authenticated)/structures/[id]/tarification/[year]/_components/Echanges";
@@ -18,6 +24,10 @@ vi.mock("next/navigation", () => ({
 const CURRENT_USER_ID = 1;
 const OTHER_USER = { id: 2, name: "Paul Martin" };
 const MESSAGES_URL = "/api/tarifications/42/2026/messages";
+const TAGS = [
+  { key: "RCA", label: "RCA" },
+  { key: "L48", label: "L48 et procédure contradictoire" },
+];
 
 const buildMessage = (
   overrides: Partial<MessageApiRead> = {}
@@ -111,6 +121,41 @@ const getDeletedFileUrls = () =>
 
 const getSendButton = () => screen.getByRole("button", { name: "Envoyer" });
 
+const answerWithTags = ({
+  messages,
+  patchMessage = async () => buildJsonResponse({}),
+}: {
+  messages: MessageApiRead[];
+  patchMessage?: () => Promise<Response>;
+}) => {
+  mockFetch.mockImplementation(async (_url: string, init?: RequestInit) => {
+    if (init?.method === "PATCH") {
+      return patchMessage();
+    }
+    if (init?.method === "POST") {
+      return buildJsonResponse({ id: 99 }, 201);
+    }
+    return buildJsonResponse(messages);
+  });
+};
+
+const getPatchCalls = () =>
+  mockFetch.mock.calls
+    .filter(([, init]) => init?.method === "PATCH")
+    .map(([url, init]) => ({ url, body: JSON.parse(init.body) }));
+
+const getReadCount = () =>
+  mockFetch.mock.calls.filter(([, init]) => init?.method === undefined).length;
+
+const getComposerTagSelect = () =>
+  screen.getByRole("combobox", { name: "Tag" });
+
+const findMessageTagSelect = async () =>
+  within(await screen.findByRole("list", { name: "Messages" })).getByRole(
+    "combobox",
+    { name: "Tag" }
+  );
+
 const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
   render(
     <FetchStateProvider>
@@ -120,6 +165,7 @@ const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
         currentUserId={CURRENT_USER_ID}
         isOperateur={false}
         isCampaignOpen
+        tags={TAGS}
         {...props}
       />
     </FetchStateProvider>
@@ -170,7 +216,12 @@ describe("Echanges", () => {
 
     await waitFor(() =>
       expect(getPostBodies(MESSAGES_URL)).toEqual([
-        { visibility: "SHARED", text: "Le BP est déposé", fileKeys: [] },
+        {
+          visibility: "SHARED",
+          text: "Le BP est déposé",
+          fileKeys: [],
+          tagKey: null,
+        },
       ])
     );
     await waitFor(() =>
@@ -298,7 +349,7 @@ describe("Echanges", () => {
     );
   });
 
-  it("garde le texte et les pièces jointes de chaque canal quand on change d'onglet", async () => {
+  it("garde le texte, les pièces jointes et le tag de chaque canal quand on change d'onglet", async () => {
     answerWithFiles();
     const buildEchanges = () => (
       <FetchStateProvider>
@@ -308,6 +359,7 @@ describe("Echanges", () => {
           currentUserId={CURRENT_USER_ID}
           isOperateur={false}
           isCampaignOpen
+          tags={TAGS}
         />
       </FetchStateProvider>
     );
@@ -318,6 +370,7 @@ describe("Echanges", () => {
     });
     attachFiles(buildFile("budget.pdf"));
     expect(await screen.findByText("budget.pdf")).toBeInTheDocument();
+    fireEvent.change(getComposerTagSelect(), { target: { value: "RCA" } });
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
     rerender(buildEchanges());
@@ -325,6 +378,7 @@ describe("Echanges", () => {
       await screen.findByPlaceholderText("Écrivez un message")
     ).toHaveValue("");
     expect(screen.queryByText("budget.pdf")).not.toBeInTheDocument();
+    expect(getComposerTagSelect()).toHaveValue("");
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
     rerender(buildEchanges());
@@ -332,6 +386,7 @@ describe("Echanges", () => {
       await screen.findByPlaceholderText("Écrivez un message")
     ).toHaveValue("Réponse en cours");
     expect(screen.getByText("budget.pdf")).toBeInTheDocument();
+    expect(getComposerTagSelect()).toHaveValue("RCA");
   });
 
   it("ne montre que le canal partagé à l'opérateur, même si l'URL demande le canal agents", async () => {
@@ -410,6 +465,7 @@ describe("Echanges", () => {
             visibility: "SHARED",
             text: "Ci-joint le budget",
             fileKeys: ["cle-budget.pdf", "cle-annexe.pdf"],
+            tagKey: null,
           },
         ])
       );
@@ -430,7 +486,12 @@ describe("Echanges", () => {
 
       await waitFor(() =>
         expect(getPostBodies(MESSAGES_URL)).toEqual([
-          { visibility: "SHARED", text: "", fileKeys: ["cle-budget.pdf"] },
+          {
+            visibility: "SHARED",
+            text: "",
+            fileKeys: ["cle-budget.pdf"],
+            tagKey: null,
+          },
         ])
       );
     });
@@ -698,6 +759,134 @@ describe("Echanges", () => {
         .getByRole("list", { name: "Messages" })
         .querySelectorAll(":scope > li > p");
       expect(messageParagraphs).toHaveLength(1);
+    });
+  });
+
+  describe("tags", () => {
+    it("envoie le tag choisi avec le message puis vide le sélecteur", async () => {
+      answerWithTags({ messages: [] });
+      renderEchanges();
+      await screen.findByText("Aucun message pour l’instant.");
+
+      const tagSelect = screen.getByRole("combobox", { name: "Tag" });
+      fireEvent.change(tagSelect, { target: { value: "L48" } });
+      typeMessage("Voici nos observations");
+      fireEvent.click(getSendButton());
+
+      await waitFor(() =>
+        expect(getPostBodies(MESSAGES_URL)).toEqual([
+          {
+            visibility: "SHARED",
+            text: "Voici nos observations",
+            fileKeys: [],
+            tagKey: "L48",
+          },
+        ])
+      );
+      await waitFor(() => expect(tagSelect).toHaveValue(""));
+    });
+
+    it("modifie le tag d'un message sur place sans attendre la réponse", async () => {
+      const patching = createDeferred<Response>();
+      answerWithTags({
+        messages: [buildMessage()],
+        patchMessage: () => patching.promise,
+      });
+      renderEchanges();
+
+      const tagSelect = await findMessageTagSelect();
+      fireEvent.change(tagSelect, { target: { value: "RCA" } });
+
+      expect(tagSelect).toHaveValue("RCA");
+      expect(tagSelect).toBeDisabled();
+      expect(getPatchCalls()).toEqual([
+        { url: "/api/tarifications/messages/10", body: { tagKey: "RCA" } },
+      ]);
+
+      patching.resolve(buildJsonResponse({}));
+      await waitFor(() => expect(tagSelect).toBeEnabled());
+    });
+
+    it("retire le tag d'un message", async () => {
+      answerWithTags({ messages: [buildMessage({ tagKey: "L48" })] });
+      renderEchanges();
+
+      const tagSelect = await findMessageTagSelect();
+      expect(tagSelect).toHaveValue("L48");
+      fireEvent.change(tagSelect, { target: { value: "" } });
+
+      await waitFor(() =>
+        expect(getPatchCalls()).toEqual([
+          { url: "/api/tarifications/messages/10", body: { tagKey: null } },
+        ])
+      );
+    });
+
+    it("signale l'échec de la modification et relit le fil", async () => {
+      answerWithTags({
+        messages: [buildMessage()],
+        patchMessage: async () =>
+          buildJsonResponse(
+            {
+              error:
+                "La campagne 2026 n'est pas ouverte : ses échanges sont en lecture seule",
+            },
+            409
+          ),
+      });
+      renderEchanges();
+
+      const tagSelect = await findMessageTagSelect();
+      const readCountBeforeChange = getReadCount();
+      fireEvent.change(tagSelect, { target: { value: "RCA" } });
+
+      expect(await screen.findByText(/n'est pas ouverte/)).toBeInTheDocument();
+      await waitFor(() =>
+        expect(getReadCount()).toBeGreaterThan(readCountBeforeChange)
+      );
+      await waitFor(() => expect(tagSelect).toHaveValue(""));
+    });
+
+    it("montre le tag en lecture seule à l'opérateur, sans sélecteur ni à l'écriture ni sur les messages", async () => {
+      answerWithTags({ messages: [buildMessage({ tagKey: "L48" })] });
+
+      renderEchanges({ isOperateur: true });
+
+      expect(
+        await screen.findByText("L48 et procédure contradictoire")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("Écrivez un message")
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("combobox", { name: "Tag" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("montre le tag en lecture seule sur une campagne close", async () => {
+      answerWithTags({ messages: [buildMessage({ tagKey: "L48" })] });
+
+      renderEchanges({ isCampaignOpen: false });
+
+      expect(
+        await screen.findByText("L48 et procédure contradictoire")
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("combobox", { name: "Tag" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("n'affiche pas de tag sur un message qui n'en a pas", async () => {
+      answerWithTags({ messages: [buildMessage()] });
+
+      renderEchanges({ isOperateur: true });
+
+      const messageList = await screen.findByRole("list", { name: "Messages" });
+      TAGS.forEach((tag) =>
+        expect(
+          within(messageList).queryByText(tag.label)
+        ).not.toBeInTheDocument()
+      );
     });
   });
 });
