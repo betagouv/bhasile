@@ -22,13 +22,13 @@ describe("canAccessTarification", () => {
     ).toBe(true);
   });
 
-  it("la ferme à un agent d'un autre département", () => {
+  it("refuse la tarification à un agent d'un autre département", () => {
     expect(
       canAccessTarification(createDepartementalAgent(["50"]), parisStructure)
     ).toBe(false);
   });
 
-  it("la ferme à un agent national, même éditeur", () => {
+  it("refuse la tarification à un agent national, même éditeur", () => {
     expect(canAccessTarification(createNationalAgent(), parisStructure)).toBe(
       false
     );
@@ -39,7 +39,7 @@ describe("canAccessTarification", () => {
       vi.unstubAllEnvs();
     });
 
-    it("la ferme aux agents tant que la messagerie n'est pas activée", () => {
+    it("refuse la tarification aux agents tant que la messagerie n'est pas activée", () => {
       vi.stubEnv("MESSAGERIE_ENABLED", "");
 
       expect(
@@ -47,7 +47,7 @@ describe("canAccessTarification", () => {
       ).toBe(false);
     });
 
-    it("la laisse ouverte aux superadmins", () => {
+    it("ouvre la tarification aux superadmins", () => {
       vi.stubEnv("MESSAGERIE_ENABLED", "");
 
       expect(
