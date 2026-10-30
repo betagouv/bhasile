@@ -17,12 +17,7 @@ export class AuthError extends Error {
   }
 }
 
-export const ACCEPTED_ACR_VALUES = [
-  "eidas0-mfa", // TODO : supprimer dans une prochaine PR et voir si ça pose problème à certains users en prod
-  "eidas1-mfa",
-  "eidas2",
-  "eidas3",
-] as const;
+export const ACCEPTED_ACR_VALUES = ["eidas1-mfa", "eidas2", "eidas3"] as const;
 
 export type AcceptedAcrValue = (typeof ACCEPTED_ACR_VALUES)[number];
 

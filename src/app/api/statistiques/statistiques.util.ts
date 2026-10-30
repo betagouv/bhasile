@@ -9,13 +9,8 @@ import {
 } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { getNow } from "@/app/utils/now.util";
-import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
-import {
-  StructureType,
-  StructureVersionTransformationType,
-  TransformationType,
-} from "@/generated/prisma/client";
+import { StructureType } from "@/generated/prisma/client";
 import type { CompletudeStat } from "@/schemas/api/statistique.schema";
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
 import { ParsedFilters } from "@/utils/filters.util";
@@ -711,33 +706,6 @@ export const getInitialisedStructureIds = (
   new Set(
     initialisations
       .filter((structure) => isStructureFinalised(structure, now))
-      .map((structure) => structure.id)
-  );
-
-const HUDA_VERS_NOUVEAU_CADA_TRANSFORMATION_TYPES: TransformationType[] = [
-  TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
-  TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
-];
-
-/** CADA créés par une transformation HUDA vers CADA finalisée. */
-export const getCadaFromHudaStructureIds = (
-  initialisations: StatistiqueDbStructureInitialisation[]
-): Set<number> =>
-  new Set(
-    initialisations
-      .filter((structure) =>
-        structure.structureVersions.some(
-          ({ structureVersionTransformation }) =>
-            structureVersionTransformation?.type ===
-              StructureVersionTransformationType.CREATION &&
-            isTransformationFinalised(
-              structureVersionTransformation.transformation
-            ) &&
-            HUDA_VERS_NOUVEAU_CADA_TRANSFORMATION_TYPES.includes(
-              structureVersionTransformation.transformation.type
-            )
-        )
-      )
       .map((structure) => structure.id)
   );
 

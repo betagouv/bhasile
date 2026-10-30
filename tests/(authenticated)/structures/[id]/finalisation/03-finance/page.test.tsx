@@ -1,11 +1,6 @@
 import { fireEvent, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import FinalisationFinancePage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/03-finance/page";
-import { CURRENT_YEAR } from "@/constants";
-
-import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
-import { createFinalisationFinanceValidStructure } from "../../../../../test-utils/structure.factory";
+import { mockStructurePageFetch } from "tests/test-utils/http.mock";
+import { createFinalisationFinanceValidStructure } from "tests/test-utils/structure.factory";
 import {
   clickButtonByName,
   expectFinalisationStepValidation,
@@ -15,8 +10,12 @@ import {
   getLatestPutStructuresPayloadMatching,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
-} from "../../../../../test-utils/structure-page-test.helpers";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+} from "tests/test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "tests/test-utils/structure-page-test.mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import FinalisationFinancePage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/03-finance/page";
+import { getCurrentYear } from "@/app/utils/now.util";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
@@ -66,7 +65,7 @@ describe("FinalisationFinance page integration", () => {
       ...validStructure,
       isInCpomPerYear: {
         ...validStructure.isInCpomPerYear,
-        [CURRENT_YEAR]: false,
+        [getCurrentYear()]: false,
       },
       indicateursFinanciers: [],
     };
@@ -79,7 +78,7 @@ describe("FinalisationFinance page integration", () => {
     // THEN
     expect(
       screen.getByText(
-        new RegExp(`réalisé ou prévisionnel ${CURRENT_YEAR}.*requis`, "i")
+        new RegExp(`réalisé ou prévisionnel ${getCurrentYear()}.*requis`, "i")
       )
     ).toBeInTheDocument();
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
