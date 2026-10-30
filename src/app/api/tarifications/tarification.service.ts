@@ -1,15 +1,20 @@
 import type { MessageDb } from "@/app/api/conversations/conversation.db.type";
 import {
+  abandonStaleNotifications,
   changeMessageTag,
   getMessages,
   markMessagesAsRead,
   postMessage,
+  sendMessageDigests,
 } from "@/app/api/conversations/conversation.service";
 import {
   assertCanPostMessage,
   getAuthorLevel,
 } from "@/app/api/conversations/conversation.util";
-import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
+import {
+  findUsersWithGrantsOnStructure,
+  getUserWithGrantsByEmail,
+} from "@/app/api/users/user.repository";
 import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
@@ -24,6 +29,7 @@ import { SessionUser } from "@/types/global";
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
 import {
   findMessageTarification,
+  findPendingMessageContexts,
   findStructureScope,
   findStructureTarification,
   findStructureTarificationCampaigns,
@@ -31,6 +37,8 @@ import {
 } from "./tarification.repository";
 import {
   assertCampaignOpen,
+  buildNotificationParams,
+  getMessageRecipients,
   getSelectableCampaignYears,
 } from "./tarification.util";
 
@@ -172,6 +180,55 @@ export const changeTarificationMessageTag = async ({
     { messageId, tagKey, editorLevel: editor.level },
     TARIFICATION_CONVERSATION_TAGS
   );
+};
+
+export const notifyPendingTarificationMessages = async (): Promise<{
+  sentCount: number;
+  failedCount: number;
+  abandonedCount: number;
+}> => {
+  const abandonedCount = await abandonStaleNotifications();
+  const messages = await findPendingMessageContexts();
+  const structuresById = new Map(
+    messages.map(({ conversation }) => [
+      conversation.structureTarification.structure.id,
+      conversation.structureTarification.structure,
+    ])
+  );
+  const candidatesByStructureId = new Map(
+    await Promise.all(
+      [...structuresById.values()].map(
+        async (structure) =>
+          [
+            structure.id,
+            await findUsersWithGrantsOnStructure({
+              structureId: structure.id,
+              departementNumero: structure.departementAdministratif,
+            }),
+          ] as const
+      )
+    )
+  );
+  const { sentCount, failedCount } = await sendMessageDigests(
+    messages.map((message) => {
+      const { structure, campaign } =
+        message.conversation.structureTarification;
+      return {
+        messageId: message.id,
+        conversationId: message.conversation.id,
+        recipients: getMessageRecipients(
+          candidatesByStructureId.get(structure.id)!,
+          { structure, authorId: message.authorId }
+        ),
+        params: buildNotificationParams({
+          structure,
+          year: campaign.year,
+          visibility: message.conversation.visibility,
+        }),
+      };
+    })
+  );
+  return { sentCount, failedCount, abandonedCount };
 };
 
 const resolveParticipant = async (

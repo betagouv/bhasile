@@ -19,6 +19,12 @@ export const deleteTarificationTestData = async ({
   await prisma.messageReceipt.deleteMany({
     where: { message: { conversation: conversationWhere } },
   });
+  await prisma.messageNotificationRecipient.deleteMany({
+    where: { message: { conversation: conversationWhere } },
+  });
+  await prisma.messageNotification.deleteMany({
+    where: { message: { conversation: conversationWhere } },
+  });
   await prisma.message.deleteMany({
     where: { conversation: conversationWhere },
   });

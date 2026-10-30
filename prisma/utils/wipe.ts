@@ -5,6 +5,8 @@ import { PrismaClient } from "@/generated/prisma/client";
 // une base peuplée sans violer de contrainte de clé étrangère.
 export const wipeTables = async (prisma: PrismaClient) => {
   await prisma.messageReceipt.deleteMany({});
+  await prisma.messageNotificationRecipient.deleteMany({});
+  await prisma.messageNotification.deleteMany({});
   await prisma.message.deleteMany({});
   await prisma.conversation.deleteMany({});
   await prisma.structureTarification.deleteMany({});

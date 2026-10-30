@@ -80,6 +80,14 @@ export const createFakeConversations = async (
     });
   }
 
+  // Réputés notifiés : la reprise des notifications ne doit pas les envoyer
+  const seededMessages = await prisma.message.findMany({
+    select: { id: true },
+  });
+  await prisma.messageNotification.createMany({
+    data: seededMessages.map((message) => ({ messageId: message.id })),
+  });
+
   console.log(
     `✅ ${structures.length} tarifications ${campaignYear} avec leurs échanges créées`
   );

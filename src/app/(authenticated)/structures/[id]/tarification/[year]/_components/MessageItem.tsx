@@ -1,6 +1,6 @@
 import { Fragment, ReactElement } from "react";
 
-import { AuthorLevel } from "@/generated/prisma/enums";
+import { AUTHOR_LEVEL_LABELS } from "@/constants";
 import { MessageApiRead } from "@/schemas/api/message.schema";
 import { ConversationTag } from "@/types/conversation.type";
 
@@ -55,12 +55,6 @@ export const MessageItem = ({
     )}
   </li>
 );
-
-const AUTHOR_LEVEL_LABELS: Record<AuthorLevel, string> = {
-  DEPARTEMENT: "DDETS",
-  REGION: "DREETS",
-  OPERATEUR: "Opérateur",
-};
 
 const DATE_TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "short",

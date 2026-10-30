@@ -5,7 +5,10 @@ import {
   GrantScope,
   Visibility,
 } from "@/generated/prisma/enums";
-import type { ConversationTag } from "@/types/conversation.type";
+import type {
+  ConversationTag,
+  PendingMessageNotification,
+} from "@/types/conversation.type";
 
 export const getAuthorLevel = ({
   isAgent,
@@ -64,4 +67,62 @@ export const assertTagKnown = (
   if (!tags.some((tag) => tag.key === tagKey)) {
     throw new DomainError(`Étiquette inconnue : ${tagKey}`);
   }
+};
+
+export const buildDigests = (
+  pendingMessages: PendingMessageNotification[],
+  notifiedOrReadPairs: MessageUser[]
+): MessageDigest[] => {
+  const excludedKeys = new Set(notifiedOrReadPairs.map(toMessageUserKey));
+  const digestsByUserId = new Map<number, DigestDraft>();
+  for (const {
+    messageId,
+    conversationId,
+    recipients,
+    params,
+  } of pendingMessages) {
+    for (const { userId, email } of recipients) {
+      if (excludedKeys.has(toMessageUserKey({ messageId, userId }))) {
+        continue;
+      }
+      const digest: DigestDraft = digestsByUserId.get(userId) ?? {
+        userId,
+        email,
+        messageIds: [],
+        conversationsById: new Map(),
+      };
+      digest.messageIds.push(messageId);
+      const conversation = digest.conversationsById.get(conversationId) ?? {
+        ...params,
+        nombre: 0,
+      };
+      conversation.nombre += 1;
+      digest.conversationsById.set(conversationId, conversation);
+      digestsByUserId.set(userId, digest);
+    }
+  }
+  return [...digestsByUserId.values()].map(
+    ({ conversationsById, ...digest }) => ({
+      ...digest,
+      conversations: [...conversationsById.values()],
+    })
+  );
+};
+
+const toMessageUserKey = ({ messageId, userId }: MessageUser): string =>
+  `${messageId}:${userId}`;
+
+type MessageUser = { messageId: number; userId: number };
+
+type DigestConversation = Record<string, string | number> & { nombre: number };
+
+type DigestDraft = Omit<MessageDigest, "conversations"> & {
+  conversationsById: Map<number, DigestConversation>;
+};
+
+type MessageDigest = {
+  userId: number;
+  email: string;
+  messageIds: number[];
+  conversations: DigestConversation[];
 };
