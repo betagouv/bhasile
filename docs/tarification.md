@@ -71,7 +71,7 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
 
 ## Campagnes et éligibilité
 
-- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule. C'est un calcul sur la date civile de Paris, sans cron, partagé avec la messagerie : `getCampaignPhase(year, now)` renvoie `OPEN`, `CATCH_UP` (rattrapage) ou `CLOSED`, et remplace `assertCampaignOpen`, binaire. Le calcul de « maintenant » suit la PR transverse sur `CURRENT_YEAR` (calcul par requête, heure de Paris).
+- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule. C'est un calcul sur la date civile locale de la structure (voir Échéances), sans cron, partagé avec la messagerie : `getCampaignPhase(year, now, timeZone)` renvoie `UPCOMING` (pas encore ouverte), `OPEN` ou `CATCH_UP` (rattrapage, sans limite de durée), et remplacera `assertCampaignOpen`, binaire. Le calcul de « maintenant » suit la PR transverse sur `CURRENT_YEAR` (calcul par requête, heure de Paris).
 - **Clôture automatique**, sans bouton : une clôture manuelle ne serait jamais faite, et multiplierait les campagnes ouvertes.
 - **Rattrapage après le 31 décembre N** ⏳ : un agent peut encore déposer et partager un arrêté, une DAM, une DAI ou un échéancier dans la campagne N (arrêté tardif). Tout le reste est fermé : messages, dépôts de l'opérateur, relecture. Sans limite de durée. Le sélecteur de campagne propose donc aussi, aux agents, les campagnes en rattrapage même sans tarification.
 - **Éligibilité** ⏳ : seuls les CADA et les CPH ont une tarification (`isStructureAutorisee`). Une structure ne change jamais de type : une transformation ferme une structure et en ouvre une autre, qui a sa propre tarification. La garde est une règle de domaine dans le service (et non un droit CASL), appliquée aussi à la messagerie. Une tarification existante reste consultable si la structure ferme.
@@ -154,8 +154,9 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 | DAB              | J60 depuis la DRL                           | État       |
 
 - **Uniquement les échéances réglementaires**, nationales, calculées. Les calendriers internes des DREETS n'en sont pas.
-- **Jours calendaires, sans report**, en heure de Paris ; le jour de l'événement ne compte pas (J1 est le lendemain).
-- **Dates civiles** : une échéance est une date de Paris (la DRL en `@db.Date`), pas un instant. Une étape est en retard quand la date de Paris du jour dépasse l'échéance ; une réponse est acceptée tant que sa date de Paris ne la dépasse pas. Tests au 31/12 à 23 h 30 heure de Paris et aux changements d'heure.
+- **Jours calendaires, sans report** ; le jour de l'événement ne compte pas (J1 est le lendemain).
+- **Heure du département de la structure**, pas celle de l'utilisateur : un délai se compte à l'heure de la DDETS qui reçoit, et l'état doit être le même pour tous, y compris côté serveur (notifications, tableau de bord) où il n'y a pas d'utilisateur. Le fuseau se déduit de `Structure.departementAdministratif` (`getDepartementTimeZone`) : Europe/Paris, sauf les cinq DROM.
+- **Dates civiles** : une échéance est une date locale (la DRL en `@db.Date`), pas un instant. Une étape est en retard quand la date locale du jour dépasse l'échéance ; une réponse est acceptée tant que sa date locale ne la dépasse pas. Tests au 31/12 à 23 h 30, aux changements d'heure et outre-mer.
 - **DRL non saisie** : pas d'échéance J48 ni J60, et donc pas de retard, tant que la date n'est pas en base.
 - **Toutes les échéances sont visibles de tous**, opérateur compris : la date de la DRL est publique.
 - **Retard** : un badge sur l'étape et un filtre au tableau de bord, pas le moteur d'anomalies. Une étape est en retard si son échéance est passée sans qu'elle soit faite ou sans objet ; un dépôt du CA ou du BP, s'il arrive après sa date.
@@ -248,14 +249,14 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 
 ## Implémentation
 
-| Brique                                     | Où                                                                                                                | État    |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------- |
-| Doc, modèle, registres, règles calculées   | `docs/tarification.md`, `prisma/schema/tarification.prisma`, `src/app/api/tarifications/` (`tarification-modele`) | à faire |
-| Écritures, gardes, journal, fichiers       | `tarification-api`                                                                                                | à faire |
-| Copie vers la fiche, verrouillage, reprise | `tarification-fiche`                                                                                              | à faire |
-| Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                    | à faire |
-| Interface                                  | `tarification-ui`, après les maquettes                                                                            | à faire |
-| Tableau de bord, suivi d'une structure     | `tarification-dashboard`, `StructureSubscription`                                                                 | à faire |
+| Brique                                     | Où                                                                                                                                                                                                                                   | État                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| Doc, modèle, registres, règles calculées   | `docs/tarification.md`, `prisma/schema/tarification.prisma`, `src/lib/tarification/` (registres `tarification.definition.ts`, calcul `tarification.compute.ts`, visibilité, forme des événements, phase de campagne, dates locales) | en cours (`tarification-modele`) |
+| Écritures, gardes, journal, fichiers       | `tarification-api`                                                                                                                                                                                                                   | à faire                          |
+| Copie vers la fiche, verrouillage, reprise | `tarification-fiche`                                                                                                                                                                                                                 | à faire                          |
+| Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                                                                                                                                       | à faire                          |
+| Interface                                  | `tarification-ui`, après les maquettes                                                                                                                                                                                               | à faire                          |
+| Tableau de bord, suivi d'une structure     | `tarification-dashboard`, `StructureSubscription`                                                                                                                                                                                    | à faire                          |
 
 T1 met aussi à jour l'ordre de `prisma/utils/wipe.ts`, les seeders, `isOrphan` et `fileWithParentsInclude` (fichiers rattachés à un document de tarification) et les types de `src/types/`.
 
