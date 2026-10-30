@@ -1,18 +1,17 @@
 import { screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import ModificationFinancesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/finances/page";
-import { getCurrentYear } from "@/app/utils/now.util";
-
-import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
-import { createModificationFinancesValidStructure } from "../../../../../test-utils/structure.factory";
+import { mockStructurePageFetch } from "tests/test-utils/http.mock";
+import { createModificationFinancesValidStructure } from "tests/test-utils/structure.factory";
 import {
   clickButtonByName,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
-} from "../../../../../test-utils/structure-page-test.helpers";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+} from "tests/test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "tests/test-utils/structure-page-test.mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import ModificationFinancesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/finances/page";
+import { getCurrentYear } from "@/app/utils/now.util";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),

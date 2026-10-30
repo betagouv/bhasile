@@ -1,4 +1,10 @@
 import { fireEvent, screen, within } from "@testing-library/react";
+import { createActualisationForm } from "tests/test-utils/factories/actualisation-form.factory";
+import { createFinalisationFinanceValidStructure } from "tests/test-utils/structure.factory";
+import {
+  clickButtonByName,
+  renderWithStructurePageProviders,
+} from "tests/test-utils/structure-page-test.helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ActualisationAnalyseFinanciere from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/03-analyse-financiere/page";
@@ -6,13 +12,6 @@ import { getIndicateursFinanciersDefaultValues } from "@/app/utils/indicateur-fi
 import { getCurrentYear } from "@/app/utils/now.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
-
-import { createActualisationForm } from "../../../../../../test-utils/factories/actualisation-form.factory";
-import { createFinalisationFinanceValidStructure } from "../../../../../../test-utils/structure.factory";
-import {
-  clickButtonByName,
-  renderWithStructurePageProviders,
-} from "../../../../../../test-utils/structure-page-test.helpers";
 
 const mockRouterPush = vi.fn();
 

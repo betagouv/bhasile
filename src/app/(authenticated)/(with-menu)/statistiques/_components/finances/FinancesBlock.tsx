@@ -2,12 +2,12 @@
 
 import { ReactElement } from "react";
 
+import { DotationChart } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_finances/DotationChart";
 import { getPercentage } from "@/app/utils/common.util";
 import { getCurrentYear } from "@/app/utils/now.util";
 import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
 import { ClosedStructuresDisclaimer } from "../ClosedStructuresDisclaimer";
 import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { BalanceChart } from "./BalanceChart";

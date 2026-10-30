@@ -2,12 +2,12 @@
 
 import { ReactElement } from "react";
 
+import { TypePlaceCharts } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_type-places/TypePlaceCharts";
 import { getPercentage } from "@/app/utils/common.util";
 import { getCurrentYear } from "@/app/utils/now.util";
 import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
 import { AnnualDataNote } from "../AnnualDataNote";
 import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";

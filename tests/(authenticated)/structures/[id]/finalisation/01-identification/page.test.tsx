@@ -1,13 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import FinalisationIdentificationPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/01-identification/page";
-import { getCurrentYear } from "@/app/utils/now.util";
-import { StructureType } from "@/types/structure.type";
-
-import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
-import { createStructure } from "../../../../../test-utils/structure.factory";
+import { mockStructurePageFetch } from "tests/test-utils/http.mock";
+import { createStructure } from "tests/test-utils/structure.factory";
 import {
   expectFinalisationStepValidation,
   FinalisationStepValidationPayload,
@@ -16,8 +10,13 @@ import {
   getLatestPutStructuresPayloadMatching,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
-} from "../../../../../test-utils/structure-page-test.helpers";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+} from "tests/test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "tests/test-utils/structure-page-test.mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import FinalisationIdentificationPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/01-identification/page";
+import { getCurrentYear } from "@/app/utils/now.util";
+import { StructureType } from "@/types/structure.type";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
