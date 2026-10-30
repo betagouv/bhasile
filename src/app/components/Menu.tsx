@@ -2,99 +2,75 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactElement, useState } from "react";
+import { useSession } from "next-auth/react";
+import { ReactElement, useEffect, useMemo, useState } from "react";
+
+import { SessionUser } from "@/types/global";
+import {
+  MenuGroup,
+  MenuGroupId,
+  MenuItem,
+  resolveMenuItems,
+} from "@/utils/menu.util";
 
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
 
-export const Menu = (): ReactElement => {
-  const pathname = usePathname();
+const matchesPath = (pathname: string | null, url: string): boolean =>
+  url === "/" ? pathname === "/" : Boolean(pathname?.includes(url));
 
-  const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(
-    getDefaultOpenGroup(pathname)
+const findActiveGroupId = (
+  menuItems: MenuItem[],
+  pathname: string | null
+): MenuGroupId | null => {
+  const activeGroup = menuItems.find(
+    (menuItem): menuItem is MenuGroup =>
+      "subItems" in menuItem &&
+      menuItem.subItems.some((subItem) => matchesPath(pathname, subItem.url))
   );
-  const [previousPathname, setPreviousPathname] = useState(pathname);
+  return activeGroup?.id ?? null;
+};
+
+export const Menu = (): ReactElement | null => {
+  const pathname = usePathname();
+  const { data: sessionData, status } = useSession();
+
+  const menuItems = useMemo(() => {
+    if (status === "loading") {
+      return [];
+    }
+    return resolveMenuItems(sessionData?.user as SessionUser);
+  }, [status, sessionData?.user]);
+
+  const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(() =>
+    findActiveGroupId(menuItems, pathname)
+  );
 
   const toggleGroup = (groupId: MenuGroupId): void => {
-    setOpenGroup(openGroup === groupId ? null : groupId);
+    setOpenGroup((current) => (current === groupId ? null : groupId));
   };
 
-  const menuItems: MenuItem[] = [
-    {
-      icon: "ri-speed-up-line",
-      label: "Tableau de bord",
-      url: "/",
-    },
-    {
-      id: "structures",
-      icon: "fr-icon-community-line",
-      label: "Structures et opérateurs",
-      subItems: [
-        {
-          label: "Voir les structures",
-          url: "/structures",
-        },
-        {
-          label: "Voir les CPOM",
-          url: "/cpoms",
-        },
-        {
-          label: "Voir les opérateurs",
-          url: "/operateurs",
-        },
-      ],
-    },
-    {
-      icon: "fr-icon-pie-chart-2-line",
-      label: "Statistiques",
-      url: "/statistiques",
-    },
-    ...(process.env.NEXT_PUBLIC_SHOW_RESSOURCES === "true" //TODO: remove this once the ressources page is ready
-      ? [
-          {
-            icon: "fr-icon-book-shelf-line",
-            label: "Modèles et ressources",
-            url: "/ressources",
-          },
-        ]
-      : []),
-    ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
-      ? [
-          {
-            id: "parametres" as const,
-            icon: "fr-icon-settings-5-line",
-            label: "Paramètres",
-            subItems: [
-              {
-                label: "Gérer les accès",
-                url: "/parametres/acces",
-              },
-              {
-                label: "Voir mon compte",
-                url: "/parametres/compte",
-              },
-            ],
-          },
-        ]
-      : []),
-  ];
-
-  const matchesPath = (url: string): boolean =>
-    url === "/" ? pathname === "/" : Boolean(pathname?.includes(url));
+  useEffect(() => {
+    const activeGroupId = findActiveGroupId(menuItems, pathname);
+    if (activeGroupId) {
+      setOpenGroup(activeGroupId);
+    }
+  }, [menuItems, pathname]);
 
   const isMenuItemActive = (menuItem: MenuItem): boolean =>
     "subItems" in menuItem
-      ? menuItem.subItems.some((subItem) => matchesPath(subItem.url))
-      : matchesPath(menuItem.url);
+      ? menuItem.subItems.some((subItem) => matchesPath(pathname, subItem.url))
+      : matchesPath(pathname, menuItem.url);
 
-  if (previousPathname !== pathname) {
-    setPreviousPathname(pathname);
-    const activeGroup = menuItems.find(
-      (menuItem) => "subItems" in menuItem && isMenuItemActive(menuItem)
+  if (status === "loading") {
+    return (
+      <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey shrink-0">
+        <div className="border-b border-default-grey min-h-[4.35rem] grid">
+          <Logo />
+        </div>
+        <MenuFooter />
+      </nav>
     );
-    if (activeGroup && "id" in activeGroup) {
-      setOpenGroup(activeGroup.id);
-    }
   }
 
   return (
@@ -124,14 +100,14 @@ export const Menu = (): ReactElement => {
                   <ul className="fr-sidemenu__list">
                     {menuItem.subItems.map((subItem) => (
                       <li
-                        className={`fr-sidemenu__item ${matchesPath(subItem.url) ? "fr-sidemenu__item--active" : ""}`}
+                        className={`fr-sidemenu__item ${matchesPath(pathname, subItem.url) ? "fr-sidemenu__item--active" : ""}`}
                         key={subItem.label}
                       >
                         <Link
                           className="fr-sidemenu__link"
                           href={subItem.url}
                           aria-current={
-                            matchesPath(subItem.url) ? "page" : false
+                            matchesPath(pathname, subItem.url) ? "page" : false
                           }
                         >
                           {subItem.label}
@@ -158,26 +134,3 @@ export const Menu = (): ReactElement => {
     </nav>
   );
 };
-
-const getDefaultOpenGroup = (pathname: string | null): MenuGroupId =>
-  pathname?.startsWith("/parametres") ? "parametres" : "structures";
-
-type MenuGroupId = "structures" | "parametres";
-
-type MenuSubItem = {
-  label: string;
-  url: string;
-};
-
-type MenuItem =
-  | {
-      icon: string;
-      label: string;
-      url: string;
-    }
-  | {
-      id: MenuGroupId;
-      icon: string;
-      label: string;
-      subItems: MenuSubItem[];
-    };

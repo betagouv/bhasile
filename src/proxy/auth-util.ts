@@ -20,3 +20,8 @@ export const getApiRouteProtection = (
   }
   return null;
 };
+
+export const matchesPath = (pathname: string, base: string): boolean =>
+  base === "/"
+    ? pathname === "/"
+    : pathname === base || pathname.startsWith(`${base}/`);

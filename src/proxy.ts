@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { withAuth } from "next-auth/middleware";
 
 import { canAccessApp } from "./lib/casl";
+import { canAccessPage } from "./lib/casl/rules";
 import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,
@@ -10,7 +11,7 @@ import {
   pendingAccessPage,
   proConnectProtectedPages,
 } from "./proxy/auth-config";
-import { getApiRouteProtection } from "./proxy/auth-util";
+import { getApiRouteProtection, matchesPath } from "./proxy/auth-util";
 import { filtersProxy } from "./proxy/filters";
 import { SessionUser } from "./types/global";
 
@@ -76,15 +77,25 @@ const protectApiWithAuth = async (
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isProtected = proConnectProtectedPages.some((path) =>
-    path === "/" ? pathname === "/" : pathname.startsWith(path)
+  const isProtected = proConnectProtectedPages.some((base) =>
+    matchesPath(pathname, base)
   );
 
   if (isProtected) {
     const session = await getServerSession(authOptions);
-    if (session?.user && !canAccessApp(session.user as SessionUser)) {
-      return NextResponse.redirect(new URL(pendingAccessPage, request.url));
+
+    if (session?.user) {
+      const user = session.user as SessionUser;
+
+      if (!canAccessApp(user)) {
+        return NextResponse.redirect(new URL(pendingAccessPage, request.url));
+      }
+
+      if (!canAccessPage(user, pathname)) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
     }
+
     return (proConnectPagesProxy as (request: NextRequest) => NextResponse)(
       request
     );
