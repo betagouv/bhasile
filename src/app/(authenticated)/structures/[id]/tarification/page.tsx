@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
+import { getCurrentYear } from "@/app/utils/now.util";
 import { parseId } from "@/app/utils/string.util";
-import { CURRENT_YEAR } from "@/constants";
 
 export default async function CurrentTarificationPage({
   params,
@@ -13,5 +13,5 @@ export default async function CurrentTarificationPage({
   if (structureId === null) {
     notFound();
   }
-  redirect(`/structures/${structureId}/tarification/${CURRENT_YEAR}`);
+  redirect(`/structures/${structureId}/tarification/${getCurrentYear()}`);
 }

@@ -1,4 +1,8 @@
-import { Prisma, StructureType } from "@/generated/prisma/client";
+import {
+  Prisma,
+  StructureType,
+  TransformationType,
+} from "@/generated/prisma/client";
 
 export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   select: {
@@ -74,9 +78,6 @@ export type StatistiqueDbTarifJournalierCible = {
 
 export type StatistiqueDbTauxEncadrementCible = {
   structureType: StructureType;
-  year: number;
-  isIdf: boolean;
-  isFromHuda: boolean;
   tauxCible: number;
 };
 
@@ -133,6 +134,9 @@ export type StatistiqueDbStructureVersionTimeline = {
   structureId: number | null;
   effectiveDate: Date | null;
   placesAutorisees: number | null;
+  structureVersionTransformation: {
+    transformation: { type: TransformationType };
+  } | null;
 };
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
@@ -194,8 +198,7 @@ export type CiblesFinancieresLookup = {
     year: number
   ) => number | null;
   getTauxEncadrementCible: (
-    structure: StatistiqueDbStructure,
-    year: number
+    structureType: StructureType | null
   ) => number | null;
 };
 

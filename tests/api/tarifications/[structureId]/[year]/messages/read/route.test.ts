@@ -20,7 +20,7 @@ vi.mock("@/app/api/tarifications/tarification.service", () => ({
     mockMarkTarificationMessagesAsRead(...args),
 }));
 
-const participant = { id: 3, level: "DEPARTEMENT", isSuperAdmin: false };
+const participant = { id: 3, level: "DEPARTEMENT" };
 const params = Promise.resolve({ structureId: "42", year: "2027" });
 
 const buildRequest = (body: unknown): NextRequest =>

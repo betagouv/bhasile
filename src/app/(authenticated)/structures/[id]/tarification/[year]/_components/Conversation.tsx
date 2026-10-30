@@ -20,7 +20,6 @@ export const Conversation = ({
   year,
   visibility,
   currentUserId,
-  isSuperAdmin,
   isCampaignOpen,
   tags,
   canTag,
@@ -34,15 +33,14 @@ export const Conversation = ({
     markAsRead,
     changeTag,
   } = useConversationMessages({ structureId, year, visibility });
-  const isReadOnly = !isCampaignOpen || isSuperAdmin;
-  const canTagMessages = canTag && !isReadOnly;
+  const canTagMessages = canTag && isCampaignOpen;
 
   const requestedReceiptIdsRef = useRef(new Set<number>());
   const listRef = useRef<HTMLOListElement>(null);
   const isAtBottomRef = useRef(true);
 
   useEffect(() => {
-    if (!messages || isSuperAdmin) {
+    if (!messages) {
       return;
     }
     const requestedReceiptIds = requestedReceiptIdsRef.current;
@@ -65,7 +63,7 @@ export const Conversation = ({
         requestedReceiptIds.delete(messageId)
       );
     });
-  }, [messages, isSuperAdmin, currentUserId, markAsRead]);
+  }, [messages, currentUserId, markAsRead]);
 
   useEffect(() => {
     const list = listRef.current;
@@ -135,8 +133,8 @@ export const Conversation = ({
           ))}
         </ol>
       )}
-      {isReadOnly ? (
-        <ReadOnlyNotice year={year} isCampaignOpen={isCampaignOpen} />
+      {!isCampaignOpen ? (
+        <ReadOnlyNotice year={year} />
       ) : (
         <MessageComposer
           tags={tags}
@@ -156,7 +154,6 @@ type Props = {
   year: number;
   visibility: ConversationVisibility;
   currentUserId: number;
-  isSuperAdmin: boolean;
   isCampaignOpen: boolean;
   tags: ConversationTag[];
   canTag: boolean;

@@ -42,7 +42,7 @@ export const isVersionValid = (version: ResolvableVersion): boolean => {
 };
 
 // Le socle est toujours éligible, mais supplanté par n'importe quelle version datée déjà effective.
-const compareMostRecentFirst = (
+export const compareMostRecentFirst = (
   first: OrderableVersion,
   second: OrderableVersion
 ): number => {

@@ -28,6 +28,7 @@ export type Fixtures = {
   seededSubventionneeStructure: SeededStructure;
   seededActualisationAutorisee: SeededActualisationStructure;
   seededActualisationSubventionnee: SeededActualisationStructure;
+  seededActualisationMissingDocument: SeededActualisationStructure;
   seededCpom: SeededCpom;
   seededCpomWithDates: SeededCpom;
   structuresPool: SeededStructure[];
@@ -83,6 +84,18 @@ export const test = base.extend<Fixtures>({
   seededActualisationAutorisee: async ({}, use) => {
     const structure = await createActualisationStructureForTest({
       type: StructureType.CADA,
+    });
+    try {
+      await use(structure);
+    } finally {
+      await deleteStructureByCode(structure.codeBhasile).catch(() => {});
+    }
+  },
+
+  seededActualisationMissingDocument: async ({}, use) => {
+    const structure = await createActualisationStructureForTest({
+      type: StructureType.CADA,
+      shouldSkipMissingDocument: true,
     });
     try {
       await use(structure);
