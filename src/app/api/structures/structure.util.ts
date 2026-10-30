@@ -10,11 +10,10 @@ import {
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
 import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
-import { getNow } from "@/app/utils/now.util";
+import { getCurrentYear, getNow } from "@/app/utils/now.util";
 import { normalizeAccents } from "@/app/utils/string.util";
 import { getPlacesByCommunes } from "@/app/utils/structure.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
-import { CURRENT_YEAR } from "@/constants";
 import {
   PublicType,
   StructureType,
@@ -42,10 +41,7 @@ import {
   StructureListItem,
 } from "@/types/structure-list.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
-import {
-  matchesStructureFilters,
-  ParsedFilters,
-} from "@/utils/filters.util";
+import { matchesStructureFilters, ParsedFilters } from "@/utils/filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
@@ -225,7 +221,7 @@ export const getCurrentPlacesLogementsSociaux = (
 
 export const isStructureInCpom = (
   structure: StructureDbDetails | StructureDbList,
-  year: number = CURRENT_YEAR
+  year: number = getCurrentYear()
 ): boolean =>
   structure.cpomStructures?.some((cpomStructure) => {
     const [cpomDateStart, cpomDateEnd] = getCpomDatesConvention(
