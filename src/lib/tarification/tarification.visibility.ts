@@ -59,15 +59,17 @@ export const canOperateurOpenDocument = (
 const getOperateurVisibleDocumentIds = (
   journal: TarificationJournal
 ): Set<number> => {
-  const sharedDocumentIds = journal.events
-    .filter((event) => event.type === TarificationEventType.DOCUMENT_SHARED)
-    .map((event) => event.documentId);
+  const sharedDocumentIds = new Set(
+    journal.events
+      .filter((event) => event.type === TarificationEventType.DOCUMENT_SHARED)
+      .map((event) => event.documentId)
+  );
   return new Set(
     journal.documents
       .filter(
         (document) =>
           document.status === TarificationDocumentStatus.SHARED ||
-          sharedDocumentIds.includes(document.id)
+          sharedDocumentIds.has(document.id)
       )
       .map((document) => document.id)
   );

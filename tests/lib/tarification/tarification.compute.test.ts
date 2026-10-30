@@ -400,6 +400,28 @@ describe("computeTarificationState — contradictoire", () => {
     );
   });
 
+  it("tient pour reçue une L48 à laquelle l'opérateur répond sans l'avoir ouverte", () => {
+    const { journal } = createJournalWithL48();
+    respond(journal, "L48_CONTESTED", "2028-04-22T10:00:00Z");
+
+    expect(getContradictoire(journal, "2028-05-15T12:00:00Z")).toMatchObject({
+      status: "CONTESTED",
+      deadline: "2028-04-30",
+    });
+  });
+
+  it("ignore une réponse donnée à une L48 retirée depuis", () => {
+    const { journal, l48DocumentId } = createJournalWithL48();
+    openDocument(journal, l48DocumentId, "2028-04-11T09:00:00Z");
+    respond(journal, "L48_CONTESTED", "2028-04-12T10:00:00Z");
+    withdraw(journal, l48DocumentId, "2028-04-13T10:00:00Z");
+    shareAgentDocument(journal, { types: ["L48"], at: "2028-04-14T10:00:00Z" });
+
+    expect(getContradictoire(journal, "2028-04-15T12:00:00Z").status).toBe(
+      "WAITING_OPENING"
+    );
+  });
+
   it("s'ancre sur la première L48 partagée et non retirée", () => {
     const { journal, l48DocumentId } = createJournalWithL48();
     withdraw(journal, l48DocumentId, "2028-04-11T10:00:00Z");

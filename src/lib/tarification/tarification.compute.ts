@@ -234,9 +234,12 @@ const computeContradictoire = (
     };
   }
 
-  const sharedDate = toLocalDate(
-    sharedAtByDocumentId.get(l48Document.id)!,
-    journal.timeZone
+  const sharedAt = sharedAtByDocumentId.get(l48Document.id)!;
+  const responses = getChronologicalEvents(journal).filter(
+    (event) =>
+      (event.type === TarificationEventType.L48_ACCEPTED ||
+        event.type === TarificationEventType.L48_CONTESTED) &&
+      event.createdAt >= sharedAt
   );
   const firstOpening = journal.openings
     .filter((opening) => opening.documentId === l48Document.id)
@@ -246,21 +249,20 @@ const computeContradictoire = (
     )[0];
   const receivedDate = getReceivedDate({
     openedAt: firstOpening?.createdAt ?? null,
+    firstRespondedAt: responses[0]?.createdAt ?? null,
     timeZone: journal.timeZone,
-    sharedDate,
+    sharedDate: toLocalDate(sharedAt, journal.timeZone),
     today,
   });
   const deadline = receivedDate
     ? addDays(receivedDate, CONTRADICTOIRE_DAYS)
     : null;
   const isClosed = deadline !== null && today > deadline;
-  const lastResponse = getChronologicalEvents(journal)
+  const lastResponse = responses
     .filter(
       (event) =>
-        (event.type === TarificationEventType.L48_ACCEPTED ||
-          event.type === TarificationEventType.L48_CONTESTED) &&
-        (deadline === null ||
-          toLocalDate(event.createdAt, journal.timeZone) <= deadline)
+        deadline === null ||
+        toLocalDate(event.createdAt, journal.timeZone) <= deadline
     )
     .at(-1);
 
@@ -272,20 +274,27 @@ const computeContradictoire = (
   };
 };
 
-// Jamais ouverte dans les 15 jours : réputée reçue à la date de son partage
+// Répondre vaut réception ; jamais ouverte ni répondue en 15 jours : réputée reçue à son partage
 const getReceivedDate = ({
   openedAt,
+  firstRespondedAt,
   timeZone,
   sharedDate,
   today,
 }: {
   openedAt: Date | null;
+  firstRespondedAt: Date | null;
   timeZone: string;
   sharedDate: CivilDate;
   today: CivilDate;
 }): CivilDate | null => {
-  if (openedAt) {
-    return toLocalDate(openedAt, timeZone);
+  const receivedAt = [openedAt, firstRespondedAt]
+    .filter((date) => date !== null)
+    .sort(
+      (earlierDate, laterDate) => earlierDate.getTime() - laterDate.getTime()
+    )[0];
+  if (receivedAt) {
+    return toLocalDate(receivedAt, timeZone);
   }
   if (today > addDays(sharedDate, CONTRADICTOIRE_DEEMED_RECEIPT_DAYS)) {
     return sharedDate;
