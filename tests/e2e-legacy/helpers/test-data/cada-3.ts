@@ -1,4 +1,4 @@
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -132,7 +132,9 @@ export const cada3: TestStructureScenario = {
       fileUploads: buildRequiredDocumentsFinanciers({
         structureType: StructureType.CADA,
         resolveFormKind: (document) =>
-          Number(document.year) >= CURRENT_YEAR - 1 ? "ajout" : "finalisation",
+          Number(document.year) >= getCurrentYear() - 1
+            ? "ajout"
+            : "finalisation",
       }),
     },
     finances: {

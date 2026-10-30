@@ -1,5 +1,9 @@
 import { randomUUID } from "node:crypto";
 
+import {
+  deleteTarificationTestData,
+  pickTestCampaignYear,
+} from "tests/test-utils/tarification.repository.helpers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
@@ -15,7 +19,7 @@ import { AuthorLevel, Visibility } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
 describe("conversation.repository db integration", () => {
-  const campaignYear = 9500 + Math.floor(Math.random() * 500);
+  const campaignYear = pickTestCampaignYear(9500);
   let structureId: number;
   let authorId: number;
   let structureTarificationId: number;
@@ -40,21 +44,7 @@ describe("conversation.repository db integration", () => {
   });
 
   afterAll(async () => {
-    const conversationWhere = { structureTarificationId };
-    await prisma.fileUpload.deleteMany({
-      where: { message: { conversation: conversationWhere } },
-    });
-    await prisma.messageReceipt.deleteMany({
-      where: { message: { conversation: conversationWhere } },
-    });
-    await prisma.message.deleteMany({
-      where: { conversation: conversationWhere },
-    });
-    await prisma.conversation.deleteMany({ where: conversationWhere });
-    await prisma.structureTarification.deleteMany({ where: { structureId } });
-    await prisma.tarificationCampaign.deleteMany({
-      where: { year: campaignYear },
-    });
+    await deleteTarificationTestData({ structureId, campaignYear });
     await prisma.structure.delete({ where: { id: structureId } });
     await prisma.user.delete({ where: { id: authorId } });
     await prisma.$disconnect();

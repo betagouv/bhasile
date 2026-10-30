@@ -37,7 +37,9 @@ export const uploadToContainer = async (
   await fileInput.setInputFiles(filePath);
   await uploadResponse;
 
-  await expect(container.getByRole("button", { name: fileName })).toBeVisible({
+  await expect(
+    container.getByRole("button", { name: fileName, exact: true })
+  ).toBeVisible({
     timeout: 30000,
   });
 };

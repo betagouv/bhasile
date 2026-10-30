@@ -7,6 +7,7 @@ export const DeleteButton = ({
   onClick,
   size = "medium",
   backgroundColor = "white",
+  title = "Supprimer",
 }: Props) => {
   return (
     <Button
@@ -17,7 +18,7 @@ export const DeleteButton = ({
         backgroundColor === "grey" ? "bg-gray-100!" : "bg-white!",
         className
       )}
-      title="Supprimer"
+      title={title}
       onClick={onClick}
       type="button"
       size={size}
@@ -30,4 +31,5 @@ type Props = {
   onClick: (e: React.MouseEvent) => void;
   size?: "small" | "medium";
   backgroundColor?: "white" | "grey";
+  title?: string;
 };

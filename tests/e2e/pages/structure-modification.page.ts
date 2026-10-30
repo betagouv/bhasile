@@ -9,7 +9,7 @@ import {
   fillActeStartEndDates,
   uploadActeDocument,
 } from "./shared/actes.helper";
-import { SAMPLE_PDF } from "./upload.helper";
+import { SAMPLE_PDF, uploadToContainer } from "./upload.helper";
 
 export type Section =
   | "description"
@@ -73,6 +73,20 @@ export class StructureModificationPage {
       .fill(String(value));
   }
 
+  async openDocumentsFinanciersYear(year: number): Promise<void> {
+    await this.page
+      .getByRole("button", { name: String(year), exact: true })
+      .click();
+  }
+
+  documentFinancierBox(label: string): Locator {
+    return this.page.getByRole("group", { name: label, exact: true });
+  }
+
+  async uploadDocumentFinancier(label: string): Promise<void> {
+    await uploadToContainer(this.documentFinancierBox(label));
+  }
+
   async markStructureHasNoEvaluation(): Promise<void> {
     await this.page
       .locator(`input[name="noEvaluationStructure"]`)
@@ -120,7 +134,10 @@ export class StructureModificationPage {
   }
 
   async fillAvenantDate(date: string): Promise<void> {
-    await fillActeDate(this.conventionFieldset().locator("div.border-l-2"), date);
+    await fillActeDate(
+      this.conventionFieldset().locator("div.border-l-2"),
+      date
+    );
   }
 
   async uploadAvenantDocument(filePath: string = SAMPLE_PDF): Promise<void> {

@@ -30,7 +30,6 @@ import {
 } from "./tarification.repository";
 import {
   assertCampaignOpen,
-  assertCanWrite,
   getSelectableCampaignYears,
 } from "./tarification.util";
 
@@ -85,7 +84,6 @@ export const postTarificationMessage = async ({
   tagKey: string | null;
   fileKeys: string[];
 }): Promise<MessageDb> => {
-  assertCanWrite(author);
   assertCampaignOpen(year);
   assertCanPostMessage(
     { level: author.level, visibility, tagKey },
@@ -140,9 +138,6 @@ export const markTarificationMessagesAsRead = async ({
   reader: TarificationParticipant;
   messageIds: number[];
 }): Promise<{ count: number }> => {
-  if (reader.isSuperAdmin) {
-    return { count: 0 };
-  }
   const tarification = await findStructureTarification(structureId, year);
   if (!tarification) {
     return { count: 0 };
@@ -170,7 +165,6 @@ export const changeTarificationMessageTag = async ({
   }
   const { structure, campaign } = message.conversation.structureTarification;
   const editor = await resolveParticipant(user, structure);
-  assertCanWrite(editor);
   assertCampaignOpen(campaign.year);
   return changeMessageTag(
     { messageId, tagKey, editorLevel: editor.level },
@@ -193,7 +187,6 @@ const resolveParticipant = async (
       isAgent: isAgentUser(databaseUser),
       grants: getAssignedGrants(databaseUser),
     }),
-    isSuperAdmin: databaseUser.isSuperAdmin,
   };
 };
 
@@ -203,7 +196,7 @@ const assertCanAccessTarification = (
 ): void => {
   if (!canAccessTarification(user, structure)) {
     throw new DomainError(
-      "Accès refusé à la tarification de la structure",
+      "Accès à la tarification de la structure refusé",
       403
     );
   }
@@ -229,5 +222,4 @@ export type TarificationOverview = {
 export type TarificationParticipant = {
   id: number;
   level: AuthorLevel;
-  isSuperAdmin: boolean;
 };
