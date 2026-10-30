@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationIdentificationPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/01-identification/page";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
@@ -162,7 +162,7 @@ describe("FinalisationIdentification page integration", () => {
           pmr: 0,
           lgbt: 0,
           fvvTeh: 0,
-          year: CURRENT_YEAR,
+          year: getCurrentYear(),
         },
         {
           id: 2,
@@ -170,7 +170,7 @@ describe("FinalisationIdentification page integration", () => {
           pmr: 0,
           lgbt: 0,
           fvvTeh: 0,
-          year: CURRENT_YEAR - 1,
+          year: getCurrentYear() - 1,
         },
         {
           id: 3,
@@ -178,7 +178,7 @@ describe("FinalisationIdentification page integration", () => {
           pmr: 0,
           lgbt: 0,
           fvvTeh: 0,
-          year: CURRENT_YEAR - 2,
+          year: getCurrentYear() - 2,
         },
         {
           id: 4,
@@ -186,7 +186,7 @@ describe("FinalisationIdentification page integration", () => {
           pmr: 0,
           lgbt: 0,
           fvvTeh: 0,
-          year: CURRENT_YEAR - 3,
+          year: getCurrentYear() - 3,
         },
       ],
     };

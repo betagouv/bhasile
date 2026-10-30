@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ActualisationAnalyseFinanciere from "@/app/(authenticated)/(with-menu)/structures/[id]/actualisation/[year]/03-analyse-financiere/page";
 import { getIndicateursFinanciersDefaultValues } from "@/app/utils/indicateur-financier.util";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
-import { CURRENT_YEAR } from "@/constants";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { createActualisationForm } from "../../../../../../test-utils/factories/actualisation-form.factory";
@@ -87,9 +87,7 @@ describe("Page actualisation 03-analyse-financiere", () => {
 
     await clickButtonByName("Valider");
 
-    expect(
-      screen.getByText(/réalisé 2024.*obligatoire/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/réalisé 2024.*obligatoire/i)).toBeInTheDocument();
     expect(findActualisationPut(fetchMock)).toBeUndefined();
   });
 
@@ -106,7 +104,7 @@ describe("Page actualisation 03-analyse-financiere", () => {
     };
     structure.isInCpomPerYear = {
       ...structure.isInCpomPerYear,
-      [CURRENT_YEAR]: false,
+      [getCurrentYear()]: false,
     };
     renderWithStructurePageProviders(
       structure,
@@ -127,7 +125,7 @@ describe("Page actualisation 03-analyse-financiere", () => {
     // THEN
     expect(
       screen.getByText(
-        new RegExp(`réalisé ou prévisionnel ${CURRENT_YEAR}.*requis`, "i")
+        new RegExp(`réalisé ou prévisionnel ${getCurrentYear()}.*requis`, "i")
       )
     ).toBeInTheDocument();
     expect(screen.queryByText(/réalisé 2024.*obligatoire/i)).toBeNull();
@@ -139,7 +137,7 @@ describe("Page actualisation 03-analyse-financiere", () => {
       getRealCreationYear(structure as unknown as StructureApiRead)
     ).findIndex(
       (indicateurFinancier) =>
-        indicateurFinancier.year === CURRENT_YEAR &&
+        indicateurFinancier.year === getCurrentYear() &&
         indicateurFinancier.type === "PREVISIONNEL"
     );
     for (const field of ["ETP", "tauxEncadrement", "coutJournalier"]) {

@@ -2,7 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationFinancePage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/03-finance/page";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationFinanceValidStructure } from "../../../../../test-utils/structure.factory";
@@ -66,7 +66,7 @@ describe("FinalisationFinance page integration", () => {
       ...validStructure,
       isInCpomPerYear: {
         ...validStructure.isInCpomPerYear,
-        [CURRENT_YEAR]: false,
+        [getCurrentYear()]: false,
       },
       indicateursFinanciers: [],
     };
@@ -79,7 +79,7 @@ describe("FinalisationFinance page integration", () => {
     // THEN
     expect(
       screen.getByText(
-        new RegExp(`réalisé ou prévisionnel ${CURRENT_YEAR}.*requis`, "i")
+        new RegExp(`réalisé ou prévisionnel ${getCurrentYear()}.*requis`, "i")
       )
     ).toBeInTheDocument();
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
