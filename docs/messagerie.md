@@ -238,11 +238,14 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 - **Deux onglets** : « Tout le monde » (conversation partagée) et « Services de l'État seulement » (conversation agents), absent pour l'opérateur. L'onglet est dans l'URL (`?canal=agents`), pour que les liens des mails ouvrent le bon canal ; un opérateur est toujours ramené au canal partagé.
 - **Un fil chronologique** : auteur, niveau (DDETS, DREETS, Opérateur), date et heure de Paris, « Lu par » ; on écrit toujours à la suite (« Écrivez un message »). Texte brut, retours à la ligne conservés.
 - **Envoi sans affichage optimiste** : le message n'apparaît qu'une fois accepté par le serveur. Le journal fait preuve : il n'affiche jamais un message que le serveur aurait refusé.
+- **Pièces jointes** : bouton « Joindre des fichiers » (plusieurs à la fois), envoi de chaque fichier dès qu'il est choisi, puis rattachement par clé à l'envoi du message. Affichées dans le fil sous leur message (nom, format, taille), ouvertes par un lien signé demandé au clic ; elles n'apparaissent pas dans la navigation dans les documents.
+  - Validation par le serveur seulement, comme dans le reste de l'application : un fichier refusé affiche le message du serveur, et « Envoyer » reste désactivé tant qu'un fichier est en cours d'envoi ou en erreur (pas de « ci-joint » sans la pièce).
+  - Retirer une pièce jointe supprime le fichier ; un fichier retiré pendant son envoi est supprimé à son arrivée. Une saisie abandonnée laisse des fichiers orphelins (voir [Évolutions possibles](#évolutions-possibles)).
+  - Un envoi refusé garde le texte et les pièces jointes ; un envoi accepté les vide sans supprimer les fichiers, désormais rattachés.
 - **Lecture seule** affichée en bandeau, à la place de la saisie : campagne close.
 
 **À venir**
 
-- **Pièces jointes** : bouton « Joindre » (plusieurs fichiers), envoi de chaque fichier dès qu'il est choisi, puis rattachement par clé à l'envoi du message ; affichées dans le fil, sous leur message ; elles n'apparaissent pas dans la navigation dans les documents.
 - **Tags** : sélecteur à l'écriture et modification sur place, pour les agents ; badge sur le message.
 - **Avec la gestion des documents** : le panneau « Échanges » passe en surcouche, ouvert par un bouton flottant, par-dessus la navigation dans les documents ; le sommaire (ancres et pièces jointes, pour sauter à un moment du fil) et le filtre par phase arrivent avec les ancres ; le sélecteur de tag est prérempli avec la phase en cours.
 
@@ -258,7 +261,7 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 | Pièces jointes                   | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                        | fait    |
 | Porte de mise en service         | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                      | fait    |
 | Interface : page et fil          | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                        | fait    |
-| Interface : pièces jointes       | saisie et affichage dans le fil                                                                                                        | à faire |
+| Interface : pièces jointes       | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                            | fait    |
 | Interface : tags                 | sélecteur, badge, modification                                                                                                         | à faire |
 | Notifications                    | `MessageNotification`, `StructureSubscription`, Brevo transactionnel, cron de reprise, webhook des rebonds, compteur de non-lus        | à faire |
 | Triggers d'ajout seul            | migration dédiée                                                                                                                       | à faire |

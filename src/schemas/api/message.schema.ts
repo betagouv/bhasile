@@ -4,7 +4,7 @@ import type { AuthorLevel } from "@/generated/prisma/enums";
 import { ConversationVisibility } from "@/types/conversation.type";
 
 const MESSAGE_MAX_LENGTH = 10_000;
-const MESSAGE_MAX_ATTACHMENTS = 20;
+export const MESSAGE_MAX_ATTACHMENTS = 20;
 const MESSAGE_RECEIPTS_MAX_COUNT = 500;
 
 const visibilitySchema = z.enum(ConversationVisibility);
