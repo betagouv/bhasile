@@ -56,6 +56,7 @@ import {
   resolveCurrentVersionFields,
 } from "../structure-versions/structure-version.util";
 import {
+  CpomLinkedStructureDb,
   StructureDbDetails,
   StructureDbList,
   StructureListAdresse,
@@ -539,7 +540,7 @@ export const getCpomStructuresWithDates = (
             ...(linkedStructures
               ? {
                   structures: linkedStructures.map((linkedStructure) =>
-                    resolveLinkedStructureFields(linkedStructure, now)
+                    resolveCpomLinkedStructureFields(linkedStructure, now)
                   ),
                 }
               : {}),
@@ -550,26 +551,26 @@ export const getCpomStructuresWithDates = (
   return cpomStructures;
 };
 
-type CpomDetailsView = NonNullable<
-  NonNullable<StructureDbDetails["cpomStructures"]>[number]["cpom"]
->;
-
-type CpomLinkedStructureRow = CpomDetailsView extends {
-  structures: (infer Row)[];
-}
-  ? Row
-  : never;
-
-const resolveLinkedStructureFields = (
-  linkedStructure: CpomLinkedStructureRow,
+export const resolveCpomLinkedStructureFields = <
+  TCpomStructure extends { structure: CpomLinkedStructureDb | null },
+>(
+  cpomStructure: TCpomStructure,
   now: Date
 ) => {
-  if (!linkedStructure.structure) {
-    return linkedStructure;
+  if (!cpomStructure.structure) {
+    return cpomStructure;
   }
+  const { forms, fermetureDate, ...structure } = cpomStructure.structure;
   return {
-    ...linkedStructure,
-    structure: resolveCurrentVersionFields(linkedStructure.structure, now),
+    ...cpomStructure,
+    structure: {
+      ...resolveCurrentVersionFields(structure, now),
+      isFinalised: isStructureFinalised(cpomStructure.structure, now),
+      isClosed: isStructureClosed({ fermetureDate }, now),
+      isVisible:
+        forms.length > 0 ||
+        isBornFromCreation(structure.structureVersions, now),
+    },
   };
 };
 
