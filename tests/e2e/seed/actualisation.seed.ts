@@ -4,7 +4,7 @@ import {
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { DocumentFinancierCategory } from "@/types/document-financier.type";
 import { StepStatus } from "@/types/form.type";
@@ -31,7 +31,7 @@ const isAutorisee = (type: StructureType): boolean =>
 export const ACTUALISATION_MISSING_DOCUMENT = {
   category: "BUDGET_PREVISIONNEL_DEMANDE",
   label: "Budget prévisionnel demandé",
-  year: CURRENT_YEAR - 2,
+  year: getCurrentYear() - 2,
 } as const;
 
 const fakeFileUpload = (key: string) => ({

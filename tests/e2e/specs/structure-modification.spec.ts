@@ -1,5 +1,6 @@
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR, PLACES_VERSIONED_FROM_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { getMinioClient } from "@/lib/minio";
 import { ControleType } from "@/types/controle.type";
 
@@ -16,12 +17,12 @@ import {
 // contraction/extension : leur cellule est désactivée dans le tableau. Seules
 // les années légères (< seuil) restent éditables ici.
 const TYPE_PLACES_CURRENT_YEAR_ROW_INDEX =
-  getTypePlacesYearRange().years.indexOf(CURRENT_YEAR);
+  getTypePlacesYearRange().years.indexOf(getCurrentYear());
 const TYPE_PLACES_EDITABLE_YEAR = PLACES_VERSIONED_FROM_YEAR - 1;
 const TYPE_PLACES_EDITABLE_YEAR_ROW_INDEX =
   getTypePlacesYearRange().years.indexOf(TYPE_PLACES_EDITABLE_YEAR);
 const FINANCE_CURRENT_YEAR_ROW_INDEX =
-  getYearRange().years.indexOf(CURRENT_YEAR);
+  getYearRange().years.indexOf(getCurrentYear());
 
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;
 
@@ -124,7 +125,7 @@ test.describe("Structure modification", () => {
     await modification.submitAndWaitForSave();
 
     const persisted = await prisma.budget.findFirstOrThrow({
-      where: { structureId: seededStructure.id, year: CURRENT_YEAR },
+      where: { structureId: seededStructure.id, year: getCurrentYear() },
       select: { dotationDemandee: true },
     });
     expect(persisted.dotationDemandee).toBe(newDotationDemandee);
@@ -140,7 +141,7 @@ test.describe("Structure modification", () => {
       page,
       seededStructure.id
     );
-    const year = CURRENT_YEAR - 1;
+    const year = getCurrentYear() - 1;
     const label = "Budget prévisionnel demandé";
 
     await modification.goto("finances");
