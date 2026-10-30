@@ -8,7 +8,6 @@ import {
   applyVersionedPlacesToTypologies,
   buildDnaStructureIdsResolver,
   filterByActiveStructureId,
-  getCadaFromHudaStructureIds,
   getInitialisedStructureIds,
   indexTimelineByStructureId,
   lookupActiveStructureIds,
@@ -459,7 +458,7 @@ describe("applyVersionedPlacesToTypologies", () => {
   });
 });
 
-describe("socle - structures initialisées et CADA issus de HUDA", () => {
+describe("socle - structures initialisées", () => {
   const now = new Date("2026-10-01T12:00:00.000Z");
   const finalisationForm = (status: boolean) => ({
     status,
@@ -508,9 +507,5 @@ describe("socle - structures initialisées et CADA issus de HUDA", () => {
     expect(getInitialisedStructureIds(initialisations, now)).toEqual(
       new Set([1, 3, 4])
     );
-  });
-
-  it("ne retient comme CADA issus de HUDA que les créations HUDA vers CADA finalisées", () => {
-    expect(getCadaFromHudaStructureIds(initialisations)).toEqual(new Set([3]));
   });
 });

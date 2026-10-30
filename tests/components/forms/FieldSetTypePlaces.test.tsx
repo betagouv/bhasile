@@ -8,11 +8,11 @@ import { FormKind } from "@/types/global";
 
 import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
-vi.mock("@/constants", async () => {
-  const actual = await vi.importActual("@/constants");
+vi.mock("@/app/utils/now.util", async () => {
+  const actual = await vi.importActual("@/app/utils/now.util");
   return {
     ...actual,
-    CURRENT_YEAR: 2026,
+    getCurrentYear: () => 2026,
   };
 });
 
@@ -72,7 +72,9 @@ describe("FieldSetTypePlaces", () => {
         screen.getByText("Places FVV/TEH (spécialisées)")
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Femmes Victimes de Violences/Traîte des Êtres Humains")
+        screen.getByText(
+          "Femmes Victimes de Violences/Traîte des Êtres Humains"
+        )
       ).toBeInTheDocument();
     });
 
@@ -87,7 +89,6 @@ describe("FieldSetTypePlaces", () => {
         screen.getByText(/passer par une\s+contraction ou une extension/i)
       ).toBeInTheDocument();
     });
-
   });
 
   describe("Rendering modification form", () => {
@@ -104,7 +105,9 @@ describe("FieldSetTypePlaces", () => {
 
   describe("Form inputs", () => {
     it("affiche tous les champs de saisie pour chaque année", () => {
-      const { container } = renderFieldSet({ structureTypologies: filledYears });
+      const { container } = renderFieldSet({
+        structureTypologies: filledYears,
+      });
       years.forEach((_, index) => {
         ["placesAutorisees", "pmr", "lgbt", "fvvTeh"].forEach((field) => {
           expect(
@@ -120,7 +123,9 @@ describe("FieldSetTypePlaces", () => {
   describe("Number inputs", () => {
     it("accepte des valeurs numériques pour placesAutorisees des années legacy", async () => {
       const user = userEvent.setup();
-      const { container } = renderFieldSet({ structureTypologies: filledYears });
+      const { container } = renderFieldSet({
+        structureTypologies: filledYears,
+      });
 
       // index 1 = 2025 (< seuil, éditable) ; index 0 = 2026 est en lecture seule.
       const input = container.querySelector(
@@ -138,7 +143,9 @@ describe("FieldSetTypePlaces", () => {
     });
 
     it("verrouille placesAutorisees à partir du seuil de versionnement", () => {
-      const { container } = renderFieldSet({ structureTypologies: filledYears });
+      const { container } = renderFieldSet({
+        structureTypologies: filledYears,
+      });
 
       // index 0 = 2026 (≥ seuil) verrouillé, index 1 = 2025 éditable.
       expect(

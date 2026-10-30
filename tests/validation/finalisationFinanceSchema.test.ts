@@ -17,11 +17,11 @@ import {
 } from "@/schemas/forms/base/budget.schema";
 import { cpomStructureSchema } from "@/schemas/forms/base/cpom.schema";
 
-vi.mock("@/constants", async () => {
-  const actual = await vi.importActual("@/constants");
+vi.mock("@/app/utils/now.util", async () => {
+  const actual = await vi.importActual("@/app/utils/now.util");
   return {
     ...actual,
-    CURRENT_YEAR: 2025,
+    getCurrentYear: () => 2025,
   };
 });
 

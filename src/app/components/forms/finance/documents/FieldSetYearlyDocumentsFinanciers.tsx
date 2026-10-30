@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useRef } from "react";
+import { ReactElement } from "react";
 import { Control, useFormContext } from "react-hook-form";
 
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
@@ -9,8 +9,7 @@ import { FormKind } from "@/types/global";
 
 import { DocumentsFinanciersCheckboxIsInCpom } from "./DocumentsFinanciersCheckboxIsInCpom";
 import { DocumentsFinanciersCommentaire } from "./DocumentsFinanciersCommentaire";
-import { DocumentsFinanciersList } from "./DocumentsFinanciersList";
-import { YearlyFileUpload } from "./YearlyFileUpload";
+import { DocumentsFinanciersGrid } from "./DocumentsFinanciersGrid";
 
 export const FieldSetYearlyDocumentsFinanciers = ({
   year,
@@ -33,17 +32,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
     formState.errors?.documentsFinanciers?.[
       String(year) as keyof typeof formState.errors.documentsFinanciers
     ];
-  const hasError = yearErrors && Object.keys(yearErrors).length > 0;
-
-  const fieldsetRef = useRef<HTMLFieldSetElement>(null);
-  useEffect(() => {
-    if (hasError && fieldsetRef.current) {
-      fieldsetRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [hasError]);
+  const hasYearError = !!yearErrors && Object.keys(yearErrors).length > 0;
 
   const shouldHide = startYear && Number(year) < startYear;
   if (shouldHide) {
@@ -55,37 +44,22 @@ export const FieldSetYearlyDocumentsFinanciers = ({
   }
 
   return (
-    <fieldset ref={fieldsetRef}>
+    <fieldset>
       {!hasAccordion && (
         <h2 className="text-title-blue-france text-xl mb-6">{year}</h2>
-      )}
-      {hasError && (
-        <p className=" text-default-error flex items-center gap-2" data-form-error>
-          <i
-            className="fr-icon-error-fill text-default-error"
-            aria-hidden="true"
-          />
-          Veuillez importer les documents financiers requis concernant cette
-          année.
-        </p>
       )}
 
       {formKind === FormKind.AJOUT && (
         <DocumentsFinanciersCheckboxIsInCpom year={year} index={index} />
       )}
 
-      <div className="grid grid-cols-2 gap-16 mb-10">
-        <DocumentsFinanciersList
-          isAutorisee={isAutorisee}
-          year={year}
-          coveredDocumentsFinanciers={coveredDocumentsFinanciers}
-        />
-        <YearlyFileUpload
-          year={year}
-          isAutorisee={isAutorisee}
-          control={control}
-        />
-      </div>
+      <DocumentsFinanciersGrid
+        year={year}
+        isAutorisee={isAutorisee}
+        coveredDocumentsFinanciers={coveredDocumentsFinanciers}
+        hasRequirement
+        hasYearError={hasYearError}
+      />
       <DocumentsFinanciersCommentaire
         year={year}
         index={index}

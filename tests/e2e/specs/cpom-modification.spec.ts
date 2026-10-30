@@ -1,5 +1,5 @@
 import { getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { getMinioClient } from "@/lib/minio";
 
 import { expect, test } from "../fixtures/test";
@@ -8,7 +8,7 @@ import { attachStructureToCpom } from "../seed/cpom.seed";
 import { prisma } from "../seed/prisma";
 
 const FINANCE_CURRENT_YEAR_ROW_INDEX =
-  getYearRange().years.indexOf(CURRENT_YEAR);
+  getYearRange().years.indexOf(getCurrentYear());
 
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;
 
@@ -66,7 +66,7 @@ test.describe("CPOM modification", () => {
     const persisted = await prisma.budget.findFirstOrThrow({
       where: {
         cpomId: seededCpomWithDates.id,
-        year: CURRENT_YEAR,
+        year: getCurrentYear(),
         cpomStructureType: seededStructure.type,
       },
       select: { dotationDemandee: true },
