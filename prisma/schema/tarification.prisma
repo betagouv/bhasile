@@ -1,7 +1,7 @@
 model TarificationCampaign {
   id                     Int                     @id @default(autoincrement())
   year                   Int                     @unique
-  drlPublishedAt         DateTime?               @db.Date // date civile de Paris ; null = pas encore saisie, donc ni J48 ni J60
+  drlPublishedAt         DateTime?               @db.Date // date civile ; null = pas encore saisie, donc ni J48 ni J60
   drlUrl                 String? // lien Légifrance
   structureTarifications StructureTarification[]
 
