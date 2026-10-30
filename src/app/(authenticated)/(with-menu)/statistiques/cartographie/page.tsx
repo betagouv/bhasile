@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 
+import { getCurrentYear } from "@/app/utils/now.util";
 import { SearchParams } from "@/app/utils/search-params.util";
-import { DEFAULT_CARTOGRAPHIE_ANNEE } from "@/constants";
 import { StatistiquesCartographieProvider } from "@/contexts/StatistiquesCartographieContext";
 import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
 import {
@@ -76,7 +76,7 @@ export default async function CartographiePage({
   const annee =
     typeof awaitedSearchParams.annee === "string"
       ? awaitedSearchParams.annee
-      : String(DEFAULT_CARTOGRAPHIE_ANNEE);
+      : String(getCurrentYear() - 1);
 
   const [statistiquesCartographie, statistiques] = await Promise.all([
     getStatistiquesCartographie({

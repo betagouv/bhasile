@@ -174,9 +174,6 @@ export const findTauxEncadrementCibles = async (): Promise<
 
   return cibles.map((cible) => ({
     structureType: cible.structure_type,
-    year: cible.year,
-    isIdf: cible.belongs_to_idf,
-    isFromHuda: cible.comes_from_huda,
     tauxCible: cible.taux_cible.toNumber(),
   }));
 };
@@ -285,6 +282,9 @@ export const findStructureVersionTimeline = async (
       structureId: true,
       effectiveDate: true,
       placesAutorisees: true,
+      structureVersionTransformation: {
+        select: { transformation: { select: { type: true } } },
+      },
     },
     orderBy: [
       { structureId: "asc" },

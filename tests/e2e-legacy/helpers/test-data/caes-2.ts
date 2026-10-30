@@ -1,4 +1,4 @@
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -125,7 +125,9 @@ export const caes2: TestStructureScenario = {
       fileUploads: buildRequiredDocumentsFinanciers({
         structureType: StructureType.CAES,
         resolveFormKind: (document) =>
-          Number(document.year) >= CURRENT_YEAR - 2 ? "ajout" : "finalisation",
+          Number(document.year) >= getCurrentYear() - 2
+            ? "ajout"
+            : "finalisation",
       }),
     },
     finances: {

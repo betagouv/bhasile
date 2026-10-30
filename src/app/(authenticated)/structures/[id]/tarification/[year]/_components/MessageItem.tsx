@@ -62,14 +62,13 @@ const AUTHOR_LEVEL_LABELS: Record<AuthorLevel, string> = {
   OPERATEUR: "Opérateur",
 };
 
-const PARIS_DATE_TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
-  timeZone: "Europe/Paris",
+const DATE_TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "short",
   timeStyle: "short",
 });
 
 const formatMessageDate = (isoDate: string): string =>
-  PARIS_DATE_TIME_FORMAT.format(new Date(isoDate));
+  DATE_TIME_FORMAT.format(new Date(isoDate));
 
 type Props = {
   message: MessageApiRead;
