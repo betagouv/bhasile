@@ -21,12 +21,9 @@ vi.mock("next-auth", () => ({
 
 vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
 
-vi.mock("@/constants", async () => {
-  const actual = await vi.importActual("@/constants");
-  return {
-    ...actual,
-    CURRENT_YEAR: 2026,
-  };
+vi.mock("@/app/utils/now.util", async () => {
+  const actual = await vi.importActual("@/app/utils/now.util");
+  return { ...actual, getCurrentYear: () => 2026 };
 });
 
 vi.mock("@/app/api/tarifications/tarification.service", () => ({
@@ -53,7 +50,7 @@ vi.mock(
 
 const overview = {
   codeBhasile: "BHA-42",
-  participant: { id: 3, level: "DEPARTEMENT", isSuperAdmin: false },
+  participant: { id: 3, level: "DEPARTEMENT" },
   isOperateur: false,
   campaignYears: [2027, 2026, 2024],
 };

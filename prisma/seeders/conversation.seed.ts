@@ -46,6 +46,7 @@ export const createFakeConversations = async (
               authorId: departementalAgent.id,
               authorLevel: AuthorLevel.DEPARTEMENT,
               text: faker.lorem.paragraph(),
+              receipts: { create: [{ userId: regionalAgent.id }] },
             },
             {
               authorId: departementalAgent.id,

@@ -38,9 +38,9 @@ vi.mock("@/app/api/users/user.repository", () => ({
     mockGetUserWithGrantsByEmail(...args),
 }));
 
-vi.mock("@/constants", async () => {
-  const actual = await vi.importActual("@/constants");
-  return { ...actual, CURRENT_YEAR: 2027 };
+vi.mock("@/app/utils/now.util", async () => {
+  const actual = await vi.importActual("@/app/utils/now.util");
+  return { ...actual, getCurrentYear: () => 2027 };
 });
 
 describe("postTarificationMessage", () => {
@@ -48,7 +48,7 @@ describe("postTarificationMessage", () => {
     structureId: 1,
     year: 2027,
     visibility: Visibility.SHARED,
-    author: { id: 1, level: AuthorLevel.DEPARTEMENT, isSuperAdmin: false },
+    author: { id: 1, level: AuthorLevel.DEPARTEMENT },
     text: "Bonjour",
     tagKey: null,
     fileKeys: [],
@@ -71,7 +71,7 @@ describe("postTarificationMessage", () => {
       postTarificationMessage({
         ...message,
         visibility: Visibility.AGENTS,
-        author: { id: 1, level: AuthorLevel.OPERATEUR, isSuperAdmin: false },
+        author: { id: 1, level: AuthorLevel.OPERATEUR },
       })
     ).rejects.toThrow("réservés aux agents");
 
@@ -116,7 +116,6 @@ describe("getTarificationParticipant", () => {
     expect(participant).toEqual({
       id: 5,
       level: AuthorLevel.REGION,
-      isSuperAdmin: false,
     });
   });
 

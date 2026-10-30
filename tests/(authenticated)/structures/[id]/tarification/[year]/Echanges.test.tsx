@@ -119,7 +119,6 @@ const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
         year={2026}
         currentUserId={CURRENT_USER_ID}
         isOperateur={false}
-        isSuperAdmin={false}
         isCampaignOpen
         {...props}
       />
@@ -258,19 +257,6 @@ describe("Echanges", () => {
     );
   });
 
-  it("n'accuse aucune lecture et n'offre pas d'écrire à un superadmin", async () => {
-    answerWith([buildMessage()]);
-
-    renderEchanges({ isSuperAdmin: true });
-
-    expect(await screen.findByText("Bonjour")).toBeInTheDocument();
-    expect(screen.getByText(/les superadmins consultent/)).toBeInTheDocument();
-    expect(
-      screen.queryByPlaceholderText("Écrivez un message")
-    ).not.toBeInTheDocument();
-    expect(getPostBodies(`${MESSAGES_URL}/read`)).toEqual([]);
-  });
-
   it("passe en lecture seule une campagne close", async () => {
     answerWith([]);
 
@@ -321,7 +307,6 @@ describe("Echanges", () => {
           year={2026}
           currentUserId={CURRENT_USER_ID}
           isOperateur={false}
-          isSuperAdmin={false}
           isCampaignOpen
         />
       </FetchStateProvider>

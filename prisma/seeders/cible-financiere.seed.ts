@@ -13,7 +13,6 @@ const CIBLES_BY_TYPE: Record<
 };
 
 const IDF_TARIF_SUPPLEMENT = 2;
-const CADA_FROM_HUDA_TAUX_ENCADREMENT = 18;
 
 export const getFakeTarifsJournaliersCibles =
   (): Prisma.TarifJournalierCibleCreateManyInput[] =>
@@ -32,27 +31,7 @@ export const getFakeTarifsJournaliersCibles =
 
 export const getFakeTauxEncadrementCibles =
   (): Prisma.TauxEncadrementCibleCreateManyInput[] =>
-    getYearRange().years.flatMap((year) =>
-      Object.values(StructureType).flatMap((structureType) =>
-        [true, false].flatMap((isIdf) => [
-          {
-            structure_type: structureType,
-            year,
-            belongs_to_idf: isIdf,
-            comes_from_huda: false,
-            taux_cible: CIBLES_BY_TYPE[structureType].tauxEncadrement,
-          },
-          ...(structureType === StructureType.CADA
-            ? [
-                {
-                  structure_type: structureType,
-                  year,
-                  belongs_to_idf: isIdf,
-                  comes_from_huda: true,
-                  taux_cible: CADA_FROM_HUDA_TAUX_ENCADREMENT,
-                },
-              ]
-            : []),
-        ])
-      )
-    );
+    Object.values(StructureType).map((structureType) => ({
+      structure_type: structureType,
+      taux_cible: CIBLES_BY_TYPE[structureType].tauxEncadrement,
+    }));

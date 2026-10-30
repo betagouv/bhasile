@@ -5,7 +5,10 @@ import {
   computeFinanceTotalValuesForYears,
   indexCpomBudgets,
 } from "@/app/api/statistiques/finance/finance.util";
-import { computeStructureJoursPlaces } from "@/app/api/statistiques/finance/finance-theorique.util";
+import {
+  computeStructureJoursPlaces,
+  computeTauxEncadrementCible,
+} from "@/app/api/statistiques/finance/finance-theorique.util";
 import type {
   StatistiqueDbBudget,
   StatistiqueDbCpomStructure,
@@ -14,6 +17,7 @@ import type {
   StatistiqueDbTypologie,
 } from "@/app/api/statistiques/statistiques.db.type";
 import { StructureType } from "@/types/structure.type";
+import { TransformationType } from "@/types/transformation.type";
 
 import {
   buildTestActiveStructureIdsByPeriod,
@@ -86,25 +90,23 @@ const typologieRow = (
   fvvTeh: 0,
 });
 
-const cibleTarif = (year: number, isIdf: boolean, tarifCible: number) => ({
-  structureType: StructureType.CADA,
-  year,
-  isIdf,
-  tarifCible,
-});
-
-const cibleTaux = (
-  year: number,
-  isIdf: boolean,
-  isFromHuda: boolean,
-  tauxCible: number
-) => ({
-  structureType: StructureType.CADA,
-  year,
-  isIdf,
-  isFromHuda,
+const cibleTaux = (structureType: StructureType, tauxCible: number) => ({
+  structureType,
   tauxCible,
 });
+
+// Exemple de référence : CADA de 1 501 places qui absorbe 106 places de HUDA au 1er juillet 2026
+const hudaVersCadaExistantTimeline = buildTestStructureVersionTimeline([
+  { structureId: 1, structureVersionId: 1, placesAutorisees: 1501 },
+  {
+    structureId: 1,
+    structureVersionId: 2,
+    effectiveDate: new Date("2026-07-01T00:00:00.000Z"),
+    placesAutorisees: 1607,
+    transformationType:
+      TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
+  },
+]);
 
 const buildFinanceContext = (args: {
   structures: StatistiqueDbStructure[];
@@ -261,7 +263,11 @@ describe("finance - indicateurs théoriques", () => {
       indicateurRow(3, 3, 2024, "REALISE", { ETP: 10 }), // 3
       indicateurRow(4, 1, 2024, "PREVISIONNEL", { ETP: 20 }), // 5
     ];
-    const context = buildFinanceContext({ structures, typologies, indicateurs });
+    const context = buildFinanceContext({
+      structures,
+      typologies,
+      indicateurs,
+    });
 
     const mean2024 = computeFinanceStatistiques(context, "moyenne").byYear[0];
     const median2024 = computeFinanceStatistiques(context, "mediane").byYear[0];
@@ -288,61 +294,87 @@ describe("finance - indicateurs théoriques", () => {
     expect(result.byYear[0].subventionnees.coutJournalierTheorique).toBeNull();
   });
 
-  it("applique les cibles selon le type, l'année, le zonage IDF et l'origine HUDA", () => {
+  it("applique le taux cible du type, puis moyenne ou médiane", () => {
     const context = {
       ...buildFinanceContext({
         structures: [
-          testStructure(1, StructureType.CADA, "75"),
-          testStructure(2, StructureType.CADA, "01"),
-          testStructure(3, StructureType.CADA, "01"),
+          testStructure(1, StructureType.CADA),
+          testStructure(2, StructureType.CADA),
+          testStructure(3, StructureType.HUDA),
+          testStructure(4, StructureType.CPH),
         ],
         budgets: [budgetRow(1, 1, 2024, 0, 0)],
       }),
       ciblesFinancieres: buildTestCiblesFinancieres({
-        idfDepartementNumeros: new Set(["75"]),
-        cadaFromHudaStructureIds: new Set([3]),
-        tarifsJournaliersCibles: [
-          cibleTarif(2024, true, 30),
-          cibleTarif(2024, false, 20),
-          cibleTarif(2023, false, 1),
-        ],
         tauxEncadrementCibles: [
-          cibleTaux(2024, true, false, 12),
-          cibleTaux(2024, false, false, 15),
-          cibleTaux(2024, false, true, 21),
+          cibleTaux(StructureType.CADA, 15),
+          cibleTaux(StructureType.HUDA, 30),
         ],
       }),
     };
 
-    const year2024 = computeFinanceStatistiques(context, "moyenne").byYear[0];
+    const mean2024 = computeFinanceStatistiques(context, "moyenne").byYear[0];
+    const median2024 = computeFinanceStatistiques(context, "mediane").byYear[0];
 
-    expect(year2024.total.coutJournalierCible).toBe(23.3);
-    expect(year2024.total.tauxEncadrementCible).toBe(16);
+    expect(mean2024.total.tauxEncadrementCible).toBe(20);
+    expect(median2024.total.tauxEncadrementCible).toBe(15);
+    expect(mean2024.autorisees.tauxEncadrementCible).toBe(15);
+    expect(mean2024.subventionnees.tauxEncadrementCible).toBe(30);
   });
 
-  it("ne renvoie pas de cible quand l'année est absente de la table", () => {
+  it("ne renvoie pas de cible quand le type est absent de la table", () => {
     const context = {
       ...buildFinanceContext({
-        structures: [testStructure(1, StructureType.CADA)],
+        structures: [testStructure(1, StructureType.CPH)],
         budgets: [budgetRow(1, 1, 2024, 0, 0)],
       }),
       ciblesFinancieres: buildTestCiblesFinancieres({
-        tarifsJournaliersCibles: [cibleTarif(2023, false, 20)],
+        tauxEncadrementCibles: [cibleTaux(StructureType.CADA, 15)],
       }),
     };
 
     const year2024 = computeFinanceStatistiques(context, "moyenne").byYear[0];
 
-    expect(year2024.total.coutJournalierCible).toBeNull();
     expect(year2024.total.tauxEncadrementCible).toBeNull();
+  });
+
+  it("garde au taux HUDA les places de CADA venues d'un HUDA", () => {
+    const context = {
+      ...buildFinanceContext({
+        structures: [
+          testStructure(1, StructureType.CADA),
+          testStructure(2, StructureType.HUDA),
+        ],
+        budgets: [budgetRow(1, 1, 2026, 0, 0)],
+      }),
+      timelineByStructureId: new Map([
+        [1, hudaVersCadaExistantTimeline],
+        [
+          2,
+          buildTestStructureVersionTimeline([
+            { structureId: 2, placesAutorisees: 50 },
+          ]),
+        ],
+      ]),
+      ciblesFinancieres: buildTestCiblesFinancieres({
+        tauxEncadrementCibles: [
+          cibleTaux(StructureType.CADA, 15),
+          cibleTaux(StructureType.HUDA, 25),
+        ],
+      }),
+    };
+
+    const year2026 = computeFinanceStatistiques(context, "moyenne").byYear[0];
+
+    expect(year2026.autorisees.tauxEncadrementCible).toBe(15.2);
+    expect(year2026.subventionnees.tauxEncadrementCible).toBe(25);
+    expect(year2026.total.tauxEncadrementCible).toBe(20.1);
   });
 });
 
 describe("finance - structures actualisées", () => {
   const campagneContext = {
-    actualisationFormDefinitions: [
-      { slug: "actualisation-2026" },
-    ],
+    actualisationFormDefinitions: [{ slug: "actualisation-2026" }],
   };
 
   it("ne comptabilise que les structures actualisées dès deux ans avant la première campagne", () => {
@@ -380,10 +412,7 @@ describe("finance - structures actualisées", () => {
     const context = {
       ...buildFinanceContext({
         structures: [testStructure(1, StructureType.CADA)],
-        budgets: [
-          budgetRow(1, 1, 2024, 100, 0),
-          budgetRow(2, 1, 2025, 100, 0),
-        ],
+        budgets: [budgetRow(1, 1, 2024, 100, 0), budgetRow(2, 1, 2025, 100, 0)],
       }),
       actualisationFormDefinitions: [
         { slug: "actualisation-2026" },
@@ -604,7 +633,9 @@ describe("finance - jours x places", () => {
   const now = new Date("2026-09-15T12:00:00.000Z");
 
   it("utilise le millésime de typologie avant le versionnement des places", () => {
-    expect(computeStructureJoursPlaces(context, 1, 2025, [], 10, now)).toEqual({
+    expect(
+      computeStructureJoursPlaces(context, 1, 2025, [], 10, now)
+    ).toMatchObject({
       jours: 365,
       joursPlaces: 3650,
     });
@@ -629,7 +660,7 @@ describe("finance - jours x places", () => {
 
     expect(
       computeStructureJoursPlaces(context, 1, 2026, versions, null, now)
-    ).toEqual({ jours: 365, joursPlaces: 181 * 100 + 184 * 200 });
+    ).toMatchObject({ jours: 365, joursPlaces: 181 * 100 + 184 * 200 });
   });
 
   it("borne l'année par les dates d'ouverture et de fermeture", () => {
@@ -644,9 +675,122 @@ describe("finance - jours x places", () => {
 
     expect(
       computeStructureJoursPlaces(boundedContext, 1, 2025, [], 10, now)
-    ).toEqual({ jours: 10, joursPlaces: 100 });
+    ).toMatchObject({ jours: 10, joursPlaces: 100 });
     expect(
       computeStructureJoursPlaces(boundedContext, 1, 2026, [], 10, now)
+    ).toBeNull();
+  });
+});
+
+describe("finance - taux d'encadrement cible", () => {
+  const context = {
+    openingDateByStructureId: new Map([
+      [1, new Date("2020-01-01T00:00:00.000Z")],
+    ]),
+    closureDateByStructureId: new Map<number, Date | null>(),
+  };
+  const ciblesFinancieres = buildTestCiblesFinancieres({
+    tauxEncadrementCibles: [
+      cibleTaux(StructureType.CADA, 15),
+      cibleTaux(StructureType.HUDA, 25),
+    ],
+  });
+  const now = new Date("2027-12-31T12:00:00.000Z");
+  const computeTauxCada = (
+    year: number,
+    versions: ReturnType<typeof buildTestStructureVersionTimeline>
+  ) =>
+    computeTauxEncadrementCible(
+      ciblesFinancieres,
+      StructureType.CADA,
+      computeStructureJoursPlaces(context, 1, year, versions, null, now)
+    );
+
+  it("pondère les places venues d'un HUDA au prorata de l'année (exemple de référence)", () => {
+    expect(computeTauxCada(2026, hudaVersCadaExistantTimeline)).toBeCloseTo(
+      15.21,
+      2
+    );
+    expect(computeTauxCada(2027, hudaVersCadaExistantTimeline)).toBeCloseTo(
+      15.41,
+      2
+    );
+  });
+
+  it("applique le taux HUDA à toutes les places d'un CADA créé depuis un HUDA", () => {
+    const versions = buildTestStructureVersionTimeline([
+      {
+        structureId: 1,
+        effectiveDate: new Date("2026-07-01T00:00:00.000Z"),
+        placesAutorisees: 106,
+        transformationType:
+          TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+      },
+    ]);
+
+    expect(computeTauxCada(2026, versions)).toBe(25);
+  });
+
+  it("conserve les places venues d'un HUDA dans les versions suivantes et les réduit au prorata d'une baisse de places", () => {
+    const versions = [
+      ...hudaVersCadaExistantTimeline,
+      ...buildTestStructureVersionTimeline([
+        {
+          structureId: 1,
+          structureVersionId: 3,
+          effectiveDate: new Date("2027-01-01T00:00:00.000Z"),
+          placesAutorisees: 1607,
+        },
+        {
+          structureId: 1,
+          structureVersionId: 4,
+          effectiveDate: new Date("2027-07-01T00:00:00.000Z"),
+          placesAutorisees: 50,
+        },
+      ]),
+    ];
+
+    expect(
+      computeStructureJoursPlaces(context, 1, 2027, versions, null, now)
+    ).toEqual({
+      jours: 365,
+      joursPlaces: 181 * 1607 + 184 * 50,
+      joursPlacesHuda: 181 * 106 + 184 * 3,
+    });
+  });
+
+  it("ignore les transformations HUDA avec remise en concurrence", () => {
+    const versions = buildTestStructureVersionTimeline([
+      { structureId: 1, structureVersionId: 1, placesAutorisees: 1501 },
+      {
+        structureId: 1,
+        structureVersionId: 2,
+        effectiveDate: new Date("2026-07-01T00:00:00.000Z"),
+        placesAutorisees: 1607,
+        transformationType:
+          TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE,
+      },
+    ]);
+
+    expect(computeTauxCada(2027, versions)).toBe(15);
+  });
+
+  it("ne renvoie pas de cible pour des places venues d'un HUDA sans taux HUDA", () => {
+    expect(
+      computeTauxEncadrementCible(
+        buildTestCiblesFinancieres({
+          tauxEncadrementCibles: [cibleTaux(StructureType.CADA, 15)],
+        }),
+        StructureType.CADA,
+        computeStructureJoursPlaces(
+          context,
+          1,
+          2027,
+          hudaVersCadaExistantTimeline,
+          null,
+          now
+        )
+      )
     ).toBeNull();
   });
 });

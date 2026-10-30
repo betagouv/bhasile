@@ -1,4 +1,3 @@
-import { getNow } from "./app/utils/now.util";
 import { Departement, Region } from "./types/departement.type";
 
 export type LatLngTuple = [number, number];
@@ -48,10 +47,6 @@ export const EVALUATION_NOTES_START_YEAR = 2022;
 export const EVALUATION_NOTE_MIN = 1;
 export const EVALUATION_NOTE_MAX = 4;
 
-export const CURRENT_YEAR = getNow().getFullYear();
-
-export const DEFAULT_CARTOGRAPHIE_ANNEE = CURRENT_YEAR - 1;
-
 export const PLACES_VERSIONED_FROM_YEAR =
   Number(process.env.NEXT_PUBLIC_PLACES_VERSIONED_FROM_YEAR) || 2026;
 
@@ -99,10 +94,13 @@ const TEXT_DOCUMENT_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 ];
 
-export const ALLOWED_MIME_TYPES = [
+export const DOCUMENT_MIME_TYPES = [
   "application/pdf",
-  ...IMAGE_MIME_TYPES,
   ...SPREADSHEET_MIME_TYPES,
+];
+export const ALLOWED_MIME_TYPES = [
+  ...DOCUMENT_MIME_TYPES,
+  ...IMAGE_MIME_TYPES,
   ...TEXT_DOCUMENT_MIME_TYPES,
 ];
 
