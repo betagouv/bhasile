@@ -36,7 +36,10 @@ import {
   getTypologieMapForExactYear,
   isCpomLinkActiveInYear,
 } from "../statistiques.util";
-import { computeStructureJoursPlaces } from "./finance-theorique.util";
+import {
+  computeStructureJoursPlaces,
+  computeTauxEncadrementCible,
+} from "./finance-theorique.util";
 
 type FinanceScope = keyof Omit<FinanceByYearStat, "year">;
 
@@ -276,12 +279,19 @@ const computeFinanceYearData = (
       etpRealise,
       tauxPrevisionnel: divideOrNull(placesMoyennes, etpPrevisionnel),
       tauxRealise: divideOrNull(placesMoyennes, etpRealise),
-      tauxCible: context.ciblesFinancieres.getTauxEncadrementCible(structure, year),
+      tauxCible: computeTauxEncadrementCible(
+        context.ciblesFinancieres,
+        structure.type,
+        joursPlaces
+      ),
       coutTheorique: divideOrNull(
         dotationByStructureId.get(structure.id) || null,
         joursPlaces?.joursPlaces
       ),
-      coutCible: context.ciblesFinancieres.getTarifJournalierCible(structure, year),
+      coutCible: context.ciblesFinancieres.getTarifJournalierCible(
+        structure,
+        year
+      ),
     };
   });
 
@@ -338,7 +348,6 @@ const aggregateFinanceScope = (
     tauxEncadrementCible: aggregate("tauxCible"),
     tauxEncadrementTheoriquePrevisionnel: aggregate("tauxPrevisionnel"),
     tauxEncadrementTheoriqueRealise: aggregate("tauxRealise"),
-    coutJournalierCible: aggregate("coutCible"),
     coutJournalierTheorique: aggregate("coutTheorique"),
     ...sumBudgetsForYear(
       yearData.budgets.filter((budget) =>

@@ -5,17 +5,18 @@ import {
   toSessionGrant,
 } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { CURRENT_YEAR, VISIBILITY_LABELS } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
+import { VISIBILITY_LABELS } from "@/constants";
 import { GrantScope, Visibility } from "@/generated/prisma/enums";
 import { canAccessTarification } from "@/lib/casl";
 import type { NotificationRecipient } from "@/types/conversation.type";
 import type { SessionPermissions } from "@/types/global";
 
 // La campagne N est ouverte du 1er janvier N-1 au 31 décembre N
-export const getOpenCampaignYears = (): number[] => [
-  CURRENT_YEAR,
-  CURRENT_YEAR + 1,
-];
+export const getOpenCampaignYears = (): number[] => {
+  const currentYear = getCurrentYear();
+  return [currentYear, currentYear + 1];
+};
 
 export const getSelectableCampaignYears = (
   tarificationYears: number[]
@@ -32,17 +33,6 @@ export const assertCampaignOpen = (year: number): void => {
     throw new DomainError(
       `La campagne ${year} n'est pas ouverte : ses échanges sont en lecture seule`,
       409
-    );
-  }
-};
-
-export const assertCanWrite = (participant: {
-  isSuperAdmin: boolean;
-}): void => {
-  if (participant.isSuperAdmin) {
-    throw new DomainError(
-      "Les superadmins consultent les échanges sans y écrire",
-      403
     );
   }
 };

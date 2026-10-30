@@ -1,7 +1,11 @@
 import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
+import { StructureType, TransformationType } from "@/generated/prisma/client";
 
-import { pickVersionBefore } from "../../structure-versions/structure-version.util";
+import {
+  compareMostRecentFirst,
+  pickVersionBefore,
+} from "../../structure-versions/structure-version.util";
 import type {
   CiblesFinancieresLookup,
   StatistiqueDbStructure,
@@ -12,9 +16,10 @@ import type {
 } from "../statistiques.db.type";
 import { countDaysBetween, getStructureOpenBounds } from "../statistiques.util";
 
-type StructureJoursPlaces = {
+export type StructureJoursPlaces = {
   jours: number;
   joursPlaces: number;
+  joursPlacesHuda: number;
 };
 
 type JoursPlacesContext = Pick<
@@ -22,12 +27,55 @@ type JoursPlacesContext = Pick<
   "openingDateByStructureId" | "closureDateByStructureId"
 >;
 
+const HUDA_VERS_CADA_TRANSFORMATION_TYPES: TransformationType[] = [
+  TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_EXISTANT,
+  TransformationType.TRANSFO_HUDA_FERMETURE_VERS_CADA_NOUVEAU,
+  TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_EXISTANT,
+  TransformationType.TRANSFO_HUDA_CONTRACTION_VERS_CADA_NOUVEAU,
+];
+
+const isHudaVersCadaVersion = (
+  version: StatistiqueDbStructureVersionTimeline
+): boolean => {
+  const transformationType =
+    version.structureVersionTransformation?.transformation.type;
+  return (
+    transformationType !== undefined &&
+    HUDA_VERS_CADA_TRANSFORMATION_TYPES.includes(transformationType)
+  );
+};
+
+/** Places venues d'un HUDA par version : gain de places des versions HUDA vers CADA, réduit au prorata quand la structure perd des places. */
+const buildPlacesHudaByVersionId = (
+  versions: StatistiqueDbStructureVersionTimeline[]
+): Map<number, number> => {
+  const placesHudaByVersionId = new Map<number, number>();
+  let previousPlaces = 0;
+  let placesHuda = 0;
+  const chronologicalVersions = [...versions].sort((versionA, versionB) =>
+    compareMostRecentFirst(versionB, versionA)
+  );
+  for (const version of chronologicalVersions) {
+    const places = version.placesAutorisees;
+    if (places != null) {
+      if (places < previousPlaces) {
+        placesHuda = Math.round((placesHuda * places) / previousPlaces);
+      } else if (isHudaVersCadaVersion(version)) {
+        placesHuda += places - previousPlaces;
+      }
+      previousPlaces = places;
+    }
+    placesHudaByVersionId.set(version.id, placesHuda);
+  }
+  return placesHudaByVersionId;
+};
+
 /**
- * Jours d'ouverture et jours x places d'une structure sur une année, bornés par
- * ses dates d'ouverture et de fermeture. À partir de `PLACES_VERSIONED_FROM_YEAR`,
- * les places suivent les versions de la structure (une transformation en cours
- * d'année découpe l'année) ; avant, le millésime de typologie vaut pour l'année.
- * L'année en cours est comptée en entier, avec les versions effectives à `now`.
+ * Jours d'ouverture, jours x places et jours x places venues d'un HUDA d'une structure
+ * sur une année, bornés par ses dates d'ouverture et de fermeture. À partir de
+ * `PLACES_VERSIONED_FROM_YEAR`, les places suivent les versions de la structure ;
+ * avant, le millésime de typologie vaut pour l'année. L'année en cours est comptée
+ * en entier, avec les versions effectives à `now`.
  */
 export const computeStructureJoursPlaces = (
   context: JoursPlacesContext,
@@ -54,7 +102,7 @@ export const computeStructureJoursPlaces = (
       return null;
     }
     const jours = countDaysBetween(bounds.start, bounds.end);
-    return { jours, joursPlaces: jours * placesTypologie };
+    return { jours, joursPlaces: jours * placesTypologie, joursPlacesHuda: 0 };
   }
 
   const nowCutoff = startOfNextUtcDay(now).getTime();
@@ -63,6 +111,7 @@ export const computeStructureJoursPlaces = (
       version.effectiveDate === null ||
       version.effectiveDate.getTime() < nowCutoff
   );
+  const placesHudaByVersionId = buildPlacesHudaByVersionId(effectiveVersions);
   const changeDays = effectiveVersions
     .flatMap((version) =>
       version.effectiveDate === null
@@ -76,12 +125,14 @@ export const computeStructureJoursPlaces = (
 
   let jours = 0;
   let joursPlaces = 0;
+  let joursPlacesHuda = 0;
   for (let index = 0; index < boundaries.length - 1; index += 1) {
-    const places = pickVersionBefore(
+    const version = pickVersionBefore(
       effectiveVersions,
       startOfNextUtcDay(new Date(boundaries[index])).getTime()
-    )?.placesAutorisees;
-    if (places == null) {
+    );
+    const places = version?.placesAutorisees;
+    if (version == null || places == null) {
       continue;
     }
     const segmentJours = countDaysBetween(
@@ -90,26 +141,49 @@ export const computeStructureJoursPlaces = (
     );
     jours += segmentJours;
     joursPlaces += segmentJours * places;
+    joursPlacesHuda +=
+      segmentJours * (placesHudaByVersionId.get(version.id) ?? 0);
   }
 
-  return jours > 0 ? { jours, joursPlaces } : null;
+  return jours > 0 ? { jours, joursPlaces, joursPlacesHuda } : null;
+};
+
+/** Places moyennes / ETP cibles moyens : les places venues d'un HUDA restent au taux HUDA. */
+export const computeTauxEncadrementCible = (
+  ciblesFinancieres: CiblesFinancieresLookup,
+  structureType: StructureType | null,
+  joursPlaces: StructureJoursPlaces | null
+): number | null => {
+  const tauxStructure =
+    ciblesFinancieres.getTauxEncadrementCible(structureType);
+  if (tauxStructure === null || !joursPlaces?.joursPlacesHuda) {
+    return tauxStructure;
+  }
+  const tauxHuda = ciblesFinancieres.getTauxEncadrementCible(
+    StructureType.HUDA
+  );
+  if (tauxHuda === null) {
+    return null;
+  }
+  const joursEtpCible =
+    (joursPlaces.joursPlaces - joursPlaces.joursPlacesHuda) / tauxStructure +
+    joursPlaces.joursPlacesHuda / tauxHuda;
+  return joursPlaces.joursPlaces / joursEtpCible;
 };
 
 type CiblesFinancieresInputs = {
   tarifsJournaliersCibles: StatistiqueDbTarifJournalierCible[];
   tauxEncadrementCibles: StatistiqueDbTauxEncadrementCible[];
   idfDepartementNumeros: Set<string>;
-  cadaFromHudaStructureIds: Set<number>;
 };
 
 const toCibleKey = (
   structureType: string | null,
   year: number,
-  isIdf: boolean,
-  isFromHuda = false
-): string => `${structureType}|${year}|${isIdf}|${isFromHuda}`;
+  isIdf: boolean
+): string => `${structureType}|${year}|${isIdf}`;
 
-/** Cibles par structure : selon son type, l'année, son zonage IDF et, pour le taux, son origine HUDA. */
+/** Tarif cible selon le type, l'année et le zonage IDF ; taux cible selon le type seul. */
 export const buildCiblesFinancieresLookup = (
   inputs: CiblesFinancieresInputs
 ): CiblesFinancieresLookup => {
@@ -119,14 +193,9 @@ export const buildCiblesFinancieresLookup = (
       cible.tarifCible,
     ])
   );
-  const tauxByKey = new Map(
+  const tauxByStructureType = new Map(
     inputs.tauxEncadrementCibles.map((cible) => [
-      toCibleKey(
-        cible.structureType,
-        cible.year,
-        cible.isIdf,
-        cible.isFromHuda
-      ),
+      cible.structureType,
       cible.tauxCible,
     ])
   );
@@ -137,14 +206,7 @@ export const buildCiblesFinancieresLookup = (
     getTarifJournalierCible: (structure, year) =>
       tarifByKey.get(toCibleKey(structure.type, year, isIdf(structure))) ??
       null,
-    getTauxEncadrementCible: (structure, year) =>
-      tauxByKey.get(
-        toCibleKey(
-          structure.type,
-          year,
-          isIdf(structure),
-          inputs.cadaFromHudaStructureIds.has(structure.id)
-        )
-      ) ?? null,
+    getTauxEncadrementCible: (structureType) =>
+      (structureType && tauxByStructureType.get(structureType)) ?? null,
   };
 };

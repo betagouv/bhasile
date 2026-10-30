@@ -1,4 +1,4 @@
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -80,7 +80,9 @@ export const cph2: TestStructureScenario = {
       fileUploads: buildRequiredDocumentsFinanciers({
         structureType: StructureType.CPH,
         resolveFormKind: (document) =>
-          Number(document.year) >= CURRENT_YEAR - 2 ? "finalisation" : "ajout",
+          Number(document.year) >= getCurrentYear() - 2
+            ? "finalisation"
+            : "ajout",
       }),
     },
     finances: {

@@ -67,7 +67,7 @@ TarificationCampaign 1─N StructureTarification 1─2 Conversation 1─N Messag
 
 ## Campagnes et conversations
 
-- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule : plus aucun message ni changement de tag, mais la lecture reste possible et les lectures restent enregistrées. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur l'année en cours (`CURRENT_YEAR`), sans cron.
+- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule : plus aucun message ni changement de tag, mais la lecture reste possible et les lectures restent enregistrées. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur l'année en cours (`getCurrentYear`), sans cron.
 - **Une conversation par tarification et par canal**, au plus deux par tarification (unicité `(structureTarificationId, visibility)`). La visibilité appartient à la conversation, pas au message : l'accès se vérifie une fois, sur la conversation, et aucune requête ne peut faire fuiter le canal agents en oubliant un filtre.
 - **Création à la volée** : la tarification et la conversation sont créées au premier message (création idempotente sur leurs clés uniques). Une campagne ouverte sans message n'existe qu'à l'écran.
 
@@ -113,13 +113,13 @@ type ConversationContext = {
 - **Fermé par défaut.** La messagerie ne reprend **pas** la règle de lecture de Bhasile, ouverte à tous (voir [Permissions](permissions.md)).
 - **Opérateur** : la conversation partagée de ses structures. La conversation agents n'existe pas pour lui (`canReadConversation`).
 - **DREETS** : les deux conversations des structures de sa région.
-- **Superadmins** : lecture seule, partout. Ils n'écrivent jamais et leurs lectures ne laissent pas d'accusé : aucun message de l'équipe technique n'entre dans le journal d'une tarification. Les tests d'écriture se font en staging.
+- **Superadmins** : les deux conversations de toutes les structures, en lecture et en écriture, comme un agent. Sans grant régional, ils signent au niveau départemental.
 - **Agents nationaux** : aucun accès. Ils n'interviennent pas dans les échanges, et les services territoriaux préfèrent qu'ils n'y aient pas accès.
 
 ## Lectures, non-lus et temps réel
 
 - **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand : la lecture d'une conversation renvoie les accusés de chaque message. Restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
-- **Accusé envoyé par l'écran** : le client n'envoie que les messages d'autrui sans accusé à son nom, et seulement quand ils sont affichés (onglet visible). Les superadmins n'en envoient jamais.
+- **Accusé envoyé par l'écran** : le client n'envoie que les messages d'autrui sans accusé à son nom, et seulement quand ils sont affichés (onglet visible).
 - **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La messagerie expose un compteur par structure, que le bloc tarification du dashboard affiche.
 - **Temps réel** : tant que les échanges sont affichés, le client relit toute la conversation toutes les 10 secondes et remplace sa liste (`src/hooks/useConversationMessages.ts`).
   - La requête suivante ne part que 10 secondes après la réponse de la précédente (`setTimeout` chaîné) : un serveur lent n'accumule pas de requêtes.
@@ -173,7 +173,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : l'envoi des notifications se recette en préprod.
 
 ## Interface
@@ -185,16 +185,16 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 - **Page** `/structures/[id]/tarification/[year]`, hors navigation principale. `/structures/[id]/tarification` redirige vers la campagne de l'année en cours. Le bouton « Tarification » de l'en-tête de la fiche n'apparaît qu'à qui a accès.
 - **Sélecteur de campagne** : les campagnes ouvertes et les campagnes passées qui ont une tarification, de la plus récente à la plus ancienne. Une autre année donne une page introuvable.
 - **Deux onglets** : « Tout le monde » (conversation partagée) et « Services de l'État seulement » (conversation agents), absent pour l'opérateur. L'onglet est dans l'URL (`?canal=agents`), pour que les liens des mails ouvrent le bon canal ; un opérateur est toujours ramené au canal partagé.
-- **Un fil chronologique** : auteur, niveau (DDETS, DREETS, Opérateur), date et heure de Paris, « Lu par » ; on écrit toujours à la suite (« Écrivez un message »). Texte brut, retours à la ligne conservés.
+- **Un fil chronologique** : auteur, niveau (DDETS, DREETS, Opérateur), date et heure locales, « Lu par » ; on écrit toujours à la suite (« Écrivez un message »). Texte brut, retours à la ligne conservés.
 - **Envoi sans affichage optimiste** : le message n'apparaît qu'une fois accepté par le serveur. Le journal fait preuve : il n'affiche jamais un message que le serveur aurait refusé.
 - **Pièces jointes** : bouton « Joindre des fichiers » (plusieurs à la fois), envoi de chaque fichier dès qu'il est choisi, puis rattachement par clé à l'envoi du message. Affichées dans le fil sous leur message (nom, format, taille), ouvertes par un lien signé demandé au clic ; elles n'apparaissent pas dans la navigation dans les documents.
   - Validation par le serveur seulement, comme dans le reste de l'application : un fichier refusé affiche le message du serveur, et « Envoyer » reste désactivé tant qu'un fichier est en cours d'envoi ou en erreur (pas de « ci-joint » sans la pièce).
   - Retirer une pièce jointe supprime le fichier ; un fichier retiré pendant son envoi est supprimé à son arrivée. Une saisie abandonnée laisse des fichiers orphelins (voir [Évolutions possibles](#évolutions-possibles)).
   - Un envoi refusé garde le texte et les pièces jointes ; un envoi accepté les vide sans supprimer les fichiers, désormais rattachés.
-- **Lecture seule** affichée en bandeau, à la place de la saisie : campagne close, ou superadmin.
+- **Lecture seule** affichée en bandeau, à la place de la saisie : campagne close.
 - **Tags** : liste fournie par la tarification (`getTarificationOverview`), passée en props jusqu'aux composants de la messagerie. L'interface est en attente de la maquette.
   - Pour un agent sur une campagne ouverte : un sélecteur « Tag » à l'écriture (vide par défaut, vidé après l'envoi) et un sélecteur sur chaque message. Un seul changement à la fois par message. Forme provisoire, à revoir avec les maquettes définitives : chaque sélecteur s'appelle « Tag », sans dire de quel message (accessibilité).
-  - Pour les autres (opérateur, superadmin, campagne close) : le tag en lecture seule, rien pour un message sans tag.
+  - Pour les autres (opérateur, campagne close) : le tag en lecture seule, rien pour un message sans tag.
   - Modification affichée tout de suite, puis fil relu depuis le serveur, que la modification réussisse ou non ; un échec affiche le message du serveur sous le sélecteur.
 
 **À venir**

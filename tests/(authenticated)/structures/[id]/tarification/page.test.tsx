@@ -14,12 +14,9 @@ vi.mock("next/navigation", () => ({
   notFound: () => mockNotFound(),
 }));
 
-vi.mock("@/constants", async () => {
-  const actual = await vi.importActual("@/constants");
-  return {
-    ...actual,
-    CURRENT_YEAR: 2027,
-  };
+vi.mock("@/app/utils/now.util", async () => {
+  const actual = await vi.importActual("@/app/utils/now.util");
+  return { ...actual, getCurrentYear: () => 2027 };
 });
 
 describe("CurrentTarificationPage", () => {

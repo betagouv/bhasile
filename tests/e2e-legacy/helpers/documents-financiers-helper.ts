@@ -51,7 +51,7 @@ export async function handleDocumentsFinanciers(
       }
 
       if (shouldAdd && !isImported) {
-        await addDocumentViaDropzone(container, document);
+        await addDocumentToBox(container, document);
       }
     }
   }
@@ -63,55 +63,37 @@ const getYearContainer = async (page: Page, year: number) => {
     level: 2,
   });
   await expect(heading).toBeVisible();
-  const fieldset = page.locator("fieldset").filter({ has: heading }).first();
-  if ((await fieldset.count()) > 0) {
-    await expect(fieldset).toBeVisible();
-    return fieldset;
-  }
-  const fallback = heading.locator("..");
-  await expect(fallback).toBeVisible();
-  return fallback;
+  return heading.locator("xpath=..");
 };
+
+const getDocumentBox = (
+  container: ReturnType<Page["locator"]>,
+  label: string
+) => container.getByRole("group", { name: label, exact: true });
+
+const getDeleteFileButton = (
+  container: ReturnType<Page["locator"]>,
+  label: string
+) =>
+  getDocumentBox(container, label).getByRole("button", { name: /^Supprimer / });
 
 const isDocumentImported = async (
   container: ReturnType<Page["locator"]>,
   label: string
-) => {
-  const categoryButton = getCategoryButton(container, label);
-  if ((await categoryButton.count()) === 0) {
-    return false;
-  }
-  const texts = await categoryButton.allTextContents();
-  return texts.some((text) => text.includes("Importé"));
-};
+) => (await getDeleteFileButton(container, label).count()) > 0;
 
-const addDocumentViaDropzone = async (
+const addDocumentToBox = async (
   container: ReturnType<Page["locator"]>,
   document: TestStructureData["documentsFinanciers"]["fileUploads"][number]
 ) => {
-  const fileInput = container.locator('input[type="file"]').first();
+  const fileInput = getDocumentBox(container, document.category).locator(
+    'input[type="file"]'
+  );
   await fileInput.setInputFiles(path.join(process.cwd(), document.filePath));
 
-  const categorySelect = container.getByRole("combobox", {
-    name: "Type de document",
+  await expect(getDeleteFileButton(container, document.category)).toBeVisible({
+    timeout: TIMEOUTS.FILE_UPLOAD,
   });
-  await expect(categorySelect).toBeVisible({ timeout: TIMEOUTS.FILE_UPLOAD });
-  await categorySelect.selectOption({ label: document.category });
-
-  const addButton = container.getByRole("button", {
-    name: "Ajouter le document",
-  });
-  await expect(addButton).toBeEnabled();
-  await addButton.click();
-
-  await expectDocumentImported(container, document.category);
-};
-
-const getCategoryButton = (
-  container: ReturnType<Page["locator"]>,
-  label: string
-) => {
-  return container.locator("button").filter({ hasText: label }).first();
 };
 
 const expectDocumentImported = async (
@@ -119,8 +101,7 @@ const expectDocumentImported = async (
   label: string,
   year?: number
 ) => {
-  const categoryButton = getCategoryButton(container, label);
-  if ((await categoryButton.count()) === 0) {
+  if ((await getDocumentBox(container, label).count()) === 0) {
     const context = year
       ? formatErrorMessage(
           "Document financier introuvable",
@@ -130,5 +111,5 @@ const expectDocumentImported = async (
       : formatErrorMessage("Document financier introuvable", undefined, label);
     throw new ElementNotFoundError(label, context);
   }
-  await expect(categoryButton).toContainText("Importé");
+  await expect(getDeleteFileButton(container, label)).toBeVisible();
 };

@@ -19,6 +19,7 @@ import {
 } from "@/app/api/statistiques/statistiques.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
+import { TransformationType } from "@/types/transformation.type";
 
 export const testStructure = (
   id: number,
@@ -61,6 +62,7 @@ type BuildTestStructureVersionTimelineEntry = {
   structureVersionId?: number;
   effectiveDate?: Date;
   placesAutorisees?: number | null;
+  transformationType?: TransformationType;
 };
 
 export const buildTestStructureVersionTimeline = (
@@ -78,6 +80,9 @@ export const buildTestStructureVersionTimeline = (
     structureId: entry.structureId,
     effectiveDate: entry.effectiveDate ?? defaultEffectiveDate,
     placesAutorisees: entry.placesAutorisees ?? null,
+    structureVersionTransformation: entry.transformationType
+      ? { transformation: { type: entry.transformationType } }
+      : null,
   }));
 };
 
@@ -169,7 +174,6 @@ export const buildTestCiblesFinancieres = (
     tarifsJournaliersCibles: [],
     tauxEncadrementCibles: [],
     idfDepartementNumeros: new Set(),
-    cadaFromHudaStructureIds: new Set(),
     ...inputs,
   });
 
@@ -201,8 +205,8 @@ export const buildTestStatistiquesContext = (
         | "ciblesFinancieres"
       >
     > & {
-    structureVersionTimeline?: StatistiqueDbStructureVersionTimeline[];
-  }
+      structureVersionTimeline?: StatistiqueDbStructureVersionTimeline[];
+    }
 ): StatistiquesContext => {
   const structures = partial.structures;
   const allStructures = partial.allStructures ?? structures;
@@ -228,7 +232,7 @@ export const buildTestStatistiquesContext = (
   const dnaLinks = partial.dnaLinks ?? [];
   const timelineByStructureId = indexTimelineByStructureId(
     partial.structureVersionTimeline ??
-    buildTestStructureVersionTimeline(allStructureIds)
+      buildTestStructureVersionTimeline(allStructureIds)
   );
 
   return {

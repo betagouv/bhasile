@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { ChartLegend } from "@/app/components/ChartLegend";
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 import { getCompletudeChartData } from "@/utils/statistiques.util";
@@ -28,7 +28,7 @@ export const BalanceChart = ({ startYear, endYear }: Props): ReactElement => {
       : getYearRange();
 
   const yearsWithBudget = years
-    .filter((year) => year < CURRENT_YEAR)
+    .filter((year) => year < getCurrentYear())
     .map((year) => ({
       year,
       budget: statistiques.finance.byYear.find(

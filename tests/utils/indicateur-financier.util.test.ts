@@ -7,7 +7,7 @@ import {
   isYearPrevisionnelle,
   isYearRealisee,
 } from "@/app/utils/indicateur-financier.util";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 
 const rempli = (
@@ -35,7 +35,9 @@ describe("getIndicateurFinancierTypes", () => {
   });
 
   it("renvoie prévisionnel seul pour l'année courante", () => {
-    expect(getIndicateurFinancierTypes(CURRENT_YEAR)).toEqual(["PREVISIONNEL"]);
+    expect(getIndicateurFinancierTypes(getCurrentYear())).toEqual([
+      "PREVISIONNEL",
+    ]);
   });
 });
 
@@ -46,7 +48,7 @@ describe("getIndicateursFinanciersDefaultValues", () => {
     expect(
       result.filter(
         (indicateurFinancier) =>
-          indicateurFinancier.year === CURRENT_YEAR &&
+          indicateurFinancier.year === getCurrentYear() &&
           indicateurFinancier.type === "REALISE"
       )
     ).toEqual([]);
@@ -92,8 +94,8 @@ describe("getEveryColumn", () => {
   it("n'affiche que le prévisionnel pour l'année courante, même si un réalisé existe en base", () => {
     const [colonnes] = getEveryColumn(
       false,
-      [rempli(CURRENT_YEAR, "REALISE")],
-      [CURRENT_YEAR]
+      [rempli(getCurrentYear(), "REALISE")],
+      [getCurrentYear()]
     );
 
     expect(colonnes).toEqual(["PREVISIONNEL"]);
@@ -103,7 +105,7 @@ describe("getEveryColumn", () => {
 describe("isYearRealisee / isYearPrevisionnelle", () => {
   it("rejette un réalisé sur l'année courante, non close", () => {
     expect(
-      isYearRealisee([rempli(CURRENT_YEAR, "REALISE")], CURRENT_YEAR)
+      isYearRealisee([rempli(getCurrentYear(), "REALISE")], getCurrentYear())
     ).toBe(false);
   });
 

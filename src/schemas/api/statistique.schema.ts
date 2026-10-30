@@ -81,7 +81,6 @@ export type FinanceByYearScopeStat = {
   tauxEncadrementCible: number | null;
   tauxEncadrementTheoriquePrevisionnel: number | null;
   tauxEncadrementTheoriqueRealise: number | null;
-  coutJournalierCible: number | null;
   coutJournalierTheorique: number | null;
   totalProduits: number;
   totalCharges: number;

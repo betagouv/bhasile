@@ -30,7 +30,7 @@ vi.mock("@/app/api/tarifications/tarification.service", () => ({
     mockPostTarificationMessage(...args),
 }));
 
-const participant = { id: 3, level: "DEPARTEMENT", isSuperAdmin: false };
+const participant = { id: 3, level: "DEPARTEMENT" };
 const reader = { isAgent: true };
 const params = Promise.resolve({ structureId: "42", year: "2027" });
 
@@ -85,7 +85,7 @@ describe("GET /api/tarifications/[structureId]/[year]/messages", () => {
 
   it("renvoie le refus d'accès du service", async () => {
     mockGetTarificationReader.mockRejectedValue(
-      new DomainError("Accès refusé à la tarification de la structure", 403)
+      new DomainError("Accès à la tarification de la structure refusé", 403)
     );
 
     const response = await GET(buildGetRequest("SHARED"), { params });

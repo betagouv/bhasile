@@ -52,14 +52,3 @@ export const getCategoryLabel = (
   };
   return labels[category] || "";
 };
-
-export const getShortDisplayedName = (
-  name: string = "",
-  length: number = 25
-): string => {
-  if (name.length > length) {
-    const splittedName = name.split(".");
-    return splittedName[0].slice(0, 20) + "..." + splittedName[1];
-  }
-  return name;
-};
