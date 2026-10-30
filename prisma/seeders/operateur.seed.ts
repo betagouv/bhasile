@@ -32,6 +32,7 @@ type OperateurWithRelations = Operateur & {
     | "controleId"
     | "evaluationId"
     | "operateurId"
+    | "messageId"
   >;
 };
 

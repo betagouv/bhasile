@@ -18,4 +18,9 @@ export {
   canUpdateStructure,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
+  type StructureScope,
 } from "./structure.ability";
+export {
+  canAccessTarification,
+  canReadConversation,
+} from "./tarification.ability";
