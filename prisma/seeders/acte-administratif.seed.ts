@@ -19,6 +19,7 @@ export const createFakeActeAdministratif = (): Omit<
   | "structureId"
   | "operateurId"
   | "structureVersionTransformationId"
+  | "sourceTarificationDocumentId"
 > => {
   return {
     date: faker.date.past(),

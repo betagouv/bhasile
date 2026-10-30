@@ -14,7 +14,12 @@ export type DocumentFinancierWithFileUploads = DocumentFinancier & {
 
 export const createFakeDocumentFinancier = (): Omit<
   DocumentFinancierWithFileUploads,
-  "id" | "structureDnaCode" | "cpomId" | "structureId" | "granularity"
+  | "id"
+  | "structureDnaCode"
+  | "cpomId"
+  | "structureId"
+  | "granularity"
+  | "sourceTarificationDocumentId"
 > => {
   return {
     year: faker.number.int({
