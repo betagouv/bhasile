@@ -1,0 +1,58 @@
+model Conversation {
+  id                      Int                   @id @default(autoincrement())
+  structureTarification   StructureTarification @relation(fields: [structureTarificationId], references: [id], onDelete: Restrict)
+  structureTarificationId Int
+  visibility              Visibility
+  messages                Message[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([structureTarificationId, visibility])
+  @@schema("public")
+}
+
+// Ajout seul : jamais modifié ni supprimé, sauf tagKey (voir docs/messagerie.md)
+model Message {
+  id             Int              @id @default(autoincrement())
+  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  conversationId Int
+  author         User             @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  authorId       Int
+  authorLevel    AuthorLevel
+  text           String
+  tagKey         String?
+  receipts       MessageReceipt[]
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, id])
+  @@schema("public")
+}
+
+model MessageReceipt {
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Restrict)
+  messageId Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId    Int
+
+  createdAt DateTime @default(now())
+
+  @@id([messageId, userId])
+  @@index([userId])
+  @@schema("public")
+}
+
+enum Visibility {
+  SHARED
+  AGENTS
+
+  @@schema("public")
+}
+
+enum AuthorLevel {
+  DEPARTEMENT
+  REGION
+  OPERATEUR
+
+  @@schema("public")
+}

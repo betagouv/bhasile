@@ -120,7 +120,7 @@ enum AuthorLevel { DEPARTEMENT REGION OPERATEUR }
 
 ## Campagnes et conversations
 
-- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule : plus aucun message ni changement de tag, mais la lecture reste possible et les lectures restent enregistrées. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur la date du jour (heure de Paris), sans cron.
+- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule : plus aucun message ni changement de tag, mais la lecture reste possible et les lectures restent enregistrées. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur l'année en cours (`CURRENT_YEAR`), sans cron.
 - **Une conversation par tarification et par canal**, au plus deux par tarification (unicité `(structureTarificationId, visibility)`). La visibilité appartient à la conversation, pas au message : l'accès se vérifie une fois, sur la conversation, et aucune requête ne peut faire fuiter le canal agents en oubliant un filtre.
 - **Création à la volée** : la tarification et la conversation sont créées au premier message (création idempotente sur leurs clés uniques). Une campagne ouverte sans message n'existe qu'à l'écran.
 
@@ -239,8 +239,8 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 
 | Brique                           | Où                                                                                                                                     | État    |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Modèle et squelette tarification | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                               | à faire |
-| Messagerie (agnostique)          | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                         | à faire |
+| Modèle et squelette tarification | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                               | fait    |
+| Messagerie (agnostique)          | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                         | fait    |
 | Branchement tarification         | `src/app/api/tarifications/` : tags (`tarification.constants.ts`), fenêtre de campagne (`tarification.util.ts`), droits et participant | à faire |
 | Routes                           | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]` | à faire |
 | Droits                           | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                | à faire |
