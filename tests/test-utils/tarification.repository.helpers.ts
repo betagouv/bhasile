@@ -18,6 +18,15 @@ export const deleteTarificationTestData = async ({
     where: documentWhere,
     select: { fileUploadId: true },
   });
+  await prisma.documentFinancier.deleteMany({
+    where: { sourceTarificationDocument: documentWhere },
+  });
+  await prisma.acteAdministratif.deleteMany({
+    where: { sourceTarificationDocument: documentWhere },
+  });
+  await prisma.tarificationEventNotification.deleteMany({
+    where: { event: { structureTarification: { structureId } } },
+  });
   await prisma.tarificationDocumentOpening.deleteMany({
     where: { document: documentWhere },
   });
@@ -44,6 +53,6 @@ export const deleteTarificationTestData = async ({
   await prisma.conversation.deleteMany({ where: conversationWhere });
   await prisma.structureTarification.deleteMany({ where: { structureId } });
   await prisma.tarificationCampaign.deleteMany({
-    where: { year: campaignYear },
+    where: { year: campaignYear, structureTarifications: { none: {} } },
   });
 };

@@ -11,6 +11,7 @@ import {
   assertCanPostMessage,
   getAuthorLevel,
 } from "@/app/api/conversations/conversation.util";
+import { copyStoredFile } from "@/app/api/files/file.service";
 import { isStructureInCpom } from "@/app/api/structures/structure.util";
 import {
   findUsersWithGrantsOnStructure,
@@ -24,7 +25,7 @@ import {
   AuthorLevel,
   TarificationDocumentStatus,
   type TarificationDocumentType,
-  type TarificationEventType,
+  TarificationEventType,
   type TarificationStepCode,
   type Visibility,
 } from "@/generated/prisma/enums";
@@ -44,6 +45,10 @@ import {
   toCivilDate,
 } from "@/lib/tarification/tarification.date";
 import {
+  computeFicheCopies,
+  computeFicheCopyChanges,
+} from "@/lib/tarification/tarification.fiche";
+import {
   assertCanDepositDocument,
   assertCanRecordEvent,
 } from "@/lib/tarification/tarification.guard";
@@ -54,6 +59,7 @@ import {
 import type { ConversationTag } from "@/types/conversation.type";
 import { SessionUser } from "@/types/global";
 import type {
+  FicheCopy,
   TarificationJournalEvent,
   TarificationJournalRead,
   TarificationJournalView,
@@ -62,6 +68,7 @@ import type {
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
 import {
   createTarificationDocumentOpening,
+  findFicheCopies,
   findMessageTarification,
   findPendingMessageContexts,
   findStructureScope,
@@ -248,10 +255,10 @@ export const getTarificationJournal = async ({
   year: number;
   reader: TarificationReader;
 }): Promise<TarificationJournalView> => {
-  const { journal, drlUrl } = await loadTarificationJournal(year, {
-    findJournal: () => findStructureTarificationJournal(structureId, year),
-    findCampaign: () => findTarificationCampaign(year),
-  });
+  const { journal, drlUrl } = await loadTarificationJournal(
+    year,
+    getJournalSource(structureId, year)
+  );
   return {
     journal: reader.isAgent ? journal : filterJournalForOperateur(journal),
     state: computeTarificationState(journal, getNow()),
@@ -276,7 +283,7 @@ export const depositTarificationDocument = async ({
 }): Promise<{ id: number }> => {
   const structure = await findStructureScopeOrThrow(structureId);
   assertStructureEligible(structure);
-  return runInTarificationTransaction(
+  const document = await runInTarificationTransaction(
     structureId,
     year,
     async (transaction) => {
@@ -293,6 +300,10 @@ export const depositTarificationDocument = async ({
       return transaction.createDocument({ fileKey, types, status, author });
     }
   );
+  if (status === TarificationDocumentStatus.SHARED) {
+    await trySyncFicheCopies(structureId, year);
+  }
+  return document;
 };
 
 export const recordTarificationEvent = async ({
@@ -322,7 +333,7 @@ export const recordTarificationEvent = async ({
     stepCode,
     text,
   };
-  return runInTarificationTransaction(
+  const createdEvent = await runInTarificationTransaction(
     structureId,
     year,
     async (transaction) => {
@@ -337,6 +348,114 @@ export const recordTarificationEvent = async ({
       return transaction.createEvent(event);
     }
   );
+  if (
+    type === TarificationEventType.DOCUMENT_SHARED ||
+    type === TarificationEventType.DOCUMENT_WITHDRAWN
+  ) {
+    await trySyncFicheCopies(structureId, year);
+  }
+  return createdEvent;
+};
+
+// Les copies S3 se font hors transaction, pour ne pas tenir le verrou pendant un appel réseau : l'état voulu
+// est recalculé sous verrou, et un objet copié pour rien reste orphelin
+export const syncFicheCopies = async (
+  structureId: number,
+  year: number
+): Promise<void> => {
+  const { journal } = await loadTarificationJournal(
+    year,
+    getJournalSource(structureId, year)
+  );
+  const { copiesToCreate, copiesToDelete } = computeFicheCopyChanges(
+    computeFicheCopies(journal),
+    await findFicheCopies(structureId, year)
+  );
+  if (copiesToCreate.length === 0 && copiesToDelete.length === 0) {
+    return;
+  }
+  const storedKeys = await storeFicheCopies(journal, copiesToCreate);
+  const structure = await findStructureScopeOrThrow(structureId);
+
+  await runInTarificationTransaction(structureId, year, async (transaction) => {
+    const { journal: lockedJournal } = await loadTarificationJournal(
+      year,
+      transaction
+    );
+    const changes = computeFicheCopyChanges(
+      computeFicheCopies(lockedJournal),
+      await transaction.findFicheCopies()
+    );
+    for (const copy of changes.copiesToDelete) {
+      await transaction.deleteFicheCopy(copy);
+    }
+    for (const copy of changes.copiesToCreate) {
+      const key = storedKeys.get(getFicheCopyKey(copy));
+      if (key) {
+        await transaction.createFicheCopy({
+          copy,
+          structureType: structure.type,
+          file: { ...findJournalDocument(lockedJournal, copy).fileUpload, key },
+        });
+      }
+    }
+  });
+};
+
+// Une copie qui échoue ne bloque pas le reste : un document retiré doit quitter la fiche même si S3 est en panne
+const storeFicheCopies = async (
+  journal: TarificationJournalRead,
+  copies: FicheCopy[]
+): Promise<Map<string, string>> => {
+  const storedKeys = new Map<string, string>();
+  for (const copy of copies) {
+    const { fileUpload } = findJournalDocument(journal, copy);
+    try {
+      storedKeys.set(
+        getFicheCopyKey(copy),
+        await copyStoredFile(
+          process.env.S3_BUCKET_NAME!,
+          fileUpload.key,
+          fileUpload.originalName
+        )
+      );
+    } catch (error) {
+      console.error(`Copie du document ${copy.documentId} impossible`, error);
+    }
+  }
+  return storedKeys;
+};
+
+const getFicheCopyKey = ({ documentId, category }: FicheCopy): string =>
+  `${documentId}-${category}`;
+
+const findJournalDocument = (
+  journal: TarificationJournalRead,
+  { documentId }: FicheCopy
+) => journal.documents.find((document) => document.id === documentId)!;
+
+const getJournalSource = (
+  structureId: number,
+  year: number
+): TarificationJournalSource => ({
+  findJournal: () => findStructureTarificationJournal(structureId, year),
+  findCampaign: () => findTarificationCampaign(year),
+});
+
+// Le fait est déjà écrit : une panne de la copie ne doit pas le faire passer pour un échec. Le prochain dépôt,
+// partage ou retrait rattrape la fiche
+const trySyncFicheCopies = async (
+  structureId: number,
+  year: number
+): Promise<void> => {
+  try {
+    await syncFicheCopies(structureId, year);
+  } catch (error) {
+    console.error(
+      `Copie vers la fiche impossible (structure ${structureId}, campagne ${year})`,
+      error
+    );
+  }
 };
 
 export const authorizeTarificationDocument = async ({
