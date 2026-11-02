@@ -39,7 +39,6 @@ describe("Menu", () => {
 
     // WHEN
     render(<Menu />);
-    fireEvent.click(getGroupButton("Structures d’hébergement"));
 
     // THEN
     const logo = screen.getByRole("link", {
@@ -53,7 +52,7 @@ describe("Menu", () => {
     const cpoms = screen.getByRole("link", { name: "Voir les CPOM" });
     expect(cpoms).toHaveAttribute("href", "/cpoms");
     const operateurs = screen.getByRole("link", {
-      name: "Opérateurs",
+      name: "Voir les opérateurs",
     });
     expect(operateurs).toHaveAttribute("href", "/operateurs");
     const statistiques = screen.getByRole("link", { name: "Statistiques" });
@@ -92,7 +91,7 @@ describe("Menu", () => {
     expect(codeSource).toHaveAttribute("rel", "noopener external");
   });
 
-  it("déploie le groupe Structures d'hébergement par défaut quand on est sur /structures", () => {
+  it("déploie le groupe Structures et opérateurs par défaut quand on est sur /structures", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
@@ -111,14 +110,14 @@ describe("Menu", () => {
     render(<Menu />);
 
     // THEN
-    expect(getGroupButton("Structures d’hébergement")).toHaveAttribute(
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
       "aria-expanded",
       "true"
     );
     expect(screen.getByText("Voir les structures")).toBeInTheDocument();
   });
 
-  it("replie Structures d'hébergement quand on clique dessus", () => {
+  it("replie Structures et opérateurs quand on clique dessus", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
@@ -136,13 +135,13 @@ describe("Menu", () => {
     render(<Menu />);
 
     // WHEN
-    fireEvent.click(getGroupButton("Structures d’hébergement"));
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
 
     // THEN
     expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
   });
 
-  it("redéploie Structures d'hébergement au second clic", () => {
+  it("redéploie Structures et opérateurs au second clic", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
@@ -159,11 +158,9 @@ describe("Menu", () => {
 
     render(<Menu />);
 
-    // WHEN - premier clic
-    fireEvent.click(getGroupButton("Structures d’hébergement"));
-
-    // WHEN - second clic
-    fireEvent.click(getGroupButton("Structures d’hébergement"));
+    // WHEN
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
 
     // THEN
     expect(screen.getByText("Voir les structures")).toBeInTheDocument();
@@ -190,13 +187,13 @@ describe("Menu", () => {
     rerender(<Menu />);
 
     // THEN
-    expect(getGroupButton("Structures d’hébergement")).toHaveAttribute(
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
       "aria-expanded",
       "true"
     );
   });
 
-  it("garde le groupe replié en changeant de page vers un autre endroit", () => {
+  it("ouvre ou maintient le groupe si le chemin correspond à un sous-élément en changeant de page", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
@@ -213,16 +210,16 @@ describe("Menu", () => {
     const { rerender } = render(<Menu />);
 
     // WHEN
-    fireEvent.click(getGroupButton("Structures d’hébergement"));
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
 
     // WHEN
     mockPathname.mockReturnValue("/operateurs");
     rerender(<Menu />);
 
     // THEN
-    expect(getGroupButton("Structures d’hébergement")).toHaveAttribute(
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
       "aria-expanded",
-      "false"
+      "true"
     );
   });
 
@@ -243,15 +240,17 @@ describe("Menu", () => {
       status: "authenticated",
       update: vi.fn(),
     });
+
     // WHEN
     render(<Menu />);
 
     // THEN
-    const operateurLink = screen.getByRole("link", { name: "Opérateur" });
+    const operateurLink = screen.getByRole("link", {
+      name: "Voir l’opérateur",
+    });
     expect(operateurLink).toHaveAttribute("href", "/operateurs/10");
 
-    expect(screen.queryByText("Tableau de bord")).not.toBeInTheDocument();
-    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
-    expect(screen.queryByText("Opérateurs")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tableau de bord")).toBeInTheDocument();
+    expect(screen.queryByText("Voir les structures")).toBeInTheDocument();
   });
 });

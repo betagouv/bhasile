@@ -3,122 +3,79 @@ import { ApiRoute } from "../types/proxy.type";
 export const protectedApiRoutes: ApiRoute[] = [
   {
     pattern: /^\/api\/structures$/,
-    routes: {
-      GET: "either",
-      POST: "password",
-    },
+    routes: { GET: "either", POST: "password" },
   },
   {
     pattern: /^\/api\/structures\/\d+$/,
-    routes: {
-      GET: "either",
-      PUT: "proconnect",
-    },
+    routes: { GET: "either", PUT: "proconnect" },
   },
   {
     pattern: /^\/api\/structures\/[^/]+\/actualisation$/,
-    routes: {
-      PUT: "proconnect",
-    },
+    routes: { PUT: "proconnect" },
   },
   {
     pattern: /^\/api\/cpoms$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/cpoms\/[^/]+$/,
-    routes: {
-      PUT: "proconnect",
-    },
+    routes: { PUT: "proconnect" },
   },
   {
     pattern: /^\/api\/dna-codes$/,
-    routes: {
-      GET: "either",
-    },
+    routes: { GET: "either" },
   },
   {
     pattern: /^\/api\/files\/[^/]+$/,
-    routes: {
-      GET: "either",
-      DELETE: "either",
-    },
+    routes: { GET: "either", DELETE: "either" },
   },
   {
     pattern: /^\/api\/files$/,
-    routes: {
-      POST: "either",
-    },
+    routes: { POST: "either" },
   },
   {
     pattern: /^\/api\/operateurs\/suggestions$/,
-    routes: {
-      GET: "either",
-    },
+    routes: { GET: "either" },
   },
   {
     pattern: /^\/api\/operateurs\/[^/]+$/,
-    routes: {
-      PUT: "proconnect",
-    },
+    routes: { PUT: "proconnect" },
   },
   {
     pattern: /^\/api\/activites\/stats$/,
-    routes: {
-      GET: "proconnect",
-    },
+    routes: { GET: "proconnect" },
   },
   {
     pattern: /^\/api\/statistiques$/,
-    routes: {
-      GET: "proconnect",
-    },
+    routes: { GET: "proconnect" },
   },
   {
     pattern: /^\/api\/statistiques\/cartographie$/,
-    routes: {
-      GET: "proconnect",
-    },
+    routes: { GET: "proconnect" },
   },
   {
     pattern: /^\/api\/auth(?:\/.*)?$/,
-    routes: {
-      GET: "none",
-      POST: "none",
-    },
+    routes: { GET: "none", POST: "none" },
   },
   {
     pattern: /^\/api\/metabase$/,
-    routes: {
-      GET: "none",
-    },
+    routes: { GET: "none" },
   },
   {
     pattern: /^\/api\/transformations$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/transformations\/[^/]+$/,
-    routes: {
-      PUT: "proconnect",
-      DELETE: "proconnect",
-    },
+    routes: { PUT: "proconnect", DELETE: "proconnect" },
   },
   {
     pattern: /^\/api\/transformations\/[^/]+\/selection$/,
-    routes: {
-      PUT: "proconnect",
-    },
+    routes: { PUT: "proconnect" },
   },
   {
     pattern: /^\/api\/anomalies\/[^/]+$/,
-    routes: {
-      PUT: "proconnect",
-    },
+    routes: { PUT: "proconnect" },
   },
   {
     pattern: /^\/api\/tarifications\/\d+\/\d+\/messages$/,
@@ -141,84 +98,59 @@ export const protectedApiRoutes: ApiRoute[] = [
   },
   {
     pattern: /^\/api\/user-actions\/statistiques$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/statistiques-cartographie$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/structures-cartographie$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/controle-qualite-spreadsheet-export$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/finances-spreadsheet-export$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/type-places-spreadsheet-export$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/structure-spreadsheet-export$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/structure-pdf-export$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/statistiques-spreadsheet-export$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/user-actions\/statistiques-pdf-export$/,
-    routes: {
-      POST: "proconnect",
-    },
+    routes: { POST: "proconnect" },
   },
   {
     pattern: /^\/api\/faq$/,
-    routes: {
-      GET: "proconnect",
-    },
+    routes: { GET: "proconnect" },
   },
 ];
 
 export const OPERATEUR_BASE_PATH = "/operateurs";
 
-export const agentOnlyPages = ["/ressources"];
-
-export const commonPages = ["/", "/structures", "/cpoms", "/statistiques"];
-
-export const operateurPages = [OPERATEUR_BASE_PATH];
-
 export const proConnectProtectedPages = [
-  ...commonPages,
-  ...operateurPages,
-  ...agentOnlyPages,
+  "/",
+  "/structures",
+  "/cpoms",
+  "/statistiques",
+  "/ressources",
+  OPERATEUR_BASE_PATH,
 ];
 
 export const passwordProtectedPages = ["/ajout-structure"];

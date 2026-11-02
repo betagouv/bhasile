@@ -99,14 +99,15 @@ const getOperateurMenuItems = (operateurId: number | null): MenuItem[] => [
         url: "/structures",
       },
       {
-        label: "Voir les CPOM",
-        url: "/cpoms",
-      },
-      {
         label: "Voir l’opérateur",
         url: `/operateurs/${operateurId}`,
       },
     ],
+  },
+  {
+    icon: "fr-icon-pie-chart-2-line",
+    label: "Statistiques",
+    url: "/statistiques",
   },
   ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
     ? [

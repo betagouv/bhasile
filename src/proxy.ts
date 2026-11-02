@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { withAuth } from "next-auth/middleware";
 
 import { canAccessApp } from "./lib/casl";
-import { canAccessPage } from "./lib/casl/rules";
+import { canAccessPage } from "./lib/casl/pages";
 import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,
@@ -11,9 +11,10 @@ import {
   pendingAccessPage,
   proConnectProtectedPages,
 } from "./proxy/auth-config";
-import { getApiRouteProtection, matchesPath } from "./proxy/auth-util";
+import { getApiRouteProtection } from "./proxy/auth-util";
 import { filtersProxy } from "./proxy/filters";
 import { SessionUser } from "./types/global";
+import { matchesPath } from "./utils/path.util";
 
 const proConnectPagesProxy = withAuth(filtersProxy, {
   callbacks: {
@@ -92,7 +93,7 @@ export async function proxy(request: NextRequest) {
       }
 
       if (!canAccessPage(user, pathname)) {
-        return NextResponse.redirect(new URL("/", request.url));
+        return NextResponse.redirect(new URL("/404", request.url));
       }
     }
 

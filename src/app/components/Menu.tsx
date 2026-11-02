@@ -12,24 +12,10 @@ import {
   MenuItem,
   resolveMenuItems,
 } from "@/utils/menu.util";
+import { matchesPath } from "@/utils/path.util";
 
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
-
-const matchesPath = (pathname: string | null, url: string): boolean =>
-  url === "/" ? pathname === "/" : Boolean(pathname?.includes(url));
-
-const findActiveGroupId = (
-  menuItems: MenuItem[],
-  pathname: string | null
-): MenuGroupId | null => {
-  const activeGroup = menuItems.find(
-    (menuItem): menuItem is MenuGroup =>
-      "subItems" in menuItem &&
-      menuItem.subItems.some((subItem) => matchesPath(pathname, subItem.url))
-  );
-  return activeGroup?.id ?? null;
-};
 
 export const Menu = (): ReactElement | null => {
   const pathname = usePathname();
@@ -43,7 +29,7 @@ export const Menu = (): ReactElement | null => {
   }, [status, sessionData?.user]);
 
   const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(() =>
-    findActiveGroupId(menuItems, pathname)
+    getDefaultOpenGroup(pathname)
   );
 
   const toggleGroup = (groupId: MenuGroupId): void => {
@@ -133,4 +119,19 @@ export const Menu = (): ReactElement | null => {
       <MenuFooter />
     </nav>
   );
+};
+
+const getDefaultOpenGroup = (pathname: string | null): MenuGroupId =>
+  pathname?.startsWith("/parametres") ? "parametres" : "structures";
+
+const findActiveGroupId = (
+  menuItems: MenuItem[],
+  pathname: string | null
+): MenuGroupId | null => {
+  const activeGroup = menuItems.find(
+    (menuItem): menuItem is MenuGroup =>
+      "subItems" in menuItem &&
+      menuItem.subItems.some((subItem) => matchesPath(pathname, subItem.url))
+  );
+  return activeGroup?.id ?? null;
 };
