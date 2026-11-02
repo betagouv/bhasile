@@ -17,6 +17,7 @@ export const Conversation = ({
   year,
   visibility,
   currentUserId,
+  canParticipate,
   isCampaignOpen,
   draft,
 }: Props): ReactElement => {
@@ -28,7 +29,7 @@ export const Conversation = ({
   const isAtBottomRef = useRef(true);
 
   useEffect(() => {
-    if (!messages) {
+    if (!messages || !canParticipate) {
       return;
     }
     const requestedReceiptIds = requestedReceiptIdsRef.current;
@@ -51,7 +52,7 @@ export const Conversation = ({
         requestedReceiptIds.delete(messageId)
       );
     });
-  }, [messages, currentUserId, markAsRead]);
+  }, [messages, canParticipate, currentUserId, markAsRead]);
 
   useEffect(() => {
     const list = listRef.current;
@@ -115,9 +116,8 @@ export const Conversation = ({
           ))}
         </ol>
       )}
-      {!isCampaignOpen ? (
-        <ReadOnlyNotice year={year} />
-      ) : (
+      {!isCampaignOpen && <ReadOnlyNotice year={year} />}
+      {isCampaignOpen && canParticipate && (
         <MessageComposer draft={draft} onSend={postMessage} />
       )}
     </div>
@@ -131,6 +131,7 @@ type Props = {
   year: number;
   visibility: ConversationVisibility;
   currentUserId: number;
+  canParticipate: boolean;
   isCampaignOpen: boolean;
   draft: MessageDraft;
 };

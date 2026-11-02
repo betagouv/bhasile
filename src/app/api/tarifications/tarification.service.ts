@@ -63,6 +63,7 @@ export const getTarificationOverview = async (
     codeBhasile: structure.codeBhasile,
     participant,
     isOperateur: participant.level === AuthorLevel.OPERATEUR,
+    canParticipate: canParticipateInTarification(user),
     campaignYears: getSelectableCampaignYears(
       tarifications.map((tarification) => tarification.campaign.year)
     ),
@@ -228,6 +229,7 @@ export type TarificationOverview = {
   codeBhasile: string;
   participant: TarificationParticipant;
   isOperateur: boolean;
+  canParticipate: boolean;
   campaignYears: number[];
 };
 

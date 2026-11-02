@@ -224,7 +224,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : la reprise des notifications se recette en préprod.
 
 ## Interface

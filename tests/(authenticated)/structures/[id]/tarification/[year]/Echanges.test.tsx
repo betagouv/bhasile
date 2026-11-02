@@ -56,6 +56,7 @@ const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
         year={2026}
         currentUserId={CURRENT_USER_ID}
         isOperateur={false}
+        canParticipate
         isCampaignOpen
         {...props}
       />
@@ -206,6 +207,20 @@ describe("Echanges", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("montre les échanges sans composer ni accusé de lecture à qui ne participe pas", async () => {
+    answerWith([buildMessage()]);
+
+    renderEchanges({ canParticipate: false });
+
+    expect(await screen.findByText("Bonjour")).toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Écrivez un message")
+    ).not.toBeInTheDocument();
+    expect(
+      mockFetch.mock.calls.filter(([, init]) => init?.method === "POST")
+    ).toEqual([]);
+  });
+
   it("ouvre le canal agents demandé dans l'URL", async () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
     answerWith([]);
@@ -243,6 +258,7 @@ describe("Echanges", () => {
           year={2026}
           currentUserId={CURRENT_USER_ID}
           isOperateur={false}
+          canParticipate
           isCampaignOpen
         />
       </FetchStateProvider>

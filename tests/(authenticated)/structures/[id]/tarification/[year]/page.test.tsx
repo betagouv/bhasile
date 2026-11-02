@@ -52,6 +52,7 @@ const overview = {
   codeBhasile: "BHA-42",
   participant: { id: 3, level: "DEPARTEMENT" },
   isOperateur: false,
+  canParticipate: true,
   campaignYears: [2027, 2026, 2024],
 };
 
