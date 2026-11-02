@@ -13,3 +13,8 @@ export const getCampaignPhase = (
   }
   return today <= `${year}-12-31` ? "OPEN" : "CATCH_UP";
 };
+
+export const getOpenCampaignYears = (now: Date, timeZone: string): number[] => {
+  const localYear = Number(toLocalDate(now, timeZone).slice(0, 4));
+  return [localYear, localYear + 1];
+};

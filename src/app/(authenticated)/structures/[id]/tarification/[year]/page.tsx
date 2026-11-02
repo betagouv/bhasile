@@ -5,7 +5,6 @@ import {
   getTarificationOverview,
   TarificationOverview,
 } from "@/app/api/tarifications/tarification.service";
-import { isCampaignOpen } from "@/app/api/tarifications/tarification.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { authOptions } from "@/lib/next-auth/auth";
 import { tarificationParamsSchema } from "@/schemas/api/message.schema";
@@ -59,7 +58,7 @@ export default async function TarificationPage({
           year={year}
           currentUserId={overview.participant.id}
           isOperateur={overview.isOperateur}
-          isCampaignOpen={isCampaignOpen(year)}
+          isCampaignOpen={overview.openCampaignYears.includes(year)}
           tags={overview.tags}
         />
       </div>

@@ -30,14 +30,38 @@ export type TarificationJournalOpening = {
   createdAt: Date;
 };
 
-export type TarificationJournal = {
+export type TarificationJournal<
+  TDocument extends TarificationJournalDocument = TarificationJournalDocument,
+  TEvent extends TarificationJournalEvent = TarificationJournalEvent,
+  TOpening extends TarificationJournalOpening = TarificationJournalOpening,
+> = {
   campaignYear: number;
   timeZone: string;
   drlPublishedAt: CivilDate | null;
   isCoveredByCpom: boolean;
-  documents: TarificationJournalDocument[];
-  events: TarificationJournalEvent[];
-  openings: TarificationJournalOpening[];
+  documents: TDocument[];
+  events: TEvent[];
+  openings: TOpening[];
+};
+
+export type TarificationJournalRead = TarificationJournal<
+  TarificationJournalDocument & {
+    fileUpload: {
+      key: string;
+      originalName: string;
+      mimeType: string;
+      fileSize: number;
+      sha256: string | null;
+    };
+  },
+  TarificationJournalEvent & { author: { name: string | null } | null },
+  TarificationJournalOpening & { user: { name: string | null } }
+>;
+
+export type TarificationJournalView = {
+  journal: TarificationJournalRead;
+  state: TarificationState;
+  drlUrl: string | null;
 };
 
 export type CampaignPhase = "UPCOMING" | "OPEN" | "CATCH_UP";

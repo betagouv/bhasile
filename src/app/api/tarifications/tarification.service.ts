@@ -11,32 +11,57 @@ import {
   assertCanPostMessage,
   getAuthorLevel,
 } from "@/app/api/conversations/conversation.util";
+import { isStructureInCpom } from "@/app/api/structures/structure.util";
 import {
   findUsersWithGrantsOnStructure,
   getUserWithGrantsByEmail,
 } from "@/app/api/users/user.repository";
 import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
+import { getNow } from "@/app/utils/now.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
+import {
+  AuthorLevel,
+  TarificationDocumentStatus,
+  type Visibility,
+} from "@/generated/prisma/enums";
 import {
   canAccessTarification,
   isAgent,
   type StructureScope,
 } from "@/lib/casl";
+import { getOpenCampaignYears } from "@/lib/tarification/tarification.campaign";
+import { computeTarificationState } from "@/lib/tarification/tarification.compute";
+import {
+  getDepartementTimeZone,
+  toCivilDate,
+} from "@/lib/tarification/tarification.date";
+import {
+  canOperateurOpenDocument,
+  filterJournalForOperateur,
+} from "@/lib/tarification/tarification.visibility";
 import type { ConversationTag } from "@/types/conversation.type";
 import { SessionUser } from "@/types/global";
+import type {
+  TarificationJournalRead,
+  TarificationJournalView,
+} from "@/types/tarification.type";
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
 import {
+  createTarificationDocumentOpening,
   findMessageTarification,
   findPendingMessageContexts,
   findStructureScope,
   findStructureTarification,
   findStructureTarificationCampaigns,
+  findStructureTarificationJournal,
+  findTarificationCampaign,
   upsertStructureTarification,
 } from "./tarification.repository";
 import {
   assertCampaignOpen,
+  assertStructureEligible,
   buildNotificationParams,
   getMessageRecipients,
   getSelectableCampaignYears,
@@ -66,13 +91,23 @@ export const getTarificationOverview = async (
   const structure = await findStructureScopeOrThrow(structureId);
   const participant = await resolveParticipant(user, structure);
   const tarifications = await findStructureTarificationCampaigns(structureId);
+  const openCampaignYears = isStructureAutorisee(structure.type)
+    ? getOpenCampaignYears(
+        getNow(),
+        getDepartementTimeZone(structure.departementAdministratif)
+      )
+    : [];
   return {
     codeBhasile: structure.codeBhasile,
     participant,
     isOperateur: participant.level === AuthorLevel.OPERATEUR,
-    campaignYears: getSelectableCampaignYears(
-      tarifications.map((tarification) => tarification.campaign.year)
-    ),
+    openCampaignYears,
+    campaignYears: getSelectableCampaignYears({
+      openCampaignYears,
+      tarificationYears: tarifications.map(
+        (tarification) => tarification.campaign.year
+      ),
+    }),
     tags: TARIFICATION_CONVERSATION_TAGS,
   };
 };
@@ -94,7 +129,9 @@ export const postTarificationMessage = async ({
   tagKey: string | null;
   fileKeys: string[];
 }): Promise<MessageDb> => {
-  assertCampaignOpen(year);
+  const structure = await findStructureScopeOrThrow(structureId);
+  assertStructureEligible(structure);
+  assertCampaignOpen(year, structure);
   assertCanPostMessage(
     { level: author.level, visibility, tagKey },
     TARIFICATION_CONVERSATION_TAGS
@@ -175,11 +212,98 @@ export const changeTarificationMessageTag = async ({
   }
   const { structure, campaign } = message.conversation.structureTarification;
   const editor = await resolveParticipant(user, structure);
-  assertCampaignOpen(campaign.year);
+  assertStructureEligible(structure);
+  assertCampaignOpen(campaign.year, structure);
   return changeMessageTag(
     { messageId, tagKey, editorLevel: editor.level },
     TARIFICATION_CONVERSATION_TAGS
   );
+};
+
+// Seul point de passage pour lire le journal : page, API, fichiers et mails
+export const getTarificationJournal = async ({
+  structureId,
+  year,
+  reader,
+}: {
+  structureId: number;
+  year: number;
+  reader: TarificationReader;
+}): Promise<TarificationJournalView> => {
+  const [structure, campaign] = await Promise.all([
+    findStructureTarificationJournal(structureId, year),
+    findTarificationCampaign(year),
+  ]);
+  if (!structure) {
+    throw new DomainError("Structure introuvable", 404);
+  }
+  const [tarification] = structure.structureTarifications;
+  const journal: TarificationJournalRead = {
+    campaignYear: year,
+    timeZone: getDepartementTimeZone(structure.departementAdministratif),
+    drlPublishedAt: campaign?.drlPublishedAt
+      ? toCivilDate(campaign.drlPublishedAt)
+      : null,
+    isCoveredByCpom: isStructureInCpom(structure, year),
+    documents:
+      tarification?.documents.map(({ id, types, status, fileUpload }) => ({
+        id,
+        types,
+        status,
+        fileUpload,
+      })) ?? [],
+    events: tarification?.events ?? [],
+    openings:
+      tarification?.documents.flatMap((document) => document.openings) ?? [],
+  };
+  return {
+    journal: reader.isAgent ? journal : filterJournalForOperateur(journal),
+    state: computeTarificationState(journal, getNow()),
+    drlUrl: campaign?.drlUrl ?? null,
+  };
+};
+
+export const authorizeTarificationDocument = async ({
+  user,
+  document,
+}: {
+  user: SessionUser;
+  document: {
+    id: number;
+    structureTarification: { structureId: number; campaign: { year: number } };
+  };
+}): Promise<PendingTarificationOpening | null> => {
+  const {
+    structureId,
+    campaign: { year },
+  } = document.structureTarification;
+  const participant = await getTarificationParticipant(user, structureId);
+  if (participant.level !== AuthorLevel.OPERATEUR) {
+    return null;
+  }
+  const { journal } = await getTarificationJournal({
+    structureId,
+    year,
+    reader: { isAgent: false },
+  });
+  const journalDocument = journal.documents.find(
+    (candidate) => candidate.id === document.id
+  );
+  if (!journalDocument || !canOperateurOpenDocument(journal, journalDocument)) {
+    throw new DomainError("Aucun fichier trouvé", 404);
+  }
+  const isOperateurDeposit =
+    journalDocument.status === TarificationDocumentStatus.SHARED;
+  return isOperateurDeposit
+    ? null
+    : { documentId: document.id, userId: participant.id };
+};
+
+export const recordTarificationDocumentOpening = async ({
+  documentId,
+  userId,
+}: PendingTarificationOpening): Promise<void> => {
+  await createTarificationDocumentOpening(documentId, userId);
 };
 
 export const notifyPendingTarificationMessages = async (): Promise<{
@@ -271,10 +395,16 @@ const findStructureScopeOrThrow = async (structureId: number) => {
 
 export type TarificationReader = { isAgent: boolean };
 
+export type PendingTarificationOpening = {
+  documentId: number;
+  userId: number;
+};
+
 export type TarificationOverview = {
   codeBhasile: string;
   participant: TarificationParticipant;
   isOperateur: boolean;
+  openCampaignYears: number[];
   campaignYears: number[];
   tags: ConversationTag[];
 };

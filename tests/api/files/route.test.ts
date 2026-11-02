@@ -99,6 +99,8 @@ describe("POST /api/files", () => {
       mimeType: "application/pdf",
       originalName: "test.pdf",
       fileSize: 7,
+      sha256:
+        "ed7002b439e9ac845f22357d822bac1444730fbdb6016d3ec9432297b9ec9f73",
     });
   });
 });
