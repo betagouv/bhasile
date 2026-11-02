@@ -29,4 +29,11 @@ export const addDays = (date: CivilDate, days: number): CivilDate => {
     .slice(0, 10);
 };
 
+export const formatCivilDate = (date: CivilDate): string =>
+  date.split("-").reverse().join("/");
+
+// Au fuseau de la structure : le serveur et le navigateur doivent afficher la même date à l'hydratation
+export const formatInstantDate = (instant: Date, timeZone: string): string =>
+  formatCivilDate(toLocalDate(instant, timeZone));
+
 export type CivilDate = string;

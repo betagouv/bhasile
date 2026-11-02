@@ -11,6 +11,7 @@ const mockAuthorizeFileAccess = vi.fn();
 const mockAuthorizeTarificationDocument = vi.fn();
 const mockRecordTarificationDocumentOpening = vi.fn();
 const mockGetDownloadLink = vi.fn();
+const mockGetInlineLink = vi.fn();
 const mockDeleteFile = vi.fn();
 const mockDeleteFileByStorageKey = vi.fn();
 
@@ -35,6 +36,7 @@ vi.mock("@/app/api/files/file.service", () => ({
   authorizeFileAccess: (...args: unknown[]) =>
     mockAuthorizeFileAccess(...args),
   getDownloadLink: (...args: unknown[]) => mockGetDownloadLink(...args),
+  getInlineLink: (...args: unknown[]) => mockGetInlineLink(...args),
   deleteFile: (...args: unknown[]) => mockDeleteFile(...args),
   deleteFileByStorageKey: (...args: unknown[]) =>
     mockDeleteFileByStorageKey(...args),
@@ -202,6 +204,43 @@ describe("GET /api/files/[key]", () => {
     // THEN
     expect(response.status).toBe(404);
     expect(mockGetDownloadLink).not.toHaveBeenCalled();
+  });
+
+  it("délivre un lien d'affichage pour un format que le navigateur sait afficher", async () => {
+    mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+    mockAuthorizeFileAccess.mockReturnValueOnce(true);
+    mockGetInlineLink.mockResolvedValueOnce("https://s3.example.com/inline");
+
+    const response = await GET(
+      new NextRequest("http://localhost/api/files/test.pdf?getLink=1&inline=true")
+    );
+
+    expect(await response.json()).toEqual({
+      url: "https://s3.example.com/inline",
+    });
+    expect(mockGetInlineLink).toHaveBeenCalledWith(
+      process.env.S3_BUCKET_NAME,
+      "test.pdf",
+      "application/pdf"
+    );
+    expect(mockGetDownloadLink).not.toHaveBeenCalled();
+  });
+
+  it("délivre un lien de téléchargement pour un format que le navigateur n'affiche pas", async () => {
+    mockGetFileWithParents.mockResolvedValueOnce({
+      ...linkedFile,
+      mimeType:
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
+    mockAuthorizeFileAccess.mockReturnValueOnce(true);
+    mockGetDownloadLink.mockResolvedValueOnce("https://s3.example.com/x");
+
+    await GET(
+      new NextRequest("http://localhost/api/files/test.pdf?getLink=1&inline=true")
+    );
+
+    expect(mockGetInlineLink).not.toHaveBeenCalled();
+    expect(mockGetDownloadLink).toHaveBeenCalled();
   });
 
   it("retourne 404 quand le fichier est introuvable", async () => {
