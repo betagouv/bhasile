@@ -60,6 +60,8 @@ export const assertCampaignOpen = (
   }
 };
 
+const NOTIFICATION_PARIS_HOURS = [8, 14];
+
 // REGION exclu : la DDETS mène les échanges. Opérateurs exclus tant qu'ils n'ont pas accès à la messagerie
 export const getMessageRecipients = (
   users: (UserWithGrants & { email: string })[],
@@ -80,6 +82,18 @@ export const getMessageRecipients = (
         canAccessTarification(toRecipientPermissions(user), structure)
     )
     .map((user) => ({ userId: user.id, email: user.email }));
+
+// Scalingo ne planifie qu'en UTC : le cron passe aux heures UTC de l'hiver et de l'été, et ne garde que les bonnes
+export const isNotificationHour = (now: Date): boolean =>
+  NOTIFICATION_PARIS_HOURS.includes(
+    Number(
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Paris",
+        hour: "2-digit",
+        hourCycle: "h23",
+      }).format(now)
+    )
+  );
 
 export const buildNotificationParams = ({
   structure,

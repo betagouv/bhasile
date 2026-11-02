@@ -6,6 +6,7 @@ import {
   buildNotificationParams,
   getMessageRecipients,
   getSelectableCampaignYears,
+  isNotificationHour,
 } from "@/app/api/tarifications/tarification.util";
 import type { GrantDb } from "@/app/api/users/user.db.type";
 import {
@@ -14,6 +15,22 @@ import {
   StructureType,
   Visibility,
 } from "@/generated/prisma/enums";
+
+describe("isNotificationHour", () => {
+  it("garde 8 h et 14 h à Paris l'hiver, soit 7 h et 13 h UTC", () => {
+    expect(isNotificationHour(new Date("2027-01-15T07:00:00Z"))).toBe(true);
+    expect(isNotificationHour(new Date("2027-01-15T13:00:00Z"))).toBe(true);
+    expect(isNotificationHour(new Date("2027-01-15T06:00:00Z"))).toBe(false);
+    expect(isNotificationHour(new Date("2027-01-15T12:00:00Z"))).toBe(false);
+  });
+
+  it("garde 8 h et 14 h à Paris l'été, soit 6 h et 12 h UTC", () => {
+    expect(isNotificationHour(new Date("2027-07-15T06:00:00Z"))).toBe(true);
+    expect(isNotificationHour(new Date("2027-07-15T12:00:00Z"))).toBe(true);
+    expect(isNotificationHour(new Date("2027-07-15T07:00:00Z"))).toBe(false);
+    expect(isNotificationHour(new Date("2027-07-15T13:00:00Z"))).toBe(false);
+  });
+});
 
 describe("getSelectableCampaignYears", () => {
   it("propose les campagnes ouvertes, en rattrapage et celles qui ont une tarification, de la plus récente à la plus ancienne", () => {
