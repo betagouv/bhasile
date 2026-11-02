@@ -60,7 +60,7 @@
     "@codegouvfr/react-dsfr": "^1.36.0",
     "@formkit/auto-animate": "^0.10.0",
     "@gouvfr/dsfr-chart": "^2.1.1",
-    "@hookform/resolvers": "^5.9.2",
+    "@hookform/resolvers": "^6.0.0",
     "@nazka/map-gl-js-spiderfy": "^2.0.0",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
