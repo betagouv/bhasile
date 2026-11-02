@@ -201,10 +201,7 @@ export const createTarificationDocumentOpening = (
 export const runInTarificationTransaction = async <T>(
   structureId: number,
   year: number,
-  callback: (
-    tx: PrismaTransaction,
-    structureTarificationId: number
-  ) => Promise<T>
+  callback: (transaction: TarificationTransaction) => Promise<T>
 ): Promise<T> => {
   const campaign = await prisma.tarificationCampaign.upsert({
     where: { year },
@@ -213,33 +210,31 @@ export const runInTarificationTransaction = async <T>(
     select: { id: true },
   });
   return prisma.$transaction(async (tx) => {
-    const tarification = await tx.structureTarification.upsert({
-      where: {
-        structureId_campaignId: { structureId, campaignId: campaign.id },
-      },
-      update: { campaignId: campaign.id },
-      create: { structureId, campaignId: campaign.id },
-      select: { id: true },
+    const { id: structureTarificationId } =
+      await tx.structureTarification.upsert({
+        where: {
+          structureId_campaignId: { structureId, campaignId: campaign.id },
+        },
+        update: { campaignId: campaign.id },
+        create: { structureId, campaignId: campaign.id },
+        select: { id: true },
+      });
+    return callback({
+      findJournal: () =>
+        findStructureTarificationJournal(structureId, year, tx),
+      findCampaign: () => findTarificationCampaign(year, tx),
+      createDocument: (document) =>
+        createTarificationDocument(tx, structureTarificationId, document),
+      createEvent: (event) =>
+        createTarificationEvent(tx, structureTarificationId, event),
     });
-    return callback(tx, tarification.id);
   });
 };
 
-export const createTarificationDocument = async (
+const createTarificationDocument = async (
   tx: PrismaTransaction,
-  {
-    structureTarificationId,
-    fileKey,
-    types,
-    status,
-    author,
-  }: {
-    structureTarificationId: number;
-    fileKey: string;
-    types: TarificationDocumentType[];
-    status: TarificationDocumentStatus;
-    author: { id: number; level: AuthorLevel };
-  }
+  structureTarificationId: number,
+  { fileKey, types, status, author }: TarificationDocumentCreate
 ): Promise<{ id: number }> => {
   const fileUpload = await tx.fileUpload.findFirst({
     where: {
@@ -278,12 +273,36 @@ export const createTarificationDocument = async (
   return document;
 };
 
-export const createTarificationEvent = (
+const createTarificationEvent = (
   tx: PrismaTransaction,
   structureTarificationId: number,
-  event: Omit<TarificationJournalEvent, "id" | "createdAt">
+  event: TarificationEventCreate
 ): Promise<{ id: number }> =>
   tx.tarificationEvent.create({
     data: { structureTarificationId, ...event },
     select: { id: true },
   });
+
+type TarificationDocumentCreate = {
+  fileKey: string;
+  types: TarificationDocumentType[];
+  status: TarificationDocumentStatus;
+  author: { id: number; level: AuthorLevel };
+};
+
+type TarificationEventCreate = Omit<
+  TarificationJournalEvent,
+  "id" | "createdAt"
+>;
+
+export type TarificationJournalSource = {
+  findJournal: () => ReturnType<typeof findStructureTarificationJournal>;
+  findCampaign: () => ReturnType<typeof findTarificationCampaign>;
+};
+
+export type TarificationTransaction = TarificationJournalSource & {
+  createDocument: (
+    document: TarificationDocumentCreate
+  ) => Promise<{ id: number }>;
+  createEvent: (event: TarificationEventCreate) => Promise<{ id: number }>;
+};

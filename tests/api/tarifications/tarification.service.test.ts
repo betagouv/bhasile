@@ -45,8 +45,6 @@ const { mockCanAccessTarification } = vi.hoisted(() => ({
 const mockFindStructureTarificationJournal = vi.fn();
 const mockFindTarificationCampaign = vi.fn();
 const mockCreateTarificationDocumentOpening = vi.fn();
-const mockCreateTarificationDocument = vi.fn();
-const mockCreateTarificationEvent = vi.fn();
 const mockRunInTarificationTransaction = vi.fn();
 const mockFindStructureTarificationCampaigns = vi.fn();
 
@@ -71,10 +69,6 @@ vi.mock("@/app/api/tarifications/tarification.repository", () => ({
     mockFindTarificationCampaign(...args),
   createTarificationDocumentOpening: (...args: unknown[]) =>
     mockCreateTarificationDocumentOpening(...args),
-  createTarificationDocument: (...args: unknown[]) =>
-    mockCreateTarificationDocument(...args),
-  createTarificationEvent: (...args: unknown[]) =>
-    mockCreateTarificationEvent(...args),
   runInTarificationTransaction: (...args: unknown[]) =>
     mockRunInTarificationTransaction(...args),
   findStructureTarificationCampaigns: (...args: unknown[]) =>
@@ -766,9 +760,13 @@ describe("recordTarificationDocumentOpening", () => {
 });
 
 describe("écritures de la tarification", () => {
-  const TRANSACTION = { isTransaction: true };
-  const STRUCTURE_TARIFICATION_ID = 77;
   const agent = { id: 51, level: AuthorLevel.DEPARTEMENT };
+  const transaction = {
+    findJournal: vi.fn(),
+    findCampaign: vi.fn(),
+    createDocument: vi.fn(),
+    createEvent: vi.fn(),
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -779,19 +777,17 @@ describe("écritures de la tarification", () => {
       operateurId: null,
       type: StructureType.CADA,
     });
-    mockFindStructureTarificationJournal.mockResolvedValue(
-      buildStructureJournal()
-    );
-    mockFindTarificationCampaign.mockResolvedValue(null);
+    transaction.findJournal.mockResolvedValue(buildStructureJournal());
+    transaction.findCampaign.mockResolvedValue(null);
+    transaction.createDocument.mockResolvedValue({ id: 9 });
+    transaction.createEvent.mockResolvedValue({ id: 10 });
     mockRunInTarificationTransaction.mockImplementation(
       (
         _structureId: number,
         _year: number,
-        callback: (tx: unknown, id: number) => Promise<unknown>
-      ) => callback(TRANSACTION, STRUCTURE_TARIFICATION_ID)
+        callback: (openTransaction: typeof transaction) => Promise<unknown>
+      ) => callback(transaction)
     );
-    mockCreateTarificationDocument.mockResolvedValue({ id: 9 });
-    mockCreateTarificationEvent.mockResolvedValue({ id: 10 });
   });
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -812,13 +808,14 @@ describe("écritures de la tarification", () => {
         id: 9,
       });
 
-      expect(mockFindStructureTarificationJournal).toHaveBeenCalledWith(
+      expect(mockRunInTarificationTransaction).toHaveBeenCalledWith(
         1,
         2027,
-        TRANSACTION
+        expect.any(Function)
       );
-      expect(mockCreateTarificationDocument).toHaveBeenCalledWith(TRANSACTION, {
-        structureTarificationId: STRUCTURE_TARIFICATION_ID,
+      expect(transaction.findJournal).toHaveBeenCalled();
+      expect(mockFindStructureTarificationJournal).not.toHaveBeenCalled();
+      expect(transaction.createDocument).toHaveBeenCalledWith({
         fileKey: "abc-rca.pdf",
         types: ["RCA"],
         status: TarificationDocumentStatus.DRAFT,
@@ -834,7 +831,7 @@ describe("écritures de la tarification", () => {
         })
       ).rejects.toThrow("Cet état");
 
-      expect(mockCreateTarificationDocument).not.toHaveBeenCalled();
+      expect(transaction.createDocument).not.toHaveBeenCalled();
     });
 
     it("n'ouvre pas de transaction pour une structure sans tarification", async () => {
@@ -873,23 +870,16 @@ describe("écritures de la tarification", () => {
         text: "Courrier",
       });
 
-      expect(mockFindStructureTarificationJournal).toHaveBeenCalledWith(
-        1,
-        2027,
-        TRANSACTION
-      );
-      expect(mockCreateTarificationEvent).toHaveBeenCalledWith(
-        TRANSACTION,
-        STRUCTURE_TARIFICATION_ID,
-        {
-          type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
-          authorId: agent.id,
-          authorLevel: agent.level,
-          documentId: null,
-          stepCode: null,
-          text: "Courrier",
-        }
-      );
+      expect(transaction.findJournal).toHaveBeenCalled();
+      expect(mockFindStructureTarificationJournal).not.toHaveBeenCalled();
+      expect(transaction.createEvent).toHaveBeenCalledWith({
+        type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+        authorId: agent.id,
+        authorLevel: agent.level,
+        documentId: null,
+        stepCode: null,
+        text: "Courrier",
+      });
     });
 
     it("n'écrit rien quand une garde refuse le fait", async () => {
@@ -905,7 +895,7 @@ describe("écritures de la tarification", () => {
         })
       ).rejects.toThrow("pas valide");
 
-      expect(mockCreateTarificationEvent).not.toHaveBeenCalled();
+      expect(transaction.createEvent).not.toHaveBeenCalled();
     });
   });
 });

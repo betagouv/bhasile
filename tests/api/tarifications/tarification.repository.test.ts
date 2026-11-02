@@ -7,9 +7,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
-  createTarificationDocument,
   createTarificationDocumentOpening,
-  createTarificationEvent,
   findMessageTarification,
   findStructureTarification,
   findStructureTarificationCampaigns,
@@ -183,9 +181,8 @@ describe("tarification.repository db integration", () => {
       runInTarificationTransaction(
         writeStructureId,
         writeCampaignYear,
-        (tx, structureTarificationId) =>
-          createTarificationDocument(tx, {
-            structureTarificationId,
+        (transaction) =>
+          transaction.createDocument({
             fileKey,
             types: ["CA"],
             status: TarificationDocumentStatus.SHARED,
@@ -243,18 +240,19 @@ describe("tarification.repository db integration", () => {
         runInTarificationTransaction(
           writeStructureId,
           writeCampaignYear,
-          async (tx, structureTarificationId) => {
-            const existingCount = await tx.tarificationEvent.count({
-              where: {
-                structureTarificationId,
-                type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
-              },
-            });
-            if (existingCount > 0) {
+          async (transaction) => {
+            const structure = await transaction.findJournal();
+            const isAlreadyDeclared = structure?.structureTarifications
+              .flatMap((tarification) => tarification.events)
+              .some(
+                (event) =>
+                  event.type === TarificationEventType.OUT_OF_BHASILE_DECLARED
+              );
+            if (isAlreadyDeclared) {
               return;
             }
             await new Promise((resolve) => setTimeout(resolve, 100));
-            await createTarificationEvent(tx, structureTarificationId, {
+            await transaction.createEvent({
               type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
               authorId,
               authorLevel: AuthorLevel.DEPARTEMENT,

@@ -53,7 +53,6 @@ import {
 } from "@/lib/tarification/tarification.visibility";
 import type { ConversationTag } from "@/types/conversation.type";
 import { SessionUser } from "@/types/global";
-import type { PrismaTransaction } from "@/types/prisma.type";
 import type {
   TarificationJournalEvent,
   TarificationJournalRead,
@@ -62,9 +61,7 @@ import type {
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
 import {
-  createTarificationDocument,
   createTarificationDocumentOpening,
-  createTarificationEvent,
   findMessageTarification,
   findPendingMessageContexts,
   findStructureScope,
@@ -73,6 +70,7 @@ import {
   findStructureTarificationJournal,
   findTarificationCampaign,
   runInTarificationTransaction,
+  type TarificationJournalSource,
   upsertStructureTarification,
 } from "./tarification.repository";
 import {
@@ -250,7 +248,10 @@ export const getTarificationJournal = async ({
   year: number;
   reader: TarificationReader;
 }): Promise<TarificationJournalView> => {
-  const { journal, drlUrl } = await loadTarificationJournal(structureId, year);
+  const { journal, drlUrl } = await loadTarificationJournal(year, {
+    findJournal: () => findStructureTarificationJournal(structureId, year),
+    findCampaign: () => findTarificationCampaign(year),
+  });
   return {
     journal: reader.isAgent ? journal : filterJournalForOperateur(journal),
     state: computeTarificationState(journal, getNow()),
@@ -278,8 +279,8 @@ export const depositTarificationDocument = async ({
   return runInTarificationTransaction(
     structureId,
     year,
-    async (tx, structureTarificationId) => {
-      const { journal } = await loadTarificationJournal(structureId, year, tx);
+    async (transaction) => {
+      const { journal } = await loadTarificationJournal(year, transaction);
       const now = getNow();
       assertCanDepositDocument({
         journal,
@@ -289,13 +290,7 @@ export const depositTarificationDocument = async ({
         phase: getCampaignPhase(year, now, journal.timeZone),
         now,
       });
-      return createTarificationDocument(tx, {
-        structureTarificationId,
-        fileKey,
-        types,
-        status,
-        author,
-      });
+      return transaction.createDocument({ fileKey, types, status, author });
     }
   );
 };
@@ -330,8 +325,8 @@ export const recordTarificationEvent = async ({
   return runInTarificationTransaction(
     structureId,
     year,
-    async (tx, structureTarificationId) => {
-      const { journal } = await loadTarificationJournal(structureId, year, tx);
+    async (transaction) => {
+      const { journal } = await loadTarificationJournal(year, transaction);
       const now = getNow();
       assertCanRecordEvent({
         journal,
@@ -339,7 +334,7 @@ export const recordTarificationEvent = async ({
         phase: getCampaignPhase(year, now, journal.timeZone),
         now,
       });
-      return createTarificationEvent(tx, structureTarificationId, event);
+      return transaction.createEvent(event);
     }
   );
 };
@@ -437,16 +432,11 @@ export const notifyPendingTarificationMessages = async (): Promise<{
 };
 
 const loadTarificationJournal = async (
-  structureId: number,
   year: number,
-  db?: PrismaTransaction
+  { findJournal, findCampaign }: TarificationJournalSource
 ): Promise<{ journal: TarificationJournalRead; drlUrl: string | null }> => {
-  const structure = await findStructureTarificationJournal(
-    structureId,
-    year,
-    db
-  );
-  const campaign = await findTarificationCampaign(year, db);
+  const structure = await findJournal();
+  const campaign = await findCampaign();
   if (!structure) {
     throw new DomainError("Structure introuvable", 404);
   }
