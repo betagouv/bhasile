@@ -3,6 +3,7 @@ import { fakerFR as faker } from "@faker-js/faker";
 import {
   AuthorLevel,
   PrismaClient,
+  StructureType,
   Visibility,
 } from "@/generated/prisma/client";
 
@@ -21,7 +22,10 @@ export const createFakeConversations = async (
     }),
   ]);
   const structures = await prisma.structure.findMany({
-    where: { departementAdministratif: "75" },
+    where: {
+      departementAdministratif: "75",
+      type: { in: [StructureType.CADA, StructureType.CPH] },
+    },
     select: { id: true },
     orderBy: { id: "asc" },
   });

@@ -81,6 +81,7 @@ export const getSectionVersions = (
       );
       return {
         id: document.id,
+        types: document.types,
         file: document.fileUpload,
         typesLabel: document.types
           .map((type) => getExerciseLabel(type, journal.campaignYear))
@@ -208,6 +209,7 @@ const getParticipants = (
 
 export type SectionVersion = {
   id: number;
+  types: TarificationDocumentType[];
   file: TarificationJournalRead["documents"][number]["fileUpload"];
   typesLabel: string;
   stateLabel: string;

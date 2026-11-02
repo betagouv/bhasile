@@ -76,6 +76,18 @@ const overview = {
   tags: [{ key: "L48", label: "L48 et procédure contradictoire" }],
 };
 
+vi.mock("@/hooks/useTarificationActions", () => ({
+  useTarificationActions: () => ({ recordEvent: vi.fn() }),
+}));
+
+vi.mock("@codegouvfr/react-dsfr/Modal", () => ({
+  createModal: () => ({
+    open: vi.fn(),
+    close: vi.fn(),
+    Component: () => null,
+  }),
+}));
+
 const buildJournalView = (journal: Partial<TarificationJournalRead> = {}) => ({
   journal: {
     campaignYear: 2026,
@@ -307,6 +319,27 @@ describe("TarificationPage", () => {
     mockGetFullStructure.mockResolvedValue(null);
 
     await expect(renderPage("42", "2026")).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+
+  it("ne propose aucune action sur une structure non éligible, et le dit", async () => {
+    mockGetFullStructure.mockResolvedValue({
+      codeBhasile: "BHA-42",
+      type: "HUDA",
+    });
+
+    await renderPage("42", "2026");
+
+    const [panelProps] = mockDocumentPanel.mock.lastCall!;
+    expect(panelProps.actions).toEqual({
+      depositOptions: [],
+      canMarkNotApplicable: false,
+      canRespondToL48: false,
+      versionActions: {},
+    });
+    expect(screen.getByText(/n’a pas de tarification/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Hors Bhasile" })
+    ).not.toBeInTheDocument();
   });
 
   it("renvoie introuvable pour une année hors de la liste des campagnes", async () => {
