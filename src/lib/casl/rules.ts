@@ -9,14 +9,11 @@ import type {
   User,
 } from "@/generated/prisma/client";
 import { AccessRole, CpomGranularity } from "@/generated/prisma/enums";
-import {
-  agentOnlyPages,
-  commonPages,
-  OPERATEUR_BASE_PATH,
-  operateurPages,
-} from "@/proxy/auth-config";
-import { matchesPath } from "@/proxy/auth-util";
+import { OPERATEUR_BASE_PATH } from "@/proxy/auth-config";
 import { SessionGrant, SessionPermissions, SessionUser } from "@/types/global";
+import { matchesPath } from "@/utils/path.util";
+
+import { agentOnlyPages, commonPages, operateurAllowedPages } from "./pages";
 
 export type AppAbility = PureAbility<
   [
@@ -53,7 +50,7 @@ export const canAccessPage = (
     return isAgentUser;
   }
 
-  if (operateurPages.some((base) => matchesPath(pathname, base))) {
+  if (operateurAllowedPages.some((base) => matchesPath(pathname, base))) {
     if (isOperateur && user.operateurId) {
       return pathname === `${OPERATEUR_BASE_PATH}/${user.operateurId}`;
     }
@@ -102,7 +99,11 @@ const defineReadRules = (
       can("read", "Cpom", toRuleConditions(conditions));
     }
   }
-  can("read", "Operateur");
+  can(
+    "read",
+    "Operateur",
+    isAgent(user) ? undefined : { id: user.operateurId }
+  );
 };
 
 const defineAgentRules = (
@@ -126,8 +127,6 @@ const defineAgentRules = (
   can("update", "Operateur");
 };
 
-// Prisma traduit `OR: [{}]` par « aucune ligne » : une règle sans restriction
-// doit être déclarée sans conditions pour qu'accessibleBy renvoie `{}`.
 const toRuleConditions = <T extends object>(conditions: T): T | undefined =>
   Object.keys(conditions).length > 0 ? conditions : undefined;
 

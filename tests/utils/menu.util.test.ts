@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { SessionUser } from "@/types/global";
-import { MenuLink, resolveMenuItems } from "@/utils/menu.util";
+import { MenuGroup, resolveMenuItems } from "@/utils/menu.util";
 
 describe("menu.util", () => {
   describe("resolveMenuItems", () => {
@@ -17,7 +17,7 @@ describe("menu.util", () => {
       const menuItems = resolveMenuItems(agentUser as SessionUser);
 
       // THEN
-      expect(menuItems).toHaveLength(4);
+      expect(menuItems.length).toBe(3);
       expect(menuItems[0].label).toBe("Tableau de bord");
     });
 
@@ -26,17 +26,23 @@ describe("menu.util", () => {
       const operateurUser: Partial<SessionUser> = {
         email: "operateur@example.com",
         name: "Marie Opérateur",
-        isAgent: false,
         operateurId: 42,
+        isAgent: false,
       };
 
       // WHEN
       const menuItems = resolveMenuItems(operateurUser as SessionUser);
 
       // THEN
-      expect(menuItems).toHaveLength(1);
-      expect(menuItems[0].label).toBe("Opérateur");
-      expect((menuItems[0] as MenuLink).url).toBe("/operateurs/42");
+      const structuresMenuGroup = menuItems[1] as MenuGroup;
+      expect(structuresMenuGroup).toBeDefined();
+
+      const operateurSubItem = structuresMenuGroup.subItems.find(
+        (subItem) => subItem.label === "Voir l’opérateur"
+      );
+
+      expect(operateurSubItem).toBeDefined();
+      expect(operateurSubItem?.url).toBe("/operateurs/42");
     });
   });
 });
