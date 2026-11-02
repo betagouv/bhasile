@@ -1,8 +1,13 @@
-import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
+import {
+  createDepartementalAgent,
+  createSessionUser,
+} from "tests/test-utils/factories/session-user.factory";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  changeTarificationMessageTag,
   getTarificationParticipant,
+  getTarificationReader,
   notifyPendingTarificationMessages,
   postTarificationMessage,
 } from "@/app/api/tarifications/tarification.service";
@@ -63,6 +68,8 @@ vi.mock("@/app/utils/now.util", async () => {
   const actual = await vi.importActual("@/app/utils/now.util");
   return { ...actual, getCurrentYear: () => 2027 };
 });
+
+const superAdmin = createSessionUser({ isSuperAdmin: true, isAgent: true });
 
 describe("postTarificationMessage", () => {
   const message = {
@@ -140,6 +147,12 @@ describe("getTarificationParticipant", () => {
     });
   });
 
+  it("refuse un superadmin, qui consulte sans participer", async () => {
+    await expect(
+      getTarificationParticipant(superAdmin, 1)
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
   it("retombe au niveau le plus restreint pour un utilisateur qui n'est pas agent en base", async () => {
     mockGetUserWithGrantsByEmail.mockResolvedValue(
       buildDatabaseUser({ isAgent: false })
@@ -151,6 +164,32 @@ describe("getTarificationParticipant", () => {
     );
 
     expect(participant.level).toBe(AuthorLevel.OPERATEUR);
+  });
+});
+
+describe("getTarificationReader", () => {
+  it("laisse un superadmin consulter les échanges", async () => {
+    mockFindStructureScope.mockResolvedValue({
+      id: 1,
+      departementAdministratif: "75",
+      operateurId: null,
+    });
+
+    await expect(getTarificationReader(superAdmin, 1)).resolves.toEqual({
+      isAgent: true,
+    });
+  });
+});
+
+describe("changeTarificationMessageTag", () => {
+  it("refuse un superadmin", async () => {
+    await expect(
+      changeTarificationMessageTag({
+        messageId: 1,
+        tagKey: null,
+        user: superAdmin,
+      })
+    ).rejects.toMatchObject({ status: 403 });
   });
 });
 
