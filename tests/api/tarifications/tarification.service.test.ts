@@ -344,7 +344,7 @@ describe("notifyPendingTarificationMessages", () => {
             structure: "C42",
             campagne: "2027",
             canal: "Tout le monde",
-            lien: "https://bhasile.test/structures/42/tarification/2027",
+            lien: "https://bhasile.test/structures/42/tarification/2027?canal=tous",
             nombre: 1,
           },
         ],

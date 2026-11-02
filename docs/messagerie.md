@@ -105,7 +105,7 @@ type ConversationContext = {
 - **Côté écran**, le composant de messagerie reçoit les tags en props, calculés par la page de la tarification.
 - **Côté serveur**, la tarification passe la liste des tags au service de la messagerie, qui vérifie qu'un `tagKey` en fait partie.
 - **La dépendance va dans un seul sens** : la tarification importe la messagerie, jamais l'inverse. La messagerie connaît le contrat (« il y a des tags et des ancres »), pas son contenu (« L48 », « procédure contradictoire »).
-- Les ancres (réception du CA et du BP, envoi et ouverture des documents) relèvent de la gestion des documents. Tant qu'elle n'existe pas, la liste des ancres est vide et seuls les tags choisis classent les messages.
+- Les ancres (dépôts, envois, ouvertures et autres faits du journal) sont calculées par la tarification (`tarification.anchor.ts`), pour chaque canal. Elles s'affichent dans le fil et le sommaire ; aucune n'ouvre encore de phase (`startsTagKey`), donc seuls les tags choisis classent les messages.
 
 ## Droits et visibilité
 

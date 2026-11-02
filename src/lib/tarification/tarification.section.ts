@@ -157,7 +157,7 @@ const getPendingChangesRequest = (
     : null;
 };
 
-const getExerciseLabel = (
+export const getExerciseLabel = (
   type: TarificationDocumentType,
   campaignYear: number
 ): string => {

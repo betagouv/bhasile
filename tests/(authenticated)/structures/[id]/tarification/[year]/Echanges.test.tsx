@@ -22,6 +22,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 const CURRENT_USER_ID = 1;
+const OPEN_DRAWER_QUERY = "canal=tous";
+const NO_ANCHORS = { SHARED: [], AGENTS: [] };
 const OTHER_USER = { id: 2, name: "Paul Martin" };
 const MESSAGES_URL = "/api/tarifications/42/2026/messages";
 const TAGS = [
@@ -107,7 +109,7 @@ const attachFiles = (...files: File[]) =>
   });
 
 const typeMessage = (text: string) =>
-  fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
+  fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
     target: { value: text },
   });
 
@@ -166,6 +168,7 @@ const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
         isOperateur={false}
         isCampaignOpen
         tags={TAGS}
+        anchorsByVisibility={NO_ANCHORS}
         {...props}
       />
     </FetchStateProvider>
@@ -174,8 +177,16 @@ const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
 describe("Echanges", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(OPEN_DRAWER_QUERY));
     global.fetch = mockFetch;
+    HTMLDialogElement.prototype.showModal = vi.fn(function (
+      this: HTMLDialogElement
+    ) {
+      this.setAttribute("open", "");
+    });
+    vi.spyOn(window.history, "replaceState").mockImplementation(
+      () => undefined
+    );
   });
 
   afterEach(() => {
@@ -209,7 +220,7 @@ describe("Echanges", () => {
     renderEchanges();
     await screen.findByText("Aucun message pour l’instant.");
 
-    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
+    fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
       target: { value: "Le BP est déposé" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
@@ -225,7 +236,7 @@ describe("Echanges", () => {
       ])
     );
     await waitFor(() =>
-      expect(screen.getByPlaceholderText("Écrivez un message")).toHaveValue("")
+      expect(screen.getByPlaceholderText("Écrivez une note")).toHaveValue("")
     );
     const readCalls = mockFetch.mock.calls.filter(
       ([, init]) => init?.method !== "POST"
@@ -243,7 +254,7 @@ describe("Echanges", () => {
     renderEchanges();
     await screen.findByText("Aucun message pour l’instant.");
 
-    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
+    fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
       target: { value: "Le BP est déposé" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
@@ -252,7 +263,7 @@ describe("Echanges", () => {
       await screen.findByText("Le message n’a pas pu être envoyé.")
     ).toBeInTheDocument();
     expect(screen.queryByText("Failed to fetch")).not.toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Écrivez un message")).toHaveValue(
+    expect(screen.getByPlaceholderText("Écrivez une note")).toHaveValue(
       "Le BP est déposé"
     );
   });
@@ -272,7 +283,7 @@ describe("Echanges", () => {
     renderEchanges();
     await screen.findByText("Aucun message pour l’instant.");
 
-    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
+    fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
       target: { value: "Très long" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
@@ -317,7 +328,7 @@ describe("Echanges", () => {
       await screen.findByText(/campagne 2026 est close/)
     ).toBeInTheDocument();
     expect(
-      screen.queryByPlaceholderText("Écrivez un message")
+      screen.queryByPlaceholderText("Écrivez une note")
     ).not.toBeInTheDocument();
   });
 
@@ -342,11 +353,254 @@ describe("Echanges", () => {
       screen.getByRole("tab", { name: "Services de l’État seulement" })
     );
 
-    await waitFor(() =>
-      expect(mockRouterReplace).toHaveBeenCalledWith("?canal=agents", {
-        scroll: true,
-      })
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      null,
+      "",
+      "?canal=agents"
     );
+  });
+
+  it("passe au canal partagé depuis le canal agents ouvert par le lien d'un mail", async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
+    answerWith([]);
+    renderEchanges();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Tout le monde" }));
+
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      null,
+      "",
+      "?canal=tous"
+    );
+  });
+
+  describe("tiroir", () => {
+    it("ne charge ni n'accuse aucun message tant que le tiroir est fermé", () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams());
+      answerWith([buildMessage()]);
+
+      renderEchanges();
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it("ouvre le tiroir au clic sur le bouton en gardant les autres paramètres", () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams("etape=L48"));
+      answerWith([]);
+      renderEchanges();
+
+      fireEvent.click(screen.getByRole("button", { name: "Échanges" }));
+
+      expect(window.history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "?etape=L48&canal=tous"
+      );
+    });
+
+    it("affiche un tiroir modal quand l'URL le demande", async () => {
+      answerWith([]);
+
+      renderEchanges();
+
+      expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalledOnce();
+      expect(
+        await screen.findByRole("dialog", { name: "Échanges" })
+      ).toBeInTheDocument();
+    });
+
+    it("retire le canal à la fermeture et revient à la page seule", async () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
+      answerWith([]);
+      renderEchanges();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Fermer les échanges" })
+      );
+
+      expect(window.history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "/structures/42/tarification/2026"
+      );
+    });
+
+    it("garde les autres paramètres à la fermeture", () => {
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams("etape=L48&canal=tous")
+      );
+      answerWith([]);
+      renderEchanges();
+
+      fireEvent(screen.getByRole("dialog"), new Event("close"));
+
+      expect(window.history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "?etape=L48"
+      );
+    });
+
+    it("ferme le tiroir au clic sur le fond, pas dans le contenu", () => {
+      answerWith([]);
+      renderEchanges();
+
+      fireEvent.click(screen.getByRole("heading", { name: "Échanges" }));
+      expect(window.history.replaceState).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole("dialog"));
+      expect(window.history.replaceState).toHaveBeenCalledOnce();
+    });
+
+    it("garde le brouillon quand on ferme puis rouvre le tiroir", async () => {
+      answerWith([]);
+      const buildEchanges = () => (
+        <FetchStateProvider>
+          <Echanges
+            structureId={42}
+            year={2026}
+            currentUserId={CURRENT_USER_ID}
+            isOperateur={false}
+            isCampaignOpen
+            tags={TAGS}
+            anchorsByVisibility={NO_ANCHORS}
+          />
+        </FetchStateProvider>
+      );
+      const { rerender } = render(buildEchanges());
+      await screen.findByPlaceholderText("Écrivez une note");
+      typeMessage("Réponse en cours");
+
+      mockUseSearchParams.mockReturnValue(new URLSearchParams());
+      rerender(buildEchanges());
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams(OPEN_DRAWER_QUERY)
+      );
+      rerender(buildEchanges());
+      expect(
+        await screen.findByPlaceholderText("Écrivez une note")
+      ).toHaveValue("Réponse en cours");
+    });
+  });
+
+  describe("fil et sommaire", () => {
+    const ANCHOR = {
+      id: "event-1",
+      label: "Envoi : L48 2026",
+      date: new Date("2026-10-27T08:00:00.000Z"),
+    };
+    const LATER_ANCHOR = {
+      id: "event-2",
+      label: "Dépôt : DAB 2026",
+      date: new Date("2026-10-27T11:00:00.000Z"),
+    };
+
+    it("intercale les jalons du canal affiché dans le fil, par date", async () => {
+      answerWith([buildMessage()]);
+
+      renderEchanges({
+        anchorsByVisibility: {
+          SHARED: [ANCHOR, LATER_ANCHOR],
+          AGENTS: [{ ...ANCHOR, id: "event-9", label: "Relecture : L48 2026" }],
+        },
+      });
+
+      const list = await screen.findByRole("list", { name: "Messages" });
+      const texts = within(list)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent);
+      expect(texts[0]).toContain("Envoi : L48 2026");
+      expect(texts[1]).toContain("Bonjour");
+      expect(texts[2]).toContain("Dépôt : DAB 2026");
+      expect(screen.queryByText(/Relecture/)).not.toBeInTheDocument();
+    });
+
+    it("affiche les jalons même sans aucun message", async () => {
+      answerWith([]);
+
+      renderEchanges({
+        anchorsByVisibility: { SHARED: [ANCHOR], AGENTS: [] },
+      });
+
+      expect(
+        await screen.findByRole("list", { name: "Messages" })
+      ).toHaveTextContent("Envoi : L48 2026");
+      expect(
+        screen.queryByText("Aucun message pour l’instant.")
+      ).not.toBeInTheDocument();
+    });
+
+    it("liste au sommaire les jalons et les seuls messages avec pièces jointes", async () => {
+      answerWith([
+        buildMessage({ id: 10, text: "Sans pièce jointe" }),
+        buildMessage({
+          id: 11,
+          text: "Avec pièce jointe",
+          attachments: [
+            {
+              id: 1,
+              key: "cle",
+              originalName: "preuve.pdf",
+              mimeType: "application/pdf",
+              fileSize: 10,
+            },
+          ],
+        }),
+      ]);
+
+      renderEchanges({
+        anchorsByVisibility: { SHARED: [ANCHOR], AGENTS: [] },
+      });
+
+      const summary = await screen.findByRole("navigation", {
+        name: "Sommaire des échanges",
+      });
+      const entries = within(summary).getAllByRole("button");
+      expect(entries).toHaveLength(2);
+      expect(entries[0]).toHaveTextContent("Envoi : L48 2026");
+      expect(entries[1]).toHaveTextContent("Justificatif");
+    });
+
+    it("fait défiler le fil vers l'élément choisi au sommaire", async () => {
+      answerWith([]);
+      const scrolledElementIds: string[] = [];
+      HTMLElement.prototype.scrollIntoView = function (this: HTMLElement) {
+        scrolledElementIds.push(this.id);
+      };
+      renderEchanges({
+        anchorsByVisibility: { SHARED: [ANCHOR], AGENTS: [] },
+      });
+      const summary = await screen.findByRole("navigation", {
+        name: "Sommaire des échanges",
+      });
+
+      fireEvent.click(within(summary).getByRole("button"));
+
+      expect(scrolledElementIds).toEqual(["jalon-event-1"]);
+    });
+
+    it("distingue ses propres messages de ceux des autres", async () => {
+      answerWith([
+        buildMessage({
+          id: 10,
+          text: "Le mien",
+          author: { id: CURRENT_USER_ID, name: "Moi" },
+        }),
+        buildMessage({ id: 11, text: "Le sien" }),
+      ]);
+
+      renderEchanges();
+
+      expect((await screen.findByText("Le mien")).closest("li")).toHaveClass(
+        "self-end"
+      );
+      expect(screen.getByText("Le sien").closest("li")).toHaveClass(
+        "self-start"
+      );
+    });
   });
 
   it("garde le texte, les pièces jointes et le tag de chaque canal quand on change d'onglet", async () => {
@@ -360,12 +614,13 @@ describe("Echanges", () => {
           isOperateur={false}
           isCampaignOpen
           tags={TAGS}
+          anchorsByVisibility={NO_ANCHORS}
         />
       </FetchStateProvider>
     );
     const { rerender } = render(buildEchanges());
     await screen.findByText("Aucun message pour l’instant.");
-    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
+    fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
       target: { value: "Réponse en cours" },
     });
     attachFiles(buildFile("budget.pdf"));
@@ -374,17 +629,17 @@ describe("Echanges", () => {
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
     rerender(buildEchanges());
-    expect(
-      await screen.findByPlaceholderText("Écrivez un message")
-    ).toHaveValue("");
+    expect(await screen.findByPlaceholderText("Écrivez une note")).toHaveValue(
+      ""
+    );
     expect(screen.queryByText("budget.pdf")).not.toBeInTheDocument();
     expect(getComposerTagSelect()).toHaveValue("");
 
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(OPEN_DRAWER_QUERY));
     rerender(buildEchanges());
-    expect(
-      await screen.findByPlaceholderText("Écrivez un message")
-    ).toHaveValue("Réponse en cours");
+    expect(await screen.findByPlaceholderText("Écrivez une note")).toHaveValue(
+      "Réponse en cours"
+    );
     expect(screen.getByText("budget.pdf")).toBeInTheDocument();
     expect(getComposerTagSelect()).toHaveValue("RCA");
   });
@@ -630,7 +885,7 @@ describe("Echanges", () => {
       fireEvent.click(getSendButton());
 
       expect(await screen.findByText(/n'est pas ouverte/)).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("Écrivez un message")).toHaveValue(
+      expect(screen.getByPlaceholderText("Écrivez une note")).toHaveValue(
         "Ci-joint le budget"
       );
       expect(screen.getByText("budget.pdf")).toBeInTheDocument();
@@ -653,7 +908,7 @@ describe("Echanges", () => {
           screen.getByRole("button", { name: "Retirer budget.pdf" })
         ).toBeDisabled()
       );
-      expect(screen.getByPlaceholderText("Écrivez un message")).toHaveAttribute(
+      expect(screen.getByPlaceholderText("Écrivez une note")).toHaveAttribute(
         "readonly"
       );
 
@@ -661,7 +916,7 @@ describe("Echanges", () => {
 
       await waitFor(() =>
         expect(
-          screen.getByPlaceholderText("Écrivez un message")
+          screen.getByPlaceholderText("Écrivez une note")
         ).not.toHaveAttribute("readonly")
       );
       expect(getDeletedFileUrls()).toEqual([]);
@@ -856,7 +1111,7 @@ describe("Echanges", () => {
         await screen.findByText("L48 et procédure contradictoire")
       ).toBeInTheDocument();
       expect(
-        screen.getByPlaceholderText("Écrivez un message")
+        screen.getByPlaceholderText("Écrivez une note")
       ).toBeInTheDocument();
       expect(
         screen.queryByRole("combobox", { name: "Tag" })

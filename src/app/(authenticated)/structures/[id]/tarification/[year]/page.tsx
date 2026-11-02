@@ -17,6 +17,7 @@ import {
   canDeclareOutOfBhasile,
   computeSectionActions,
 } from "@/lib/tarification/tarification.actions";
+import { buildConversationAnchors } from "@/lib/tarification/tarification.anchor";
 import { getCampaignPhase } from "@/lib/tarification/tarification.campaign";
 import {
   computeStepProgress,
@@ -25,6 +26,7 @@ import {
   getSectionVersions,
   parseSectionCode,
 } from "@/lib/tarification/tarification.section";
+import { filterJournalForOperateur } from "@/lib/tarification/tarification.visibility";
 import { tarificationParamsSchema } from "@/schemas/api/message.schema";
 import { SessionUser } from "@/types/global";
 
@@ -159,7 +161,7 @@ export default async function TarificationPage({
             departementAdministratif: structure.departementAdministratif,
           }}
         />
-        <div className="flex flex-col gap-6 p-4">
+        <div className="flex flex-col gap-6 p-4 pb-20">
           <CampaignNotice
             year={year}
             phase={phase}
@@ -201,6 +203,12 @@ export default async function TarificationPage({
             isOperateur={overview.isOperateur}
             isCampaignOpen={overview.openCampaignYears.includes(year)}
             tags={overview.tags}
+            anchorsByVisibility={{
+              SHARED: buildConversationAnchors(
+                filterJournalForOperateur(journal)
+              ),
+              AGENTS: buildConversationAnchors(journal),
+            }}
           />
         </div>
       </main>
