@@ -1,3 +1,5 @@
+import { Readable } from "node:stream";
+
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,6 +14,7 @@ const mockAuthorizeTarificationDocument = vi.fn();
 const mockRecordTarificationDocumentOpening = vi.fn();
 const mockGetDownloadLink = vi.fn();
 const mockGetInlineLink = vi.fn();
+const mockGetFileContent = vi.fn();
 const mockDeleteFile = vi.fn();
 const mockDeleteFileByStorageKey = vi.fn();
 
@@ -33,10 +36,10 @@ vi.mock("@/app/api/tarifications/tarification.service", () => ({
 vi.mock("@/app/api/files/file.service", () => ({
   getPrincipal: (...args: unknown[]) => mockGetPrincipal(...args),
   getFileWithParents: (...args: unknown[]) => mockGetFileWithParents(...args),
-  authorizeFileAccess: (...args: unknown[]) =>
-    mockAuthorizeFileAccess(...args),
+  authorizeFileAccess: (...args: unknown[]) => mockAuthorizeFileAccess(...args),
   getDownloadLink: (...args: unknown[]) => mockGetDownloadLink(...args),
   getInlineLink: (...args: unknown[]) => mockGetInlineLink(...args),
+  getFileContent: (...args: unknown[]) => mockGetFileContent(...args),
   deleteFile: (...args: unknown[]) => mockDeleteFile(...args),
   deleteFileByStorageKey: (...args: unknown[]) =>
     mockDeleteFileByStorageKey(...args),
@@ -62,7 +65,9 @@ describe("GET /api/files/[key]", () => {
     // GIVEN
     mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
     mockAuthorizeFileAccess.mockReturnValueOnce(true);
-    mockGetDownloadLink.mockResolvedValueOnce("https://s3.example.com/test.pdf");
+    mockGetDownloadLink.mockResolvedValueOnce(
+      "https://s3.example.com/test.pdf"
+    );
 
     const request = new NextRequest(
       "http://localhost/api/files/test.pdf?getLink=1"
@@ -83,6 +88,85 @@ describe("GET /api/files/[key]", () => {
       "read"
     );
     expect(mockGetDownloadLink).toHaveBeenCalled();
+  });
+
+  describe("contenu d'un tableur", () => {
+    const XLSX_MIME_TYPE =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    const contentRequest = () =>
+      new NextRequest("http://localhost/api/files/test.xlsx?getContent=true");
+
+    it("sert le contenu en téléchargement forcé, jamais affichable sur le domaine", async () => {
+      mockGetFileWithParents.mockResolvedValueOnce({
+        ...linkedFile,
+        mimeType: XLSX_MIME_TYPE,
+      });
+      mockAuthorizeFileAccess.mockReturnValueOnce(true);
+      mockGetFileContent.mockResolvedValueOnce(
+        Readable.from([Buffer.from("contenu")])
+      );
+
+      const response = await GET(contentRequest());
+
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe("contenu");
+      expect(response.headers.get("Content-Type")).toBe(XLSX_MIME_TYPE);
+      expect(response.headers.get("Content-Disposition")).toBe("attachment");
+      expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    });
+
+    it("applique les droits de lecture", async () => {
+      mockGetFileWithParents.mockResolvedValueOnce({
+        ...linkedFile,
+        mimeType: XLSX_MIME_TYPE,
+      });
+      mockAuthorizeFileAccess.mockReturnValueOnce(false);
+
+      const response = await GET(contentRequest());
+
+      expect(response.status).toBe(404);
+      expect(mockGetFileContent).not.toHaveBeenCalled();
+    });
+
+    it("refuse un format sans aperçu", async () => {
+      mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+      mockAuthorizeFileAccess.mockReturnValueOnce(true);
+
+      const response = await GET(contentRequest());
+
+      expect(response.status).toBe(400);
+      expect(mockGetFileContent).not.toHaveBeenCalled();
+    });
+
+    it("n'enregistre l'ouverture d'un document de tarification qu'une fois le contenu obtenu", async () => {
+      const pendingOpening = { documentId: 7, userId: 50 };
+      const tarificationFile = {
+        ...linkedFile,
+        mimeType: XLSX_MIME_TYPE,
+        tarificationDocument: {
+          id: 7,
+          structureTarification: { structureId: 1, campaign: { year: 2027 } },
+        },
+      };
+      mockGetServerSession.mockResolvedValue({ user: { email: "o@test.fr" } });
+      mockGetFileWithParents.mockResolvedValue(tarificationFile);
+      mockAuthorizeTarificationDocument.mockResolvedValue(pendingOpening);
+      mockGetFileContent.mockRejectedValueOnce(new Error("Objet introuvable"));
+
+      await expect(GET(contentRequest())).rejects.toThrow("Objet introuvable");
+      expect(mockRecordTarificationDocumentOpening).not.toHaveBeenCalled();
+
+      mockGetFileContent.mockResolvedValueOnce(
+        Readable.from([Buffer.from("contenu")])
+      );
+      await GET(contentRequest());
+
+      expect(mockRecordTarificationDocumentOpening).toHaveBeenCalledWith(
+        pendingOpening
+      );
+      mockGetServerSession.mockReset();
+      mockGetFileWithParents.mockReset();
+    });
   });
 
   describe("document de tarification", () => {
@@ -212,7 +296,9 @@ describe("GET /api/files/[key]", () => {
     mockGetInlineLink.mockResolvedValueOnce("https://s3.example.com/inline");
 
     const response = await GET(
-      new NextRequest("http://localhost/api/files/test.pdf?getLink=1&inline=true")
+      new NextRequest(
+        "http://localhost/api/files/test.pdf?getLink=1&inline=true"
+      )
     );
 
     expect(await response.json()).toEqual({
@@ -236,7 +322,9 @@ describe("GET /api/files/[key]", () => {
     mockGetDownloadLink.mockResolvedValueOnce("https://s3.example.com/x");
 
     await GET(
-      new NextRequest("http://localhost/api/files/test.pdf?getLink=1&inline=true")
+      new NextRequest(
+        "http://localhost/api/files/test.pdf?getLink=1&inline=true"
+      )
     );
 
     expect(mockGetInlineLink).not.toHaveBeenCalled();
