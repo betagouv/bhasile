@@ -22,5 +22,6 @@ export {
 } from "./structure.ability";
 export {
   canAccessTarification,
+  canParticipateInTarification,
   canReadConversation,
 } from "./tarification.ability";

@@ -15,6 +15,7 @@ import { DomainError } from "@/app/utils/domain-error.util";
 import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
 import {
   canAccessTarification,
+  canParticipateInTarification,
   isAgent,
   type StructureScope,
 } from "@/lib/casl";
@@ -37,6 +38,7 @@ export const getTarificationParticipant = async (
   user: SessionUser,
   structureId: number
 ): Promise<TarificationParticipant> => {
+  assertCanParticipateInTarification(user);
   const structure = await findStructureScopeOrThrow(structureId);
   return resolveParticipant(user, structure);
 };
@@ -159,6 +161,7 @@ export const changeTarificationMessageTag = async ({
   tagKey: string | null;
   user: SessionUser;
 }): Promise<MessageDb> => {
+  assertCanParticipateInTarification(user);
   const message = await findMessageTarification(messageId);
   if (!message) {
     throw new DomainError("Message introuvable", 404);
@@ -188,6 +191,15 @@ const resolveParticipant = async (
       grants: getAssignedGrants(databaseUser),
     }),
   };
+};
+
+const assertCanParticipateInTarification = (user: SessionUser): void => {
+  if (!canParticipateInTarification(user)) {
+    throw new DomainError(
+      "Les superadmins consultent les échanges sans y participer",
+      403
+    );
+  }
 };
 
 const assertCanAccessTarification = (
