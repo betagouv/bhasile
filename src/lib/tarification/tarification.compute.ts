@@ -59,7 +59,7 @@ export const computeTarificationState = (
   };
 };
 
-const getActiveDocuments = (
+export const getActiveDocuments = (
   journal: TarificationJournal
 ): TarificationJournalDocument[] => {
   const withdrawnDocumentIds = new Set(
@@ -75,7 +75,7 @@ const getActiveDocuments = (
 };
 
 // Un dépôt de l'opérateur est partagé d'office ; un document des agents l'est à son premier partage
-const getSharedAtByDocumentId = (
+export const getSharedAtByDocumentId = (
   journal: TarificationJournal
 ): Map<number, Date> => {
   const statusByDocumentId = new Map(

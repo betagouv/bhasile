@@ -202,6 +202,7 @@ export const TARIFICATION_EVENT_DEFINITIONS: Record<
   },
 };
 
+export const TARIFICATION_FIRST_CAMPAIGN_YEAR = 2027;
 export const CA_DEPOSIT_DEADLINE = "04-30";
 export const BP_DEPOSIT_DEADLINE = "10-31";
 export const CONTRADICTOIRE_DAYS = 8;

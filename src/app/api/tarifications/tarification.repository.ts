@@ -1,5 +1,14 @@
+import { DomainError } from "@/app/utils/domain-error.util";
 import type { Prisma } from "@/generated/prisma/client";
+import {
+  type AuthorLevel,
+  type TarificationDocumentStatus,
+  type TarificationDocumentType,
+  TarificationEventType,
+} from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
+import type { PrismaTransaction } from "@/types/prisma.type";
+import type { TarificationJournalEvent } from "@/types/tarification.type";
 
 const structureScopeSelect = {
   id: true,
@@ -92,17 +101,21 @@ export const findPendingMessageContexts = () =>
     },
   });
 
-export const findTarificationCampaign = (year: number) =>
-  prisma.tarificationCampaign.findUnique({
+export const findTarificationCampaign = (
+  year: number,
+  db: PrismaTransaction = prisma
+) =>
+  db.tarificationCampaign.findUnique({
     where: { year },
     select: { drlPublishedAt: true, drlUrl: true },
   });
 
 export const findStructureTarificationJournal = (
   structureId: number,
-  year: number
+  year: number,
+  db: PrismaTransaction = prisma
 ) =>
-  prisma.structure.findUnique({
+  db.structure.findUnique({
     where: { id: structureId },
     select: {
       departementAdministratif: true,
@@ -180,4 +193,97 @@ export const createTarificationDocumentOpening = (
   prisma.tarificationDocumentOpening.createMany({
     data: [{ documentId, userId }],
     skipDuplicates: true,
+  });
+
+// L'upsert verrouille la tarification jusqu'au commit, grâce à son `update` non vide : deux faits simultanés
+// s'exécutent l'un après l'autre, et le second relit le journal avant ses gardes. La campagne reste hors
+// transaction : son verrou bloquerait toutes les structures du pays
+export const runInTarificationTransaction = async <T>(
+  structureId: number,
+  year: number,
+  callback: (
+    tx: PrismaTransaction,
+    structureTarificationId: number
+  ) => Promise<T>
+): Promise<T> => {
+  const campaign = await prisma.tarificationCampaign.upsert({
+    where: { year },
+    update: { year },
+    create: { year },
+    select: { id: true },
+  });
+  return prisma.$transaction(async (tx) => {
+    const tarification = await tx.structureTarification.upsert({
+      where: {
+        structureId_campaignId: { structureId, campaignId: campaign.id },
+      },
+      update: { campaignId: campaign.id },
+      create: { structureId, campaignId: campaign.id },
+      select: { id: true },
+    });
+    return callback(tx, tarification.id);
+  });
+};
+
+export const createTarificationDocument = async (
+  tx: PrismaTransaction,
+  {
+    structureTarificationId,
+    fileKey,
+    types,
+    status,
+    author,
+  }: {
+    structureTarificationId: number;
+    fileKey: string;
+    types: TarificationDocumentType[];
+    status: TarificationDocumentStatus;
+    author: { id: number; level: AuthorLevel };
+  }
+): Promise<{ id: number }> => {
+  const fileUpload = await tx.fileUpload.findFirst({
+    where: {
+      key: fileKey,
+      acteAdministratifId: null,
+      documentFinancierId: null,
+      controleId: null,
+      evaluationId: null,
+      operateurId: null,
+      messageId: null,
+      tarificationDocument: null,
+    },
+    select: { id: true },
+  });
+  if (!fileUpload) {
+    throw new DomainError("Ce fichier est introuvable ou déjà rattaché", 422);
+  }
+  const document = await tx.tarificationDocument.create({
+    data: {
+      structureTarificationId,
+      fileUploadId: fileUpload.id,
+      types,
+      status,
+    },
+    select: { id: true },
+  });
+  await tx.tarificationEvent.create({
+    data: {
+      structureTarificationId,
+      type: TarificationEventType.DOCUMENT_DEPOSITED,
+      authorId: author.id,
+      authorLevel: author.level,
+      documentId: document.id,
+    },
+  });
+  return document;
+};
+
+export const createTarificationEvent = (
+  tx: PrismaTransaction,
+  structureTarificationId: number,
+  event: Omit<TarificationJournalEvent, "id" | "createdAt">
+): Promise<{ id: number }> =>
+  tx.tarificationEvent.create({
+    data: { structureTarificationId, ...event },
+    select: { id: true },
   });

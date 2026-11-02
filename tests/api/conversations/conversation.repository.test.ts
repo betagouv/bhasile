@@ -20,7 +20,11 @@ import {
   upsertConversation,
 } from "@/app/api/conversations/conversation.repository";
 import { upsertStructureTarification } from "@/app/api/tarifications/tarification.repository";
-import { AuthorLevel, Visibility } from "@/generated/prisma/enums";
+import {
+  AuthorLevel,
+  TarificationDocumentStatus,
+  Visibility,
+} from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
 describe("conversation.repository db integration", () => {
@@ -188,6 +192,22 @@ describe("conversation.repository db integration", () => {
     expect(message.attachments.map((attachment) => attachment.key)).toEqual([
       file.key,
     ]);
+  });
+
+  it("refuse une pièce jointe rattachée à un document de tarification", async () => {
+    const file = await createAttachment();
+    await prisma.tarificationDocument.create({
+      data: {
+        structureTarificationId,
+        fileUploadId: file.id,
+        types: ["CA"],
+        status: TarificationDocumentStatus.SHARED,
+      },
+    });
+
+    await expect(postMessageWithFiles([file.key])).rejects.toThrow(
+      "déjà rattachée"
+    );
   });
 
   it("refuse une pièce jointe déjà rattachée, sans créer le message", async () => {

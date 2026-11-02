@@ -21,14 +21,20 @@ import type { SessionPermissions } from "@/types/global";
 
 export const getSelectableCampaignYears = ({
   openCampaignYears,
+  catchUpCampaignYears,
   tarificationYears,
 }: {
   openCampaignYears: number[];
+  catchUpCampaignYears: number[];
   tarificationYears: number[];
 }): number[] =>
-  [...new Set([...openCampaignYears, ...tarificationYears])].sort(
-    (firstYear, secondYear) => secondYear - firstYear
-  );
+  [
+    ...new Set([
+      ...openCampaignYears,
+      ...catchUpCampaignYears,
+      ...tarificationYears,
+    ]),
+  ].sort((firstYear, secondYear) => secondYear - firstYear);
 
 export const assertStructureEligible = (structure: {
   type: StructureType | null;
