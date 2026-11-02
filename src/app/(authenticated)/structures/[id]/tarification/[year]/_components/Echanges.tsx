@@ -89,7 +89,7 @@ export const Echanges = ({
                 { tabId: "SHARED", label: VISIBILITY_LABELS.SHARED },
                 { tabId: "AGENTS", label: VISIBILITY_LABELS.AGENTS },
               ]}
-              className="bg-white"
+              className="bg-white shrink-0 h-auto! before:h-auto! before:self-stretch"
             >
               {conversation}
             </Tabs>

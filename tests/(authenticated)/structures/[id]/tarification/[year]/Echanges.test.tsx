@@ -109,7 +109,7 @@ const attachFiles = (...files: File[]) =>
   });
 
 const typeMessage = (text: string) =>
-  fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
+  fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
     target: { value: text },
   });
 
@@ -220,7 +220,7 @@ describe("Echanges", () => {
     renderEchanges();
     await screen.findByText("Aucun message pour l’instant.");
 
-    fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
+    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
       target: { value: "Le BP est déposé" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
@@ -236,7 +236,7 @@ describe("Echanges", () => {
       ])
     );
     await waitFor(() =>
-      expect(screen.getByPlaceholderText("Écrivez une note")).toHaveValue("")
+      expect(screen.getByPlaceholderText("Écrivez un message")).toHaveValue("")
     );
     const readCalls = mockFetch.mock.calls.filter(
       ([, init]) => init?.method !== "POST"
@@ -254,7 +254,7 @@ describe("Echanges", () => {
     renderEchanges();
     await screen.findByText("Aucun message pour l’instant.");
 
-    fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
+    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
       target: { value: "Le BP est déposé" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
@@ -263,7 +263,7 @@ describe("Echanges", () => {
       await screen.findByText("Le message n’a pas pu être envoyé.")
     ).toBeInTheDocument();
     expect(screen.queryByText("Failed to fetch")).not.toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Écrivez une note")).toHaveValue(
+    expect(screen.getByPlaceholderText("Écrivez un message")).toHaveValue(
       "Le BP est déposé"
     );
   });
@@ -283,7 +283,7 @@ describe("Echanges", () => {
     renderEchanges();
     await screen.findByText("Aucun message pour l’instant.");
 
-    fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
+    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
       target: { value: "Très long" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
@@ -328,7 +328,7 @@ describe("Echanges", () => {
       await screen.findByText(/campagne 2026 est close/)
     ).toBeInTheDocument();
     expect(
-      screen.queryByPlaceholderText("Écrivez une note")
+      screen.queryByPlaceholderText("Écrivez un message")
     ).not.toBeInTheDocument();
   });
 
@@ -469,7 +469,7 @@ describe("Echanges", () => {
         </FetchStateProvider>
       );
       const { rerender } = render(buildEchanges());
-      await screen.findByPlaceholderText("Écrivez une note");
+      await screen.findByPlaceholderText("Écrivez un message");
       typeMessage("Réponse en cours");
 
       mockUseSearchParams.mockReturnValue(new URLSearchParams());
@@ -481,7 +481,7 @@ describe("Echanges", () => {
       );
       rerender(buildEchanges());
       expect(
-        await screen.findByPlaceholderText("Écrivez une note")
+        await screen.findByPlaceholderText("Écrivez un message")
       ).toHaveValue("Réponse en cours");
     });
   });
@@ -620,7 +620,7 @@ describe("Echanges", () => {
     );
     const { rerender } = render(buildEchanges());
     await screen.findByText("Aucun message pour l’instant.");
-    fireEvent.change(screen.getByPlaceholderText("Écrivez une note"), {
+    fireEvent.change(screen.getByPlaceholderText("Écrivez un message"), {
       target: { value: "Réponse en cours" },
     });
     attachFiles(buildFile("budget.pdf"));
@@ -629,7 +629,7 @@ describe("Echanges", () => {
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
     rerender(buildEchanges());
-    expect(await screen.findByPlaceholderText("Écrivez une note")).toHaveValue(
+    expect(await screen.findByPlaceholderText("Écrivez un message")).toHaveValue(
       ""
     );
     expect(screen.queryByText("budget.pdf")).not.toBeInTheDocument();
@@ -637,7 +637,7 @@ describe("Echanges", () => {
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams(OPEN_DRAWER_QUERY));
     rerender(buildEchanges());
-    expect(await screen.findByPlaceholderText("Écrivez une note")).toHaveValue(
+    expect(await screen.findByPlaceholderText("Écrivez un message")).toHaveValue(
       "Réponse en cours"
     );
     expect(screen.getByText("budget.pdf")).toBeInTheDocument();
@@ -885,7 +885,7 @@ describe("Echanges", () => {
       fireEvent.click(getSendButton());
 
       expect(await screen.findByText(/n'est pas ouverte/)).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("Écrivez une note")).toHaveValue(
+      expect(screen.getByPlaceholderText("Écrivez un message")).toHaveValue(
         "Ci-joint le budget"
       );
       expect(screen.getByText("budget.pdf")).toBeInTheDocument();
@@ -908,7 +908,7 @@ describe("Echanges", () => {
           screen.getByRole("button", { name: "Retirer budget.pdf" })
         ).toBeDisabled()
       );
-      expect(screen.getByPlaceholderText("Écrivez une note")).toHaveAttribute(
+      expect(screen.getByPlaceholderText("Écrivez un message")).toHaveAttribute(
         "readonly"
       );
 
@@ -916,7 +916,7 @@ describe("Echanges", () => {
 
       await waitFor(() =>
         expect(
-          screen.getByPlaceholderText("Écrivez une note")
+          screen.getByPlaceholderText("Écrivez un message")
         ).not.toHaveAttribute("readonly")
       );
       expect(getDeletedFileUrls()).toEqual([]);
@@ -1111,7 +1111,7 @@ describe("Echanges", () => {
         await screen.findByText("L48 et procédure contradictoire")
       ).toBeInTheDocument();
       expect(
-        screen.getByPlaceholderText("Écrivez une note")
+        screen.getByPlaceholderText("Écrivez un message")
       ).toBeInTheDocument();
       expect(
         screen.queryByRole("combobox", { name: "Tag" })
