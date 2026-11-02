@@ -50,9 +50,14 @@ export const computeSectionActions = ({
       versionIds.map((documentId) => [
         documentId,
         {
-          canReview: canRecord(context, {
+          canApprove: canRecord(context, {
             type: TarificationEventType.APPROVED,
             documentId,
+          }),
+          canRequestChanges: canRecord(context, {
+            type: TarificationEventType.CHANGES_REQUESTED,
+            documentId,
+            text: PLACEHOLDER_TEXT,
           }),
           canShare: canRecord(context, {
             type: TarificationEventType.DOCUMENT_SHARED,
@@ -173,7 +178,8 @@ export type DepositOption = {
 };
 
 export type VersionActions = {
-  canReview: boolean;
+  canApprove: boolean;
+  canRequestChanges: boolean;
   canShare: boolean;
   canWithdraw: boolean;
 };

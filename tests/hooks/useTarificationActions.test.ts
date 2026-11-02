@@ -57,6 +57,35 @@ describe("useTarificationActions", () => {
     expect(mockRefresh).toHaveBeenCalled();
   });
 
+  it("ne redépose pas la réponse quand on réessaie après un échec", async () => {
+    mockFetch
+      .mockResolvedValueOnce(answer({ key: "reponse.pdf" }))
+      .mockResolvedValueOnce(answer({ id: 9 }, 201))
+      .mockResolvedValueOnce(answer({ error: "Réseau" }, 500));
+    const { result } = renderHook(() =>
+      useTarificationActions({ structureId: 42, year: 2028 })
+    );
+    const response = {
+      type: "L48_CONTESTED" as const,
+      text: "Montant erroné",
+      file,
+    };
+
+    await act(async () => {
+      await expect(result.current.respondToL48(response)).rejects.toThrow(
+        "Réseau"
+      );
+    });
+    expect(mockRefresh).toHaveBeenCalled();
+
+    mockFetch.mockClear();
+    mockFetch.mockResolvedValueOnce(answer({ id: 10 }, 201));
+    await act(() => result.current.respondToL48(response));
+
+    expect(getCalls()).toEqual([["/api/tarifications/42/2028/events", "POST"]]);
+    expect(JSON.parse(mockFetch.mock.calls[0][1].body).documentId).toBe(9);
+  });
+
   it("répond sans pièce jointe sans passer par un dépôt", async () => {
     mockFetch.mockResolvedValueOnce(answer({ id: 10 }, 201));
     const { respondToL48 } = renderActions();

@@ -5,7 +5,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { ChangeEvent, ReactElement, useRef, useState } from "react";
 
-import { ApiError } from "@/app/utils/api-error.util";
+import { getApiErrorMessage } from "@/app/utils/api-error.util";
 import { ALLOWED_MIME_TYPES } from "@/constants";
 import {
   TarificationDocumentStatus,
@@ -46,9 +46,10 @@ export const DocumentDeposit = ({
       setIsSigned(false);
     } catch (error) {
       setErrorMessage(
-        error instanceof ApiError
-          ? error.message
-          : "Le dépôt n’a pas abouti. Réessayez dans quelques instants."
+        getApiErrorMessage(
+          error,
+          "Le dépôt n’a pas abouti. Réessayez dans quelques instants."
+        )
       );
     } finally {
       setIsUploading(false);

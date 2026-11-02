@@ -47,7 +47,12 @@ vi.mock("@codegouvfr/react-dsfr/Modal", () => ({
   }),
 }));
 
-const NONE = { canReview: false, canShare: false, canWithdraw: false };
+const NONE = {
+  canApprove: false,
+  canRequestChanges: false,
+  canShare: false,
+  canWithdraw: false,
+};
 
 const version = {
   id: 7,
@@ -82,14 +87,28 @@ describe("DocumentActionBar", () => {
     mockRespondToL48.mockResolvedValue(undefined);
   });
 
-  it("n'affiche rien sans action ni relecteur", () => {
+  it("n'affiche aucune barre sans action ni relecteur, mais garde la modale montée", () => {
     const { container } = renderBar();
 
-    expect(container).toBeEmptyDOMElement();
+    expect(container.querySelector("footer")).toBeNull();
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
+  });
+
+  it("propose seulement de demander des modifications à qui a déjà relu", () => {
+    renderBar({ versionActions: { ...NONE, canRequestChanges: true } });
+
+    expect(
+      screen.getByRole("button", { name: "Demander des modifications" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "J’ai relu ce document" })
+    ).not.toBeInTheDocument();
   });
 
   it("enregistre « J'ai relu » sans confirmation", async () => {
-    renderBar({ versionActions: { ...NONE, canReview: true } });
+    renderBar({
+      versionActions: { ...NONE, canApprove: true, canRequestChanges: true },
+    });
 
     await userEvent.click(
       screen.getByRole("button", { name: "J’ai relu ce document" })
@@ -106,7 +125,9 @@ describe("DocumentActionBar", () => {
     mockRecordEvent.mockRejectedValue(
       new ApiError("L'auteur d'une version ne la relit pas", 403)
     );
-    renderBar({ versionActions: { ...NONE, canReview: true } });
+    renderBar({
+      versionActions: { ...NONE, canApprove: true, canRequestChanges: true },
+    });
 
     await userEvent.click(
       screen.getByRole("button", { name: "J’ai relu ce document" })
@@ -118,7 +139,9 @@ describe("DocumentActionBar", () => {
   });
 
   it("exige un motif pour demander des modifications", async () => {
-    renderBar({ versionActions: { ...NONE, canReview: true } });
+    renderBar({
+      versionActions: { ...NONE, canApprove: true, canRequestChanges: true },
+    });
 
     await userEvent.click(
       screen.getByRole("button", { name: "Demander des modifications" })

@@ -99,10 +99,7 @@ export const getSectionVersions = (
         isShared: sharedAtByDocumentId.has(document.id),
         isWithdrawn: !activeDocumentIds.has(document.id),
         withdrawalReason: withdrawal?.text ?? null,
-        reviewRequestText:
-          documentEvents.findLast(
-            (event) => event.type === TarificationEventType.CHANGES_REQUESTED
-          )?.text ?? null,
+        reviewRequestText: getPendingChangesRequest(documentEvents),
       };
     })
     .reverse();
@@ -147,6 +144,17 @@ export const computeStepProgress = (
         sharedAtByDocumentId.has(opening.documentId)
     ),
   };
+};
+
+const getPendingChangesRequest = (
+  documentEvents: TarificationJournalRead["events"]
+): string | null => {
+  const lastReview = documentEvents
+    .filter((event) => isReviewType(event.type))
+    .at(-1);
+  return lastReview?.type === TarificationEventType.CHANGES_REQUESTED
+    ? lastReview.text
+    : null;
 };
 
 const getExerciseLabel = (

@@ -3,7 +3,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement, useState } from "react";
 
-import { ApiError } from "@/app/utils/api-error.util";
+import { getApiErrorMessage } from "@/app/utils/api-error.util";
 import {
   TarificationEventType,
   type TarificationStepCode,
@@ -30,21 +30,30 @@ export const DocumentActionBar = ({
   contradictoireDeadline,
   recordEvent,
   respondToL48,
-}: Props): ReactElement | null => {
+}: Props): ReactElement => {
   const [request, setRequest] = useState<ActionRequest | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
 
   const documentId = version?.id ?? null;
 
+  const modal = (
+    <TarificationActionModal
+      modalId="tarification-document-action"
+      request={request}
+      onClose={() => setRequest(null)}
+    />
+  );
+
   const hasActions =
-    versionActions?.canReview ||
+    versionActions?.canApprove ||
+    versionActions?.canRequestChanges ||
     versionActions?.canShare ||
     versionActions?.canWithdraw ||
     canMarkNotApplicable ||
     canRespondToL48;
   if (!hasActions && reviewerNames.length === 0) {
-    return null;
+    return modal;
   }
 
   const approve = async () => {
@@ -54,9 +63,10 @@ export const DocumentActionBar = ({
       await recordEvent({ type: TarificationEventType.APPROVED, documentId });
     } catch (error) {
       setErrorMessage(
-        error instanceof ApiError
-          ? error.message
-          : "L’action n’a pas abouti. Réessayez dans quelques instants."
+        getApiErrorMessage(
+          error,
+          "L’action n’a pas abouti. Réessayez dans quelques instants."
+        )
       );
     } finally {
       setIsReviewing(false);
@@ -170,15 +180,15 @@ export const DocumentActionBar = ({
           Retirer
         </Button>
       )}
-      {versionActions?.canReview && (
-        <>
-          <Button priority="secondary" onClick={requestChanges}>
-            Demander des modifications
-          </Button>
-          <Button disabled={isReviewing} onClick={approve}>
-            J’ai relu ce document
-          </Button>
-        </>
+      {versionActions?.canRequestChanges && (
+        <Button priority="secondary" onClick={requestChanges}>
+          Demander des modifications
+        </Button>
+      )}
+      {versionActions?.canApprove && (
+        <Button disabled={isReviewing} onClick={approve}>
+          J’ai relu ce document
+        </Button>
       )}
       {versionActions?.canShare && (
         <Button onClick={requestShare}>Envoyer à l’opérateur</Button>
@@ -202,11 +212,7 @@ export const DocumentActionBar = ({
           </Button>
         </>
       )}
-      <TarificationActionModal
-        modalId="tarification-document-action"
-        request={request}
-        onClose={() => setRequest(null)}
-      />
+      {modal}
     </footer>
   );
 };

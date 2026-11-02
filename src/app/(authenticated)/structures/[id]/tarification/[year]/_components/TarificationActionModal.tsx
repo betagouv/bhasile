@@ -4,7 +4,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 
-import { ApiError } from "@/app/utils/api-error.util";
+import { getApiErrorMessage } from "@/app/utils/api-error.util";
 import { ALLOWED_MIME_TYPES } from "@/constants";
 
 export const TarificationActionModal = ({
@@ -52,9 +52,10 @@ export const TarificationActionModal = ({
       onClose();
     } catch (error) {
       setErrorMessage(
-        error instanceof ApiError
-          ? error.message
-          : "L’action n’a pas abouti. Réessayez dans quelques instants."
+        getApiErrorMessage(
+          error,
+          "L’action n’a pas abouti. Réessayez dans quelques instants."
+        )
       );
     } finally {
       setIsSubmitting(false);

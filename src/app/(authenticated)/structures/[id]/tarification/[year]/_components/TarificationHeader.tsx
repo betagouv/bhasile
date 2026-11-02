@@ -21,9 +21,11 @@ export const TarificationHeader = ({
     </Link>
     <StructureHeaderContent title="Campagne de tarification" {...structure} />
     <div className="grow" />
-    {canDeclareOutOfBhasile && (
-      <OutOfBhasileButton structureId={structureId} year={year} />
-    )}
+    <OutOfBhasileButton
+      structureId={structureId}
+      year={year}
+      isAvailable={canDeclareOutOfBhasile}
+    />
     <Link
       href={`/structures/${structureId}`}
       className="fr-btn fr-btn--tertiary-no-outline fr-icon-close-line"

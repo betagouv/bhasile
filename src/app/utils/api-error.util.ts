@@ -17,3 +17,6 @@ export const extractApiError = async (response: Response): Promise<string> => {
     ? body.message
     : `Erreur serveur (${response.status})`;
 };
+
+export const getApiErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof ApiError ? error.message : fallback;

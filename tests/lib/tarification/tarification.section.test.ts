@@ -206,6 +206,18 @@ describe("getSectionVersions", () => {
     });
   });
 
+  it("oublie une demande de modifications dès qu'une relecture la suit", () => {
+    const journal = createJournal();
+    const documentId = depositDraft(journal);
+    review(journal, documentId, "CHANGES_REQUESTED");
+    review(journal, documentId, "APPROVED", 22);
+
+    expect(getSectionVersions(toRead(journal), "RCA")[0]).toMatchObject({
+      stateLabel: "Validé",
+      reviewRequestText: null,
+    });
+  });
+
   it("date une version des agents à son partage pour l'opérateur, jamais à sa rédaction", () => {
     const journal = createJournal();
     const documentId = depositDocument(journal, {

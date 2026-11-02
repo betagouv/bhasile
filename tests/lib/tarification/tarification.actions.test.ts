@@ -158,7 +158,12 @@ describe("computeSectionActions", () => {
 
       expect(
         computeVersionActions(buildContext({ journal }), documentId)
-      ).toEqual({ canReview: true, canShare: false, canWithdraw: false });
+      ).toEqual({
+        canApprove: true,
+        canRequestChanges: true,
+        canShare: false,
+        canWithdraw: false,
+      });
       expect(
         computeVersionActions(
           buildContext({
@@ -166,8 +171,8 @@ describe("computeSectionActions", () => {
             author: { id: AGENT_USER_ID, level: AuthorLevel.DEPARTEMENT },
           }),
           documentId
-        ).canReview
-      ).toBe(false);
+        )
+      ).toMatchObject({ canApprove: false, canRequestChanges: false });
     });
 
     it("propose l'envoi d'une version signée, puis son retrait une fois envoyée", () => {
@@ -179,7 +184,12 @@ describe("computeSectionActions", () => {
 
       expect(
         computeVersionActions(buildContext({ journal }), documentId)
-      ).toEqual({ canReview: false, canShare: true, canWithdraw: false });
+      ).toEqual({
+        canApprove: false,
+        canRequestChanges: false,
+        canShare: true,
+        canWithdraw: false,
+      });
 
       addEvent(journal, {
         type: TarificationEventType.DOCUMENT_SHARED,
@@ -189,7 +199,30 @@ describe("computeSectionActions", () => {
 
       expect(
         computeVersionActions(buildContext({ journal }), documentId)
-      ).toEqual({ canReview: false, canShare: false, canWithdraw: true });
+      ).toEqual({
+        canApprove: false,
+        canRequestChanges: false,
+        canShare: false,
+        canWithdraw: true,
+      });
+    });
+
+    it("ne repropose pas la relecture à qui vient de relire, mais lui laisse demander des modifications", () => {
+      const journal = createJournal();
+      const documentId = depositAgentVersion(
+        journal,
+        TarificationDocumentStatus.DRAFT
+      );
+      addEvent(journal, {
+        type: TarificationEventType.APPROVED,
+        documentId,
+        authorId: OTHER_AGENT_ID,
+        createdAt: new Date(AT),
+      });
+
+      expect(
+        computeVersionActions(buildContext({ journal }), documentId)
+      ).toMatchObject({ canApprove: false, canRequestChanges: true });
     });
 
     it("ne propose pas d'envoyer une L48 sans BP", () => {
@@ -217,7 +250,12 @@ describe("computeSectionActions", () => {
           buildContext({ journal, author: operateur }),
           documentId
         )
-      ).toEqual({ canReview: false, canShare: false, canWithdraw: false });
+      ).toEqual({
+        canApprove: false,
+        canRequestChanges: false,
+        canShare: false,
+        canWithdraw: false,
+      });
     });
   });
 
