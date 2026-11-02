@@ -15,6 +15,7 @@ import { DomainError } from "@/app/utils/domain-error.util";
 import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
 import {
   canAccessTarification,
+  canParticipateInTarification,
   isAgent,
   type StructureScope,
 } from "@/lib/casl";
@@ -37,6 +38,7 @@ export const getTarificationParticipant = async (
   user: SessionUser,
   structureId: number
 ): Promise<TarificationParticipant> => {
+  assertCanParticipateInTarification(user);
   const structure = await findStructureScopeOrThrow(structureId);
   return resolveParticipant(user, structure);
 };
@@ -61,6 +63,7 @@ export const getTarificationOverview = async (
     codeBhasile: structure.codeBhasile,
     participant,
     isOperateur: participant.level === AuthorLevel.OPERATEUR,
+    canParticipate: canParticipateInTarification(user),
     campaignYears: getSelectableCampaignYears(
       tarifications.map((tarification) => tarification.campaign.year)
     ),
@@ -159,6 +162,7 @@ export const changeTarificationMessageTag = async ({
   tagKey: string | null;
   user: SessionUser;
 }): Promise<MessageDb> => {
+  assertCanParticipateInTarification(user);
   const message = await findMessageTarification(messageId);
   if (!message) {
     throw new DomainError("Message introuvable", 404);
@@ -190,6 +194,15 @@ const resolveParticipant = async (
   };
 };
 
+const assertCanParticipateInTarification = (user: SessionUser): void => {
+  if (!canParticipateInTarification(user)) {
+    throw new DomainError(
+      "Les superadmins consultent les échanges sans y participer",
+      403
+    );
+  }
+};
+
 const assertCanAccessTarification = (
   user: SessionUser,
   structure: StructureScope
@@ -216,6 +229,7 @@ export type TarificationOverview = {
   codeBhasile: string;
   participant: TarificationParticipant;
   isOperateur: boolean;
+  canParticipate: boolean;
   campaignYears: number[];
 };
 

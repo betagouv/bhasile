@@ -15,6 +15,7 @@ export const Echanges = ({
   year,
   currentUserId,
   isOperateur,
+  canParticipate,
   isCampaignOpen,
 }: Props): ReactElement => {
   const searchParams = useSearchParams();
@@ -44,6 +45,7 @@ export const Echanges = ({
       year={year}
       visibility={visibility}
       currentUserId={currentUserId}
+      canParticipate={canParticipate}
       isCampaignOpen={isCampaignOpen}
       draft={draft}
     />
@@ -79,5 +81,6 @@ type Props = {
   year: number;
   currentUserId: number;
   isOperateur: boolean;
+  canParticipate: boolean;
   isCampaignOpen: boolean;
 };
