@@ -46,6 +46,15 @@ export const useFileUpload = () => {
     return result.url;
   }, []);
 
+  const getFileContent = useCallback(async (key: string): Promise<Blob> => {
+    const encodedKey = encodeURIComponent(key);
+    const response = await fetch(`/api/files/${encodedKey}?getContent=true`);
+    if (!response.ok) {
+      throw new ApiError(await extractApiError(response), response.status);
+    }
+    return response.blob();
+  }, []);
+
   const getFile = useCallback(
     async (key: string): Promise<FileUploadResponse> => {
       const encodedKey = encodeURIComponent(key);
@@ -71,5 +80,12 @@ export const useFileUpload = () => {
     return await response.json();
   }, []);
 
-  return { uploadFile, getFile, deleteFile, getDownloadLink, getInlineLink };
+  return {
+    uploadFile,
+    getFile,
+    getFileContent,
+    deleteFile,
+    getDownloadLink,
+    getInlineLink,
+  };
 };
