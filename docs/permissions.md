@@ -6,15 +6,6 @@ Un user a accès à Bhasile si son compte est **activé**. Ses droits viennent d
 
 ## Modèle
 
-### Général
-
-La gestion de rôles d'un agent se fait obligatoirement par son rattachement à un unique périmètre.
-
-La gestion de rôles d'un opérateur se fait :
-
-- De manière automatique pour son accès à la fiche dont il est contact
-- Par l'attribution de binômes "droits x périmètre géographique"
-
 ### Tables
 
 | Table / colonne                     | Rôle                                                                                                                          |
@@ -30,32 +21,44 @@ Plusieurs périmètres peuvent couvrir la même zone.
 
 ### Qui a quels droits
 
-- **Désactivé** : rien. **En attente** : droits de contact seulement (\*).
-- **Superadmin** : tous les droits, hors messagerie.
-- **Agent** : lecture nationale + admin sur son périmètre.
-- **Opérateur** : ses binômes + droits de contact (\*), limités à son opérateur ; lecture seule, pas de CPOM. Certains champs lui sont masqués
+- **Désactivé** : rien.
+- **En attente** : droits de contact seulement (\*).
+- **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
+- **Agent** : rattaché obligatoirement à un unique périmètre, dont il tire ses droits : lecture nationale + admin sur la zone du périmètre.
+- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans CPOM ; certains champs lui sont masqués.
 - **Activé sans périmètre ni opérateur** : droits de contact seulement (\*).
 
-(\*) Seulement si `CONTACT_ACCESS_ENABLED=true`.
+(\*) Droits de contact : un user non-agent qui figure comme contact (même email) dans la version affichée d'une structure lit cette structure, sans validation préalable. Seulement si `CONTACT_ACCESS_ENABLED=true`.
 
 À noter pour les **emails** : users et contacts écrits sans espaces et en minuscules (`normalizeEmail`, `contactApiSchema`), puis comparés tels quels.
 
-### Ce que couvre un binôme (gestion de droits pour les opérateurs)
+### Ce que couvre un binôme
 
-Les binômes s'additionnent, aucun ne restreint : sur une structure, le rôle le plus fort qui la couvre s'applique. Trois rôles :
+Les droits d'un agent sont deux binômes calculés à partir de son périmètre ; ceux d'un opérateur sont stockés. Les binômes s'additionnent, aucun ne restreint : sur une structure, le rôle le plus fort qui la couvre s'applique.
 
-- Lecteur : peut voir seulement
-- Éditeur : droits Lecteur + peut renseigner une fiche
-- Admin : droits Éditeur + peut gérer les accès à la fiche
+Trois rôles :
+
+- **Lecteur** : voit ;
+- **Éditeur** : droits Lecteur + renseigne les fiches ;
+- **Admin** : droits Éditeur + gère les accès.
+
+Zones :
+
+- **Structures** : national = toutes ; région ou département = celles dont le département administratif est dans la zone ; structure = celle-là.
+- **CPOM** : national = tous ; région ou département = ceux dont au moins un département est dans la zone, plus les CPOM régionaux de la région ; structure = ceux liés à cette structure.
+- **Tarification** : droit d'édition sur la structure, binômes nationaux exclus (voir [Messagerie](messagerie.md)).
+- **Opérateur** : tout est en plus restreint à son `operateurId`.
+
+Une fiche hors périmètre renvoie une 404.
 
 ## Choix et raisons
 
 - **Périmètre ≠ binôme** : un périmètre (agents) est partagé par plusieurs agents et porte un nom métier ; un binôme (opérateur) est personnel et cumulable.
 - **Statut déduit des rattachements** : agent = périmètre, opérateur = `operateurId`. Pas de `isAgent` qui pourrait contredire le périmètre.
-- **Email patterns abandonnés** : par simplicité on n'a pas de rattachement automatique sur le email pattern.
+- **Email patterns abandonnés** : par simplicité, pas de rattachement automatique par domaine d'email.
 - **`isActivated` + `deactivatedAt`** : distingue « jamais activé » (écran de demande) de « désactivé » (affiché comme tel).
 - **`scope` explicite** : un binôme ou un périmètre sans cible ne donne rien, jamais tout.
-- **Évolutivité des structures** : une structure qui arrive en AURA entre dans les droits AURA.
+- **Région distincte du département** : couvrir une région revient à couvrir ses départements, mais le métier distingue les deux niveaux : un binôme régional couvre aussi les CPOM régionaux, et la messagerie sépare DREETS et DDETS (signature des messages, notifications réservées aux périmètres départementaux).
 - **Suppressions** : supprimer une zone ou une structure supprime ses binômes (`Cascade`) ; une zone ou un périmètre utilisés ne se suppriment pas (`Restrict`), un opérateur qui a des users non plus.
 
 ## Avant d'activer les contacts
@@ -81,11 +84,12 @@ Mise en prod du basculement :
    - affichage de la désactivation dans la messagerie.
 2. **Ouverture aux opérateurs** :
    - authentification via ProConnect ;
-   - fiche opérateur (#1742), CPOM liés à leurs structures, statistiques filtrées sur `operateurId` sans RMU ;
+   - fiche opérateur (#1742), statistiques filtrées sur `operateurId` sans RMU ;
+   - lecture des CPOM de leur opérateur dont la zone recouvre, au moins en partie, leurs binômes (PR stackée à venir) ;
    - écriture par leurs binômes éditeur / admin, restreinte à leur opérateur, selon la matrice validée par le métier.
 3. **`Grant.userId` obligatoire**, une fois `20261104-clean-grants-and-emails` passé en prod.
 
-Et les points d'attention restant
+### Points d'attention restants
 
 - **CPOM chargé sans ses champs de périmètre** : la règle CPOM lit `departements`, `structures`, `granularity` et `regionId` (`cpomScopeSelect`). Sans l'un d'eux, l'accès est refusé en silence.
 - **Pas de contrainte en base** sur `Grant` ni sur `User` (périmètre et opérateur à la fois) : la cohérence est vérifiée par le one-off de reprise, puis par la gestion des accès.
