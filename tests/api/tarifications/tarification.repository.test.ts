@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   findMessageTarification,
   findStructureTarification,
+  findStructureTarificationCampaigns,
   upsertStructureTarification,
 } from "@/app/api/tarifications/tarification.repository";
 import { AuthorLevel, Visibility } from "@/generated/prisma/enums";
@@ -59,6 +60,14 @@ describe("tarification.repository db integration", () => {
     const found = await findStructureTarification(structureId, campaignYear);
 
     expect(found?.id).toBe(created.id);
+  });
+
+  it("liste les campagnes où la structure a une tarification", async () => {
+    await upsertStructureTarification(structureId, campaignYear);
+
+    expect(await findStructureTarificationCampaigns(structureId)).toEqual([
+      { campaign: { year: campaignYear } },
+    ]);
   });
 
   it("ne trouve rien pour une campagne sans échange", async () => {

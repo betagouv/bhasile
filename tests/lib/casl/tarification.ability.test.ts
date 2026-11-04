@@ -4,10 +4,14 @@ import {
   createSessionGrant,
   createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Visibility } from "@/generated/prisma/enums";
-import { canAccessTarification, canReadConversation } from "@/lib/casl";
+import {
+  canAccessTarification,
+  canParticipateInTarification,
+  canReadConversation,
+} from "@/lib/casl";
 
 describe("canAccessTarification", () => {
   const parisStructure = {
@@ -22,16 +26,55 @@ describe("canAccessTarification", () => {
     ).toBe(true);
   });
 
-  it("la ferme à un agent d'un autre département", () => {
+  it("refuse la tarification à un agent d'un autre département", () => {
     expect(
       canAccessTarification(createDepartementalAgent(["50"]), parisStructure)
     ).toBe(false);
   });
 
-  it("la ferme à un agent national, même éditeur", () => {
+  it("refuse la tarification à un agent national, même éditeur", () => {
     expect(canAccessTarification(createNationalAgent(), parisStructure)).toBe(
       false
     );
+  });
+
+  describe("avant la mise en service", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it("refuse la tarification aux agents tant que la messagerie n'est pas activée", () => {
+      vi.stubEnv("MESSAGERIE_ENABLED", "");
+
+      expect(
+        canAccessTarification(createDepartementalAgent(["75"]), parisStructure)
+      ).toBe(false);
+    });
+
+    it("ouvre la tarification aux superadmins", () => {
+      vi.stubEnv("MESSAGERIE_ENABLED", "");
+
+      expect(
+        canAccessTarification(
+          createSessionUser({ isSuperAdmin: true }),
+          parisStructure
+        )
+      ).toBe(true);
+    });
+  });
+});
+
+describe("canParticipateInTarification", () => {
+  it("laisse participer un agent", () => {
+    expect(canParticipateInTarification(createDepartementalAgent(["75"]))).toBe(
+      true
+    );
+  });
+
+  it("empêche un superadmin de participer", () => {
+    expect(
+      canParticipateInTarification(createSessionUser({ isSuperAdmin: true }))
+    ).toBe(false);
   });
 });
 
