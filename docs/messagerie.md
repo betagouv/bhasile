@@ -96,10 +96,6 @@ type ConversationAnchor = {
   date: Date;
   startsTagKey?: string;
 };
-type ConversationContext = {
-  tags: ConversationTag[];
-  anchors: ConversationAnchor[];
-};
 ```
 
 - **Côté écran**, le composant de messagerie reçoit les tags en props, calculés par la page de la tarification.
