@@ -19,7 +19,7 @@ export type BrevoContact = {
     PERIMETRE: string;
     LAST_LOGIN: string;
     CREATION_COMPTE: string;
-    DESACTIVE: boolean;
+    ACTIVE_USER: boolean;
   };
 };
 
@@ -45,7 +45,7 @@ export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
       PERIMETRE: actionGrants.map(getGrantLabel).join(", "),
       LAST_LOGIN: user.lastConnection ? toDayKey(user.lastConnection) : "",
       CREATION_COMPTE: toDayKey(user.createdAt),
-      DESACTIVE: getAccountStatus(user) === "DEACTIVATED",
+      ACTIVE_USER: getAccountStatus(user) === "ACTIVATED",
     },
   };
 };

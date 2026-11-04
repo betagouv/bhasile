@@ -30,7 +30,7 @@ describe("brevo util", () => {
         PERIMETRE: "Bouches-du-Rhône",
         LAST_LOGIN: "2026-09-15",
         CREATION_COMPTE: "2025-01-20",
-        DESACTIVE: false,
+        ACTIVE_USER: true,
       },
     });
   });
@@ -76,7 +76,7 @@ describe("brevo util", () => {
     expect(contact.attributes.DEPARTEMENT).toBe("");
   });
 
-  it("marque désactivé un agent désactivé, sans changer son statut", () => {
+  it("marque inactif un agent désactivé, sans changer son statut", () => {
     // WHEN
     const contact = toBrevoContact({
       ...baseUser,
@@ -85,7 +85,7 @@ describe("brevo util", () => {
     });
 
     // THEN
-    expect(contact.attributes.DESACTIVE).toBe(true);
+    expect(contact.attributes.ACTIVE_USER).toBe(false);
     expect(contact.attributes.STATUT).toBe("Agent");
   });
 });
