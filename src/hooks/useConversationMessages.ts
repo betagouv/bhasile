@@ -91,11 +91,17 @@ export const useConversationMessages = ({
   }, [messagesUrl, visibility, refreshCount]);
 
   const postMessage = useCallback(
-    async (text: string): Promise<void> => {
+    async ({
+      text,
+      fileKeys,
+    }: {
+      text: string;
+      fileKeys: string[];
+    }): Promise<void> => {
       const response = await fetch(messagesUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visibility, text }),
+        body: JSON.stringify({ visibility, text, fileKeys }),
       });
       if (!response.ok) {
         throw new ApiError(await extractApiError(response), response.status);
