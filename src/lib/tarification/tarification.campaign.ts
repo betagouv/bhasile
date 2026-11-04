@@ -1,4 +1,4 @@
-import { toLocalDate } from "@/lib/tarification/tarification.date";
+import { toLocalDate } from "@/app/utils/date.util";
 import { TARIFICATION_FIRST_CAMPAIGN_YEAR } from "@/lib/tarification/tarification.definition";
 import type { CampaignPhase } from "@/types/tarification.type";
 

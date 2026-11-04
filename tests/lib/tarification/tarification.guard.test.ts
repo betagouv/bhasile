@@ -198,11 +198,11 @@ describe("assertCanRecordEvent", () => {
     const journal = createJournal();
 
     expect(() =>
-      record(journal, { type: TarificationEventType.OUT_OF_BHASILE_DECLARED })
+      record(journal, { type: TarificationEventType.OUT_OF_APP_DECLARED })
     ).toThrow("pas valide");
     expect(() =>
       record(journal, {
-        type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+        type: TarificationEventType.OUT_OF_APP_DECLARED,
         text: "Courrier",
         ...OPERATEUR_AUTHOR,
       })
@@ -490,14 +490,14 @@ describe("assertCanRecordEvent", () => {
     const journal = createJournal();
     const declare = () =>
       record(journal, {
-        type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+        type: TarificationEventType.OUT_OF_APP_DECLARED,
         text: "Courrier",
       });
 
     expect(declare).not.toThrow();
 
     addEvent(journal, {
-      type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+      type: TarificationEventType.OUT_OF_APP_DECLARED,
       text: "Courrier",
       createdAt: NOW,
     });

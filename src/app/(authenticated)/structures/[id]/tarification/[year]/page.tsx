@@ -58,6 +58,7 @@ export default async function TarificationPage({
           year={year}
           currentUserId={overview.participant.id}
           isOperateur={overview.isOperateur}
+          canParticipate={overview.canParticipate}
           isCampaignOpen={overview.openCampaignYears.includes(year)}
           tags={overview.tags}
         />

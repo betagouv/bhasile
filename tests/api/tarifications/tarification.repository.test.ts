@@ -246,14 +246,14 @@ describe("tarification.repository db integration", () => {
               .flatMap((tarification) => tarification.events)
               .some(
                 (event) =>
-                  event.type === TarificationEventType.OUT_OF_BHASILE_DECLARED
+                  event.type === TarificationEventType.OUT_OF_APP_DECLARED
               );
             if (isAlreadyDeclared) {
               return;
             }
             await new Promise((resolve) => setTimeout(resolve, 100));
             await transaction.createEvent({
-              type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+              type: TarificationEventType.OUT_OF_APP_DECLARED,
               authorId,
               authorLevel: AuthorLevel.DEPARTEMENT,
               documentId: null,
@@ -279,7 +279,7 @@ describe("tarification.repository db integration", () => {
         await prisma.tarificationEvent.count({
           where: {
             structureTarification: { structureId: writeStructureId },
-            type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+            type: TarificationEventType.OUT_OF_APP_DECLARED,
           },
         })
       ).toBe(1);

@@ -106,7 +106,7 @@ export const assertCanRecordEvent = ({
       assertContradictoireOpen(journal, now);
       assertIsResponseDocument(journal, document);
       break;
-    case TarificationEventType.OUT_OF_BHASILE_DECLARED:
+    case TarificationEventType.OUT_OF_APP_DECLARED:
       assertNotOutOfBhasile(journal, now);
       break;
   }
