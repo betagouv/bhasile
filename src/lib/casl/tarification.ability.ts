@@ -18,6 +18,9 @@ export const canAccessTarification = (
   );
 };
 
+export const canParticipateInTarification = (user: SessionUser): boolean =>
+  !user.isSuperAdmin;
+
 export const canReadConversation = (
   user: SessionUser,
   conversation: {

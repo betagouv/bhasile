@@ -150,7 +150,7 @@ describe("computeTarificationState — dépôts", () => {
     const underCpom = createJournal({ isCoveredByCpom: true });
     const outOfBhasile = createJournal();
     addEvent(outOfBhasile, {
-      type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+      type: TarificationEventType.OUT_OF_APP_DECLARED,
       text: "Opérateur suivi hors de l'outil",
       createdAt: new Date("2027-02-01T10:00:00Z"),
     });
@@ -375,6 +375,36 @@ describe("computeTarificationState — contradictoire", () => {
     expect(getContradictoire(journal, "2028-04-26T12:00:00Z")).toMatchObject({
       status: "DEEMED_ACCEPTED",
       deadline: "2028-04-18",
+    });
+  });
+
+  it("ne relance pas le délai quand la L48 est ouverte après le 15e jour", () => {
+    const { journal, l48DocumentId } = createJournalWithL48();
+    openDocument(journal, l48DocumentId, "2028-04-27T09:00:00Z");
+
+    expect(getContradictoire(journal, "2028-04-27T12:00:00Z")).toMatchObject({
+      status: "DEEMED_ACCEPTED",
+      deadline: "2028-04-18",
+    });
+  });
+
+  it("ignore une réponse donnée après le 15e jour à une L48 jamais ouverte", () => {
+    const { journal } = createJournalWithL48();
+    respond(journal, "L48_CONTESTED", "2028-04-27T09:00:00Z");
+
+    expect(getContradictoire(journal, "2028-04-27T12:00:00Z")).toMatchObject({
+      status: "DEEMED_ACCEPTED",
+      deadline: "2028-04-18",
+    });
+  });
+
+  it("fait courir le délai depuis une ouverture le 15e jour", () => {
+    const { journal, l48DocumentId } = createJournalWithL48();
+    openDocument(journal, l48DocumentId, "2028-04-25T09:00:00Z");
+
+    expect(getContradictoire(journal, "2028-04-27T12:00:00Z")).toMatchObject({
+      status: "RUNNING",
+      deadline: "2028-05-03",
     });
   });
 

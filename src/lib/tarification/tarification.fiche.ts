@@ -74,3 +74,26 @@ export const computeFicheCopyChanges = (
     ),
   };
 };
+
+// Un document remplacé reste sur la fiche tant que la copie de son remplaçant n'existe pas ;
+// un document retiré la quitte toujours, même si S3 est en panne
+export const getDeletableFicheCopies = (
+  journal: TarificationJournal,
+  {
+    copiesToDelete,
+    copiesWithoutFile,
+  }: { copiesToDelete: ExistingFicheCopy[]; copiesWithoutFile: FicheCopy[] }
+): ExistingFicheCopy[] => {
+  const activeDocumentIds = new Set(
+    getActiveDocuments(journal).map((document) => document.id)
+  );
+  return copiesToDelete.filter(
+    (copyToDelete) =>
+      !activeDocumentIds.has(copyToDelete.documentId) ||
+      !copiesWithoutFile.some(
+        (copyWithoutFile) =>
+          copyWithoutFile.target === copyToDelete.target &&
+          copyWithoutFile.category === copyToDelete.category
+      )
+  );
+};
