@@ -65,7 +65,7 @@ flowchart TD
 
 Le pattern d'email ne porte pas encore d'opérateur : un pattern d'opérateur (`@coallia.org`) avec `isAgent = false` mène aujourd'hui à « Non-agent sans opérateur ». `EmailPattern.operateurId` viendra avec le premier pattern d'opérateur, et donnera alors la branche « Opérateur ».
 
-- **Droits de contact** : un user non-agent qui figure comme contact (même email, sans tenir compte de la casse) dans la version affichée d'une structure reçoit un binôme `LECTEUR` × `STRUCTURE` sur cette structure. Ces binômes sont calculés à chaque session, jamais stockés : retirer le contact retire le droit. Ils s'ajoutent aux autres binômes. Ils sont désactivés tant que `CONTACT_ACCESS_ENABLED` ne vaut pas `true` (voir « Avant d'activer les contacts »).
+- **Droits de contact** : un user non-agent qui figure comme contact (même email, sans tenir compte de la casse) dans la version affichée d'une structure reçoit un binôme `LECTEUR` × `STRUCTURE` sur cette structure. Ces binômes sont calculés à chaque session, jamais stockés : retirer le contact retire le droit. Ils s'ajoutent aux autres binômes. Ils sont désactivés tant que `CONTACT_ACCESS_ENABLED` ne vaut pas `true` (voir « Avant d'activer les contacts »). Ils ne demandent pas de validation : un contact voit sa structure dès sa première connexion (choix encore à valider par le métier). Avec l'activation des comptes (`User.isActivated`, à venir dans #1773 et #1774), un compte en attente garde ses droits de contact, un compte désactivé les perd.
 - **Champs réservés aux agents** : pour un non-agent, la fiche et la liste des structures masquent notes, contrôles, évaluations, EIG, anomalies justifiées et CPOM (`hideAgentOnlyFields`).
 - **Une seule source** : `isAgentUser` (`users/user.util.ts`) calcule le statut à partir de la base, la session le porte (`user.isAgent`), et le code le lit avec `isAgent(user)` (`lib/casl`).
 
@@ -142,7 +142,7 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
 
 ## Avant d'activer les contacts
 
-`CONTACT_ACCESS_ENABLED=true` ouvre l'application à des non-agents. Avant de l'activer en prod, il faut fermer ce qui reste ouvert à toute session :
+`CONTACT_ACCESS_ENABLED=true` ouvre l'application à des non-agents, sans validation préalable. Ouverture prévue après #1742, qui limite ce qu'un non-agent voit sur la fiche structure. Avant de l'activer en prod, il faut aussi fermer ce qui reste ouvert à toute session :
 
 - **Fichiers** (`/api/files`) : lisibles par toute session.
 - **Opérateurs** : fiche et liste non filtrées.
