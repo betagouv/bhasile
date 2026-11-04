@@ -135,6 +135,29 @@ export const getDownloadLink = async (
   }
 };
 
+// Les fichiers sont stockés sans type sur S3 : sans ces en-têtes, le navigateur les téléchargerait
+export const getInlineLink = async (
+  bucketName: string,
+  fileName: string,
+  mimeType: string
+): Promise<string> => {
+  try {
+    return getMinioClient().presignedGetObject(
+      bucketName,
+      fileName,
+      FILE_UPLOAD_EXPIRATION_DELAY,
+      {
+        "response-content-type":
+          mimeType === "text/csv" ? "text/plain; charset=utf-8" : mimeType,
+        "response-content-disposition": "inline",
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    throw new Error("Erreur lors de l'ouverture du fichier");
+  }
+};
+
 export const validateUpload = (
   mimeType: string,
   fileSize: number

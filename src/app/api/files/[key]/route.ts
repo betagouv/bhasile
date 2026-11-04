@@ -7,6 +7,7 @@ import {
   recordTarificationDocumentOpening,
 } from "@/app/api/tarifications/tarification.service";
 import { DomainError } from "@/app/utils/domain-error.util";
+import { INLINE_VIEWABLE_MIME_TYPES } from "@/constants";
 import { authOptions } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 
@@ -17,6 +18,7 @@ import {
   deleteFileByStorageKey,
   getDownloadLink,
   getFileWithParents,
+  getInlineLink,
   getPrincipal,
 } from "../file.service";
 
@@ -79,7 +81,12 @@ export async function GET(request: NextRequest) {
 
   if (getLink) {
     try {
-      const url = await getDownloadLink(process.env.S3_BUCKET_NAME!, key);
+      const isInline =
+        request.nextUrl.searchParams.get("inline") === "true" &&
+        INLINE_VIEWABLE_MIME_TYPES.includes(file.mimeType);
+      const url = isInline
+        ? await getInlineLink(process.env.S3_BUCKET_NAME!, key, file.mimeType)
+        : await getDownloadLink(process.env.S3_BUCKET_NAME!, key);
       // L'ouverture fait courir le contradictoire
       if (access.pendingOpening) {
         await recordTarificationDocumentOpening(access.pendingOpening);
