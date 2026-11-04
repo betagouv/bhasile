@@ -14,7 +14,7 @@ const run = async () => {
   try {
     const users = await prisma.user.findMany({
       where: {
-        isActivated: true,
+        OR: [{ isActivated: true }, { deactivatedAt: { not: null } }],
         operateurId: null,
         perimeterId: { not: null },
       },
@@ -23,6 +23,7 @@ const run = async () => {
         lastConnection: true,
         createdAt: true,
         isActivated: true,
+        deactivatedAt: true,
         operateurId: true,
         perimeter: { select: perimeterSelect },
         grants: { select: grantSelect },
