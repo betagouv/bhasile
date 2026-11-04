@@ -1,7 +1,10 @@
-import { GrantDb } from "@/app/api/users/user.db.type";
-import { getAssignedGrants, normalizeEmail } from "@/app/api/users/user.util";
+import { GrantDb, UserWithGrants } from "@/app/api/users/user.db.type";
+import {
+  getAccountStatus,
+  getAssignedGrants,
+  normalizeEmail,
+} from "@/app/api/users/user.util";
 import { AccessRole, GrantScope } from "@/generated/prisma/client";
-import { EDITING_ROLES } from "@/lib/casl";
 
 export const AGENTS_DOCUMENT_COLUMNS = {
   zone: "Sélectionnez votre département",
@@ -157,7 +160,7 @@ export const planAgentsReset = (
     deactivated: [],
     superAdmins: [],
     operateurUsers: [],
-    pendingCount: 0,
+    inactiveCount: 0,
     errors: [],
     warnings: [],
   };
@@ -186,7 +189,7 @@ export const planAgentsReset = (
         email,
         perimeter,
         user,
-        status: getAgentStatus(user, perimeter.zone),
+        status: getAgentStatus(user, perimeter.name),
         rightsBefore: user ? describeCurrentRights(user) : "aucun compte",
         rightsAfter:
           perimeter.zone.scope === GrantScope.NATIONAL
@@ -208,14 +211,11 @@ export const planAgentsReset = (
       plan.operateurUsers.push(user);
       continue;
     }
-    const hasCurrentAccess = getAssignedGrants(user).length > 0;
-    if (!hasCurrentAccess && !user.isActivated && !user.perimeter) {
-      plan.pendingCount++;
+    if (!user.isActivated) {
+      plan.inactiveCount++;
       continue;
     }
-    const isNational = getEditingGrants(user).some(
-      ({ scope }) => scope === GrantScope.NATIONAL
-    );
+    const isNational = user.perimeter?.scope === GrantScope.NATIONAL;
     const rights = describeCurrentRights(user);
     plan.deactivated.push({ user, rights, isNational });
     if (isNational) {
@@ -296,28 +296,28 @@ const getDuplicates = <T>(entries: [T, number][]): [T, number[]][] => {
 
 const getAgentStatus = (
   user: ResetUser | null,
-  zone: PerimeterZone
+  perimeterName: string
 ): AgentStatus => {
   if (!user) {
     return "CREATED";
   }
-  const editingKeys = new Set(getEditingGrants(user).map(getGrantKey));
-  const isSameRights =
-    zone.scope === GrantScope.NATIONAL
-      ? editingKeys.size === 0
-      : editingKeys.size === 1 && editingKeys.has(getZoneKey(zone));
-  return isSameRights ? "SAME_RIGHTS" : "DIFFERENT_RIGHTS";
+  return user.isActivated && user.perimeter?.name === perimeterName
+    ? "SAME_RIGHTS"
+    : "DIFFERENT_RIGHTS";
 };
 
-const getEditingGrants = (user: ResetUser): GrantDb[] =>
-  getAssignedGrants(user).filter(({ role }) => EDITING_ROLES.includes(role));
+const ACCOUNT_STATUS_LABELS = {
+  PENDING: " [en attente]",
+  ACTIVATED: "",
+  DEACTIVATED: " [désactivé]",
+};
 
 const describeCurrentRights = (user: ResetUser): string => {
   const grants = getAssignedGrants(user).map(describeGrant).join(" + ");
   const perimeter = user.perimeter
     ? ` [périmètre : ${user.perimeter.name}]`
     : "";
-  return `${grants || "aucun accès"}${perimeter}`;
+  return `${grants || "aucun accès"}${perimeter}${ACCOUNT_STATUS_LABELS[getAccountStatus(user)]}`;
 };
 
 const describeGrant = (grant: GrantDb): string => {
@@ -334,19 +334,6 @@ const describeGrant = (grant: GrantDb): string => {
       : `${role} département inconnu`;
   }
   return `${role} ${grant.structure?.codeBhasile ?? "structure inconnue"}`;
-};
-
-const getGrantKey = (grant: GrantDb): string => {
-  if (grant.scope === GrantScope.NATIONAL) {
-    return GrantScope.NATIONAL;
-  }
-  if (grant.scope === GrantScope.REGION) {
-    return `${GrantScope.REGION}:${grant.region?.id}`;
-  }
-  if (grant.scope === GrantScope.DEPARTEMENT) {
-    return `${GrantScope.DEPARTEMENT}:${grant.departement?.numero}`;
-  }
-  return `${GrantScope.STRUCTURE}:${grant.structure?.id}`;
 };
 
 const getGrantsKey = (grants: PerimeterGrant[]): string =>
@@ -412,18 +399,18 @@ export type PerimetersPlan = {
   absent: string[];
 };
 
-export type ResetUser = {
-  id: number;
+export type ResetUser = Pick<
+  UserWithGrants,
+  | "id"
+  | "isSuperAdmin"
+  | "operateurId"
+  | "isActivated"
+  | "deactivatedAt"
+  | "perimeter"
+  | "grants"
+> & {
   email: string;
-  isSuperAdmin: boolean;
-  isAgent: boolean | null;
-  operateurId: number | null;
-  isActivated: boolean;
-  deactivatedAt: Date | null;
   lastConnection: Date | null;
-  perimeter: { name: string } | null;
-  grants: GrantDb[];
-  emailPattern: { isAgent: boolean; grants: GrantDb[] } | null;
 };
 
 type AgentStatus = "CREATED" | "SAME_RIGHTS" | "DIFFERENT_RIGHTS";
@@ -448,7 +435,7 @@ export type AgentsResetPlan = {
   deactivated: PlannedDeactivation[];
   superAdmins: ResetUser[];
   operateurUsers: ResetUser[];
-  pendingCount: number;
+  inactiveCount: number;
   errors: string[];
   warnings: string[];
 };

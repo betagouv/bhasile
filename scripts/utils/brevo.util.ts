@@ -1,5 +1,5 @@
-import { GrantDb } from "@/app/api/users/user.db.type";
-import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
+import { GrantDb, UserWithGrants } from "@/app/api/users/user.db.type";
+import { getAssignedGrants, toSessionGrant } from "@/app/api/users/user.util";
 import { toDayKey } from "@/app/utils/date.util";
 import { AccessRole, GrantScope } from "@/generated/prisma/client";
 import { postToBrevo } from "@/lib/brevo";
@@ -18,16 +18,17 @@ export type BrevoContact = {
   };
 };
 
-export type BrevoAgentUser = {
+export type BrevoAgentUser = Pick<
+  UserWithGrants,
+  "isActivated" | "operateurId" | "perimeter" | "grants"
+> & {
   email: string;
   lastConnection: Date | null;
   createdAt: Date;
-  grants: GrantDb[];
-  emailPattern: { grants: GrantDb[] } | null;
 };
 
 export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
-  const actionGrants = getEffectiveGrants(user).filter(
+  const actionGrants = getAssignedGrants(user).filter(
     (grant) => grant.role !== AccessRole.LECTEUR
   );
 

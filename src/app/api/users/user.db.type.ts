@@ -14,17 +14,29 @@ export const grantSelect = {
   structure: { select: { id: true, codeBhasile: true } },
 } satisfies Prisma.GrantSelect;
 
+export const perimeterSelect = {
+  name: true,
+  scope: true,
+  region: grantSelect.region,
+  departement: grantSelect.departement,
+} satisfies Prisma.PerimeterSelect;
+
 export const userWithGrantsSelect = {
   id: true,
   operateurId: true,
   isSuperAdmin: true,
-  isAgent: true,
+  isActivated: true,
+  deactivatedAt: true,
   grants: { select: grantSelect },
-  emailPattern: { select: { isAgent: true, grants: { select: grantSelect } } },
+  perimeter: { select: perimeterSelect },
 } satisfies Prisma.UserSelect;
 
 export type GrantDb = Prisma.GrantGetPayload<{
   select: typeof grantSelect;
+}>;
+
+export type PerimeterDb = Prisma.PerimeterGetPayload<{
+  select: typeof perimeterSelect;
 }>;
 
 export type UserWithGrants = Prisma.UserGetPayload<{
