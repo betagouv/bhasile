@@ -289,7 +289,7 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 
 T1 met aussi à jour l'ordre de `prisma/utils/wipe.ts`, les seeders, `isOrphan` et `fileWithParentsInclude` (fichiers rattachés à un document de tarification) et les types de `src/types/`.
 
-Les tags de la messagerie se déduisent de `TARIFICATION_STEP_DEFINITIONS` (codes et libellés des étapes) : `ARRETE_PAIEMENT` est devenu `ARRETE` (« Arrêté »), sans reprise de données tant que la messagerie n'est pas ouverte.
+Les tags de la messagerie se déduisent de `TARIFICATION_STEP_DEFINITIONS` (codes et libellés des étapes).
 
 ## Questions ouvertes
 

@@ -18,12 +18,6 @@ import type {
   TarificationState,
 } from "@/types/tarification.type";
 
-export const PRELIMINARY_SECTION_CODES: TarificationSectionCode[] = [
-  "CA",
-  "BP",
-  "DAI",
-];
-
 export const getSectionLabel = (
   code: TarificationSectionCode,
   year: number
