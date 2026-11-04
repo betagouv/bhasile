@@ -11,14 +11,15 @@ import type {
 import type { MessageDb } from "./conversation.db.type";
 import {
   createMessage,
-  createMessageNotifications,
   createMessageReceipts,
   createNotificationRecipients,
   findConversationMessageIds,
   findMessages,
   findNotifiedPairs,
-  findPendingMessageIds,
   findReadPairs,
+  findStaleNotificationIds,
+  markNotificationsAbandoned,
+  markNotificationsProcessed,
   updateMessageTagKey,
   upsertConversation,
 } from "./conversation.repository";
@@ -133,13 +134,13 @@ export const sendMessageDigests = async (
         to: digest.email,
         templateId,
         params: {
-          nombre: digest.messageIds.length,
+          nombre: digest.notificationIds.length,
           conversations: digest.conversations,
         },
       });
       await createNotificationRecipients(
-        digest.messageIds.map((messageId) => ({
-          messageId,
+        digest.notificationIds.map((notificationId) => ({
+          notificationId,
           userId: digest.userId,
           email: digest.email,
           brevoMessageId,
@@ -150,7 +151,7 @@ export const sendMessageDigests = async (
       console.error(error);
     }
   }
-  await createMessageNotifications(
+  await markNotificationsProcessed(
     pendingMessages
       .filter(
         (message) =>
@@ -158,8 +159,8 @@ export const sendMessageDigests = async (
             failedUserIds.has(recipient.userId)
           )
       )
-      .map((message) => message.messageId),
-    null
+      .map((message) => message.notificationId),
+    getNow()
   );
   return {
     sentCount: digests.length - failedUserIds.size,
@@ -169,11 +170,11 @@ export const sendMessageDigests = async (
 
 export const abandonStaleNotifications = async (): Promise<number> => {
   const now = getNow();
-  const staleMessageIds = await findPendingMessageIds(
+  const staleNotificationIds = await findStaleNotificationIds(
     dayjs(now).subtract(NOTIFICATION_ABANDON_DAYS, "day").toDate()
   );
-  await createMessageNotifications(staleMessageIds, now);
-  return staleMessageIds.length;
+  await markNotificationsAbandoned(staleNotificationIds, now);
+  return staleNotificationIds.length;
 };
 
 const getMessageTemplateId = (): number | null =>

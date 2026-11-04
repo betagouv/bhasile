@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import { formatInstantDate } from "@/lib/tarification/tarification.date";
+import { formatInstantDate } from "@/app/utils/date.util";
 import type { SectionVersion } from "@/lib/tarification/tarification.section";
 
 export const DocumentVersionDetails = ({

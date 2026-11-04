@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import { formatCivilDate } from "@/lib/tarification/tarification.date";
+import { formatCivilDate } from "@/app/utils/date.util";
 import type { ContradictoireState } from "@/types/tarification.type";
 
 export const ContradictoireNotice = ({

@@ -34,7 +34,7 @@ export const OutOfBhasileButton = ({
               confirmLabel: "Déclarer hors Bhasile",
               onConfirm: ({ text }) =>
                 recordEvent({
-                  type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+                  type: TarificationEventType.OUT_OF_APP_DECLARED,
                   text,
                 }),
             })

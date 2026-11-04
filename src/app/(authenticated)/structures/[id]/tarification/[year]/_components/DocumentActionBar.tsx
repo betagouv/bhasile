@@ -4,12 +4,12 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement, useState } from "react";
 
 import { getApiErrorMessage } from "@/app/utils/api-error.util";
+import { formatCivilDate } from "@/app/utils/date.util";
 import {
   TarificationEventType,
   type TarificationStepCode,
 } from "@/generated/prisma/enums";
 import type { VersionActions } from "@/lib/tarification/tarification.actions";
-import { formatCivilDate } from "@/lib/tarification/tarification.date";
 import type { TarificationSectionCode } from "@/lib/tarification/tarification.definition";
 import type { SectionVersion } from "@/lib/tarification/tarification.section";
 import type { TarificationEventApiCreateClient } from "@/schemas/api/tarification.schema";

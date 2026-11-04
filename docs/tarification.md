@@ -4,7 +4,7 @@ La campagne de tarification d'une structure dans Bhasile : les documents échang
 
 La tarification s'appuie sur la [messagerie](messagerie.md) : les échanges vivent dans un panneau à part, la tarification leur fournit les tags et les ancres. La dépendance va dans un seul sens : la tarification importe la messagerie, jamais l'inverse. Elle partage aussi son [socle commun](messagerie.md#socle-commun) (ajout seul, fichiers, preuve, conservation, mise en prod) et le mécanisme des [emails](email.md).
 
-Les décisions et leurs alternatives écartées sont dans l'[ancienne RFC](rfc/campagne-tarification/rfc-01-socle-messagerie.md), conservée pour l'historique, et dans le grill du 30/10. Les décisions marquées ⏳ attendent la confirmation de l'équipe (envoyées le 30/10) : elles sont appliquées en attendant.
+Les décisions et leurs alternatives écartées sont dans l'[ancienne RFC](rfc/campagne-tarification/rfc-01-socle-messagerie.md), conservée pour l'historique. Les décisions marquées ⏳ attendent la confirmation de l'équipe (envoyées le 30/10) : elles sont appliquées en attendant.
 
 ## Vocabulaire
 
@@ -19,7 +19,7 @@ Les décisions et leurs alternatives écartées sont dans l'[ancienne RFC](rfc/c
 | **Relecture**               | `APPROVED`, `CHANGES_REQUESTED` | Validation d'une version de travail, ou demande de modifications, par un autre agent que son auteur.                              |
 | **Ouverture**               | `TarificationDocumentOpening`   | La première fois qu'un fichier partagé est servi à un utilisateur de l'opérateur. Celle de la L48 fait courir le contradictoire.  |
 | **Sans objet**              | `STEP_MARKED_NOT_APPLICABLE`    | Une étape déclarée sans objet par un agent, avec un motif (CA jamais reçu, RCA intégré à la L48…).                                |
-| **Hors Bhasile**            | `OUT_OF_BHASILE_DECLARED`       | Une tarification menée hors de l'outil, déclarée par un agent avec un motif.                                                      |
+| **Hors Bhasile**            | `OUT_OF_APP_DECLARED`           | Une tarification menée hors de l'outil, déclarée par un agent avec un motif.                                                      |
 | **Échéance**                | registre des étapes             | Une date réglementaire, calculée.                                                                                                 |
 | **Exercice**                | —                               | L'année que couvre un document, déduite de son type et de la campagne (le CA de la campagne N est le CA N-2).                     |
 | **Documents préparatoires** | —                               | Ce que l'écran rappelle en tête de la campagne : DRL, CA et rapport d'activité, BP et rapport budgétaire, DAI N.                  |
@@ -111,18 +111,18 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
 
 **États**, choisis au dépôt et jamais modifiés :
 
-| État     | Sens                                    | Qui le voit         |
-| -------- | --------------------------------------- | ------------------- |
-| `DRAFT`  | version de travail des agents, à relire | agents              |
-| `FINAL`  | version signée, pas encore partagée     | agents              |
-| `SHARED` | dépôt de l'opérateur, partagé d'office  | agents et opérateur |
+| État     | Sens                                                                              | Qui le voit         |
+| -------- | --------------------------------------------------------------------------------- | ------------------- |
+| `DRAFT`  | version de travail des agents, à relire                                           | agents              |
+| `FINAL`  | version signée, partagée ensuite par un événement, sans changer d'état            | agents, puis tous   |
+| `SHARED` | document déposé par un agent ou un opérateur, visible des opérateurs dès le dépôt | agents et opérateur |
 
 - **Documents de l'opérateur** ⏳ : la campagne est le seul point d'entrée du CA, du BP et de leurs rapports, qui ne se déposent plus sur la fiche (voir [Fiche structure](#fiche-structure)). Les opérateurs ont un compte dès la mise en service. Un agent qui reçoit malgré tout un document par mail le dépose à la place de l'opérateur, toujours à l'état `SHARED` ; c'est la date du dépôt qui compte.
 - **Documents des agents** ⏳ : une version se dépose en `DRAFT`, ou en `FINAL` en cochant « c'est la version signée ».
   - **Relecture** : sur un `DRAFT`, tout agent éditeur sauf son auteur peut **valider** ou **demander des modifications** (avec un texte). Une validation suffit. Tout `DRAFT` est à relire : il n'y a pas de demande de relecture, on sollicite un collègue par un message dans le canal agents.
   - **Partage** : « Envoyer à l'opérateur » n'existe que pour un `FINAL`. La validation n'est pas exigée (rien ne bloque), l'écran affiche « non validé ».
   - **État affiché**, calculé à partir du journal : créé, validé ou modifications demandées, signé, envoyé.
-- **Retrait** : un agent retire un document partagé par erreur (`DOCUMENT_WITHDRAWN`, motif obligatoire). Il sort des états, de l'ancre du contradictoire et de la copie vers la fiche (retour à la copie précédente) ; l'opérateur voit « retiré le … » et ne peut plus ouvrir le fichier ; rien n'est effacé. Une erreur de structure se corrige ainsi, l'agent prévient l'opérateur.
+- **Retrait** : un agent retire un document partagé par erreur (`DOCUMENT_WITHDRAWN`, motif obligatoire), sauf un dépôt de l'opérateur lui-même, qui reste visible : l'opérateur en dépose au besoin une nouvelle version. Il sort des états, de l'ancre du contradictoire et de la copie vers la fiche (retour à la copie précédente) ; l'opérateur voit « retiré le … » et ne peut plus ouvrir le fichier ; rien n'est effacé. Une erreur de structure se corrige ainsi, l'agent prévient l'opérateur.
 - **Qui a fait quoi** : chaque fait d'un document s'affiche avec son auteur et sa date, tirés du journal. On sait qui a déposé la version signée, pas qui a signé.
 
 ## Étapes
@@ -165,7 +165,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 ## Contradictoire
 
 - **Un seul contradictoire par tarification**, ancré sur la première L48 partagée et non retirée. Une L48 partagée ensuite reste visible mais ne relance pas le délai ; l'agent en est averti (les corrections passent par la DAB).
-- **Le délai court à partir de la première ouverture** de la L48 par un utilisateur de l'opérateur : 8 jours, J1 étant le lendemain. Une réponse de l'opérateur vaut réception, même sans ouverture ⏳ : sinon une contestation donnée avant le 15e jour serait rejetée après coup. Si elle n'est ni ouverte ni répondue dans les 15 jours, elle est réputée reçue à la date de son partage (repli du CRPA, avis juridique attendu). Seules comptent les réponses postérieures au partage de la L48 en cours : une réponse à une L48 retirée ne vaut pas pour la suivante. Entre le partage et la première ouverture, l'échéance n'est pas encore fixée : l'état est « en attente d'ouverture », jusqu'à l'ouverture ou jusqu'au 15e jour.
+- **Le délai court à partir de la première ouverture** de la L48 par un utilisateur de l'opérateur : 8 jours, J1 étant le lendemain. Une réponse de l'opérateur vaut réception, même sans ouverture ⏳ : sinon une contestation donnée avant le 15e jour serait rejetée après coup. Si elle n'est ni ouverte ni répondue dans les 15 jours, elle est réputée reçue à la date de son partage (repli du CRPA, avis juridique attendu) ; une ouverture ou une réponse plus tardive ne relance rien. Seules comptent les réponses postérieures au partage de la L48 en cours : une réponse à une L48 retirée ne vaut pas pour la suivante. Entre le partage et la première ouverture, l'échéance n'est pas encore fixée : l'état est « en attente d'ouverture », jusqu'à l'ouverture ou jusqu'au 15e jour.
 - **Ouverture** : un lien signé vers le fichier délivré à un utilisateur de l'opérateur, pour la visionneuse ou le téléchargement (l'application ne sert pas le fichier, elle renvoie une URL S3 présignée). L'ouverture est enregistrée une fois le lien généré et **avant** de le renvoyer : si l'écriture échoue, pas d'URL ; si le lien ne se génère pas, pas d'ouverture, et le délai ne court pas pour un fichier jamais reçu. Le retrait bloque toute nouvelle demande de lien ; un lien déjà délivré ne se révoque pas et reste valable au plus 1 h, comme pour les autres fichiers, ce qui est acceptable puisque le document a déjà été vu. L'affichage de la page, de la liste ou du mail ne compte pas (un antivirus de messagerie ouvre les liens tout seul) : seul compte un lien demandé par une session, au clic. Les agents et les superadmins n'ouvrent jamais au sens du délai. Les ouvertures de tous les documents partagés par les agents sont enregistrées et affichées (« ouvert le … par … ») ; l'opérateur qui rouvre son propre dépôt n'ouvre rien. La première ouverture fait foi : les suivantes n'écrasent rien.
 - **Réponse** : l'opérateur accepte ou conteste (`L48_ACCEPTED`, `L48_CONTESTED`, observations et document `REPONSE_CONTRADICTOIRE` facultatifs). Plusieurs réponses sont possibles jusqu'à l'échéance, la dernière compte ; aucune après.
 - **Réputé accepté** : calculé, à l'échéance, sans réponse.
@@ -189,7 +189,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 
 - **Une copie est verrouillée** : la présence de `sourceTarificationDocumentId` suffit, quels que soient la catégorie et l'année. Les deux repositories l'excluent de leurs suppressions et ignorent toute modification qui la vise (`createOrUpdateDocumentsFinanciers` supprime aujourd'hui les documents absents du formulaire et réécrit catégorie et année ; les actes administratifs ont le même chemin) ; `canDeleteFile` refuse la suppression de son fichier. Les lignes saisies à la main restent modifiables, y compris pour les années couvertes. Aucun formulaire (documents financiers, actes, évaluations, contrôles, logo d'opérateur) ne rattache le fichier d'un document de tarification, d'une copie ou d'un message, qui font preuve (`assertFilesCanBeAttached`).
 - **Réconciliation** : `syncFicheCopies(structureId, year)`, idempotente, appelée après chaque dépôt partagé, partage ou retrait. Elle calcule l'état voulu depuis le journal (dernier document non retiré par type), fait les copies S3 hors transaction, puis recalcule et écrit la fiche sous le verrou de la tarification (voir [Écritures](#écritures)). Une copie remplacée est supprimée de la fiche, son objet S3 reste orphelin, comme pour les autres suppressions de la fiche. Rejouée, elle ne fait rien ; un retrait la fait revenir à la copie précédente.
-- **Panne de la copie** : le fait est déjà écrit, il n'échoue pas. Une copie S3 qui échoue ne bloque pas le reste : un document retiré quitte la fiche même si S3 est en panne. L'erreur est journalisée, et le prochain dépôt, partage ou retrait de la tarification rattrape la fiche.
+- **Panne de la copie** : le fait est déjà écrit, il n'échoue pas. Une copie S3 qui échoue ne bloque pas le reste : un document retiré quitte la fiche même si S3 est en panne, alors qu'un document remplacé y reste tant que la copie de son remplaçant n'existe pas. L'erreur est journalisée, et le prochain dépôt, partage ou retrait de la tarification rattrape la fiche.
 - **Script de reprise** : la mise en service a lieu avant la campagne 2027 ; un script reprend dans la tarification les CA 2025, rapports d'activité 2025, BP 2027 et rapports budgétaires 2027 déjà sur la fiche, comme des dépôts ordinaires écrits par le système, sans notification ni retard. Il **relie** la ligne existante de la fiche (`sourceTarificationDocumentId`) au lieu d'en créer une copie ; s'il y a plusieurs lignes pour une même catégorie et une même année, il prend la plus récente. Le fichier est copié pour la tarification : la ligne reliée garde le sien. Le dépôt prend la date de la ligne de la fiche. Rejouable sans doublon ; une ligne en échec (objet S3 absent) n'arrête pas les autres, elle est listée à la fin et retentée au tour suivant (`scripts/one-off-scripts/20261102-backfill-tarification-from-fiche.ts`).
 
 ## Droits et visibilité
@@ -205,7 +205,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 
 - **Un seul point de passage pour lire le journal** : `getTarificationJournal({ structureId, year, reader })`, utilisé par la page, l'API, les fichiers et les mails. Aucune lecture du journal ne le contourne. L'état est calculé sur le journal complet, la visibilité ne filtre que ce qui est renvoyé.
 - **Un seul point de passage pour les fichiers** : `GET /api/files/[key]` confie un fichier de tarification à `authorizeTarificationDocument` (avant la règle générale qui laisse tout agent lire un fichier rattaché), puis enregistre l'ouverture au moment de délivrer le lien. Un fichier de tarification ne se supprime jamais par `/api/files`.
-- **Superadmins** : comme un agent, en lecture et en écriture, comme dans la messagerie ; leurs lectures n'ouvrent rien au sens du délai.
+- **Superadmins** : voient tout, sans participer : ni message, ni document, ni événement. Leurs lectures ne laissent aucune trace et n'ouvrent rien au sens du délai.
 
 ## Écritures
 
@@ -232,7 +232,7 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 - **Liste blanche** : chaque type d'événement déclare dans le registre s'il notifie ; un nouveau type ne notifie pas par défaut.
 - **La DREETS n'est notifiée que des contestations** : c'est le seul fait qui attend une action de sa part.
 - **Jamais le nom du fichier** dans un mail (un mail est une notification, pas un contenu, voir [Emails](email.md#principes)) : « L48 2027 » et l'empreinte.
-- **Trace** : `TarificationEventNotification` (l'événement est traité, ou abandonné) et `TarificationEventNotificationRecipient` (signalé à un destinataire, avec le `brevoMessageId`), sur le modèle de la messagerie. Le mail groupé lit l'union des messages et des événements en attente, avec un template à deux sections.
+- **File et trace** : la file des [emails](email.md), `EmailNotification` et `EmailNotificationRecipient`, avec ces notifications : elles y ajouteront `eventId` et un `CHECK` (une ligne vise un message ou un événement). Un événement ne s'y inscrit, dans sa transaction, que si son type notifie ; ceux écrits avant n'ont pas de ligne, donc pas de mail. Le mail groupé lit toutes les lignes en attente, avec un template à deux sections.
 - **Destinataires** : une fonction propre à la tarification ; celle de la messagerie (`getMessageRecipients`) exclut les grants `REGION`, alors que la contestation vise la DREETS.
 - **Déjà vu** : un partage ouvert avant le passage du cron n'est pas signalé ; un accusé de dépôt l'est toujours. Un partage retiré avant le passage n'est pas signalé (le mail annoncerait un document retiré).
 - **Les opérateurs** ont un compte dès la mise en service : les rebonds redeviennent utiles (contacts partis), le webhook Brevo est donc un prérequis de la mise en service.
@@ -289,7 +289,7 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 
 T1 met aussi à jour l'ordre de `prisma/utils/wipe.ts`, les seeders, `isOrphan` et `fileWithParentsInclude` (fichiers rattachés à un document de tarification) et les types de `src/types/`.
 
-Les tags de la messagerie se déduisent de `TARIFICATION_STEP_DEFINITIONS` (codes et libellés des étapes) : `ARRETE_PAIEMENT` est devenu `ARRETE` (« Arrêté »), sans reprise de données tant que la messagerie n'est pas ouverte.
+Les tags de la messagerie se déduisent de `TARIFICATION_STEP_DEFINITIONS` (codes et libellés des étapes).
 
 ## Questions ouvertes
 
