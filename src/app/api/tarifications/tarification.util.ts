@@ -109,12 +109,12 @@ export const buildNotificationParams = ({
       "NEXT_URL manquant : impossible de construire le lien du mail"
     );
   }
-  const channelQuery = visibility === Visibility.AGENTS ? "?canal=agents" : "";
+  const channel = visibility === Visibility.AGENTS ? "agents" : "tous";
   return {
     structure: structure.codeBhasile,
     campagne: String(year),
     canal: VISIBILITY_LABELS[visibility],
-    lien: `${process.env.NEXT_URL}/structures/${structure.id}/tarification/${year}${channelQuery}`,
+    lien: `${process.env.NEXT_URL}/structures/${structure.id}/tarification/${year}?canal=${channel}`,
   };
 };
 

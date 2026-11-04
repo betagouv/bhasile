@@ -155,7 +155,7 @@ const getChangesRequests = (
       authorName: author?.name ?? null,
     }));
 
-const getExerciseLabel = (
+export const getExerciseLabel = (
   type: TarificationDocumentType,
   campaignYear: number
 ): string => {

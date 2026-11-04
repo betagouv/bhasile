@@ -24,6 +24,14 @@ export const formatDate = (
   return dateObject.toLocaleDateString("fr-FR", options);
 };
 
+const DATE_TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
+  dateStyle: "short",
+  timeStyle: "short",
+});
+
+export const formatDateTime = (date: Date | string): string =>
+  DATE_TIME_FORMAT.format(new Date(date));
+
 export const toDayKey = (date: Date): string => date.toISOString().slice(0, 10);
 
 export const toMonthKey = (date: Date): string =>

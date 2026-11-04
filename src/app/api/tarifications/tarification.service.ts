@@ -3,6 +3,7 @@ import {
   abandonStaleNotifications,
   changeMessageTag,
   getMessages,
+  getUnreadMessageCounts,
   markMessagesAsRead,
   postMessage,
   sendMessageDigests,
@@ -138,6 +139,32 @@ export const getTarificationOverview = async (
     }),
     tags: TARIFICATION_CONVERSATION_TAGS,
   };
+};
+
+export const getTarificationUnreadCounts = async ({
+  structureId,
+  year,
+  overview: { participant, isOperateur, canParticipate },
+}: {
+  structureId: number;
+  year: number;
+  overview: Pick<
+    TarificationOverview,
+    "participant" | "isOperateur" | "canParticipate"
+  >;
+}): Promise<Record<Visibility, number>> => {
+  // Un superadmin ne laisse pas d'accusé : tout lui paraîtrait non lu
+  const tarification = canParticipate
+    ? await findStructureTarification(structureId, year)
+    : null;
+  if (!tarification) {
+    return { SHARED: 0, AGENTS: 0 };
+  }
+  return getUnreadMessageCounts({
+    structureTarificationId: tarification.id,
+    userId: participant.id,
+    isAgentReader: !isOperateur,
+  });
 };
 
 export const postTarificationMessage = async ({
