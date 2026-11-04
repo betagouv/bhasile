@@ -31,15 +31,18 @@ export const upsertStructureTarification = async (
 };
 
 // `update` non vide : sinon Prisma émule l'upsert (SELECT puis INSERT, P2002 sur deux premiers appels simultanés) au lieu d'un INSERT … ON CONFLICT
-const upsertTarificationCampaign = (year: number) =>
-  prisma.tarificationCampaign.upsert({
+export const upsertTarificationCampaign = (
+  year: number,
+  db: PrismaTransaction = prisma
+) =>
+  db.tarificationCampaign.upsert({
     where: { year },
     update: { year },
     create: { year },
     select: { id: true },
   });
 
-const upsertTarificationInCampaign = (
+export const upsertTarificationInCampaign = (
   structureId: number,
   campaignId: number,
   db: PrismaTransaction = prisma

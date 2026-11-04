@@ -24,9 +24,6 @@ export const deleteTarificationTestData = async ({
   await prisma.acteAdministratif.deleteMany({
     where: { sourceTarificationDocument: documentWhere },
   });
-  await prisma.tarificationEventNotification.deleteMany({
-    where: { event: { structureTarification: { structureId } } },
-  });
   await prisma.tarificationDocumentOpening.deleteMany({
     where: { document: documentWhere },
   });

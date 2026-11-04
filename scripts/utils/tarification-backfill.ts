@@ -1,5 +1,9 @@
 import { copyStoredFile } from "@/app/api/files/file.service";
 import {
+  upsertTarificationCampaign,
+  upsertTarificationInCampaign,
+} from "@/app/api/tarifications/tarification.repository";
+import {
   type DocumentFinancier,
   type FileUpload,
   type PrismaClient,
@@ -58,12 +62,7 @@ export const backfillTarificationFromFiche = async (
   prisma: PrismaClient,
   year: number
 ): Promise<BackfillResult> => {
-  const campaign = await prisma.tarificationCampaign.upsert({
-    where: { year },
-    update: { year },
-    create: { year },
-    select: { id: true },
-  });
+  const campaign = await upsertTarificationCampaign(year, prisma);
   const result: BackfillResult = { linkedCount: 0, failedRowIds: [] };
 
   for (const type of BACKFILLED_TYPES) {
@@ -118,17 +117,11 @@ const linkRowToTarification = async (
     fiche.originalName
   );
   return prisma.$transaction(async (tx) => {
-    const tarification = await tx.structureTarification.upsert({
-      where: {
-        structureId_campaignId: {
-          structureId: row.structureId!,
-          campaignId,
-        },
-      },
-      update: { campaignId },
-      create: { structureId: row.structureId!, campaignId },
-      select: { id: true },
-    });
+    const tarification = await upsertTarificationInCampaign(
+      row.structureId!,
+      campaignId,
+      tx
+    );
     const linkedRow = await tx.documentFinancier.findFirst({
       where: {
         structureId: row.structureId,
@@ -160,17 +153,13 @@ const linkRowToTarification = async (
       },
       select: { id: true },
     });
-    const event = await tx.tarificationEvent.create({
+    await tx.tarificationEvent.create({
       data: {
         structureTarificationId: tarification.id,
         type: TarificationEventType.DOCUMENT_DEPOSITED,
         documentId: document.id,
         createdAt: row.createdAt,
       },
-      select: { id: true },
-    });
-    await tx.tarificationEventNotification.create({
-      data: { eventId: event.id },
     });
     await tx.documentFinancier.update({
       where: { id: row.id },

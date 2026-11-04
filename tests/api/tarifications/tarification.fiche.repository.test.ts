@@ -76,6 +76,18 @@ describe("copie vers la fiche db integration", () => {
     });
   };
 
+  const depositForOperateur = async (types: ("CA" | "RAPPORT_ACTIVITE")[]) => {
+    const file = await createFile();
+    return depositTarificationDocument({
+      structureId,
+      year: campaignYear,
+      author: { id: authorId, level: AuthorLevel.DEPARTEMENT },
+      fileKey: file.key,
+      types,
+      status: TarificationDocumentStatus.SHARED,
+    });
+  };
+
   const withdraw = (documentId: number) =>
     recordTarificationEvent({
       structureId,
@@ -175,7 +187,7 @@ describe("copie vers la fiche db integration", () => {
 
   it("remplace la copie par celle du dernier document, et y revient après un retrait", async () => {
     const firstDocument = await depositAsOperateur(["CA"]);
-    const lastDocument = await depositAsOperateur(["CA"]);
+    const lastDocument = await depositForOperateur(["CA"]);
 
     expect(await findCopies()).toMatchObject([
       { sourceTarificationDocumentId: lastDocument.id },
@@ -205,7 +217,7 @@ describe("copie vers la fiche db integration", () => {
   it("retire de la fiche un document retiré, même si S3 est en panne, et rattrape ensuite la copie précédente", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const firstDocument = await depositAsOperateur(["CA"]);
-    const lastDocument = await depositAsOperateur(["CA"]);
+    const lastDocument = await depositForOperateur(["CA"]);
     mockCopyObject.mockRejectedValueOnce(new Error("S3 indisponible"));
 
     await withdraw(lastDocument.id);
@@ -216,6 +228,24 @@ describe("copie vers la fiche db integration", () => {
 
     expect(await findCopies()).toMatchObject([
       { sourceTarificationDocumentId: firstDocument.id },
+    ]);
+  });
+
+  it("garde l'ancienne copie quand celle de son remplaçant échoue, et la remplace ensuite", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const firstDocument = await depositAsOperateur(["CA"]);
+    mockCopyObject.mockRejectedValueOnce(new Error("S3 indisponible"));
+
+    const lastDocument = await depositAsOperateur(["CA"]);
+
+    expect(await findCopies()).toMatchObject([
+      { sourceTarificationDocumentId: firstDocument.id },
+    ]);
+
+    await syncFicheCopies(structureId, campaignYear);
+
+    expect(await findCopies()).toMatchObject([
+      { sourceTarificationDocumentId: lastDocument.id },
     ]);
   });
 
@@ -494,7 +524,7 @@ describe("copie vers la fiche db integration", () => {
       });
     };
 
-    it("relie la ligne la plus récente de la fiche, comme un dépôt système déjà notifié", async () => {
+    it("relie la ligne la plus récente de la fiche, comme un dépôt système", async () => {
       await createFicheRow(new Date("2020-01-01T10:00:00Z"), "ancien.pdf");
       const latestRow = await createFicheRow(
         new Date("2021-01-01T10:00:00Z"),
@@ -511,10 +541,7 @@ describe("copie vers la fiche db integration", () => {
       expect(copy.id).toBe(latestRow.id);
       const document = await prisma.tarificationDocument.findUniqueOrThrow({
         where: { id: copy.sourceTarificationDocumentId! },
-        include: {
-          fileUpload: true,
-          events: { include: { notification: true } },
-        },
+        include: { fileUpload: true, events: true },
       });
       expect(document).toMatchObject({
         types: ["CA"],
@@ -526,7 +553,6 @@ describe("copie vers la fiche db integration", () => {
             authorId: null,
             authorLevel: null,
             createdAt: latestRow.createdAt,
-            notification: { eventId: expect.any(Number) },
           },
         ],
       });

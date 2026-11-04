@@ -48,6 +48,7 @@ import { computeTarificationState } from "@/lib/tarification/tarification.comput
 import {
   computeFicheCopies,
   computeFicheCopyChanges,
+  getDeletableFicheCopies,
 } from "@/lib/tarification/tarification.fiche";
 import {
   assertCanDepositDocument,
@@ -390,7 +391,13 @@ export const syncFicheCopies = async (
       computeFicheCopies(lockedJournal),
       await transaction.findFicheCopies()
     );
-    for (const copy of changes.copiesToDelete) {
+    const deletableCopies = getDeletableFicheCopies(lockedJournal, {
+      copiesToDelete: changes.copiesToDelete,
+      copiesWithoutFile: changes.copiesToCreate.filter(
+        (copy) => !storedKeys.has(getFicheCopyKey(copy))
+      ),
+    });
+    for (const copy of deletableCopies) {
       await transaction.deleteFicheCopy(copy);
     }
     for (const copy of changes.copiesToCreate) {
@@ -406,7 +413,7 @@ export const syncFicheCopies = async (
   });
 };
 
-// Une copie qui échoue ne bloque pas le reste : un document retiré doit quitter la fiche même si S3 est en panne
+// Une copie qui échoue ne bloque pas le reste : voir getDeletableFicheCopies
 const storeFicheCopies = async (
   journal: TarificationJournalRead,
   copies: FicheCopy[]
