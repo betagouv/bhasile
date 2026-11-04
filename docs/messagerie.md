@@ -116,7 +116,7 @@ type ConversationAnchor = {
 
 - **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand : la lecture d'une conversation renvoie les accusés de chaque message. Restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
 - **Accusé envoyé par l'écran** : le client n'envoie que les messages d'autrui sans accusé à son nom, et seulement quand ils sont affichés (onglet visible).
-- **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La messagerie expose un compteur par structure, que le bloc tarification du dashboard affiche.
+- **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur.
 - **Temps réel** : tant que les échanges sont affichés, le client relit toute la conversation toutes les 10 secondes et remplace sa liste (`src/hooks/useConversationMessages.ts`).
   - La requête suivante ne part que 10 secondes après la réponse de la précédente (`setTimeout` chaîné) : un serveur lent n'accumule pas de requêtes.
   - Pause quand l'onglet du navigateur est caché, relecture immédiate au retour et après chaque envoi.
@@ -199,21 +199,21 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 
 ## Implémentation
 
-| Brique                           | Où                                                                                                                                                                    | État    |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Modèle et squelette tarification | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                                                              | fait    |
-| Messagerie (agnostique)          | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                                                        | fait    |
-| Branchement tarification         | `src/app/api/tarifications/` : tags (`tarification.constants.ts`), fenêtre de campagne (`tarification.util.ts`), droits et participant                                | fait    |
-| Routes                           | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]`                                | fait    |
-| Droits                           | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                                               | fait    |
-| Pièces jointes                   | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                                                       | fait    |
-| Porte de mise en service         | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                                                     | fait    |
-| Interface : page et fil          | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                                                       | fait    |
-| Interface : pièces jointes       | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                                                           | fait    |
-| Interface : tags                 | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                                                    | fait    |
-| Notifications : envoi            | `src/lib/brevo.ts`, `sendMessageDigests` (conversation.service), `notifyPendingTarificationMessages` et `getMessageRecipients` (tarification), cron `notify-messages` | fait    |
-| Notifications : rebonds          | Consultables dans Brevo ; webhook quand un écran devra les montrer                                                                                                    | reporté |
-| Suivi et compteur de non-lus     | `StructureSubscription`, bloc tarification du dashboard (avec la tarification)                                                                                        | à faire |
+| Brique                              | Où                                                                                                                                                                    | État    |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Modèle et squelette tarification    | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                                                              | fait    |
+| Messagerie (agnostique)             | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                                                        | fait    |
+| Branchement tarification            | `src/app/api/tarifications/` : tags (`tarification.constants.ts`), fenêtre de campagne (`tarification.util.ts`), droits et participant                                | fait    |
+| Routes                              | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]`                                | fait    |
+| Droits                              | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                                               | fait    |
+| Pièces jointes                      | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                                                       | fait    |
+| Porte de mise en service            | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                                                     | fait    |
+| Interface : page et fil             | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                                                       | fait    |
+| Interface : pièces jointes          | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                                                           | fait    |
+| Interface : tags                    | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                                                    | fait    |
+| Notifications : envoi               | `src/lib/brevo.ts`, `sendMessageDigests` (conversation.service), `notifyPendingTarificationMessages` et `getMessageRecipients` (tarification), cron `notify-messages` | fait    |
+| Notifications : rebonds             | Consultables dans Brevo ; webhook quand un écran devra les montrer                                                                                                    | reporté |
+| Suivi et non-lus du tableau de bord | `StructureSubscription`, bloc tarification du dashboard (avec la tarification)                                                                                        | à faire |
 
 ## Évolutions possibles
 

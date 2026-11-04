@@ -88,6 +88,20 @@ describe("buildConversationAnchors", () => {
     expect(dates).toEqual([...dates].sort((first, second) => first - second));
   });
 
+  it("n'affiche que la première ouverture d'un document, quel que soit le nombre de lecteurs", () => {
+    const journal = createJournal();
+    const documentId = shareAgentDocument(journal, { types: ["L48"], at: AT });
+    openDocument(journal, documentId, "2028-04-13T10:00:00Z");
+    openDocument(journal, documentId, LATER);
+
+    const openings = buildConversationAnchors(journal).filter(({ label }) =>
+      label.startsWith("Ouverture")
+    );
+
+    expect(openings).toHaveLength(1);
+    expect(openings[0].date).toEqual(new Date(LATER));
+  });
+
   it("donne un identifiant distinct à chaque jalon", () => {
     const journal = createJournal();
     const documentId = shareAgentDocument(journal, { types: ["L48"], at: AT });

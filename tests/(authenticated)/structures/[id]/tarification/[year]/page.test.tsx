@@ -31,6 +31,8 @@ vi.mock("@/app/api/tarifications/tarification.service", () => ({
     mockGetTarificationOverview(...args),
   getTarificationJournal: (...args: unknown[]) =>
     mockGetTarificationJournal(...args),
+  getTarificationUnreadCounts: () =>
+    Promise.resolve({ SHARED: 0, AGENTS: 0 }),
 }));
 
 vi.mock("@/app/api/structures/structure.service", () => ({

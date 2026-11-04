@@ -21,12 +21,29 @@ export const buildConversationAnchors = (
       label: getEventLabel(event, getDocumentLabel(event.documentId)),
       date: event.createdAt,
     })),
-    ...journal.openings.map((opening) => ({
-      id: `opening-${opening.documentId}-${opening.userId}`,
+    ...getFirstOpenings(journal).map((opening) => ({
+      id: `opening-${opening.documentId}`,
       label: `Ouverture : ${getDocumentLabel(opening.documentId)}`,
       date: opening.createdAt,
     })),
   ].sort((first, second) => first.date.getTime() - second.date.getTime());
+};
+
+// Seule la première ouverture d'un document fait courir le délai : les suivantes n'apportent rien au fil
+const getFirstOpenings = (
+  journal: TarificationJournal
+): TarificationJournal["openings"] => {
+  const firstOpeningByDocumentId = new Map<
+    number,
+    TarificationJournal["openings"][number]
+  >();
+  for (const opening of journal.openings) {
+    const firstOpening = firstOpeningByDocumentId.get(opening.documentId);
+    if (!firstOpening || opening.createdAt < firstOpening.createdAt) {
+      firstOpeningByDocumentId.set(opening.documentId, opening);
+    }
+  }
+  return [...firstOpeningByDocumentId.values()];
 };
 
 const getTypesLabel = (

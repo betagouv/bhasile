@@ -3,7 +3,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 
 import { VISIBILITY_LABELS } from "@/constants";
 import { useMessageDraft } from "@/hooks/useMessageDraft";
@@ -15,6 +15,7 @@ import {
 
 import { Conversation } from "./Conversation";
 import { EchangesDrawer } from "./EchangesDrawer";
+import { UnreadCountBadge } from "./UnreadCountBadge";
 
 export const Echanges = ({
   structureId,
@@ -25,6 +26,7 @@ export const Echanges = ({
   isCampaignOpen,
   tags,
   anchorsByVisibility,
+  unreadCounts,
 }: Props): ReactElement => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -38,6 +40,15 @@ export const Echanges = ({
     : "SHARED";
   const draft = isAgentsChannel ? agentsDraft : sharedDraft;
   const isOpen = searchParams.has(CHANNEL_PARAM);
+
+  const [seenVisibilities, setSeenVisibilities] = useState<
+    ConversationVisibility[]
+  >([]);
+  if (isOpen && !seenVisibilities.includes(visibility)) {
+    setSeenVisibilities([...seenVisibilities, visibility]);
+  }
+  const getUnreadCount = (channel: ConversationVisibility): number =>
+    seenVisibilities.includes(channel) ? 0 : unreadCounts[channel];
 
   const updateChannel = (channel: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -74,6 +85,9 @@ export const Echanges = ({
         className="fixed bottom-6 right-6 z-30"
       >
         Échanges
+        <UnreadCountBadge
+          count={getUnreadCount("SHARED") + getUnreadCount("AGENTS")}
+        />
       </Button>
       {isOpen && (
         <EchangesDrawer onClose={() => updateChannel(null)}>
@@ -88,8 +102,24 @@ export const Echanges = ({
                 )
               }
               tabs={[
-                { tabId: "SHARED", label: VISIBILITY_LABELS.SHARED },
-                { tabId: "AGENTS", label: VISIBILITY_LABELS.AGENTS },
+                {
+                  tabId: "SHARED",
+                  label: (
+                    <>
+                      {VISIBILITY_LABELS.SHARED}
+                      <UnreadCountBadge count={getUnreadCount("SHARED")} />
+                    </>
+                  ),
+                },
+                {
+                  tabId: "AGENTS",
+                  label: (
+                    <>
+                      {VISIBILITY_LABELS.AGENTS}
+                      <UnreadCountBadge count={getUnreadCount("AGENTS")} />
+                    </>
+                  ),
+                },
               ]}
               className="bg-white shrink-0 h-auto! before:h-auto! before:self-stretch"
             >
@@ -115,4 +145,5 @@ type Props = {
   isCampaignOpen: boolean;
   tags: ConversationTag[];
   anchorsByVisibility: Record<ConversationVisibility, ConversationAnchor[]>;
+  unreadCounts: Record<ConversationVisibility, number>;
 };

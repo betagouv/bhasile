@@ -22,6 +22,7 @@ vi.mock("next/navigation", () => ({
 const CURRENT_USER_ID = 1;
 const OPEN_DRAWER_QUERY = "canal=tous";
 const NO_ANCHORS = { SHARED: [], AGENTS: [] };
+const NO_UNREAD = { SHARED: 0, AGENTS: 0 };
 const OTHER_USER = { id: 2, name: "Paul Martin" };
 const MESSAGES_URL = "/api/tarifications/42/2026/messages";
 const TAGS = [
@@ -168,6 +169,7 @@ const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
         isCampaignOpen
         tags={TAGS}
         anchorsByVisibility={NO_ANCHORS}
+        unreadCounts={NO_UNREAD}
         {...props}
       />
     </FetchStateProvider>
@@ -373,6 +375,43 @@ describe("Echanges", () => {
     );
   });
 
+  describe("pastilles de non-lus", () => {
+    const UNREAD = { SHARED: 2, AGENTS: 1 };
+
+    it("additionne les non-lus des deux canaux sur le bouton, tiroir fermé", () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams());
+      renderEchanges({ unreadCounts: UNREAD });
+
+      expect(
+        screen.getByRole("button", { name: "Échanges 3 non lus" })
+      ).toBeInTheDocument();
+    });
+
+    it("n'affiche pas de pastille sans message non lu", () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams());
+      renderEchanges();
+
+      expect(
+        screen.getByRole("button", { name: "Échanges" })
+      ).toBeInTheDocument();
+    });
+
+    it("retire la pastille du canal ouvert et garde celle de l'autre canal", async () => {
+      answerWith([]);
+      renderEchanges({ unreadCounts: UNREAD });
+
+      expect(
+        await screen.findByRole("tab", { name: "Tout le monde" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: /1 non lu$/ })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Échanges 1 non lu" })
+      ).toBeInTheDocument();
+    });
+  });
+
   it("passe au canal partagé depuis le canal agents ouvert par le lien d'un mail", async () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
     answerWith([]);
@@ -479,6 +518,7 @@ describe("Echanges", () => {
             isCampaignOpen
             tags={TAGS}
             anchorsByVisibility={NO_ANCHORS}
+        unreadCounts={NO_UNREAD}
           />
         </FetchStateProvider>
       );
@@ -630,6 +670,7 @@ describe("Echanges", () => {
           isCampaignOpen
           tags={TAGS}
           anchorsByVisibility={NO_ANCHORS}
+        unreadCounts={NO_UNREAD}
         />
       </FetchStateProvider>
     );

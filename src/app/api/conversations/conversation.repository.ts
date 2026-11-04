@@ -73,6 +73,27 @@ export const findMessages = (
     select: messageSelect,
   });
 
+export const findUnreadMessageCounts = (
+  structureTarificationId: number,
+  userId: number
+) =>
+  prisma.conversation.findMany({
+    where: { structureTarificationId },
+    select: {
+      visibility: true,
+      _count: {
+        select: {
+          messages: {
+            where: {
+              authorId: { not: userId },
+              receipts: { none: { userId } },
+            },
+          },
+        },
+      },
+    },
+  });
+
 export const findConversationMessageIds = async (
   structureTarificationId: number,
   visibility: Visibility,

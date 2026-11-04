@@ -5,6 +5,7 @@ import { getFullStructure } from "@/app/api/structures/structure.service";
 import {
   getTarificationJournal,
   getTarificationOverview,
+  getTarificationUnreadCounts,
   TarificationOverview,
 } from "@/app/api/tarifications/tarification.service";
 import { DomainError } from "@/app/utils/domain-error.util";
@@ -68,6 +69,12 @@ export default async function TarificationPage({
   if (!structure) {
     notFound();
   }
+
+  const unreadCounts = await getTarificationUnreadCounts({
+    structureId,
+    year,
+    overview,
+  });
 
   const reader = { isAgent: !overview.isOperateur };
   const [{ journal, state, drlUrl }, { journal: previousJournal }] =
@@ -204,6 +211,7 @@ export default async function TarificationPage({
             canParticipate={overview.canParticipate}
             isCampaignOpen={overview.openCampaignYears.includes(year)}
             tags={overview.tags}
+            unreadCounts={unreadCounts}
             anchorsByVisibility={{
               SHARED: buildConversationAnchors(
                 filterJournalForOperateur(journal)
