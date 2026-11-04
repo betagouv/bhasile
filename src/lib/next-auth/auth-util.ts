@@ -6,6 +6,7 @@ import {
   getAccountStatus,
   getAssignedGrants,
   isAgentUser,
+  normalizeEmail,
   toContactGrant,
   toSessionGrant,
 } from "@/app/api/users/user.util";
@@ -22,7 +23,7 @@ export type ProConnectUser = User & {
 export const getPermissionsFromSession = async (
   session: Session
 ): Promise<SessionPermissions> => {
-  const email = session.user?.email;
+  const email = session.user?.email ? normalizeEmail(session.user.email) : null;
   const databaseUser = await getUserWithGrantsByEmail({ email });
 
   if (!databaseUser || !email) {

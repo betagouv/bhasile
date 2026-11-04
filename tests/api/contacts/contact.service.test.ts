@@ -37,7 +37,7 @@ describe("getContactStructureIds", () => {
 
     expect(await getContactStructureIds(" Contact@Coallia.org ")).toEqual([1]);
     expect(mockFindStructuresWithContactEmail).toHaveBeenCalledWith(
-      "Contact@Coallia.org"
+      "contact@coallia.org"
     );
   });
 

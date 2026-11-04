@@ -37,11 +37,11 @@ flowchart TD
 
 - **Agent** = périmètre renseigné sans opérateur (`isAgentUser`). Le superadmin compte comme agent (il voit tous les champs). Ses droits sont calculés à chaque session (`getPerimeterGrants`), jamais stockés : changer le périmètre d'un agent change ses droits.
 - **Activation** : non activé = aucun droit stocké. Désactiver ne supprime rien (périmètre, binômes, historique) ; la date reste visible. Réactiver remet `deactivatedAt` à vide.
-- **Droits de contact** : un user non-agent qui figure comme contact (même email, sans tenir compte de la casse) dans la version affichée d'une structure lit cette structure. Calculés à chaque session, jamais stockés. Exception provisoire, à confirmer avec les PO : ils ne demandent pas d'activation ; un compte désactivé les perd.
+- **Droits de contact** : un user non-agent qui figure comme contact (même email) dans la version affichée d'une structure lit cette structure. Calculés à chaque session, jamais stockés. Exception provisoire, à confirmer avec les PO : ils ne demandent pas d'activation ; un compte désactivé les perd.
 - **Superadmin** : `manage all`, mais hors messagerie : ni message, ni fichier, ni accusé de lecture (`canParticipateInTarification`).
 - **Champs réservés aux agents** : masqués pour un non-agent (`hideAgentOnlyFields`) : notes, contrôles, évaluations, EIG, anomalies justifiées, CPOM.
 - **Une seule source** : la session (`getPermissionsFromSession`) porte `isAgent`, `isSuperAdmin` et les binômes ; le code les lit via `lib/casl`. Sans binôme ni superadmin : `/acces-en-attente`, et 401 sur les routes d'API ProConnect.
-- **Emails** : comparés sans tenir compte de la casse, écrits en minuscules (`normalizeEmail`).
+- **Emails** : users et contacts écrits sans espaces et en minuscules (`normalizeEmail`, `contactApiSchema`), puis comparés tels quels.
 
 ## Ce que couvre un binôme
 
@@ -92,7 +92,11 @@ Une seule définition de la couverture (`getStructureConditions` / `getCpomCondi
 - périmètres upsertés par nom, agents du document créés ou rattachés puis activés, superadmins activés, agents activés absents du document désactivés, emails passés en minuscules ;
 - le dry-run classe les agents (nouveau, même périmètre, droits différents avec avant / après), liste les désactivés avec leurs droits et leur dernière connexion, et met les nationaux absents en avertissement.
 
-Mise en prod du basculement : lancer le one-off sur la version précédente (dry-run puis réel), conserver sa sortie (seule trace des anciens binômes), puis déployer. La migration supprime les binômes des agents, `EmailPattern`, `User.emailPatternId` et `User.isAgent`.
+Mise en prod du basculement :
+
+1. sur la version précédente, lancer `20261104-reset-agents` (dry-run puis réel) et conserver sa sortie, seule trace des anciens binômes ;
+2. déployer : la migration supprime `EmailPattern`, `User.emailPatternId` et `User.isAgent` ;
+3. lancer `yarn one-off 20261104-clean-grants-and-emails [--dry-run]` : supprime les binômes sans propriétaire (anciens patterns) et ceux des agents, normalise les emails des users et des contacts. Entre 2 et 3, les binômes des agents sont déjà ignorés ; seuls les contacts à l'email en majuscules perdent leurs droits.
 
 ## Reste à faire
 
@@ -108,3 +112,4 @@ Mise en prod du basculement : lancer le one-off sur la version précédente (dry
    - fiche opérateur (#1742), CPOM liés à leurs structures, statistiques filtrées sur `operateurId` sans RMU ;
    - écriture par leurs binômes éditeur / admin, restreinte à leur opérateur, selon la matrice validée par le métier ;
    - Metabase fermé aux opérateurs.
+3. **`Grant.userId` obligatoire**, une fois `20261104-clean-grants-and-emails` passé en prod.
