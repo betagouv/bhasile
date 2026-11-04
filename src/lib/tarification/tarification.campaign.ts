@@ -1,4 +1,4 @@
-import { toLocalDate } from "@/lib/tarification/tarification.date";
+import { toLocalDate } from "@/app/utils/date.util";
 import type { CampaignPhase } from "@/types/tarification.type";
 
 // Ouverte du 1er janvier N-1 au 31 décembre N, puis rattrapage sans limite de durée

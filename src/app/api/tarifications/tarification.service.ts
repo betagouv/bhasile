@@ -17,6 +17,10 @@ import {
   getUserWithGrantsByEmail,
 } from "@/app/api/users/user.repository";
 import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
+import {
+  getDepartementTimeZone,
+  toCivilDate,
+} from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
@@ -27,15 +31,12 @@ import {
 } from "@/generated/prisma/enums";
 import {
   canAccessTarification,
+  canParticipateInTarification,
   isAgent,
   type StructureScope,
 } from "@/lib/casl";
 import { getOpenCampaignYears } from "@/lib/tarification/tarification.campaign";
 import { computeTarificationState } from "@/lib/tarification/tarification.compute";
-import {
-  getDepartementTimeZone,
-  toCivilDate,
-} from "@/lib/tarification/tarification.date";
 import {
   canOperateurOpenDocument,
   filterJournalForOperateur,
@@ -71,6 +72,7 @@ export const getTarificationParticipant = async (
   user: SessionUser,
   structureId: number
 ): Promise<TarificationParticipant> => {
+  assertCanParticipateInTarification(user);
   const structure = await findStructureScopeOrThrow(structureId);
   return resolveParticipant(user, structure);
 };
@@ -101,6 +103,7 @@ export const getTarificationOverview = async (
     codeBhasile: structure.codeBhasile,
     participant,
     isOperateur: participant.level === AuthorLevel.OPERATEUR,
+    canParticipate: canParticipateInTarification(user),
     openCampaignYears,
     campaignYears: getSelectableCampaignYears({
       openCampaignYears,
@@ -206,6 +209,7 @@ export const changeTarificationMessageTag = async ({
   tagKey: string | null;
   user: SessionUser;
 }): Promise<MessageDb> => {
+  assertCanParticipateInTarification(user);
   const message = await findMessageTarification(messageId);
   if (!message) {
     throw new DomainError("Message introuvable", 404);
@@ -312,9 +316,9 @@ export const notifyPendingTarificationMessages = async (): Promise<{
   abandonedCount: number;
 }> => {
   const abandonedCount = await abandonStaleNotifications();
-  const messages = await findPendingMessageContexts();
+  const notifications = await findPendingMessageContexts();
   const structuresById = new Map(
-    messages.map(({ conversation }) => [
+    notifications.map(({ message: { conversation } }) => [
       conversation.structureTarification.structure.id,
       conversation.structureTarification.structure,
     ])
@@ -334,10 +338,11 @@ export const notifyPendingTarificationMessages = async (): Promise<{
     )
   );
   const { sentCount, failedCount } = await sendMessageDigests(
-    messages.map((message) => {
+    notifications.map(({ id: notificationId, message }) => {
       const { structure, campaign } =
         message.conversation.structureTarification;
       return {
+        notificationId,
         messageId: message.id,
         conversationId: message.conversation.id,
         recipients: getMessageRecipients(
@@ -373,6 +378,15 @@ const resolveParticipant = async (
   };
 };
 
+const assertCanParticipateInTarification = (user: SessionUser): void => {
+  if (!canParticipateInTarification(user)) {
+    throw new DomainError(
+      "Les superadmins consultent les échanges sans y participer",
+      403
+    );
+  }
+};
+
 const assertCanAccessTarification = (
   user: SessionUser,
   structure: StructureScope
@@ -404,6 +418,7 @@ export type TarificationOverview = {
   codeBhasile: string;
   participant: TarificationParticipant;
   isOperateur: boolean;
+  canParticipate: boolean;
   openCampaignYears: number[];
   campaignYears: number[];
   tags: ConversationTag[];

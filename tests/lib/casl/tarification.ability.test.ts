@@ -7,7 +7,11 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Visibility } from "@/generated/prisma/enums";
-import { canAccessTarification, canReadConversation } from "@/lib/casl";
+import {
+  canAccessTarification,
+  canParticipateInTarification,
+  canReadConversation,
+} from "@/lib/casl";
 
 describe("canAccessTarification", () => {
   const parisStructure = {
@@ -57,6 +61,20 @@ describe("canAccessTarification", () => {
         )
       ).toBe(true);
     });
+  });
+});
+
+describe("canParticipateInTarification", () => {
+  it("laisse participer un agent", () => {
+    expect(canParticipateInTarification(createDepartementalAgent(["75"]))).toBe(
+      true
+    );
+  });
+
+  it("empêche un superadmin de participer", () => {
+    expect(
+      canParticipateInTarification(createSessionUser({ isSuperAdmin: true }))
+    ).toBe(false);
   });
 });
 

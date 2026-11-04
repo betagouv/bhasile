@@ -56,8 +56,8 @@ Le design repose sur ces constats. S'ils deviennent faux, la colonne de droite d
 ```
 TarificationCampaign 1─N StructureTarification 1─2 Conversation 1─N Message
                                                                      ├─ MessageReceipt                (lu, par utilisateur)
-                                                                     ├─ MessageNotification           (notifications traitées)
-                                                                     ├─ MessageNotificationRecipient  (signalé par mail, par utilisateur)
+                                                                     ├─ EmailNotification             (à signaler par mail, puis traité)
+                                                                     │    └─ EmailNotificationRecipient (signalé, par utilisateur)
                                                                      └─ FileUpload.messageId          (pièces jointes)
 ```
 
@@ -96,10 +96,6 @@ type ConversationAnchor = {
   date: Date;
   startsTagKey?: string;
 };
-type ConversationContext = {
-  tags: ConversationTag[];
-  anchors: ConversationAnchor[];
-};
 ```
 
 - **Côté écran**, le composant de messagerie reçoit les tags en props, calculés par la page de la tarification.
@@ -113,7 +109,7 @@ type ConversationContext = {
 - **Fermé par défaut.** La messagerie ne reprend **pas** la règle de lecture de Bhasile, ouverte à tous (voir [Permissions](permissions.md)).
 - **Opérateur** : la conversation partagée de ses structures. La conversation agents n'existe pas pour lui (`canReadConversation`).
 - **DREETS** : les deux conversations des structures de sa région.
-- **Superadmins** : les deux conversations de toutes les structures, en lecture et en écriture, comme un agent. Sans grant régional, ils signent au niveau départemental.
+- **Superadmins** : les deux conversations de toutes les structures, en lecture seule (`canParticipateInTarification`). Ils n'écrivent jamais et leurs lectures ne laissent pas d'accusé : aucune trace de l'équipe technique n'entre dans le journal d'une tarification.
 - **Agents nationaux** : aucun accès. Ils n'interviennent pas dans les échanges, et les services territoriaux préfèrent qu'ils n'y aient pas accès.
 
 ## Lectures, non-lus et temps réel
@@ -145,7 +141,7 @@ Le mécanisme (Brevo, mail groupé par cron, trace, reprise, abandon) est décri
 
 - **Superadmins** : jamais notifiés (lecture seule).
 - **Regroupement** : deux passages par jour (voir [Emails](email.md#envoi-et-reprise)). Un agent qui suit 50 structures reçoit au plus deux mails par jour, chacun limité aux messages arrivés depuis le précédent ; un message lu à l'écran avant le passage n'est pas signalé.
-- **Trace** : `MessageNotification` (le message est traité, ou abandonné avec `abandonedAt`) et `MessageNotificationRecipient` (un message signalé à un destinataire, avec le `brevoMessageId` du mail qui le regroupe). Cron `notify-messages`.
+- **File et trace** : `EmailNotification`, écrite dans la transaction du message (en attente, traitée avec `processedAt`, ou abandonnée avec `abandonedAt`), et `EmailNotificationRecipient` (un message signalé à un destinataire, avec le `brevoMessageId` du mail qui le regroupe). Cron `notify-messages`.
 
 ## Socle commun
 
@@ -173,7 +169,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : l'envoi des notifications se recette en préprod.
 
 ## Interface

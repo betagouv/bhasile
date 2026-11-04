@@ -8,14 +8,15 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   createMessage,
-  createMessageNotifications,
   createMessageReceipts,
   createNotificationRecipients,
   findConversationMessageIds,
   findMessages,
   findNotifiedPairs,
-  findPendingMessageIds,
   findReadPairs,
+  findStaleNotificationIds,
+  markNotificationsAbandoned,
+  markNotificationsProcessed,
   updateMessageTagKey,
   upsertConversation,
 } from "@/app/api/conversations/conversation.repository";
@@ -209,16 +210,53 @@ describe("conversation.repository db integration", () => {
     ).toMatchObject({ messageId: first.id });
   });
 
-  it("renvoie les messages sans trace de notification créés avant la date donnée", async () => {
+  const getNotificationId = async (messageId: number): Promise<number> => {
+    const notification = await prisma.emailNotification.findUniqueOrThrow({
+      where: { messageId },
+      select: { id: true },
+    });
+    return notification.id;
+  };
+
+  it("met chaque message en attente de notification dès sa création", async () => {
+    const { id: messageId } = await postMessage(
+      Visibility.SHARED,
+      "À notifier"
+    );
+
+    expect(
+      await prisma.emailNotification.findUniqueOrThrow({ where: { messageId } })
+    ).toMatchObject({ processedAt: null, abandonedAt: null });
+  });
+
+  it("ne garde aucune notification d'un message dont la création échoue", async () => {
+    const countBefore = await prisma.emailNotification.count();
+
+    await expect(postMessageWithFiles(["cle-inconnue"])).rejects.toThrow();
+
+    expect(await prisma.emailNotification.count()).toBe(countBefore);
+  });
+
+  it("renvoie les notifications encore en attente créées avant la date donnée", async () => {
     const pending = await postMessage(Visibility.SHARED, "À notifier");
-    const notified = await postMessage(Visibility.SHARED, "Déjà notifié");
-    await createMessageNotifications([notified.id], null);
+    const processed = await postMessage(Visibility.SHARED, "Déjà notifié");
+    const abandoned = await postMessage(Visibility.SHARED, "Abandonné");
+    const pendingId = await getNotificationId(pending.id);
+    const processedId = await getNotificationId(processed.id);
+    const abandonedId = await getNotificationId(abandoned.id);
+    await markNotificationsProcessed([processedId], new Date());
+    await markNotificationsAbandoned([abandonedId], new Date());
 
-    const pendingIds = await findPendingMessageIds(new Date(Date.now() + 1000));
+    const staleIds = await findStaleNotificationIds(
+      new Date(Date.now() + 1000)
+    );
 
-    expect(pendingIds).toContain(pending.id);
-    expect(pendingIds).not.toContain(notified.id);
-    expect(await findPendingMessageIds(new Date(0))).not.toContain(pending.id);
+    expect(staleIds).toContain(pendingId);
+    expect(staleIds).not.toContain(processedId);
+    expect(staleIds).not.toContain(abandonedId);
+    expect(await findStaleNotificationIds(new Date(0))).not.toContain(
+      pendingId
+    );
   });
 
   it("trace un même mail pour plusieurs messages et distingue les signalements des lectures", async () => {
@@ -228,12 +266,14 @@ describe("conversation.repository db integration", () => {
     const pending = await postMessage(Visibility.SHARED, "À signaler");
     const brevoMessageId = `<${randomUUID()}>`;
     await createNotificationRecipients(
-      [first, second].map((message) => ({
-        messageId: message.id,
-        userId: authorId,
-        email: "agent@test.fr",
-        brevoMessageId,
-      }))
+      await Promise.all(
+        [first, second].map(async (message) => ({
+          notificationId: await getNotificationId(message.id),
+          userId: authorId,
+          email: "agent@test.fr",
+          brevoMessageId,
+        }))
+      )
     );
     await createMessageReceipts(authorId, [read.id]);
 

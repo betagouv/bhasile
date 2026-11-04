@@ -19,6 +19,7 @@ export const Echanges = ({
   year,
   currentUserId,
   isOperateur,
+  canParticipate,
   isCampaignOpen,
   tags,
 }: Props): ReactElement => {
@@ -49,6 +50,7 @@ export const Echanges = ({
       year={year}
       visibility={visibility}
       currentUserId={currentUserId}
+      canParticipate={canParticipate}
       isCampaignOpen={isCampaignOpen}
       tags={tags}
       canTag={!isOperateur}
@@ -86,6 +88,7 @@ type Props = {
   year: number;
   currentUserId: number;
   isOperateur: boolean;
+  canParticipate: boolean;
   isCampaignOpen: boolean;
   tags: ConversationTag[];
 };

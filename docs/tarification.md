@@ -4,7 +4,7 @@ La campagne de tarification d'une structure dans Bhasile : les documents échang
 
 La tarification s'appuie sur la [messagerie](messagerie.md) : les échanges vivent dans un panneau à part, la tarification leur fournit les tags et les ancres. La dépendance va dans un seul sens : la tarification importe la messagerie, jamais l'inverse. Elle partage aussi son [socle commun](messagerie.md#socle-commun) (ajout seul, fichiers, preuve, conservation, mise en prod) et le mécanisme des [emails](email.md).
 
-Les décisions et leurs alternatives écartées sont dans l'[ancienne RFC](rfc/campagne-tarification/rfc-01-socle-messagerie.md), conservée pour l'historique, et dans le grill du 30/10. Les décisions marquées ⏳ attendent la confirmation de l'équipe (envoyées le 30/10) : elles sont appliquées en attendant.
+Les décisions et leurs alternatives écartées sont dans l'[ancienne RFC](rfc/campagne-tarification/rfc-01-socle-messagerie.md), conservée pour l'historique. Les décisions marquées ⏳ attendent la confirmation de l'équipe (envoyées le 30/10) : elles sont appliquées en attendant.
 
 ## Vocabulaire
 
@@ -19,7 +19,7 @@ Les décisions et leurs alternatives écartées sont dans l'[ancienne RFC](rfc/c
 | **Relecture**               | `APPROVED`, `CHANGES_REQUESTED` | Validation d'une version de travail, ou demande de modifications, par un autre agent que son auteur.                              |
 | **Ouverture**               | `TarificationDocumentOpening`   | La première fois qu'un fichier partagé est servi à un utilisateur de l'opérateur. Celle de la L48 fait courir le contradictoire.  |
 | **Sans objet**              | `STEP_MARKED_NOT_APPLICABLE`    | Une étape déclarée sans objet par un agent, avec un motif (CA jamais reçu, RCA intégré à la L48…).                                |
-| **Hors Bhasile**            | `OUT_OF_BHASILE_DECLARED`       | Une tarification menée hors de l'outil, déclarée par un agent avec un motif.                                                      |
+| **Hors Bhasile**            | `OUT_OF_APP_DECLARED`           | Une tarification menée hors de l'outil, déclarée par un agent avec un motif.                                                      |
 | **Échéance**                | registre des étapes             | Une date réglementaire, calculée.                                                                                                 |
 | **Exercice**                | —                               | L'année que couvre un document, déduite de son type et de la campagne (le CA de la campagne N est le CA N-2).                     |
 | **Documents préparatoires** | —                               | Ce que l'écran rappelle en tête de la campagne : DRL, CA et rapport d'activité, BP et rapport budgétaire, DAI N.                  |
@@ -111,11 +111,11 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
 
 **États**, choisis au dépôt et jamais modifiés :
 
-| État     | Sens                                    | Qui le voit         |
-| -------- | --------------------------------------- | ------------------- |
-| `DRAFT`  | version de travail des agents, à relire | agents              |
-| `FINAL`  | version signée, pas encore partagée     | agents              |
-| `SHARED` | dépôt de l'opérateur, partagé d'office  | agents et opérateur |
+| État     | Sens                                                                              | Qui le voit         |
+| -------- | --------------------------------------------------------------------------------- | ------------------- |
+| `DRAFT`  | version de travail des agents, à relire                                           | agents              |
+| `FINAL`  | version signée, partagée ensuite par un événement, sans changer d'état            | agents, puis tous   |
+| `SHARED` | document déposé par un agent ou un opérateur, visible des opérateurs dès le dépôt | agents et opérateur |
 
 - **Documents de l'opérateur** ⏳ : la campagne est le seul point d'entrée du CA, du BP et de leurs rapports, qui ne se déposent plus sur la fiche (voir [Fiche structure](#fiche-structure)). Les opérateurs ont un compte dès la mise en service. Un agent qui reçoit malgré tout un document par mail le dépose à la place de l'opérateur, toujours à l'état `SHARED` ; c'est la date du dépôt qui compte.
 - **Documents des agents** ⏳ : une version se dépose en `DRAFT`, ou en `FINAL` en cochant « c'est la version signée ».
@@ -165,7 +165,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 ## Contradictoire
 
 - **Un seul contradictoire par tarification**, ancré sur la première L48 partagée et non retirée. Une L48 partagée ensuite reste visible mais ne relance pas le délai ; l'agent en est averti (les corrections passent par la DAB).
-- **Le délai court à partir de la première ouverture** de la L48 par un utilisateur de l'opérateur : 8 jours, J1 étant le lendemain. Une réponse de l'opérateur vaut réception, même sans ouverture ⏳ : sinon une contestation donnée avant le 15e jour serait rejetée après coup. Si elle n'est ni ouverte ni répondue dans les 15 jours, elle est réputée reçue à la date de son partage (repli du CRPA, avis juridique attendu). Seules comptent les réponses postérieures au partage de la L48 en cours : une réponse à une L48 retirée ne vaut pas pour la suivante. Entre le partage et la première ouverture, l'échéance n'est pas encore fixée : l'état est « en attente d'ouverture », jusqu'à l'ouverture ou jusqu'au 15e jour.
+- **Le délai court à partir de la première ouverture** de la L48 par un utilisateur de l'opérateur : 8 jours, J1 étant le lendemain. Une réponse de l'opérateur vaut réception, même sans ouverture ⏳ : sinon une contestation donnée avant le 15e jour serait rejetée après coup. Si elle n'est ni ouverte ni répondue dans les 15 jours, elle est réputée reçue à la date de son partage (repli du CRPA, avis juridique attendu) ; une ouverture ou une réponse plus tardive ne relance rien. Seules comptent les réponses postérieures au partage de la L48 en cours : une réponse à une L48 retirée ne vaut pas pour la suivante. Entre le partage et la première ouverture, l'échéance n'est pas encore fixée : l'état est « en attente d'ouverture », jusqu'à l'ouverture ou jusqu'au 15e jour.
 - **Ouverture** : un lien signé vers le fichier délivré à un utilisateur de l'opérateur, pour la visionneuse ou le téléchargement (l'application ne sert pas le fichier, elle renvoie une URL S3 présignée). L'ouverture est enregistrée une fois le lien généré et **avant** de le renvoyer : si l'écriture échoue, pas d'URL ; si le lien ne se génère pas, pas d'ouverture, et le délai ne court pas pour un fichier jamais reçu. Le retrait bloque toute nouvelle demande de lien ; un lien déjà délivré ne se révoque pas et reste valable au plus 1 h, comme pour les autres fichiers, ce qui est acceptable puisque le document a déjà été vu. L'affichage de la page, de la liste ou du mail ne compte pas (un antivirus de messagerie ouvre les liens tout seul) : seul compte un lien demandé par une session, au clic. Les agents et les superadmins n'ouvrent jamais au sens du délai. Les ouvertures de tous les documents partagés par les agents sont enregistrées et affichées (« ouvert le … par … ») ; l'opérateur qui rouvre son propre dépôt n'ouvre rien. La première ouverture fait foi : les suivantes n'écrasent rien.
 - **Réponse** : l'opérateur accepte ou conteste (`L48_ACCEPTED`, `L48_CONTESTED`, observations et document `REPONSE_CONTRADICTOIRE` facultatifs). Plusieurs réponses sont possibles jusqu'à l'échéance, la dernière compte ; aucune après.
 - **Réputé accepté** : calculé, à l'échéance, sans réponse.
@@ -224,7 +224,7 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 - **Liste blanche** : chaque type d'événement déclare dans le registre s'il notifie ; un nouveau type ne notifie pas par défaut.
 - **La DREETS n'est notifiée que des contestations** : c'est le seul fait qui attend une action de sa part.
 - **Jamais le nom du fichier** dans un mail (un mail est une notification, pas un contenu, voir [Emails](email.md#principes)) : « L48 2027 » et l'empreinte.
-- **Trace** : `TarificationEventNotification` (l'événement est traité, ou abandonné) et `TarificationEventNotificationRecipient` (signalé à un destinataire, avec le `brevoMessageId`), sur le modèle de la messagerie. Le mail groupé lit l'union des messages et des événements en attente, avec un template à deux sections.
+- **File et trace** : la file des [emails](email.md), `EmailNotification` et `EmailNotificationRecipient`, avec ces notifications : elles y ajouteront `eventId` et un `CHECK` (une ligne vise un message ou un événement). Un événement ne s'y inscrit, dans sa transaction, que si son type notifie ; ceux écrits avant n'ont pas de ligne, donc pas de mail. Le mail groupé lit toutes les lignes en attente, avec un template à deux sections.
 - **Destinataires** : une fonction propre à la tarification ; celle de la messagerie (`getMessageRecipients`) exclut les grants `REGION`, alors que la contestation vise la DREETS.
 - **Déjà vu** : un partage ouvert avant le passage du cron n'est pas signalé ; un accusé de dépôt l'est toujours. Un partage retiré avant le passage n'est pas signalé (le mail annoncerait un document retiré).
 - **Les opérateurs** ont un compte dès la mise en service : les rebonds redeviennent utiles (contacts partis), le webhook Brevo est donc un prérequis de la mise en service.
@@ -249,15 +249,15 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 
 ## Implémentation
 
-| Brique                                     | Où                                                                                                                                                                                                                                   | État                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| Brique                                     | Où                                                                                                                                                                                                                                  | État                         |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
 | Doc, modèle, registres, règles calculées   | `docs/tarification.md`, `prisma/schema/tarification.prisma`, `src/lib/tarification/` (registres `tarification.definition.ts`, calcul `tarification.compute.ts`, visibilité, forme des événements, phase de campagne, dates locales) | fait (`tarification-modele`) |
-| Journal, fichiers, empreinte, messagerie   | `tarification-api` : `getTarificationJournal`, `authorizeTarificationDocument`, SHA-256 à l'upload, phase et éligibilité dans la messagerie, tags dérivés des étapes | en cours |
-| Écritures et gardes                        | `tarification-ecritures` : `POST …/documents`, `POST …/events`, gardes de domaine, sélecteur des campagnes en rattrapage | à faire                          |
-| Copie vers la fiche, verrouillage, reprise | `tarification-fiche`                                                                                                                                                                                                                 | à faire                          |
-| Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                                                                                                                                       | à faire                          |
-| Interface                                  | `tarification-ui`, après les maquettes                                                                                                                                                                                               | à faire                          |
-| Tableau de bord, suivi d'une structure     | `tarification-dashboard`, `StructureSubscription`                                                                                                                                                                                    | à faire                          |
+| Journal, fichiers, empreinte, messagerie   | `tarification-api` : `getTarificationJournal`, `authorizeTarificationDocument`, SHA-256 à l'upload, phase et éligibilité dans la messagerie, tags dérivés des étapes                                                                | en cours                     |
+| Écritures et gardes                        | `tarification-ecritures` : `POST …/documents`, `POST …/events`, gardes de domaine, sélecteur des campagnes en rattrapage                                                                                                            | à faire                      |
+| Copie vers la fiche, verrouillage, reprise | `tarification-fiche`                                                                                                                                                                                                                | à faire                      |
+| Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                                                                                                                                      | à faire                      |
+| Interface                                  | `tarification-ui`, après les maquettes                                                                                                                                                                                              | à faire                      |
+| Tableau de bord, suivi d'une structure     | `tarification-dashboard`, `StructureSubscription`                                                                                                                                                                                   | à faire                      |
 
 T1 met aussi à jour l'ordre de `prisma/utils/wipe.ts`, les seeders, `isOrphan` et `fileWithParentsInclude` (fichiers rattachés à un document de tarification) et les types de `src/types/`.
 
