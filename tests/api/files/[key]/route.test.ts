@@ -2,11 +2,14 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DELETE, GET } from "@/app/api/files/[key]/route";
+import { DomainError } from "@/app/utils/domain-error.util";
 
 const mockGetServerSession = vi.fn();
 const mockGetPrincipal = vi.fn();
 const mockGetFileWithParents = vi.fn();
 const mockAuthorizeFileAccess = vi.fn();
+const mockAuthorizeTarificationDocument = vi.fn();
+const mockRecordTarificationDocumentOpening = vi.fn();
 const mockGetDownloadLink = vi.fn();
 const mockDeleteFile = vi.fn();
 const mockDeleteFileByStorageKey = vi.fn();
@@ -17,6 +20,13 @@ vi.mock("next-auth", () => ({
 
 vi.mock("@/lib/next-auth/auth", () => ({
   authOptions: {},
+}));
+
+vi.mock("@/app/api/tarifications/tarification.service", () => ({
+  authorizeTarificationDocument: (...args: unknown[]) =>
+    mockAuthorizeTarificationDocument(...args),
+  recordTarificationDocumentOpening: (...args: unknown[]) =>
+    mockRecordTarificationDocumentOpening(...args),
 }));
 
 vi.mock("@/app/api/files/file.service", () => ({
@@ -71,6 +81,110 @@ describe("GET /api/files/[key]", () => {
       "read"
     );
     expect(mockGetDownloadLink).toHaveBeenCalled();
+  });
+
+  describe("document de tarification", () => {
+    const tarificationDocument = {
+      id: 7,
+      structureTarification: { structureId: 1, campaign: { year: 2027 } },
+    };
+    const tarificationFile = { ...linkedFile, tarificationDocument };
+    const session = { user: { email: "utilisateur@test.fr" } };
+    const pendingOpening = { documentId: 7, userId: 50 };
+    const linkRequest = () =>
+      new NextRequest("http://localhost/api/files/test.pdf?getLink=1");
+
+    beforeEach(() => {
+      mockGetServerSession.mockResolvedValueOnce(session);
+      mockGetFileWithParents.mockResolvedValueOnce(tarificationFile);
+    });
+
+    it("confie la décision à la tarification et délivre le lien", async () => {
+      mockAuthorizeTarificationDocument.mockResolvedValueOnce(null);
+      mockGetDownloadLink.mockResolvedValueOnce("https://s3.example.com/x");
+
+      const response = await GET(linkRequest());
+
+      expect(response.status).toBe(200);
+      expect(mockAuthorizeTarificationDocument).toHaveBeenCalledWith({
+        user: session.user,
+        document: tarificationDocument,
+      });
+      expect(mockAuthorizeFileAccess).not.toHaveBeenCalled();
+      expect(await response.json()).toEqual({
+        url: "https://s3.example.com/x",
+      });
+      expect(mockRecordTarificationDocumentOpening).not.toHaveBeenCalled();
+    });
+
+    it("retourne 404 quand la tarification refuse le document", async () => {
+      mockAuthorizeTarificationDocument.mockRejectedValueOnce(
+        new DomainError("Aucun fichier trouvé", 404)
+      );
+
+      const response = await GET(linkRequest());
+
+      expect(response.status).toBe(404);
+      expect(mockGetDownloadLink).not.toHaveBeenCalled();
+    });
+
+    it("enregistre l'ouverture une fois le lien généré", async () => {
+      mockAuthorizeTarificationDocument.mockResolvedValueOnce(pendingOpening);
+      mockGetDownloadLink.mockResolvedValueOnce("https://s3.example.com/x");
+
+      const response = await GET(linkRequest());
+
+      expect(response.status).toBe(200);
+      expect(mockRecordTarificationDocumentOpening).toHaveBeenCalledWith(
+        pendingOpening
+      );
+      expect(mockGetDownloadLink.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRecordTarificationDocumentOpening.mock.invocationCallOrder[0]
+      );
+    });
+
+    it("n'enregistre aucune ouverture quand le lien n'a pas pu être généré", async () => {
+      mockAuthorizeTarificationDocument.mockResolvedValueOnce(pendingOpening);
+      mockGetDownloadLink.mockRejectedValueOnce(new Error("S3 mal configuré"));
+
+      await expect(GET(linkRequest())).rejects.toThrow(
+        "Impossible de récupérer le lien"
+      );
+      expect(mockRecordTarificationDocumentOpening).not.toHaveBeenCalled();
+    });
+
+    it("ne délivre aucun lien quand l'ouverture n'a pas pu être enregistrée", async () => {
+      mockAuthorizeTarificationDocument.mockResolvedValueOnce(pendingOpening);
+      mockGetDownloadLink.mockResolvedValueOnce("https://s3.example.com/x");
+      mockRecordTarificationDocumentOpening.mockRejectedValueOnce(
+        new Error("Base indisponible")
+      );
+
+      await expect(GET(linkRequest())).rejects.toThrow(
+        "Impossible de récupérer le lien"
+      );
+    });
+
+    it("n'enregistre aucune ouverture pour une simple lecture des métadonnées", async () => {
+      mockAuthorizeTarificationDocument.mockResolvedValueOnce(pendingOpening);
+
+      const response = await GET(
+        new NextRequest("http://localhost/api/files/test.pdf")
+      );
+
+      expect(response.status).toBe(200);
+      expect(mockRecordTarificationDocumentOpening).not.toHaveBeenCalled();
+    });
+
+    it("retourne 404 sans session", async () => {
+      mockGetServerSession.mockReset();
+      mockGetServerSession.mockResolvedValueOnce(null);
+
+      const response = await GET(linkRequest());
+
+      expect(response.status).toBe(404);
+      expect(mockAuthorizeTarificationDocument).not.toHaveBeenCalled();
+    });
   });
 
   it("retourne 404 sur le lien de téléchargement à un utilisateur non autorisé pour ne pas révéler l'existence du fichier", async () => {

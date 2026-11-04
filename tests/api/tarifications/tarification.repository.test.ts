@@ -7,12 +7,19 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
+  createTarificationDocumentOpening,
   findMessageTarification,
   findStructureTarification,
   findStructureTarificationCampaigns,
+  findStructureTarificationJournal,
   upsertStructureTarification,
 } from "@/app/api/tarifications/tarification.repository";
-import { AuthorLevel, Visibility } from "@/generated/prisma/enums";
+import {
+  AuthorLevel,
+  TarificationDocumentStatus,
+  TarificationEventType,
+  Visibility,
+} from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
 describe("tarification.repository db integration", () => {
@@ -70,6 +77,73 @@ describe("tarification.repository db integration", () => {
     ]);
   });
 
+  it("lit le journal d'une tarification et garde la première ouverture d'un document", async () => {
+    const tarification = await upsertStructureTarification(
+      structureId,
+      campaignYear
+    );
+    const fileUpload = await prisma.fileUpload.create({
+      data: {
+        key: `journal-${randomUUID()}.pdf`,
+        mimeType: "application/pdf",
+        originalName: "l48.pdf",
+        fileSize: 10,
+        sha256: "empreinte",
+      },
+    });
+    const document = await prisma.tarificationDocument.create({
+      data: {
+        structureTarificationId: tarification.id,
+        fileUploadId: fileUpload.id,
+        types: ["L48"],
+        status: TarificationDocumentStatus.FINAL,
+      },
+    });
+    await prisma.tarificationEvent.create({
+      data: {
+        structureTarificationId: tarification.id,
+        type: TarificationEventType.DOCUMENT_SHARED,
+        authorId,
+        authorLevel: AuthorLevel.DEPARTEMENT,
+        documentId: document.id,
+      },
+    });
+    await createTarificationDocumentOpening(document.id, authorId);
+    const firstOpening =
+      await prisma.tarificationDocumentOpening.findFirstOrThrow({
+        where: { documentId: document.id },
+      });
+    await createTarificationDocumentOpening(document.id, authorId);
+
+    const structure = await findStructureTarificationJournal(
+      structureId,
+      campaignYear
+    );
+
+    expect(structure?.structureTarifications).toMatchObject([
+      {
+        documents: [
+          {
+            id: document.id,
+            types: ["L48"],
+            fileUpload: { sha256: "empreinte" },
+            openings: [{ userId: authorId, createdAt: firstOpening.createdAt }],
+          },
+        ],
+        events: [
+          {
+            type: TarificationEventType.DOCUMENT_SHARED,
+            documentId: document.id,
+          },
+        ],
+      },
+    ]);
+    expect(
+      (await findStructureTarificationJournal(structureId, campaignYear + 1))
+        ?.structureTarifications
+    ).toEqual([]);
+  });
+
   it("ne trouve rien pour une campagne sans échange", async () => {
     expect(
       await findStructureTarification(structureId, campaignYear + 1)
@@ -110,6 +184,7 @@ describe("tarification.repository db integration", () => {
         id: structureId,
         departementAdministratif: "50",
         operateurId: null,
+        type: null,
       },
       campaign: { year: campaignYear },
     });
