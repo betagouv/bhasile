@@ -1,6 +1,8 @@
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { assertFilesCanBeAttachedToEntity } from "../files/file.repository";
+
 const deleteEvaluations = async (
   tx: PrismaTransaction,
   evaluationsToKeep: EvaluationApiType[],
@@ -31,12 +33,18 @@ export const createOrUpdateEvaluations = async (
     return;
   }
 
+  await assertFilesCanBeAttachedToEntity(
+    tx,
+    evaluations.flatMap((evaluation) => evaluation.fileUploads ?? []),
+    { structureId }
+  );
+
   await deleteEvaluations(tx, evaluations, structureId);
 
   await Promise.all(
     (evaluations || []).map((evaluation) => {
       return tx.evaluation.upsert({
-        where: { id: evaluation.id || 0 },
+        where: { id: evaluation.id || 0, structureId },
         update: {
           date: evaluation.date,
           notePersonne: evaluation.notePersonne,

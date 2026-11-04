@@ -2,6 +2,7 @@ import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { assertFilesCanBeAttachedToEntity } from "../files/file.repository";
 import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 
 export const createOrUpdateActesAdministratifs = async (
@@ -13,6 +14,14 @@ export const createOrUpdateActesAdministratifs = async (
   if (!actesAdministratifs || actesAdministratifs.length === 0) {
     return;
   }
+
+  await assertFilesCanBeAttachedToEntity(
+    tx,
+    actesAdministratifs.flatMap(
+      (acteAdministratif) => acteAdministratif.fileUploads ?? []
+    ),
+    entityId
+  );
 
   const deletedIds = options.skipOrphanDelete
     ? new Set<number>()

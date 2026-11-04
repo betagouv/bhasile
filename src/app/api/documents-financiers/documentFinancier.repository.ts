@@ -2,6 +2,7 @@ import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { assertFilesCanBeAttachedToEntity } from "../files/file.repository";
 import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 
 export const createOrUpdateDocumentsFinanciers = async (
@@ -12,6 +13,14 @@ export const createOrUpdateDocumentsFinanciers = async (
   if (!documentsFinanciers || documentsFinanciers.length === 0) {
     return;
   }
+
+  await assertFilesCanBeAttachedToEntity(
+    tx,
+    documentsFinanciers.flatMap(
+      (documentFinancier) => documentFinancier.fileUploads
+    ),
+    entityId
+  );
 
   await deleteDocumentsFinanciers(tx, documentsFinanciers, entityId);
 
