@@ -204,7 +204,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 
 - **Un seul point de passage pour lire le journal** : `getTarificationJournal({ structureId, year, reader })`, utilisé par la page, l'API, les fichiers et les mails. Aucune lecture du journal ne le contourne. L'état est calculé sur le journal complet, la visibilité ne filtre que ce qui est renvoyé.
 - **Un seul point de passage pour les fichiers** : `GET /api/files/[key]` confie un fichier de tarification à `authorizeTarificationDocument` (avant la règle générale qui laisse tout agent lire un fichier rattaché), puis enregistre l'ouverture au moment de délivrer le lien. Un fichier de tarification ne se supprime jamais par `/api/files`.
-- **Superadmins** : comme un agent, en lecture et en écriture, comme dans la messagerie ; leurs lectures n'ouvrent rien au sens du délai.
+- **Superadmins** : voient tout, sans participer : ni message, ni document, ni événement. Leurs lectures ne laissent aucune trace et n'ouvrent rien au sens du délai.
 
 ## Écritures
 
