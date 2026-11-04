@@ -1,5 +1,9 @@
 import { GrantDb, UserWithGrants } from "@/app/api/users/user.db.type";
-import { getAssignedGrants, toSessionGrant } from "@/app/api/users/user.util";
+import {
+  getAccountStatus,
+  getAssignedGrants,
+  toSessionGrant,
+} from "@/app/api/users/user.util";
 import { toDayKey } from "@/app/utils/date.util";
 import { AccessRole, GrantScope } from "@/generated/prisma/client";
 import { postToBrevo } from "@/lib/brevo";
@@ -15,12 +19,13 @@ export type BrevoContact = {
     PERIMETRE: string;
     LAST_LOGIN: string;
     CREATION_COMPTE: string;
+    DESACTIVE: boolean;
   };
 };
 
 export type BrevoAgentUser = Pick<
   UserWithGrants,
-  "isActivated" | "operateurId" | "perimeter" | "grants"
+  "isActivated" | "deactivatedAt" | "operateurId" | "perimeter" | "grants"
 > & {
   email: string;
   lastConnection: Date | null;
@@ -40,6 +45,7 @@ export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
       PERIMETRE: actionGrants.map(getGrantLabel).join(", "),
       LAST_LOGIN: user.lastConnection ? toDayKey(user.lastConnection) : "",
       CREATION_COMPTE: toDayKey(user.createdAt),
+      DESACTIVE: getAccountStatus(user) === "DEACTIVATED",
     },
   };
 };
