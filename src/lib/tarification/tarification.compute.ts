@@ -33,7 +33,7 @@ export const computeTarificationState = (
   const activeDocuments = getActiveDocuments(journal);
   const sharedAtByDocumentId = getSharedAtByDocumentId(journal);
   const isOutOfBhasile = journal.events.some(
-    (event) => event.type === TarificationEventType.OUT_OF_BHASILE_DECLARED
+    (event) => event.type === TarificationEventType.OUT_OF_APP_DECLARED
   );
   const isNeverLate = isOutOfBhasile || journal.isCoveredByCpom;
 

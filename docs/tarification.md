@@ -19,7 +19,7 @@ Les décisions et leurs alternatives écartées sont dans l'[ancienne RFC](rfc/c
 | **Relecture**               | `APPROVED`, `CHANGES_REQUESTED` | Validation d'une version de travail, ou demande de modifications, par un autre agent que son auteur.                              |
 | **Ouverture**               | `TarificationDocumentOpening`   | La première fois qu'un fichier partagé est servi à un utilisateur de l'opérateur. Celle de la L48 fait courir le contradictoire.  |
 | **Sans objet**              | `STEP_MARKED_NOT_APPLICABLE`    | Une étape déclarée sans objet par un agent, avec un motif (CA jamais reçu, RCA intégré à la L48…).                                |
-| **Hors Bhasile**            | `OUT_OF_BHASILE_DECLARED`       | Une tarification menée hors de l'outil, déclarée par un agent avec un motif.                                                      |
+| **Hors Bhasile**            | `OUT_OF_APP_DECLARED`           | Une tarification menée hors de l'outil, déclarée par un agent avec un motif.                                                      |
 | **Échéance**                | registre des étapes             | Une date réglementaire, calculée.                                                                                                 |
 | **Exercice**                | —                               | L'année que couvre un document, déduite de son type et de la campagne (le CA de la campagne N est le CA N-2).                     |
 | **Documents préparatoires** | —                               | Ce que l'écran rappelle en tête de la campagne : DRL, CA et rapport d'activité, BP et rapport budgétaire, DAI N.                  |
@@ -111,11 +111,11 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
 
 **États**, choisis au dépôt et jamais modifiés :
 
-| État     | Sens                                    | Qui le voit         |
-| -------- | --------------------------------------- | ------------------- |
-| `DRAFT`  | version de travail des agents, à relire | agents              |
-| `FINAL`  | version signée, pas encore partagée     | agents              |
-| `SHARED` | dépôt de l'opérateur, partagé d'office  | agents et opérateur |
+| État     | Sens                                                                              | Qui le voit         |
+| -------- | --------------------------------------------------------------------------------- | ------------------- |
+| `DRAFT`  | version de travail des agents, à relire                                           | agents              |
+| `FINAL`  | version signée, partagée ensuite par un événement, sans changer d'état            | agents, puis tous   |
+| `SHARED` | document déposé par un agent ou un opérateur, visible des opérateurs dès le dépôt | agents et opérateur |
 
 - **Documents de l'opérateur** ⏳ : la campagne est le seul point d'entrée du CA, du BP et de leurs rapports, qui ne se déposent plus sur la fiche (voir [Fiche structure](#fiche-structure)). Les opérateurs ont un compte dès la mise en service. Un agent qui reçoit malgré tout un document par mail le dépose à la place de l'opérateur ; c'est la date du dépôt qui compte.
 - **Documents des agents** ⏳ : une version se dépose en `DRAFT`, ou en `FINAL` en cochant « c'est la version signée ».
@@ -249,14 +249,14 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 
 ## Implémentation
 
-| Brique                                     | Où                                                                                                                                                                                                                                   | État                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| Brique                                     | Où                                                                                                                                                                                                                                  | État                             |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | Doc, modèle, registres, règles calculées   | `docs/tarification.md`, `prisma/schema/tarification.prisma`, `src/lib/tarification/` (registres `tarification.definition.ts`, calcul `tarification.compute.ts`, visibilité, forme des événements, phase de campagne, dates locales) | en cours (`tarification-modele`) |
-| Écritures, gardes, journal, fichiers       | `tarification-api`                                                                                                                                                                                                                   | à faire                          |
-| Copie vers la fiche, verrouillage, reprise | `tarification-fiche`                                                                                                                                                                                                                 | à faire                          |
-| Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                                                                                                                                       | à faire                          |
-| Interface                                  | `tarification-ui`, après les maquettes                                                                                                                                                                                               | à faire                          |
-| Tableau de bord, suivi d'une structure     | `tarification-dashboard`, `StructureSubscription`                                                                                                                                                                                    | à faire                          |
+| Écritures, gardes, journal, fichiers       | `tarification-api`                                                                                                                                                                                                                  | à faire                          |
+| Copie vers la fiche, verrouillage, reprise | `tarification-fiche`                                                                                                                                                                                                                | à faire                          |
+| Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                                                                                                                                      | à faire                          |
+| Interface                                  | `tarification-ui`, après les maquettes                                                                                                                                                                                              | à faire                          |
+| Tableau de bord, suivi d'une structure     | `tarification-dashboard`, `StructureSubscription`                                                                                                                                                                                   | à faire                          |
 
 T1 met aussi à jour l'ordre de `prisma/utils/wipe.ts`, les seeders, `isOrphan` et `fileWithParentsInclude` (fichiers rattachés à un document de tarification) et les types de `src/types/`.
 

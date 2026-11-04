@@ -230,7 +230,7 @@ export const SCENARIOS: Scenario[] = [
     label: "hors Bhasile",
     write: async (writer, { agent }) => {
       await writer.addEvent({
-        type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+        type: TarificationEventType.OUT_OF_APP_DECLARED,
         author: agent,
         text: "Tarification menée par courrier",
         at: daysAgo(40),

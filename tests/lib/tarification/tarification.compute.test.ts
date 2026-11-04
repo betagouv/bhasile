@@ -150,7 +150,7 @@ describe("computeTarificationState — dépôts", () => {
     const underCpom = createJournal({ isCoveredByCpom: true });
     const outOfBhasile = createJournal();
     addEvent(outOfBhasile, {
-      type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+      type: TarificationEventType.OUT_OF_APP_DECLARED,
       text: "Opérateur suivi hors de l'outil",
       createdAt: new Date("2027-02-01T10:00:00Z"),
     });
