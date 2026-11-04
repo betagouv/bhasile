@@ -24,17 +24,27 @@ export type TarificationDocumentApiCreate = z.infer<
   typeof tarificationDocumentApiCreateSchema
 >;
 
-export const tarificationEventApiCreateSchema = z.object({
-  type: z.enum(TarificationEventType).exclude(["DOCUMENT_DEPOSITED"]),
-  documentId: z.number().int().positive().nullish().default(null),
-  stepCode: z.enum(TarificationStepCode).nullish().default(null),
-  text: z
-    .string()
-    .trim()
-    .max(TARIFICATION_TEXT_MAX_LENGTH)
-    .nullish()
-    .transform((text) => text || null),
-});
+export const tarificationEventApiCreateSchema = z
+  .object({
+    type: z.enum(TarificationEventType).exclude(["DOCUMENT_DEPOSITED"]),
+    documentId: z.number().int().positive().nullish().default(null),
+    fileKey: z.string().min(1).nullish().default(null),
+    stepCode: z.enum(TarificationStepCode).nullish().default(null),
+    text: z
+      .string()
+      .trim()
+      .max(TARIFICATION_TEXT_MAX_LENGTH)
+      .nullish()
+      .transform((text) => text || null),
+  })
+  .refine(
+    ({ type, fileKey, documentId }) =>
+      !fileKey ||
+      (documentId === null &&
+        (type === TarificationEventType.L48_ACCEPTED ||
+          type === TarificationEventType.L48_CONTESTED)),
+    { error: "Seule une réponse à la L48 joint un fichier" }
+  );
 
 export type TarificationEventApiCreate = z.infer<
   typeof tarificationEventApiCreateSchema

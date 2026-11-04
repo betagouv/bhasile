@@ -392,7 +392,7 @@ type FicheCopyCreate = {
   };
 };
 
-type TarificationDocumentCreate = {
+export type TarificationDocumentCreate = {
   fileKey: string;
   types: TarificationDocumentType[];
   status: TarificationDocumentStatus;
