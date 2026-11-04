@@ -6,8 +6,3 @@ export type ConversationAnchor = {
   date: Date;
   startsTagKey?: string;
 };
-
-export type ConversationContext = {
-  tags: ConversationTag[];
-  anchors: ConversationAnchor[];
-};
