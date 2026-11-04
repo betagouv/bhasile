@@ -378,6 +378,36 @@ describe("computeTarificationState — contradictoire", () => {
     });
   });
 
+  it("ne relance pas le délai quand la L48 est ouverte après le 15e jour", () => {
+    const { journal, l48DocumentId } = createJournalWithL48();
+    openDocument(journal, l48DocumentId, "2028-04-27T09:00:00Z");
+
+    expect(getContradictoire(journal, "2028-04-27T12:00:00Z")).toMatchObject({
+      status: "DEEMED_ACCEPTED",
+      deadline: "2028-04-18",
+    });
+  });
+
+  it("ignore une réponse donnée après le 15e jour à une L48 jamais ouverte", () => {
+    const { journal } = createJournalWithL48();
+    respond(journal, "L48_CONTESTED", "2028-04-27T09:00:00Z");
+
+    expect(getContradictoire(journal, "2028-04-27T12:00:00Z")).toMatchObject({
+      status: "DEEMED_ACCEPTED",
+      deadline: "2028-04-18",
+    });
+  });
+
+  it("fait courir le délai depuis une ouverture le 15e jour", () => {
+    const { journal, l48DocumentId } = createJournalWithL48();
+    openDocument(journal, l48DocumentId, "2028-04-25T09:00:00Z");
+
+    expect(getContradictoire(journal, "2028-04-27T12:00:00Z")).toMatchObject({
+      status: "RUNNING",
+      deadline: "2028-05-03",
+    });
+  });
+
   it("retient la dernière réponse avant l'échéance, y compris tard le dernier jour", () => {
     const { journal, l48DocumentId } = createJournalWithL48();
     openDocument(journal, l48DocumentId, "2028-04-12T09:00:00Z");

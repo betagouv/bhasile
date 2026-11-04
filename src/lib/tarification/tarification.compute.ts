@@ -1,13 +1,13 @@
 import {
+  addDays,
+  type CivilDate,
+  toLocalDate,
+} from "@/app/utils/date.util";
+import {
   TarificationDocumentStatus,
   TarificationEventType,
   TarificationStepCode,
 } from "@/generated/prisma/enums";
-import {
-  addDays,
-  type CivilDate,
-  toLocalDate,
-} from "@/lib/tarification/tarification.date";
 import {
   BP_DEPOSIT_DEADLINE,
   CA_DEPOSIT_DEADLINE,
@@ -274,7 +274,7 @@ const computeContradictoire = (
   };
 };
 
-// Répondre vaut réception ; jamais ouverte ni répondue en 15 jours : réputée reçue à son partage
+// Répondre vaut réception ; jamais ouverte ni répondue en 15 jours : réputée reçue à son partage, définitivement
 const getReceivedDate = ({
   openedAt,
   firstRespondedAt,
@@ -293,13 +293,17 @@ const getReceivedDate = ({
     .sort(
       (earlierDate, laterDate) => earlierDate.getTime() - laterDate.getTime()
     )[0];
+  const lastReceiptDate = addDays(
+    sharedDate,
+    CONTRADICTOIRE_DEEMED_RECEIPT_DAYS
+  );
   if (receivedAt) {
-    return toLocalDate(receivedAt, timeZone);
+    const receivedDate = toLocalDate(receivedAt, timeZone);
+    if (receivedDate <= lastReceiptDate) {
+      return receivedDate;
+    }
   }
-  if (today > addDays(sharedDate, CONTRADICTOIRE_DEEMED_RECEIPT_DAYS)) {
-    return sharedDate;
-  }
-  return null;
+  return today > lastReceiptDate ? sharedDate : null;
 };
 
 const getContradictoireStatus = ({

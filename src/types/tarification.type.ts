@@ -1,3 +1,4 @@
+import type { CivilDate } from "@/app/utils/date.util";
 import type {
   AuthorLevel,
   TarificationDocumentStatus,
@@ -5,7 +6,6 @@ import type {
   TarificationEventType,
   TarificationStepCode,
 } from "@/generated/prisma/enums";
-import type { CivilDate } from "@/lib/tarification/tarification.date";
 
 export type TarificationJournalEvent = {
   id: number;
