@@ -9,11 +9,11 @@ import {
   type TarificationStepCode,
 } from "@/generated/prisma/enums";
 import type { VersionActions } from "@/lib/tarification/tarification.actions";
-import { formatCivilDate } from "@/lib/tarification/tarification.date";
 import type { TarificationSectionCode } from "@/lib/tarification/tarification.definition";
 import type { SectionVersion } from "@/lib/tarification/tarification.section";
 import type { TarificationEventApiCreateClient } from "@/schemas/api/tarification.schema";
 
+import { type L48Response, L48ResponseButtons } from "./L48ResponseButtons";
 import {
   type ActionRequest,
   TarificationActionModal,
@@ -140,21 +140,6 @@ export const DocumentActionBar = ({
         }),
     });
 
-  const requestL48Response = (
-    type: "L48_ACCEPTED" | "L48_CONTESTED",
-    title: string
-  ) =>
-    setRequest({
-      title,
-      description: contradictoireDeadline
-        ? `Vous pourrez modifier votre réponse jusqu’au ${formatCivilDate(contradictoireDeadline)}.`
-        : "Vous pourrez modifier votre réponse jusqu’à l’échéance.",
-      textLabel: "Observations (facultatif)",
-      canAttachFile: true,
-      confirmLabel: title,
-      onConfirm: ({ text, file }) => respondToL48({ type, text, file }),
-    });
-
   return (
     <footer className="flex items-center gap-3 flex-wrap bg-white rounded-xl border border-border-default-grey px-6 py-4">
       <p className="mb-0 text-sm grow">
@@ -194,23 +179,11 @@ export const DocumentActionBar = ({
         <Button onClick={requestShare}>Envoyer à l’opérateur</Button>
       )}
       {canRespondToL48 && (
-        <>
-          <Button
-            priority="secondary"
-            onClick={() =>
-              requestL48Response("L48_CONTESTED", "Je conteste la L48")
-            }
-          >
-            Je conteste
-          </Button>
-          <Button
-            onClick={() =>
-              requestL48Response("L48_ACCEPTED", "J’accepte la L48")
-            }
-          >
-            J’accepte
-          </Button>
-        </>
+        <L48ResponseButtons
+          contradictoireDeadline={contradictoireDeadline}
+          respondToL48={respondToL48}
+          onRequest={setRequest}
+        />
       )}
       {modal}
     </footer>
@@ -240,9 +213,5 @@ type Props = {
   hasSharedL48: boolean;
   contradictoireDeadline: string | null;
   recordEvent: (event: TarificationEventApiCreateClient) => Promise<void>;
-  respondToL48: (response: {
-    type: "L48_ACCEPTED" | "L48_CONTESTED";
-    text: string;
-    file: File | null;
-  }) => Promise<void>;
+  respondToL48: (response: L48Response) => Promise<void>;
 };

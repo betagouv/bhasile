@@ -348,7 +348,7 @@ describe("canDeclareOutOfBhasile", () => {
 
     const journal = createJournal();
     addEvent(journal, {
-      type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+      type: TarificationEventType.OUT_OF_APP_DECLARED,
       text: "Courrier",
       createdAt: new Date(AT),
     });

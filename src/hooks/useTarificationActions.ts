@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { startTransition, useCallback, useRef } from "react";
+import { startTransition, useCallback } from "react";
 
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { ApiError, extractApiError } from "@/app/utils/api-error.util";
@@ -19,7 +19,6 @@ export const useTarificationActions = ({
   year: number;
 }) => {
   const router = useRouter();
-  const depositedResponseRef = useRef<{ file: File; id: number } | null>(null);
   const { uploadFile, deleteFile } = useFileUpload();
 
   const post = useCallback(
@@ -40,18 +39,13 @@ export const useTarificationActions = ({
     [structureId, year]
   );
 
-  const postDocument = async ({
-    file,
-    type,
-    status,
-  }: {
-    file: File;
-    type: TarificationDocumentType;
-    status: TarificationDocumentStatus;
-  }): Promise<{ id: number }> => {
+  const postWithUploadedFile = async (
+    file: File,
+    send: (fileKey: string) => Promise<{ id: number }>
+  ): Promise<{ id: number }> => {
     const { key } = await uploadFile(file);
     try {
-      return await post("documents", { fileKey: key, types: [type], status });
+      return await send(key);
     } catch (error) {
       deleteFile(key).catch(() => undefined);
       throw error;
@@ -60,10 +54,18 @@ export const useTarificationActions = ({
 
   const refresh = () => startTransition(() => router.refresh());
 
-  const depositDocument = async (
-    document: Parameters<typeof postDocument>[0]
-  ): Promise<void> => {
-    await postDocument(document);
+  const depositDocument = async ({
+    file,
+    type,
+    status,
+  }: {
+    file: File;
+    type: TarificationDocumentType;
+    status: TarificationDocumentStatus;
+  }): Promise<void> => {
+    await postWithUploadedFile(file, (fileKey) =>
+      post("documents", { fileKey, types: [type], status })
+    );
     refresh();
   };
 
@@ -72,21 +74,6 @@ export const useTarificationActions = ({
   ): Promise<void> => {
     await post("events", event);
     refresh();
-  };
-
-  // Le journal est en ajout seul : réessayer après un échec ne doit pas déposer le fichier une seconde fois
-  const depositResponseDocument = async (file: File): Promise<number> => {
-    if (depositedResponseRef.current?.file === file) {
-      return depositedResponseRef.current.id;
-    }
-    const { id } = await postDocument({
-      file,
-      type: "REPONSE_CONTRADICTOIRE",
-      status: "SHARED",
-    });
-    depositedResponseRef.current = { file, id };
-    refresh();
-    return id;
   };
 
   const respondToL48 = async ({
@@ -98,9 +85,11 @@ export const useTarificationActions = ({
     text: string;
     file: File | null;
   }): Promise<void> => {
-    const documentId = file ? await depositResponseDocument(file) : null;
-    await post("events", { type, text, documentId });
-    depositedResponseRef.current = null;
+    await (file
+      ? postWithUploadedFile(file, (fileKey) =>
+          post("events", { type, text, fileKey })
+        )
+      : post("events", { type, text }));
     refresh();
   };
 

@@ -194,7 +194,7 @@ export const TARIFICATION_EVENT_DEFINITIONS: Record<
     visibility: "ALL",
     notifies: true,
   },
-  OUT_OF_BHASILE_DECLARED: {
+  OUT_OF_APP_DECLARED: {
     author: "AGENT",
     document: "FORBIDDEN",
     stepCode: "FORBIDDEN",

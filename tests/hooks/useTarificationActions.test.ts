@@ -30,10 +30,9 @@ describe("useTarificationActions", () => {
     global.fetch = mockFetch;
   });
 
-  it("dépose la réponse jointe, puis écrit la réponse en la citant", async () => {
+  it("envoie le fichier, puis écrit la réponse et sa pièce en un seul appel", async () => {
     mockFetch
       .mockResolvedValueOnce(answer({ key: "reponse.pdf" }))
-      .mockResolvedValueOnce(answer({ id: 9 }, 201))
       .mockResolvedValueOnce(answer({ id: 10 }, 201));
     const { respondToL48 } = renderActions();
 
@@ -41,49 +40,35 @@ describe("useTarificationActions", () => {
       respondToL48({ type: "L48_CONTESTED", text: "Montant erroné", file })
     );
 
+    expect(getCalls()).toEqual([
+      ["/api/files", "POST"],
+      ["/api/tarifications/42/2028/events", "POST"],
+    ]);
     expect(JSON.parse(mockFetch.mock.calls[1][1].body)).toEqual({
-      fileKey: "reponse.pdf",
-      types: ["REPONSE_CONTRADICTOIRE"],
-      status: "SHARED",
-    });
-    expect(mockFetch.mock.calls[2][0]).toBe(
-      "/api/tarifications/42/2028/events"
-    );
-    expect(JSON.parse(mockFetch.mock.calls[2][1].body)).toEqual({
       type: "L48_CONTESTED",
       text: "Montant erroné",
-      documentId: 9,
+      fileKey: "reponse.pdf",
     });
     expect(mockRefresh).toHaveBeenCalled();
   });
 
-  it("ne redépose pas la réponse quand on réessaie après un échec", async () => {
+  it("supprime le fichier envoyé quand la réponse est refusée, et ne relit rien", async () => {
     mockFetch
       .mockResolvedValueOnce(answer({ key: "reponse.pdf" }))
-      .mockResolvedValueOnce(answer({ id: 9 }, 201))
-      .mockResolvedValueOnce(answer({ error: "Réseau" }, 500));
-    const { result } = renderHook(() =>
-      useTarificationActions({ structureId: 42, year: 2028 })
-    );
-    const response = {
-      type: "L48_CONTESTED" as const,
-      text: "Montant erroné",
-      file,
-    };
+      .mockResolvedValueOnce(answer({ error: "Délai dépassé" }, 409))
+      .mockResolvedValueOnce(answer({}));
+    const { respondToL48 } = renderActions();
 
-    await act(async () => {
-      await expect(result.current.respondToL48(response)).rejects.toThrow(
-        "Réseau"
-      );
-    });
-    expect(mockRefresh).toHaveBeenCalled();
+    await expect(
+      respondToL48({ type: "L48_CONTESTED", text: "Montant erroné", file })
+    ).rejects.toThrow("Délai dépassé");
 
-    mockFetch.mockClear();
-    mockFetch.mockResolvedValueOnce(answer({ id: 10 }, 201));
-    await act(() => result.current.respondToL48(response));
-
-    expect(getCalls()).toEqual([["/api/tarifications/42/2028/events", "POST"]]);
-    expect(JSON.parse(mockFetch.mock.calls[0][1].body).documentId).toBe(9);
+    expect(getCalls()).toEqual([
+      ["/api/files", "POST"],
+      ["/api/tarifications/42/2028/events", "POST"],
+      ["/api/files/reponse.pdf", "DELETE"],
+    ]);
+    expect(mockRefresh).not.toHaveBeenCalled();
   });
 
   it("répond sans pièce jointe sans passer par un dépôt", async () => {
@@ -98,7 +83,6 @@ describe("useTarificationActions", () => {
     expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual({
       type: "L48_ACCEPTED",
       text: "",
-      documentId: null,
     });
   });
 
