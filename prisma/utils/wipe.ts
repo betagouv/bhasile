@@ -4,6 +4,11 @@ import { PrismaClient } from "@/generated/prisma/client";
 // reset, mais cet ordre permet aussi un re-seed direct (`prisma db seed`) sur
 // une base peuplée sans violer de contrainte de clé étrangère.
 export const wipeTables = async (prisma: PrismaClient) => {
+  await prisma.messageReceipt.deleteMany({});
+  await prisma.message.deleteMany({});
+  await prisma.conversation.deleteMany({});
+  await prisma.structureTarification.deleteMany({});
+  await prisma.tarificationCampaign.deleteMany({});
   await prisma.rmu.deleteMany({});
   await prisma.adresse.deleteMany({});
   await prisma.controle.deleteMany({});
