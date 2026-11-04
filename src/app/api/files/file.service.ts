@@ -32,7 +32,8 @@ const isOrphan = (file: FileWithParents): boolean =>
   file.controleId == null &&
   file.evaluationId == null &&
   file.operateurId == null &&
-  file.messageId == null;
+  file.messageId == null &&
+  file.tarificationDocument == null;
 
 export const authorizeFileAccess = (
   principal: Principal,
@@ -41,6 +42,10 @@ export const authorizeFileAccess = (
 ): boolean => {
   if (isOrphan(file)) {
     return true;
+  }
+
+  if (file.tarificationDocument) {
+    return false;
   }
   if (principal.type === PrincipalType.Operateur) {
     return false;
