@@ -9,7 +9,6 @@ const UPDATE_INTERVAL_MINUTES = 60;
 export const upsertUser = async ({
   name,
   email,
-  emailPattern,
 }: UpsertUserArgs): Promise<void> => {
   const now = getNow();
   const threshold = new Date(
@@ -21,7 +20,6 @@ export const upsertUser = async ({
     select: {
       id: true,
       lastConnection: true,
-      emailPattern: { select: { pattern: true } },
     },
   });
 
@@ -31,9 +29,6 @@ export const upsertUser = async ({
         email,
         name,
         lastConnection: now,
-        ...(emailPattern && {
-          emailPattern: { connect: { pattern: emailPattern } },
-        }),
       },
     });
     return;
@@ -41,8 +36,7 @@ export const upsertUser = async ({
 
   const isRecentConnection =
     existing.lastConnection && existing.lastConnection >= threshold;
-  const isSameEmailPattern = existing.emailPattern?.pattern === emailPattern;
-  if (isRecentConnection && isSameEmailPattern) {
+  if (isRecentConnection) {
     return;
   }
 
@@ -51,9 +45,6 @@ export const upsertUser = async ({
     data: {
       name,
       lastConnection: now,
-      emailPattern: emailPattern
-        ? { connect: { pattern: emailPattern } }
-        : { disconnect: true },
     },
   });
 };
@@ -95,9 +86,10 @@ export const findUsersWithGrantsOnStructure = ({
   };
   return prisma.user.findMany({
     where: {
+      isActivated: true,
       OR: [
+        { perimeter: { scope: GrantScope.DEPARTEMENT, departementNumero } },
         { grants: { some: grantWhere } },
-        { emailPattern: { grants: { some: grantWhere } } },
       ],
     },
     select: { ...userWithGrantsSelect, email: true },
@@ -111,5 +103,4 @@ const emailWhere = (email: string) => ({
 type UpsertUserArgs = {
   name: string;
   email: string;
-  emailPattern?: string;
 };

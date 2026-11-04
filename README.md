@@ -38,7 +38,7 @@ Sur la page intermédiaire, choisissez `eidas1-mfa` et cliquez sur "Se connecter
 
 Pour changer de rôle, déconnectez-vous et reconnectez-vous avec un autre email.
 
-Le modèle de droits (binômes rôle × niveau géographique) et sa feuille de route sont décrits dans [le document des permissions](docs/permissions.md).
+Le modèle de droits (activation, périmètres des agents, binômes des opérateurs) et sa feuille de route sont décrits dans [le document des permissions](docs/permissions.md).
 
 ## 🧪 Tests
 

@@ -3,6 +3,7 @@ import { Session, User } from "next-auth";
 import { getContactStructureIds } from "@/app/api/contacts/contact.service";
 import { getUserWithGrantsByEmail } from "@/app/api/users/user.repository";
 import {
+  getAccountStatus,
   getAssignedGrants,
   isAgentUser,
   toContactGrant,
@@ -33,14 +34,18 @@ export const getPermissionsFromSession = async (
     };
   }
 
-  const isAgent = isAgentUser(databaseUser);
+  const status = getAccountStatus(databaseUser);
+  const isActivated = status === "ACTIVATED";
+  const isAgent = isActivated && isAgentUser(databaseUser);
   return {
     operateurId: databaseUser.operateurId,
-    isSuperAdmin: databaseUser.isSuperAdmin,
+    isSuperAdmin: isActivated && databaseUser.isSuperAdmin,
     isAgent,
     grants: [
       ...getAssignedGrants(databaseUser).map(toSessionGrant),
-      ...(isAgent ? [] : await getContactGrants(email)),
+      ...(isAgent || status === "DEACTIVATED"
+        ? []
+        : await getContactGrants(email)),
     ],
   };
 };
