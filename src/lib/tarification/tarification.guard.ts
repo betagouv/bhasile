@@ -177,6 +177,16 @@ const isWithdrawn = (
     (activeDocument) => activeDocument.id === document.id
   );
 
+const findDepositEvent = (
+  journal: TarificationJournal,
+  document: TarificationJournalDocument
+): TarificationJournalEvent | undefined =>
+  journal.events.find(
+    (event) =>
+      event.type === TarificationEventType.DOCUMENT_DEPOSITED &&
+      event.documentId === document.id
+  );
+
 const assertCanShare = (
   journal: TarificationJournal,
   document: TarificationJournalDocument,
@@ -207,12 +217,7 @@ const assertCanReview = (
   if (document.status !== TarificationDocumentStatus.DRAFT) {
     throw new DomainError("Seule une version de travail se relit", 409);
   }
-  const deposit = journal.events.find(
-    (event) =>
-      event.type === TarificationEventType.DOCUMENT_DEPOSITED &&
-      event.documentId === document.id
-  );
-  if (deposit?.authorId === reviewerId) {
+  if (findDepositEvent(journal, document)?.authorId === reviewerId) {
     throw new DomainError("L'auteur d'une version ne la relit pas", 403);
   }
 };
@@ -223,6 +228,11 @@ const assertCanWithdraw = (
 ): void => {
   if (!getSharedAtByDocumentId(journal).has(document.id)) {
     throw new DomainError("Seul un document partagé se retire", 409);
+  }
+  if (
+    findDepositEvent(journal, document)?.authorLevel === AuthorLevel.OPERATEUR
+  ) {
+    throw new DomainError("Un dépôt de l'opérateur ne se retire pas", 403);
   }
   if (isWithdrawn(journal, document)) {
     throw new DomainError("Ce document est déjà retiré", 409);

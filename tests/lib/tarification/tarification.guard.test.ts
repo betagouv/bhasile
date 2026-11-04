@@ -387,6 +387,29 @@ describe("assertCanRecordEvent", () => {
       );
     });
 
+    it("refuse de retirer un dépôt de l'opérateur", () => {
+      const journal = createJournal();
+      const documentId = depositDocument(journal, {
+        types: ["REPONSE_CONTRADICTOIRE"],
+        at: "2028-04-10T10:00:00Z",
+      });
+
+      expect(() => recordWithdrawal(journal, documentId)).toThrow(
+        "ne se retire pas"
+      );
+    });
+
+    it("laisse retirer un document de l'opérateur déposé par un agent à sa place", () => {
+      const journal = createJournal();
+      const documentId = depositDocument(journal, {
+        types: ["CA"],
+        at: "2028-04-10T10:00:00Z",
+        authorLevel: AuthorLevel.DEPARTEMENT,
+      });
+
+      expect(() => recordWithdrawal(journal, documentId)).not.toThrow();
+    });
+
     it("refuse de retirer un document jamais partagé", () => {
       const journal = createJournal();
 

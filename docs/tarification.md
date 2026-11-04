@@ -122,7 +122,7 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
   - **Relecture** : sur un `DRAFT`, tout agent éditeur sauf son auteur peut **valider** ou **demander des modifications** (avec un texte). Une validation suffit. Tout `DRAFT` est à relire : il n'y a pas de demande de relecture, on sollicite un collègue par un message dans le canal agents.
   - **Partage** : « Envoyer à l'opérateur » n'existe que pour un `FINAL`. La validation n'est pas exigée (rien ne bloque), l'écran affiche « non validé ».
   - **État affiché**, calculé à partir du journal : créé, validé ou modifications demandées, signé, envoyé.
-- **Retrait** : un agent retire un document partagé par erreur (`DOCUMENT_WITHDRAWN`, motif obligatoire). Il sort des états, de l'ancre du contradictoire et de la copie vers la fiche (retour à la copie précédente) ; l'opérateur voit « retiré le … » et ne peut plus ouvrir le fichier ; rien n'est effacé. Une erreur de structure se corrige ainsi, l'agent prévient l'opérateur.
+- **Retrait** : un agent retire un document partagé par erreur (`DOCUMENT_WITHDRAWN`, motif obligatoire), sauf un dépôt de l'opérateur lui-même, qui reste visible : l'opérateur en dépose au besoin une nouvelle version. Il sort des états, de l'ancre du contradictoire et de la copie vers la fiche (retour à la copie précédente) ; l'opérateur voit « retiré le … » et ne peut plus ouvrir le fichier ; rien n'est effacé. Une erreur de structure se corrige ainsi, l'agent prévient l'opérateur.
 - **Qui a fait quoi** : chaque fait d'un document s'affiche avec son auteur et sa date, tirés du journal. On sait qui a déposé la version signée, pas qui a signé.
 
 ## Étapes
