@@ -18,17 +18,14 @@ import {
   getUserWithGrantsByEmail,
 } from "@/app/api/users/user.repository";
 import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
-import {
-  getDepartementTimeZone,
-  toCivilDate,
-} from "@/app/utils/date.util";
+import { getDepartementTimeZone, toCivilDate } from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   AuthorLevel,
   TarificationDocumentStatus,
-  type TarificationDocumentType,
+  TarificationDocumentType,
   TarificationEventType,
   type TarificationStepCode,
   type Visibility,
@@ -79,7 +76,9 @@ import {
   findStructureTarificationJournal,
   findTarificationCampaign,
   runInTarificationTransaction,
+  type TarificationDocumentCreate,
   type TarificationJournalSource,
+  type TarificationTransaction,
   upsertStructureTarification,
 } from "./tarification.repository";
 import {
@@ -291,19 +290,13 @@ export const depositTarificationDocument = async ({
   const document = await runInTarificationTransaction(
     structureId,
     year,
-    async (transaction) => {
-      const { journal } = await loadTarificationJournal(year, transaction);
-      const now = getNow();
-      assertCanDepositDocument({
-        journal,
-        authorLevel: author.level,
+    (transaction) =>
+      createDocumentInTransaction(transaction, year, {
+        fileKey,
         types,
         status,
-        phase: getCampaignPhase(year, now, journal.timeZone),
-        now,
-      });
-      return transaction.createDocument({ fileKey, types, status, author });
-    }
+        author,
+      })
   );
   if (status === TarificationDocumentStatus.SHARED) {
     await trySyncFicheCopies(structureId, year);
@@ -317,6 +310,7 @@ export const recordTarificationEvent = async ({
   author,
   type,
   documentId,
+  fileKey = null,
   stepCode,
   text,
 }: {
@@ -325,23 +319,32 @@ export const recordTarificationEvent = async ({
   author: TarificationParticipant;
   type: TarificationEventType;
   documentId: number | null;
+  fileKey?: string | null;
   stepCode: TarificationStepCode | null;
   text: string | null;
 }): Promise<{ id: number }> => {
   const structure = await findStructureScopeOrThrow(structureId);
   assertStructureEligible(structure);
-  const event: Omit<TarificationJournalEvent, "id" | "createdAt"> = {
-    type,
-    authorId: author.id,
-    authorLevel: author.level,
-    documentId,
-    stepCode,
-    text,
-  };
   const createdEvent = await runInTarificationTransaction(
     structureId,
     year,
     async (transaction) => {
+      const responseDocument = fileKey
+        ? await createDocumentInTransaction(transaction, year, {
+            fileKey,
+            types: [TarificationDocumentType.REPONSE_CONTRADICTOIRE],
+            status: TarificationDocumentStatus.SHARED,
+            author,
+          })
+        : null;
+      const event: Omit<TarificationJournalEvent, "id" | "createdAt"> = {
+        type,
+        authorId: author.id,
+        authorLevel: author.level,
+        documentId: responseDocument?.id ?? documentId,
+        stepCode,
+        text,
+      };
       const { journal } = await loadTarificationJournal(year, transaction);
       const now = getNow();
       assertCanRecordEvent({
@@ -467,6 +470,24 @@ const trySyncFicheCopies = async (
       error
     );
   }
+};
+
+const createDocumentInTransaction = async (
+  transaction: TarificationTransaction,
+  year: number,
+  { fileKey, types, status, author }: TarificationDocumentCreate
+): Promise<{ id: number }> => {
+  const { journal } = await loadTarificationJournal(year, transaction);
+  const now = getNow();
+  assertCanDepositDocument({
+    journal,
+    authorLevel: author.level,
+    types,
+    status,
+    phase: getCampaignPhase(year, now, journal.timeZone),
+    now,
+  });
+  return transaction.createDocument({ fileKey, types, status, author });
 };
 
 export const authorizeTarificationDocument = async ({

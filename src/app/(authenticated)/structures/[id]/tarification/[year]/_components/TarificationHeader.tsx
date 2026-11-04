@@ -3,8 +3,12 @@ import { ComponentProps, ReactElement } from "react";
 
 import { StructureHeaderContent } from "@/components/structures/StructureHeaderContent";
 
+import { OutOfBhasileButton } from "./OutOfBhasileButton";
+
 export const TarificationHeader = ({
   structureId,
+  year,
+  canDeclareOutOfBhasile,
   structure,
 }: Props): ReactElement => (
   <div className="sticky top-0 z-40 flex items-center gap-2 bg-white border-b border-b-border-default-grey px-6 py-3">
@@ -17,6 +21,11 @@ export const TarificationHeader = ({
     </Link>
     <StructureHeaderContent title="Campagne de tarification" {...structure} />
     <div className="grow" />
+    <OutOfBhasileButton
+      structureId={structureId}
+      year={year}
+      isAvailable={canDeclareOutOfBhasile}
+    />
     <Link
       href={`/structures/${structureId}`}
       className="fr-btn fr-btn--tertiary-no-outline fr-icon-close-line"
@@ -29,5 +38,7 @@ export const TarificationHeader = ({
 
 type Props = {
   structureId: number;
+  year: number;
+  canDeclareOutOfBhasile: boolean;
   structure: Omit<ComponentProps<typeof StructureHeaderContent>, "title">;
 };

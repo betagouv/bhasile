@@ -75,6 +75,7 @@ export const getSectionVersions = (
       );
       return {
         id: document.id,
+        types: document.types,
         file: document.fileUpload,
         typesLabel: document.types
           .map((type) => getExerciseLabel(type, journal.campaignYear))
@@ -92,10 +93,7 @@ export const getSectionVersions = (
         isShared: sharedAtByDocumentId.has(document.id),
         isWithdrawn: !activeDocumentIds.has(document.id),
         withdrawalReason: withdrawal?.text ?? null,
-        reviewRequestText:
-          documentEvents.findLast(
-            (event) => event.type === TarificationEventType.CHANGES_REQUESTED
-          )?.text ?? null,
+        changesRequests: getChangesRequests(documentEvents),
       };
     })
     .reverse();
@@ -123,12 +121,15 @@ export const computeStepProgress = (
   const reviews = events.filter(
     (event) => event.type === TarificationEventType.APPROVED
   );
-  const lastReview = events.filter((event) => isReviewType(event.type)).at(-1);
+  const latestDocument = documents.at(-1);
   return {
     creators: getParticipants(deposits),
     reviewers: getParticipants(reviews),
-    hasChangesRequested:
-      lastReview?.type === TarificationEventType.CHANGES_REQUESTED,
+    hasChangesRequested: events.some(
+      (event) =>
+        event.type === TarificationEventType.CHANGES_REQUESTED &&
+        event.documentId === latestDocument?.id
+    ),
     isValidated: reviews.length > 0,
     isSigned: documents.some(
       (document) => document.status === TarificationDocumentStatus.FINAL
@@ -141,6 +142,18 @@ export const computeStepProgress = (
     ),
   };
 };
+
+// Une demande reste affichée sur sa version : y répondre, c'est déposer une nouvelle version
+const getChangesRequests = (
+  documentEvents: TarificationJournalRead["events"]
+): ChangesRequest[] =>
+  documentEvents
+    .filter((event) => event.type === TarificationEventType.CHANGES_REQUESTED)
+    .map(({ id, text, author }) => ({
+      id,
+      text,
+      authorName: author?.name ?? null,
+    }));
 
 const getExerciseLabel = (
   type: TarificationDocumentType,
@@ -178,11 +191,12 @@ const getVersionStateLabel = ({
   if (status === TarificationDocumentStatus.FINAL) {
     return "Signé";
   }
-  const lastReviewType = reviewTypes.at(-1);
-  if (lastReviewType === TarificationEventType.CHANGES_REQUESTED) {
+  if (reviewTypes.includes(TarificationEventType.CHANGES_REQUESTED)) {
     return "Modifications demandées";
   }
-  return lastReviewType === TarificationEventType.APPROVED ? "Validé" : "Créé";
+  return reviewTypes.includes(TarificationEventType.APPROVED)
+    ? "Validé"
+    : "Créé";
 };
 
 const getParticipants = (
@@ -202,6 +216,7 @@ const getParticipants = (
 
 export type SectionVersion = {
   id: number;
+  types: TarificationDocumentType[];
   file: TarificationJournalRead["documents"][number]["fileUpload"];
   typesLabel: string;
   stateLabel: string;
@@ -210,7 +225,13 @@ export type SectionVersion = {
   isShared: boolean;
   isWithdrawn: boolean;
   withdrawalReason: string | null;
-  reviewRequestText: string | null;
+  changesRequests: ChangesRequest[];
+};
+
+type ChangesRequest = {
+  id: number;
+  text: string | null;
+  authorName: string | null;
 };
 
 export type StepParticipant = {

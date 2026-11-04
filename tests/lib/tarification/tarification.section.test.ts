@@ -202,7 +202,19 @@ describe("getSectionVersions", () => {
     const reviewed = createJournal();
     review(reviewed, depositDraft(reviewed), "CHANGES_REQUESTED");
     expect(getSectionVersions(toRead(reviewed), "RCA")[0]).toMatchObject({
-      reviewRequestText: "Corriger le montant",
+      changesRequests: [expect.objectContaining({ text: "Corriger le montant" })],
+    });
+  });
+
+  it("garde une demande de modifications quand une relecture la suit", () => {
+    const journal = createJournal();
+    const documentId = depositDraft(journal);
+    review(journal, documentId, "CHANGES_REQUESTED");
+    review(journal, documentId, "APPROVED", 22);
+
+    expect(getSectionVersions(toRead(journal), "RCA")[0]).toMatchObject({
+      stateLabel: "Modifications demandées",
+      changesRequests: [expect.objectContaining({ text: "Corriger le montant" })],
     });
   });
 
@@ -267,19 +279,18 @@ describe("computeStepProgress", () => {
     });
   });
 
-  it("signale une demande de modifications, si elle est la dernière relecture", () => {
+  it("signale une demande de modifications jusqu'à la version suivante, même relue entre-temps", () => {
     const journal = createJournal();
     const documentId = depositDraft(journal);
-    review(journal, documentId, "APPROVED");
     review(journal, documentId, "CHANGES_REQUESTED");
-
-    const progress = computeStepProgress(
-      toRead(journal),
-      TarificationStepCode.RCA
-    );
-    expect(progress.hasChangesRequested).toBe(true);
-
     review(journal, documentId, "APPROVED");
+
+    expect(
+      computeStepProgress(toRead(journal), TarificationStepCode.RCA)
+        .hasChangesRequested
+    ).toBe(true);
+
+    depositDraft(journal);
 
     expect(
       computeStepProgress(toRead(journal), TarificationStepCode.RCA)

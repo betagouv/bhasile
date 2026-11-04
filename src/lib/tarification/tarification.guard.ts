@@ -93,7 +93,7 @@ export const assertCanRecordEvent = ({
       break;
     case TarificationEventType.APPROVED:
     case TarificationEventType.CHANGES_REQUESTED:
-      assertCanReview(journal, document!, event.authorId);
+      assertCanReview(journal, document!, event);
       break;
     case TarificationEventType.DOCUMENT_WITHDRAWN:
       assertCanWithdraw(journal, document!);
@@ -212,13 +212,31 @@ const assertCanShare = (
 const assertCanReview = (
   journal: TarificationJournal,
   document: TarificationJournalDocument,
-  reviewerId: number | null
+  {
+    type,
+    authorId: reviewerId,
+  }: Pick<TarificationJournalEvent, "type" | "authorId">
 ): void => {
   if (document.status !== TarificationDocumentStatus.DRAFT) {
     throw new DomainError("Seule une version de travail se relit", 409);
   }
   if (findDepositEvent(journal, document)?.authorId === reviewerId) {
     throw new DomainError("L'auteur d'une version ne la relit pas", 403);
+  }
+  const lastReview = journal.events
+    .filter(
+      (event) =>
+        event.documentId === document.id &&
+        event.authorId === reviewerId &&
+        (event.type === TarificationEventType.APPROVED ||
+          event.type === TarificationEventType.CHANGES_REQUESTED)
+    )
+    .at(-1);
+  if (
+    type === TarificationEventType.APPROVED &&
+    lastReview?.type === TarificationEventType.APPROVED
+  ) {
+    throw new DomainError("Vous avez déjà relu cette version", 409);
   }
 };
 
