@@ -26,8 +26,9 @@ const mockFindUsersWithGrantsOnStructure = vi.fn();
 const mockFindNotifiedPairs = vi.fn();
 const mockFindReadPairs = vi.fn();
 const mockCreateNotificationRecipients = vi.fn();
-const mockCreateMessageNotifications = vi.fn();
-const mockFindPendingMessageIds = vi.fn();
+const mockMarkNotificationsProcessed = vi.fn();
+const mockMarkNotificationsAbandoned = vi.fn();
+const mockFindStaleNotificationIds = vi.fn();
 const mockFetch = vi.fn();
 
 vi.mock("@/app/api/tarifications/tarification.repository", () => ({
@@ -51,10 +52,12 @@ vi.mock("@/app/api/conversations/conversation.repository", () => ({
   findReadPairs: (...args: unknown[]) => mockFindReadPairs(...args),
   createNotificationRecipients: (...args: unknown[]) =>
     mockCreateNotificationRecipients(...args),
-  createMessageNotifications: (...args: unknown[]) =>
-    mockCreateMessageNotifications(...args),
-  findPendingMessageIds: (...args: unknown[]) =>
-    mockFindPendingMessageIds(...args),
+  markNotificationsProcessed: (...args: unknown[]) =>
+    mockMarkNotificationsProcessed(...args),
+  markNotificationsAbandoned: (...args: unknown[]) =>
+    mockMarkNotificationsAbandoned(...args),
+  findStaleNotificationIds: (...args: unknown[]) =>
+    mockFindStaleNotificationIds(...args),
 }));
 
 vi.mock("@/app/api/users/user.repository", () => ({
@@ -221,18 +224,21 @@ describe("notifyPendingTarificationMessages", () => {
     conversationId: number;
     visibility: Visibility;
   }) => ({
-    id,
-    authorId,
-    conversation: {
-      id: conversationId,
-      visibility,
-      structureTarification: {
-        structure: {
-          id: 42,
-          departementAdministratif: "75",
-          codeBhasile: "C42",
+    id: id + 100,
+    message: {
+      id,
+      authorId,
+      conversation: {
+        id: conversationId,
+        visibility,
+        structureTarification: {
+          structure: {
+            id: 42,
+            departementAdministratif: "75",
+            codeBhasile: "C42",
+          },
+          campaign: { year: 2027 },
         },
-        campaign: { year: 2027 },
       },
     },
   });
@@ -257,7 +263,7 @@ describe("notifyPendingTarificationMessages", () => {
     vi.stubEnv("NEXT_URL", "https://bhasile.test");
     vi.stubEnv("MESSAGERIE_ENABLED", "true");
     global.fetch = mockFetch;
-    mockFindPendingMessageIds.mockResolvedValue([]);
+    mockFindStaleNotificationIds.mockResolvedValue([]);
     mockFindPendingMessageContexts.mockResolvedValue([
       buildPendingMessage({
         id: 9,
@@ -325,16 +331,16 @@ describe("notifyPendingTarificationMessages", () => {
       },
     });
     expect(mockCreateNotificationRecipients).toHaveBeenCalledWith(
-      [9, 10, 11].map((messageId) => ({
-        messageId,
+      [109, 110, 111].map((notificationId) => ({
+        notificationId,
         userId: 3,
         email: "agent3@paris.gouv.fr",
         brevoMessageId: "<agent3@paris.gouv.fr>",
       }))
     );
-    expect(mockCreateMessageNotifications).toHaveBeenCalledWith(
-      [9, 10, 11],
-      null
+    expect(mockMarkNotificationsProcessed).toHaveBeenCalledWith(
+      [109, 110, 111],
+      expect.any(Date)
     );
     expect(summary).toEqual({
       sentCount: 3,
@@ -358,9 +364,9 @@ describe("notifyPendingTarificationMessages", () => {
       "agent1@paris.gouv.fr",
     ]);
     expect(getSentEmails()[0].params.nombre).toBe(2);
-    expect(mockCreateMessageNotifications).toHaveBeenCalledWith(
-      [9, 10, 11],
-      null
+    expect(mockMarkNotificationsProcessed).toHaveBeenCalledWith(
+      [109, 110, 111],
+      expect.any(Date)
     );
   });
 
@@ -379,7 +385,10 @@ describe("notifyPendingTarificationMessages", () => {
     expect(mockCreateNotificationRecipients).not.toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ userId: 2 })])
     );
-    expect(mockCreateMessageNotifications).toHaveBeenCalledWith([10], null);
+    expect(mockMarkNotificationsProcessed).toHaveBeenCalledWith(
+      [110],
+      expect.any(Date)
+    );
     expect(summary).toEqual({
       sentCount: 2,
       failedCount: 1,
@@ -401,7 +410,10 @@ describe("notifyPendingTarificationMessages", () => {
     await notifyPendingTarificationMessages();
 
     expect(mockFetch).not.toHaveBeenCalled();
-    expect(mockCreateMessageNotifications).toHaveBeenCalledWith([9], null);
+    expect(mockMarkNotificationsProcessed).toHaveBeenCalledWith(
+      [109],
+      expect.any(Date)
+    );
   });
 
   it("journalise les mails au lieu de les envoyer sans template Brevo, et trace les messages", async () => {
@@ -424,9 +436,9 @@ describe("notifyPendingTarificationMessages", () => {
         }),
       ])
     );
-    expect(mockCreateMessageNotifications).toHaveBeenCalledWith(
-      [9, 10, 11],
-      null
+    expect(mockMarkNotificationsProcessed).toHaveBeenCalledWith(
+      [109, 110, 111],
+      expect.any(Date)
     );
     expect(summary.sentCount).toBe(3);
   });
@@ -439,21 +451,23 @@ describe("notifyPendingTarificationMessages", () => {
     const summary = await notifyPendingTarificationMessages();
 
     expect(mockFetch).not.toHaveBeenCalled();
-    expect(mockCreateMessageNotifications).toHaveBeenCalledWith([], null);
+    expect(mockMarkNotificationsProcessed).toHaveBeenCalledWith(
+      [],
+      expect.any(Date)
+    );
     expect(summary.failedCount).toBe(3);
   });
 
   it("abandonne les messages en attente depuis plus de 3 jours avant d'envoyer", async () => {
     vi.stubEnv("NEXT_PUBLIC_EMULATED_NOW", "2027-03-10T10:00:00.000Z");
-    mockFindPendingMessageIds.mockResolvedValue([1, 2]);
+    mockFindStaleNotificationIds.mockResolvedValue([1, 2]);
 
     const summary = await notifyPendingTarificationMessages();
 
-    expect(mockFindPendingMessageIds).toHaveBeenCalledWith(
+    expect(mockFindStaleNotificationIds).toHaveBeenCalledWith(
       new Date("2027-03-07T10:00:00.000Z")
     );
-    expect(mockCreateMessageNotifications).toHaveBeenNthCalledWith(
-      1,
+    expect(mockMarkNotificationsAbandoned).toHaveBeenCalledWith(
       [1, 2],
       new Date("2027-03-10T10:00:00.000Z")
     );

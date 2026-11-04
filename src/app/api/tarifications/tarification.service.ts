@@ -192,9 +192,9 @@ export const notifyPendingTarificationMessages = async (): Promise<{
   abandonedCount: number;
 }> => {
   const abandonedCount = await abandonStaleNotifications();
-  const messages = await findPendingMessageContexts();
+  const notifications = await findPendingMessageContexts();
   const structuresById = new Map(
-    messages.map(({ conversation }) => [
+    notifications.map(({ message: { conversation } }) => [
       conversation.structureTarification.structure.id,
       conversation.structureTarification.structure,
     ])
@@ -214,10 +214,11 @@ export const notifyPendingTarificationMessages = async (): Promise<{
     )
   );
   const { sentCount, failedCount } = await sendMessageDigests(
-    messages.map((message) => {
+    notifications.map(({ id: notificationId, message }) => {
       const { structure, campaign } =
         message.conversation.structureTarification;
       return {
+        notificationId,
         messageId: message.id,
         conversationId: message.conversation.id,
         recipients: getMessageRecipients(

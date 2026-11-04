@@ -76,6 +76,7 @@ export const buildDigests = (
   const excludedKeys = new Set(notifiedOrReadPairs.map(toMessageUserKey));
   const digestsByUserId = new Map<number, DigestDraft>();
   for (const {
+    notificationId,
     messageId,
     conversationId,
     recipients,
@@ -88,10 +89,10 @@ export const buildDigests = (
       const digest: DigestDraft = digestsByUserId.get(userId) ?? {
         userId,
         email,
-        messageIds: [],
+        notificationIds: [],
         conversationsById: new Map(),
       };
-      digest.messageIds.push(messageId);
+      digest.notificationIds.push(notificationId);
       const conversation = digest.conversationsById.get(conversationId) ?? {
         ...params,
         nombre: 0,
@@ -123,6 +124,6 @@ type DigestDraft = Omit<MessageDigest, "conversations"> & {
 type MessageDigest = {
   userId: number;
   email: string;
-  messageIds: number[];
+  notificationIds: number[];
   conversations: DigestConversation[];
 };

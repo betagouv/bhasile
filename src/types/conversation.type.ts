@@ -19,6 +19,7 @@ export type ConversationVisibility = (typeof ConversationVisibility)[number];
 export type NotificationRecipient = { userId: number; email: string };
 
 export type PendingMessageNotification = {
+  notificationId: number;
   messageId: number;
   conversationId: number;
   recipients: NotificationRecipient[];
