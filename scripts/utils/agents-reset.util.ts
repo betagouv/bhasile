@@ -4,27 +4,18 @@ import { AccessRole, GrantScope } from "@/generated/prisma/client";
 import { EDITING_ROLES } from "@/lib/casl";
 
 export const AGENTS_DOCUMENT_COLUMNS = {
-  level: "Vous remplissez le formulaire pour",
-  departement: "Sélectionnez votre département",
-  region: "Sélectionnez votre région",
-  perimeterName: "Nom du rôle",
-  emails: [
+  zone: "Sélectionnez votre département",
+  level: "Granularité",
+  perimeterName: "Périmètre",
+  firstEmail:
     "Saisissez les adresses mail à autoriser (au moins une obligatoire)",
-    "Untitled email field",
-    "Untitled email field (2)",
-    "Untitled email field (3)",
-    "Untitled email field (4)",
-    "Untitled email field (5)",
-    "Untitled email field (6)",
-    "Untitled email field (7)",
-    "Untitled email field (8)",
-  ],
+  otherEmailsPrefix: "Untitled email field",
 };
 
 export const AGENTS_DOCUMENT_LEVELS: Record<string, PerimeterScope> = {
-  "Une région (accès DREETS - DRIHL - SGAR)": GrantScope.REGION,
-  "Un département (accès DDETS - UD-DD)": GrantScope.DEPARTEMENT,
-  National: GrantScope.NATIONAL,
+  DEPARTEMENT: GrantScope.DEPARTEMENT,
+  REGION: GrantScope.REGION,
+  NATIONAL: GrantScope.NATIONAL,
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -37,12 +28,15 @@ const ROLE_LABELS: Record<AccessRole, string> = {
 
 export const getMissingColumns = (headers: string[]): string[] =>
   [
+    AGENTS_DOCUMENT_COLUMNS.zone,
     AGENTS_DOCUMENT_COLUMNS.level,
-    AGENTS_DOCUMENT_COLUMNS.departement,
-    AGENTS_DOCUMENT_COLUMNS.region,
     AGENTS_DOCUMENT_COLUMNS.perimeterName,
-    ...AGENTS_DOCUMENT_COLUMNS.emails,
+    AGENTS_DOCUMENT_COLUMNS.firstEmail,
   ].filter((column) => !headers.includes(column));
+
+const isEmailColumn = (column: string): boolean =>
+  column === AGENTS_DOCUMENT_COLUMNS.firstEmail ||
+  column.startsWith(AGENTS_DOCUMENT_COLUMNS.otherEmailsPrefix);
 
 export const parseAgentsDocument = (
   rows: Record<string, string | undefined>[],
@@ -67,15 +61,13 @@ export const parseAgentsDocument = (
     }
     const zone = resolveZone(row, scope, referential);
     if (!zone) {
-      const rawZone =
-        scope === GrantScope.REGION
-          ? row[AGENTS_DOCUMENT_COLUMNS.region]
-          : row[AGENTS_DOCUMENT_COLUMNS.departement];
-      errors.push(`${where} : zone introuvable « ${rawZone?.trim() ?? ""} »`);
+      const rawZone = row[AGENTS_DOCUMENT_COLUMNS.zone]?.trim() ?? "";
+      errors.push(`${where} : zone introuvable « ${rawZone} »`);
       return;
     }
 
-    const emails = AGENTS_DOCUMENT_COLUMNS.emails
+    const emails = Object.keys(row)
+      .filter(isEmailColumn)
       .map((column) => normalizeEmail(row[column] ?? ""))
       .filter((email) => email !== "");
     if (emails.length === 0) {
@@ -244,7 +236,7 @@ const resolveZone = (
     };
   }
   if (scope === GrantScope.REGION) {
-    const rawRegion = normalizeLabel(row[AGENTS_DOCUMENT_COLUMNS.region] ?? "");
+    const rawRegion = normalizeLabel(row[AGENTS_DOCUMENT_COLUMNS.zone] ?? "");
     const region = regions.find(
       ({ name }) => normalizeLabel(name) === rawRegion
     );
@@ -257,7 +249,7 @@ const resolveZone = (
         }
       : null;
   }
-  const numero = (row[AGENTS_DOCUMENT_COLUMNS.departement] ?? "")
+  const numero = (row[AGENTS_DOCUMENT_COLUMNS.zone] ?? "")
     .split(" - ")[0]
     .trim();
   const departement = departements.find(
