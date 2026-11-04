@@ -26,22 +26,30 @@ export const upsertStructureTarification = async (
   structureId: number,
   year: number
 ) => {
-  // `update` non vide : sinon Prisma émule l'upsert (SELECT puis INSERT, P2002 sur deux premiers appels simultanés) au lieu d'un INSERT … ON CONFLICT
-  const campaign = await prisma.tarificationCampaign.upsert({
+  const campaign = await upsertTarificationCampaign(year);
+  return upsertTarificationInCampaign(structureId, campaign.id);
+};
+
+// `update` non vide : sinon Prisma émule l'upsert (SELECT puis INSERT, P2002 sur deux premiers appels simultanés) au lieu d'un INSERT … ON CONFLICT
+const upsertTarificationCampaign = (year: number) =>
+  prisma.tarificationCampaign.upsert({
     where: { year },
     update: { year },
     create: { year },
     select: { id: true },
   });
-  return prisma.structureTarification.upsert({
-    where: {
-      structureId_campaignId: { structureId, campaignId: campaign.id },
-    },
-    update: { campaignId: campaign.id },
-    create: { structureId, campaignId: campaign.id },
+
+const upsertTarificationInCampaign = (
+  structureId: number,
+  campaignId: number,
+  db: PrismaTransaction = prisma
+) =>
+  db.structureTarification.upsert({
+    where: { structureId_campaignId: { structureId, campaignId } },
+    update: { campaignId },
+    create: { structureId, campaignId },
     select: { id: true },
   });
-};
 
 export const findStructureTarification = (structureId: number, year: number) =>
   prisma.structureTarification.findFirst({
@@ -79,26 +87,31 @@ export const findStructureScope = (structureId: number) =>
   });
 
 export const findPendingMessageContexts = () =>
-  prisma.message.findMany({
-    where: { notification: null },
+  prisma.emailNotification.findMany({
+    where: { processedAt: null },
     orderBy: { id: "asc" },
     select: {
       id: true,
-      authorId: true,
-      conversation: {
+      message: {
         select: {
           id: true,
-          visibility: true,
-          structureTarification: {
+          authorId: true,
+          conversation: {
             select: {
-              structure: {
+              id: true,
+              visibility: true,
+              structureTarification: {
                 select: {
-                  id: true,
-                  departementAdministratif: true,
-                  codeBhasile: true,
+                  structure: {
+                    select: {
+                      id: true,
+                      departementAdministratif: true,
+                      codeBhasile: true,
+                    },
+                  },
+                  campaign: { select: { year: true } },
                 },
               },
-              campaign: { select: { year: true } },
             },
           },
         },
@@ -208,22 +221,13 @@ export const runInTarificationTransaction = async <T>(
   year: number,
   callback: (transaction: TarificationTransaction) => Promise<T>
 ): Promise<T> => {
-  const campaign = await prisma.tarificationCampaign.upsert({
-    where: { year },
-    update: { year },
-    create: { year },
-    select: { id: true },
-  });
+  const campaign = await upsertTarificationCampaign(year);
   return prisma.$transaction(async (tx) => {
-    const { id: structureTarificationId } =
-      await tx.structureTarification.upsert({
-        where: {
-          structureId_campaignId: { structureId, campaignId: campaign.id },
-        },
-        update: { campaignId: campaign.id },
-        create: { structureId, campaignId: campaign.id },
-        select: { id: true },
-      });
+    const { id: structureTarificationId } = await upsertTarificationInCampaign(
+      structureId,
+      campaign.id,
+      tx
+    );
     return callback({
       findJournal: () =>
         findStructureTarificationJournal(structureId, year, tx),
