@@ -1,6 +1,49 @@
 import type { Borders, Cell, CellValue, Row, Worksheet } from "exceljs";
 import type { CSSProperties } from "react";
 
+const SPREADSHEET_PREVIEW_MAX_ROWS = 1000;
+
+const DEFAULT_COLUMN_WIDTH = 8.43;
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const UNIX_EPOCH_SERIAL = 25569;
+
+// Palette héritée du format xls, encore courante : les index 64 et 65 sont les couleurs système, donc la couleur par défaut
+const INDEXED_COLORS =
+  "000000 FFFFFF FF0000 00FF00 0000FF FFFF00 FF00FF 00FFFF 000000 FFFFFF FF0000 00FF00 0000FF FFFF00 FF00FF 00FFFF 800000 008000 000080 808000 800080 008080 C0C0C0 808080 9999FF 993366 FFFFCC CCFFFF 660066 FF8080 0066CC CCCCFF 000080 FF00FF FFFF00 00FFFF 800080 800000 008080 0000FF 00CCFF CCFFFF CCFFCC FFFF99 99CCFF FF99CC CC99FF FFCC99 3366FF 33CCCC 99CC00 FFCC00 FF9900 FF6600 666699 969696 003366 339966 003300 333300 993300 993366 333399 333333".split(
+    " "
+  );
+
+const GRID_LINE_SHADOW = "inset -1px -1px 0 #e5e5e5";
+
+const BORDER_STYLES: Record<string, string> = {
+  hair: "1px dotted",
+  dotted: "1px dotted",
+  thin: "1px solid",
+  dashed: "1px dashed",
+  medium: "2px solid",
+  mediumDashed: "2px dashed",
+  thick: "3px solid",
+  double: "3px double",
+};
+
+// Dans l'ordre des index de `theme` : Excel inverse clair et foncé par rapport au fichier de thème
+const THEME_COLOR_NAMES = [
+  "lt1",
+  "dk1",
+  "lt2",
+  "dk2",
+  "accent1",
+  "accent2",
+  "accent3",
+  "accent4",
+  "accent5",
+  "accent6",
+  "hlink",
+  "folHlink",
+];
+
 // Importés à la demande : ces décodeurs ne pèsent que sur la page de qui ouvre un tableur
 export const parseSpreadsheetPreview = async (
   content: Blob
@@ -370,49 +413,6 @@ const toColumnWidthPx = (widthInCharacters = DEFAULT_COLUMN_WIDTH): number =>
   Math.round(widthInCharacters * 7 + 5);
 
 // Un tableur de 30 Mo peut compter des centaines de milliers de lignes : le DOM ne les supporterait pas
-const SPREADSHEET_PREVIEW_MAX_ROWS = 1000;
-
-const DEFAULT_COLUMN_WIDTH = 8.43;
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-const UNIX_EPOCH_SERIAL = 25569;
-
-// Palette héritée du format xls, encore courante : les index 64 et 65 sont les couleurs système, donc la couleur par défaut
-const INDEXED_COLORS =
-  "000000 FFFFFF FF0000 00FF00 0000FF FFFF00 FF00FF 00FFFF 000000 FFFFFF FF0000 00FF00 0000FF FFFF00 FF00FF 00FFFF 800000 008000 000080 808000 800080 008080 C0C0C0 808080 9999FF 993366 FFFFCC CCFFFF 660066 FF8080 0066CC CCCCFF 000080 FF00FF FFFF00 00FFFF 800080 800000 008080 0000FF 00CCFF CCFFFF CCFFCC FFFF99 99CCFF FF99CC CC99FF FFCC99 3366FF 33CCCC 99CC00 FFCC00 FF9900 FF6600 666699 969696 003366 339966 003300 333300 993300 993366 333399 333333".split(
-    " "
-  );
-
-const GRID_LINE_SHADOW = "inset -1px -1px 0 #e5e5e5";
-
-const BORDER_STYLES: Record<string, string> = {
-  hair: "1px dotted",
-  dotted: "1px dotted",
-  thin: "1px solid",
-  dashed: "1px dashed",
-  medium: "2px solid",
-  mediumDashed: "2px dashed",
-  thick: "3px solid",
-  double: "3px double",
-};
-
-// Dans l'ordre des index de `theme` : Excel inverse clair et foncé par rapport au fichier de thème
-const THEME_COLOR_NAMES = [
-  "lt1",
-  "dk1",
-  "lt2",
-  "dk2",
-  "accent1",
-  "accent2",
-  "accent3",
-  "accent4",
-  "accent5",
-  "accent6",
-  "hlink",
-  "folHlink",
-];
-
 type NumberFormatter = (numFmt: string, value: number) => string;
 
 type RenderingContext = {
