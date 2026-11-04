@@ -1,0 +1,431 @@
+import { GrantDb } from "@/app/api/users/user.db.type";
+import { getAssignedGrants, normalizeEmail } from "@/app/api/users/user.util";
+import { AccessRole, GrantScope } from "@/generated/prisma/client";
+import { EDITING_ROLES } from "@/lib/casl";
+
+export const AGENTS_DOCUMENT_COLUMNS = {
+  level: "Vous remplissez le formulaire pour",
+  departement: "Sélectionnez votre département",
+  region: "Sélectionnez votre région",
+  perimeterName: "Nom du rôle",
+  emails: [
+    "Saisissez les adresses mail à autoriser (au moins une obligatoire)",
+    "Untitled email field",
+    "Untitled email field (2)",
+    "Untitled email field (3)",
+    "Untitled email field (4)",
+    "Untitled email field (5)",
+    "Untitled email field (6)",
+    "Untitled email field (7)",
+    "Untitled email field (8)",
+  ],
+};
+
+export const AGENTS_DOCUMENT_LEVELS: Record<string, PerimeterScope> = {
+  "Une région (accès DREETS - DRIHL - SGAR)": GrantScope.REGION,
+  "Un département (accès DDETS - UD-DD)": GrantScope.DEPARTEMENT,
+  National: GrantScope.NATIONAL,
+};
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const ROLE_LABELS: Record<AccessRole, string> = {
+  [AccessRole.LECTEUR]: "Lecteur",
+  [AccessRole.EDITEUR]: "Éditeur",
+  [AccessRole.ADMIN]: "Admin",
+};
+
+export const getMissingColumns = (headers: string[]): string[] =>
+  [
+    AGENTS_DOCUMENT_COLUMNS.level,
+    AGENTS_DOCUMENT_COLUMNS.departement,
+    AGENTS_DOCUMENT_COLUMNS.region,
+    AGENTS_DOCUMENT_COLUMNS.perimeterName,
+    ...AGENTS_DOCUMENT_COLUMNS.emails,
+  ].filter((column) => !headers.includes(column));
+
+export const parseAgentsDocument = (
+  rows: Record<string, string | undefined>[],
+  referential: Referential
+): { perimeters: DocumentPerimeter[]; errors: string[] } => {
+  const errors: string[] = [];
+  const perimeters: DocumentPerimeter[] = [];
+
+  rows.forEach((row, index) => {
+    const line = index + 2;
+    const name = row[AGENTS_DOCUMENT_COLUMNS.perimeterName]?.trim() ?? "";
+    const level = row[AGENTS_DOCUMENT_COLUMNS.level]?.trim() ?? "";
+    const where = `ligne ${line} (${name || "rôle sans nom"})`;
+
+    if (!name) {
+      errors.push(`${where} : nom du rôle manquant`);
+    }
+    const scope = AGENTS_DOCUMENT_LEVELS[level];
+    if (!scope) {
+      errors.push(`${where} : niveau inconnu « ${level} »`);
+      return;
+    }
+    const zone = resolveZone(row, scope, referential);
+    if (!zone) {
+      const rawZone =
+        scope === GrantScope.REGION
+          ? row[AGENTS_DOCUMENT_COLUMNS.region]
+          : row[AGENTS_DOCUMENT_COLUMNS.departement];
+      errors.push(`${where} : zone introuvable « ${rawZone?.trim() ?? ""} »`);
+      return;
+    }
+
+    const emails = AGENTS_DOCUMENT_COLUMNS.emails
+      .map((column) => normalizeEmail(row[column] ?? ""))
+      .filter((email) => email !== "");
+    if (emails.length === 0) {
+      errors.push(`${where} : aucune adresse mail`);
+    }
+    for (const email of emails.filter((email) => !EMAIL_REGEX.test(email))) {
+      errors.push(`${where} : adresse mail invalide « ${email} »`);
+    }
+
+    perimeters.push({ name, zone, emails, line });
+  });
+
+  errors.push(
+    ...getDuplicates(perimeters.map(({ name, line }) => [name, line])).map(
+      ([name, lines]) =>
+        `rôle « ${name} » présent plusieurs fois (lignes ${lines.join(", ")})`
+    ),
+    ...getDuplicates(
+      perimeters.flatMap(({ emails, line }) =>
+        emails.map((email): [string, number] => [email, line])
+      )
+    ).map(
+      ([email, lines]) =>
+        `${email} présent plusieurs fois (lignes ${lines.join(", ")})`
+    )
+  );
+
+  return { perimeters, errors };
+};
+
+export const findEmailCaseDuplicates = (
+  users: { email: string }[]
+): string[][] => {
+  const emailsByNormalizedEmail = new Map<string, string[]>();
+  for (const { email } of users) {
+    const key = normalizeEmail(email);
+    emailsByNormalizedEmail.set(key, [
+      ...(emailsByNormalizedEmail.get(key) ?? []),
+      email,
+    ]);
+  }
+  return [...emailsByNormalizedEmail.values()].filter(
+    (emails) => emails.length > 1
+  );
+};
+
+export const planPerimeters = (
+  documentPerimeters: DocumentPerimeter[],
+  existingPerimeters: ExistingPerimeter[]
+): PerimetersPlan => {
+  const plan: PerimetersPlan = {
+    created: [],
+    zoneChanged: [],
+    unchanged: [],
+    absent: [],
+  };
+  for (const perimeter of documentPerimeters) {
+    const existing = existingPerimeters.find(
+      ({ name }) => name === perimeter.name
+    );
+    if (!existing) {
+      plan.created.push(perimeter);
+    } else if (getZoneKey(existing) !== getZoneKey(perimeter.zone)) {
+      plan.zoneChanged.push(perimeter);
+    } else {
+      plan.unchanged.push(perimeter);
+    }
+  }
+  plan.absent = existingPerimeters
+    .filter(
+      ({ name }) =>
+        !documentPerimeters.some((perimeter) => perimeter.name === name)
+    )
+    .map(({ name }) => name);
+  return plan;
+};
+
+export const planAgentsReset = (
+  perimeters: DocumentPerimeter[],
+  users: ResetUser[]
+): AgentsResetPlan => {
+  const plan: AgentsResetPlan = {
+    agents: [],
+    deactivated: [],
+    superAdmins: [],
+    operateurUsers: [],
+    pendingCount: 0,
+    errors: [],
+    warnings: [],
+  };
+  const usersByEmail = new Map(
+    users.map((user) => [normalizeEmail(user.email), user])
+  );
+  const documentEmails = new Set<string>();
+
+  for (const perimeter of perimeters) {
+    for (const email of perimeter.emails) {
+      documentEmails.add(email);
+      const user = usersByEmail.get(email) ?? null;
+      if (user?.isSuperAdmin) {
+        plan.warnings.push(
+          `${email} est superadmin : ignoré dans « ${perimeter.name} », reste superadmin`
+        );
+        continue;
+      }
+      if (user?.operateurId) {
+        plan.errors.push(
+          `${email} est rattaché à un opérateur et ne peut pas rejoindre « ${perimeter.name} »`
+        );
+        continue;
+      }
+      plan.agents.push({
+        email,
+        perimeter,
+        user,
+        status: getAgentStatus(user, perimeter.zone),
+        rightsBefore: user ? describeCurrentRights(user) : "aucun compte",
+        rightsAfter: `Lecteur national + Admin ${perimeter.zone.label}`,
+      });
+    }
+  }
+
+  for (const user of users) {
+    if (documentEmails.has(normalizeEmail(user.email))) {
+      continue;
+    }
+    if (user.isSuperAdmin) {
+      plan.superAdmins.push(user);
+      continue;
+    }
+    if (user.operateurId) {
+      plan.operateurUsers.push(user);
+      continue;
+    }
+    const hasCurrentAccess = getAssignedGrants(user).length > 0;
+    if (!hasCurrentAccess && !user.isActivated && !user.perimeter) {
+      plan.pendingCount++;
+      continue;
+    }
+    const isNational = getEditingGrants(user).some(
+      ({ scope }) => scope === GrantScope.NATIONAL
+    );
+    const rights = describeCurrentRights(user);
+    plan.deactivated.push({ user, rights, isNational });
+    if (isNational) {
+      plan.warnings.push(
+        `${user.email} (${rights}) est national et absent du document : il sera désactivé`
+      );
+    }
+  }
+
+  return plan;
+};
+
+const resolveZone = (
+  row: Record<string, string | undefined>,
+  scope: PerimeterScope,
+  { regions, departements }: Referential
+): PerimeterZone | null => {
+  if (scope === GrantScope.NATIONAL) {
+    return {
+      scope,
+      regionId: null,
+      departementNumero: null,
+      label: "national",
+    };
+  }
+  if (scope === GrantScope.REGION) {
+    const rawRegion = normalizeLabel(row[AGENTS_DOCUMENT_COLUMNS.region] ?? "");
+    const region = regions.find(
+      ({ name }) => normalizeLabel(name) === rawRegion
+    );
+    return region
+      ? {
+          scope,
+          regionId: region.id,
+          departementNumero: null,
+          label: region.name,
+        }
+      : null;
+  }
+  const numero = (row[AGENTS_DOCUMENT_COLUMNS.departement] ?? "")
+    .split(" - ")[0]
+    .trim();
+  const departement = departements.find(
+    (departement) => departement.numero === numero
+  );
+  return departement
+    ? {
+        scope,
+        regionId: null,
+        departementNumero: departement.numero,
+        label: `${departement.numero} - ${departement.name}`,
+      }
+    : null;
+};
+
+const normalizeLabel = (label: string): string =>
+  label.trim().replace(/[’‘]/g, "'").toLowerCase();
+
+const getDuplicates = <T>(entries: [T, number][]): [T, number[]][] => {
+  const linesByKey = new Map<T, number[]>();
+  for (const [key, line] of entries) {
+    linesByKey.set(key, [...(linesByKey.get(key) ?? []), line]);
+  }
+  return [...linesByKey.entries()].filter(([, lines]) => lines.length > 1);
+};
+
+const getAgentStatus = (
+  user: ResetUser | null,
+  zone: PerimeterZone
+): AgentStatus => {
+  if (!user) {
+    return "CREATED";
+  }
+  const editingKeys = new Set(getEditingGrants(user).map(getGrantKey));
+  return editingKeys.size === 1 && editingKeys.has(getZoneKey(zone))
+    ? "SAME_RIGHTS"
+    : "DIFFERENT_RIGHTS";
+};
+
+const getEditingGrants = (user: ResetUser): GrantDb[] =>
+  getAssignedGrants(user).filter(({ role }) => EDITING_ROLES.includes(role));
+
+const describeCurrentRights = (user: ResetUser): string => {
+  const grants = getAssignedGrants(user).map(describeGrant).join(" + ");
+  const perimeter = user.perimeter
+    ? ` [périmètre : ${user.perimeter.name}]`
+    : "";
+  return `${grants || "aucun accès"}${perimeter}`;
+};
+
+const describeGrant = (grant: GrantDb): string => {
+  const role = ROLE_LABELS[grant.role];
+  if (grant.scope === GrantScope.NATIONAL) {
+    return `${role} national`;
+  }
+  if (grant.scope === GrantScope.REGION) {
+    return `${role} ${grant.region?.name ?? "région inconnue"}`;
+  }
+  if (grant.scope === GrantScope.DEPARTEMENT) {
+    return grant.departement
+      ? `${role} ${grant.departement.numero} - ${grant.departement.name}`
+      : `${role} département inconnu`;
+  }
+  return `${role} ${grant.structure?.codeBhasile ?? "structure inconnue"}`;
+};
+
+const getGrantKey = (grant: GrantDb): string => {
+  if (grant.scope === GrantScope.NATIONAL) {
+    return GrantScope.NATIONAL;
+  }
+  if (grant.scope === GrantScope.REGION) {
+    return `${GrantScope.REGION}:${grant.region?.id}`;
+  }
+  if (grant.scope === GrantScope.DEPARTEMENT) {
+    return `${GrantScope.DEPARTEMENT}:${grant.departement?.numero}`;
+  }
+  return `${GrantScope.STRUCTURE}:${grant.structure?.id}`;
+};
+
+const getZoneKey = (zone: {
+  scope: GrantScope;
+  regionId: number | null;
+  departementNumero: string | null;
+}): string => {
+  if (zone.scope === GrantScope.REGION) {
+    return `${GrantScope.REGION}:${zone.regionId}`;
+  }
+  if (zone.scope === GrantScope.DEPARTEMENT) {
+    return `${GrantScope.DEPARTEMENT}:${zone.departementNumero}`;
+  }
+  return zone.scope;
+};
+
+type PerimeterScope =
+  | typeof GrantScope.NATIONAL
+  | typeof GrantScope.REGION
+  | typeof GrantScope.DEPARTEMENT;
+
+type Referential = {
+  regions: { id: number; name: string }[];
+  departements: { numero: string; name: string }[];
+};
+
+export type PerimeterZone = {
+  scope: PerimeterScope;
+  regionId: number | null;
+  departementNumero: string | null;
+  label: string;
+};
+
+export type DocumentPerimeter = {
+  name: string;
+  zone: PerimeterZone;
+  emails: string[];
+  line: number;
+};
+
+export type ExistingPerimeter = {
+  name: string;
+  scope: GrantScope;
+  regionId: number | null;
+  departementNumero: string | null;
+};
+
+export type PerimetersPlan = {
+  created: DocumentPerimeter[];
+  zoneChanged: DocumentPerimeter[];
+  unchanged: DocumentPerimeter[];
+  absent: string[];
+};
+
+export type ResetUser = {
+  id: number;
+  email: string;
+  isSuperAdmin: boolean;
+  isAgent: boolean | null;
+  operateurId: number | null;
+  isActivated: boolean;
+  deactivatedAt: Date | null;
+  lastConnection: Date | null;
+  perimeter: { name: string } | null;
+  grants: GrantDb[];
+  emailPattern: { isAgent: boolean; grants: GrantDb[] } | null;
+};
+
+type AgentStatus = "CREATED" | "SAME_RIGHTS" | "DIFFERENT_RIGHTS";
+
+export type PlannedAgent = {
+  email: string;
+  perimeter: DocumentPerimeter;
+  user: ResetUser | null;
+  status: AgentStatus;
+  rightsBefore: string;
+  rightsAfter: string;
+};
+
+export type PlannedDeactivation = {
+  user: ResetUser;
+  rights: string;
+  isNational: boolean;
+};
+
+export type AgentsResetPlan = {
+  agents: PlannedAgent[];
+  deactivated: PlannedDeactivation[];
+  superAdmins: ResetUser[];
+  operateurUsers: ResetUser[];
+  pendingCount: number;
+  errors: string[];
+  warnings: string[];
+};

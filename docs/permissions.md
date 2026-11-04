@@ -166,6 +166,42 @@ WHERE u."operateurId" IS NULL
 
 La ligne du postdeploy est à retirer à la PR suivante.
 
+## Refonte : périmètres et activation (en cours)
+
+Le reste de ce document décrit les droits appliqués aujourd'hui. Cette refonte les remplace en deux PR : la première ajoute le modèle sans rien changer aux droits, la seconde bascule.
+
+### Choix métier
+
+- **Activation** : un compte non activé n'a accès à rien. Désactiver ne supprime rien, et la date reste affichée (messagerie). Exception provisoire, à confirmer avec les PO : les droits de contact ne demandent pas d'activation, mais un compte désactivé les perd.
+- **Agent** : rattaché à un seul périmètre nommé (« DDETS Finistère », « SGAR Bretagne »), partagé avec d'autres agents. Droits calculés, jamais stockés : lecture nationale + admin sur le périmètre. Plusieurs périmètres peuvent couvrir la même zone.
+- **Statut** : agent = périmètre renseigné, opérateur = `operateurId` renseigné, jamais les deux. `isAgent` disparaît.
+- **Email patterns** : abandonnés.
+- **Opérateur** : ses binômes personnels + ses droits de contact, limités à son opérateur.
+- **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
+- **Emails** : comparés sans tenir compte de la casse, stockés en minuscules.
+- **Reprise** : l'export Tally fait foi. Une adresse en double arrête le script. Les agents absents sont désactivés et loggés ; leurs binômes restent pour l'instant.
+
+### PR 1 : modèle (faite)
+
+- `Perimeter` (dans `grant.prisma`) : `name` unique, `scope` `NATIONAL` / `REGION` / `DEPARTEMENT`, cible.
+- `User.perimeterId`, `User.isActivated` (faux par défaut), `User.deactivatedAt`. Seul `getAccountStatus` les lit.
+- Connexion : recherche du user sans tenir compte de la casse, email créé en minuscules (`normalizeEmail`).
+- One-off `yarn one-off 20261104-reset-agents <fichier.csv> [--dry-run]` :
+  - colonnes et libellés de niveau dans `AGENTS_DOCUMENT_COLUMNS` et `AGENTS_DOCUMENT_LEVELS` ;
+  - arrêt avant écriture sur une adresse ou un rôle en double, une zone introuvable, un doublon de casse en base ou un user opérateur dans le document ;
+  - périmètres upsertés par nom, agents du document créés ou rattachés puis activés, superadmins activés, autres agents désactivés, emails passés en minuscules ;
+  - le dry-run classe les agents (nouveau, même zone, droits différents avec avant / après) et liste les désactivés avec leurs droits et leur dernière connexion. Les nationaux absents du document sont en avertissement.
+
+### PR 2 : basculement (à faire)
+
+- Relancer le one-off juste avant la mise en prod.
+- Session et CASL : compte non activé = droits de contact seulement ; superadmin = `manage all` ; agent = lecture nationale + `ADMIN` sur son périmètre, binômes personnels ignorés ; opérateur = binômes + contacts, filtrés sur `operateurId`.
+- Supprimer `User.isAgent`, `EmailPattern`, `User.emailPatternId`, `fill-roles` et `20261027-mark-existing-agents` (avec sa ligne du postdeploy) ; adapter `brevo-push-users`.
+- Supprimer les binômes des agents (ceux des patterns partent avec `EmailPattern`). La sortie du one-off reste la trace des anciens droits : la conserver.
+- Réécrire ce document.
+
+Viennent ensuite la gestion des accès (écran de demande après ProConnect, création par les agents et les opérateurs, désactivation par un admin qui couvre tous les binômes du user, refus d'un binôme déjà couvert) et l'ouverture aux opérateurs (CPOM de leurs structures, statistiques sans RMU ; fiche opérateur dans #1742).
+
 ## Reste à faire
 
 1. **PR 2, administration des binômes** :

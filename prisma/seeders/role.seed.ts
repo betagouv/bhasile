@@ -21,16 +21,19 @@ export const seedRolesAndAgents = async (
     {
       name: "Jean Nation",
       email: `national@${TEST_EMAIL_DOMAIN}`,
+      perimeterName: "Administration centrale",
       zone: { scope: GrantScope.NATIONAL },
     },
     {
       name: "Jean Idf",
       email: `regional@${TEST_EMAIL_DOMAIN}`,
+      perimeterName: "DREETS Île-de-France",
       zone: { scope: GrantScope.REGION, regionId: region.id },
     },
     {
       name: "Jean Paris",
       email: `departemental@${TEST_EMAIL_DOMAIN}`,
+      perimeterName: "DDETS Paris",
       zone: { scope: GrantScope.DEPARTEMENT, departementNumeros: ["75"] },
     },
   ];
@@ -41,11 +44,17 @@ export const seedRolesAndAgents = async (
   });
 
   for (const agent of agents) {
+    const perimeter = await prisma.perimeter.create({
+      data: { name: agent.perimeterName, ...toPerimeterZone(agent.zone) },
+      select: { id: true },
+    });
     await prisma.user.create({
       data: {
         name: agent.name,
         email: agent.email,
         emailPatternId: emailPattern.id,
+        perimeterId: perimeter.id,
+        isActivated: true,
         lastConnection: new Date(),
         grants: { createMany: { data: getAgentBaseGrants(agent.zone) } },
       },
@@ -59,8 +68,19 @@ export const seedRolesAndAgents = async (
   );
 };
 
+const toPerimeterZone = (zone: AgentZone) => {
+  if (zone.scope === GrantScope.REGION) {
+    return { scope: zone.scope, regionId: zone.regionId };
+  }
+  if (zone.scope === GrantScope.DEPARTEMENT) {
+    return { scope: zone.scope, departementNumero: zone.departementNumeros[0] };
+  }
+  return { scope: zone.scope };
+};
+
 type AgentSeed = {
   name: string;
   email: string;
+  perimeterName: string;
   zone: AgentZone;
 };

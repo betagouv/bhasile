@@ -37,3 +37,19 @@ enum GrantScope {
 
   @@schema("public")
 }
+
+model Perimeter {
+  id                Int          @id @default(autoincrement())
+  name              String       @unique
+  scope             GrantScope
+  region            Region?      @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  regionId          Int?
+  departement       Departement? @relation(fields: [departementNumero], references: [numero], onDelete: Restrict)
+  departementNumero String?
+  users             User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
