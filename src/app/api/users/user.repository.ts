@@ -1,4 +1,5 @@
 import { getNow } from "@/app/utils/now.util";
+import { GrantScope } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
 import { UserWithGrants, userWithGrantsSelect } from "./user.db.type";
@@ -69,6 +70,30 @@ export const getUserWithGrantsByEmail = async ({
   return prisma.user.findUnique({
     where: { email },
     select: userWithGrantsSelect,
+  });
+};
+
+export const findUsersWithGrantsOnStructure = ({
+  structureId,
+  departementNumero,
+}: {
+  structureId: number;
+  departementNumero: string;
+}): Promise<(UserWithGrants & { email: string })[]> => {
+  const grantWhere = {
+    OR: [
+      { scope: GrantScope.DEPARTEMENT, departementNumero },
+      { scope: GrantScope.STRUCTURE, structureId },
+    ],
+  };
+  return prisma.user.findMany({
+    where: {
+      OR: [
+        { grants: { some: grantWhere } },
+        { emailPattern: { grants: { some: grantWhere } } },
+      ],
+    },
+    select: { ...userWithGrantsSelect, email: true },
   });
 };
 

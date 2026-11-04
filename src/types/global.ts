@@ -49,3 +49,8 @@ export type SessionUser = {
   isAgent: boolean;
   grants: SessionGrant[];
 };
+
+export type SessionPermissions = Pick<
+  SessionUser,
+  "operateurId" | "isSuperAdmin" | "isAgent" | "grants"
+>;

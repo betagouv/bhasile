@@ -1,12 +1,25 @@
+import dayjs from "dayjs";
+
+import { getNow } from "@/app/utils/now.util";
 import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
-import type { ConversationTag } from "@/types/conversation.type";
+import { sendTemplateEmail } from "@/lib/brevo";
+import type {
+  ConversationTag,
+  PendingMessageNotification,
+} from "@/types/conversation.type";
 
 import type { MessageDb } from "./conversation.db.type";
 import {
   createMessage,
   createMessageReceipts,
+  createNotificationRecipients,
   findConversationMessageIds,
   findMessages,
+  findNotifiedPairs,
+  findReadPairs,
+  findStaleNotificationIds,
+  markNotificationsAbandoned,
+  markNotificationsProcessed,
   updateMessageTagKey,
   upsertConversation,
 } from "./conversation.repository";
@@ -15,7 +28,10 @@ import {
   assertCanPostMessage,
   assertCanTag,
   assertTagKnown,
+  buildDigests,
 } from "./conversation.util";
+
+const NOTIFICATION_ABANDON_DAYS = 3;
 
 export const postMessage = async (
   {
@@ -97,5 +113,71 @@ export const markMessagesAsRead = async ({
   );
   return createMessageReceipts(reader.id, conversationMessageIds);
 };
+
+export const sendMessageDigests = async (
+  pendingMessages: PendingMessageNotification[]
+): Promise<{ sentCount: number; failedCount: number }> => {
+  const templateId = getMessageTemplateId();
+  const messageIds = pendingMessages.map((message) => message.messageId);
+  const [notifiedPairs, readPairs] = await Promise.all([
+    findNotifiedPairs(messageIds),
+    findReadPairs(messageIds),
+  ]);
+  const digests = buildDigests(pendingMessages, [
+    ...notifiedPairs,
+    ...readPairs,
+  ]);
+  const failedUserIds = new Set<number>();
+  for (const digest of digests) {
+    try {
+      const brevoMessageId = await sendTemplateEmail({
+        to: digest.email,
+        templateId,
+        params: {
+          nombre: digest.notificationIds.length,
+          conversations: digest.conversations,
+        },
+      });
+      await createNotificationRecipients(
+        digest.notificationIds.map((notificationId) => ({
+          notificationId,
+          userId: digest.userId,
+          email: digest.email,
+          brevoMessageId,
+        }))
+      );
+    } catch (error) {
+      failedUserIds.add(digest.userId);
+      console.error(error);
+    }
+  }
+  await markNotificationsProcessed(
+    pendingMessages
+      .filter(
+        (message) =>
+          !message.recipients.some((recipient) =>
+            failedUserIds.has(recipient.userId)
+          )
+      )
+      .map((message) => message.notificationId),
+    getNow()
+  );
+  return {
+    sentCount: digests.length - failedUserIds.size,
+    failedCount: failedUserIds.size,
+  };
+};
+
+export const abandonStaleNotifications = async (): Promise<number> => {
+  const now = getNow();
+  const staleNotificationIds = await findStaleNotificationIds(
+    dayjs(now).subtract(NOTIFICATION_ABANDON_DAYS, "day").toDate()
+  );
+  await markNotificationsAbandoned(staleNotificationIds, now);
+  return staleNotificationIds.length;
+};
+
+const getMessageTemplateId = (): number | null =>
+  Number(process.env.BREVO_MESSAGE_TEMPLATE_ID) || null;
 
 type ConversationParticipant = { id: number; level: AuthorLevel };

@@ -8,7 +8,7 @@ import {
   toContactGrant,
   toSessionGrant,
 } from "@/app/api/users/user.util";
-import { SessionGrant, SessionUser } from "@/types/global";
+import { SessionGrant, SessionPermissions } from "@/types/global";
 
 export type ProConnectUser = User & {
   id: string;
@@ -49,8 +49,3 @@ const getContactGrants = async (email: string): Promise<SessionGrant[]> =>
   process.env.CONTACT_ACCESS_ENABLED === "true"
     ? (await getContactStructureIds(email)).map(toContactGrant)
     : [];
-
-type SessionPermissions = Pick<
-  SessionUser,
-  "operateurId" | "isSuperAdmin" | "isAgent" | "grants"
->;

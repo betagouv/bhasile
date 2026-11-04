@@ -10,6 +10,7 @@ export {
   type AppAbility,
   canAccessApp,
   defineAbilityFor,
+  EDITING_ROLES,
   isAgent,
 } from "./rules";
 export {

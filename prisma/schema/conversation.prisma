@@ -2,7 +2,7 @@ model Conversation {
   id                      Int                   @id @default(autoincrement())
   structureTarification   StructureTarification @relation(fields: [structureTarificationId], references: [id], onDelete: Restrict)
   structureTarificationId Int
-  visibility              Visibility
+  visibility              Visibility // fixée à la création
   messages                Message[]
 
   createdAt DateTime @default(now())
@@ -13,23 +13,25 @@ model Conversation {
 
 // Ajout seul : jamais modifié ni supprimé, sauf tagKey (voir docs/messagerie.md)
 model Message {
-  id             Int              @id @default(autoincrement())
-  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Restrict)
-  conversationId Int
-  author         User             @relation(fields: [authorId], references: [id], onDelete: Restrict)
-  authorId       Int
-  authorLevel    AuthorLevel
-  text           String
-  tagKey         String?
-  receipts       MessageReceipt[]
-  attachments    FileUpload[]
+  id                Int                @id @default(autoincrement())
+  conversation      Conversation       @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  conversationId    Int
+  author            User               @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  authorId          Int
+  authorLevel       AuthorLevel // tiré des grants de l'auteur à l'écriture ; le plus large l'emporte
+  text              String
+  tagKey            String?
+  receipts          MessageReceipt[]
+  attachments       FileUpload[]
+  emailNotification EmailNotification?
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) // horodatage serveur, fait foi
 
   @@index([conversationId, id])
   @@schema("public")
 }
 
+// Première lecture d'un message par un utilisateur ; ajout seul
 model MessageReceipt {
   message   Message @relation(fields: [messageId], references: [id], onDelete: Restrict)
   messageId Int

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
+import { VISIBILITY_LABELS } from "@/constants";
 import { useMessageDraft } from "@/hooks/useMessageDraft";
 import {
   ConversationTag,
@@ -67,8 +68,8 @@ export const Echanges = ({
           selectedTabId={visibility}
           onTabChange={handleTabChange}
           tabs={[
-            { tabId: "SHARED", label: "Tout le monde" },
-            { tabId: "AGENTS", label: "Services de l’État seulement" },
+            { tabId: "SHARED", label: VISIBILITY_LABELS.SHARED },
+            { tabId: "AGENTS", label: VISIBILITY_LABELS.AGENTS },
           ]}
           className="bg-white"
         >

@@ -62,3 +62,36 @@ export const findStructureScope = (structureId: number) =>
     where: { id: structureId },
     select: { ...structureScopeSelect, codeBhasile: true },
   });
+
+export const findPendingMessageContexts = () =>
+  prisma.emailNotification.findMany({
+    where: { processedAt: null },
+    orderBy: { id: "asc" },
+    select: {
+      id: true,
+      message: {
+        select: {
+          id: true,
+          authorId: true,
+          conversation: {
+            select: {
+              id: true,
+              visibility: true,
+              structureTarification: {
+                select: {
+                  structure: {
+                    select: {
+                      id: true,
+                      departementAdministratif: true,
+                      codeBhasile: true,
+                    },
+                  },
+                  campaign: { select: { year: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
