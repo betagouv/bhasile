@@ -23,10 +23,10 @@ Sans rapport avec le modèle `Notification`, qui porte les bandeaux affichés da
 
 ## Envoi et reprise
 
-- **Pas de file de tâches** : l'absence de trace d'envoi d'un événement vaut « à notifier » (une _outbox_ implicite).
+- **Une file explicite** (`EmailNotification`, une _outbox_) : un événement à signaler écrit sa ligne dans sa propre transaction, à un seul point d'écriture par feature et couvert par un test ; `processedAt` nul vaut « à notifier ». Un événement sans ligne n'envoie jamais de mail : un type qui ne notifie pas, le seed et les scripts de reprise n'écrivent rien.
 - **Un mail groupé, pas d'envoi immédiat** : un cron envoie deux fois par jour, à 8 h et 14 h à Paris toute l'année, pour que l'heure du mail ne change pas avec la saison. Scalingo ne planifie qu'en UTC : le cron passe à 6 h, 7 h, 12 h et 13 h UTC, et le script ignore les passages qui ne tombent pas à ces heures à Paris. Lancé à la main, sans l'argument `scheduled`, il envoie à toute heure. Il envoie à chaque destinataire un seul mail pour tous ses événements en attente. Une rafale donne un mail ; un événement déjà vu dans l'application entre-temps n'est pas signalé.
-- **Trace par destinataire** : chaque mail accepté écrit une ligne par événement qu'il signale ; la trace de l'événement n'est écrite que si aucun de ses destinataires n'a échoué, même vide quand personne n'était à notifier. Le passage suivant reprend donc les seuls destinataires restants.
-- **Échec et abandon** : un envoi en échec est repris au passage suivant ; au-delà de 3 jours sans trace, l'événement est abandonné (trace avec date d'abandon). Dans les deux cas le script sort en erreur : `scripts/cron.sh` remonte alors l'échec au moniteur Sentry du cron, qui porte le nom du script. Les crons ne tournent qu'en prod : l'envoi se recette en lançant le script à la main.
+- **Trace par destinataire** (`EmailNotificationRecipient`) : chaque mail accepté écrit une ligne par événement qu'il signale ; l'événement n'est marqué traité que si aucun de ses destinataires n'a échoué, y compris quand personne n'était à notifier. Le passage suivant reprend donc les seuls destinataires restants.
+- **Échec et abandon** : un envoi en échec est repris au passage suivant ; au-delà de 3 jours en attente, l'événement est abandonné (`abandonedAt`). Dans les deux cas le script sort en erreur : `scripts/cron.sh` remonte alors l'échec au moniteur Sentry du cron, qui porte le nom du script. Les crons ne tournent qu'en prod : l'envoi se recette en lançant le script à la main.
 
 ## À venir
 

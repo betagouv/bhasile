@@ -69,14 +69,6 @@ export const createFakeTarificationJournals = async (
     });
   }
 
-  // Le cron de notification ne doit pas envoyer de mail pour ces événements fictifs
-  const seededEvents = await prisma.tarificationEvent.findMany({
-    select: { id: true },
-  });
-  await prisma.tarificationEventNotification.createMany({
-    data: seededEvents.map((event) => ({ eventId: event.id })),
-  });
-
   console.log(
     `✅ Journaux de tarification ${campaignYear} (structure : scénario) :\n${tarifications
       .map(
@@ -153,7 +145,6 @@ const createJournalWriter = (
   return {
     addEvent,
     deposit,
-    // Le cron de notification ne doit pas envoyer de mail pour ces messages fictifs
     addMessage: async ({
       visibility,
       author,
@@ -184,7 +175,6 @@ const createJournalWriter = (
           text,
           tagKey,
           createdAt: at,
-          notification: { create: {} },
           receipts: readBy ? { create: { userId: readBy.id } } : undefined,
         },
       });

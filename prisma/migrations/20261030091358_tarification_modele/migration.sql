@@ -58,26 +58,6 @@ CREATE TABLE "TarificationDocumentOpening" (
     CONSTRAINT "TarificationDocumentOpening_pkey" PRIMARY KEY ("documentId","userId")
 );
 
--- CreateTable
-CREATE TABLE "TarificationEventNotification" (
-    "eventId" INTEGER NOT NULL,
-    "abandonedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "TarificationEventNotification_pkey" PRIMARY KEY ("eventId")
-);
-
--- CreateTable
-CREATE TABLE "TarificationEventNotificationRecipient" (
-    "eventId" INTEGER NOT NULL,
-    "userId" INTEGER NOT NULL,
-    "email" TEXT NOT NULL,
-    "brevoMessageId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "TarificationEventNotificationRecipient_pkey" PRIMARY KEY ("eventId","userId")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "TarificationDocument_fileUploadId_key" ON "TarificationDocument"("fileUploadId");
 
@@ -128,13 +108,3 @@ ALTER TABLE "TarificationDocumentOpening" ADD CONSTRAINT "TarificationDocumentOp
 
 -- AddForeignKey
 ALTER TABLE "TarificationDocumentOpening" ADD CONSTRAINT "TarificationDocumentOpening_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "TarificationEventNotification" ADD CONSTRAINT "TarificationEventNotification_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "TarificationEvent"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "TarificationEventNotificationRecipient" ADD CONSTRAINT "TarificationEventNotificationRecipient_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "TarificationEvent"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "TarificationEventNotificationRecipient" ADD CONSTRAINT "TarificationEventNotificationRecipient_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-

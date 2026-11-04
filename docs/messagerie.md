@@ -56,8 +56,8 @@ Le design repose sur ces constats. S'ils deviennent faux, la colonne de droite d
 ```
 TarificationCampaign 1─N StructureTarification 1─2 Conversation 1─N Message
                                                                      ├─ MessageReceipt                (lu, par utilisateur)
-                                                                     ├─ MessageNotification           (notifications traitées)
-                                                                     ├─ MessageNotificationRecipient  (signalé par mail, par utilisateur)
+                                                                     ├─ EmailNotification             (à signaler par mail, puis traité)
+                                                                     │    └─ EmailNotificationRecipient (signalé, par utilisateur)
                                                                      └─ FileUpload.messageId          (pièces jointes)
 ```
 
@@ -95,10 +95,6 @@ type ConversationAnchor = {
   label: string;
   date: Date;
   startsTagKey?: string;
-};
-type ConversationContext = {
-  tags: ConversationTag[];
-  anchors: ConversationAnchor[];
 };
 ```
 
@@ -145,7 +141,7 @@ Le mécanisme (Brevo, mail groupé par cron, trace, reprise, abandon) est décri
 
 - **Superadmins** : jamais notifiés (lecture seule).
 - **Regroupement** : deux passages par jour (voir [Emails](email.md#envoi-et-reprise)). Un agent qui suit 50 structures reçoit au plus deux mails par jour, chacun limité aux messages arrivés depuis le précédent ; un message lu à l'écran avant le passage n'est pas signalé.
-- **Trace** : `MessageNotification` (le message est traité, ou abandonné avec `abandonedAt`) et `MessageNotificationRecipient` (un message signalé à un destinataire, avec le `brevoMessageId` du mail qui le regroupe). Cron `notify-messages`.
+- **File et trace** : `EmailNotification`, écrite dans la transaction du message (en attente, traitée avec `processedAt`, ou abandonnée avec `abandonedAt`), et `EmailNotificationRecipient` (un message signalé à un destinataire, avec le `brevoMessageId` du mail qui le regroupe). Cron `notify-messages`.
 
 ## Socle commun
 

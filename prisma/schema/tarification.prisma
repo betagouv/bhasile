@@ -47,19 +47,17 @@ model TarificationDocument {
 
 // Journal en ajout seul ; les colonnes requises par type sont fixées par le registre des types d'événements
 model TarificationEvent {
-  id                      Int                                      @id @default(autoincrement())
-  structureTarification   StructureTarification                    @relation(fields: [structureTarificationId], references: [id], onDelete: Restrict)
+  id                      Int                   @id @default(autoincrement())
+  structureTarification   StructureTarification @relation(fields: [structureTarificationId], references: [id], onDelete: Restrict)
   structureTarificationId Int
   type                    TarificationEventType
-  author                  User?                                    @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  author                  User?                 @relation(fields: [authorId], references: [id], onDelete: Restrict)
   authorId                Int? // null = système (script de reprise)
   authorLevel             AuthorLevel?
-  document                TarificationDocument?                    @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  document                TarificationDocument? @relation(fields: [documentId], references: [id], onDelete: Restrict)
   documentId              Int?
   stepCode                TarificationStepCode?
   text                    String?
-  notification            TarificationEventNotification?
-  notifiedUsers           TarificationEventNotificationRecipient[]
 
   createdAt DateTime @default(now()) // horodatage serveur, fait foi
 
@@ -80,32 +78,6 @@ model TarificationDocumentOpening {
 
   @@id([documentId, userId])
   @@index([userId])
-  @@schema("public")
-}
-
-// Traitement des notifications d'un événement terminé (même sans destinataire) ; son absence = événement à notifier
-model TarificationEventNotification {
-  event       TarificationEvent @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  eventId     Int               @id
-  abandonedAt DateTime? // reprise abandonnée après 3 jours
-
-  createdAt DateTime @default(now())
-
-  @@schema("public")
-}
-
-// Un événement signalé à un destinataire dans un mail accepté par Brevo ; un mail regroupe messages et événements
-model TarificationEventNotificationRecipient {
-  event          TarificationEvent @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  eventId        Int
-  user           User              @relation(fields: [userId], references: [id], onDelete: Restrict)
-  userId         Int
-  email          String
-  brevoMessageId String // retrouve le mail dans les logs Brevo
-
-  createdAt DateTime @default(now())
-
-  @@id([eventId, userId])
   @@schema("public")
 }
 
