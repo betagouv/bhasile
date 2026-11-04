@@ -78,6 +78,10 @@ vi.mock("@/app/api/tarifications/tarification.repository", () => ({
     mockFindStructureTarificationCampaigns(...args),
 }));
 
+vi.mock("@/app/api/files/file.service", () => ({
+  copyStoredFile: vi.fn(),
+}));
+
 vi.mock("@/app/api/conversations/conversation.repository", () => ({
   upsertConversation: vi.fn(),
   createMessage: vi.fn(),
