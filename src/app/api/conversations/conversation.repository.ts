@@ -1,3 +1,4 @@
+import { DomainError } from "@/app/utils/domain-error.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
@@ -19,8 +20,35 @@ export const upsertConversation = (
     select: { id: true },
   });
 
-export const createMessage = (data: MessageCreateData): Promise<MessageDb> =>
-  prisma.message.create({ data, select: messageSelect });
+// Le rattachement conditionnel dans la transaction empêche deux messages de se disputer un même fichier
+export const createMessage = ({
+  fileKeys,
+  ...data
+}: MessageCreateData): Promise<MessageDb> =>
+  prisma.$transaction(async (tx) => {
+    const message = await tx.message.create({ data, select: { id: true } });
+    const attached = await tx.fileUpload.updateMany({
+      where: {
+        key: { in: fileKeys },
+        acteAdministratifId: null,
+        documentFinancierId: null,
+        controleId: null,
+        evaluationId: null,
+        operateurId: null,
+        messageId: null,
+      },
+      data: { messageId: message.id },
+    });
+    if (attached.count !== fileKeys.length) {
+      throw new DomainError(
+        "Une pièce jointe est introuvable ou déjà rattachée à un document"
+      );
+    }
+    return tx.message.findUniqueOrThrow({
+      where: { id: message.id },
+      select: messageSelect,
+    });
+  });
 
 type MessageCreateData = {
   conversationId: number;
@@ -28,6 +56,7 @@ type MessageCreateData = {
   authorLevel: AuthorLevel;
   text: string;
   tagKey: string | null;
+  fileKeys: string[];
 };
 
 export const findMessages = (

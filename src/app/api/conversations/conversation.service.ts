@@ -1,4 +1,4 @@
-import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
+import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
 import type { ConversationTag } from "@/types/conversation.type";
 
 import type { MessageDb } from "./conversation.db.type";
@@ -24,12 +24,14 @@ export const postMessage = async (
     author,
     text,
     tagKey,
+    fileKeys,
   }: {
     structureTarificationId: number;
     visibility: Visibility;
     author: ConversationParticipant;
     text: string;
     tagKey: string | null;
+    fileKeys: string[];
   },
   tags: ConversationTag[]
 ): Promise<MessageDb> => {
@@ -44,19 +46,20 @@ export const postMessage = async (
     authorLevel: author.level,
     text,
     tagKey,
+    fileKeys: [...new Set(fileKeys)],
   });
 };
 
 export const getMessages = ({
   structureTarificationId,
   visibility,
-  readerLevel,
+  isAgentReader,
 }: {
   structureTarificationId: number;
   visibility: Visibility;
-  readerLevel: AuthorLevel;
+  isAgentReader: boolean;
 }): Promise<MessageDb[]> => {
-  assertCanAccessVisibility(readerLevel, visibility);
+  assertCanAccessVisibility(isAgentReader, visibility);
   return findMessages(structureTarificationId, visibility);
 };
 
@@ -86,7 +89,7 @@ export const markMessagesAsRead = async ({
   reader: ConversationParticipant;
   messageIds: number[];
 }) => {
-  assertCanAccessVisibility(reader.level, visibility);
+  assertCanAccessVisibility(reader.level !== AuthorLevel.OPERATEUR, visibility);
   const conversationMessageIds = await findConversationMessageIds(
     structureTarificationId,
     visibility,

@@ -6,3 +6,7 @@ export type ConversationAnchor = {
   date: Date;
   startsTagKey?: string;
 };
+
+export const ConversationVisibility = ["SHARED", "AGENTS"] as const;
+
+export type ConversationVisibility = (typeof ConversationVisibility)[number];

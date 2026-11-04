@@ -1,7 +1,5 @@
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getCurrentYear } from "@/app/utils/now.util";
-import { canUpdateStructure } from "@/lib/casl";
-import { SessionUser } from "@/types/global";
 
 // La campagne N est ouverte du 1er janvier N-1 au 31 décembre N
 export const getOpenCampaignYears = (): number[] => {
@@ -20,17 +18,3 @@ export const assertCampaignOpen = (year: number): void => {
     );
   }
 };
-
-// Les grants nationaux n'ouvrent pas la tarification, même en édition
-export const canAccessTarification = (
-  user: SessionUser,
-  structure: {
-    id: number;
-    departementAdministratif: string;
-    operateurId: number | null;
-  }
-): boolean =>
-  canUpdateStructure(
-    { ...user, grants: user.grants.filter((grant) => !grant.isNational) },
-    structure
-  );

@@ -13,6 +13,9 @@ export const deleteTarificationTestData = async ({
   campaignYear: number;
 }): Promise<void> => {
   const conversationWhere = { structureTarification: { structureId } };
+  await prisma.fileUpload.deleteMany({
+    where: { message: { conversation: conversationWhere } },
+  });
   await prisma.messageReceipt.deleteMany({
     where: { message: { conversation: conversationWhere } },
   });

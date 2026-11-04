@@ -22,6 +22,7 @@ model Message {
   text           String
   tagKey         String?
   receipts       MessageReceipt[]
+  attachments    FileUpload[]
 
   createdAt DateTime @default(now())
 

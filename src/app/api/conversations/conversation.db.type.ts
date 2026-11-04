@@ -7,6 +7,16 @@ export const messageSelect = {
   authorLevel: true,
   createdAt: true,
   author: { select: { id: true, name: true } },
+  attachments: {
+    select: {
+      id: true,
+      key: true,
+      originalName: true,
+      mimeType: true,
+      fileSize: true,
+    },
+    orderBy: { id: "asc" },
+  },
 } satisfies Prisma.MessageSelect;
 
 export type MessageDb = Prisma.MessageGetPayload<{

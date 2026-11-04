@@ -56,7 +56,7 @@ const canAbilityUpdateStructure = (
     subject("Structure", { id, departementAdministratif } as Structure)
   );
 
-type StructureScope = {
+export type StructureScope = {
   id?: number;
   departementAdministratif?: string | null;
   operateurId?: number | null;

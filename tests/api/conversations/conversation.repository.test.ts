@@ -61,6 +61,7 @@ describe("conversation.repository db integration", () => {
       authorLevel: AuthorLevel.DEPARTEMENT,
       text,
       tagKey: null,
+      fileKeys: [],
     });
   };
 
@@ -131,5 +132,59 @@ describe("conversation.repository db integration", () => {
     const tagged = await updateMessageTagKey(message.id, "L48");
 
     expect(tagged).toMatchObject({ tagKey: "L48", text: "à étiqueter" });
+  });
+
+  const createAttachment = () =>
+    prisma.fileUpload.create({
+      data: {
+        key: `conversation-${randomUUID()}.pdf`,
+        mimeType: "application/pdf",
+        fileSize: 10,
+        originalName: "justificatif.pdf",
+      },
+    });
+
+  const postMessageWithFiles = async (fileKeys: string[]) => {
+    const conversation = await upsertConversation(
+      structureTarificationId,
+      Visibility.SHARED
+    );
+    return createMessage({
+      conversationId: conversation.id,
+      authorId,
+      authorLevel: AuthorLevel.DEPARTEMENT,
+      text: "",
+      tagKey: null,
+      fileKeys,
+    });
+  };
+
+  it("rattache les pièces jointes au message par leur clé", async () => {
+    const file = await createAttachment();
+
+    const message = await postMessageWithFiles([file.key]);
+
+    expect(message.attachments.map((attachment) => attachment.key)).toEqual([
+      file.key,
+    ]);
+  });
+
+  it("refuse une pièce jointe déjà rattachée, sans créer le message", async () => {
+    const file = await createAttachment();
+    const first = await postMessageWithFiles([file.key]);
+    const countConversationMessages = () =>
+      prisma.message.count({
+        where: { conversation: { structureTarificationId } },
+      });
+    const messageCountBefore = await countConversationMessages();
+
+    await expect(postMessageWithFiles([file.key])).rejects.toThrow(
+      "déjà rattachée"
+    );
+
+    expect(await countConversationMessages()).toBe(messageCountBefore);
+    expect(
+      await prisma.fileUpload.findUnique({ where: { key: file.key } })
+    ).toMatchObject({ messageId: first.id });
   });
 });

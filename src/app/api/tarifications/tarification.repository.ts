@@ -1,4 +1,11 @@
+import type { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+
+const structureScopeSelect = {
+  id: true,
+  departementAdministratif: true,
+  operateurId: true,
+} satisfies Prisma.StructureSelect;
 
 export const upsertStructureTarification = async (
   structureId: number,
@@ -35,17 +42,17 @@ export const findMessageTarification = (messageId: number) =>
         select: {
           structureTarification: {
             select: {
-              structure: {
-                select: {
-                  id: true,
-                  departementAdministratif: true,
-                  operateurId: true,
-                },
-              },
+              structure: { select: structureScopeSelect },
               campaign: { select: { year: true } },
             },
           },
         },
       },
     },
+  });
+
+export const findStructureScope = (structureId: number) =>
+  prisma.structure.findUnique({
+    where: { id: structureId },
+    select: structureScopeSelect,
   });

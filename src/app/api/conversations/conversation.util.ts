@@ -8,13 +8,13 @@ import {
 import type { ConversationTag } from "@/types/conversation.type";
 
 export const getAuthorLevel = ({
-  operateurId,
+  isAgent,
   grants,
 }: {
-  operateurId: number | null;
+  isAgent: boolean;
   grants: { scope: GrantScope; role: AccessRole }[];
 }): AuthorLevel => {
-  if (operateurId !== null) {
+  if (!isAgent) {
     return AuthorLevel.OPERATEUR;
   }
   const isRegionalEditor = grants.some(
@@ -25,12 +25,12 @@ export const getAuthorLevel = ({
 };
 
 export const assertCanAccessVisibility = (
-  level: AuthorLevel,
+  isAgent: boolean,
   visibility: Visibility
 ): void => {
-  if (level === AuthorLevel.OPERATEUR && visibility === Visibility.AGENTS) {
+  if (!isAgent && visibility === Visibility.AGENTS) {
     throw new DomainError(
-      "Les échanges entre agents ne sont pas accessibles à l'opérateur",
+      "Les échanges entre agents sont réservés aux agents",
       403
     );
   }
@@ -44,7 +44,7 @@ export const assertCanPostMessage = (
   }: { level: AuthorLevel; visibility: Visibility; tagKey: string | null },
   tags: ConversationTag[]
 ): void => {
-  assertCanAccessVisibility(level, visibility);
+  assertCanAccessVisibility(level !== AuthorLevel.OPERATEUR, visibility);
   if (tagKey !== null) {
     assertCanTag(level);
     assertTagKnown(tagKey, tags);
