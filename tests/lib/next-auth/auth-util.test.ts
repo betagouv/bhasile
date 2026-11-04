@@ -134,6 +134,23 @@ describe("getPermissionsFromSession", () => {
     ]);
   });
 
+  it("cherche l'utilisateur et ses contacts par son email normalisé", async () => {
+    mockGetUserWithGrantsByEmail.mockResolvedValue(
+      createUserWithGrants({ isActivated: false })
+    );
+
+    await getPermissionsFromSession({
+      user: { email: " Agent@Finistere.gouv.fr " },
+    } as Session);
+
+    expect(mockGetUserWithGrantsByEmail).toHaveBeenCalledWith({
+      email: "agent@finistere.gouv.fr",
+    });
+    expect(mockGetContactStructureIds).toHaveBeenCalledWith(
+      "agent@finistere.gouv.fr"
+    );
+  });
+
   it("ne donne rien à un email inconnu en base", async () => {
     mockGetUserWithGrantsByEmail.mockResolvedValue(null);
 

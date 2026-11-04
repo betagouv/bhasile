@@ -14,9 +14,8 @@ export const upsertUser = async ({
   const threshold = new Date(
     now.getTime() - UPDATE_INTERVAL_MINUTES * 60 * 1000
   );
-  const existing = await prisma.user.findFirst({
-    where: emailWhere(email),
-    orderBy: { id: "asc" },
+  const existing = await prisma.user.findUnique({
+    where: { email },
     select: {
       id: true,
       lastConnection: true,
@@ -50,9 +49,8 @@ export const upsertUser = async ({
 };
 
 export const findUserIdByEmail = (email: string) =>
-  prisma.user.findFirst({
-    where: emailWhere(email),
-    orderBy: { id: "asc" },
+  prisma.user.findUnique({
+    where: { email },
     select: { id: true },
   });
 
@@ -64,9 +62,8 @@ export const getUserWithGrantsByEmail = async ({
   if (!email) {
     return null;
   }
-  return prisma.user.findFirst({
-    where: emailWhere(email),
-    orderBy: { id: "asc" },
+  return prisma.user.findUnique({
+    where: { email },
     select: userWithGrantsSelect,
   });
 };
@@ -95,10 +92,6 @@ export const findUsersWithGrantsOnStructure = ({
     select: { ...userWithGrantsSelect, email: true },
   });
 };
-
-const emailWhere = (email: string) => ({
-  email: { equals: email, mode: "insensitive" as const },
-});
 
 type UpsertUserArgs = {
   name: string;

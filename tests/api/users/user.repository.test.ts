@@ -2,10 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import {
-  findUsersWithGrantsOnStructure,
-  getUserWithGrantsByEmail,
-} from "@/app/api/users/user.repository";
+import { findUsersWithGrantsOnStructure } from "@/app/api/users/user.repository";
 import { AccessRole, GrantScope } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
@@ -104,13 +101,5 @@ describe("user repository", () => {
     expect(userIds).toContain(structureUserId);
     expect(userIds).not.toContain(deactivatedUserId);
     expect(userIds).not.toContain(otherDepartementUserId);
-  });
-
-  it("retrouve un utilisateur par son email sans tenir compte de la casse", async () => {
-    const user = await getUserWithGrantsByEmail({
-      email: `PERIMETER-${testId}@Manche.gouv.fr`,
-    });
-
-    expect(user?.id).toBe(perimeterUserId);
   });
 });
