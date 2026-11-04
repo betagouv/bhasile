@@ -170,6 +170,8 @@ La ligne du postdeploy est à retirer à la PR suivante.
 
 Le reste de ce document décrit les droits appliqués aujourd'hui. Cette refonte les remplace en deux PR : la première (#1773) ajoute le modèle sans rien changer aux droits, la seconde (#1774) bascule et réécrit ce document.
 
+![Périmètres et binômes : modèle cible](perimeters_and_grants.png)
+
 ### Choix métier
 
 - **Activation** : un compte non activé n'a accès à rien. Désactiver ne supprime rien, et la date reste affichée (messagerie). Les droits de contact ne demandent pas d'activation (choix encore à valider par le métier, ouverture après #1742) ; un compte désactivé les perd.
