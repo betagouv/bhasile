@@ -129,13 +129,13 @@ Le mécanisme (Brevo, mail groupé par cron, trace, reprise, abandon) est décri
 
 - **Un seul type d'événement, le message**, et il notifie.
 - **Contenu** : un mail par destinataire qui liste ses conversations ayant des messages ni lus ni déjà signalés, chacune avec sa structure, sa campagne, son canal, son nombre de messages et son lien ; ni texte, ni pièce jointe. Template `BREVO_MESSAGE_TEMPLATE_ID`, paramètres `nombre` (total) et `conversations` (`structure`, `campagne`, `canal`, `lien` calculés par `buildNotificationParams`, et `nombre`).
-- **Notifiés par défaut, sauf l'auteur**, selon le `Grant.scope` en base (la session ne distingue pas région et département) :
+- **Notifiés par défaut, sauf l'auteur**, comptes activés seulement, selon le scope du périmètre en base (la session ne distingue pas région et département) :
 
-  | Destinataire                                      | Conversation partagée                    | Conversation agents |
-  | ------------------------------------------------- | ---------------------------------------- | ------------------- |
-  | Agent éditeur, grant `DEPARTEMENT` ou `STRUCTURE` | Oui                                      | Oui                 |
-  | Agent, grant `REGION`                             | Non                                      | Non                 |
-  | Utilisateur de l'opérateur                        | Oui, une fois qu'il a accès (pas encore) | —                   |
+  | Destinataire                                       | Conversation partagée                    | Conversation agents |
+  | -------------------------------------------------- | ---------------------------------------- | ------------------- |
+  | Agent d'un périmètre `DEPARTEMENT` de la structure | Oui                                      | Oui                 |
+  | Agent d'un périmètre `REGION` ou `NATIONAL`        | Non                                      | Non                 |
+  | Utilisateur de l'opérateur                         | Oui, une fois qu'il a accès (pas encore) | —                   |
 
   La DREETS n'est notifiée que des actions attendues d'elle, qui relèvent de la gestion des documents (une relecture demandée). C'est la DDETS qui mène les échanges.
 
