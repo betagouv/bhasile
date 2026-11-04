@@ -39,6 +39,7 @@ export const createMessage = ({
         evaluationId: null,
         operateurId: null,
         messageId: null,
+        tarificationDocument: null,
       },
       data: { messageId: message.id },
     });
