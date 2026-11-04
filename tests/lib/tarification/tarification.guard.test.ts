@@ -198,11 +198,11 @@ describe("assertCanRecordEvent", () => {
     const journal = createJournal();
 
     expect(() =>
-      record(journal, { type: TarificationEventType.OUT_OF_BHASILE_DECLARED })
+      record(journal, { type: TarificationEventType.OUT_OF_APP_DECLARED })
     ).toThrow("pas valide");
     expect(() =>
       record(journal, {
-        type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+        type: TarificationEventType.OUT_OF_APP_DECLARED,
         text: "Courrier",
         ...OPERATEUR_AUTHOR,
       })
@@ -430,6 +430,29 @@ describe("assertCanRecordEvent", () => {
       );
     });
 
+    it("refuse de retirer un dépôt de l'opérateur", () => {
+      const journal = createJournal();
+      const documentId = depositDocument(journal, {
+        types: ["REPONSE_CONTRADICTOIRE"],
+        at: "2028-04-10T10:00:00Z",
+      });
+
+      expect(() => recordWithdrawal(journal, documentId)).toThrow(
+        "ne se retire pas"
+      );
+    });
+
+    it("laisse retirer un document de l'opérateur déposé par un agent à sa place", () => {
+      const journal = createJournal();
+      const documentId = depositDocument(journal, {
+        types: ["CA"],
+        at: "2028-04-10T10:00:00Z",
+        authorLevel: AuthorLevel.DEPARTEMENT,
+      });
+
+      expect(() => recordWithdrawal(journal, documentId)).not.toThrow();
+    });
+
     it("refuse de retirer un document jamais partagé", () => {
       const journal = createJournal();
 
@@ -533,14 +556,14 @@ describe("assertCanRecordEvent", () => {
     const journal = createJournal();
     const declare = () =>
       record(journal, {
-        type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+        type: TarificationEventType.OUT_OF_APP_DECLARED,
         text: "Courrier",
       });
 
     expect(declare).not.toThrow();
 
     addEvent(journal, {
-      type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+      type: TarificationEventType.OUT_OF_APP_DECLARED,
       text: "Courrier",
       createdAt: NOW,
     });

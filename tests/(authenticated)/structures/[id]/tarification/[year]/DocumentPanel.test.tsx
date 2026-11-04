@@ -48,7 +48,7 @@ const buildVersion = (
   isShared: false,
   isWithdrawn: false,
   withdrawalReason: null,
-  reviewRequestText: null,
+  changesRequests: [],
   ...overrides,
 });
 

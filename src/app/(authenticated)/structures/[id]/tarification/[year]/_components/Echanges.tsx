@@ -21,6 +21,7 @@ export const Echanges = ({
   year,
   currentUserId,
   isOperateur,
+  canParticipate,
   isCampaignOpen,
   tags,
   anchorsByVisibility,
@@ -56,6 +57,7 @@ export const Echanges = ({
       year={year}
       visibility={visibility}
       currentUserId={currentUserId}
+      canParticipate={canParticipate}
       isCampaignOpen={isCampaignOpen}
       tags={tags}
       anchors={anchorsByVisibility[visibility]}
@@ -109,6 +111,7 @@ type Props = {
   year: number;
   currentUserId: number;
   isOperateur: boolean;
+  canParticipate: boolean;
   isCampaignOpen: boolean;
   tags: ConversationTag[];
   anchorsByVisibility: Record<ConversationVisibility, ConversationAnchor[]>;

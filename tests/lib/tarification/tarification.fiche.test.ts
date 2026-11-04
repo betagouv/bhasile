@@ -14,6 +14,7 @@ import {
 import {
   computeFicheCopies,
   computeFicheCopyChanges,
+  getDeletableFicheCopies,
 } from "@/lib/tarification/tarification.fiche";
 
 describe("computeFicheCopies", () => {
@@ -139,5 +140,87 @@ describe("computeFicheCopyChanges", () => {
       copiesToCreate: [newCopy],
       copiesToDelete: [existingCopy],
     });
+  });
+});
+
+describe("getDeletableFicheCopies", () => {
+  const depositCa = (journal: ReturnType<typeof createJournal>) =>
+    depositDocument(journal, { types: ["CA"], at: "2026-06-01T10:00:00Z" });
+
+  const toExistingCopy = (documentId: number) => ({
+    id: 9,
+    documentId,
+    target: "DOCUMENT_FINANCIER" as const,
+    category: "COMPTE_ADMINISTRATIF_SOUMIS",
+  });
+
+  const toCopyWithoutFile = (documentId: number) => ({
+    documentId,
+    target: "DOCUMENT_FINANCIER" as const,
+    category: "COMPTE_ADMINISTRATIF_SOUMIS" as const,
+    year: 2026,
+  });
+
+  it("garde un document remplacé tant que la copie de son remplaçant manque", () => {
+    const journal = createJournal();
+    const replacedCopy = toExistingCopy(depositCa(journal));
+
+    expect(
+      getDeletableFicheCopies(journal, {
+        copiesToDelete: [replacedCopy],
+        copiesWithoutFile: [toCopyWithoutFile(depositCa(journal))],
+      })
+    ).toEqual([]);
+  });
+
+  it("supprime un document remplacé dès que la copie de son remplaçant existe", () => {
+    const journal = createJournal();
+    const replacedCopy = toExistingCopy(depositCa(journal));
+
+    expect(
+      getDeletableFicheCopies(journal, {
+        copiesToDelete: [replacedCopy],
+        copiesWithoutFile: [],
+      })
+    ).toEqual([replacedCopy]);
+  });
+
+  it("supprime un document retiré même si la copie suivante manque", () => {
+    const journal = createJournal();
+    const previousDocumentId = depositCa(journal);
+    const withdrawnDocumentId = depositCa(journal);
+    addEvent(journal, {
+      type: TarificationEventType.DOCUMENT_WITHDRAWN,
+      documentId: withdrawnDocumentId,
+      text: "Erreur de structure",
+      createdAt: new Date("2026-06-02T10:00:00Z"),
+    });
+    const withdrawnCopy = toExistingCopy(withdrawnDocumentId);
+
+    expect(
+      getDeletableFicheCopies(journal, {
+        copiesToDelete: [withdrawnCopy],
+        copiesWithoutFile: [toCopyWithoutFile(previousDocumentId)],
+      })
+    ).toEqual([withdrawnCopy]);
+  });
+
+  it("supprime une copie dont la catégorie n'a pas de remplaçant en échec", () => {
+    const journal = createJournal();
+    const replacedCopy = toExistingCopy(depositCa(journal));
+
+    expect(
+      getDeletableFicheCopies(journal, {
+        copiesToDelete: [replacedCopy],
+        copiesWithoutFile: [
+          {
+            documentId: depositCa(journal),
+            target: "DOCUMENT_FINANCIER",
+            category: "BUDGET_PREVISIONNEL_DEMANDE",
+            year: 2027,
+          },
+        ],
+      })
+    ).toEqual([replacedCopy]);
   });
 });

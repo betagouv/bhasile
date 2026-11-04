@@ -77,7 +77,7 @@ export const computeSectionActions = ({
 export const canDeclareOutOfBhasile = (context: ActionContext): boolean =>
   context.isEligible &&
   canRecord(context, {
-    type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+    type: TarificationEventType.OUT_OF_APP_DECLARED,
     text: PLACEHOLDER_TEXT,
   });
 

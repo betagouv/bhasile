@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import { formatInstantDate } from "@/lib/tarification/tarification.date";
+import { formatInstantDate } from "@/app/utils/date.util";
 import type { SectionVersion } from "@/lib/tarification/tarification.section";
 
 export const DocumentVersionDetails = ({
@@ -21,11 +21,12 @@ export const DocumentVersionDetails = ({
         Motif du retrait : {version.withdrawalReason}
       </p>
     )}
-    {!version.isWithdrawn && version.reviewRequestText && (
-      <p className="mb-0 text-sm">
-        Modifications demandées : {version.reviewRequestText}
-      </p>
-    )}
+    {!version.isWithdrawn &&
+      version.changesRequests.map(({ id, text, authorName }) => (
+        <p key={id} className="mb-0 text-sm">
+          Modifications demandées{authorName && ` par ${authorName}`} : {text}
+        </p>
+      ))}
   </div>
 );
 

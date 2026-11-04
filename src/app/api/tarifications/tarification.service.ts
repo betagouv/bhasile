@@ -18,19 +18,21 @@ import {
   getUserWithGrantsByEmail,
 } from "@/app/api/users/user.repository";
 import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
+import { getDepartementTimeZone, toCivilDate } from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   AuthorLevel,
   TarificationDocumentStatus,
-  type TarificationDocumentType,
+  TarificationDocumentType,
   TarificationEventType,
   type TarificationStepCode,
   type Visibility,
 } from "@/generated/prisma/enums";
 import {
   canAccessTarification,
+  canParticipateInTarification,
   isAgent,
   type StructureScope,
 } from "@/lib/casl";
@@ -41,12 +43,9 @@ import {
 } from "@/lib/tarification/tarification.campaign";
 import { computeTarificationState } from "@/lib/tarification/tarification.compute";
 import {
-  getDepartementTimeZone,
-  toCivilDate,
-} from "@/lib/tarification/tarification.date";
-import {
   computeFicheCopies,
   computeFicheCopyChanges,
+  getDeletableFicheCopies,
 } from "@/lib/tarification/tarification.fiche";
 import {
   assertCanDepositDocument,
@@ -77,7 +76,9 @@ import {
   findStructureTarificationJournal,
   findTarificationCampaign,
   runInTarificationTransaction,
+  type TarificationDocumentCreate,
   type TarificationJournalSource,
+  type TarificationTransaction,
   upsertStructureTarification,
 } from "./tarification.repository";
 import {
@@ -92,6 +93,7 @@ export const getTarificationParticipant = async (
   user: SessionUser,
   structureId: number
 ): Promise<TarificationParticipant> => {
+  assertCanParticipateInTarification(user);
   const structure = await findStructureScopeOrThrow(structureId);
   return resolveParticipant(user, structure);
 };
@@ -122,6 +124,7 @@ export const getTarificationOverview = async (
     codeBhasile: structure.codeBhasile,
     participant,
     isOperateur,
+    canParticipate: canParticipateInTarification(user),
     openCampaignYears,
     campaignYears: getSelectableCampaignYears({
       openCampaignYears,
@@ -231,6 +234,7 @@ export const changeTarificationMessageTag = async ({
   tagKey: string | null;
   user: SessionUser;
 }): Promise<MessageDb> => {
+  assertCanParticipateInTarification(user);
   const message = await findMessageTarification(messageId);
   if (!message) {
     throw new DomainError("Message introuvable", 404);
@@ -286,19 +290,13 @@ export const depositTarificationDocument = async ({
   const document = await runInTarificationTransaction(
     structureId,
     year,
-    async (transaction) => {
-      const { journal } = await loadTarificationJournal(year, transaction);
-      const now = getNow();
-      assertCanDepositDocument({
-        journal,
-        authorLevel: author.level,
+    (transaction) =>
+      createDocumentInTransaction(transaction, year, {
+        fileKey,
         types,
         status,
-        phase: getCampaignPhase(year, now, journal.timeZone),
-        now,
-      });
-      return transaction.createDocument({ fileKey, types, status, author });
-    }
+        author,
+      })
   );
   if (status === TarificationDocumentStatus.SHARED) {
     await trySyncFicheCopies(structureId, year);
@@ -312,6 +310,7 @@ export const recordTarificationEvent = async ({
   author,
   type,
   documentId,
+  fileKey = null,
   stepCode,
   text,
 }: {
@@ -320,23 +319,32 @@ export const recordTarificationEvent = async ({
   author: TarificationParticipant;
   type: TarificationEventType;
   documentId: number | null;
+  fileKey?: string | null;
   stepCode: TarificationStepCode | null;
   text: string | null;
 }): Promise<{ id: number }> => {
   const structure = await findStructureScopeOrThrow(structureId);
   assertStructureEligible(structure);
-  const event: Omit<TarificationJournalEvent, "id" | "createdAt"> = {
-    type,
-    authorId: author.id,
-    authorLevel: author.level,
-    documentId,
-    stepCode,
-    text,
-  };
   const createdEvent = await runInTarificationTransaction(
     structureId,
     year,
     async (transaction) => {
+      const responseDocument = fileKey
+        ? await createDocumentInTransaction(transaction, year, {
+            fileKey,
+            types: [TarificationDocumentType.REPONSE_CONTRADICTOIRE],
+            status: TarificationDocumentStatus.SHARED,
+            author,
+          })
+        : null;
+      const event: Omit<TarificationJournalEvent, "id" | "createdAt"> = {
+        type,
+        authorId: author.id,
+        authorLevel: author.level,
+        documentId: responseDocument?.id ?? documentId,
+        stepCode,
+        text,
+      };
       const { journal } = await loadTarificationJournal(year, transaction);
       const now = getNow();
       assertCanRecordEvent({
@@ -386,7 +394,13 @@ export const syncFicheCopies = async (
       computeFicheCopies(lockedJournal),
       await transaction.findFicheCopies()
     );
-    for (const copy of changes.copiesToDelete) {
+    const deletableCopies = getDeletableFicheCopies(lockedJournal, {
+      copiesToDelete: changes.copiesToDelete,
+      copiesWithoutFile: changes.copiesToCreate.filter(
+        (copy) => !storedKeys.has(getFicheCopyKey(copy))
+      ),
+    });
+    for (const copy of deletableCopies) {
       await transaction.deleteFicheCopy(copy);
     }
     for (const copy of changes.copiesToCreate) {
@@ -402,7 +416,7 @@ export const syncFicheCopies = async (
   });
 };
 
-// Une copie qui échoue ne bloque pas le reste : un document retiré doit quitter la fiche même si S3 est en panne
+// Une copie qui échoue ne bloque pas le reste : voir getDeletableFicheCopies
 const storeFicheCopies = async (
   journal: TarificationJournalRead,
   copies: FicheCopy[]
@@ -458,6 +472,24 @@ const trySyncFicheCopies = async (
   }
 };
 
+const createDocumentInTransaction = async (
+  transaction: TarificationTransaction,
+  year: number,
+  { fileKey, types, status, author }: TarificationDocumentCreate
+): Promise<{ id: number }> => {
+  const { journal } = await loadTarificationJournal(year, transaction);
+  const now = getNow();
+  assertCanDepositDocument({
+    journal,
+    authorLevel: author.level,
+    types,
+    status,
+    phase: getCampaignPhase(year, now, journal.timeZone),
+    now,
+  });
+  return transaction.createDocument({ fileKey, types, status, author });
+};
+
 export const authorizeTarificationDocument = async ({
   user,
   document,
@@ -507,9 +539,9 @@ export const notifyPendingTarificationMessages = async (): Promise<{
   abandonedCount: number;
 }> => {
   const abandonedCount = await abandonStaleNotifications();
-  const messages = await findPendingMessageContexts();
+  const notifications = await findPendingMessageContexts();
   const structuresById = new Map(
-    messages.map(({ conversation }) => [
+    notifications.map(({ message: { conversation } }) => [
       conversation.structureTarification.structure.id,
       conversation.structureTarification.structure,
     ])
@@ -529,10 +561,11 @@ export const notifyPendingTarificationMessages = async (): Promise<{
     )
   );
   const { sentCount, failedCount } = await sendMessageDigests(
-    messages.map((message) => {
+    notifications.map(({ id: notificationId, message }) => {
       const { structure, campaign } =
         message.conversation.structureTarification;
       return {
+        notificationId,
         messageId: message.id,
         conversationId: message.conversation.id,
         recipients: getMessageRecipients(
@@ -601,6 +634,15 @@ const resolveParticipant = async (
   };
 };
 
+const assertCanParticipateInTarification = (user: SessionUser): void => {
+  if (!canParticipateInTarification(user)) {
+    throw new DomainError(
+      "Les superadmins consultent les échanges sans y participer",
+      403
+    );
+  }
+};
+
 const assertCanAccessTarification = (
   user: SessionUser,
   structure: StructureScope
@@ -632,6 +674,7 @@ export type TarificationOverview = {
   codeBhasile: string;
   participant: TarificationParticipant;
   isOperateur: boolean;
+  canParticipate: boolean;
   openCampaignYears: number[];
   campaignYears: number[];
   tags: ConversationTag[];

@@ -58,5 +58,5 @@ const EVENT_LABELS: Record<TarificationEventType, string> = {
   STEP_MARKED_NOT_APPLICABLE: "Sans objet",
   L48_ACCEPTED: "L48 acceptée",
   L48_CONTESTED: "L48 contestée",
-  OUT_OF_BHASILE_DECLARED: "Déclarée hors Bhasile",
+  OUT_OF_APP_DECLARED: "Déclarée hors Bhasile",
 };

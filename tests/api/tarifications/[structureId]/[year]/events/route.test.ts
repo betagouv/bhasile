@@ -67,6 +67,7 @@ describe("POST /api/tarifications/[structureId]/[year]/events", () => {
       author: participant,
       type: "DOCUMENT_SHARED",
       documentId: 1,
+      fileKey: null,
       stepCode: null,
       text: null,
     });
@@ -82,6 +83,33 @@ describe("POST /api/tarifications/[structureId]/[year]/events", () => {
 
     expect(mockRecordTarificationEvent.mock.calls[0][0].text).toBe("Oui");
     expect(mockRecordTarificationEvent.mock.calls[1][0].text).toBeNull();
+  });
+
+  it("transmet le fichier joint à une réponse à la L48", async () => {
+    const response = await postEvent({
+      type: "L48_CONTESTED",
+      text: "Montant erroné",
+      fileKey: "reponse.pdf",
+    });
+
+    expect(response.status).toBe(201);
+    expect(mockRecordTarificationEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "L48_CONTESTED",
+        fileKey: "reponse.pdf",
+        documentId: null,
+      })
+    );
+  });
+
+  it.each([
+    { type: "DOCUMENT_SHARED", documentId: 1, fileKey: "piece.pdf" },
+    { type: "L48_ACCEPTED", documentId: 1, fileKey: "reponse.pdf" },
+  ])("refuse un fichier hors d'une réponse à la L48 : $type", async (body) => {
+    const response = await postEvent(body);
+
+    expect(response.status).toBe(400);
+    expect(mockRecordTarificationEvent).not.toHaveBeenCalled();
   });
 
   it("ne laisse pas écrire un dépôt par cette route", async () => {

@@ -48,7 +48,7 @@ describe("buildConversationAnchors", () => {
       createdAt: new Date(AT),
     });
     addEvent(journal, {
-      type: TarificationEventType.OUT_OF_BHASILE_DECLARED,
+      type: TarificationEventType.OUT_OF_APP_DECLARED,
       text: "Motif",
       createdAt: new Date(LATER),
     });

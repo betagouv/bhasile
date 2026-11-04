@@ -4,6 +4,7 @@ import {
   isAgentUser,
   toSessionGrant,
 } from "@/app/api/users/user.util";
+import { getDepartementTimeZone } from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
@@ -15,7 +16,6 @@ import {
 } from "@/generated/prisma/enums";
 import { canAccessTarification } from "@/lib/casl";
 import { getCampaignPhase } from "@/lib/tarification/tarification.campaign";
-import { getDepartementTimeZone } from "@/lib/tarification/tarification.date";
 import type { NotificationRecipient } from "@/types/conversation.type";
 import type { SessionPermissions } from "@/types/global";
 

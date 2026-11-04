@@ -24,6 +24,7 @@ export const Conversation = ({
   year,
   visibility,
   currentUserId,
+  canParticipate,
   isCampaignOpen,
   tags,
   anchors,
@@ -38,14 +39,14 @@ export const Conversation = ({
     markAsRead,
     changeTag,
   } = useConversationMessages({ structureId, year, visibility });
-  const canTagMessages = canTag && isCampaignOpen;
+  const canTagMessages = canTag && canParticipate && isCampaignOpen;
 
   const requestedReceiptIdsRef = useRef(new Set<number>());
   const listRef = useRef<HTMLOListElement>(null);
   const isAtBottomRef = useRef(true);
 
   useEffect(() => {
-    if (!messages) {
+    if (!messages || !canParticipate) {
       return;
     }
     const requestedReceiptIds = requestedReceiptIdsRef.current;
@@ -68,7 +69,7 @@ export const Conversation = ({
         requestedReceiptIds.delete(messageId)
       );
     });
-  }, [messages, currentUserId, markAsRead]);
+  }, [messages, canParticipate, currentUserId, markAsRead]);
 
   useEffect(() => {
     const list = listRef.current;
@@ -161,9 +162,8 @@ export const Conversation = ({
           </ol>
         )}
       </div>
-      {!isCampaignOpen ? (
-        <ReadOnlyNotice year={year} />
-      ) : (
+      {!isCampaignOpen && <ReadOnlyNotice year={year} />}
+      {isCampaignOpen && canParticipate && (
         <MessageComposer
           tags={tags}
           canTag={canTagMessages}
@@ -182,6 +182,7 @@ type Props = {
   year: number;
   visibility: ConversationVisibility;
   currentUserId: number;
+  canParticipate: boolean;
   isCampaignOpen: boolean;
   tags: ConversationTag[];
   anchors: ConversationAnchor[];
