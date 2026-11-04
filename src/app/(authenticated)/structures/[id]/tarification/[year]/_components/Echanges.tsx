@@ -6,7 +6,10 @@ import { ReactElement } from "react";
 
 import { useSearchParamsNavigation } from "@/app/hooks/useSearchParamsNavigation";
 import { useMessageDraft } from "@/hooks/useMessageDraft";
-import { ConversationVisibility } from "@/types/conversation.type";
+import {
+  ConversationTag,
+  ConversationVisibility,
+} from "@/types/conversation.type";
 
 import { Conversation } from "./Conversation";
 
@@ -17,6 +20,7 @@ export const Echanges = ({
   isOperateur,
   canParticipate,
   isCampaignOpen,
+  tags,
 }: Props): ReactElement => {
   const searchParams = useSearchParams();
   const navigateWithParams = useSearchParamsNavigation();
@@ -47,6 +51,8 @@ export const Echanges = ({
       currentUserId={currentUserId}
       canParticipate={canParticipate}
       isCampaignOpen={isCampaignOpen}
+      tags={tags}
+      canTag={!isOperateur}
       draft={draft}
     />
   );
@@ -83,4 +89,5 @@ type Props = {
   isOperateur: boolean;
   canParticipate: boolean;
   isCampaignOpen: boolean;
+  tags: ConversationTag[];
 };

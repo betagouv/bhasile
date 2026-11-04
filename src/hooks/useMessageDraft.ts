@@ -6,14 +6,16 @@ import { useMessageAttachments } from "./useMessageAttachments";
 
 export const useMessageDraft = () => {
   const [text, setText] = useState("");
+  const [tagKey, setTagKey] = useState<string | null>(null);
   const attachments = useMessageAttachments();
 
   const clear = () => {
     setText("");
+    setTagKey(null);
     attachments.clearAttachments();
   };
 
-  return { text, setText, attachments, clear };
+  return { text, setText, tagKey, setTagKey, attachments, clear };
 };
 
 export type MessageDraft = ReturnType<typeof useMessageDraft>;

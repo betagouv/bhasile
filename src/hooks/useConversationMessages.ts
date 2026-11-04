@@ -94,14 +94,16 @@ export const useConversationMessages = ({
     async ({
       text,
       fileKeys,
+      tagKey,
     }: {
       text: string;
       fileKeys: string[];
+      tagKey: string | null;
     }): Promise<void> => {
       const response = await fetch(messagesUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visibility, text, fileKeys }),
+        body: JSON.stringify({ visibility, text, fileKeys, tagKey }),
       });
       if (!response.ok) {
         throw new ApiError(await extractApiError(response), response.status);
@@ -126,5 +128,39 @@ export const useConversationMessages = ({
     [messagesUrl, visibility, refresh]
   );
 
-  return { messages, hasLoadingError, hasLostAccess, postMessage, markAsRead };
+  const changeTag = useCallback(
+    async (messageId: number, tagKey: string | null): Promise<void> => {
+      setMessages(
+        (current) =>
+          current?.map((message) =>
+            message.id === messageId ? { ...message, tagKey } : message
+          ) ?? null
+      );
+      try {
+        const response = await fetch(
+          `/api/tarifications/messages/${messageId}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tagKey }),
+          }
+        );
+        if (!response.ok) {
+          throw new ApiError(await extractApiError(response), response.status);
+        }
+      } finally {
+        refresh();
+      }
+    },
+    [refresh]
+  );
+
+  return {
+    messages,
+    hasLoadingError,
+    hasLostAccess,
+    postMessage,
+    markAsRead,
+    changeTag,
+  };
 };
