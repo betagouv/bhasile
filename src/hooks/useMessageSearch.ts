@@ -25,14 +25,11 @@ export const useMessageSearch = ({
     () => findSearchResultIds(messages ?? [], searchWords),
     [messages, searchWords]
   );
-  const resultIdSet = useMemo(() => new Set(resultIds), [resultIds]);
   const [currentResultId, setCurrentResultId] = useState<number | null>(null);
 
-  const isCurrentResultKept =
-    currentResultId !== null && resultIdSet.has(currentResultId);
-  const nextResultId = isCurrentResultKept
-    ? currentResultId
-    : (resultIds[0] ?? null);
+  const currentIndex = resultIds.indexOf(currentResultId ?? -1);
+  const nextResultId =
+    currentIndex === -1 ? (resultIds[0] ?? null) : currentResultId;
   if (nextResultId !== currentResultId) {
     setCurrentResultId(nextResultId);
   }
@@ -47,7 +44,6 @@ export const useMessageSearch = ({
     if (resultIds.length === 0) {
       return;
     }
-    const currentIndex = resultIds.indexOf(currentResultId ?? -1);
     const nextIndex =
       (currentIndex + step + resultIds.length) % resultIds.length;
     setCurrentResultId(resultIds[nextIndex]);
@@ -57,10 +53,9 @@ export const useMessageSearch = ({
   return {
     searchWords,
     resultCount: resultIds.length,
-    resultPosition:
-      currentResultId === null ? 0 : resultIds.indexOf(currentResultId) + 1,
+    resultPosition: currentIndex + 1,
     currentResultId,
-    isResult: (messageId: number) => resultIdSet.has(messageId),
+    isResult: (messageId: number) => resultIds.includes(messageId),
     goToOlderResult: () => moveToResult(1),
     goToNewerResult: () => moveToResult(-1),
   };

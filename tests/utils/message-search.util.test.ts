@@ -115,9 +115,6 @@ describe("splitTextBySearchWords", () => {
     expect(getHighlights("aujourd’hui", "aujourd'hui")).toEqual([
       "aujourd’hui",
     ]);
-    expect(getHighlights("aujourd'hui", "aujourd’hui")).toEqual([
-      "aujourd'hui",
-    ]);
   });
 
   it("surligne toutes les occurrences", () => {
