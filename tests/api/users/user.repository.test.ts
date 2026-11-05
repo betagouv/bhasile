@@ -28,8 +28,13 @@ describe("user repository", () => {
         prisma.perimeter.create({
           data: {
             name: `DDETS ${departementNumero} ${testId}`,
-            scope: GrantScope.DEPARTEMENT,
-            departementNumero,
+            grants: {
+              create: {
+                role: AccessRole.ADMIN,
+                scope: GrantScope.DEPARTEMENT,
+                departementNumero,
+              },
+            },
           },
         })
       )
