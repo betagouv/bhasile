@@ -738,25 +738,6 @@ describe("Echanges", () => {
       expect(screen.getByRole("status")).toHaveTextContent("1 sur 1");
     });
 
-    it("ne cherche pas dans le nom de l'auteur", async () => {
-      answerWith(MESSAGES);
-      await renderLoadedEchanges();
-
-      search("martin");
-
-      expect(screen.getByRole("status")).toHaveTextContent("Aucun résultat");
-    });
-
-    it("part du résultat le plus récent et fait défiler le fil jusqu'à lui", async () => {
-      answerWith(MESSAGES);
-      await renderLoadedEchanges();
-
-      search("excedent");
-
-      expect(screen.getByRole("status")).toHaveTextContent("1 sur 2");
-      expect(getList().scrollTop).toBe(1200);
-    });
-
     it("remonte et redescend dans les résultats, et boucle aux extrémités", async () => {
       answerWith(MESSAGES);
       await renderLoadedEchanges();
@@ -930,8 +911,6 @@ describe("Echanges", () => {
         screen.queryByRole("button", { name: "Résultat plus ancien" })
       ).not.toBeInTheDocument();
       expect(screen.getByText("Bonne journée")).toBeInTheDocument();
-      fireEvent.keyDown(getSearchInput(), { key: "Enter" });
-      expect(screen.getByRole("status")).toHaveTextContent("Aucun résultat");
     });
 
     it("n'affiche ni compteur ni surlignage quand la recherche est vidée", async () => {

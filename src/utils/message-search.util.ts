@@ -47,8 +47,6 @@ export const splitTextBySearchWords = (
   return segments;
 };
 
-export type TextSegment = { text: string; isMatch: boolean };
-
 const doesMessageMatch = (
   message: MessageApiRead,
   searchWords: string[]
@@ -79,7 +77,7 @@ const findMatchRanges = (text: string, searchWords: string[]): TextRange[] => {
 };
 
 // La normalisation change les longueurs (« œ » donne « oe ») : chaque caractère normalisé garde sa position d'origine pour pouvoir surligner
-const normalizeForSearch = (text: string): NormalizedText => {
+const normalizeForSearch = (text: string) => {
   let normalizedText = "";
   const sourceRanges: TextRange[] = [];
   let position = 0;
@@ -118,6 +116,6 @@ const mergeRanges = (ranges: TextRange[]): TextRange[] => {
   return mergedRanges;
 };
 
-type TextRange = { start: number; end: number };
+type TextSegment = { text: string; isMatch: boolean };
 
-type NormalizedText = { normalizedText: string; sourceRanges: TextRange[] };
+type TextRange = { start: number; end: number };
