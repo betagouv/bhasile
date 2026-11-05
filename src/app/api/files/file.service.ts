@@ -39,7 +39,6 @@ const getFileParents = (file: FileWithParents): FileParent[] => {
     [file.controleId, file.controle],
     [file.evaluationId, file.evaluation],
     [file.operateurId, { operateurId: file.operateurId }],
-    // Une pièce jointe de message n'appartient à aucune entité de formulaire
     [file.messageId, {}],
   ];
   return parents.flatMap(([parentId, parent]) =>
