@@ -7,6 +7,7 @@ import Loader from "@/app/components/ui/Loader";
 import { formatDateTime } from "@/app/utils/date.util";
 import { useConversationMessages } from "@/hooks/useConversationMessages";
 import { MessageDraft } from "@/hooks/useMessageDraft";
+import { useMessageSearch } from "@/hooks/useMessageSearch";
 import {
   ConversationAnchor,
   ConversationTag,
@@ -17,6 +18,7 @@ import { buildConversationThread } from "@/utils/conversation.util";
 import { ConversationSummary } from "./ConversationSummary";
 import { MessageComposer } from "./MessageComposer";
 import { MessageItem } from "./MessageItem";
+import { MessageSearchBar } from "./MessageSearchBar";
 import { ReadOnlyNotice } from "./ReadOnlyNotice";
 
 export const Conversation = ({
@@ -30,6 +32,8 @@ export const Conversation = ({
   anchors,
   canTag,
   draft,
+  searchQuery,
+  onSearchQueryChange,
 }: Props): ReactElement => {
   const {
     messages,
@@ -40,6 +44,14 @@ export const Conversation = ({
     changeTag,
   } = useConversationMessages({ structureId, year, visibility });
   const canTagMessages = canTag && canParticipate && isCampaignOpen;
+  const {
+    searchWords,
+    resultCount,
+    resultPosition,
+    currentResultId,
+    goToOlderResult,
+    goToNewerResult,
+  } = useMessageSearch(messages, searchQuery);
 
   const requestedReceiptIdsRef = useRef(new Set<number>());
   const listRef = useRef<HTMLOListElement>(null);
@@ -121,6 +133,15 @@ export const Conversation = ({
           description="Les échanges ne sont plus actualisés. Nouvel essai dans quelques secondes."
         />
       )}
+      <MessageSearchBar
+        value={searchQuery}
+        onChange={onSearchQueryChange}
+        isSearching={searchWords.length > 0}
+        resultCount={resultCount}
+        resultPosition={resultPosition}
+        onOlderResult={goToOlderResult}
+        onNewerResult={goToNewerResult}
+      />
       <div className="flex gap-4 h-[calc(100dvh-30rem)] min-h-64">
         <ConversationSummary thread={thread} />
         {thread.length === 0 ? (
@@ -156,6 +177,8 @@ export const Conversation = ({
                   tags={tags}
                   canTag={canTagMessages}
                   onTagChange={(tagKey) => changeTag(item.message.id, tagKey)}
+                  searchWords={searchWords}
+                  isCurrentResult={item.message.id === currentResultId}
                 />
               )
             )}
@@ -188,4 +211,6 @@ type Props = {
   anchors: ConversationAnchor[];
   canTag: boolean;
   draft: MessageDraft;
+  searchQuery: string;
+  onSearchQueryChange: (searchQuery: string) => void;
 };

@@ -32,6 +32,7 @@ export const Echanges = ({
   const pathname = usePathname();
   const sharedDraft = useMessageDraft();
   const agentsDraft = useMessageDraft();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const isAgentsChannel =
     !isOperateur && searchParams.get(CHANNEL_PARAM) === AGENTS_CHANNEL;
@@ -61,6 +62,11 @@ export const Echanges = ({
     window.history.replaceState(null, "", query ? `?${query}` : pathname);
   };
 
+  const closeDrawer = () => {
+    setSearchQuery("");
+    updateChannel(null);
+  };
+
   const conversation = (
     <Conversation
       key={`${structureId}-${year}-${visibility}`}
@@ -74,6 +80,8 @@ export const Echanges = ({
       anchors={anchorsByVisibility[visibility]}
       canTag={!isOperateur}
       draft={draft}
+      searchQuery={searchQuery}
+      onSearchQueryChange={setSearchQuery}
     />
   );
 
@@ -90,7 +98,7 @@ export const Echanges = ({
         />
       </Button>
       {isOpen && (
-        <EchangesDrawer onClose={() => updateChannel(null)}>
+        <EchangesDrawer onClose={closeDrawer}>
           {isOperateur ? (
             conversation
           ) : (
