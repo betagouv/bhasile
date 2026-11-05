@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   getCampaignPhase,
+  getCatchUpCampaignYears,
   getOpenCampaignYears,
 } from "@/lib/tarification/tarification.campaign";
 
@@ -45,5 +46,22 @@ describe("getOpenCampaignYears", () => {
 
     expect(getOpenCampaignYears(now, PARIS)).toEqual([2026, 2027]);
     expect(getOpenCampaignYears(now, "Indian/Reunion")).toEqual([2027, 2028]);
+  });
+});
+
+describe("getCatchUpCampaignYears", () => {
+  it("propose les campagnes closes depuis la mise en service", () => {
+    expect(
+      getCatchUpCampaignYears(new Date("2030-06-01T12:00:00Z"), PARIS)
+    ).toEqual([2027, 2028, 2029]);
+  });
+
+  it("ne propose rien avant la fin de la première campagne", () => {
+    expect(
+      getCatchUpCampaignYears(new Date("2027-06-01T12:00:00Z"), PARIS)
+    ).toEqual([]);
+    expect(
+      getCatchUpCampaignYears(new Date("2026-06-01T12:00:00Z"), PARIS)
+    ).toEqual([]);
   });
 });

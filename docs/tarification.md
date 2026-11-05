@@ -73,7 +73,7 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
 
 - **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule. C'est un calcul sur la date civile locale de la structure (voir Échéances), sans cron, partagé avec la messagerie : `getCampaignPhase(year, now, timeZone)` renvoie `UPCOMING` (pas encore ouverte), `OPEN` ou `CATCH_UP` (rattrapage, sans limite de durée), La messagerie écrit tant que la campagne est `OPEN` (`assertCampaignOpen`), « maintenant » venant de `getNow` (`NEXT_PUBLIC_EMULATED_NOW` en recette).
 - **Clôture automatique**, sans bouton : une clôture manuelle ne serait jamais faite, et multiplierait les campagnes ouvertes.
-- **Rattrapage après le 31 décembre N** ⏳ : un agent peut encore déposer et partager un arrêté, une DAM, une DAI ou un échéancier dans la campagne N (arrêté tardif). Tout le reste est fermé : messages, dépôts de l'opérateur, relecture. Sans limite de durée. Le sélecteur de campagne propose donc aussi, aux agents, les campagnes en rattrapage même sans tarification.
+- **Rattrapage après le 31 décembre N** ⏳ : un agent peut encore déposer et partager un arrêté, une DAM, une DAI ou un échéancier dans la campagne N (arrêté tardif), et les retirer s'il s'est trompé. Tout le reste est fermé : messages, dépôts de l'opérateur, relecture. Sans limite de durée. Le sélecteur de campagne propose donc aussi, aux agents, les campagnes en rattrapage même sans tarification, depuis la mise en service (`TARIFICATION_FIRST_CAMPAIGN_YEAR`).
 - **Éligibilité** ⏳ : seuls les CADA et les CPH ont une tarification (`isStructureAutorisee`). Une structure ne change jamais de type : une transformation ferme une structure et en ouvre une autre, qui a sa propre tarification. La garde est une règle de domaine dans le service (`assertStructureEligible`, et non un droit CASL), appliquée aussi à la messagerie. Une structure non éligible ne propose aucune campagne ouverte ; ses tarifications existantes restent consultables, en lecture seule.
 - **Création à la volée** : la campagne et la tarification sont créées au premier dépôt ou au premier message (création idempotente sur leurs clés uniques). Une campagne sans document ni message n'existe qu'à l'écran.
 - **Hors Bhasile** : un agent déclare qu'une tarification est menée hors de l'outil (motif obligatoire), par exemple pour un opérateur qu'une DDETS garde hors de Bhasile. Plus aucune étape n'est en retard, un bandeau l'affiche, et les dépôts restent possibles. La déclaration vaut pour une campagne et ne s'annule pas.
@@ -104,7 +104,7 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
 **Règles**
 
 - **Un document = un fichier**, comme sur la fiche aujourd'hui : l'opérateur regroupe ses annexes dans un seul PDF.
-- **Un document peut porter plusieurs types** (une L48 qui contient le RCA) : il compte pour toutes leurs étapes.
+- **Un document peut porter plusieurs types** (une L48 qui contient le RCA) : il compte pour toutes leurs étapes. Il ne mêle pas des types de l'opérateur et des types des agents, sinon une L48 passerait pour un dépôt partagé d'office, sans la garde du partage.
 - **L'écran ne propose que les types pertinents** pour l'émetteur et le moment de la campagne.
 - **L'exercice se déduit** du type et de la campagne, l'écran l'affiche en toutes lettres (« DAI 2028 »).
 - **Empreinte SHA-256** calculée à l'upload (`FileUpload.sha256`), affichée et reprise dans les mails.
@@ -122,7 +122,7 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
   - **Relecture** : sur un `DRAFT`, tout agent éditeur sauf son auteur peut **valider** ou **demander des modifications** (avec un texte). Une validation suffit. Tout `DRAFT` est à relire : il n'y a pas de demande de relecture, on sollicite un collègue par un message dans le canal agents.
   - **Partage** : « Envoyer à l'opérateur » n'existe que pour un `FINAL`. La validation n'est pas exigée (rien ne bloque), l'écran affiche « non validé ».
   - **État affiché**, calculé à partir du journal : créé, validé ou modifications demandées, signé, envoyé.
-- **Retrait** : un agent retire un document partagé par erreur (`DOCUMENT_WITHDRAWN`, motif obligatoire). Il sort des états, de l'ancre du contradictoire et de la copie vers la fiche (retour à la copie précédente) ; l'opérateur voit « retiré le … » et ne peut plus ouvrir le fichier ; rien n'est effacé. Une erreur de structure se corrige ainsi, l'agent prévient l'opérateur.
+- **Retrait** : un agent retire un document partagé par erreur (`DOCUMENT_WITHDRAWN`, motif obligatoire), sauf un dépôt de l'opérateur lui-même, qui reste visible : l'opérateur en dépose au besoin une nouvelle version. Il sort des états, de l'ancre du contradictoire et de la copie vers la fiche (retour à la copie précédente) ; l'opérateur voit « retiré le … » et ne peut plus ouvrir le fichier ; rien n'est effacé. Une erreur de structure se corrige ainsi, l'agent prévient l'opérateur.
 - **Qui a fait quoi** : chaque fait d'un document s'affiche avec son auteur et sa date, tirés du journal. On sait qui a déposé la version signée, pas qui a signé.
 
 ## Étapes
@@ -169,7 +169,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 - **Ouverture** : un lien signé vers le fichier délivré à un utilisateur de l'opérateur, pour la visionneuse ou le téléchargement (l'application ne sert pas le fichier, elle renvoie une URL S3 présignée). L'ouverture est enregistrée une fois le lien généré et **avant** de le renvoyer : si l'écriture échoue, pas d'URL ; si le lien ne se génère pas, pas d'ouverture, et le délai ne court pas pour un fichier jamais reçu. Le retrait bloque toute nouvelle demande de lien ; un lien déjà délivré ne se révoque pas et reste valable au plus 1 h, comme pour les autres fichiers, ce qui est acceptable puisque le document a déjà été vu. L'affichage de la page, de la liste ou du mail ne compte pas (un antivirus de messagerie ouvre les liens tout seul) : seul compte un lien demandé par une session, au clic. Les agents et les superadmins n'ouvrent jamais au sens du délai. Les ouvertures de tous les documents partagés par les agents sont enregistrées et affichées (« ouvert le … par … ») ; l'opérateur qui rouvre son propre dépôt n'ouvre rien. La première ouverture fait foi : les suivantes n'écrasent rien.
 - **Réponse** : l'opérateur accepte ou conteste (`L48_ACCEPTED`, `L48_CONTESTED`, observations et document `REPONSE_CONTRADICTOIRE` facultatifs). Plusieurs réponses sont possibles jusqu'à l'échéance, la dernière compte ; aucune après.
 - **Réputé accepté** : calculé, à l'échéance, sans réponse.
-- **La contestation se fait dans Bhasile** ⏳. Il n'y a pas de saisie par un agent d'une contestation reçue par courrier ; ce cas se signale par un message.
+- **La contestation se fait dans Bhasile** ⏳. Il n'y a pas de saisie par un agent d'une contestation reçue par courrier, ni de dépôt de `REPONSE_CONTRADICTOIRE` par un agent ; ce cas se signale par un message.
 
 ## Fiche structure
 
@@ -204,7 +204,14 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 
 - **Un seul point de passage pour lire le journal** : `getTarificationJournal({ structureId, year, reader })`, utilisé par la page, l'API, les fichiers et les mails. Aucune lecture du journal ne le contourne. L'état est calculé sur le journal complet, la visibilité ne filtre que ce qui est renvoyé.
 - **Un seul point de passage pour les fichiers** : `GET /api/files/[key]` confie un fichier de tarification à `authorizeTarificationDocument` (avant la règle générale qui laisse tout agent lire un fichier rattaché), puis enregistre l'ouverture au moment de délivrer le lien. Un fichier de tarification ne se supprime jamais par `/api/files`.
-- **Superadmins** : comme un agent, en lecture et en écriture, comme dans la messagerie ; leurs lectures n'ouvrent rien au sens du délai.
+- **Superadmins** : voient tout, sans participer : ni message, ni document, ni événement. Leurs lectures ne laissent aucune trace et n'ouvrent rien au sens du délai.
+
+## Écritures
+
+- **Deux routes** : `POST /api/tarifications/[structureId]/[year]/documents` (un dépôt : le document et son événement) et `POST /api/tarifications/[structureId]/[year]/events` (tous les autres faits). Un nouveau type de fait est une entrée de registre, pas une route.
+- **Gardes pures** dans `tarification.guard.ts`, évaluées sur le journal : forme et auteur du fait (registre), phase de campagne, émetteur et état du dépôt, partage d'un `FINAL` une seule fois, pas de L48 sans BP, relecture d'un `DRAFT` hors auteur, retrait d'un document partagé, étape encore en attente, contradictoire ouvert, hors Bhasile une seule fois. Une règle de domaine renvoie 409 ou 422, un auteur qui n'y a pas droit 403.
+- **Une écriture à la fois par tarification** : dans une transaction, l'upsert de la tarification verrouille sa ligne, puis le journal est relu, les gardes évaluées, le fait écrit. Sans ce verrou, deux partages simultanés passeraient tous les deux la garde. Une garde refusée annule tout, y compris la création de la tarification.
+- **Le fichier d'un dépôt** doit être sans rattachement ; à l'inverse, une pièce jointe de message refuse un fichier déjà rattaché à un document de tarification.
 
 ## Notifications
 
@@ -252,8 +259,8 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 | Brique                                     | Où                                                                                                                                                                                                                                  | État                         |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
 | Doc, modèle, registres, règles calculées   | `docs/tarification.md`, `prisma/schema/tarification.prisma`, `src/lib/tarification/` (registres `tarification.definition.ts`, calcul `tarification.compute.ts`, visibilité, forme des événements, phase de campagne, dates locales) | fait (`tarification-modele`) |
-| Journal, fichiers, empreinte, messagerie   | `tarification-api` : `getTarificationJournal`, `authorizeTarificationDocument`, SHA-256 à l'upload, phase et éligibilité dans la messagerie, tags dérivés des étapes                                                                | en cours                     |
-| Écritures et gardes                        | `tarification-ecritures` : `POST …/documents`, `POST …/events`, gardes de domaine, sélecteur des campagnes en rattrapage                                                                                                            | à faire                      |
+| Journal, fichiers, empreinte, messagerie   | `tarification-api` : `getTarificationJournal`, `authorizeTarificationDocument`, SHA-256 à l'upload, phase et éligibilité dans la messagerie, tags dérivés des étapes                                                                | fait                         |
+| Écritures et gardes                        | `tarification-ecritures` : `POST …/documents`, `POST …/events`, gardes de domaine (`tarification.guard.ts`), sélecteur des campagnes en rattrapage                                                                                  | en cours                     |
 | Copie vers la fiche, verrouillage, reprise | `tarification-fiche`                                                                                                                                                                                                                | à faire                      |
 | Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                                                                                                                                      | à faire                      |
 | Interface                                  | `tarification-ui`, après les maquettes                                                                                                                                                                                              | à faire                      |

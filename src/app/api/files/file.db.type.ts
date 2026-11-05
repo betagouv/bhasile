@@ -1,5 +1,15 @@
 import { Prisma } from "@/generated/prisma/client";
 
+export const unattachedFileWhere = {
+  acteAdministratifId: null,
+  documentFinancierId: null,
+  controleId: null,
+  evaluationId: null,
+  operateurId: null,
+  messageId: null,
+  tarificationDocument: null,
+} satisfies Prisma.FileUploadWhereInput;
+
 export const fileWithParentsInclude = {
   acteAdministratif: {
     include: {

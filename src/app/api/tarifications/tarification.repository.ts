@@ -1,5 +1,16 @@
+import { findUnattachedFileUpload } from "@/app/api/files/file.repository";
 import type { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+import type { PrismaTransaction } from "@/types/prisma.type";
+
+import {
+  createTarificationDocument,
+  type TarificationDocumentCreate,
+} from "./tarification-document.repository";
+import {
+  createTarificationEvent,
+  type TarificationEventCreate,
+} from "./tarification-event.repository";
 
 const structureScopeSelect = {
   id: true,
@@ -12,22 +23,30 @@ export const upsertStructureTarification = async (
   structureId: number,
   year: number
 ) => {
-  // `update` non vide : sinon Prisma émule l'upsert (SELECT puis INSERT, P2002 sur deux premiers appels simultanés) au lieu d'un INSERT … ON CONFLICT
-  const campaign = await prisma.tarificationCampaign.upsert({
+  const campaign = await upsertTarificationCampaign(year);
+  return upsertTarificationInCampaign(structureId, campaign.id);
+};
+
+// `update` non vide : sinon Prisma émule l'upsert (SELECT puis INSERT, P2002 sur deux premiers appels simultanés) au lieu d'un INSERT … ON CONFLICT
+const upsertTarificationCampaign = (year: number) =>
+  prisma.tarificationCampaign.upsert({
     where: { year },
     update: { year },
     create: { year },
     select: { id: true },
   });
-  return prisma.structureTarification.upsert({
-    where: {
-      structureId_campaignId: { structureId, campaignId: campaign.id },
-    },
-    update: { campaignId: campaign.id },
-    create: { structureId, campaignId: campaign.id },
+
+const upsertTarificationInCampaign = (
+  structureId: number,
+  campaignId: number,
+  tx: PrismaTransaction = prisma
+) =>
+  tx.structureTarification.upsert({
+    where: { structureId_campaignId: { structureId, campaignId } },
+    update: { campaignId },
+    create: { structureId, campaignId },
     select: { id: true },
   });
-};
 
 export const findStructureTarification = (structureId: number, year: number) =>
   prisma.structureTarification.findFirst({
@@ -97,17 +116,21 @@ export const findPendingMessageContexts = () =>
     },
   });
 
-export const findTarificationCampaign = (year: number) =>
-  prisma.tarificationCampaign.findUnique({
+export const findTarificationCampaign = (
+  year: number,
+  tx: PrismaTransaction = prisma
+) =>
+  tx.tarificationCampaign.findUnique({
     where: { year },
     select: { drlPublishedAt: true, drlUrl: true },
   });
 
 export const findStructureTarificationJournal = (
   structureId: number,
-  year: number
+  year: number,
+  tx: PrismaTransaction = prisma
 ) =>
-  prisma.structure.findUnique({
+  tx.structure.findUnique({
     where: { id: structureId },
     select: {
       departementAdministratif: true,
@@ -177,12 +200,43 @@ export const findStructureTarificationJournal = (
     },
   });
 
-// La première ouverture fait foi : les suivantes n'écrasent rien
-export const createTarificationDocumentOpening = (
-  documentId: number,
-  userId: number
-) =>
-  prisma.tarificationDocumentOpening.createMany({
-    data: [{ documentId, userId }],
-    skipDuplicates: true,
+// L'upsert verrouille la tarification jusqu'au commit, grâce à son `update` non vide : deux faits simultanés
+// s'exécutent l'un après l'autre, et le second relit le journal avant ses gardes. La campagne reste hors
+// transaction : son verrou bloquerait toutes les structures du pays
+export const runInTarificationTransaction = async <T>(
+  structureId: number,
+  year: number,
+  callback: (transaction: TarificationTransaction) => Promise<T>
+): Promise<T> => {
+  const campaign = await upsertTarificationCampaign(year);
+  return prisma.$transaction(async (tx) => {
+    const { id: structureTarificationId } = await upsertTarificationInCampaign(
+      structureId,
+      campaign.id,
+      tx
+    );
+    return callback({
+      findJournal: () =>
+        findStructureTarificationJournal(structureId, year, tx),
+      findCampaign: () => findTarificationCampaign(year, tx),
+      findUnattachedFile: (fileKey) => findUnattachedFileUpload(tx, fileKey),
+      createDocument: (document) =>
+        createTarificationDocument(tx, structureTarificationId, document),
+      createEvent: (event) =>
+        createTarificationEvent(tx, structureTarificationId, event),
+    });
   });
+};
+
+export type TarificationJournalSource = {
+  findJournal: () => ReturnType<typeof findStructureTarificationJournal>;
+  findCampaign: () => ReturnType<typeof findTarificationCampaign>;
+};
+
+export type TarificationTransaction = TarificationJournalSource & {
+  findUnattachedFile: (fileKey: string) => Promise<{ id: number } | null>;
+  createDocument: (
+    document: TarificationDocumentCreate
+  ) => Promise<{ id: number }>;
+  createEvent: (event: TarificationEventCreate) => Promise<{ id: number }>;
+};
