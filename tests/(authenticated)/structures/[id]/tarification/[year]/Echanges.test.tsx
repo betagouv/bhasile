@@ -670,13 +670,17 @@ describe("Echanges", () => {
       label: "Envoi : L48 2026",
       date: new Date("2026-10-27T08:00:00.000Z"),
     };
-    let scrolledElementIds: string[];
+    const getList = () => screen.getByRole("list", { name: "Messages" });
 
     beforeEach(() => {
-      scrolledElementIds = [];
-      HTMLElement.prototype.scrollIntoView = function (this: HTMLElement) {
-        scrolledElementIds.push(this.id);
-      };
+      vi.spyOn(
+        HTMLElement.prototype,
+        "getBoundingClientRect"
+      ).mockImplementation(function (this: HTMLElement) {
+        const messageId = Number(this.id.replace("message-", ""));
+        const top = messageId ? messageId * 100 - getList().scrollTop : 0;
+        return { top, height: 0 } as DOMRect;
+      });
     });
 
     const getSearchInput = () =>
@@ -750,34 +754,123 @@ describe("Echanges", () => {
       search("excedent");
 
       expect(screen.getByRole("status")).toHaveTextContent("1 sur 2");
-      expect(scrolledElementIds).toEqual(["message-12"]);
+      expect(getList().scrollTop).toBe(1200);
     });
 
     it("remonte et redescend dans les résultats, et boucle aux extrémités", async () => {
       answerWith(MESSAGES);
       await renderLoadedEchanges();
       search("excedent");
-      scrolledElementIds = [];
 
       fireEvent.click(
         screen.getByRole("button", { name: "Résultat plus ancien" })
       );
       expect(screen.getByRole("status")).toHaveTextContent("2 sur 2");
+      expect(getList().scrollTop).toBe(1000);
 
       fireEvent.click(
         screen.getByRole("button", { name: "Résultat plus ancien" })
       );
       expect(screen.getByRole("status")).toHaveTextContent("1 sur 2");
+      expect(getList().scrollTop).toBe(1200);
 
       fireEvent.click(
         screen.getByRole("button", { name: "Résultat plus récent" })
       );
       expect(screen.getByRole("status")).toHaveTextContent("2 sur 2");
-      expect(scrolledElementIds).toEqual([
-        "message-10",
-        "message-12",
-        "message-10",
-      ]);
+      expect(getList().scrollTop).toBe(1000);
+    });
+
+    it("revient au résultat unique quand on a fait défiler le fil ailleurs", async () => {
+      answerWith(MESSAGES);
+      await renderLoadedEchanges();
+      search("validé");
+      getList().scrollTop = 0;
+
+      fireEvent.keyDown(getSearchInput(), { key: "Enter" });
+
+      expect(screen.getByRole("status")).toHaveTextContent("1 sur 1");
+      expect(getList().scrollTop).toBe(1200);
+    });
+
+    it("ne surligne que les messages qui contiennent tous les mots", async () => {
+      answerWith(MESSAGES);
+      await renderLoadedEchanges();
+
+      search("excedent validé");
+
+      expect(
+        screen.getAllByRole("mark").map((highlight) => highlight.textContent)
+      ).toEqual(["excédent", "validé"]);
+
+      search("excedent chauffage");
+
+      expect(screen.getByRole("status")).toHaveTextContent("Aucun résultat");
+      expect(screen.queryByRole("mark")).not.toBeInTheDocument();
+    });
+
+    it("garde la saisie et le focus quand le fil finit de charger", async () => {
+      const deferredResponse = createDeferred<Response>();
+      mockFetch.mockImplementation(() => deferredResponse.promise);
+      renderEchanges();
+      const input = getSearchInput();
+      input.focus();
+      search("excedent");
+
+      deferredResponse.resolve(buildJsonResponse(MESSAGES));
+
+      await screen.findByText("Bonne journée");
+      expect(getSearchInput()).toBe(input);
+      expect(input).toHaveFocus();
+      expect(input).toHaveValue("excedent");
+      expect(screen.getByRole("status")).toHaveTextContent("1 sur 2");
+    });
+
+    it("n'affiche pas la barre quand le premier chargement échoue", async () => {
+      mockFetch.mockResolvedValue(buildJsonResponse({}, 500));
+      renderEchanges();
+
+      await screen.findByText(/n’ont pas pu être chargés/);
+
+      expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+    });
+
+    it("recolle le fil en bas après l'envoi de son propre message", async () => {
+      answerWith(MESSAGES);
+      await renderLoadedEchanges();
+      const list = getList();
+      Object.defineProperty(list, "scrollHeight", {
+        value: 5000,
+        configurable: true,
+      });
+      list.scrollTop = 100;
+      fireEvent.scroll(list);
+      answerWith([...MESSAGES, buildMessage({ id: 14, text: "Merci" })]);
+
+      typeMessage("Merci");
+      fireEvent.click(getSendButton());
+
+      await screen.findByText("Merci");
+      await waitFor(() => expect(list.scrollTop).toBe(5000));
+    });
+
+    it("ne recolle pas le fil en bas quand un message d'autrui arrive", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      answerWith(MESSAGES);
+      await renderLoadedEchanges();
+      const list = getList();
+      Object.defineProperty(list, "scrollHeight", {
+        value: 5000,
+        configurable: true,
+      });
+      list.scrollTop = 100;
+      fireEvent.scroll(list);
+      answerWith([...MESSAGES, buildMessage({ id: 14, text: "Nouveau" })]);
+
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      await screen.findByText("Nouveau");
+      expect(list.scrollTop).toBe(100);
     });
 
     it("passe au résultat suivant à chaque Entrée, sans perdre le focus", async () => {
@@ -799,7 +892,6 @@ describe("Echanges", () => {
       answerWith(MESSAGES);
       await renderLoadedEchanges();
       search("excedent");
-      scrolledElementIds = [];
       answerWith([
         ...MESSAGES,
         buildMessage({ id: 14, text: "Encore un excédent" }),
@@ -811,7 +903,7 @@ describe("Echanges", () => {
       await waitFor(() =>
         expect(screen.getByRole("status")).toHaveTextContent("2 sur 3")
       );
-      expect(scrolledElementIds).toEqual([]);
+      expect(getList().scrollTop).toBe(1200);
     });
 
     it("revient au plus récent quand le résultat courant ne correspond plus", async () => {
@@ -882,6 +974,7 @@ describe("Echanges", () => {
       await waitFor(() =>
         expect(screen.getByRole("status")).toHaveTextContent("1 sur 2")
       );
+      expect(getList().scrollTop).toBe(1200);
     });
 
     it("vide la recherche à la fermeture du tiroir", async () => {

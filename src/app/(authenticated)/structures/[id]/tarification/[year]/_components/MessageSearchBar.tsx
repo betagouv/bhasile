@@ -11,7 +11,7 @@ export const MessageSearchBar = ({
   onOlderResult,
   onNewerResult,
 }: Props): ReactElement => (
-  <div className="flex items-center justify-end gap-2 shrink-0">
+  <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
     <p role="status" className="mb-0 text-sm text-mention-grey">
       {isSearching && getResultLabel(resultCount, resultPosition)}
     </p>

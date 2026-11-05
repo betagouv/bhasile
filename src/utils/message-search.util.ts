@@ -1,4 +1,7 @@
-import { normalizeAccents } from "@/app/utils/string.util";
+import {
+  normalizeAccents,
+  replaceSearchSeparators,
+} from "@/app/utils/string.util";
 import type { MessageApiRead } from "@/schemas/api/message.schema";
 
 export const parseSearchWords = (searchQuery: string): string[] =>
@@ -25,6 +28,9 @@ export const splitTextBySearchWords = (
   text: string,
   searchWords: string[]
 ): TextSegment[] => {
+  if (searchWords.length === 0) {
+    return [{ text, isMatch: false }];
+  }
   const ranges = findMatchRanges(text, searchWords);
   const segments: TextSegment[] = [];
   let position = 0;
@@ -47,12 +53,12 @@ const doesMessageMatch = (
   message: MessageApiRead,
   searchWords: string[]
 ): boolean => {
-  const searchableTexts = [
+  const normalizedTexts = [
     message.text,
     ...message.attachments.map(({ originalName }) => originalName),
-  ];
+  ].map((text) => normalizeForSearch(text).normalizedText);
   return searchWords.every((word) =>
-    searchableTexts.some((text) => findMatchRanges(text, [word]).length > 0)
+    normalizedTexts.some((text) => text.includes(word))
   );
 };
 
@@ -79,10 +85,9 @@ const normalizeForSearch = (text: string): NormalizedText => {
   let position = 0;
   for (const character of text) {
     const end = position + character.length;
-    const normalizedCharacter = normalizeAccents(character).replace(
-      /[-_'\s]/,
-      " "
-    );
+    const normalizedCharacter = replaceSearchSeparators(
+      normalizeAccents(character)
+    ).replace(/\s/, " ");
     if (normalizedCharacter === "" && sourceRanges.length > 0) {
       sourceRanges[sourceRanges.length - 1].end = end;
     }

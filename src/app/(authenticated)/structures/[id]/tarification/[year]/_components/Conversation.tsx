@@ -44,18 +44,20 @@ export const Conversation = ({
     changeTag,
   } = useConversationMessages({ structureId, year, visibility });
   const canTagMessages = canTag && canParticipate && isCampaignOpen;
+
+  const requestedReceiptIdsRef = useRef(new Set<number>());
+  const listRef = useRef<HTMLOListElement>(null);
+  const isAtBottomRef = useRef(true);
+
   const {
     searchWords,
     resultCount,
     resultPosition,
     currentResultId,
+    isResult,
     goToOlderResult,
     goToNewerResult,
-  } = useMessageSearch(messages, searchQuery);
-
-  const requestedReceiptIdsRef = useRef(new Set<number>());
-  const listRef = useRef<HTMLOListElement>(null);
-  const isAtBottomRef = useRef(true);
+  } = useMessageSearch({ messages, searchQuery, listRef });
 
   useEffect(() => {
     if (!messages || !canParticipate) {
@@ -85,10 +87,10 @@ export const Conversation = ({
 
   useEffect(() => {
     const list = listRef.current;
-    if (list && isAtBottomRef.current) {
+    if (list && isAtBottomRef.current && currentResultId === null) {
       list.scrollTop = list.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, currentResultId]);
 
   const handleScroll = () => {
     const list = listRef.current;
@@ -99,6 +101,23 @@ export const Conversation = ({
       list.scrollHeight - list.scrollTop - list.clientHeight <
       SCROLL_BOTTOM_TOLERANCE_PX;
   };
+
+  const sendMessage: typeof postMessage = async (message) => {
+    await postMessage(message);
+    isAtBottomRef.current = true;
+  };
+
+  const searchBar = (
+    <MessageSearchBar
+      value={searchQuery}
+      onChange={onSearchQueryChange}
+      isSearching={searchWords.length > 0}
+      resultCount={resultCount}
+      resultPosition={resultPosition}
+      onOlderResult={goToOlderResult}
+      onNewerResult={goToNewerResult}
+    />
+  );
 
   if (hasLostAccess) {
     return (
@@ -118,7 +137,10 @@ export const Conversation = ({
         description="Les échanges n’ont pas pu être chargés. Nouvel essai dans quelques secondes."
       />
     ) : (
-      <Loader />
+      <div className="flex flex-col gap-4">
+        {searchBar}
+        <Loader />
+      </div>
     );
   }
 
@@ -126,6 +148,7 @@ export const Conversation = ({
 
   return (
     <div className="flex flex-col gap-4">
+      {searchBar}
       {hasLoadingError && (
         <Alert
           severity="warning"
@@ -133,15 +156,6 @@ export const Conversation = ({
           description="Les échanges ne sont plus actualisés. Nouvel essai dans quelques secondes."
         />
       )}
-      <MessageSearchBar
-        value={searchQuery}
-        onChange={onSearchQueryChange}
-        isSearching={searchWords.length > 0}
-        resultCount={resultCount}
-        resultPosition={resultPosition}
-        onOlderResult={goToOlderResult}
-        onNewerResult={goToNewerResult}
-      />
       <div className="flex gap-4 h-[calc(100dvh-30rem)] min-h-64">
         <ConversationSummary thread={thread} />
         {thread.length === 0 ? (
@@ -177,7 +191,7 @@ export const Conversation = ({
                   tags={tags}
                   canTag={canTagMessages}
                   onTagChange={(tagKey) => changeTag(item.message.id, tagKey)}
-                  searchWords={searchWords}
+                  searchWords={isResult(item.message.id) ? searchWords : []}
                   isCurrentResult={item.message.id === currentResultId}
                 />
               )
@@ -191,7 +205,7 @@ export const Conversation = ({
           tags={tags}
           canTag={canTagMessages}
           draft={draft}
-          onSend={postMessage}
+          onSend={sendMessage}
         />
       )}
     </div>
