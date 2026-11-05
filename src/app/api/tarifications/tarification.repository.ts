@@ -1,14 +1,16 @@
-import { DomainError } from "@/app/utils/domain-error.util";
+import { findUnattachedFileUpload } from "@/app/api/files/file.repository";
 import type { Prisma } from "@/generated/prisma/client";
-import {
-  type AuthorLevel,
-  type TarificationDocumentStatus,
-  type TarificationDocumentType,
-  TarificationEventType,
-} from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import type { PrismaTransaction } from "@/types/prisma.type";
-import type { TarificationJournalEvent } from "@/types/tarification.type";
+
+import {
+  createTarificationDocument,
+  type TarificationDocumentCreate,
+} from "./tarification-document.repository";
+import {
+  createTarificationEvent,
+  type TarificationEventCreate,
+} from "./tarification-event.repository";
 
 const structureScopeSelect = {
   id: true,
@@ -37,9 +39,9 @@ const upsertTarificationCampaign = (year: number) =>
 const upsertTarificationInCampaign = (
   structureId: number,
   campaignId: number,
-  db: PrismaTransaction = prisma
+  tx: PrismaTransaction = prisma
 ) =>
-  db.structureTarification.upsert({
+  tx.structureTarification.upsert({
     where: { structureId_campaignId: { structureId, campaignId } },
     update: { campaignId },
     create: { structureId, campaignId },
@@ -116,9 +118,9 @@ export const findPendingMessageContexts = () =>
 
 export const findTarificationCampaign = (
   year: number,
-  db: PrismaTransaction = prisma
+  tx: PrismaTransaction = prisma
 ) =>
-  db.tarificationCampaign.findUnique({
+  tx.tarificationCampaign.findUnique({
     where: { year },
     select: { drlPublishedAt: true, drlUrl: true },
   });
@@ -126,9 +128,9 @@ export const findTarificationCampaign = (
 export const findStructureTarificationJournal = (
   structureId: number,
   year: number,
-  db: PrismaTransaction = prisma
+  tx: PrismaTransaction = prisma
 ) =>
-  db.structure.findUnique({
+  tx.structure.findUnique({
     where: { id: structureId },
     select: {
       departementAdministratif: true,
@@ -198,16 +200,6 @@ export const findStructureTarificationJournal = (
     },
   });
 
-// La première ouverture fait foi : les suivantes n'écrasent rien
-export const createTarificationDocumentOpening = (
-  documentId: number,
-  userId: number
-) =>
-  prisma.tarificationDocumentOpening.createMany({
-    data: [{ documentId, userId }],
-    skipDuplicates: true,
-  });
-
 // L'upsert verrouille la tarification jusqu'au commit, grâce à son `update` non vide : deux faits simultanés
 // s'exécutent l'un après l'autre, et le second relit le journal avant ses gardes. La campagne reste hors
 // transaction : son verrou bloquerait toutes les structures du pays
@@ -227,6 +219,7 @@ export const runInTarificationTransaction = async <T>(
       findJournal: () =>
         findStructureTarificationJournal(structureId, year, tx),
       findCampaign: () => findTarificationCampaign(year, tx),
+      findUnattachedFile: (fileKey) => findUnattachedFileUpload(tx, fileKey),
       createDocument: (document) =>
         createTarificationDocument(tx, structureTarificationId, document),
       createEvent: (event) =>
@@ -235,76 +228,13 @@ export const runInTarificationTransaction = async <T>(
   });
 };
 
-const createTarificationDocument = async (
-  tx: PrismaTransaction,
-  structureTarificationId: number,
-  { fileKey, types, status, author }: TarificationDocumentCreate
-): Promise<{ id: number }> => {
-  const fileUpload = await tx.fileUpload.findFirst({
-    where: {
-      key: fileKey,
-      acteAdministratifId: null,
-      documentFinancierId: null,
-      controleId: null,
-      evaluationId: null,
-      operateurId: null,
-      messageId: null,
-      tarificationDocument: null,
-    },
-    select: { id: true },
-  });
-  if (!fileUpload) {
-    throw new DomainError("Ce fichier est introuvable ou déjà rattaché", 422);
-  }
-  const document = await tx.tarificationDocument.create({
-    data: {
-      structureTarificationId,
-      fileUploadId: fileUpload.id,
-      types,
-      status,
-    },
-    select: { id: true },
-  });
-  await tx.tarificationEvent.create({
-    data: {
-      structureTarificationId,
-      type: TarificationEventType.DOCUMENT_DEPOSITED,
-      authorId: author.id,
-      authorLevel: author.level,
-      documentId: document.id,
-    },
-  });
-  return document;
-};
-
-const createTarificationEvent = (
-  tx: PrismaTransaction,
-  structureTarificationId: number,
-  event: TarificationEventCreate
-): Promise<{ id: number }> =>
-  tx.tarificationEvent.create({
-    data: { structureTarificationId, ...event },
-    select: { id: true },
-  });
-
-type TarificationDocumentCreate = {
-  fileKey: string;
-  types: TarificationDocumentType[];
-  status: TarificationDocumentStatus;
-  author: { id: number; level: AuthorLevel };
-};
-
-type TarificationEventCreate = Omit<
-  TarificationJournalEvent,
-  "id" | "createdAt"
->;
-
 export type TarificationJournalSource = {
   findJournal: () => ReturnType<typeof findStructureTarificationJournal>;
   findCampaign: () => ReturnType<typeof findTarificationCampaign>;
 };
 
 export type TarificationTransaction = TarificationJournalSource & {
+  findUnattachedFile: (fileKey: string) => Promise<{ id: number } | null>;
   createDocument: (
     document: TarificationDocumentCreate
   ) => Promise<{ id: number }>;

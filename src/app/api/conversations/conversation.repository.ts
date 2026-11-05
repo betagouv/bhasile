@@ -1,3 +1,4 @@
+import { unattachedFileWhere } from "@/app/api/files/file.db.type";
 import { DomainError } from "@/app/utils/domain-error.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
@@ -33,13 +34,7 @@ export const createMessage = ({
     const attached = await tx.fileUpload.updateMany({
       where: {
         key: { in: fileKeys },
-        acteAdministratifId: null,
-        documentFinancierId: null,
-        controleId: null,
-        evaluationId: null,
-        operateurId: null,
-        messageId: null,
-        tarificationDocument: null,
+        ...unattachedFileWhere,
       },
       data: { messageId: message.id },
     });
