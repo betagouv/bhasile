@@ -1,5 +1,5 @@
 import { getNow } from "@/app/utils/now.util";
-import { GrantScope } from "@/generated/prisma/client";
+import { AccessRole, GrantScope } from "@/generated/prisma/client";
 
 import { prisma } from "./prisma";
 
@@ -20,14 +20,15 @@ export const seedAgent = async (): Promise<void> => {
     );
   }
 
+  const grant = {
+    role: AccessRole.ADMIN,
+    scope: GrantScope.REGION,
+    regionId: region.id,
+  };
   const perimeter = await prisma.perimeter.upsert({
     where: { name: E2E_PERIMETER_NAME },
-    update: { scope: GrantScope.REGION, regionId: region.id },
-    create: {
-      name: E2E_PERIMETER_NAME,
-      scope: GrantScope.REGION,
-      regionId: region.id,
-    },
+    update: { grants: { deleteMany: {}, create: grant } },
+    create: { name: E2E_PERIMETER_NAME, grants: { create: grant } },
     select: { id: true },
   });
 
