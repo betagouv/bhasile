@@ -76,6 +76,10 @@ vi.mock("@/app/api/tarifications/tarification.repository", () => ({
     mockFindStructureTarificationCampaigns(...args),
 }));
 
+vi.mock("@/app/api/files/file.service", () => ({
+  copyStoredFile: vi.fn(),
+}));
+
 vi.mock("@/app/api/tarifications/tarification-document.repository", () => ({
   createTarificationDocumentOpening: (...args: unknown[]) =>
     mockCreateTarificationDocumentOpening(...args),

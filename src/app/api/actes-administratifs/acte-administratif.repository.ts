@@ -2,6 +2,7 @@ import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { assertFilesCanBeAttached } from "../files/file.repository";
 import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 
 export const createOrUpdateActesAdministratifs = async (
@@ -150,9 +151,13 @@ const createOrUpdateActeAdministratif = async (
   if (acteAdministratif.id !== undefined) {
     const ownedActe = await tx.acteAdministratif.findFirst({
       where: { id: acteAdministratif.id, ...entityId },
-      select: { id: true },
+      select: { id: true, sourceTarificationDocumentId: true },
     });
+    if (ownedActe?.sourceTarificationDocumentId) {
+      return ownedActe;
+    }
     if (ownedActe) {
+      await assertFilesCanBeAttached(tx, fileUploadKeys);
       return tx.acteAdministratif.update({
         where: { id: ownedActe.id },
         data: {
@@ -176,8 +181,17 @@ const createOrUpdateActeAdministratif = async (
 
   const existingFileUpload = await tx.fileUpload.findUnique({
     where: { key: fileKey },
-    select: { acteAdministratifId: true },
+    select: {
+      acteAdministratifId: true,
+      acteAdministratif: {
+        select: { id: true, sourceTarificationDocumentId: true },
+      },
+    },
   });
+  if (existingFileUpload?.acteAdministratif?.sourceTarificationDocumentId) {
+    return existingFileUpload.acteAdministratif;
+  }
+  await assertFilesCanBeAttached(tx, fileUploadKeys);
   if (existingFileUpload?.acteAdministratifId) {
     return tx.acteAdministratif.update({
       where: { id: existingFileUpload.acteAdministratifId },
@@ -236,7 +250,7 @@ const deleteActesAdministratifs = async (
   );
 
   const allActesAdministratifs = await tx.acteAdministratif.findMany({
-    where,
+    where: { ...where, sourceTarificationDocumentId: null },
     include: { fileUploads: true },
   });
 

@@ -1,7 +1,9 @@
 import { findUnattachedFileUpload } from "@/app/api/files/file.repository";
 import type { Prisma } from "@/generated/prisma/client";
+import type { StructureType } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import type { PrismaTransaction } from "@/types/prisma.type";
+import type { ExistingFicheCopy, FicheCopy } from "@/types/tarification.type";
 
 import {
   createTarificationDocument,
@@ -28,15 +30,18 @@ export const upsertStructureTarification = async (
 };
 
 // `update` non vide : sinon Prisma émule l'upsert (SELECT puis INSERT, P2002 sur deux premiers appels simultanés) au lieu d'un INSERT … ON CONFLICT
-const upsertTarificationCampaign = (year: number) =>
-  prisma.tarificationCampaign.upsert({
+export const upsertTarificationCampaign = (
+  year: number,
+  db: PrismaTransaction = prisma
+) =>
+  db.tarificationCampaign.upsert({
     where: { year },
     update: { year },
     create: { year },
     select: { id: true },
   });
 
-const upsertTarificationInCampaign = (
+export const upsertTarificationInCampaign = (
   structureId: number,
   campaignId: number,
   tx: PrismaTransaction = prisma
@@ -219,6 +224,9 @@ export const runInTarificationTransaction = async <T>(
       findJournal: () =>
         findStructureTarificationJournal(structureId, year, tx),
       findCampaign: () => findTarificationCampaign(year, tx),
+      findFicheCopies: () => findFicheCopies(structureId, year, tx),
+      createFicheCopy: (copy) => createFicheCopy(tx, structureId, copy),
+      deleteFicheCopy: (copy) => deleteFicheCopy(tx, copy),
       findUnattachedFile: (fileKey) => findUnattachedFileUpload(tx, fileKey),
       createDocument: (document) =>
         createTarificationDocument(tx, structureTarificationId, document),
@@ -228,12 +236,109 @@ export const runInTarificationTransaction = async <T>(
   });
 };
 
+export const findFicheCopies = async (
+  structureId: number,
+  year: number,
+  db: PrismaTransaction = prisma
+): Promise<ExistingFicheCopy[]> => {
+  const where = {
+    sourceTarificationDocument: {
+      structureTarification: { structureId, campaign: { year } },
+    },
+  };
+  const select = {
+    id: true,
+    category: true,
+    sourceTarificationDocumentId: true,
+  };
+  const documentsFinanciers = await db.documentFinancier.findMany({
+    where,
+    select,
+  });
+  const actesAdministratifs = await db.acteAdministratif.findMany({
+    where,
+    select,
+  });
+  return [
+    ...documentsFinanciers.map((copy) => ({
+      id: copy.id,
+      target: "DOCUMENT_FINANCIER" as const,
+      category: copy.category!,
+      documentId: copy.sourceTarificationDocumentId!,
+    })),
+    ...actesAdministratifs.map((copy) => ({
+      id: copy.id,
+      target: "ACTE_ADMINISTRATIF" as const,
+      category: copy.category!,
+      documentId: copy.sourceTarificationDocumentId!,
+    })),
+  ];
+};
+
+const createFicheCopy = async (
+  tx: PrismaTransaction,
+  structureId: number,
+  { copy, structureType, file }: FicheCopyCreate
+): Promise<void> => {
+  const fileUploads = { create: file };
+  if (copy.target === "ACTE_ADMINISTRATIF") {
+    await tx.acteAdministratif.create({
+      data: {
+        structureId,
+        structureType,
+        category: copy.category,
+        startDate: new Date(Date.UTC(copy.year, 0, 1)),
+        endDate: new Date(Date.UTC(copy.year, 11, 31)),
+        sourceTarificationDocumentId: copy.documentId,
+        fileUploads,
+      },
+    });
+    return;
+  }
+  await tx.documentFinancier.create({
+    data: {
+      structureId,
+      structureType,
+      category: copy.category,
+      year: copy.year,
+      sourceTarificationDocumentId: copy.documentId,
+      fileUploads,
+    },
+  });
+};
+
+const deleteFicheCopy = async (
+  tx: PrismaTransaction,
+  { id, target }: ExistingFicheCopy
+): Promise<void> => {
+  if (target === "ACTE_ADMINISTRATIF") {
+    await tx.acteAdministratif.delete({ where: { id } });
+    return;
+  }
+  await tx.documentFinancier.delete({ where: { id } });
+};
+
+type FicheCopyCreate = {
+  copy: FicheCopy;
+  structureType: StructureType | null;
+  file: {
+    key: string;
+    originalName: string;
+    mimeType: string;
+    fileSize: number;
+    sha256: string | null;
+  };
+};
+
 export type TarificationJournalSource = {
   findJournal: () => ReturnType<typeof findStructureTarificationJournal>;
   findCampaign: () => ReturnType<typeof findTarificationCampaign>;
 };
 
 export type TarificationTransaction = TarificationJournalSource & {
+  findFicheCopies: () => Promise<ExistingFicheCopy[]>;
+  createFicheCopy: (copy: FicheCopyCreate) => Promise<void>;
+  deleteFicheCopy: (copy: ExistingFicheCopy) => Promise<void>;
   findUnattachedFile: (fileKey: string) => Promise<{ id: number } | null>;
   createDocument: (
     document: TarificationDocumentCreate

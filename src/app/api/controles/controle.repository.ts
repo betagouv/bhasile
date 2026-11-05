@@ -1,6 +1,7 @@
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { assertFilesCanBeAttached } from "../files/file.repository";
 import { convertToControleType } from "./controle.util";
 
 const deleteControles = async (
@@ -33,6 +34,12 @@ export const createOrUpdateControles = async (
     return;
   }
 
+  await assertFilesCanBeAttached(
+    tx,
+    controles.flatMap((controle) =>
+      (controle.fileUploads ?? []).map((fileUpload) => fileUpload.key)
+    )
+  );
   await deleteControles(tx, controles, structureId);
 
   await Promise.all(

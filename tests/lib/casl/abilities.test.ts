@@ -709,6 +709,36 @@ describe("Permissions : canDeleteFile", () => {
       ...overrides,
     }) as unknown as FileWithParents;
 
+  it("refuse à tout agent de supprimer le fichier d'une copie de la tarification", () => {
+    const superAdmin = createSessionUser({ isSuperAdmin: true });
+
+    expect(
+      canDeleteFile(
+        superAdmin,
+        buildFile({
+          documentFinancierId: 1,
+          documentFinancier: {
+            sourceTarificationDocumentId: 7,
+            structure: { id: 1, departementAdministratif: "92" },
+          } as unknown as FileWithParents["documentFinancier"],
+        })
+      )
+    ).toBe(false);
+    expect(
+      canDeleteFile(
+        superAdmin,
+        buildFile({
+          acteAdministratifId: 1,
+          acteAdministratif: {
+            sourceTarificationDocumentId: 7,
+            structureId: 1,
+            structure: { id: 1, departementAdministratif: "92" },
+          } as unknown as FileWithParents["acteAdministratif"],
+        })
+      )
+    ).toBe(false);
+  });
+
   it("autorise n'importe quel agent à supprimer un fichier d'une transformation en cours (acte lié à une structureVersionTransformation)", () => {
     const file = buildFile({
       acteAdministratifId: 1,
