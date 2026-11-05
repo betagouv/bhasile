@@ -19,6 +19,7 @@ export const fileWithParentsInclude = {
   controle: { include: { structure: true } },
   evaluation: { include: { structure: true } },
   operateur: true,
+  tarificationDocument: { select: { id: true } },
   message: {
     select: {
       conversation: {
