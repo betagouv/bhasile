@@ -194,7 +194,7 @@ describe("TarificationPage", () => {
         year: 2026,
         currentUserId: 3,
         isCampaignOpen: true,
-        tags: overview.tags,
+        tags: [],
       })
     );
   });
@@ -241,14 +241,22 @@ describe("TarificationPage", () => {
 
     const [props] = mockSidebar.mock.lastCall!;
     expect(props.steps.map((step: { label: string }) => step.label)).toEqual([
-      "RCA",
-      "L48 (Procédure contradictoire)",
-      "L60 (DAB)",
-      "Arrêté et tarification",
+      "Rapport du compte administratif",
+      "Lettre du 48ème jour",
+      "Lettre du 60ème jour",
+      "Arrêté de tarification",
     ]);
     expect(props.preliminarySections).toEqual([
-      { code: "CA", label: "CA et rapport d'activité 2024", isLate: true },
-      { code: "BP", label: "BP et rapport budgétaire 2026", isLate: false },
+      {
+        code: "CA",
+        label: "Comptes Administratifs et Rapport d'Activité 2024",
+        isLate: true,
+      },
+      {
+        code: "BP",
+        label: "Budget Prévisionnel et Rapport Budgétaire 2026",
+        isLate: false,
+      },
     ]);
   });
 
@@ -341,7 +349,7 @@ describe("TarificationPage", () => {
     });
     expect(screen.getByText(/n’a pas de tarification/)).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Hors Bhasile" })
+      screen.queryByRole("button", { name: "Déclarer hors Bhasile" })
     ).not.toBeInTheDocument();
   });
 

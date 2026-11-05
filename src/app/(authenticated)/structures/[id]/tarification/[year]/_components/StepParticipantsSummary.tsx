@@ -13,17 +13,21 @@ export const StepParticipantsSummary = ({
   const levels = [
     ...new Set(participants.map((participant) => participant.level)),
   ];
+  const names = participants.map(({ name }) => name).join(", ");
   return (
-    <>
-      <span title={participants.map(({ name }) => name).join(", ")}>
-        par {participants.length} personne{participants.length > 1 ? "s" : ""}
-      </span>
+    <span className="flex items-center gap-1">
       {levels.map((level) => (
         <Badge key={level} type="yellow">
           {AUTHOR_LEVEL_LABELS[level]}
         </Badge>
       ))}
-    </>
+      <span
+        title={names}
+        className="fr-icon-user-line fr-icon--xs text-title-blue-france border-0 border-b border-dashed border-title-blue-france"
+      >
+        <span className="sr-only">{names}</span>
+      </span>
+    </span>
   );
 };
 

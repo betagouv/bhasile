@@ -34,8 +34,8 @@ describe("buildConversationAnchors", () => {
     });
 
     expect(getLabels(journal)).toEqual([
-      `Dépôt : Compte administratif ${journal.campaignYear - 2}`,
-      `Retrait : Compte administratif ${journal.campaignYear - 2}`,
+      `Dépôt – Compte administratif ${journal.campaignYear - 2}`,
+      `Retrait – Compte administratif ${journal.campaignYear - 2}`,
     ]);
   });
 
@@ -54,7 +54,7 @@ describe("buildConversationAnchors", () => {
     });
 
     expect(getLabels(journal)).toEqual([
-      "Sans objet : RCA",
+      "Sans objet – RCA",
       "Déclarée hors Bhasile",
     ]);
   });
@@ -81,7 +81,8 @@ describe("buildConversationAnchors", () => {
 
     const labels = getLabels(journal);
 
-    expect(labels.at(-1)).toBe(`Ouverture : L48 ${journal.campaignYear}`);
+    expect(labels.at(-2)).toBe(`Réception – L48 ${journal.campaignYear}`);
+    expect(labels.at(-1)).toBe("Début de la procédure contradictoire");
     const dates = buildConversationAnchors(journal).map(({ date }) =>
       date.getTime()
     );
@@ -95,11 +96,32 @@ describe("buildConversationAnchors", () => {
     openDocument(journal, documentId, LATER);
 
     const openings = buildConversationAnchors(journal).filter(({ label }) =>
-      label.startsWith("Ouverture")
+      label.startsWith("Réception")
     );
 
     expect(openings).toHaveLength(1);
     expect(openings[0].date).toEqual(new Date(LATER));
+  });
+
+  it("ne marque le début du contradictoire qu'à la première ouverture d'une L48", () => {
+    const journal = createJournal();
+    const budgetId = depositDocument(journal, { types: ["BP"], at: AT });
+    const firstL48Id = shareAgentDocument(journal, { types: ["L48"], at: AT });
+    const secondL48Id = shareAgentDocument(journal, { types: ["L48"], at: LATER });
+    openDocument(journal, budgetId, AT);
+    openDocument(journal, firstL48Id, LATER);
+    openDocument(journal, secondL48Id, "2028-04-14T10:00:00Z");
+
+    const starts = buildConversationAnchors(journal).filter(
+      ({ isMajor }) => isMajor
+    );
+
+    expect(starts).toEqual([
+      expect.objectContaining({
+        label: "Début de la procédure contradictoire",
+        date: new Date(LATER),
+      }),
+    ]);
   });
 
   it("donne un identifiant distinct à chaque jalon", () => {

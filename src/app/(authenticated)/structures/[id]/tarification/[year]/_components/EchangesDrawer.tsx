@@ -1,6 +1,5 @@
 "use client";
 
-import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement, ReactNode, useEffect, useRef } from "react";
 
 export const EchangesDrawer = ({ onClose, children }: Props): ReactElement => {
@@ -16,34 +15,21 @@ export const EchangesDrawer = ({ onClose, children }: Props): ReactElement => {
   return (
     <dialog
       ref={dialogRef}
-      aria-labelledby={TITLE_ID}
+      aria-labelledby={ECHANGES_TITLE_ID}
       onClose={onClose}
       onClick={(event) => {
         if (event.target === dialogRef.current) {
           onClose();
         }
       }}
-      className="m-0 ml-auto h-dvh max-h-none w-[64rem] max-w-full p-0 bg-white backdrop:bg-black/50"
+      className="m-0 ml-auto h-dvh max-h-none w-[70.5rem] max-w-full p-0 overflow-hidden rounded-l-[10px] bg-alt-blue-france shadow-[0_4px_6px_rgba(0,0,18,0.16)] backdrop:bg-black/50 transition-transform duration-300 ease-out starting:translate-x-full motion-reduce:transition-none"
     >
-      <div className="h-full flex flex-col gap-4 p-4 overflow-y-auto">
-        <div className="flex items-center justify-between gap-2">
-          <h2 id={TITLE_ID} className="fr-h4 mb-0">
-            Échanges
-          </h2>
-          <Button
-            priority="tertiary no outline"
-            iconId="fr-icon-close-line"
-            title="Fermer les échanges"
-            onClick={onClose}
-          />
-        </div>
-        {children}
-      </div>
+      {children}
     </dialog>
   );
 };
 
-const TITLE_ID = "echanges-title";
+export const ECHANGES_TITLE_ID = "echanges-title";
 
 type Props = {
   onClose: () => void;

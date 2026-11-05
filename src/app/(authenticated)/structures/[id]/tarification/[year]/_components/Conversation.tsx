@@ -1,10 +1,9 @@
 "use client";
 
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { ReactElement, useEffect, useRef } from "react";
+import { ReactElement, ReactNode, useEffect, useRef } from "react";
 
 import Loader from "@/app/components/ui/Loader";
-import { formatDateTime } from "@/app/utils/date.util";
 import { useConversationMessages } from "@/hooks/useConversationMessages";
 import { MessageDraft } from "@/hooks/useMessageDraft";
 import {
@@ -14,7 +13,9 @@ import {
 } from "@/types/conversation.type";
 import { buildConversationThread } from "@/utils/conversation.util";
 
+import { ConversationAnchorSeparator } from "./ConversationAnchorSeparator";
 import { ConversationSummary } from "./ConversationSummary";
+import { EchangesLayout } from "./EchangesLayout";
 import { MessageComposer } from "./MessageComposer";
 import { MessageItem } from "./MessageItem";
 import { ReadOnlyNotice } from "./ReadOnlyNotice";
@@ -30,6 +31,8 @@ export const Conversation = ({
   anchors,
   canTag,
   draft,
+  tabs,
+  onClose,
 }: Props): ReactElement => {
   const {
     messages,
@@ -39,7 +42,8 @@ export const Conversation = ({
     markAsRead,
     changeTag,
   } = useConversationMessages({ structureId, year, visibility });
-  const canTagMessages = canTag && canParticipate && isCampaignOpen;
+  const canTagMessages =
+    canTag && canParticipate && isCampaignOpen && tags.length > 0;
 
   const requestedReceiptIdsRef = useRef(new Set<number>());
   const listRef = useRef<HTMLOListElement>(null);
@@ -90,30 +94,40 @@ export const Conversation = ({
 
   if (hasLostAccess) {
     return (
-      <Alert
-        severity="error"
-        small
-        description="Votre session a expiré ou vous n’avez plus accès à ces échanges. Rechargez la page pour vous reconnecter."
-      />
+      <EchangesLayout tabs={tabs} onClose={onClose}>
+        <Alert
+          severity="error"
+          small
+          description="Votre session a expiré ou vous n’avez plus accès à ces échanges. Rechargez la page pour vous reconnecter."
+        />
+      </EchangesLayout>
     );
   }
 
   if (!messages) {
-    return hasLoadingError ? (
-      <Alert
-        severity="error"
-        small
-        description="Les échanges n’ont pas pu être chargés. Nouvel essai dans quelques secondes."
-      />
-    ) : (
-      <Loader />
+    return (
+      <EchangesLayout tabs={tabs} onClose={onClose}>
+        {hasLoadingError ? (
+          <Alert
+            severity="error"
+            small
+            description="Les échanges n’ont pas pu être chargés. Nouvel essai dans quelques secondes."
+          />
+        ) : (
+          <Loader />
+        )}
+      </EchangesLayout>
     );
   }
 
   const thread = buildConversationThread(messages, anchors);
 
   return (
-    <div className="flex flex-col gap-4">
+    <EchangesLayout
+      summary={<ConversationSummary thread={thread} />}
+      tabs={tabs}
+      onClose={onClose}
+    >
       {hasLoadingError && (
         <Alert
           severity="warning"
@@ -121,47 +135,40 @@ export const Conversation = ({
           description="Les échanges ne sont plus actualisés. Nouvel essai dans quelques secondes."
         />
       )}
-      <div className="flex gap-4 h-[calc(100dvh-30rem)] min-h-64">
-        <ConversationSummary thread={thread} />
-        {thread.length === 0 ? (
-          <p className="mb-0 text-mention-grey">
-            Aucun message pour l’instant.
-          </p>
-        ) : (
-          <ol
-            ref={listRef}
-            onScroll={handleScroll}
-            aria-label="Messages"
-            className="grow min-w-0 overflow-y-auto list-none p-0 m-0 flex flex-col gap-3 [--ol-content:none]"
-          >
-            {thread.map((item) =>
-              item.kind === "anchor" ? (
-                <li
-                  key={item.elementId}
-                  id={item.elementId}
-                  className="self-center p-0 text-xs text-mention-grey text-center"
-                >
-                  {item.label}
-                  {" · "}
-                  <time dateTime={item.date.toISOString()}>
-                    {formatDateTime(item.date)}
-                  </time>
-                </li>
-              ) : (
-                <MessageItem
-                  key={item.elementId}
-                  elementId={item.elementId}
-                  message={item.message}
-                  isOwn={item.message.author.id === currentUserId}
-                  tags={tags}
-                  canTag={canTagMessages}
-                  onTagChange={(tagKey) => changeTag(item.message.id, tagKey)}
-                />
-              )
-            )}
-          </ol>
-        )}
-      </div>
+      {thread.length === 0 ? (
+        <p className="grow mb-0 text-mention-grey">
+          Aucun message pour l’instant.
+        </p>
+      ) : (
+        <ol
+          ref={listRef}
+          onScroll={handleScroll}
+          aria-label="Messages"
+          className="grow min-h-0 overflow-y-auto list-none p-0 m-0 flex flex-col gap-3 [--ol-content:none]"
+        >
+          {thread.map((item) =>
+            item.kind === "anchor" ? (
+              <ConversationAnchorSeparator
+                key={item.elementId}
+                elementId={item.elementId}
+                label={item.label}
+                date={item.date}
+                isMajor={item.isMajor}
+              />
+            ) : (
+              <MessageItem
+                key={item.elementId}
+                elementId={item.elementId}
+                message={item.message}
+                isOwn={item.message.author.id === currentUserId}
+                tags={tags}
+                canTag={canTagMessages}
+                onTagChange={(tagKey) => changeTag(item.message.id, tagKey)}
+              />
+            )
+          )}
+        </ol>
+      )}
       {!isCampaignOpen && <ReadOnlyNotice year={year} />}
       {isCampaignOpen && canParticipate && (
         <MessageComposer
@@ -171,7 +178,7 @@ export const Conversation = ({
           onSend={postMessage}
         />
       )}
-    </div>
+    </EchangesLayout>
   );
 };
 
@@ -188,4 +195,6 @@ type Props = {
   anchors: ConversationAnchor[];
   canTag: boolean;
   draft: MessageDraft;
+  tabs?: ReactNode;
+  onClose: () => void;
 };

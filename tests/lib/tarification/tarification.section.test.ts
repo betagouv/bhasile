@@ -77,15 +77,19 @@ const review = (
 
 describe("getSectionLabel", () => {
   it("donne l'exercice des documents préliminaires", () => {
-    expect(getSectionLabel("CA", 2028)).toBe("CA et rapport d'activité 2026");
-    expect(getSectionLabel("BP", 2028)).toBe("BP et rapport budgétaire 2028");
+    expect(getSectionLabel("CA", 2028)).toBe(
+      "Comptes Administratifs et Rapport d'Activité 2026"
+    );
+    expect(getSectionLabel("BP", 2028)).toBe(
+      "Budget Prévisionnel et Rapport Budgétaire 2028"
+    );
     expect(getSectionLabel("DAI", 2028)).toBe(
-      "DAI 2028 (issue de l'arrêté 2027)"
+      "Décision d'Attribution Initiale 2028 (issue de l'arrêté 2027)"
     );
   });
 
-  it("nomme la quatrième étape Arrêté et tarification", () => {
-    expect(getSectionLabel("ARRETE", 2028)).toBe("Arrêté et tarification");
+  it("nomme la quatrième étape Arrêté de tarification", () => {
+    expect(getSectionLabel("ARRETE", 2028)).toBe("Arrêté de tarification");
   });
 });
 
@@ -256,6 +260,11 @@ describe("computeStepProgress", () => {
       isSigned: false,
       isSent: false,
       isReceived: false,
+      createdAt: null,
+      validatedAt: null,
+      signedAt: null,
+      sentAt: null,
+      receivedAt: null,
     });
   });
 

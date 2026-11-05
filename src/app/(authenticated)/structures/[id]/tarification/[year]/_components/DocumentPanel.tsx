@@ -22,6 +22,7 @@ export const DocumentPanel = ({
   hasSharedL48,
   contradictoireDeadline,
   label,
+  subtitle,
   versions,
   isOperateur,
   timeZone,
@@ -42,13 +43,29 @@ export const DocumentPanel = ({
     defaultVersion;
 
   return (
-    <div className="flex flex-col gap-4">
-      <header className="bg-white rounded-xl border border-border-default-grey px-6 py-4">
-        <h1 className="fr-h5 text-title-blue-france mb-0">{label}</h1>
+    <div className="grow min-h-0 flex flex-col gap-4">
+      <header className="flex items-center justify-between gap-4 flex-wrap bg-white rounded-[10px] border border-border-default-grey pl-5 pr-3.5 py-3.5">
+        <h1 className="text-xl font-bold text-title-blue-france mb-0">
+          {label}
+          {subtitle && (
+            <span className="font-normal text-lg">{` – ${subtitle}`}</span>
+          )}
+        </h1>
+        {selectedVersion && (
+          <button
+            type="button"
+            aria-expanded={isHistoryOpen}
+            onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+            className="flex items-center gap-1.5 text-xs font-bold text-title-blue-france"
+          >
+            <span aria-hidden className="fr-icon-eye-line fr-icon--sm" />
+            Voir l’historique des modifications
+          </button>
+        )}
       </header>
       {notice}
-      <div className="flex gap-4 items-stretch">
-        <section className="w-[26rem] shrink-0 flex flex-col gap-3 bg-white rounded-xl border border-border-default-grey p-6">
+      <div className="grow min-h-80 flex gap-4 items-stretch">
+        <section className="w-[26rem] shrink-0 overflow-y-auto flex flex-col gap-3 bg-white rounded-[10px] border border-border-default-grey p-5">
           {actions.depositOptions.length > 0 && (
             <DocumentDeposit
               options={actions.depositOptions}
@@ -64,14 +81,6 @@ export const DocumentPanel = ({
                 version={selectedVersion}
                 timeZone={timeZone}
               />
-              <button
-                type="button"
-                aria-expanded={isHistoryOpen}
-                onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-                className="text-sm font-medium text-title-blue-france text-left underline"
-              >
-                Voir l’historique des modifications
-              </button>
               {isHistoryOpen && (
                 <DocumentVersions
                   versions={versions}
@@ -129,6 +138,7 @@ type Props = {
   hasSharedL48: boolean;
   contradictoireDeadline: string | null;
   label: string;
+  subtitle?: string;
   versions: SectionVersion[];
   isOperateur: boolean;
   timeZone: string;

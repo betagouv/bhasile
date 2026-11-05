@@ -5,6 +5,7 @@ export type ConversationAnchor = {
   label: string;
   date: Date;
   startsTagKey?: string;
+  isMajor?: boolean;
 };
 
 export const ConversationVisibility = ["SHARED", "AGENTS"] as const;

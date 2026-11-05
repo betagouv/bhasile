@@ -35,6 +35,10 @@ export const getSectionLabel = (
   return label;
 };
 
+export const getSectionSubtitle = (
+  code: TarificationSectionCode
+): string | undefined => TARIFICATION_SECTION_DEFINITIONS[code].subtitle;
+
 export const parseSectionCode = (
   value: string | undefined
 ): TarificationSectionCode | null =>
@@ -122,6 +126,21 @@ export const computeStepProgress = (
     (event) => event.type === TarificationEventType.APPROVED
   );
   const latestDocument = documents.at(-1);
+  const signedDocumentIds = new Set(
+    documents
+      .filter(
+        (document) => document.status === TarificationDocumentStatus.FINAL
+      )
+      .map((document) => document.id)
+  );
+  const sentDates = documents.flatMap((document) =>
+    sharedAtByDocumentId.get(document.id) ?? []
+  );
+  const receptions = journal.openings.filter(
+    (opening) =>
+      documentIds.has(opening.documentId) &&
+      sharedAtByDocumentId.has(opening.documentId)
+  );
   return {
     creators: getParticipants(deposits),
     reviewers: getParticipants(reviews),
@@ -135,11 +154,17 @@ export const computeStepProgress = (
       (document) => document.status === TarificationDocumentStatus.FINAL
     ),
     isSent: documents.some((document) => sharedAtByDocumentId.has(document.id)),
-    isReceived: journal.openings.some(
-      (opening) =>
-        documentIds.has(opening.documentId) &&
-        sharedAtByDocumentId.has(opening.documentId)
-    ),
+    isReceived: receptions.length > 0,
+    createdAt: deposits[0]?.createdAt ?? null,
+    validatedAt: reviews[0]?.createdAt ?? null,
+    signedAt:
+      deposits.find(
+        (deposit) =>
+          deposit.documentId !== null &&
+          signedDocumentIds.has(deposit.documentId)
+      )?.createdAt ?? null,
+    sentAt: getEarliestDate(sentDates),
+    receivedAt: getEarliestDate(receptions.map(({ createdAt }) => createdAt)),
   };
 };
 
@@ -154,6 +179,12 @@ const getChangesRequests = (
       text,
       authorName: author?.name ?? null,
     }));
+
+const getEarliestDate = (dates: Date[]): Date | null =>
+  dates.reduce<Date | null>(
+    (earliest, date) => (!earliest || date < earliest ? date : earliest),
+    null
+  );
 
 export const getExerciseLabel = (
   type: TarificationDocumentType,
@@ -247,4 +278,9 @@ export type StepProgress = {
   isSigned: boolean;
   isSent: boolean;
   isReceived: boolean;
+  createdAt: Date | null;
+  validatedAt: Date | null;
+  signedAt: Date | null;
+  sentAt: Date | null;
+  receivedAt: Date | null;
 };

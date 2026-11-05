@@ -68,7 +68,7 @@ export const DocumentViewer = ({
   }
 
   return (
-    <div className="grow flex flex-col gap-3 min-w-0">
+    <div className="grow flex flex-col gap-3 min-w-0 min-h-0">
       <div className="flex justify-end">
         <Button
           priority="tertiary"
@@ -85,11 +85,11 @@ export const DocumentViewer = ({
           src={inlineLink}
           title={title}
           referrerPolicy="no-referrer"
-          className="w-full grow min-h-[40rem] bg-white rounded-xl border border-border-default-grey"
+          className="w-full grow min-h-0 bg-white rounded-xl border border-border-default-grey"
         />
       )}
       {!sheets && !inlineLink && (
-        <div className="grow min-h-[40rem] flex flex-col items-center justify-center gap-3 bg-white rounded-xl p-6">
+        <div className="grow min-h-0 flex flex-col items-center justify-center gap-3 bg-white rounded-xl p-6">
           <p className="mb-0 font-medium">{file.originalName}</p>
           {isInlineViewable || isSpreadsheet ? (
             <Button onClick={openDocument} disabled={isOpening}>

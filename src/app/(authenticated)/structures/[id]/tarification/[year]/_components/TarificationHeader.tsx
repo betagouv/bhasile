@@ -11,7 +11,7 @@ export const TarificationHeader = ({
   canDeclareOutOfBhasile,
   structure,
 }: Props): ReactElement => (
-  <div className="sticky top-0 z-40 flex items-center gap-2 bg-white border-b border-b-border-default-grey px-6 py-3">
+  <div className="shrink-0 sticky top-0 z-40 flex items-center gap-2 bg-white border-b border-b-border-default-grey px-6 py-3">
     <Link
       href={`/structures/${structureId}`}
       className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"

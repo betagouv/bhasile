@@ -1,7 +1,8 @@
 import { Fragment, ReactElement } from "react";
 
+import { Badge } from "@/app/components/common/Badge";
 import { cn } from "@/app/utils/classname.util";
-import { formatDateTime } from "@/app/utils/date.util";
+import { formatDateAndTime, formatDateTime } from "@/app/utils/date.util";
 import { AUTHOR_LEVEL_LABELS } from "@/constants";
 import { MessageApiRead } from "@/schemas/api/message.schema";
 import { ConversationTag } from "@/types/conversation.type";
@@ -20,30 +21,41 @@ export const MessageItem = ({
   <li
     id={elementId}
     className={cn(
-      "max-w-[85%] p-4 rounded border border-solid border-default-grey",
-      isOwn ? "self-end bg-alt-blue-france" : "self-start bg-white"
+      "p-0 w-[92%] flex flex-col gap-3 pb-4 rounded-[10px] bg-white",
+      isOwn ? "self-end" : "self-start"
     )}
   >
-    <p className="text-sm mb-1">
-      <strong>{message.author.name ?? "Utilisateur"}</strong>
-      {" · "}
-      {AUTHOR_LEVEL_LABELS[message.authorLevel]}
-      {" · "}
-      <time dateTime={message.createdAt}>
-        {formatDateTime(message.createdAt)}
+    <div className="flex items-center justify-between gap-4 flex-wrap pl-4 pr-3 py-2 rounded-t-[10px] bg-action-low-blue-france">
+      <span className="flex items-center gap-2 text-sm text-title-blue-france">
+        <strong>{message.author.name ?? "Utilisateur"}</strong>
+        {" – "}
+        <Badge
+          type={message.authorLevel === "OPERATEUR" ? "pink" : "yellow"}
+        >
+          {AUTHOR_LEVEL_LABELS[message.authorLevel]}
+        </Badge>
+      </span>
+      <time dateTime={message.createdAt} className="text-sm font-bold text-title-grey">
+        {formatDateAndTime(message.createdAt)}
       </time>
-    </p>
-    <MessageTag
-      tagKey={message.tagKey}
-      tags={tags}
-      canTag={canTag}
-      onTagChange={onTagChange}
-    />
-    {message.text && <p className="whitespace-pre-wrap mb-0">{message.text}</p>}
+    </div>
+    {tags.length > 0 && (
+      <div className="px-4">
+        <MessageTag
+          tagKey={message.tagKey}
+          tags={tags}
+          canTag={canTag}
+          onTagChange={onTagChange}
+        />
+      </div>
+    )}
+    {message.text && (
+      <p className="px-4 whitespace-pre-wrap text-sm mb-0">{message.text}</p>
+    )}
     {message.attachments.length > 0 && (
       <ul
         aria-label="Pièces jointes du message"
-        className="list-none p-0 mt-2 mb-0 flex flex-col gap-1"
+        className="list-none px-4 m-0 flex flex-col items-start gap-1"
       >
         {message.attachments.map((attachment) => (
           <MessageAttachment key={attachment.id} attachment={attachment} />
@@ -51,7 +63,7 @@ export const MessageItem = ({
       </ul>
     )}
     {message.receipts.length > 0 && (
-      <p className="text-xs text-mention-grey mt-2 mb-0">
+      <p className="px-4 text-xs text-mention-grey mb-0">
         Lu par{" "}
         {message.receipts.map((receipt, receiptIndex) => (
           <Fragment key={receipt.user.id}>

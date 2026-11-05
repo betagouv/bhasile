@@ -12,6 +12,7 @@ import type { StepStatus } from "@/types/tarification.type";
 
 import { CampaignSelect } from "./CampaignSelect";
 import { PreliminarySectionLink } from "./PreliminarySectionLink";
+import { PreparatoryDocuments } from "./PreparatoryDocuments";
 import { SidebarStep } from "./SidebarStep";
 
 export const TarificationSidebar = ({
@@ -21,6 +22,7 @@ export const TarificationSidebar = ({
   selectedCode,
   isOperateur,
   drlUrl,
+  timeZone,
   preliminarySections,
   steps,
 }: Props): ReactElement => {
@@ -33,36 +35,30 @@ export const TarificationSidebar = ({
   };
 
   return (
-    <aside className="w-[25rem] shrink-0 flex flex-col gap-4 bg-white border-r border-r-border-default-grey px-5 py-4">
-      <Image
-        src="/logo.svg"
-        alt="Bhasile"
-        width={100}
-        height={40}
-        className="self-center"
-      />
-      <CampaignSelect
-        structureId={structureId}
-        year={year}
-        campaignYears={campaignYears}
-      />
+    <aside className="w-[22rem] shrink-0 sticky top-0 h-dvh flex flex-col bg-white border-r border-r-border-default-grey">
+      <div className="h-[4.5rem] shrink-0 flex items-center justify-center border-b border-b-border-default-grey">
+        <Image src="/logo.svg" alt="Bhasile" width={72} height={26} />
+      </div>
+      <div className="shrink-0 p-4 shadow-[0_2px_3px_rgba(0,0,18,0.16)] z-10">
+        <CampaignSelect
+          structureId={structureId}
+          year={year}
+          campaignYears={campaignYears}
+        />
+      </div>
 
-      <nav aria-label="Documents préliminaires">
-        <h2 className="text-title-blue-france text-sm uppercase font-bold mb-2">
-          Documents préliminaires
-        </h2>
-        <ul className="fr-raw-list p-0 m-0 flex flex-col gap-2">
+      <div className="grow min-h-0 overflow-y-auto flex flex-col gap-4 p-4">
+        <PreparatoryDocuments
+          isInitiallyOpen={preliminarySections.some(
+            (section) => section.code === selectedCode || section.isLate
+          )}
+        >
           {drlUrl && (
-            <li className="p-0">
-              <a
-                href={drlUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block rounded-lg bg-alt-blue-france px-4 py-2 text-sm font-medium text-title-blue-france"
-              >
-                Dotation Régionale Limitative {year}
-              </a>
-            </li>
+            <PreliminarySectionLink
+              label={`Dotation Régionale Limitative ${year}`}
+              href={drlUrl}
+              isExternal
+            />
           )}
           {preliminarySections.map((section) => (
             <PreliminarySectionLink
@@ -73,37 +69,44 @@ export const TarificationSidebar = ({
               isLate={section.isLate}
             />
           ))}
-        </ul>
-      </nav>
+        </PreparatoryDocuments>
+        <div aria-hidden className="shrink-0 h-px bg-[var(--border-default-grey)]" />
 
-      <nav aria-label="Parcours de tarification">
-        <h2 className="text-title-blue-france text-sm uppercase font-bold mb-2">
-          Parcours de tarification
-        </h2>
-        <ol className="fr-raw-list p-0 m-0 flex flex-col gap-3">
-          {steps.map((step) => (
-            <SidebarStep
-              key={step.code}
-              label={step.label}
-              href={getSectionHref(step.code)}
-              status={step.status}
-              isLate={step.isLate}
-              isSelected={step.code === selectedCode}
-              isOperateur={isOperateur}
-              progress={step.progress}
-            />
-          ))}
-        </ol>
-      </nav>
+        <nav aria-label="Parcours de tarification">
+          <h2 className="text-title-blue-france text-xs uppercase font-bold mb-4">
+            Parcours de tarification
+          </h2>
+          <ol className="fr-raw-list p-0 m-0 flex flex-col">
+            {steps.map((step, stepIndex) => (
+              <SidebarStep
+                key={step.code}
+                label={step.label}
+                subtitle={step.subtitle}
+                href={getSectionHref(step.code)}
+                status={step.status}
+                isLate={step.isLate}
+                isSelected={step.code === selectedCode}
+                isLast={stepIndex === steps.length - 1}
+                isOperateur={isOperateur}
+                deadline={step.deadline}
+                timeZone={timeZone}
+                progress={step.progress}
+              />
+            ))}
+          </ol>
+        </nav>
+      </div>
 
-      <a
-        href={BHASILE_HELP_CENTER_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fr-btn fr-btn--secondary fr-btn--sm fr-icon-question-line fr-btn--icon-left self-center mt-auto"
-      >
-        Centre d’aide
-      </a>
+      <div className="shrink-0 flex justify-center py-6 shadow-[0_-2px_3px_rgba(0,0,18,0.16)] z-10">
+        <a
+          href={BHASILE_HELP_CENTER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-question-line fr-btn--icon-left"
+        >
+          Centre d’aide
+        </a>
+      </div>
     </aside>
   );
 };
@@ -117,6 +120,7 @@ type Props = {
   selectedCode: TarificationSectionCode;
   isOperateur: boolean;
   drlUrl: string | null;
+  timeZone: string;
   preliminarySections: {
     code: TarificationSectionCode;
     label: string;
@@ -125,8 +129,10 @@ type Props = {
   steps: {
     code: TarificationStepCode;
     label: string;
+    subtitle?: string;
     status: StepStatus;
     isLate: boolean;
+    deadline: string | null;
     progress: StepProgress;
   }[];
 };

@@ -23,10 +23,37 @@ export const buildConversationAnchors = (
     })),
     ...getFirstOpenings(journal).map((opening) => ({
       id: `opening-${opening.documentId}`,
-      label: `Ouverture : ${getDocumentLabel(opening.documentId)}`,
+      label: `Réception – ${getDocumentLabel(opening.documentId)}`,
       date: opening.createdAt,
     })),
+    ...getContradictoireStartAnchors(journal),
   ].sort((first, second) => first.date.getTime() - second.date.getTime());
+};
+
+// Le délai court depuis la première ouverture d'une L48 : une seconde L48 ne le relance pas
+const getContradictoireStartAnchors = (
+  journal: TarificationJournal
+): ConversationAnchor[] => {
+  const l48DocumentIds = new Set(
+    journal.documents
+      .filter((document) => document.types.includes("L48"))
+      .map((document) => document.id)
+  );
+  const firstL48Opening = getFirstOpenings(journal)
+    .filter((opening) => l48DocumentIds.has(opening.documentId))
+    .sort(
+      (first, second) => first.createdAt.getTime() - second.createdAt.getTime()
+    )[0];
+  return firstL48Opening
+    ? [
+        {
+          id: "contradictoire-start",
+          label: "Début de la procédure contradictoire",
+          date: firstL48Opening.createdAt,
+          isMajor: true,
+        },
+      ]
+    : [];
 };
 
 // Seule la première ouverture d'un document fait courir le délai : les suivantes n'apportent rien au fil
@@ -63,7 +90,7 @@ const getEventLabel = (
   const detail =
     documentLabel ??
     (event.stepCode && TARIFICATION_STEP_DEFINITIONS[event.stepCode].label);
-  return detail ? `${label} : ${detail}` : label;
+  return detail ? `${label} – ${detail}` : label;
 };
 
 const EVENT_LABELS: Record<TarificationEventType, string> = {

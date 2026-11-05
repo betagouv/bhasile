@@ -141,7 +141,7 @@ export const DocumentActionBar = ({
     });
 
   return (
-    <footer className="flex items-center gap-3 flex-wrap bg-white rounded-xl border border-border-default-grey px-6 py-4">
+    <footer className="shrink-0 flex items-center gap-3 flex-wrap bg-white rounded-xl border border-border-default-grey px-6 py-4">
       <p className="mb-0 text-sm grow">
         {reviewerNames.length > 0 && (
           <>

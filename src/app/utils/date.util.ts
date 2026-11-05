@@ -32,6 +32,11 @@ const DATE_TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
 export const formatDateTime = (date: Date | string): string =>
   DATE_TIME_FORMAT.format(new Date(date));
 
+export const formatDateAndTime = (date: Date | string): string => {
+  const [day, time] = DATE_TIME_FORMAT.format(new Date(date)).split(" ");
+  return `${day} à ${time.replace(":", "h")}`;
+};
+
 export const toDayKey = (date: Date): string => date.toISOString().slice(0, 10);
 
 export const toMonthKey = (date: Date): string =>
@@ -289,5 +294,22 @@ export const formatCivilDate = (date: CivilDate): string =>
 // Au fuseau de la structure : le serveur et le navigateur doivent afficher la même date à l'hydratation
 export const formatInstantDate = (instant: Date, timeZone: string): string =>
   formatCivilDate(toLocalDate(instant, timeZone));
+
+// Au fuseau de la structure, comme formatInstantDate
+export const formatInstantDayAndTime = (
+  instant: Date,
+  timeZone: string
+): string => {
+  const parts = new Intl.DateTimeFormat("fr-FR", {
+    timeZone,
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(instant);
+  const getPart = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${getPart("day")}/${getPart("month")} à ${getPart("hour")}h${getPart("minute")}`;
+};
 
 export type CivilDate = string;

@@ -1,44 +1,123 @@
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
+import {
+  formatCivilDate,
+  formatInstantDayAndTime,
+} from "@/app/utils/date.util";
 import type { StepProgress } from "@/lib/tarification/tarification.section";
 
 import { StepParticipantsSummary } from "./StepParticipantsSummary";
-import { StepProgressLine } from "./StepProgressLine";
+import { StepLineStatus, StepProgressLine } from "./StepProgressLine";
 
 export const StepProgressList = ({
   progress,
   isOperateur,
-}: Props): ReactElement => (
-  <ul className="fr-raw-list m-0 px-4 pb-4 flex flex-col gap-2 text-white text-sm">
-    {!isOperateur && (
+  deadline,
+  timeZone,
+}: Props): ReactElement => {
+  const buildDoneLabel = (label: string, date: Date | null): ReactNode =>
+    date ? (
       <>
-        <StepProgressLine
-          label="créé"
-          isDone={progress.creators.length > 0}
-          participants={
-            <StepParticipantsSummary participants={progress.creators} />
-          }
-        />
-        {progress.hasChangesRequested && (
-          <StepProgressLine label="modifications demandées" isDone={false} />
-        )}
-        <StepProgressLine
-          label="relu"
-          isDone={progress.reviewers.length > 0}
-          participants={
-            <StepParticipantsSummary participants={progress.reviewers} />
-          }
-        />
-        <StepProgressLine label="validé" isDone={progress.isValidated} />
-        <StepProgressLine label="signé" isDone={progress.isSigned} />
+        {label} le{" "}
+        <strong>{formatInstantDayAndTime(date, timeZone)}</strong>
       </>
-    )}
-    <StepProgressLine label="envoyé" isDone={progress.isSent} />
-    <StepProgressLine label="reçu" isDone={progress.isReceived} />
-  </ul>
-);
+    ) : (
+      label
+    );
+
+  const lines: Line[] = [
+    ...(isOperateur
+      ? []
+      : [
+          {
+            key: "created",
+            isDone: progress.creators.length > 0,
+            doneLabel: buildDoneLabel("créé", progress.createdAt),
+            pendingLabel: "à créer",
+            participants: (
+              <StepParticipantsSummary participants={progress.creators} />
+            ),
+          },
+          ...(progress.hasChangesRequested
+            ? [
+                {
+                  key: "changes",
+                  isDone: false,
+                  doneLabel: null,
+                  pendingLabel: "modifications demandées",
+                },
+              ]
+            : []),
+          {
+            key: "validated",
+            isDone: progress.isValidated,
+            doneLabel: buildDoneLabel("validé", progress.validatedAt),
+            pendingLabel: "à valider",
+            participants: (
+              <StepParticipantsSummary participants={progress.reviewers} />
+            ),
+          },
+          {
+            key: "signed",
+            isDone: progress.isSigned,
+            doneLabel: buildDoneLabel("signé", progress.signedAt),
+            pendingLabel: "à signer",
+          },
+        ]),
+    {
+      key: "sent",
+      isDone: progress.isSent,
+      doneLabel: buildDoneLabel("envoyé", progress.sentAt),
+      pendingLabel: deadline ? (
+        <>
+          à envoyer{" "}
+          <strong>avant le {formatCivilDate(deadline).slice(0, 5)}</strong>
+        </>
+      ) : (
+        "à envoyer"
+      ),
+    },
+    {
+      key: "received",
+      isDone: progress.isReceived,
+      doneLabel: buildDoneLabel("reçu", progress.receivedAt),
+      pendingLabel: "à recevoir",
+    },
+  ];
+  const nextKey = lines.find((line) => !line.isDone)?.key;
+
+  const getStatus = ({ key, isDone }: Line): StepLineStatus => {
+    if (isDone) {
+      return "DONE";
+    }
+    return key === nextKey ? "NEXT" : "LATER";
+  };
+
+  return (
+    <ul className="fr-raw-list m-0 px-2 flex flex-col gap-1.5">
+      {lines.map((line) => (
+        <StepProgressLine
+          key={line.key}
+          label={line.isDone ? line.doneLabel : line.pendingLabel}
+          status={getStatus(line)}
+          participants={line.isDone ? line.participants : undefined}
+        />
+      ))}
+    </ul>
+  );
+};
+
+type Line = {
+  key: string;
+  isDone: boolean;
+  doneLabel: ReactNode;
+  pendingLabel: ReactNode;
+  participants?: ReactNode;
+};
 
 type Props = {
   progress: StepProgress;
   isOperateur: boolean;
+  deadline: string | null;
+  timeZone: string;
 };

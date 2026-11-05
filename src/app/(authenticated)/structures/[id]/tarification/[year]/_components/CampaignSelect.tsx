@@ -25,6 +25,8 @@ export const CampaignSelect = ({
       className="mb-0"
       nativeSelectProps={{
         name: "campagne",
+        className:
+          "bg-white! shadow-none! border border-solid border-active-blue-france rounded-none! text-sm font-medium text-title-blue-france",
         value: String(year),
         onChange: handleYearChange,
       }}

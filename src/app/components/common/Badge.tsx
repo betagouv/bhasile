@@ -19,6 +19,7 @@ export const Badge = ({
       purple: "fr-badge--purple-glycine",
       yellow: "fr-badge--yellow-tournesol",
       brown: "fr-badge--brown-caramel",
+      pink: "fr-badge--pink-tuile",
       disabled: "",
     };
     return types[type];
@@ -49,4 +50,5 @@ export type BadgeType =
   | "new"
   | "purple"
   | "brown"
+  | "pink"
   | "disabled";

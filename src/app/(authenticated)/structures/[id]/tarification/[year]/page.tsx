@@ -24,6 +24,7 @@ import {
   computeStepProgress,
   getDefaultSectionCode,
   getSectionLabel,
+  getSectionSubtitle,
   getSectionVersions,
   parseSectionCode,
 } from "@/lib/tarification/tarification.section";
@@ -124,6 +125,7 @@ export default async function TarificationPage({
         selectedCode={selectedCode}
         isOperateur={overview.isOperateur}
         drlUrl={drlUrl}
+        timeZone={journal.timeZone}
         preliminarySections={[
           {
             code: "CA" as const,
@@ -148,13 +150,15 @@ export default async function TarificationPage({
         steps={state.steps.map((step) => ({
           code: step.code,
           label: getSectionLabel(step.code, year),
+          subtitle: getSectionSubtitle(step.code),
           status: step.status,
           isLate: step.isLate,
+          deadline: step.deadline,
           progress: stepProgress.find(({ code }) => code === step.code)!
             .progress,
         }))}
       />
-      <main id="content" className="grow min-w-0 flex flex-col">
+      <main id="content" className="grow min-w-0 h-dvh flex flex-col">
         <TarificationHeader
           structureId={structureId}
           year={year}
@@ -168,7 +172,7 @@ export default async function TarificationPage({
             departementAdministratif: structure.departementAdministratif,
           }}
         />
-        <div className="flex flex-col gap-6 p-4 pb-20">
+        <div className="grow min-h-0 overflow-y-auto flex flex-col gap-4 p-4">
           <CampaignNotice
             year={year}
             phase={phase}
@@ -189,6 +193,7 @@ export default async function TarificationPage({
             hasSharedL48={state.contradictoire.l48DocumentId !== null}
             contradictoireDeadline={state.contradictoire.deadline}
             label={getSectionLabel(selectedCode, year)}
+            subtitle={getSectionSubtitle(selectedCode)}
             versions={versions}
             isOperateur={overview.isOperateur}
             timeZone={journal.timeZone}
@@ -210,7 +215,7 @@ export default async function TarificationPage({
             isOperateur={overview.isOperateur}
             canParticipate={overview.canParticipate}
             isCampaignOpen={overview.openCampaignYears.includes(year)}
-            tags={overview.tags}
+            tags={[]}
             unreadCounts={unreadCounts}
             anchorsByVisibility={{
               SHARED: buildConversationAnchors(

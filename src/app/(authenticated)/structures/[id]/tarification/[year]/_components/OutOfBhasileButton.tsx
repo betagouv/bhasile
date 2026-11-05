@@ -40,7 +40,7 @@ export const OutOfBhasileButton = ({
             })
           }
         >
-          Hors Bhasile
+          Déclarer hors Bhasile
         </Button>
       )}
       <TarificationActionModal

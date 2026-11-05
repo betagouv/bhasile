@@ -241,20 +241,28 @@ export const TARIFICATION_SECTION_DEFINITIONS: Record<
   TarificationSectionCode,
   SectionDefinition
 > = {
-  CA: { label: "CA et rapport d'activité", types: ["CA", "RAPPORT_ACTIVITE"] },
+  CA: {
+    label: "Comptes Administratifs et Rapport d'Activité",
+    types: ["CA", "RAPPORT_ACTIVITE"],
+  },
   BP: {
-    label: "BP et rapport budgétaire",
+    label: "Budget Prévisionnel et Rapport Budgétaire",
     types: ["BP", "RAPPORT_BUDGETAIRE"],
   },
-  DAI: { label: "DAI", types: ["DAI"] },
-  RCA: { label: "RCA", types: ["RCA"] },
+  DAI: { label: "Décision d'Attribution Initiale", types: ["DAI"] },
+  RCA: { label: "Rapport du compte administratif", types: ["RCA"] },
   L48: {
-    label: "L48 (Procédure contradictoire)",
+    label: "Lettre du 48ème jour",
+    subtitle: "Procédure Contradictoire",
     types: ["L48", "REPONSE_CONTRADICTOIRE"],
   },
-  DAB: { label: "L60 (DAB)", types: ["DAB"] },
+  DAB: {
+    label: "Lettre du 60ème jour",
+    subtitle: "Décision d'autorisation budgétaire",
+    types: ["DAB"],
+  },
   ARRETE: {
-    label: "Arrêté et tarification",
+    label: "Arrêté de tarification",
     types: ["ARRETE", "DAM", "DAI", "ECHEANCIER"],
   },
 };
@@ -278,6 +286,7 @@ type FicheCopyDefinition =
 
 type SectionDefinition = {
   label: string;
+  subtitle?: string;
   types: TarificationDocumentType[];
 };
 

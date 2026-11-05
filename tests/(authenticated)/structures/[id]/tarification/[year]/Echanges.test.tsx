@@ -615,7 +615,7 @@ describe("Echanges", () => {
       const entries = within(summary).getAllByRole("button");
       expect(entries).toHaveLength(2);
       expect(entries[0]).toHaveTextContent("Envoi : L48 2026");
-      expect(entries[1]).toHaveTextContent("Justificatif");
+      expect(entries[1]).toHaveTextContent("Document joint");
     });
 
     it("fait défiler le fil vers l'élément choisi au sommaire", async () => {
@@ -1069,7 +1069,7 @@ describe("Echanges", () => {
       const messageParagraphs = screen
         .getByRole("list", { name: "Messages" })
         .querySelectorAll(":scope > li > p");
-      expect(messageParagraphs).toHaveLength(1);
+      expect(messageParagraphs).toHaveLength(0);
     });
   });
 

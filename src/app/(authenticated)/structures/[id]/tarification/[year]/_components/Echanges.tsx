@@ -1,7 +1,6 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ReactElement, useState } from "react";
 
@@ -13,6 +12,7 @@ import {
   ConversationVisibility,
 } from "@/types/conversation.type";
 
+import { ChannelTabs } from "./ChannelTabs";
 import { Conversation } from "./Conversation";
 import { EchangesDrawer } from "./EchangesDrawer";
 import { UnreadCountBadge } from "./UnreadCountBadge";
@@ -74,6 +74,41 @@ export const Echanges = ({
       anchors={anchorsByVisibility[visibility]}
       canTag={!isOperateur}
       draft={draft}
+      tabs={
+        isOperateur ? undefined : (
+          <ChannelTabs
+            selected={visibility}
+            tabs={[
+              {
+                visibility: "SHARED",
+                label: (
+                  <>
+                    {VISIBILITY_LABELS.SHARED}
+                    <UnreadCountBadge count={getUnreadCount("SHARED")} />
+                  </>
+                ),
+              },
+              {
+                visibility: "AGENTS",
+                label: (
+                  <>
+                    {VISIBILITY_LABELS.AGENTS}
+                    <UnreadCountBadge count={getUnreadCount("AGENTS")} />
+                  </>
+                ),
+              },
+            ]}
+            onSelect={(selectedVisibility) =>
+              updateChannel(
+                selectedVisibility === "AGENTS"
+                  ? AGENTS_CHANNEL
+                  : SHARED_CHANNEL
+              )
+            }
+          />
+        )
+      }
+      onClose={() => updateChannel(null)}
     />
   );
 
@@ -82,7 +117,7 @@ export const Echanges = ({
       <Button
         iconId="fr-icon-question-answer-line"
         onClick={() => updateChannel(SHARED_CHANNEL)}
-        className="fixed bottom-6 right-6 z-30"
+        className="fixed bottom-[7.5rem] right-0 z-30 rounded-l-full! p-[1.125rem]! shadow-[0_4px_6px_rgba(0,0,18,0.16)]"
       >
         Échanges
         <UnreadCountBadge
@@ -91,41 +126,7 @@ export const Echanges = ({
       </Button>
       {isOpen && (
         <EchangesDrawer onClose={() => updateChannel(null)}>
-          {isOperateur ? (
-            conversation
-          ) : (
-            <Tabs
-              selectedTabId={visibility}
-              onTabChange={(tabId) =>
-                updateChannel(
-                  tabId === "AGENTS" ? AGENTS_CHANNEL : SHARED_CHANNEL
-                )
-              }
-              tabs={[
-                {
-                  tabId: "SHARED",
-                  label: (
-                    <>
-                      {VISIBILITY_LABELS.SHARED}
-                      <UnreadCountBadge count={getUnreadCount("SHARED")} />
-                    </>
-                  ),
-                },
-                {
-                  tabId: "AGENTS",
-                  label: (
-                    <>
-                      {VISIBILITY_LABELS.AGENTS}
-                      <UnreadCountBadge count={getUnreadCount("AGENTS")} />
-                    </>
-                  ),
-                },
-              ]}
-              className="bg-white shrink-0 h-auto! before:h-auto! before:self-stretch"
-            >
-              {conversation}
-            </Tabs>
-          )}
+          {conversation}
         </EchangesDrawer>
       )}
     </>

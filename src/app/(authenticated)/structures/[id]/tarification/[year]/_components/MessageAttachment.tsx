@@ -21,12 +21,13 @@ export const MessageAttachment = ({ attachment }: Props): ReactElement => {
   };
 
   return (
-    <li className="text-sm">
+    <li className="p-0 text-xs">
       <button
         type="button"
         onClick={openAttachment}
-        className="underline text-title-blue-france text-left"
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-2xl bg-active-blue-france text-white text-left"
       >
+        <span aria-hidden className="fr-icon-file-text-fill fr-icon--xs" />
         {attachment.originalName}
       </button>
       <span className="text-mention-grey">

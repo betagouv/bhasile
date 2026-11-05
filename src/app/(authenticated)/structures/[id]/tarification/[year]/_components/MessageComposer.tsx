@@ -61,11 +61,17 @@ export const MessageComposer = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+    <form
+      onSubmit={handleSubmit}
+      className="shrink-0 flex flex-col gap-3 p-4 rounded-[10px] bg-white"
+    >
       <Input
         label="Message"
         hideLabel
         textArea
+        classes={{
+          nativeInputOrTextArea: "bg-transparent! shadow-none! p-0!",
+        }}
         state={errorMessage ? "error" : "default"}
         stateRelatedMessage={errorMessage ?? undefined}
         nativeTextAreaProps={{
@@ -91,7 +97,7 @@ export const MessageComposer = ({
           ))}
         </ul>
       )}
-      <div className="flex items-end justify-between gap-2">
+      <div className="flex items-center justify-end gap-2 flex-wrap">
         <input
           ref={fileInputRef}
           type="file"
@@ -101,26 +107,32 @@ export const MessageComposer = ({
           aria-label="Fichiers à joindre"
           onChange={handleFileChange}
         />
-        <div className="flex items-end gap-2">
-          <Button
-            type="button"
-            priority="secondary"
-            iconId="fr-icon-attachment-line"
-            disabled={isSending}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Joindre des fichiers
-          </Button>
-          {canTag && (
+        {canTag && (
+          <div className="mr-auto">
             <TagSelect
               tags={tags}
               value={tagKey}
               isDisabled={isSending}
               onChange={setTagKey}
             />
-          )}
-        </div>
-        <Button type="submit" disabled={!canSend}>
+          </div>
+        )}
+        <Button
+          type="button"
+          priority="secondary"
+          size="small"
+          iconId="fr-icon-attachment-line"
+          disabled={isSending}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Joindre des fichiers
+        </Button>
+        <Button
+          type="submit"
+          size="small"
+          iconId="fr-icon-send-plane-fill"
+          disabled={!canSend}
+        >
           Envoyer
         </Button>
       </div>

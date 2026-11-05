@@ -6,11 +6,12 @@ export const buildConversationThread = (
   anchors: ConversationAnchor[]
 ): ConversationThreadItem[] =>
   [
-    ...anchors.map(({ id, label, date }) => ({
+    ...anchors.map(({ id, label, date, isMajor = false }) => ({
       kind: "anchor" as const,
       elementId: `jalon-${id}`,
       date,
       label,
+      isMajor,
     })),
     ...messages.map((message) => ({
       kind: "message" as const,
@@ -21,7 +22,13 @@ export const buildConversationThread = (
   ].sort((first, second) => first.date.getTime() - second.date.getTime());
 
 export type ConversationThreadItem =
-  | { kind: "anchor"; elementId: string; date: Date; label: string }
+  | {
+      kind: "anchor";
+      elementId: string;
+      date: Date;
+      label: string;
+      isMajor: boolean;
+    }
   | {
       kind: "message";
       elementId: string;

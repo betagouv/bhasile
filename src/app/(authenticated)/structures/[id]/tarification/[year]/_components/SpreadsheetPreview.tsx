@@ -14,13 +14,13 @@ export const SpreadsheetPreview = ({ sheets }: Props): ReactElement => {
     columns.reduce((total, { widthPx }) => total + widthPx, 0);
 
   return (
-    <div className="grow min-w-0 flex flex-col gap-2 bg-white rounded-xl border border-border-default-grey p-3">
+    <div className="grow min-w-0 min-h-0 flex flex-col gap-2 bg-white rounded-xl border border-border-default-grey p-3">
       <p className="mb-0 text-xs text-mention-grey">
         Aperçu simplifié, sans graphiques, images, mise en forme conditionnelle
         ni éléments masqués. Téléchargez le fichier pour les voir.
       </p>
       <div
-        className="overflow-auto max-h-[40rem] bg-white text-black"
+        className="grow min-h-0 overflow-auto bg-white text-black"
         role="region"
         aria-label={`Feuille ${name}`}
         tabIndex={0}
