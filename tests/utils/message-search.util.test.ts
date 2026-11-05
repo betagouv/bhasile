@@ -111,6 +111,15 @@ describe("splitTextBySearchWords", () => {
     expect(getHighlights("sous   sol", "sous-sol")).toEqual(["sous   sol"]);
   });
 
+  it("confond l'apostrophe droite et l'apostrophe typographique", () => {
+    expect(getHighlights("aujourd’hui", "aujourd'hui")).toEqual([
+      "aujourd’hui",
+    ]);
+    expect(getHighlights("aujourd'hui", "aujourd’hui")).toEqual([
+      "aujourd'hui",
+    ]);
+  });
+
   it("surligne toutes les occurrences", () => {
     expect(getHighlights("Tarif et tarifs", "tarif")).toEqual([
       "Tarif",

@@ -1,7 +1,8 @@
+export const replaceSearchSeparators = (text: string): string =>
+  text.replace(/[-_'’]/g, " ");
+
 const normalizeSearchText = (text: string): string => {
-  return normalizeAccents(text)
-    .toLowerCase()
-    .replace(/[-_']/g, " ")
+  return replaceSearchSeparators(normalizeAccents(text).toLowerCase())
     .replace(/\s+/g, " ")
     .trim();
 };
