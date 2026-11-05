@@ -70,8 +70,6 @@ vi.mock("@/app/api/tarifications/tarification.repository", () => ({
     mockFindStructureTarificationJournal(...args),
   findTarificationCampaign: (...args: unknown[]) =>
     mockFindTarificationCampaign(...args),
-  createTarificationDocumentOpening: (...args: unknown[]) =>
-    mockCreateTarificationDocumentOpening(...args),
   runInTarificationTransaction: (...args: unknown[]) =>
     mockRunInTarificationTransaction(...args),
   findStructureTarificationCampaigns: (...args: unknown[]) =>
@@ -80,6 +78,11 @@ vi.mock("@/app/api/tarifications/tarification.repository", () => ({
 
 vi.mock("@/app/api/files/file.service", () => ({
   copyStoredFile: vi.fn(),
+}));
+
+vi.mock("@/app/api/tarifications/tarification-document.repository", () => ({
+  createTarificationDocumentOpening: (...args: unknown[]) =>
+    mockCreateTarificationDocumentOpening(...args),
 }));
 
 vi.mock("@/app/api/conversations/conversation.repository", () => ({
@@ -818,6 +821,7 @@ describe("écritures de la tarification", () => {
   const transaction = {
     findJournal: vi.fn(),
     findCampaign: vi.fn(),
+    findUnattachedFile: vi.fn(),
     createDocument: vi.fn(),
     createEvent: vi.fn(),
   };
@@ -833,6 +837,7 @@ describe("écritures de la tarification", () => {
     });
     transaction.findJournal.mockResolvedValue(buildStructureJournal());
     transaction.findCampaign.mockResolvedValue(null);
+    transaction.findUnattachedFile.mockResolvedValue({ id: 7 });
     transaction.createDocument.mockResolvedValue({ id: 9 });
     transaction.createEvent.mockResolvedValue({ id: 10 });
     mockRunInTarificationTransaction.mockImplementation(
@@ -869,12 +874,38 @@ describe("écritures de la tarification", () => {
       );
       expect(transaction.findJournal).toHaveBeenCalled();
       expect(mockFindStructureTarificationJournal).not.toHaveBeenCalled();
+      expect(transaction.findUnattachedFile).toHaveBeenCalledWith(
+        "abc-rca.pdf"
+      );
       expect(transaction.createDocument).toHaveBeenCalledWith({
-        fileKey: "abc-rca.pdf",
+        fileUploadId: 7,
         types: ["RCA"],
         status: TarificationDocumentStatus.DRAFT,
-        author: agent,
       });
+    });
+
+    it("journalise le dépôt avec son auteur", async () => {
+      await depositTarificationDocument(deposit);
+
+      expect(transaction.createEvent).toHaveBeenCalledWith({
+        type: TarificationEventType.DOCUMENT_DEPOSITED,
+        authorId: agent.id,
+        authorLevel: agent.level,
+        documentId: 9,
+        stepCode: null,
+        text: null,
+      });
+    });
+
+    it("n'écrit rien quand le fichier est introuvable ou déjà rattaché", async () => {
+      transaction.findUnattachedFile.mockResolvedValue(null);
+
+      await expect(depositTarificationDocument(deposit)).rejects.toMatchObject({
+        status: 422,
+      });
+
+      expect(transaction.createDocument).not.toHaveBeenCalled();
+      expect(transaction.createEvent).not.toHaveBeenCalled();
     });
 
     it("n'écrit rien quand une garde refuse le dépôt", async () => {

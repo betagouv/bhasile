@@ -69,7 +69,6 @@ import type {
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
 import {
-  createTarificationDocumentOpening,
   findFicheCopies,
   findMessageTarification,
   findPendingMessageContexts,
@@ -89,6 +88,7 @@ import {
   getMessageRecipients,
   getSelectableCampaignYears,
 } from "./tarification.util";
+import { createTarificationDocumentOpening } from "./tarification-document.repository";
 
 export const getTarificationParticipant = async (
   user: SessionUser,
@@ -302,7 +302,27 @@ export const depositTarificationDocument = async ({
         phase: getCampaignPhase(year, now, journal.timeZone),
         now,
       });
-      return transaction.createDocument({ fileKey, types, status, author });
+      const file = await transaction.findUnattachedFile(fileKey);
+      if (!file) {
+        throw new DomainError(
+          "Ce fichier est introuvable ou déjà rattaché",
+          422
+        );
+      }
+      const document = await transaction.createDocument({
+        fileUploadId: file.id,
+        types,
+        status,
+      });
+      await transaction.createEvent({
+        type: TarificationEventType.DOCUMENT_DEPOSITED,
+        authorId: author.id,
+        authorLevel: author.level,
+        documentId: document.id,
+        stepCode: null,
+        text: null,
+      });
+      return document;
     }
   );
   if (status === TarificationDocumentStatus.SHARED) {

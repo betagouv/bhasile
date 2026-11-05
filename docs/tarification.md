@@ -209,7 +209,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 
 ## Écritures
 
-- **Deux routes** : `POST /api/tarifications/[structureId]/[year]/documents` (un dépôt : le document et son événement) et `…/events` (tous les autres faits). Un nouveau type de fait est une entrée de registre, pas une route.
+- **Deux routes** : `POST /api/tarifications/[structureId]/[year]/documents` (un dépôt : le document et son événement) et `POST /api/tarifications/[structureId]/[year]/events` (tous les autres faits). Un nouveau type de fait est une entrée de registre, pas une route.
 - **Gardes pures** dans `tarification.guard.ts`, évaluées sur le journal : forme et auteur du fait (registre), phase de campagne, émetteur et état du dépôt, partage d'un `FINAL` une seule fois, pas de L48 sans BP, relecture d'un `DRAFT` hors auteur, retrait d'un document partagé, étape encore en attente, contradictoire ouvert, hors Bhasile une seule fois. Une règle de domaine renvoie 409 ou 422, un auteur qui n'y a pas droit 403.
 - **Une écriture à la fois par tarification** : dans une transaction, l'upsert de la tarification verrouille sa ligne, puis le journal est relu, les gardes évaluées, le fait écrit. Sans ce verrou, deux partages simultanés passeraient tous les deux la garde. Une garde refusée annule tout, y compris la création de la tarification.
 - **Le fichier d'un dépôt** doit être sans rattachement ; à l'inverse, une pièce jointe de message refuse un fichier déjà rattaché à un document de tarification.
