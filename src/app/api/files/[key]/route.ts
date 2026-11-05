@@ -1,5 +1,3 @@
-import { Readable } from "node:stream";
-
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession, type Session } from "next-auth";
 
@@ -9,10 +7,7 @@ import {
   recordTarificationDocumentOpening,
 } from "@/app/api/tarifications/tarification.service";
 import { DomainError } from "@/app/utils/domain-error.util";
-import {
-  INLINE_VIEWABLE_MIME_TYPES,
-  SPREADSHEET_PREVIEW_MIME_TYPES,
-} from "@/constants";
+import { INLINE_VIEWABLE_MIME_TYPES } from "@/constants";
 import { authOptions } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 
@@ -22,7 +17,6 @@ import {
   deleteFile,
   deleteFileByStorageKey,
   getDownloadLink,
-  getFileContent,
   getFileWithParents,
   getInlineLink,
   getPrincipal,
@@ -83,27 +77,6 @@ export async function GET(request: NextRequest) {
       { error: "Aucun fichier trouvé" },
       { status: 404 }
     );
-  }
-
-  if (request.nextUrl.searchParams.get("getContent") === "true") {
-    if (!SPREADSHEET_PREVIEW_MIME_TYPES.includes(file.mimeType)) {
-      return NextResponse.json(
-        { error: "Ce format n'a pas d'aperçu" },
-        { status: 400 }
-      );
-    }
-    const content = await getFileContent(process.env.S3_BUCKET_NAME!, key);
-    if (access.pendingOpening) {
-      await recordTarificationDocumentOpening(access.pendingOpening);
-    }
-    // Servi depuis le domaine de l'application : le navigateur ne doit jamais l'afficher ni le deviner
-    return new NextResponse(Readable.toWeb(content) as ReadableStream, {
-      headers: {
-        "Content-Type": file.mimeType,
-        "Content-Disposition": "attachment",
-        "X-Content-Type-Options": "nosniff",
-      },
-    });
   }
 
   if (getLink) {

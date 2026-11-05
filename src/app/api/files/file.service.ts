@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import type { Readable } from "node:stream";
 
 import { Session } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
@@ -11,7 +10,7 @@ import {
 } from "@/constants";
 import { FileUpload } from "@/generated/prisma/client";
 import { canDeleteFile, canReadConversation } from "@/lib/casl";
-import { checkBucket, getMinioClient, getObject } from "@/lib/minio";
+import { checkBucket, getMinioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { SessionUser } from "@/types/global";
@@ -156,18 +155,6 @@ export const getInlineLink = async (
   } catch (error) {
     console.error(error);
     throw new Error("Erreur lors de l'ouverture du fichier");
-  }
-};
-
-export const getFileContent = async (
-  bucketName: string,
-  fileName: string
-): Promise<Readable> => {
-  try {
-    return await getObject(bucketName, fileName);
-  } catch (error) {
-    console.error(error);
-    throw new Error("Erreur lors de la lecture du fichier");
   }
 };
 
