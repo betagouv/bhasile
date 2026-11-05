@@ -148,15 +148,12 @@ describe("getAssignedGrants", () => {
     ]);
   });
 
-  it("donne l'admin national à un agent d'un périmètre national", () => {
+  it("ne donne que la lecture nationale à un agent d'un périmètre national", () => {
     expect(
       getAssignedGrants(
         createUserWithGrants({ perimeter: createNationalPerimeter() })
       ).map(({ role, scope }) => [role, scope])
-    ).toEqual([
-      [AccessRole.LECTEUR, GrantScope.NATIONAL],
-      [AccessRole.ADMIN, GrantScope.NATIONAL],
-    ]);
+    ).toEqual([[AccessRole.LECTEUR, GrantScope.NATIONAL]]);
   });
 
   it("ignore les binômes personnels d'un agent", () => {

@@ -1,9 +1,5 @@
-import { GrantDb, UserWithGrants } from "@/app/api/users/user.db.type";
-import {
-  getAccountStatus,
-  getAssignedGrants,
-  toSessionGrant,
-} from "@/app/api/users/user.util";
+import { PerimeterDb, UserWithGrants } from "@/app/api/users/user.db.type";
+import { getAccountStatus, toSessionGrant } from "@/app/api/users/user.util";
 import { toDayKey } from "@/app/utils/date.util";
 import { AccessRole, GrantScope } from "@/generated/prisma/client";
 import { postToBrevo } from "@/lib/brevo";
@@ -25,7 +21,7 @@ export type BrevoContact = {
 
 export type BrevoAgentUser = Pick<
   UserWithGrants,
-  "isActivated" | "deactivatedAt" | "operateurId" | "perimeter" | "grants"
+  "isActivated" | "deactivatedAt" | "perimeter"
 > & {
   email: string;
   lastConnection: Date | null;
@@ -33,19 +29,18 @@ export type BrevoAgentUser = Pick<
 };
 
 export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
-  const actionGrants = getAssignedGrants(user).filter(
-    (grant) => grant.role !== AccessRole.LECTEUR
-  );
+  const isActivated = getAccountStatus(user) === "ACTIVATED";
+  const perimeter = isActivated ? user.perimeter : null;
 
   return {
     email: user.email,
     attributes: {
-      DEPARTEMENT: formatDepartements(actionGrants),
+      DEPARTEMENT: perimeter ? formatDepartements(perimeter) : "",
       STATUT: AGENT_STATUT,
-      PERIMETRE: actionGrants.map(getGrantLabel).join(", "),
+      PERIMETRE: perimeter ? getPerimeterLabel(perimeter) : "",
       LAST_LOGIN: user.lastConnection ? toDayKey(user.lastConnection) : "",
       CREATION_COMPTE: toDayKey(user.createdAt),
-      ACTIVE_USER: getAccountStatus(user) === "ACTIVATED",
+      ACTIVE_USER: isActivated,
     },
   };
 };
@@ -80,23 +75,12 @@ export const pushContactsToBrevo = async (
   }
 };
 
-const formatDepartements = (grants: GrantDb[]): string =>
-  [
-    ...new Set(
-      grants.flatMap((grant) => toSessionGrant(grant).departementNumeros)
-    ),
-  ]
-    .sort()
+const formatDepartements = (perimeter: PerimeterDb): string =>
+  toSessionGrant({ ...perimeter, role: AccessRole.LECTEUR, structure: null })
+    .departementNumeros.sort()
     .join(", ");
 
-const getGrantLabel = (grant: GrantDb): string => {
-  if (grant.scope === GrantScope.NATIONAL) {
-    return "National";
-  }
-  return (
-    grant.region?.name ??
-    grant.departement?.name ??
-    grant.structure?.codeBhasile ??
-    ""
-  );
-};
+const getPerimeterLabel = (perimeter: PerimeterDb): string =>
+  perimeter.scope === GrantScope.NATIONAL
+    ? "National"
+    : (perimeter.region?.name ?? perimeter.departement?.name ?? "");

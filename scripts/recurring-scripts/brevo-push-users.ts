@@ -5,7 +5,7 @@ import "dotenv/config";
 
 import { pushContactsToBrevo, toBrevoContact } from "scripts/utils/brevo.util";
 
-import { grantSelect, perimeterSelect } from "@/app/api/users/user.db.type";
+import { perimeterSelect } from "@/app/api/users/user.db.type";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
@@ -24,9 +24,7 @@ const run = async () => {
         createdAt: true,
         isActivated: true,
         deactivatedAt: true,
-        operateurId: true,
         perimeter: { select: perimeterSelect },
-        grants: { select: grantSelect },
       },
     });
 

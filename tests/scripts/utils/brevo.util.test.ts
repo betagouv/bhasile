@@ -11,8 +11,6 @@ const baseUser = {
   createdAt: new Date("2025-01-20T10:00:00.000Z"),
   isActivated: true,
   deactivatedAt: null,
-  operateurId: null,
-  grants: [],
   perimeter: createDepartementPerimeter("13", "Bouches-du-Rhône"),
 };
 

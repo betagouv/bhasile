@@ -46,13 +46,17 @@ export const getPerimeterGrants = (perimeter: PerimeterDb): GrantDb[] => [
     departement: null,
     structure: null,
   },
-  {
-    role: AccessRole.ADMIN,
-    scope: perimeter.scope,
-    region: perimeter.region,
-    departement: perimeter.departement,
-    structure: null,
-  },
+  ...(perimeter.scope === GrantScope.NATIONAL
+    ? []
+    : [
+        {
+          role: AccessRole.ADMIN,
+          scope: perimeter.scope,
+          region: perimeter.region,
+          departement: perimeter.departement,
+          structure: null,
+        },
+      ]),
 ];
 
 export const toContactGrant = (structureId: number): SessionGrant => ({
