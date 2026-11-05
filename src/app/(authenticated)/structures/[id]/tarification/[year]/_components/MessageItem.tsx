@@ -6,6 +6,7 @@ import { AUTHOR_LEVEL_LABELS } from "@/constants";
 import { MessageApiRead } from "@/schemas/api/message.schema";
 import { ConversationTag } from "@/types/conversation.type";
 
+import { HighlightedText } from "./HighlightedText";
 import { MessageAttachment } from "./MessageAttachment";
 import { MessageTag } from "./MessageTag";
 
@@ -16,12 +17,16 @@ export const MessageItem = ({
   tags,
   canTag,
   onTagChange,
+  searchWords,
+  isCurrentResult,
 }: Props): ReactElement => (
   <li
     id={elementId}
     className={cn(
       "max-w-[85%] p-4 rounded border border-solid border-default-grey",
-      isOwn ? "self-end bg-alt-blue-france" : "self-start bg-white"
+      isOwn ? "self-end bg-alt-blue-france" : "self-start bg-white",
+      isCurrentResult &&
+        "shadow-[inset_0_0_0_2px_var(--border-action-high-blue-france)]"
     )}
   >
     <p className="text-sm mb-1">
@@ -39,14 +44,22 @@ export const MessageItem = ({
       canTag={canTag}
       onTagChange={onTagChange}
     />
-    {message.text && <p className="whitespace-pre-wrap mb-0">{message.text}</p>}
+    {message.text && (
+      <p className="whitespace-pre-wrap mb-0">
+        <HighlightedText text={message.text} searchWords={searchWords} />
+      </p>
+    )}
     {message.attachments.length > 0 && (
       <ul
         aria-label="Pièces jointes du message"
         className="list-none p-0 mt-2 mb-0 flex flex-col gap-1"
       >
         {message.attachments.map((attachment) => (
-          <MessageAttachment key={attachment.id} attachment={attachment} />
+          <MessageAttachment
+            key={attachment.id}
+            attachment={attachment}
+            searchWords={searchWords}
+          />
         ))}
       </ul>
     )}
@@ -73,4 +86,6 @@ type Props = {
   tags: ConversationTag[];
   canTag: boolean;
   onTagChange: (tagKey: string | null) => Promise<void>;
+  searchWords: string[];
+  isCurrentResult: boolean;
 };
