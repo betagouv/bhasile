@@ -175,7 +175,7 @@ Le reste de ce document décrit les droits appliqués aujourd'hui. Cette refonte
 ### Choix métier
 
 - **Activation** : un compte non activé n'a accès à rien. Désactiver ne supprime rien, et la date reste affichée (messagerie). Les droits de contact ne demandent pas d'activation (choix encore à valider par le métier, ouverture après #1742) ; un compte désactivé les perd.
-- **Agent** : rattaché à un seul périmètre nommé (« DDETS Finistère », « SGAR Bretagne »), partagé avec d'autres agents. Droits calculés : lecture nationale + admin sur le périmètre. Plusieurs périmètres peuvent couvrir la même zone.
+- **Agent** : rattaché à un seul périmètre nommé (« DDETS Finistère », « SGAR Bretagne »), partagé avec d'autres agents. Droits calculés : lecture nationale + admin sur le périmètre ; un périmètre national ne donne que la lecture (aucun agent national n'écrit). Plusieurs périmètres peuvent couvrir la même zone.
 - **Statut** : agent = périmètre renseigné, opérateur = `operateurId` renseigné, jamais les deux. `isAgent` disparaît.
 - **Email patterns** : abandonnés.
 - **Opérateur** : ses binômes personnels + ses droits de contact, limités à son opérateur.
@@ -196,10 +196,10 @@ Le reste de ce document décrit les droits appliqués aujourd'hui. Cette refonte
 
 ### PR 2 : basculement (#1774)
 
-- Session et CASL : compte en attente = droits de contact seulement ; compte désactivé = rien ; superadmin = `manage all` ; agent = lecture nationale + `ADMIN` sur son périmètre, binômes personnels ignorés ; opérateur = binômes + contacts, filtrés sur `operateurId`.
+- Session et CASL : compte en attente = droits de contact seulement ; compte désactivé = rien ; superadmin = `manage all` ; agent = lecture nationale + `ADMIN` sur son périmètre (lecture nationale seule pour un périmètre national), binômes personnels ignorés ; opérateur = binômes + contacts, filtrés sur `operateurId`.
 - Migration : supprime `User.isAgent`, `EmailPattern` et `User.emailPatternId`. `fill-roles` disparaît ; les anciens one-offs restent, en `@ts-nocheck`.
 - Emails comparés tels quels ; ceux des contacts normalisés à l'écriture (`contactApiSchema`).
-- `brevo-push-users` pousse aussi les agents désactivés, avec un attribut booléen `DESACTIVE` (à créer dans Brevo avant le premier push).
+- `brevo-push-users` pousse aussi les agents désactivés, avec un attribut booléen `ACTIVE_USER` (créé dans Brevo).
 - One-off `20261104-clean-grants-and-emails` : supprime les binômes sans propriétaire (anciens patterns : la cascade ne joue pas, la colonne part avant la table) et ceux des agents, normalise les emails des users et des contacts.
 
 Mise en prod :

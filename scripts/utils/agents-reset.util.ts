@@ -185,7 +185,10 @@ export const planAgentsReset = (
         user,
         status: getAgentStatus(user, perimeter.zone),
         rightsBefore: user ? describeCurrentRights(user) : "aucun compte",
-        rightsAfter: `Lecteur national + Admin ${perimeter.zone.label}`,
+        rightsAfter:
+          perimeter.zone.scope === GrantScope.NATIONAL
+            ? "Lecteur national"
+            : `Lecteur national + Admin ${perimeter.zone.label}`,
       });
     }
   }
@@ -284,9 +287,11 @@ const getAgentStatus = (
     return "CREATED";
   }
   const editingKeys = new Set(getEditingGrants(user).map(getGrantKey));
-  return editingKeys.size === 1 && editingKeys.has(getZoneKey(zone))
-    ? "SAME_RIGHTS"
-    : "DIFFERENT_RIGHTS";
+  const isSameRights =
+    zone.scope === GrantScope.NATIONAL
+      ? editingKeys.size === 0
+      : editingKeys.size === 1 && editingKeys.has(getZoneKey(zone));
+  return isSameRights ? "SAME_RIGHTS" : "DIFFERENT_RIGHTS";
 };
 
 const getEditingGrants = (user: ResetUser): GrantDb[] =>
