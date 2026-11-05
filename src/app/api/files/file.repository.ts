@@ -1,7 +1,5 @@
-import { DomainError } from "@/app/utils/domain-error.util";
 import { FileUpload } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
-import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { FileWithParents, fileWithParentsInclude } from "./file.db.type";
@@ -33,64 +31,14 @@ export const findOneByKeyWithParents = async (
   });
 };
 
-export const assertFilesCanBeAttachedToEntity = async (
+export const findManyByKeysWithParents = async (
   tx: PrismaTransaction,
-  fileUploads: { key: string }[],
-  entityId: EntityId
-): Promise<void> => {
-  const files = await tx.fileUpload.findMany({
-    where: { key: { in: fileUploads.map((fileUpload) => fileUpload.key) } },
-    select: {
-      key: true,
-      operateurId: true,
-      acteAdministratif: {
-        select: {
-          structureId: true,
-          cpomId: true,
-          operateurId: true,
-          structureVersionTransformationId: true,
-        },
-      },
-      documentFinancier: { select: { structureId: true, cpomId: true } },
-      controle: { select: { structureId: true } },
-      evaluation: { select: { structureId: true } },
-    },
+  keys: string[]
+): Promise<FileWithParents[]> => {
+  return tx.fileUpload.findMany({
+    where: { key: { in: keys } },
+    include: fileWithParentsInclude,
   });
-
-  const foundKeys = new Set(files.map((file) => file.key));
-  if (fileUploads.some((fileUpload) => !foundKeys.has(fileUpload.key))) {
-    throw new DomainError("Fichier introuvable", 404);
-  }
-
-  const hasFileFromOtherEntity = files.some((file) => {
-    const owners: FileOwner[] = [
-      file.acteAdministratif,
-      file.documentFinancier,
-      file.controle,
-      file.evaluation,
-      file.operateurId === null ? null : { operateurId: file.operateurId },
-    ].filter((owner) => owner !== null);
-    return owners.some((owner) => !isOwnedByEntity(owner, entityId));
-  });
-
-  if (hasFileFromOtherEntity) {
-    throw new DomainError(
-      "Un fichier est déjà rattaché à une autre entité",
-      409
-    );
-  }
-};
-
-type FileOwner = Partial<Record<keyof EntityId, number | null>>;
-
-const isOwnedByEntity = (owner: FileOwner, entityId: EntityId): boolean => {
-  const entityFields = (Object.keys(entityId) as (keyof EntityId)[]).filter(
-    (field) => entityId[field] !== undefined
-  );
-  return (
-    entityFields.length > 0 &&
-    entityFields.every((field) => owner[field] === entityId[field])
-  );
 };
 
 export const deleteOneByKey = async (

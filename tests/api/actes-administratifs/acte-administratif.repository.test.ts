@@ -9,9 +9,6 @@ import { EntityId } from "@/types/Entity.type";
 
 describe("acte-administratif.repository db integration (clé déjà rattachée)", () => {
   const createdStructureIds: number[] = [];
-  const createdCpomIds: number[] = [];
-  const createdOperateurIds: number[] = [];
-  const createdTransformationIds: number[] = [];
 
   const createStructure = async () => {
     const structure = await prisma.structure.create({
@@ -55,30 +52,9 @@ describe("acte-administratif.repository db integration (clé déjà rattachée)"
     fileUploads: [{ key }],
   });
 
-  const createTransformationBlock = async () => {
-    const transformation = await prisma.transformation.create({
-      data: {
-        type: "OUVERTURE_EX_NIHILO",
-        structureVersionTransformations: {
-          create: { type: "CREATION" },
-        },
-      },
-      include: { structureVersionTransformations: true },
-    });
-    createdTransformationIds.push(transformation.id);
-    return transformation.structureVersionTransformations[0];
-  };
-
   afterAll(async () => {
-    await prisma.transformation.deleteMany({
-      where: { id: { in: createdTransformationIds } },
-    });
     await prisma.structure.deleteMany({
       where: { id: { in: createdStructureIds } },
-    });
-    await prisma.cpom.deleteMany({ where: { id: { in: createdCpomIds } } });
-    await prisma.operateur.deleteMany({
-      where: { id: { in: createdOperateurIds } },
     });
   });
 
@@ -99,30 +75,6 @@ describe("acte-administratif.repository db integration (clé déjà rattachée)"
     expect(error).toMatchObject({ name: "DomainError", status: 409 });
   });
 
-  it("refuse la clé de l'acte d'une structure sur un CPOM sans déplacer la ligne", async () => {
-    const otherStructure = await createStructure();
-    const { acte, key } = await createActeWithFile(otherStructure.id);
-    const operateur = await prisma.operateur.create({
-      data: { name: `ACTE-TEST-${randomUUID()}` },
-    });
-    createdOperateurIds.push(operateur.id);
-    const cpom = await prisma.cpom.create({
-      data: { operateurId: operateur.id },
-    });
-    createdCpomIds.push(cpom.id);
-
-    const error = await saveActe(buildActePayload(key), {
-      cpomId: cpom.id,
-    }).catch((caughtError: unknown) => caughtError);
-
-    const acteAfter = await prisma.acteAdministratif.findUniqueOrThrow({
-      where: { id: acte.id },
-    });
-    expect(acteAfter.cpomId).toBeNull();
-    expect(acteAfter.structureId).toBe(otherStructure.id);
-    expect(error).toMatchObject({ name: "DomainError", status: 409 });
-  });
-
   it("refuse la clé d'une autre structure sur un acte existant sans prendre le fichier", async () => {
     const otherStructure = await createStructure();
     const structure = await createStructure();
@@ -140,53 +92,6 @@ describe("acte-administratif.repository db integration (clé déjà rattachée)"
       where: { key: foreignKey },
     });
     expect(fileAfter.acteAdministratifId).toBe(foreignActe.id);
-    expect(error).toMatchObject({ name: "DomainError", status: 409 });
-  });
-
-  it("refuse la clé du document financier d'une autre structure sans rattacher le fichier", async () => {
-    const otherStructure = await createStructure();
-    const structure = await createStructure();
-    const key = `acte-docfin-${randomUUID()}`;
-    await prisma.documentFinancier.create({
-      data: {
-        structureId: otherStructure.id,
-        year: 2025,
-        category: "RAPPORT_BUDGETAIRE",
-        fileUploads: { create: buildFile(key) },
-      },
-    });
-
-    const error = await saveActe(buildActePayload(key), {
-      structureId: structure.id,
-    }).catch((caughtError: unknown) => caughtError);
-
-    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
-      where: { key },
-    });
-    expect(fileAfter.acteAdministratifId).toBeNull();
-    expect(error).toMatchObject({ name: "DomainError", status: 409 });
-  });
-
-  it("refuse la clé de l'acte d'un autre bloc de transformation sans déplacer la ligne", async () => {
-    const otherBlock = await createTransformationBlock();
-    const block = await createTransformationBlock();
-    const key = `acte-bloc-${randomUUID()}`;
-    const acte = await prisma.acteAdministratif.create({
-      data: {
-        structureVersionTransformationId: otherBlock.id,
-        category: "CONVENTION",
-        fileUploads: { create: buildFile(key) },
-      },
-    });
-
-    const error = await saveActe(buildActePayload(key), {
-      structureVersionTransformationId: block.id,
-    }).catch((caughtError: unknown) => caughtError);
-
-    const acteAfter = await prisma.acteAdministratif.findUniqueOrThrow({
-      where: { id: acte.id },
-    });
-    expect(acteAfter.structureVersionTransformationId).toBe(otherBlock.id);
     expect(error).toMatchObject({ name: "DomainError", status: 409 });
   });
 

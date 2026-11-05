@@ -5,7 +5,7 @@ import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
-import { assertFilesCanBeAttachedToEntity } from "../files/file.repository";
+import { assertFilesCanBeAttachedToEntity } from "../files/file.service";
 import {
   OperateurDbDetail,
   OperateurListRow,

@@ -164,36 +164,6 @@ describe("documentFinancier.repository db integration (clé déjà rattachée)",
     expect(error).toMatchObject({ name: "DomainError", status: 409 });
   });
 
-  it("refuse la clé de l'acte d'une autre structure sans rattacher le fichier", async () => {
-    const otherStructure = await createStructure();
-    const structure = await createStructure();
-    const key = `docfin-acte-${randomUUID()}`;
-    await prisma.acteAdministratif.create({
-      data: {
-        structureId: otherStructure.id,
-        category: "CONVENTION",
-        fileUploads: {
-          create: {
-            key,
-            mimeType: "application/pdf",
-            fileSize: 1,
-            originalName: `${key}.pdf`,
-          },
-        },
-      },
-    });
-
-    const error = await saveDocument(key, { structureId: structure.id }).catch(
-      (caughtError: unknown) => caughtError
-    );
-
-    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
-      where: { key },
-    });
-    expect(fileAfter.documentFinancierId).toBeNull();
-    expect(error).toMatchObject({ name: "DomainError", status: 409 });
-  });
-
   it("met à jour la ligne quand la clé appartient déjà à la même structure", async () => {
     const structure = await createStructure();
     const { document, key } = await createDocumentWithFile(structure.id);

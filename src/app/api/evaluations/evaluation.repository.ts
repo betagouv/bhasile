@@ -1,7 +1,7 @@
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { assertFilesCanBeAttachedToEntity } from "../files/file.repository";
+import { assertFilesCanBeAttachedToEntity } from "../files/file.service";
 
 const deleteEvaluations = async (
   tx: PrismaTransaction,

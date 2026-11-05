@@ -1,7 +1,7 @@
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { assertFilesCanBeAttachedToEntity } from "../files/file.repository";
+import { assertFilesCanBeAttachedToEntity } from "../files/file.service";
 import { convertToControleType } from "./controle.util";
 
 const deleteControles = async (

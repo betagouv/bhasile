@@ -2,8 +2,10 @@ import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { assertFilesCanBeAttachedToEntity } from "../files/file.repository";
-import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
+import {
+  assertFilesCanBeAttachedToEntity,
+  getKeysFromIncomingDocumentsOrActes,
+} from "../files/file.service";
 
 export const createOrUpdateActesAdministratifs = async (
   tx: PrismaTransaction,

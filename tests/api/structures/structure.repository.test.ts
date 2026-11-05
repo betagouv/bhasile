@@ -1105,35 +1105,6 @@ describe("structure.repository db integration", () => {
     ]);
   });
 
-  it("met à jour le contrôle de la structure quand son id est envoyé", async () => {
-    const structure = await createStructure();
-    const controle = await prisma.controle.create({
-      data: {
-        structureId: structure.id,
-        date: new Date("2024-01-01T00:00:00.000Z"),
-        type: "PROGRAMME",
-      },
-    });
-
-    await updateOne({
-      id: structure.id,
-      controles: [
-        {
-          id: controle.id,
-          date: "2025-01-01T00:00:00.000Z",
-          type: ControleType.INOPINE,
-        },
-      ],
-    });
-
-    const controles = await prisma.controle.findMany({
-      where: { structureId: structure.id },
-    });
-    expect(controles).toHaveLength(1);
-    expect(controles[0].id).toBe(controle.id);
-    expect(controles[0].type).toBe("INOPINE");
-  });
-
   it("ne met pas à jour l'évaluation d'une autre structure quand son id est envoyé", async () => {
     const otherStructure = await createStructure();
     const structure = await createStructure();
@@ -1177,36 +1148,7 @@ describe("structure.repository db integration", () => {
     ]);
   });
 
-  it("met à jour l'évaluation de la structure quand son id est envoyé", async () => {
-    const structure = await createStructure();
-    const evaluation = await prisma.evaluation.create({
-      data: {
-        structureId: structure.id,
-        date: new Date("2024-01-01T00:00:00.000Z"),
-        notePersonne: 1,
-      },
-    });
-
-    await updateOne({
-      id: structure.id,
-      evaluations: [
-        {
-          id: evaluation.id,
-          date: "2025-01-01T00:00:00.000Z",
-          notePersonne: 5,
-        },
-      ],
-    });
-
-    const evaluations = await prisma.evaluation.findMany({
-      where: { structureId: structure.id },
-    });
-    expect(evaluations).toHaveLength(1);
-    expect(evaluations[0].id).toBe(evaluation.id);
-    expect(evaluations[0].notePersonne).toBe(5);
-  });
-
-  it("accepte de renvoyer le fichier d'un contrôle de la même structure", async () => {
+  it("met à jour le contrôle de la structure et garde son fichier quand son id est envoyé", async () => {
     const structure = await createStructure();
     const file = await createFileUpload("controle-meme-structure");
     const controle = await prisma.controle.create({
@@ -1234,9 +1176,14 @@ describe("structure.repository db integration", () => {
       where: { key: file.key },
     });
     expect(fileAfter.controleId).toBe(controle.id);
+    const controles = await prisma.controle.findMany({
+      where: { structureId: structure.id },
+    });
+    expect(controles).toHaveLength(1);
+    expect(controles[0].type).toBe("INOPINE");
   });
 
-  it("accepte de renvoyer le fichier d'une évaluation de la même structure", async () => {
+  it("met à jour l'évaluation de la structure et garde son fichier quand son id est envoyé", async () => {
     const structure = await createStructure();
     const file = await createFileUpload("evaluation-meme-structure");
     const evaluation = await prisma.evaluation.create({
@@ -1253,6 +1200,7 @@ describe("structure.repository db integration", () => {
         {
           id: evaluation.id,
           date: "2025-01-01T00:00:00.000Z",
+          notePersonne: 5,
           fileUploads: [{ key: file.key }],
         },
       ],
@@ -1262,6 +1210,11 @@ describe("structure.repository db integration", () => {
       where: { key: file.key },
     });
     expect(fileAfter.evaluationId).toBe(evaluation.id);
+    const evaluations = await prisma.evaluation.findMany({
+      where: { structureId: structure.id },
+    });
+    expect(evaluations).toHaveLength(1);
+    expect(evaluations[0].notePersonne).toBe(5);
   });
 
   it("remplace la liste des evaluations", async () => {
