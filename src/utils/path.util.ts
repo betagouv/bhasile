@@ -1,4 +1,4 @@
-export const matchesPath = (pathname: string | null, url: string): boolean =>
-  url === "/"
+export const matchesPath = (pathname: string | null, base: string): boolean =>
+  base === "/"
     ? pathname === "/"
-    : pathname === url || Boolean(pathname?.includes(url));
+    : pathname === base || Boolean(pathname?.startsWith(`${base}/`));

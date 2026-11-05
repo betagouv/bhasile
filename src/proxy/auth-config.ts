@@ -142,15 +142,13 @@ export const protectedApiRoutes: ApiRoute[] = [
   },
 ];
 
-export const OPERATEUR_BASE_PATH = "/operateurs";
-
 export const proConnectProtectedPages = [
   "/",
   "/structures",
   "/cpoms",
   "/statistiques",
   "/ressources",
-  OPERATEUR_BASE_PATH,
+  "/operateurs",
 ];
 
 export const passwordProtectedPages = ["/ajout-structure"];

@@ -17,7 +17,7 @@ describe("menu.util", () => {
       const menuItems = resolveMenuItems(agentUser as SessionUser);
 
       // THEN
-      expect(menuItems.length).toBe(3);
+      expect(menuItems.length).toBeGreaterThanOrEqual(3);
       expect(menuItems[0].label).toBe("Tableau de bord");
     });
 

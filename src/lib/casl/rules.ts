@@ -9,11 +9,7 @@ import type {
   User,
 } from "@/generated/prisma/client";
 import { AccessRole, CpomGranularity } from "@/generated/prisma/enums";
-import { OPERATEUR_BASE_PATH } from "@/proxy/auth-config";
-import { SessionGrant, SessionPermissions, SessionUser } from "@/types/global";
-import { matchesPath } from "@/utils/path.util";
-
-import { agentOnlyPages, commonPages, operateurAllowedPages } from "./pages";
+import { SessionGrant, SessionPermissions } from "@/types/global";
 
 export type AppAbility = PureAbility<
   [
@@ -33,35 +29,6 @@ export type AppAbility = PureAbility<
 
 export const defineAbilityFor = (user?: SessionPermissions) => {
   return createPrismaAbility(defineRulesFor(user));
-};
-
-export const canAccessPage = (
-  user: SessionUser | undefined,
-  pathname: string
-): boolean => {
-  if (!user) {
-    return false;
-  }
-
-  const isOperateur = !isAgent(user);
-  const isAgentUser = isAgent(user);
-
-  if (agentOnlyPages.some((base) => matchesPath(pathname, base))) {
-    return isAgentUser;
-  }
-
-  if (operateurAllowedPages.some((base) => matchesPath(pathname, base))) {
-    if (isOperateur && user.operateurId) {
-      return pathname === `${OPERATEUR_BASE_PATH}/${user.operateurId}`;
-    }
-    return isAgentUser;
-  }
-
-  if (commonPages.some((base) => matchesPath(pathname, base))) {
-    return true;
-  }
-
-  return false;
 };
 
 const defineRulesFor = (user?: SessionPermissions) => {
@@ -99,11 +66,11 @@ const defineReadRules = (
       can("read", "Cpom", toRuleConditions(conditions));
     }
   }
-  can(
-    "read",
-    "Operateur",
-    isAgent(user) ? undefined : { id: user.operateurId }
-  );
+  if (isAgent(user)) {
+    can("read", "Operateur");
+  } else if (user.operateurId !== null && user.operateurId !== undefined) {
+    can("read", "Operateur", { id: user.operateurId });
+  }
 };
 
 const defineAgentRules = (

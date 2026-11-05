@@ -23,7 +23,19 @@ export type MenuGroup = {
 
 export type MenuItem = MenuLink | MenuGroup;
 
-const agentMenuItems: MenuItem[] = [
+export const resolveMenuItems = (user?: SessionUser | null): MenuItem[] =>
+  buildMenuItems({
+    isAgent: !user || isAgent(user),
+    operateurId: user?.operateurId ?? null,
+  });
+
+const buildMenuItems = ({
+  isAgent,
+  operateurId,
+}: {
+  isAgent: boolean;
+  operateurId: number | null;
+}): MenuItem[] => [
   {
     icon: "ri-speed-up-line",
     label: "Tableau de bord",
@@ -32,7 +44,7 @@ const agentMenuItems: MenuItem[] = [
   {
     id: "structures",
     icon: "fr-icon-community-line",
-    label: "Structures et opérateurs",
+    label: isAgent ? "Structures et opérateurs" : "Structures et opérateur",
     subItems: [
       {
         label: "Voir les structures",
@@ -42,10 +54,15 @@ const agentMenuItems: MenuItem[] = [
         label: "Voir les CPOM",
         url: "/cpoms",
       },
-      {
-        label: "Voir les opérateurs",
-        url: "/operateurs",
-      },
+      isAgent
+        ? {
+            label: "Voir les opérateurs",
+            url: "/operateurs",
+          }
+        : {
+            label: "Voir l’opérateur",
+            url: `/operateurs/${operateurId}`,
+          },
     ],
   },
   {
@@ -53,13 +70,13 @@ const agentMenuItems: MenuItem[] = [
     label: "Statistiques",
     url: "/statistiques",
   },
-  ...(process.env.NEXT_PUBLIC_SHOW_RESSOURCES === "true" //TODO: remove this once the ressources page is ready
+  ...(isAgent && process.env.NEXT_PUBLIC_SHOW_RESSOURCES === "true" //TODO: remove this once the ressources page is ready
     ? [
         {
           icon: "fr-icon-book-shelf-line",
           label: "Modèles et ressources",
           url: "/ressources",
-        },
+        } satisfies MenuLink,
       ]
     : []),
   ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
@@ -78,61 +95,7 @@ const agentMenuItems: MenuItem[] = [
               url: "/parametres/compte",
             },
           ],
-        },
+        } satisfies MenuGroup,
       ]
     : []),
 ];
-
-const getOperateurMenuItems = (operateurId: number | null): MenuItem[] => [
-  {
-    icon: "ri-speed-up-line",
-    label: "Tableau de bord",
-    url: "/",
-  },
-  {
-    id: "structures",
-    icon: "fr-icon-community-line",
-    label: "Structures et opérateur",
-    subItems: [
-      {
-        label: "Voir les structures",
-        url: "/structures",
-      },
-      {
-        label: "Voir l’opérateur",
-        url: `/operateurs/${operateurId}`,
-      },
-    ],
-  },
-  {
-    icon: "fr-icon-pie-chart-2-line",
-    label: "Statistiques",
-    url: "/statistiques",
-  },
-  ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
-    ? [
-        {
-          id: "parametres" as const,
-          icon: "fr-icon-settings-5-line",
-          label: "Paramètres",
-          subItems: [
-            {
-              label: "Gérer les accès",
-              url: "/parametres/acces",
-            },
-            {
-              label: "Voir mon compte",
-              url: "/parametres/compte",
-            },
-          ],
-        },
-      ]
-    : []),
-];
-
-export const resolveMenuItems = (user?: SessionUser | null): MenuItem[] => {
-  if (!user || isAgent(user)) {
-    return agentMenuItems;
-  }
-  return getOperateurMenuItems(user.operateurId ?? null);
-};
