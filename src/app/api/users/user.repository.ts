@@ -85,7 +85,13 @@ export const findUsersWithGrantsOnStructure = ({
     where: {
       isActivated: true,
       OR: [
-        { perimeter: { scope: GrantScope.DEPARTEMENT, departementNumero } },
+        {
+          perimeter: {
+            grants: {
+              some: { scope: GrantScope.DEPARTEMENT, departementNumero },
+            },
+          },
+        },
         { grants: { some: grantWhere } },
       ],
     },

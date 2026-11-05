@@ -3,7 +3,11 @@ import { ContactApiType } from "@/schemas/api/contact.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { resolvableVersionSelect } from "../structure-versions/structure-version.db.type";
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
+import {
+  resolvableVersionSelect,
+  transformationStatusSelect,
+} from "../structure-versions/structure-version.db.type";
 
 // WARNING: attenion, auparavant on avait un type de contact,
 // donc on avait une unicité structureDnaCode x type.
@@ -53,9 +57,16 @@ export const findStructuresWithContactEmail = (email: string) =>
     },
     select: {
       id: true,
+      forms: {
+        where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
+        select: { status: true, formDefinition: { select: { slug: true } } },
+      },
       structureVersions: {
         select: {
           ...resolvableVersionSelect,
+          structureVersionTransformation: {
+            select: { type: true, ...transformationStatusSelect },
+          },
           contacts: { where: { email }, select: { id: true } },
         },
       },
