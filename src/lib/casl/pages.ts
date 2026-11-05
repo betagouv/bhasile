@@ -1,19 +1,11 @@
-import { OPERATEUR_BASE_PATH } from "@/proxy/auth-config";
 import { SessionUser } from "@/types/global";
 import { matchesPath } from "@/utils/path.util";
 
 import { isAgent } from "./rules";
 
-export const commonPages = ["/", "/structures", "/statistiques"];
+export const commonPages = ["/", "/structures", "/cpoms", "/statistiques"];
 
-export const agentOnlyPages = ["cpoms", "/ressources"];
-
-export const operateurAllowedPages = [
-  "/",
-  "/structures",
-  OPERATEUR_BASE_PATH,
-  "/statistiques",
-];
+export const agentOnlyPages = ["/ressources"];
 
 export const canAccessPage = (
   user: SessionUser | undefined,
@@ -25,30 +17,21 @@ export const canAccessPage = (
 
   const isUserAgent = isAgent(user);
 
+  if (commonPages.some((base) => matchesPath(pathname, base))) {
+    return true;
+  }
+
   if (agentOnlyPages.some((base) => matchesPath(pathname, base))) {
     return isUserAgent;
   }
 
-  if (!isUserAgent) {
-    const isAllowedForOperateur = operateurAllowedPages.some((base) =>
-      matchesPath(pathname, base)
-    );
-
-    if (!isAllowedForOperateur) {
-      return false;
+  if (matchesPath(pathname, "/operateurs")) {
+    if (!isUserAgent) {
+      return (
+        user.operateurId !== null &&
+        pathname === `/operateurs/${user.operateurId}`
+      );
     }
-
-    if (matchesPath(pathname, OPERATEUR_BASE_PATH)) {
-      if (user.operateurId) {
-        return pathname === `${OPERATEUR_BASE_PATH}/${user.operateurId}`;
-      }
-      return false;
-    }
-
-    return true;
-  }
-
-  if (commonPages.some((base) => matchesPath(pathname, base))) {
     return true;
   }
 
