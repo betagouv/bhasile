@@ -16,35 +16,38 @@ export const createGrantDb = (overrides: Partial<GrantDb> = {}): GrantDb => ({
 
 export const createDepartementPerimeter = (
   numero: string,
-  name: string,
-  overrides: Partial<PerimeterDb> = {}
+  name: string
 ): PerimeterDb => ({
   name: `DDETS ${name}`,
-  scope: GrantScope.DEPARTEMENT,
-  region: null,
-  departement: { numero, name, regionId: 53 },
-  ...overrides,
+  grants: [
+    createGrantDb({
+      role: AccessRole.ADMIN,
+      scope: GrantScope.DEPARTEMENT,
+      departement: { numero, name, regionId: 53 },
+    }),
+  ],
 });
 
 export const createRegionPerimeter = (
-  overrides: Partial<PerimeterDb> = {}
-): PerimeterDb => ({
-  name: "DREETS Bretagne",
-  scope: GrantScope.REGION,
-  region: {
+  region: NonNullable<GrantDb["region"]> = {
     id: 53,
     name: "Bretagne",
     departements: [{ numero: "22" }, { numero: "29" }, { numero: "35" }],
-  },
-  departement: null,
-  ...overrides,
+  }
+): PerimeterDb => ({
+  name: `DREETS ${region.name}`,
+  grants: [
+    createGrantDb({
+      role: AccessRole.ADMIN,
+      scope: GrantScope.REGION,
+      region,
+    }),
+  ],
 });
 
 export const createNationalPerimeter = (): PerimeterDb => ({
   name: "Administration centrale",
-  scope: GrantScope.NATIONAL,
-  region: null,
-  departement: null,
+  grants: [],
 });
 
 export const createUserWithGrants = (

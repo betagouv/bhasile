@@ -1,7 +1,6 @@
 import { PerimeterDb, UserWithGrants } from "@/app/api/users/user.db.type";
 import { getAccountStatus, toSessionGrant } from "@/app/api/users/user.util";
 import { toDayKey } from "@/app/utils/date.util";
-import { AccessRole, GrantScope } from "@/generated/prisma/client";
 import { postToBrevo } from "@/lib/brevo";
 
 const BATCH_SIZE = 500;
@@ -76,11 +75,14 @@ export const pushContactsToBrevo = async (
 };
 
 const formatDepartements = (perimeter: PerimeterDb): string =>
-  toSessionGrant({ ...perimeter, role: AccessRole.LECTEUR, structure: null })
-    .departementNumeros.sort()
+  perimeter.grants
+    .flatMap((grant) => toSessionGrant(grant).departementNumeros)
+    .sort()
     .join(", ");
 
 const getPerimeterLabel = (perimeter: PerimeterDb): string =>
-  perimeter.scope === GrantScope.NATIONAL
+  perimeter.grants.length === 0
     ? "National"
-    : (perimeter.region?.name ?? perimeter.departement?.name ?? "");
+    : perimeter.grants
+        .map(({ region, departement }) => region?.name ?? departement?.name)
+        .join(", ");

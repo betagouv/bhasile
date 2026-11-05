@@ -1,5 +1,5 @@
 // One-off à lancer juste après le déploiement de la bascule vers les périmètres :
-// - supprime les binômes sans propriétaire (anciens email patterns) et ceux des agents ;
+// - supprime les binômes sans user ni périmètre (anciens email patterns) et ceux des agents ;
 // - passe en minuscules, sans espaces, les emails des users et des contacts, désormais comparés tels quels.
 // Idempotent.
 //
@@ -18,7 +18,7 @@ const isDryRun = process.argv.includes("--dry-run");
 
 const TRANSACTION_TIMEOUT_MS = 120_000;
 
-const orphanGrantWhere = { userId: null };
+const orphanGrantWhere = { userId: null, perimeterId: null };
 const agentGrantWhere = { user: { operateurId: null } };
 
 const cleanGrantsAndEmails = async () => {

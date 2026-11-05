@@ -116,12 +116,9 @@ describe("getTarificationParticipant", () => {
     createUserWithGrants({
       id: 5,
       perimeter: createRegionPerimeter({
-        name: "DREETS Île-de-France",
-        region: {
-          id: 11,
-          name: "Île-de-France",
-          departements: [{ numero: "75" }],
-        },
+        id: 11,
+        name: "Île-de-France",
+        departements: [{ numero: "75" }],
       }),
       ...overrides,
     });

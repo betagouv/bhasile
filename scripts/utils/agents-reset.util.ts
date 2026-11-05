@@ -224,7 +224,7 @@ export const planAgentsReset = (
       plan.inactiveCount++;
       continue;
     }
-    const isNational = user.perimeter?.scope === GrantScope.NATIONAL;
+    const isNational = user.perimeter?.grants.length === 0;
     const rights = describeCurrentRights(user);
     if (isNational) {
       plan.nationalReaders.push({ user, rights });

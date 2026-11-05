@@ -16,9 +16,7 @@ export const grantSelect = {
 
 export const perimeterSelect = {
   name: true,
-  scope: true,
-  region: grantSelect.region,
-  departement: grantSelect.departement,
+  grants: { select: grantSelect },
 } satisfies Prisma.PerimeterSelect;
 
 export const userWithGrantsSelect = {

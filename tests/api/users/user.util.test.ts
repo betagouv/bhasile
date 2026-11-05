@@ -135,16 +135,12 @@ describe("isAgentUser", () => {
 describe("getAssignedGrants", () => {
   const grant = buildGrant({ role: AccessRole.LECTEUR });
 
-  it("donne à un agent la lecture nationale et l'admin sur son périmètre", () => {
+  it("donne à un agent la lecture nationale et les binômes de son périmètre", () => {
     const perimeter = createDepartementPerimeter("29", "Finistère");
 
     expect(getAssignedGrants(createUserWithGrants({ perimeter }))).toEqual([
       buildGrant({ role: AccessRole.LECTEUR }),
-      buildGrant({
-        role: AccessRole.ADMIN,
-        scope: GrantScope.DEPARTEMENT,
-        departement: perimeter.departement,
-      }),
+      ...perimeter.grants,
     ]);
   });
 
