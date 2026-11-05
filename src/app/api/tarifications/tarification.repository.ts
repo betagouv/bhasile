@@ -5,6 +5,7 @@ const structureScopeSelect = {
   id: true,
   departementAdministratif: true,
   operateurId: true,
+  type: true,
 } satisfies Prisma.StructureSelect;
 
 export const upsertStructureTarification = async (
@@ -94,4 +95,94 @@ export const findPendingMessageContexts = () =>
         },
       },
     },
+  });
+
+export const findTarificationCampaign = (year: number) =>
+  prisma.tarificationCampaign.findUnique({
+    where: { year },
+    select: { drlPublishedAt: true, drlUrl: true },
+  });
+
+export const findStructureTarificationJournal = (
+  structureId: number,
+  year: number
+) =>
+  prisma.structure.findUnique({
+    where: { id: structureId },
+    select: {
+      departementAdministratif: true,
+      cpomStructures: {
+        select: {
+          dateStart: true,
+          dateEnd: true,
+          cpom: {
+            select: {
+              actesAdministratifs: {
+                select: {
+                  id: true,
+                  category: true,
+                  parentId: true,
+                  startDate: true,
+                  endDate: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      structureTarifications: {
+        where: { campaign: { year } },
+        select: {
+          documents: {
+            orderBy: { id: "asc" },
+            select: {
+              id: true,
+              types: true,
+              status: true,
+              fileUpload: {
+                select: {
+                  key: true,
+                  originalName: true,
+                  mimeType: true,
+                  fileSize: true,
+                  sha256: true,
+                },
+              },
+              openings: {
+                select: {
+                  documentId: true,
+                  userId: true,
+                  createdAt: true,
+                  user: { select: { name: true } },
+                },
+              },
+            },
+          },
+          events: {
+            orderBy: { id: "asc" },
+            select: {
+              id: true,
+              type: true,
+              authorId: true,
+              authorLevel: true,
+              documentId: true,
+              stepCode: true,
+              text: true,
+              createdAt: true,
+              author: { select: { name: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+
+// La première ouverture fait foi : les suivantes n'écrasent rien
+export const createTarificationDocumentOpening = (
+  documentId: number,
+  userId: number
+) =>
+  prisma.tarificationDocumentOpening.createMany({
+    data: [{ documentId, userId }],
+    skipDuplicates: true,
   });

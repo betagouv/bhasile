@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 
+import {
+  authorizeTarificationDocument,
+  type PendingTarificationOpening,
+  recordTarificationDocumentOpening,
+} from "@/app/api/tarifications/tarification.service";
+import { DomainError } from "@/app/utils/domain-error.util";
 import { authOptions } from "@/lib/next-auth/auth";
+import { SessionUser } from "@/types/global";
 
 import type { FileWithParents } from "../file.db.type";
 import {
@@ -12,6 +19,33 @@ import {
   getFileWithParents,
   getPrincipal,
 } from "../file.service";
+
+const getFileAccess = async (
+  session: Session | null,
+  file: FileWithParents
+): Promise<FileAccess | null> => {
+  if (!file.tarificationDocument) {
+    return authorizeFileAccess(getPrincipal(session), file, "read")
+      ? { pendingOpening: null }
+      : null;
+  }
+  if (!session?.user) {
+    return null;
+  }
+  try {
+    return {
+      pendingOpening: await authorizeTarificationDocument({
+        user: session.user as SessionUser,
+        document: file.tarificationDocument,
+      }),
+    };
+  } catch (error) {
+    if (error instanceof DomainError) {
+      return null;
+    }
+    throw error;
+  }
+};
 
 const toFileResponse = (file: FileWithParents) => ({
   id: file.id,
@@ -33,16 +67,23 @@ export async function GET(request: NextRequest) {
   const getLink = request.nextUrl.searchParams.get("getLink");
 
   const session = await getServerSession(authOptions);
-  const principal = getPrincipal(session);
 
   const file = await getFileWithParents(key);
-  if (!file || !authorizeFileAccess(principal, file, "read")) {
-    return NextResponse.json({ error: "Aucun fichier trouvé" }, { status: 404 });
+  const access = file && (await getFileAccess(session, file));
+  if (!file || !access) {
+    return NextResponse.json(
+      { error: "Aucun fichier trouvé" },
+      { status: 404 }
+    );
   }
 
   if (getLink) {
     try {
       const url = await getDownloadLink(process.env.S3_BUCKET_NAME!, key);
+      // L'ouverture fait courir le contradictoire
+      if (access.pendingOpening) {
+        await recordTarificationDocumentOpening(access.pendingOpening);
+      }
       return NextResponse.json({ url });
     } catch (error) {
       console.error(error);
@@ -70,7 +111,10 @@ export async function DELETE(request: NextRequest) {
 
   const file = await getFileWithParents(key);
   if (!file || !authorizeFileAccess(principal, file, "delete")) {
-    return NextResponse.json({ error: "Aucun fichier trouvé" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Aucun fichier trouvé" },
+      { status: 404 }
+    );
   }
 
   try {
@@ -87,3 +131,5 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+type FileAccess = { pendingOpening: PendingTarificationOpening | null };
