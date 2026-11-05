@@ -24,7 +24,7 @@ Plusieurs périmètres peuvent couvrir la même zone.
 - **Désactivé** : rien.
 - **En attente** : droits de contact seulement (\*).
 - **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
-- **Agent** : rattaché obligatoirement à un unique périmètre, dont il tire ses droits : lecture nationale + admin sur la zone du périmètre.
+- **Agent** : rattaché obligatoirement à un unique périmètre, dont il tire ses droits : lecture nationale + admin sur la zone du périmètre. Un périmètre national ne donne que la lecture : aucun agent n'écrit au niveau national, seul le superadmin a tous les droits.
 - **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans CPOM ; certains champs lui sont masqués.
 - **Activé sans périmètre ni opérateur** : droits de contact seulement (\*).
 
