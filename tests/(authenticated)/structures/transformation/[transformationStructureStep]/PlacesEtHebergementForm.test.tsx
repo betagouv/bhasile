@@ -12,7 +12,7 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PlacesEtHebergementForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/PlacesEtHebergementForm";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
@@ -66,7 +66,7 @@ const buildStructureVersion = () =>
     ],
     structureTypologies: [
       {
-        year: CURRENT_YEAR,
+        year: getCurrentYear(),
         placesAutorisees: ORIGINAL_PLACES,
         pmr: 0,
         lgbt: 0,
@@ -213,27 +213,29 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
 
   it("sauvegarde même quand tous les champs sont vides (null venant de la BDD)", async () => {
     // GIVEN a version whose public / typeBati / places columns are still null
-    const structureVersionTransformation = createStructureVersionTransformation({
-      id: STRUCTURE_VERSION_TRANSFORMATION_ID,
-      type: StructureVersionTransformationType.EXTENSION,
-      structureVersion: {
-        id: 999,
-        public: null,
-        typeBati: null,
-        adresses: [],
-        structureTypologies: [
-          {
-            year: CURRENT_YEAR,
-            placesAutorisees: null,
-            pmr: null,
-            lgbt: null,
-            fvvTeh: null,
-          },
-        ],
-      } as unknown as NonNullable<
-        StructureVersionTransformationApiRead["structureVersion"]
-      >,
-    });
+    const structureVersionTransformation = createStructureVersionTransformation(
+      {
+        id: STRUCTURE_VERSION_TRANSFORMATION_ID,
+        type: StructureVersionTransformationType.EXTENSION,
+        structureVersion: {
+          id: 999,
+          public: null,
+          typeBati: null,
+          adresses: [],
+          structureTypologies: [
+            {
+              year: getCurrentYear(),
+              placesAutorisees: null,
+              pmr: null,
+              lgbt: null,
+              fvvTeh: null,
+            },
+          ],
+        } as unknown as NonNullable<
+          StructureVersionTransformationApiRead["structureVersion"]
+        >,
+      }
+    );
     const transformation = createTransformation({
       id: TRANSFORMATION_ID,
       type: TransformationType.EXTENSION_EX_NIHILO,

@@ -1,10 +1,10 @@
 import z from "zod";
 
 import { getYearRange } from "@/app/utils/date.util";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
 import {
   AUTORISEE_OPEN_YEAR,
-  CURRENT_YEAR,
   INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE,
   INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE,
   SUBVENTIONNEE_OPEN_YEAR,
@@ -23,7 +23,7 @@ import {
   budgetSubventionneeOpenSchema,
 } from "../budget.schema";
 import { cpomStructureSchema } from "../cpom.schema";
-import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
+import { DocumentsFinanciersSubmitSchema } from "../documentFinancier.schema";
 import { getIndicateursFinanciersSchema } from "../indicateurFinancier.schema";
 
 export const getFinanceSchema = (
@@ -49,12 +49,12 @@ export const getFinanceSchema = (
         return budgetInCpomSchema;
       }
 
-      if (year === CURRENT_YEAR) {
+      if (year === getCurrentYear()) {
         return budgetAutoSaveSchema;
       }
 
       if (isAutorisee) {
-        if (year === CURRENT_YEAR) {
+        if (year === getCurrentYear()) {
           return budgetAutoSaveSchema;
         }
         if (year === AUTORISEE_OPEN_YEAR) {
@@ -104,7 +104,7 @@ export const getFinanceSchema = (
       cpomStructures: z.array(cpomStructureSchema),
     })
     .and(indicateursFinanciersSchema)
-    .and(DocumentsFinanciersFlexibleSchema);
+    .and(DocumentsFinanciersSubmitSchema);
 };
 
 type BudgetSchema =

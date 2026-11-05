@@ -153,6 +153,7 @@ export const structureDetailsInclude = {
             include: { fileUploads: true },
           },
           documentsFinanciers: {
+            where: { fileUploads: { some: {} } },
             include: { fileUploads: true },
           },
           budgets: {
@@ -174,6 +175,7 @@ export const structureDetailsInclude = {
     include: { fileUploads: true },
   },
   documentsFinanciers: {
+    where: { fileUploads: { some: {} } },
     include: { fileUploads: true },
   },
   budgets: {

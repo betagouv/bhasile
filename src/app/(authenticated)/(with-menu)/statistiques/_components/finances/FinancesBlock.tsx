@@ -2,12 +2,12 @@
 
 import { ReactElement } from "react";
 
+import { DotationChart } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_finances/DotationChart";
 import { getPercentage } from "@/app/utils/common.util";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
-import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
 import { ClosedStructuresDisclaimer } from "../ClosedStructuresDisclaimer";
 import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { BalanceChart } from "./BalanceChart";
@@ -18,7 +18,7 @@ import { FinancesStatsTable } from "./FinancesStatsTable";
 export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const completude = statistiques.finance.byYear.find(
-    (yearItem) => yearItem.year === CURRENT_YEAR
+    (yearItem) => yearItem.year === getCurrentYear()
   )?.total.completude;
   const nbStructures = completude?.nbRenseignees ?? 0;
 
@@ -31,7 +31,7 @@ export const FinancesBlock = ({ startYear, endYear }: Props): ReactElement => {
         </div>
       </div>
       <h4 className="text-title-blue-france text-lg print:mb-0">
-        Budgets exécutoires pour {CURRENT_YEAR}{" "}
+        Budgets exécutoires pour {getCurrentYear()}{" "}
         {isYearIncomplete(completude) && (
           <IncompleteDataIndicator
             nbStructures={nbStructures}

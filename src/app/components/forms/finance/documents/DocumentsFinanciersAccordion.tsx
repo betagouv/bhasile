@@ -17,7 +17,7 @@ export const DocumentsFinanciersAccordion = ({
   return (
     <Accordion
       label={year}
-      className="[&_.fr-collapse]:bg-alt-blue-france [&_.fr-collapse]:m-0 [&_.fr-collapse]:p-0"
+      className="[&_.fr-collapse]:m-0 [&_.fr-collapse]:p-0"
     >
       <div className="p-6">{children}</div>
     </Accordion>

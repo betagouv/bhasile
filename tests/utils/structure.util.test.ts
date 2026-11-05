@@ -34,11 +34,11 @@ import { createEvaluation } from "../test-utils/factories/evaluation.factory";
 import { createStructureTypologie } from "../test-utils/factories/structure-typologie.factory";
 import { createStructure } from "../test-utils/structure.factory";
 
-vi.mock("@/constants", async () => {
-  const actual = await vi.importActual("@/constants");
+vi.mock("@/app/utils/now.util", async () => {
+  const actual = await vi.importActual("@/app/utils/now.util");
   return {
     ...actual,
-    CURRENT_YEAR: 2025,
+    getCurrentYear: () => 2025,
   };
 });
 
@@ -921,7 +921,7 @@ describe("structure util", () => {
       expect(result).toBe(-1);
     });
 
-    it("utilise CURRENT_YEAR par défaut quand aucune année n'est fournie", () => {
+    it("utilise l'année courante par défaut quand aucune année n'est fournie", () => {
       // GIVEN
       const structureTypologies = [
         createStructureTypologie({ year: 2024 }),
@@ -988,7 +988,7 @@ describe("structure util", () => {
       expect(result).toBe(-1);
     });
 
-    it("utilise CURRENT_YEAR par défaut quand aucune année n'est fournie", () => {
+    it("utilise l'année courante par défaut quand aucune année n'est fournie", () => {
       // GIVEN
       const structureMillesimes = [
         { year: 2024, cpom: false, operateurComment: null },
@@ -1421,7 +1421,7 @@ describe("structure util", () => {
       expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 1 });
     });
 
-    it("utilise CURRENT_YEAR par défaut quand aucune année n'est fournie", () => {
+    it("utilise l'année courante par défaut quand aucune année n'est fournie", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [
         {

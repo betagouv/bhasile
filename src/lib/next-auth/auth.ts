@@ -147,7 +147,6 @@ export const authOptions: NextAuthOptions = {
       wellKnown:
         process.env.PRO_CONNECT_BASE_URL +
         "/v2/.well-known/openid-configuration",
-      allowDangerousEmailAccountLinking: true, // TODO : supprimer dans une prochaine PR et voir si ça pose problème à certains users en prod
       checks: ["nonce", "state"],
       authorization: {
         params: {

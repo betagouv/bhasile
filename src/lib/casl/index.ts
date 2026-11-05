@@ -10,6 +10,7 @@ export {
   type AppAbility,
   canAccessApp,
   defineAbilityFor,
+  EDITING_ROLES,
   isAgent,
 } from "./rules";
 export {
@@ -18,4 +19,10 @@ export {
   canUpdateStructure,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
+  type StructureScope,
 } from "./structure.ability";
+export {
+  canAccessTarification,
+  canParticipateInTarification,
+  canReadConversation,
+} from "./tarification.ability";

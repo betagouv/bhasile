@@ -2,8 +2,8 @@ import { GrantDb } from "@/app/api/users/user.db.type";
 import { getEffectiveGrants, toSessionGrant } from "@/app/api/users/user.util";
 import { toDayKey } from "@/app/utils/date.util";
 import { AccessRole, GrantScope } from "@/generated/prisma/client";
+import { postToBrevo } from "@/lib/brevo";
 
-const BREVO_IMPORT_URL = "https://api.brevo.com/v3/contacts/import";
 const BATCH_SIZE = 500;
 const AGENT_STATUT = "Agent";
 
@@ -46,8 +46,7 @@ export const toBrevoContact = (user: BrevoAgentUser): BrevoContact => {
 export const pushContactsToBrevo = async (
   contacts: BrevoContact[]
 ): Promise<void> => {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) {
+  if (!process.env.BREVO_API_KEY) {
     throw new Error("❌ BREVO_API_KEY n'est pas défini dans l'environnement");
   }
 
@@ -61,25 +60,12 @@ export const pushContactsToBrevo = async (
   for (let start = 0; start < contacts.length; start += BATCH_SIZE) {
     const batch = contacts.slice(start, start + BATCH_SIZE);
 
-    const response = await fetch(BREVO_IMPORT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": apiKey,
-      },
-      body: JSON.stringify({
-        listIds: [listId],
-        updateExistingContacts: true,
-        emptyContactsAttributes: false,
-        jsonBody: batch,
-      }),
+    await postToBrevo("/contacts/import", {
+      listIds: [listId],
+      updateExistingContacts: true,
+      emptyContactsAttributes: false,
+      jsonBody: batch,
     });
-
-    if (!response.ok) {
-      throw new Error(
-        `❌ Brevo a répondu ${response.status} ${response.statusText} : ${await response.text()}`
-      );
-    }
 
     console.log(
       `📤 ${batch.length} contacts envoyés à la liste Brevo ${listId}`

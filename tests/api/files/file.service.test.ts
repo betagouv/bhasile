@@ -10,9 +10,11 @@ import {
 import { Principal } from "@/types/principal.type";
 
 const mockCanDeleteFile = vi.fn();
+const mockCanReadConversation = vi.fn();
 
 vi.mock("@/lib/casl", () => ({
   canDeleteFile: (...args: unknown[]) => mockCanDeleteFile(...args),
+  canReadConversation: (...args: unknown[]) => mockCanReadConversation(...args),
 }));
 
 vi.mock("@/lib/minio", () => ({
@@ -33,16 +35,29 @@ const buildFile = (overrides: Partial<FileWithParents>): FileWithParents =>
     controleId: null,
     evaluationId: null,
     operateurId: null,
+    messageId: null,
     acteAdministratif: null,
     documentFinancier: null,
     controle: null,
     evaluation: null,
     operateur: null,
+    message: null,
     ...overrides,
   }) as unknown as FileWithParents;
 
 const orphanFile = buildFile({});
 const linkedFile = buildFile({ documentFinancierId: 1 });
+const messageFile = buildFile({
+  messageId: 1,
+  message: {
+    conversation: {
+      visibility: "AGENTS",
+      structureTarification: {
+        structure: { id: 1, departementAdministratif: "75", operateurId: null },
+      },
+    },
+  },
+} as Partial<FileWithParents>);
 
 const agent: Principal = {
   type: "agent",
@@ -109,5 +124,24 @@ describe("authorizeFileAccess", () => {
   it("refuse la suppression d'un fichier lié quand canDeleteFile refuse", () => {
     mockCanDeleteFile.mockReturnValueOnce(false);
     expect(authorizeFileAccess(agent, linkedFile, "delete")).toBe(false);
+  });
+
+  it("laisse lire une pièce jointe à qui a accès à sa conversation", () => {
+    mockCanReadConversation.mockReturnValue(true);
+
+    expect(authorizeFileAccess(agent, messageFile, "read")).toBe(true);
+  });
+
+  it("refuse une pièce jointe à qui n'a pas accès à sa conversation", () => {
+    mockCanReadConversation.mockReturnValue(false);
+
+    expect(authorizeFileAccess(agent, messageFile, "read")).toBe(false);
+  });
+
+  it("ne laisse jamais supprimer une pièce jointe de message", () => {
+    mockCanReadConversation.mockReturnValue(true);
+    mockCanDeleteFile.mockReturnValue(true);
+
+    expect(authorizeFileAccess(agent, messageFile, "delete")).toBe(false);
   });
 });

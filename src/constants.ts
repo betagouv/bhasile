@@ -1,4 +1,4 @@
-import { getNow } from "./app/utils/now.util";
+import type { AuthorLevel, Visibility } from "./generated/prisma/enums";
 import { Departement, Region } from "./types/departement.type";
 
 export type LatLngTuple = [number, number];
@@ -48,10 +48,6 @@ export const EVALUATION_NOTES_START_YEAR = 2022;
 export const EVALUATION_NOTE_MIN = 1;
 export const EVALUATION_NOTE_MAX = 4;
 
-export const CURRENT_YEAR = getNow().getFullYear();
-
-export const DEFAULT_CARTOGRAPHIE_ANNEE = CURRENT_YEAR - 1;
-
 export const PLACES_VERSIONED_FROM_YEAR =
   Number(process.env.NEXT_PUBLIC_PLACES_VERSIONED_FROM_YEAR) || 2026;
 
@@ -93,13 +89,34 @@ export const SPREADSHEET_MIME_TYPES = [
   "application/vnd.ms-excel.sheet.macroenabled.12",
   "text/csv",
 ];
-export const ALLOWED_MIME_TYPES = [
+const TEXT_DOCUMENT_MIME_TYPES = [
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.oasis.opendocument.text",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+];
+
+export const DOCUMENT_MIME_TYPES = [
   "application/pdf",
-  ...IMAGE_MIME_TYPES,
   ...SPREADSHEET_MIME_TYPES,
+];
+export const ALLOWED_MIME_TYPES = [
+  ...DOCUMENT_MIME_TYPES,
+  ...IMAGE_MIME_TYPES,
+  ...TEXT_DOCUMENT_MIME_TYPES,
 ];
 
 export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo
+
+export const AUTHOR_LEVEL_LABELS: Record<AuthorLevel, string> = {
+  DEPARTEMENT: "DDETS",
+  REGION: "DREETS",
+  OPERATEUR: "Opérateur",
+};
+
+export const VISIBILITY_LABELS: Record<Visibility, string> = {
+  SHARED: "Tout le monde",
+  AGENTS: "Services de l’État seulement",
+};
 
 export const MODELE_DIFFUS_LINK = "/adresses-diffus.xlsx";
 export const MODELE_MIXTE_LINK = "/adresses-mixte.xlsx";

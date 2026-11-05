@@ -1,21 +1,17 @@
 import { ReactElement } from "react";
-import { useFormContext } from "react-hook-form";
 
 import { DocumentsFinanciersAccordion } from "@/app/components/forms/finance/documents/DocumentsFinanciersAccordion";
-import { DocumentsFinanciersList } from "@/app/components/forms/finance/documents/DocumentsFinanciersList";
-import { YearlyFileUpload } from "@/app/components/forms/finance/documents/YearlyFileUpload";
+import { DocumentsFinanciersGrid } from "@/app/components/forms/finance/documents/DocumentsFinanciersGrid";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { useCpomContext } from "@/contexts/CpomContext";
-import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { StructureType } from "@/types/structure.type";
 
 export const CpomDocumentsFinanciers = ({
   structureType,
 }: Props): ReactElement => {
   const { cpom } = useCpomContext();
-  const { control } = useFormContext<DocumentsFinanciersFlexibleFormValues>();
 
   const isAutorisee = isStructureAutorisee(structureType);
   const { years } = getYearRange();
@@ -31,20 +27,12 @@ export const CpomDocumentsFinanciers = ({
           startYear={startYear}
           hasAccordion
         >
-          <div className="grid grid-cols-2 gap-16">
-            <DocumentsFinanciersList
-              isAutorisee={isAutorisee}
-              year={year}
-              structureType={structureType}
-              hideRequirement
-            />
-            <YearlyFileUpload
-              year={year}
-              isAutorisee={isAutorisee}
-              control={control}
-              structureType={structureType}
-            />
-          </div>
+          <DocumentsFinanciersGrid
+            year={year}
+            isAutorisee={isAutorisee}
+            structureType={structureType}
+            hasRequirement={false}
+          />
         </DocumentsFinanciersAccordion>
       ))}
     </>

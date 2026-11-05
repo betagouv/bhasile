@@ -6,12 +6,12 @@ import { ComponentProps, Fragment, ReactElement } from "react";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { getPercentage } from "@/app/utils/common.util";
+import { getCurrentYear } from "@/app/utils/now.util";
 import {
   filterDisplayedYears,
   isYearIncomplete,
   shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
-import { CURRENT_YEAR } from "@/constants";
 import { useExportContext } from "@/contexts/ExportContext";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import {
@@ -90,7 +90,7 @@ const sectionsConfig: FinanceSectionConfig[] = [
         key: "totalProduits",
         type: "currency",
         maximumFractionDigits: 0,
-        emptyYearsStart: CURRENT_YEAR,
+        isEmptyFromCurrentYear: true,
       },
       {
         label: "Total charges retenu",
@@ -98,7 +98,7 @@ const sectionsConfig: FinanceSectionConfig[] = [
         key: "totalCharges",
         type: "currency",
         maximumFractionDigits: 0,
-        emptyYearsStart: CURRENT_YEAR,
+        isEmptyFromCurrentYear: true,
       },
       {
         label: "Résultat net retenu",
@@ -107,7 +107,7 @@ const sectionsConfig: FinanceSectionConfig[] = [
         type: "currency",
         maximumFractionDigits: 0,
         isBadge: true,
-        emptyYearsStart: CURRENT_YEAR,
+        isEmptyFromCurrentYear: true,
       },
     ],
   },
@@ -150,8 +150,7 @@ export const FinancesTablePresenter = ({
       const values = financeYears.map((yearItem) => {
         const visualizationType = yearItem[visualization];
         const isEmptyYear =
-          row.emptyYearsStart !== undefined &&
-          yearItem.year >= row.emptyYearsStart;
+          row.isEmptyFromCurrentYear && yearItem.year >= getCurrentYear();
         const rawValue =
           visualizationType && !isEmptyYear
             ? (visualizationType[row.key as keyof typeof visualizationType] as
@@ -314,7 +313,7 @@ type FinanceRowConfig = {
   maximumFractionDigits?: number;
   subLabel?: string;
   isBadge?: boolean;
-  emptyYearsStart?: number;
+  isEmptyFromCurrentYear?: boolean;
 };
 
 type FinanceSectionConfig = {

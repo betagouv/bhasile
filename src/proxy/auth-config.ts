@@ -121,6 +121,25 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/tarifications\/\d+\/\d+\/messages$/,
+    routes: {
+      GET: "proconnect",
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/tarifications\/\d+\/\d+\/messages\/read$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/tarifications\/messages\/\d+$/,
+    routes: {
+      PATCH: "proconnect",
+    },
+  },
+  {
     pattern: /^\/api\/user-actions\/statistiques$/,
     routes: {
       POST: "proconnect",

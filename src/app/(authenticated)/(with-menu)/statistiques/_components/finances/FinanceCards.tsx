@@ -2,13 +2,13 @@ import { ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { MultiInformationCard } from "@/app/components/MultiInformationCard";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
 export const FinanceCards = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const currentYear = statistiques.finance.byYear.find(
-    (yearItem) => yearItem.year === CURRENT_YEAR
+    (yearItem) => yearItem.year === getCurrentYear()
   );
 
   if (!currentYear) {
@@ -62,7 +62,10 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay showZero={false} value={currentYear.total.totalETPPrevisionnel} />
+              <NumberDisplay
+                showZero={false}
+                value={currentYear.total.totalETPPrevisionnel}
+              />
             ),
             secondaryInformation: "nombre prévisionnel d'ETP au total",
           },
@@ -70,7 +73,8 @@ export const FinanceCards = (): ReactElement => {
             primaryInformation: (
               <>
                 <span className="text-sm">dont </span>
-                <NumberDisplay showZero={false}
+                <NumberDisplay
+                  showZero={false}
                   value={currentYear.autorisees.totalETPPrevisionnel}
                 />
               </>
@@ -81,7 +85,8 @@ export const FinanceCards = (): ReactElement => {
             primaryInformation: (
               <>
                 <span className="text-sm">dont </span>
-                <NumberDisplay showZero={false}
+                <NumberDisplay
+                  showZero={false}
                   value={currentYear.subventionnees.totalETPPrevisionnel}
                 />
               </>
@@ -95,7 +100,8 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay showZero={false}
+              <NumberDisplay
+                showZero={false}
                 value={currentYear.total.tauxEncadrementTheoriquePrevisionnel}
               />
             ),
@@ -104,7 +110,8 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay showZero={false}
+              <NumberDisplay
+                showZero={false}
                 value={
                   currentYear.autorisees.tauxEncadrementTheoriquePrevisionnel
                 }
@@ -114,7 +121,8 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay showZero={false}
+              <NumberDisplay
+                showZero={false}
                 value={
                   currentYear.subventionnees
                     .tauxEncadrementTheoriquePrevisionnel
@@ -130,7 +138,8 @@ export const FinanceCards = (): ReactElement => {
         informations={[
           {
             primaryInformation: (
-              <NumberDisplay showZero={false}
+              <NumberDisplay
+                showZero={false}
                 value={currentYear.total.coutJournalierTheorique}
                 type="currency"
               />
@@ -140,7 +149,8 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay showZero={false}
+              <NumberDisplay
+                showZero={false}
                 value={currentYear.autorisees.coutJournalierTheorique}
                 type="currency"
               />
@@ -149,7 +159,8 @@ export const FinanceCards = (): ReactElement => {
           },
           {
             primaryInformation: (
-              <NumberDisplay showZero={false}
+              <NumberDisplay
+                showZero={false}
                 value={currentYear.subventionnees.coutJournalierTheorique}
                 type="currency"
               />

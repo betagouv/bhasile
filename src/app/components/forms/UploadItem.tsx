@@ -1,20 +1,24 @@
-import { PropsWithChildren, ReactElement } from "react";
+import { PropsWithChildren, ReactElement, ReactNode } from "react";
 
 export const UploadItem = ({
   children,
   title,
+  titleId,
   subTitle,
 }: UploadItemProps): ReactElement => {
   return (
     <div className="flex flex-col h-full">
       <div className="pb-2">
-        <h3 className="text-title-blue-france text-sm font-medium mb-0 ">
+        <p
+          id={titleId}
+          className="text-title-blue-france text-sm font-bold mb-0"
+        >
           {title}
-        </h3>
+        </p>
         {subTitle && (
-          <h4 className="text-mention-grey text-xs font-normal mb-0 ">
+          <p className="text-mention-grey text-xs font-normal mb-0">
             {subTitle}
-          </h4>
+          </p>
         )}
       </div>
       {children}
@@ -23,6 +27,7 @@ export const UploadItem = ({
 };
 
 type UploadItemProps = PropsWithChildren & {
-  title: string;
+  title: ReactNode;
+  titleId: string;
   subTitle?: string;
 };

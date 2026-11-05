@@ -2,12 +2,12 @@
 
 import { ReactElement } from "react";
 
+import { TypePlaceCharts } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_type-places/TypePlaceCharts";
 import { getPercentage } from "@/app/utils/common.util";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { isYearIncomplete } from "@/app/utils/statistiques-period.util";
-import { CURRENT_YEAR } from "@/constants";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 
-import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
 import { AnnualDataNote } from "../AnnualDataNote";
 import { IncompleteDataIndicator } from "../IncompleteDataIndicator";
 import { TypesPlacesStatsTable } from "./TypesPlacesStatsTable";
@@ -18,7 +18,7 @@ export const TypesPlacesBlock = ({
 }: Props): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const currentYearPlaces = statistiques.places.byYear.find(
-    (yearItem) => yearItem.year === CURRENT_YEAR
+    (yearItem) => yearItem.year === getCurrentYear()
   );
 
   return (
@@ -33,7 +33,7 @@ export const TypesPlacesBlock = ({
       </div>
       <div className="pb-16">
         <h4 className="text-title-blue-france text-lg print:mb-0">
-          En {CURRENT_YEAR}{" "}
+          En {getCurrentYear()}{" "}
           {isYearIncomplete(currentYearPlaces?.completude) && (
             <IncompleteDataIndicator
               nbStructures={currentYearPlaces?.completude?.nbRenseignees || 0}
@@ -46,7 +46,8 @@ export const TypesPlacesBlock = ({
         </h4>
         {isYearIncomplete(currentYearPlaces?.completude) && (
           <h5 className="hidden print:block text-title-blue-france text-sm font-normal">
-            {currentYearPlaces?.completude?.nbRenseignees} structures actualisées
+            {currentYearPlaces?.completude?.nbRenseignees} structures
+            actualisées
           </h5>
         )}
         <TypePlaceCharts

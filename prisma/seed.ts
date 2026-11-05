@@ -4,7 +4,7 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import { recomputeAllAnomalies } from "@/app/api/anomalies/anomalie.service";
 import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { StructureType } from "@/types/structure.type";
 import { getRegionFromDepartement } from "@/utils/region.util";
 
@@ -15,6 +15,7 @@ import {
   getFakeTarifsJournaliersCibles,
   getFakeTauxEncadrementCibles,
 } from "./seeders/cible-financiere.seed";
+import { createFakeConversations } from "./seeders/conversation.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
 import { seedRegionsAndDepartements } from "./seeders/departements.seed";
 import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
@@ -169,7 +170,7 @@ async function seed(): Promise<void> {
 
   // Campagne d'actualisation en cours sur la dernière année seedée.
   const actualisationFormDefinition = await prisma.formDefinition.create({
-    data: createFakeFormActualisation(CURRENT_YEAR),
+    data: createFakeFormActualisation(getCurrentYear()),
   });
   await prisma.formStepDefinition.createMany({
     data: createFakeActualisationFormStepDefinition(
@@ -184,7 +185,7 @@ async function seed(): Promise<void> {
     }
   );
   console.log(
-    `📅 Campagne actualisation ${CURRENT_YEAR} ouverte jusqu'au 31/12`
+    `📅 Campagne actualisation ${getCurrentYear()} ouverte jusqu'au 31/12`
   );
 
   const formDefinitions = await prisma.formDefinition.findMany({
@@ -355,6 +356,9 @@ async function seed(): Promise<void> {
 
   await createFakeCpoms(prisma);
   logHeap("CPOM");
+
+  console.log("💬 Création des échanges de tarification...");
+  await createFakeConversations(prisma, getCurrentYear());
 
   console.log("📣 Seed des notifications");
   const notificationsToCreate = createNotificationsList();

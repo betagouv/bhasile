@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { getCurrentYear } from "@/app/utils/now.util";
 import {
   filterDisplayedPeriods,
   filterDisplayedYears,
@@ -7,7 +8,7 @@ import {
   isYearIncomplete,
   shouldShowYearAsterisk,
 } from "@/app/utils/statistiques-period.util";
-import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import { START_YEAR } from "@/constants";
 import { CompletudeStat } from "@/schemas/api/statistique.schema";
 
 const periodOfYear = (year: number) => ({
@@ -17,7 +18,10 @@ const periodOfYear = (year: number) => ({
 describe("statistiques period util", () => {
   describe("filterDisplayedPeriods", () => {
     it("garde les périodes comprises entre START_YEAR et l'année courante", () => {
-      const periods = [periodOfYear(START_YEAR), periodOfYear(CURRENT_YEAR)];
+      const periods = [
+        periodOfYear(START_YEAR),
+        periodOfYear(getCurrentYear()),
+      ];
 
       expect(filterDisplayedPeriods(periods)).toEqual(periods);
     });
@@ -29,9 +33,9 @@ describe("statistiques period util", () => {
     });
 
     it("exclut les périodes postérieures à l'année courante", () => {
-      expect(filterDisplayedPeriods([periodOfYear(CURRENT_YEAR + 10)])).toEqual(
-        []
-      );
+      expect(
+        filterDisplayedPeriods([periodOfYear(getCurrentYear() + 10)])
+      ).toEqual([]);
     });
   });
 
@@ -40,13 +44,13 @@ describe("statistiques period util", () => {
       const items = [
         { year: START_YEAR - 5 },
         { year: START_YEAR },
-        { year: CURRENT_YEAR },
+        { year: getCurrentYear() },
         { year: 2205 },
       ];
 
       expect(filterDisplayedYears(items)).toEqual([
         { year: START_YEAR },
-        { year: CURRENT_YEAR },
+        { year: getCurrentYear() },
       ]);
     });
   });
@@ -54,25 +58,25 @@ describe("statistiques period util", () => {
   describe("getLastDisplayedPeriods", () => {
     it("trie les périodes de la plus ancienne à la plus récente", () => {
       const periods = [
-        { date: `${CURRENT_YEAR}-03-01T00:00:00.000Z` },
-        { date: `${CURRENT_YEAR}-01-01T00:00:00.000Z` },
-        { date: `${CURRENT_YEAR}-02-01T00:00:00.000Z` },
+        { date: `${getCurrentYear()}-03-01T00:00:00.000Z` },
+        { date: `${getCurrentYear()}-01-01T00:00:00.000Z` },
+        { date: `${getCurrentYear()}-02-01T00:00:00.000Z` },
       ];
 
       expect(getLastDisplayedPeriods(periods).map(({ date }) => date)).toEqual([
-        `${CURRENT_YEAR}-01-01T00:00:00.000Z`,
-        `${CURRENT_YEAR}-02-01T00:00:00.000Z`,
-        `${CURRENT_YEAR}-03-01T00:00:00.000Z`,
+        `${getCurrentYear()}-01-01T00:00:00.000Z`,
+        `${getCurrentYear()}-02-01T00:00:00.000Z`,
+        `${getCurrentYear()}-03-01T00:00:00.000Z`,
       ]);
     });
 
     it("ne conserve que les 10 dernières périodes", () => {
       const previousYearPeriods = Array.from({ length: 12 }, (_, index) => ({
-        date: `${CURRENT_YEAR - 1}-${String(index + 1).padStart(2, "0")}-01T00:00:00.000Z`,
+        date: `${getCurrentYear() - 1}-${String(index + 1).padStart(2, "0")}-01T00:00:00.000Z`,
       }));
       const currentYearPeriods = [
-        { date: `${CURRENT_YEAR}-01-01T00:00:00.000Z` },
-        { date: `${CURRENT_YEAR}-02-01T00:00:00.000Z` },
+        { date: `${getCurrentYear()}-01-01T00:00:00.000Z` },
+        { date: `${getCurrentYear()}-02-01T00:00:00.000Z` },
       ];
 
       const displayedPeriods = getLastDisplayedPeriods([
@@ -82,7 +86,7 @@ describe("statistiques period util", () => {
 
       expect(displayedPeriods).toHaveLength(10);
       expect(displayedPeriods[0].date).toBe(
-        `${CURRENT_YEAR - 1}-05-01T00:00:00.000Z`
+        `${getCurrentYear() - 1}-05-01T00:00:00.000Z`
       );
     });
   });

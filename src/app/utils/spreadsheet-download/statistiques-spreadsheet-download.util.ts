@@ -1,4 +1,4 @@
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 import { Repartition } from "@/types/adresse.type";
 import { DownloadOptions } from "@/types/spreadsheet-download.type";
@@ -73,7 +73,7 @@ const getFinanceScopeRows = (
 ) =>
   statistiques.finance.byYear.map((financeItem) => {
     const scopeItem = financeItem[scope];
-    const isEmptyResultatYear = financeItem.year >= CURRENT_YEAR;
+    const isEmptyResultatYear = financeItem.year >= getCurrentYear();
     const totalProduits = isEmptyResultatYear ? null : scopeItem.totalProduits;
     const totalCharges = isEmptyResultatYear ? null : scopeItem.totalCharges;
 

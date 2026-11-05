@@ -1,3 +1,4 @@
+import { getCurrentYear } from "@/app/utils/now.util";
 import {
   getTransformationActesAdministratifsCategoryToDisplay,
   STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS,
@@ -5,7 +6,7 @@ import {
   TRANSFORMATION_TYPE_SPECS,
   VERIFICATION_STEP_NAME,
 } from "@/config/transformation.config";
-import { CURRENT_YEAR, PLACES_VERSIONED_FROM_YEAR } from "@/constants";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
   StructureVersionTransformationApiRead,
@@ -373,7 +374,7 @@ export const getInitialAntennes = (
 };
 
 const getEffectiveYear = (effectiveDate: string | null | undefined): number =>
-  getYearFromDate(effectiveDate) || CURRENT_YEAR;
+  getYearFromDate(effectiveDate) || getCurrentYear();
 
 export const isEffectiveDateValid = (isoDate: string): boolean =>
   getYearFromDate(isoDate) >= PLACES_VERSIONED_FROM_YEAR;

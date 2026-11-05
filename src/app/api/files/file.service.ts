@@ -7,7 +7,7 @@ import {
   MAX_FILE_SIZE,
 } from "@/constants";
 import { FileUpload } from "@/generated/prisma/client";
-import { canDeleteFile } from "@/lib/casl";
+import { canDeleteFile, canReadConversation } from "@/lib/casl";
 import { checkBucket, getMinioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
@@ -31,7 +31,8 @@ const isOrphan = (file: FileWithParents): boolean =>
   file.documentFinancierId == null &&
   file.controleId == null &&
   file.evaluationId == null &&
-  file.operateurId == null;
+  file.operateurId == null &&
+  file.messageId == null;
 
 export const authorizeFileAccess = (
   principal: Principal,
@@ -43,6 +44,12 @@ export const authorizeFileAccess = (
   }
   if (principal.type === PrincipalType.Operateur) {
     return false;
+  }
+  if (file.message) {
+    return (
+      action === "read" &&
+      canReadConversation(principal.user, file.message.conversation)
+    );
   }
   if (action === "read") {
     return true;

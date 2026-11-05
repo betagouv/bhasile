@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { getCurrentYear } from "@/app/utils/now.util";
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
-import { CURRENT_YEAR } from "@/constants";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 vi.mock("../date.util", () => ({
@@ -219,7 +219,7 @@ describe("statistiques-spreadsheet-download.util", () => {
           byYear: [
             {
               ...mockStatistiques.finance.byYear[0],
-              year: CURRENT_YEAR,
+              year: getCurrentYear(),
             },
           ],
         },
@@ -230,7 +230,7 @@ describe("statistiques-spreadsheet-download.util", () => {
       for (const financeSheetIndex of [2, 3, 4]) {
         const row = content.sheets?.[financeSheetIndex].data[0];
 
-        expect(row).toMatchObject({ year: CURRENT_YEAR });
+        expect(row).toMatchObject({ year: getCurrentYear() });
         expect(row?.totalProduits).toBeNull();
         expect(row?.totalCharges).toBeNull();
         expect(row?.resultatNet).toBeUndefined();

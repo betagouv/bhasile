@@ -1,7 +1,5 @@
-import {
-  CURRENT_YEAR,
-  INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR,
-} from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
+import { INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR } from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierFormValues } from "@/schemas/forms/base/indicateurFinancier.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
@@ -12,7 +10,7 @@ import { getYearRange } from "./date.util";
 export const getIndicateurFinancierTypes = (
   year: number
 ): IndicateurFinancierType[] => {
-  if (year >= CURRENT_YEAR) {
+  if (year >= getCurrentYear()) {
     return ["PREVISIONNEL"];
   }
   if (year >= INDICATEUR_FINANCIER_PREVISIONNEL_START_YEAR) {
@@ -80,7 +78,7 @@ export const isYearRealisee = (
   indicateursFinanciers: IndicateurFinancierApiType[],
   year: number
 ) =>
-  year < CURRENT_YEAR &&
+  year < getCurrentYear() &&
   isYearTypeFilled(indicateursFinanciers, year, "REALISE");
 
 export const isYearPrevisionnelle = (

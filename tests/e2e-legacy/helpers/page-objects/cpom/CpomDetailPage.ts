@@ -2,8 +2,9 @@ import { expect, Page } from "@playwright/test";
 
 import { getGranularityLabel } from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { formatCurrency } from "@/app/utils/number.util";
-import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import { START_YEAR } from "@/constants";
 import { StructureType } from "@/types/structure.type";
 
 import { TIMEOUTS } from "../../constants";
@@ -64,7 +65,10 @@ export class CpomDetailPage extends BasePage {
       const matchesOneDate = possibleDateEnds.some((dateEndFormatted) =>
         descriptionText.includes(dateEndFormatted)
       );
-      expect(matchesOneDate, "Description should contain a valid CPOM end date").toBe(true);
+      expect(
+        matchesOneDate,
+        "Description should contain a valid CPOM end date"
+      ).toBe(true);
     }
   }
 
@@ -107,7 +111,7 @@ export class CpomDetailPage extends BasePage {
 
       for (const [yearStr, values] of Object.entries(yearlyData)) {
         const year = parseInt(yearStr, 10);
-        if (year < START_YEAR || year > CURRENT_YEAR) {
+        if (year < START_YEAR || year > getCurrentYear()) {
           continue;
         }
         if (year < minYear || year > maxYear) {
@@ -153,10 +157,10 @@ export class CpomDetailPage extends BasePage {
       .sort()
       .pop() as string | undefined;
     const startYear = startStr ? new Date(startStr).getFullYear() : START_YEAR;
-    const endYear = endStr ? new Date(endStr).getFullYear() : CURRENT_YEAR;
+    const endYear = endStr ? new Date(endStr).getFullYear() : getCurrentYear();
     return {
       minYear: Math.max(startYear, START_YEAR),
-      maxYear: Math.min(endYear, CURRENT_YEAR),
+      maxYear: Math.min(endYear, getCurrentYear()),
     };
   }
 }

@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
 
-import { getNow } from "@/app/utils/now.util";
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear, getNow } from "@/app/utils/now.util";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import {
   CpomStructureApiRead,
@@ -203,7 +202,7 @@ export const getMillesimeIndexForAYear = <
   },
 >(
   millesimes: T[] | undefined,
-  year: number = CURRENT_YEAR,
+  year: number = getCurrentYear(),
   type?: StructureType | IndicateurFinancierType
 ): number =>
   millesimes?.findIndex((millesime) => {
@@ -220,7 +219,7 @@ export const getMostRecentMillesime = <T extends { year: number }>(
   millesimes: T[] | undefined,
   {
     canBeFuture = false,
-    currentYear = CURRENT_YEAR,
+    currentYear = getCurrentYear(),
   }: { canBeFuture?: boolean; currentYear?: number } = {}
 ): T | undefined => {
   const eligibleMillesimes = canBeFuture
@@ -238,7 +237,7 @@ export const getMostRecentMillesime = <T extends { year: number }>(
 
 export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
   cpomStructures: CpomStructureApiRead[] | CpomStructureApiWrite[],
-  year: number = CURRENT_YEAR,
+  year: number = getCurrentYear(),
   type?: StructureType
 ): { cpomStructureIndex: number; budgetIndex: number } => {
   if (!type) {

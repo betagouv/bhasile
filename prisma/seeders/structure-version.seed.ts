@@ -22,13 +22,13 @@ import { createFakeAdresses, STRUCTURE_ZONE } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
 import { createFakeContact } from "./contact.seed";
 import { createFakeControle } from "./controle.seed";
-import { createFakeDocumentFinancier } from "./document-financier";
+import { createFakeDocumentsFinanciers } from "./document-financier.seed";
 import { createFakeEvaluation } from "./evaluation.seed";
 import {
   createFakeActualisationFormWithSteps,
   createFakeFormWithSteps,
 } from "./form.seed";
-import { createFakeIndicateurFinancier } from "./indicateur-financier";
+import { createFakeIndicateurFinancier } from "./indicateur-financier.seed";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
 export type FormDefInfo = { id: number; stepDefinitionIds: number[] };
@@ -401,8 +401,8 @@ const buildStructureRelations = (params: {
       create: buildStructureLevelActes(params.creationDate),
     },
     documentsFinanciers: {
-      create: Array.from({ length: 5 }, () =>
-        nestFileUploads(createFakeDocumentFinancier())
+      create: createFakeDocumentsFinanciers(params.type, 5).map(
+        nestFileUploads
       ),
     },
     forms: {

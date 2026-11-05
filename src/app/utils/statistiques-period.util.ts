@@ -1,11 +1,8 @@
 import dayjs from "dayjs";
 
 import { TimePeriod } from "@/app/components/common/TimePeriodSelector";
-import {
-  CURRENT_YEAR,
-  START_YEAR,
-  STATS_ACCOUNTED_CLOSED_MAX_YEAR,
-} from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
+import { START_YEAR, STATS_ACCOUNTED_CLOSED_MAX_YEAR } from "@/constants";
 import { CompletudeStat } from "@/schemas/api/statistique.schema";
 
 import { getYearFromDate } from "./date.util";
@@ -13,7 +10,7 @@ import { getYearFromDate } from "./date.util";
 const MAX_DISPLAYED_TIME_PERIODS = 10;
 
 const isDisplayedYear = (year: number, fromYear: number): boolean =>
-  year >= fromYear && year <= CURRENT_YEAR;
+  year >= fromYear && year <= getCurrentYear();
 
 export const filterDisplayedPeriods = <T extends { date: string | Date }>(
   periods: T[],

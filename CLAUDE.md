@@ -138,6 +138,8 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 - [Architecture](docs/architecture.md) — stack, arborescence, services externes, schéma BDD
 - [Base de données](docs/database.md) — migrations, vues SQL, process recommandé
 - [Scripts](docs/scripts.md) — scripts one-off et récurrents (Scalingo)
+- [Messagerie](docs/messagerie.md) — messagerie tripartite de la tarification (canaux, ajout seul, droits, notifications, preuve)
+- [Emails](docs/email.md) — mails de notification : Brevo transactionnel, un mail groupé par destinataire deux fois par jour, trace et reprise
 - [Anomalies](docs/anomalies.md) — détection des incohérences de données (moteur isomorphe, registre, réconciliation)
 - [Permissions](docs/permissions.md) — binômes rôle × niveau géographique, droits de base par pattern, feuille de route opérateurs
 - [Départements](docs/departements.md) — les deux départements d'une structure : autorisation vs affichage

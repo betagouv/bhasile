@@ -1,6 +1,7 @@
 import { expect, Page } from "@playwright/test";
 
-import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
+import { START_YEAR } from "@/constants";
 import { StructureType } from "@/types/structure.type";
 
 import { TIMEOUTS, URLS } from "../../constants";
@@ -14,10 +15,10 @@ import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 const getMillesimeIndexForYear = (year: number): number => {
-  return CURRENT_YEAR - year;
+  return getCurrentYear() - year;
 };
 
-const getYearSpan = (): number => CURRENT_YEAR - START_YEAR + 1;
+const getYearSpan = (): number => getCurrentYear() - START_YEAR + 1;
 
 const CPOM_FINANCE_LINE_NAMES = [
   "dotationDemandee",
@@ -77,7 +78,7 @@ export class CpomAjoutFinancePage extends BasePage {
       await this.selectStructureType(type);
       for (const [yearKey, fields] of Object.entries(yearlyData)) {
         const year = Number(yearKey);
-        if (year < START_YEAR || year > CURRENT_YEAR) {
+        if (year < START_YEAR || year > getCurrentYear()) {
           continue;
         }
         const millesimeIndex =
@@ -162,9 +163,7 @@ export class CpomAjoutFinancePage extends BasePage {
             await this.page
               .locator(`h2[id^="${BUDGET_HEADING_ID_PREFIX}"]`)
               .evaluateAll((headings) => headings.map((heading) => heading.id))
-          ).map((headingId) =>
-            headingId.replace(BUDGET_HEADING_ID_PREFIX, "")
-          );
+          ).map((headingId) => headingId.replace(BUDGET_HEADING_ID_PREFIX, ""));
 
     return values.filter((value): value is StructureType =>
       STRUCTURE_TYPES.includes(value as StructureType)
@@ -204,7 +203,7 @@ export class CpomAjoutFinancePage extends BasePage {
       }
       for (const [yearStr, values] of Object.entries(yearlyData)) {
         const year = parseInt(yearStr, 10);
-        if (year < START_YEAR || year > CURRENT_YEAR) {
+        if (year < START_YEAR || year > getCurrentYear()) {
           continue;
         }
         const index = getMillesimeIndexForYear(year) + typePosition * yearSpan;
