@@ -1,6 +1,14 @@
-import { AgentZone, getAgentBaseGrants } from "scripts/utils/grant.util";
+import {
+  AgentGrant,
+  AgentZone,
+  getAgentBaseGrants,
+} from "scripts/utils/grant.util";
 
-import { GrantScope, PrismaClient } from "@/generated/prisma/client";
+import {
+  AccessRole,
+  GrantScope,
+  PrismaClient,
+} from "@/generated/prisma/client";
 
 // Comptes du fournisseur d'identité de test ProConnect (FIA1)
 const TEST_EMAIL_DOMAIN = "test.proconnect.gouv.fr";
@@ -45,7 +53,10 @@ export const seedRolesAndAgents = async (
 
   for (const agent of agents) {
     const perimeter = await prisma.perimeter.create({
-      data: { name: agent.perimeterName, ...toPerimeterZone(agent.zone) },
+      data: {
+        name: agent.perimeterName,
+        grants: { createMany: { data: toPerimeterGrants(agent.zone) } },
+      },
       select: { id: true },
     });
     await prisma.user.create({
@@ -68,14 +79,20 @@ export const seedRolesAndAgents = async (
   );
 };
 
-const toPerimeterZone = (zone: AgentZone) => {
+const toPerimeterGrants = (zone: AgentZone): AgentGrant[] => {
   if (zone.scope === GrantScope.REGION) {
-    return { scope: zone.scope, regionId: zone.regionId };
+    return [
+      { role: AccessRole.ADMIN, scope: zone.scope, regionId: zone.regionId },
+    ];
   }
   if (zone.scope === GrantScope.DEPARTEMENT) {
-    return { scope: zone.scope, departementNumero: zone.departementNumeros[0] };
+    return zone.departementNumeros.map((departementNumero) => ({
+      role: AccessRole.ADMIN,
+      scope: zone.scope,
+      departementNumero,
+    }));
   }
-  return { scope: zone.scope };
+  return [];
 };
 
 type AgentSeed = {

@@ -5,7 +5,6 @@ model Departement {
   structures           Structure[]
   structureVersions    StructureVersion[]
   grants               Grant[]
-  perimeters           Perimeter[]
   regionAdministrative Region?            @relation(fields: [regionId], references: [id])
   regionId             Int?
   cpoms                CpomDepartement[]
@@ -22,7 +21,6 @@ model Region {
   departements Departement[]
   cpoms        Cpom[]
   grants       Grant[]
-  perimeters   Perimeter[]
 
   @@schema("public")
 }

@@ -15,6 +15,7 @@ import {
   PerimetersPlan,
   planAgentsReset,
   planPerimeters,
+  toPerimeterGrants,
 } from "scripts/utils/agents-reset.util";
 import { loadCsvFromS3 } from "scripts/utils/csv-loader";
 
@@ -56,9 +57,14 @@ const resetAgents = async () => {
     prisma.perimeter.findMany({
       select: {
         name: true,
-        scope: true,
-        regionId: true,
-        departementNumero: true,
+        grants: {
+          select: {
+            role: true,
+            scope: true,
+            regionId: true,
+            departementNumero: true,
+          },
+        },
       },
     }),
     prisma.user.findMany({
@@ -123,16 +129,18 @@ const applyPlan = async (
     async (tx) => {
       const perimeterIds = new Map<string, number>();
       for (const { name, zone } of perimeters) {
-        const data = {
-          scope: zone.scope,
-          regionId: zone.regionId,
-          departementNumero: zone.departementNumero,
-        };
         const { id } = await tx.perimeter.upsert({
           where: { name },
-          create: { name, ...data },
-          update: data,
+          create: { name },
+          update: {},
           select: { id: true },
+        });
+        await tx.grant.deleteMany({ where: { perimeterId: id } });
+        await tx.grant.createMany({
+          data: toPerimeterGrants(zone).map((grant) => ({
+            ...grant,
+            perimeterId: id,
+          })),
         });
         perimeterIds.set(name, id);
       }
@@ -193,12 +201,12 @@ const logPlan = (
   }
 
   console.log(
-    `\n🗺️ Périmètres : ${perimetersPlan.created.length} créé(s), ${perimetersPlan.zoneChanged.length} zone modifiée, ${perimetersPlan.unchanged.length} inchangé(s), ${perimetersPlan.absent.length} absent(s) du document (conservés)`
+    `\n🗺️ Périmètres : ${perimetersPlan.created.length} créé(s), ${perimetersPlan.grantsChanged.length} droits modifiés, ${perimetersPlan.unchanged.length} inchangé(s), ${perimetersPlan.absent.length} absent(s) du document (conservés)`
   );
   perimetersPlan.created.forEach(({ name, zone }) =>
     console.log(`  ➕ ${name} (${zone.label})`)
   );
-  perimetersPlan.zoneChanged.forEach(({ name, zone }) =>
+  perimetersPlan.grantsChanged.forEach(({ name, zone }) =>
     console.log(`  ✏️ ${name} → ${zone.label}`)
   );
   perimetersPlan.absent.forEach((name) => console.log(`  ⏸️ ${name}`));

@@ -120,7 +120,7 @@ export const planPerimeters = (
 ): PerimetersPlan => {
   const plan: PerimetersPlan = {
     created: [],
-    zoneChanged: [],
+    grantsChanged: [],
     unchanged: [],
     absent: [],
   };
@@ -130,8 +130,11 @@ export const planPerimeters = (
     );
     if (!existing) {
       plan.created.push(perimeter);
-    } else if (getZoneKey(existing) !== getZoneKey(perimeter.zone)) {
-      plan.zoneChanged.push(perimeter);
+    } else if (
+      getGrantsKey(existing.grants) !==
+      getGrantsKey(toPerimeterGrants(perimeter.zone))
+    ) {
+      plan.grantsChanged.push(perimeter);
     } else {
       plan.unchanged.push(perimeter);
     }
@@ -165,7 +168,6 @@ export const planAgentsReset = (
 
   for (const perimeter of perimeters) {
     for (const email of perimeter.emails) {
-      documentEmails.add(email);
       const user = usersByEmail.get(email) ?? null;
       if (user?.isSuperAdmin) {
         plan.warnings.push(
@@ -173,6 +175,7 @@ export const planAgentsReset = (
         );
         continue;
       }
+      documentEmails.add(email);
       if (user?.operateurId) {
         plan.errors.push(
           `${email} est rattaché à un opérateur et ne peut pas rejoindre « ${perimeter.name} »`
@@ -224,6 +227,18 @@ export const planAgentsReset = (
 
   return plan;
 };
+
+export const toPerimeterGrants = (zone: PerimeterZone): PerimeterGrant[] =>
+  zone.scope === GrantScope.NATIONAL
+    ? []
+    : [
+        {
+          role: AccessRole.ADMIN,
+          scope: zone.scope,
+          regionId: zone.regionId,
+          departementNumero: zone.departementNumero,
+        },
+      ];
 
 const resolveZone = (
   row: Record<string, string | undefined>,
@@ -334,6 +349,12 @@ const getGrantKey = (grant: GrantDb): string => {
   return `${GrantScope.STRUCTURE}:${grant.structure?.id}`;
 };
 
+const getGrantsKey = (grants: PerimeterGrant[]): string =>
+  grants
+    .map((grant) => `${grant.role}:${getZoneKey(grant)}`)
+    .sort()
+    .join("|");
+
 const getZoneKey = (zone: {
   scope: GrantScope;
   regionId: number | null;
@@ -372,16 +393,21 @@ export type DocumentPerimeter = {
   line: number;
 };
 
-export type ExistingPerimeter = {
-  name: string;
+export type PerimeterGrant = {
+  role: AccessRole;
   scope: GrantScope;
   regionId: number | null;
   departementNumero: string | null;
 };
 
+export type ExistingPerimeter = {
+  name: string;
+  grants: PerimeterGrant[];
+};
+
 export type PerimetersPlan = {
   created: DocumentPerimeter[];
-  zoneChanged: DocumentPerimeter[];
+  grantsChanged: DocumentPerimeter[];
   unchanged: DocumentPerimeter[];
   absent: string[];
 };
