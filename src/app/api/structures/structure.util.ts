@@ -42,10 +42,7 @@ import {
   StructureListItem,
 } from "@/types/structure-list.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
-import {
-  matchesStructureFilters,
-  ParsedFilters,
-} from "@/utils/filters.util";
+import { matchesStructureFilters, ParsedFilters } from "@/utils/filters.util";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
@@ -299,6 +296,14 @@ export const isStructureFinalised = (
   isFinalisationFormValidated(structure.forms) ||
   isBornFromCreation(structure.structureVersions, now);
 
+export const isStructureVisible = ({
+  hasForm,
+  bornFromCreation,
+}: {
+  hasForm: boolean;
+  bornFromCreation: boolean;
+}): boolean => hasForm || bornFromCreation;
+
 export const isStructureClosed = (
   structure: { fermetureDate: Date | null },
   now: Date
@@ -429,7 +434,7 @@ export const filterStructureRows = (
   const search = filters.search ? normalizeAccents(filters.search) : null;
 
   return rows.filter((row) => {
-    if (!includeNonVisible && !row.hasForm && !row.bornFromCreation) {
+    if (!includeNonVisible && !isStructureVisible(row)) {
       return false;
     }
     if (filters.isClosed && !row.isClosed) {
@@ -567,9 +572,10 @@ export const resolveCpomLinkedStructureFields = <
       ...resolveCurrentVersionFields(structure, now),
       isFinalised: isStructureFinalised(cpomStructure.structure, now),
       isClosed: isStructureClosed({ fermetureDate }, now),
-      isVisible:
-        forms.length > 0 ||
-        isBornFromCreation(structure.structureVersions, now),
+      isVisible: isStructureVisible({
+        hasForm: forms.length > 0,
+        bornFromCreation: isBornFromCreation(structure.structureVersions, now),
+      }),
     },
   };
 };

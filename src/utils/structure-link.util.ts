@@ -7,11 +7,15 @@ type StructureStatus = {
   isClosed?: boolean;
 };
 
-type CpomLinkedStructure = NonNullable<
+export type CpomLinkedStructure = NonNullable<
   NonNullable<CpomApiRead["structures"]>[number]["structure"]
 >;
 
 type CanOnStructure = (structure: StructurePermissionSubject) => boolean;
+
+type CpomStructureAction =
+  | { kind: "fiche" | "finalisation"; href: string; title: string }
+  | { kind: "finalisationForbidden"; title: string };
 
 export const hasStructureFiche = ({
   isFinalised,
@@ -23,13 +27,13 @@ export const getStructureHref = (structure: StructureStatus): string =>
     ? `/structures/${structure.id}`
     : `/structures/${structure.id}/finalisation/01-identification`;
 
-export const getCpomStructureLink = (
+export const getCpomStructureAction = (
   structure: CpomLinkedStructure,
   {
     canReadStructure,
     canUpdateStructure,
   }: { canReadStructure: CanOnStructure; canUpdateStructure: CanOnStructure }
-): { href: string; title: string; isFinalisation: boolean } | null => {
+): CpomStructureAction | null => {
   const { id, codeBhasile, isFinalised, isClosed } = structure;
   if (!id) {
     return null;
@@ -42,19 +46,14 @@ export const getCpomStructureLink = (
   const href = getStructureHref({ id, isFinalised, isClosed });
   if (hasStructureFiche(structure)) {
     return canReadStructure(permissionSubject)
-      ? {
-          href,
-          title: `Voir la structure ${codeBhasile}`,
-          isFinalisation: false,
-        }
+      ? { kind: "fiche", href, title: `Voir la structure ${codeBhasile}` }
       : null;
   }
-  if (structure.isVisible && canUpdateStructure(permissionSubject)) {
-    return {
-      href,
-      title: `Finaliser la création de la structure ${codeBhasile}`,
-      isFinalisation: true,
-    };
+  if (!structure.isVisible) {
+    return null;
   }
-  return null;
+  const title = `Finaliser la création de la structure ${codeBhasile}`;
+  return canUpdateStructure(permissionSubject)
+    ? { kind: "finalisation", href, title }
+    : { kind: "finalisationForbidden", title };
 };

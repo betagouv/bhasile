@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { StructureType } from "@/types/structure.type";
 import {
-  getCpomStructureLink,
+  getCpomStructureAction,
   getStructureHref,
   hasStructureFiche,
 } from "@/utils/structure-link.util";
@@ -38,8 +38,8 @@ describe("getStructureHref", () => {
 });
 
 const buildStructure = (
-  overrides: Partial<Parameters<typeof getCpomStructureLink>[0]> = {}
-): Parameters<typeof getCpomStructureLink>[0] => ({
+  overrides: Partial<Parameters<typeof getCpomStructureAction>[0]> = {}
+): Parameters<typeof getCpomStructureAction>[0] => ({
   id: 42,
   codeBhasile: "CADA-042",
   type: StructureType.CADA,
@@ -55,19 +55,19 @@ const buildStructure = (
 const allowed = () => true;
 const denied = () => false;
 
-describe("getCpomStructureLink", () => {
+describe("getCpomStructureAction", () => {
   it("mène à la fiche d'une structure finalisée lisible, même sans droit de modification", () => {
     expect(
-      getCpomStructureLink(buildStructure({ isFinalised: true }), {
+      getCpomStructureAction(buildStructure({ isFinalised: true }), {
         canReadStructure: allowed,
         canUpdateStructure: denied,
       })
-    ).toMatchObject({ href: "/structures/42", isFinalisation: false });
+    ).toMatchObject({ kind: "fiche", href: "/structures/42" });
   });
 
   it("ne propose aucun lien vers la fiche d'une structure hors du périmètre de lecture", () => {
     expect(
-      getCpomStructureLink(buildStructure({ isFinalised: true }), {
+      getCpomStructureAction(buildStructure({ isFinalised: true }), {
         canReadStructure: denied,
         canUpdateStructure: allowed,
       })
@@ -76,37 +76,40 @@ describe("getCpomStructureLink", () => {
 
   it("mène à la fiche d'une structure fermée non finalisée", () => {
     expect(
-      getCpomStructureLink(buildStructure({ isClosed: true }), {
+      getCpomStructureAction(buildStructure({ isClosed: true }), {
         canReadStructure: allowed,
         canUpdateStructure: allowed,
-      })?.href
-    ).toBe("/structures/42");
+      })
+    ).toMatchObject({ kind: "fiche", href: "/structures/42" });
   });
 
   it("mène à la finalisation d'une structure visible non finalisée quand l'agent peut la modifier", () => {
     expect(
-      getCpomStructureLink(buildStructure(), {
+      getCpomStructureAction(buildStructure(), {
         canReadStructure: allowed,
         canUpdateStructure: allowed,
       })
     ).toMatchObject({
+      kind: "finalisation",
       href: "/structures/42/finalisation/01-identification",
-      isFinalisation: true,
     });
   });
 
-  it("ne propose aucun lien vers la finalisation sans droit de modification", () => {
+  it("signale le manque de droits sur une structure visible non finalisée sans droit de modification", () => {
     expect(
-      getCpomStructureLink(buildStructure(), {
+      getCpomStructureAction(buildStructure(), {
         canReadStructure: allowed,
         canUpdateStructure: denied,
       })
-    ).toBeNull();
+    ).toEqual({
+      kind: "finalisationForbidden",
+      title: "Finaliser la création de la structure CADA-042",
+    });
   });
 
   it("ne propose aucun lien pour une structure pas encore saisie par l'opérateur", () => {
     expect(
-      getCpomStructureLink(buildStructure({ isVisible: false }), {
+      getCpomStructureAction(buildStructure({ isVisible: false }), {
         canReadStructure: allowed,
         canUpdateStructure: allowed,
       })
@@ -115,7 +118,7 @@ describe("getCpomStructureLink", () => {
 
   it("transmet l'id, le département de rattachement et l'opérateur au contrôle de droits", () => {
     const checkedStructures: unknown[] = [];
-    getCpomStructureLink(buildStructure({ isFinalised: true }), {
+    getCpomStructureAction(buildStructure({ isFinalised: true }), {
       canReadStructure: (structure) => {
         checkedStructures.push(structure);
         return true;

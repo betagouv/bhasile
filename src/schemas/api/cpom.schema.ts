@@ -16,6 +16,24 @@ export const cpomDepartementApiSchema = z.object({
   departement: departementApiSchema.optional(),
 });
 
+const cpomLinkedStructureApiSchema = z.object({
+  id: z.number().optional(),
+  codeBhasile: z.string(),
+  type: z.enum(StructureType),
+  communeAdministrative: z.string(),
+  departementAdministratif: z.string().optional(),
+  operateur: operateurSuggestionApiSchema,
+});
+
+const cpomStructureLineApiSchema = z.object({
+  id: z.number().optional(),
+  cpomId: z.number().optional(),
+  structureId: z.number(),
+  dateStart: z.iso.datetime().nullish(),
+  dateEnd: z.iso.datetime().nullish(),
+  structure: cpomLinkedStructureApiSchema.optional(),
+});
+
 export const cpomApiSchema = z.object({
   id: zId(),
   name: z.string().nullish(),
@@ -29,30 +47,7 @@ export const cpomApiSchema = z.object({
   budgets: z.array(budgetApiSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   documentsFinanciers: z.array(documentFinancierApiSchema).optional(),
-  structures: z
-    .array(
-      z.object({
-        id: z.number().optional(),
-        cpomId: z.number().optional(),
-        structureId: z.number(),
-        dateStart: z.iso.datetime().nullish(),
-        dateEnd: z.iso.datetime().nullish(),
-        structure: z
-          .object({
-            id: z.number().optional(),
-            codeBhasile: z.string(),
-            type: z.enum(StructureType),
-            communeAdministrative: z.string(),
-            departementAdministratif: z.string().optional(),
-            operateur: operateurSuggestionApiSchema,
-            isFinalised: z.boolean(),
-            isClosed: z.boolean(),
-            isVisible: z.boolean(),
-          })
-          .optional(),
-      })
-    )
-    .optional(),
+  structures: z.array(cpomStructureLineApiSchema).optional(),
 });
 
 export const cpomStructureApiSchema = z.object({
@@ -72,6 +67,19 @@ export const cpomApiAjoutSchema = cpomApiSchema.extend({
 export const cpomApiReadSchema = cpomApiSchema.extend({
   dateStart: z.string().optional(),
   dateEnd: z.string().optional(),
+  structures: z
+    .array(
+      cpomStructureLineApiSchema.extend({
+        structure: cpomLinkedStructureApiSchema
+          .extend({
+            isFinalised: z.boolean(),
+            isClosed: z.boolean(),
+            isVisible: z.boolean(),
+          })
+          .optional(),
+      })
+    )
+    .optional(),
 });
 
 export type CpomDepartementApiType = z.infer<typeof cpomDepartementApiSchema>;
