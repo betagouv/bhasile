@@ -116,7 +116,7 @@ type ConversationAnchor = {
 
 - **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand : la lecture d'une conversation renvoie les accusés de chaque message. Restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
 - **Accusé envoyé par l'écran** : le client n'envoie que les messages d'autrui sans accusé à son nom, et seulement quand ils sont affichés (onglet visible).
-- **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La cloche liste les conversations qui en ont, sans jamais écrire d'accusé (voir [Notifications](notifications.md)).
+- **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La cloche liste celles qui en ont et dont l'utilisateur est destinataire selon la politique ci-dessous (la DREETS n'en a pas), sans jamais écrire d'accusé (voir [Notifications](notifications.md)).
 - **Temps réel** : tant que les échanges sont affichés, le client relit toute la conversation toutes les 10 secondes et remplace sa liste (`src/hooks/useConversationMessages.ts`).
   - La requête suivante ne part que 10 secondes après la réponse de la précédente (`setTimeout` chaîné) : un serveur lent n'accumule pas de requêtes.
   - Pause quand l'onglet du navigateur est caché, relecture immédiate au retour et après chaque envoi.

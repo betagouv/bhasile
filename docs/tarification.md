@@ -204,7 +204,7 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
   | Un événement | selon son type, dans le registre : partage, retrait, sans objet, hors Bhasile, réponse au contradictoire, ses dépôts → visibles ; versions des agents, relecture → agents seulement |
   | Les dates    | celles des seuls événements qu'il voit : jamais quand la L48 a été rédigée ou validée                                                                                               |
 
-- **Un seul point de passage pour lire le journal** : `getTarificationJournal({ structureId, year, reader })`, utilisé par la page, l'API, les fichiers et les mails. Aucune lecture du journal ne le contourne. L'état est calculé sur le journal complet, la visibilité ne filtre que ce qui est renvoyé.
+- **Un seul point de passage pour lire le journal** : `getTarificationJournal({ structureId, year, reader })`, utilisé par la page, l'API, les fichiers et les mails. Aucune lecture du journal ne le contourne, sauf la cloche, qui lit en groupe les seuls événements notifiables de tout un périmètre (voir [Notifications](notifications.md#lecture)). L'état est calculé sur le journal complet, la visibilité ne filtre que ce qui est renvoyé.
 - **Un seul point de passage pour les fichiers** : `GET /api/files/[key]` confie un fichier de tarification à `authorizeTarificationDocument` (avant la règle générale qui laisse tout agent lire un fichier rattaché), puis enregistre l'ouverture au moment de délivrer le lien. Un fichier de tarification ne se supprime jamais par `/api/files`.
 - **Superadmins** : voient tout, sans participer : ni message, ni document, ni événement. Leurs lectures ne laissent aucune trace et n'ouvrent rien au sens du délai.
 
@@ -219,16 +219,16 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 
 Deux canaux : le mail, par le mécanisme des [emails](email.md) (un seul mail par destinataire et par passage, deux par jour, avec deux sections, messages et documents), et la cloche, par celui des [notifications](notifications.md). Aucun délai ne dépend de l'un ou de l'autre : le contradictoire court depuis l'ouverture, un dépôt est daté par le serveur. Ici, la politique ⏳ :
 
-| Fait                                                                         | Destinataires                                                          | Cloche                                                    |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------- |
-| Message                                                                      | voir [Notifications de la messagerie](messagerie.md#notifications)     | une ligne par conversation non lue                        |
-| Dépôt de l'opérateur (CA, BP, rapports, réponse, pièce)                      | agents éditeurs de la DDETS                                            | oui                                                       |
-| Accusé de dépôt                                                              | l'auteur du dépôt : type, date et empreinte, sa preuve hors de Bhasile | non : il vient de déposer, la cloche n'est pas une preuve |
-| Partage d'un document à l'opérateur                                          | l'opérateur, avec le type, l'exercice et l'empreinte du document       | oui                                                       |
-| Validation ou modifications demandées                                        | l'auteur de la version                                                 | oui                                                       |
-| Contestation de la L48                                                       | les agents éditeurs de la DDETS **et de la DREETS**                    | oui                                                       |
-| Retrait d'un document                                                        | ceux qui avaient reçu le mail de son partage                           | ceux qui avaient traité la ligne de son partage           |
-| Version déposée par un agent, acceptation, sans objet, hors Bhasile, reprise | personne                                                               | non                                                       |
+| Fait                                                                         | Destinataires                                                                                 | Cloche                                                    |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Message                                                                      | voir [Notifications de la messagerie](messagerie.md#notifications)                            | une ligne par conversation non lue                        |
+| Dépôt de l'opérateur (CA, BP, rapports, réponse, pièce)                      | agents éditeurs de la DDETS                                                                   | oui                                                       |
+| Accusé de dépôt                                                              | l'auteur du dépôt : type, date et empreinte, sa preuve hors de Bhasile                        | non : il vient de déposer, la cloche n'est pas une preuve |
+| Partage d'un document à l'opérateur                                          | l'opérateur, avec le type, l'exercice et l'empreinte du document                              | oui                                                       |
+| Validation ou modifications demandées                                        | l'auteur de la version                                                                        | oui                                                       |
+| Contestation de la L48                                                       | les agents éditeurs de la DDETS **et de la DREETS**                                           | oui                                                       |
+| Retrait d'un document                                                        | ceux qui ont pu voir son partage : mail reçu, ligne traitée dans la cloche ou document ouvert | les mêmes                                                 |
+| Version déposée par un agent, acceptation, sans objet, hors Bhasile, reprise | personne                                                                                      | non                                                       |
 
 - **Liste blanche** : chaque type d'événement déclare dans le registre s'il notifie ; un nouveau type ne notifie pas par défaut.
 - **La DREETS n'est notifiée que des contestations** : c'est le seul fait qui attend une action de sa part.
@@ -236,7 +236,7 @@ Deux canaux : le mail, par le mécanisme des [emails](email.md) (un seul mail pa
 - **File et trace** : la file des [emails](email.md), `EmailNotification` et `EmailNotificationRecipient`, avec ces notifications : elles y ajouteront `eventId` et un `CHECK` (une ligne vise un message ou un événement). Un événement ne s'y inscrit, dans sa transaction, que si son type notifie ; ceux écrits avant n'ont pas de ligne, donc pas de mail. Le mail groupé lit toutes les lignes en attente, avec un template à deux sections.
 - **Destinataires** : une fonction propre à la tarification ; celle de la messagerie (`getMessageRecipients`) exclut les grants `REGION`, alors que la contestation vise la DREETS.
 - **Déjà vu** : un partage ouvert avant le passage du cron n'est pas signalé, ni un fait traité dans la cloche ; un accusé de dépôt l'est toujours. Un partage retiré avant le passage n'est pas signalé (le mail annoncerait un document retiré).
-- **Retrait dans la cloche** : un partage retiré dont la ligne n'a pas été traitée disparaît, sans ligne de retrait (elle mènerait à un document retiré) ; si elle l'a été, une ligne « Retrait » apparaît.
+- **Retrait** : signalé dans les deux canaux à ceux qui ont pu voir le partage (mail du partage reçu, ligne du partage traitée dans la cloche, ou document ouvert : `TarificationDocumentOpening`). Pour les autres, le partage disparaît sans laisser de ligne de retrait : il mènerait à un document retiré. Sans l'ouverture, un opérateur qui a ouvert la L48 depuis la page avant le passage du cron ne serait prévenu par aucun des deux canaux.
 - **Les opérateurs** ont un compte dès la mise en service : les rebonds redeviennent utiles (contacts partis), le webhook Brevo est donc un prérequis de la mise en service.
 
 ## Interface
