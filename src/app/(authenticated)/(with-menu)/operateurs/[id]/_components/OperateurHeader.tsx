@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
@@ -10,6 +11,8 @@ import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { useStoredQueryParams } from "@/app/hooks/useStoredQueryParams";
 import { OPERATEURS_STORAGE_KEY } from "@/constants";
 import { useOperateurContext } from "@/contexts/OperateurContext";
+import { isAgent } from "@/lib/casl";
+import { SessionUser } from "@/types/global";
 
 export const OperateurHeader = (): ReactElement | null => {
   const { operateur } = useOperateurContext();
@@ -20,7 +23,7 @@ export const OperateurHeader = (): ReactElement | null => {
     "/operateurs",
     OPERATEURS_STORAGE_KEY
   );
-
+  const { data } = useSession();
   const isRootPath = pathname === `/operateurs/${operateur?.id}`;
 
   return operateur ? (
@@ -31,13 +34,15 @@ export const OperateurHeader = (): ReactElement | null => {
       ref={headerRef}
     >
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
-        <Link
-          className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
-          title="Retour à la liste des opérateurs"
-          href={backHref}
-        >
-          Retour
-        </Link>
+        {isAgent(data?.user as SessionUser) && (
+          <Link
+            className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
+            title="Retour à la liste des opérateurs"
+            href={backHref}
+          >
+            Retour
+          </Link>
+        )}
         <div>
           <h2 className="text-title-blue-france text-xs uppercase mb-0">
             <strong className="pr-3">Opérateur</strong>

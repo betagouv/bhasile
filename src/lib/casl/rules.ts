@@ -66,7 +66,11 @@ const defineReadRules = (
       can("read", "Cpom", toRuleConditions(conditions));
     }
   }
-  can("read", "Operateur");
+  if (isAgent(user)) {
+    can("read", "Operateur");
+  } else if (user.operateurId !== null && user.operateurId !== undefined) {
+    can("read", "Operateur", { id: user.operateurId });
+  }
 };
 
 const defineAgentRules = (
@@ -90,8 +94,6 @@ const defineAgentRules = (
   can("update", "Operateur");
 };
 
-// Prisma traduit `OR: [{}]` par « aucune ligne » : une règle sans restriction
-// doit être déclarée sans conditions pour qu'accessibleBy renvoie `{}`.
 const toRuleConditions = <T extends object>(conditions: T): T | undefined =>
   Object.keys(conditions).length > 0 ? conditions : undefined;
 

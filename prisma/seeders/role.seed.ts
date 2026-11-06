@@ -1,4 +1,8 @@
-import { AgentZone, getAgentBaseGrants } from "scripts/utils/grant.util";
+import {
+  AgentZone,
+  getAgentBaseGrants,
+  getOperateurBaseGrants,
+} from "scripts/utils/grant.util";
 
 import { GrantScope, PrismaClient } from "@/generated/prisma/client";
 
@@ -17,7 +21,7 @@ export const seedRolesAndAgents = async (
     select: { id: true },
   });
 
-  const agents: AgentSeed[] = [
+  const agents: UserSeed[] = [
     {
       name: "Jean Nation",
       email: `national@${TEST_EMAIL_DOMAIN}`,
@@ -32,6 +36,27 @@ export const seedRolesAndAgents = async (
       name: "Jean Paris",
       email: `departemental@${TEST_EMAIL_DOMAIN}`,
       zone: { scope: GrantScope.DEPARTEMENT, departementNumeros: ["75"] },
+    },
+  ];
+
+  const operateurUsers: UserSeed[] = [
+    {
+      name: "Jack Opérateur Nation",
+      email: `operateur-national@${TEST_EMAIL_DOMAIN}`,
+      zone: { scope: GrantScope.NATIONAL },
+      operateurId: 1,
+    },
+    {
+      name: "Jack Opérateur Idf",
+      email: `operateur-regional@${TEST_EMAIL_DOMAIN}`,
+      zone: { scope: GrantScope.REGION, regionId: region.id },
+      operateurId: 1,
+    },
+    {
+      name: "Jack Opérateur Paris",
+      email: `operateur-departemental@${TEST_EMAIL_DOMAIN}`,
+      zone: { scope: GrantScope.DEPARTEMENT, departementNumeros: ["75"] },
+      operateurId: 1,
     },
   ];
 
@@ -52,15 +77,37 @@ export const seedRolesAndAgents = async (
     });
   }
 
+  for (const operateurUser of operateurUsers) {
+    await prisma.user.create({
+      data: {
+        name: operateurUser.name,
+        email: operateurUser.email,
+        lastConnection: new Date(),
+        grants: {
+          createMany: { data: getOperateurBaseGrants(operateurUser.zone) },
+        },
+        operateurId: operateurUser.operateurId,
+        isAgent: false,
+      },
+    });
+  }
+
   console.log(
     `🧑 ${agents.length} agents de test créés : ${agents
       .map((agent) => agent.email)
       .join(", ")}`
   );
+
+  console.log(
+    `🧑 ${operateurUsers.length} utilisateurs opérateurs de test créés : ${operateurUsers
+      .map((operateurUser) => operateurUser.email)
+      .join(", ")}`
+  );
 };
 
-type AgentSeed = {
+type UserSeed = {
   name: string;
   email: string;
   zone: AgentZone;
+  operateurId?: number;
 };
