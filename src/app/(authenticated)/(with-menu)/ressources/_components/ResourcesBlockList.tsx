@@ -2,25 +2,32 @@ import { connection } from "next/server";
 import { ReactElement } from "react";
 
 import { getFaqItems } from "@/app/api/faq/faq.service";
-import { Block, FaqBlock } from "@/types/ressources.type";
+import { FaqApiType } from "@/schemas/api/faq.schema";
+import { FaqBlock } from "@/types/ressources.type";
+import {
+  readBlocks,
+  readSuggestions,
+} from "@/utils-server/ressources.server.util";
 
 import { ResourcesContent } from "./ResourcesContent";
 
-export const ResourcesBlockList = async ({
-  blocks,
-  suggestions,
-}: Props): Promise<ReactElement> => {
+export const ResourcesBlockList = async (): Promise<ReactElement> => {
   await connection();
+  const blocks = await readBlocks();
+  const suggestions = await readSuggestions();
   const { faqItems } = await getFaqItems();
   const validFaqItems = Array.isArray(faqItems) ? faqItems : [];
 
   const uniqueCategories = Array.from(
-    new Set(validFaqItems.map((faqItem) => faqItem.category))
+    new Set(validFaqItems.map((faqItem: FaqApiType) => faqItem.category))
   );
 
   const dynamicTabs = uniqueCategories.map((categoryName, categoryIndex) => ({
     id: `faq-tab-${categoryIndex}`,
     title: categoryName,
+    items: validFaqItems.filter(
+      (faqItem: FaqApiType) => faqItem.category === categoryName
+    ),
   }));
 
   const faqBlock: FaqBlock = {
@@ -40,9 +47,4 @@ export const ResourcesBlockList = async ({
       hasFaqTabs={dynamicTabs.length > 0}
     />
   );
-};
-
-type Props = {
-  blocks: Block[];
-  suggestions: string[];
 };

@@ -34,9 +34,11 @@ Le seed crée trois agents de test. Connectez-vous via ProConnect avec l'email v
 | Régional      | `regional@test.proconnect.gouv.fr`      | Île-de-France |
 | Départemental | `departemental@test.proconnect.gouv.fr` | Paris (75)    |
 
-Sur la page intermédiaire, restez en `eidas1` et cliquez sur "Se connecter"
+Sur la page intermédiaire, choisissez `eidas1-mfa` et cliquez sur "Se connecter" : l'application exige la double authentification. `eidas2` et `eidas3` passent aussi ; `eidas1` et `eidas0` sont refusés.
 
 Pour changer de rôle, déconnectez-vous et reconnectez-vous avec un autre email.
+
+Le modèle de droits (binômes rôle × niveau géographique) et sa feuille de route sont décrits dans [le document des permissions](docs/permissions.md).
 
 ## 🧪 Tests
 
@@ -136,7 +138,7 @@ npx patch-package @codegouvfr/react-dsfr
 
 ## 🔓 Gestion des pages protégées par mot de passe
 
-Les routes `/ajout-structure` et `/ajout-adresses` sont protégées par mot de passe. Les pages de dashboard sont protégées par un accès ProConnect.
+La route `/ajout-structure` est protégée par mot de passe. Les pages de dashboard sont protégées par un accès ProConnect.
 
 Pour définir un ou plusieurs mots de passe, il suffit d'ajouter la variable `OPERATEUR_PASSWORDS` dans le fichier `.env`. Les mots de passe devront être séparés par des virgules.
 `PAGE_PASSWORD` est une variable d'environnement legacy et sera bientôt supprimée.

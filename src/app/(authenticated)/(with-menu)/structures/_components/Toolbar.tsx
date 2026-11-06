@@ -1,6 +1,5 @@
 import { ReactElement, ReactNode } from "react";
 
-import { Filters } from "@/app/components/filters/Filters";
 import { SearchBar } from "@/app/components/SearchBar";
 import { cn } from "@/app/utils/classname.util";
 import { Visualization } from "@/types/structure-list.type";
@@ -19,7 +18,6 @@ export const Toolbar = ({ variant, count }: Props): ReactElement => (
     <div className="flex gap-2 items-center ml-auto">
       {variant === "carte" && <MapModeTabs />}
       <SearchBar placeholder="Code ou commune" inputId="structures-search" />
-      <Filters />
       {count}
     </div>
   </div>

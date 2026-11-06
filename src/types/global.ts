@@ -1,3 +1,5 @@
+import type { AccessRole } from "@/generated/prisma/client";
+
 export type Page = {
   params: Promise<{
     [key: string]: string;
@@ -20,7 +22,6 @@ export const FormKind = {
   MODIFICATION: "modification",
   FINALISATION: "finalisation",
   ACTUALISATION: "actualisation",
-  ADRESSES_RECOVERY: "adresses-recovery",
   OUVERTURE_EX_NIHILO: "ouverture-ex-nihilo",
   OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES:
     "ouverture-depuis-une-ou-plusieurs-structures",
@@ -30,11 +31,26 @@ export const FormKind = {
 
 export type FormKind = (typeof FormKind)[keyof typeof FormKind];
 
+export type SessionGrant = {
+  role: AccessRole;
+  isNational: boolean;
+  departementNumeros: string[];
+  regionIds: number[];
+  structureIds: number[];
+};
+
 export type SessionUser = {
   id: string;
   name: string;
   prenom: string;
   email: string;
-  role: string;
-  allowedDepartements: string[];
+  operateurId: number | null;
+  isSuperAdmin: boolean;
+  isAgent: boolean;
+  grants: SessionGrant[];
 };
+
+export type SessionPermissions = Pick<
+  SessionUser,
+  "operateurId" | "isSuperAdmin" | "isAgent" | "grants"
+>;

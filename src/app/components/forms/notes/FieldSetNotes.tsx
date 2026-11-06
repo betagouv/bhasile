@@ -24,7 +24,7 @@ export const FieldSetNotes = () => {
       />
       <span className="text-xs text-mention-grey pt-2">
         ex : “ 17/05/2025 Jean-Michel DUPONT (DDETS) : la rencontre pour le
-        dialogue de gestion est prévu le 12/07. Pensez à parler de la
+        dialogue de gestion est prévue le 12/07. Pensez à parler de la
         dératisation. “
       </span>
       {fieldState.error?.message && (

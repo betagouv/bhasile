@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { canUpdateDepartement } from "@/lib/casl/abilities";
+import { canAccessApp, canUpdateStructure } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureAgentUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
@@ -18,7 +18,8 @@ import {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    const isAuthenticated = !!session?.user;
+    const isAuthenticated =
+      !!session?.user && canAccessApp(session.user as SessionUser);
 
     const id = request.nextUrl.pathname.split("/").pop();
     const structure = isAuthenticated
@@ -62,10 +63,10 @@ export async function PUT(
 
     const departementAdministratif = await getStructureDepartement(result.id);
     if (
-      !canUpdateDepartement(
-        session.user as SessionUser,
-        departementAdministratif
-      )
+      !canUpdateStructure(session.user as SessionUser, {
+        id: result.id,
+        departementAdministratif,
+      })
     ) {
       return NextResponse.json(
         { error: "Droits insuffisants" },

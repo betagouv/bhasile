@@ -1,8 +1,7 @@
 import { ReactElement } from "react";
 
+import { CallToActionBanner } from "@/components/CallToActionBanner";
 import { useStructureContext } from "@/contexts/StructureContext";
-
-import { StructureCallToActionHeader } from "./StructureCallToActionHeader";
 
 export const ActualisationHeader = ({
   actualisationYear,
@@ -12,7 +11,7 @@ export const ActualisationHeader = ({
   const { structure } = useStructureContext();
 
   return (
-    <StructureCallToActionHeader
+    <CallToActionBanner
       href={`/structures/${structure.id}/actualisation/${actualisationYear}/01-places`}
       label="J’actualise cette structure"
       message={

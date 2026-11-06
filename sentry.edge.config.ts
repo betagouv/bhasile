@@ -13,5 +13,7 @@ Sentry.init({
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,
-  enabled: process.env.NODE_ENV === "production",
+  enabled:
+    process.env.NODE_ENV === "production" &&
+    process.env.NEXT_PUBLIC_IS_PRODUCTION === "true",
 });

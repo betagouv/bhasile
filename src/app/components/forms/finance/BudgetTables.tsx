@@ -44,14 +44,14 @@ export const BudgetTables = () => {
         </legend>
         {isAutorisee ? (
           <p className="mb-0">
-            Veuillez renseigner l’historique du ces données budgétaires{" "}
+            Veuillez renseigner l’historique de ces données budgétaires{" "}
             <strong>à l’échelle de votre structure.</strong> Aussi, le tableau
             des affectations reflète uniquement des flux annuels. Les montants
             saisis ne doivent en aucun cas être une estimation du stock.
           </p>
         ) : (
           <p className="mb-0">
-            Veuillez renseigner l’historique du ces données budgétaires{" "}
+            Veuillez renseigner l’historique de ces données budgétaires{" "}
             <strong>à l’échelle de votre structure.</strong>
           </p>
         )}

@@ -11,7 +11,7 @@ model Dna {
   departement              Departement   @relation(fields: [departementAdministratif], references: [numero])
   departementAdministratif String
   operateur                Operateur     @relation(fields: [operateurId], references: [id])
-  operateurId              Int
+  operateurId              Int // Useful only to enable for operateurs to search for their DNA before the structure is created
   type                     StructureType
   nom                      String
   nomOfii                  String
@@ -58,11 +58,11 @@ model Antenne {
 }
 
 model Finess {
-  id                 Int               @id @default(autoincrement())
-  code               String           @unique
-  structureFinesses  StructureFiness[]
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @default(now()) @updatedAt
+  id                Int               @id @default(autoincrement())
+  code              String            @unique
+  structureFinesses StructureFiness[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @default(now()) @updatedAt
 
   @@schema("public")
 }

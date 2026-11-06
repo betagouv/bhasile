@@ -23,23 +23,21 @@ const indicateursFinanciersObjectSchema = z.object({
   indicateursFinanciers: z.array(indicateurFinancierSchema),
 });
 
-export const getIndicateursFinanciersSchema = (cutoffYear: number) =>
+export const getIndicateursFinanciersSchema = (
+  cutoffYear: number,
+  isInCpomPerYear: Record<number, boolean>
+) =>
   indicateursFinanciersObjectSchema.check(
     z.superRefine(({ indicateursFinanciers }, ctx) => {
-      if (indicateursFinanciers.length === 0) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["indicateursFinanciers"],
-          message: "Au moins un indicateur financier est requis.",
-        });
-        return;
-      }
-
       const everyYears = [
         ...new Set(indicateursFinanciers.map((ind) => ind.year)),
       ];
 
       for (const year of everyYears) {
+        if (isInCpomPerYear[year]) {
+          continue;
+        }
+
         if (year <= cutoffYear) {
           if (!isYearRealisee(indicateursFinanciers, year)) {
             ctx.addIssue({

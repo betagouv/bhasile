@@ -22,10 +22,13 @@ import { createFakeAdresses, STRUCTURE_ZONE } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
 import { createFakeContact } from "./contact.seed";
 import { createFakeControle } from "./controle.seed";
-import { createFakeDocumentFinancier } from "./document-financier";
+import { createFakeDocumentsFinanciers } from "./document-financier.seed";
 import { createFakeEvaluation } from "./evaluation.seed";
-import { createFakeFormWithSteps } from "./form.seed";
-import { createFakeIndicateurFinancier } from "./indicateur-financier";
+import {
+  createFakeActualisationFormWithSteps,
+  createFakeFormWithSteps,
+} from "./form.seed";
+import { createFakeIndicateurFinancier } from "./indicateur-financier.seed";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
 export type FormDefInfo = { id: number; stepDefinitionIds: number[] };
@@ -45,7 +48,6 @@ const TYPOLOGIE_START_YEAR = 2022;
 
 export type SeedStructureParams = {
   operateurId: number;
-  filiale: string | null;
   codeBhasile: string;
   departementAdministratif: string;
   type: StructureType;
@@ -55,6 +57,9 @@ export type SeedStructureParams = {
   formDefs: FormDefLookup;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
+  actualisationFormDefId: number;
+  actualisationStepDefinitions: { id: number; slug: string }[];
+  hasValidatedActualisation: boolean;
   coordinates?: Coordinates;
 };
 
@@ -255,6 +260,21 @@ type StableContacts = ReturnType<typeof createFakeContact>[];
 
 type TypologieSpec = { year: number; placesAutorisees: number };
 
+const buildActualisationFormCreate = (params: {
+  actualisationFormDefId: number;
+  actualisationStepDefinitions: { id: number; slug: string }[];
+  hasValidatedActualisation: boolean;
+}) => {
+  const { formSteps, ...actualisationForm } =
+    createFakeActualisationFormWithSteps(
+      params.actualisationFormDefId,
+      params.actualisationStepDefinitions,
+      { isValidated: params.hasValidatedActualisation }
+    );
+
+  return { ...actualisationForm, formSteps: { create: formSteps } };
+};
+
 const buildTypologieSpecs = (
   timeline: VersionSpec[],
   creationDate: Date,
@@ -365,6 +385,9 @@ const buildStructureRelations = (params: {
   creationDate: Date;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
+  actualisationFormDefId: number;
+  actualisationStepDefinitions: { id: number; slug: string }[];
+  hasValidatedActualisation: boolean;
   typologieSpecs: TypologieSpec[];
 }): StructureRelations => {
   const { formSteps, ...finalisationForm } = createFakeFormWithSteps(
@@ -378,8 +401,8 @@ const buildStructureRelations = (params: {
       create: buildStructureLevelActes(params.creationDate),
     },
     documentsFinanciers: {
-      create: Array.from({ length: 5 }, () =>
-        nestFileUploads(createFakeDocumentFinancier())
+      create: createFakeDocumentsFinanciers(params.type, 5).map(
+        nestFileUploads
       ),
     },
     forms: {
@@ -389,6 +412,10 @@ const buildStructureRelations = (params: {
           status: params.isFinalised,
           formSteps: { create: formSteps },
         },
+        // L'actualisation ne concerne que les structures déjà initialisées.
+        ...(params.isFinalised
+          ? [buildActualisationFormCreate(params)]
+          : []),
       ],
     },
     structureTypologies: {
@@ -579,6 +606,9 @@ export const buildStructureCreate = (
         creationDate: history.creationDate,
         finalisationFormDefId: params.finalisationFormDefId,
         finalisationStepDefinitions: params.finalisationStepDefinitions,
+        actualisationFormDefId: params.actualisationFormDefId,
+        actualisationStepDefinitions: params.actualisationStepDefinitions,
+        hasValidatedActualisation: params.hasValidatedActualisation,
       });
 
   const fermeture = history.versions.find(
@@ -589,7 +619,6 @@ export const buildStructureCreate = (
   return {
     codeBhasile: params.codeBhasile,
     operateur: { connect: { id: params.operateurId } },
-    filiale: params.filiale,
     creationDate: history.creationDate,
     fermetureDate: fermeture?.effectiveDate ?? null,
     departement: { connect: { numero: params.departementAdministratif } },

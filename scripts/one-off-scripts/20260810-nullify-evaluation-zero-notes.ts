@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off : une note d'évaluation à 0 est toujours une non-saisie, jamais une vraie note.
 // Les sous-notes à 0 repassent à null, et la note générale à 0 est recalculée comme la moyenne des 3 sous-notes quand elles sont toutes renseignées.
 //

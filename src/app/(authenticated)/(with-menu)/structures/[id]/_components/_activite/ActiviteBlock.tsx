@@ -34,6 +34,7 @@ export const ActiviteBlock = (): ReactElement => {
           </h4>
           <div className="flex pt-10 pb-10">
             <ActivitePlaces
+              placesDisponibles={structure.activites?.[0].placesDisponibles}
               placesAutorisees={structure.activites?.[0].placesEnregistreesDna}
               placesIndisponibles={structure.activites?.[0].placesIndisponibles}
             />

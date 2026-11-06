@@ -4,7 +4,6 @@ import type { NumericAggregation } from "@/app/utils/math.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
-import type { BudgetApiType } from "./budget.schema";
 
 export type StatistiquesAggregation = NumericAggregation;
 
@@ -24,6 +23,13 @@ export type StatistiquesFilters = z.infer<typeof statistiquesFiltersSchema>;
 
 // Types de lecture pure (pas d'input à valider) : pas de schéma zod, juste des types.
 
+// `null` sur une année d'initialisation, antérieure aux campagnes d'actualisation.
+export type CompletudeStat = {
+  isComplete: boolean;
+  nbAttendues: number;
+  nbRenseignees: number;
+};
+
 export type TypeStructureStat = {
   type: StructureType;
   structures: number;
@@ -38,16 +44,12 @@ export type BatiStat = {
 
 export type StructuresByYearStat = {
   year: number;
+  completude: CompletudeStat | null;
+  structureTypes: TypeStructureStat[];
+  structureBatis: BatiStat[];
   totalStructures: number;
   totalCpoms: number;
   structuresAvecCpom: number;
-  structuresCada: number;
-  structuresCph: number;
-  structuresHuda: number;
-  structuresCaes: number;
-  structuresBatiCollectif: number;
-  structuresBatiDiffus: number;
-  structuresBatiMixte: number;
 };
 
 export type PlacesIndicatorsStat = {
@@ -67,14 +69,19 @@ export type PlacesByYearStat = Omit<
   "qpv" | "logementsSociaux"
 > & {
   year: number;
+  completude: CompletudeStat | null;
 };
 
 export type FinanceByYearScopeStat = {
+  completude: CompletudeStat | null;
   dotationDemandee: number;
   dotationAccordee: number;
-  totalETP: number;
-  tauxEncadrement: number | null;
-  coutJournalier: number | null;
+  totalETPPrevisionnel: number | null;
+  totalETPRealise: number | null;
+  tauxEncadrementCible: number | null;
+  tauxEncadrementTheoriquePrevisionnel: number | null;
+  tauxEncadrementTheoriqueRealise: number | null;
+  coutJournalierTheorique: number | null;
   totalProduits: number;
   totalCharges: number;
   resultatNet: number;
@@ -146,6 +153,8 @@ export type ActiviteSummaryStat = {
   placesOccupees: number;
   placesIndisponibles: number;
   placesDisponibles: number;
+  // Places des CAES : hors suivi de l'indisponibilité, ni disponibles ni indisponibles.
+  placesCaes: number;
   tauxIndisponibilite: number | null;
   motifsIndisponibilite: ActiviteMotifsIndisponibiliteStat;
   presencesInduesBPI: number;
@@ -216,67 +225,3 @@ export type StatistiqueApiRead = {
 };
 
 export type StatistiqueApiResponse = StatistiqueApiRead | null;
-
-/** @deprecated Ancien type du mock page `/stats`
- * Benjamin : à remplacer par `StatistiqueApiRead`. */
-export type StatistiquesApiType = {
-  totalStructures: number;
-  totalCpoms: number;
-  totalPlaces: number;
-  tauxEquipement: number;
-  structuresAvecCpom: number;
-  placesAutorisees: number;
-  dotationAnnuelle: number;
-  dotationAutorisees: number;
-  dotationSubventionnees: number;
-  ETP: number;
-  ETPAutorisees: number;
-  ETPSubventionnees: number;
-  tauxEncadrement: number;
-  tauxEncadrementAutorisees: number;
-  tauxEncadrementSubventionnees: number;
-  coutJournalier: number;
-  coutJournalierAutorisees: number;
-  coutJournalierSubventionnees: number;
-  budgets: (BudgetApiType & {
-    excedentCumule: number;
-    deficitCumule: number;
-    soldeCumule: number;
-  })[];
-  placesPmr: number;
-  placesLgbt: number;
-  placesFvvTeh: number;
-  placesQPV: number;
-  placesLogementsSociaux: number;
-  typesPlaces: {
-    label: string;
-    subLabel?: string;
-    byYear: { year: number; nbPlaces: number }[];
-  }[];
-  structureTypes: {
-    label: string;
-    byYear: {
-      year: number;
-      nbStructures: number;
-      nbCpoms: number;
-      nbPlaces: number;
-    }[];
-  }[];
-  structureBatis: {
-    label: string;
-    byYear: {
-      year: number;
-      nbStructures: number;
-      nbCpoms: number;
-      nbPlaces: number;
-    }[];
-  }[];
-  finance: {
-    byYear: {
-      year: number;
-      total: FinanceByYearScopeStat & { soldeCumule: number };
-      autorisees: FinanceByYearScopeStat & { soldeCumule: number };
-      subventionnees: FinanceByYearScopeStat & { soldeCumule: number };
-    }[];
-  };
-};

@@ -9,28 +9,16 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/structures\/stats$/,
-    routes: {
-      GET: "proconnect",
-    },
-  },
-  {
     pattern: /^\/api\/structures\/\d+$/,
     routes: {
       GET: "either",
-      PUT: "either",
+      PUT: "proconnect",
     },
   },
   {
     pattern: /^\/api\/structures\/[^/]+\/actualisation$/,
     routes: {
       PUT: "proconnect",
-    },
-  },
-  {
-    pattern: /^\/api\/structures\/[^/]+\/adresses$/,
-    routes: {
-      HEAD: "password",
     },
   },
   {
@@ -133,6 +121,25 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/tarifications\/\d+\/\d+\/messages$/,
+    routes: {
+      GET: "proconnect",
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/tarifications\/\d+\/\d+\/messages\/read$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/tarifications\/messages\/\d+$/,
+    routes: {
+      PATCH: "proconnect",
+    },
+  },
+  {
     pattern: /^\/api\/user-actions\/statistiques$/,
     routes: {
       POST: "proconnect",
@@ -192,6 +199,12 @@ export const protectedApiRoutes: ApiRoute[] = [
       POST: "proconnect",
     },
   },
+  {
+    pattern: /^\/api\/faq$/,
+    routes: {
+      GET: "proconnect",
+    },
+  },
 ];
 
 export const proConnectProtectedPages = [
@@ -203,6 +216,8 @@ export const proConnectProtectedPages = [
   "/ressources",
 ];
 
-export const passwordProtectedPages = ["/ajout-structure", "/ajout-adresses"];
+export const passwordProtectedPages = ["/ajout-structure"];
 
 export const noProtectionPage = "/mot-de-passe";
+
+export const pendingAccessPage = "/acces-en-attente";

@@ -2,9 +2,9 @@ import "dayjs/locale/fr.js";
 
 import dayjs from "dayjs";
 
-import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import { START_YEAR } from "@/constants";
 
-import { getNow } from "./now.util";
+import { getCurrentYear, getNow } from "./now.util";
 
 dayjs.locale("fr");
 
@@ -192,14 +192,14 @@ export const isCurrentlyInEffect = (
 export const getTypePlacesYearRange = (): { years: number[] } => {
   const { years } = getYearRange({
     startYear: 2023,
-    endYear: CURRENT_YEAR,
+    endYear: getCurrentYear(),
   });
   return { years };
 };
 
 export const getYearRange = ({
   startYear = START_YEAR,
-  endYear = CURRENT_YEAR,
+  endYear = getCurrentYear(),
   order = "asc",
 }: {
   startYear?: number;

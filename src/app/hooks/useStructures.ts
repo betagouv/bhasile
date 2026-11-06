@@ -77,7 +77,6 @@ export const transformAjoutFormStructureToApiStructure = async (
     id: values.id,
     codeBhasile: values.codeBhasile,
     operateur: values.operateur,
-    filiale: values.filiale,
     type: values.type,
     adresseAdministrative: values.adresseAdministrative,
     codePostalAdministratif: values.codePostalAdministratif,

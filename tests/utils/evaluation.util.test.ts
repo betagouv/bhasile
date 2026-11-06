@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getEvaluationNote,
   getEvaluationsDefaultValues,
   transformFormEvaluationsToApiEvaluations,
 } from "@/app/utils/evaluation.util";
@@ -15,7 +16,6 @@ const evaluation = (
     notePersonne: 3.63,
     notePro: 3.77,
     noteStructure: 3.17,
-    note: 3.52,
     fileUploads: [{ id: 1, key: "rapport.pdf" }],
     ...notes,
   }) as EvaluationFormValues;
@@ -31,7 +31,6 @@ describe("getEvaluationsDefaultValues", () => {
       notePersonne: null,
       notePro: null,
       noteStructure: null,
-      note: null,
     });
   });
 });
@@ -46,7 +45,6 @@ describe("transformFormEvaluationsToApiEvaluations", () => {
       notePersonne: 3.63,
       notePro: 3.77,
       noteStructure: 3.17,
-      note: 3.52,
     });
   });
 
@@ -59,7 +57,28 @@ describe("transformFormEvaluationsToApiEvaluations", () => {
       notePersonne: 3.63,
       notePro: 3.77,
       noteStructure: 3.17,
-      note: 3.52,
     });
+  });
+});
+
+describe("getEvaluationNote", () => {
+  it("calcule la moyenne des trois notes arrondie à deux décimales", () => {
+    expect(
+      getEvaluationNote({
+        notePersonne: 3.63,
+        notePro: 3.77,
+        noteStructure: 3.17,
+      })
+    ).toBe(3.52);
+  });
+
+  it("renvoie null dès qu'une des trois notes est absente", () => {
+    expect(
+      getEvaluationNote({
+        notePersonne: 3.63,
+        notePro: null,
+        noteStructure: 3.17,
+      })
+    ).toBeNull();
   });
 });

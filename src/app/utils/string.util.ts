@@ -1,3 +1,24 @@
+const normalizeSearchText = (text: string): string => {
+  return normalizeAccents(text)
+    .toLowerCase()
+    .replace(/[-_']/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+export const matchesSearchQuery = (
+  textToSearch: string,
+  searchQuery: string
+): boolean => {
+  const normalizedQuery = normalizeSearchText(searchQuery);
+
+  if (!normalizedQuery) {
+    return true;
+  }
+
+  return normalizeSearchText(textToSearch).includes(normalizedQuery);
+};
+
 export const normalizeAccents = (stringToNormalize: string) => {
   return stringToNormalize
     .normalize("NFD")

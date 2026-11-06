@@ -1,3 +1,4 @@
+import { DomainError } from "@/app/utils/domain-error.util";
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
@@ -67,15 +68,6 @@ const createOneStructureVersion = async (
   version: StructureVersionApiType,
   parent: StructureVersionParent
 ): Promise<number> => {
-  if (
-    parent.structureId === undefined &&
-    parent.structureVersionTransformationId === undefined
-  ) {
-    throw new Error(
-      "structureId ou structureVersionTransformationId est requis pour créer une StructureVersion"
-    );
-  }
-
   const data: Prisma.StructureVersionUncheckedCreateInput = {
     ...getScalarData(version),
     structureId: parent.structureId,
@@ -110,11 +102,42 @@ const updateOneStructureVersion = async (
   return version.id;
 };
 
+const assertVersionBelongsToParent = async (
+  tx: PrismaTransaction,
+  versionId: number,
+  parent: StructureVersionParent
+): Promise<void> => {
+  const ownedVersion = await tx.structureVersion.findFirst({
+    where: {
+      id: versionId,
+      ...(parent.structureVersionTransformationId !== undefined
+        ? {
+            structureVersionTransformationId:
+              parent.structureVersionTransformationId,
+          }
+        : { structureId: parent.structureId }),
+    },
+    select: { id: true },
+  });
+  if (!ownedVersion) {
+    throw new DomainError("Version de structure introuvable", 404);
+  }
+};
+
 export const createOrUpdateStructureVersion = async (
   tx: PrismaTransaction,
   version: StructureVersionApiType,
   parent: StructureVersionParent
 ): Promise<number> => {
+  if (
+    parent.structureId === undefined &&
+    parent.structureVersionTransformationId === undefined
+  ) {
+    throw new Error(
+      "structureId ou structureVersionTransformationId est requis pour écrire une StructureVersion"
+    );
+  }
+
   const structureId = version.structureId ?? parent.structureId;
   if (structureId !== undefined) {
     const structure = await tx.structure.findUnique({
@@ -128,6 +151,7 @@ export const createOrUpdateStructureVersion = async (
   }
 
   if (version.id) {
+    await assertVersionBelongsToParent(tx, version.id, parent);
     return updateOneStructureVersion(tx, version);
   }
 

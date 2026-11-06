@@ -1,8 +1,9 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
 
 import { expect } from "../fixtures/test";
+import { uploadToContainer } from "./upload.helper";
 
 const STEP_SLUGS = [
   "01-places",
@@ -53,6 +54,31 @@ export class ActualisationPage {
     await this.page.waitForURL(
       new RegExp(`/actualisation/${this.year}/01-places`)
     );
+  }
+
+  async gotoStep(slug: (typeof STEP_SLUGS)[number]): Promise<void> {
+    await this.page.goto(
+      `/structures/${this.structureId}/actualisation/${this.year}/${slug}`,
+      { waitUntil: "domcontentloaded" }
+    );
+    await this.page.waitForLoadState("networkidle").catch(() => {});
+  }
+
+  async clickValider(): Promise<void> {
+    await this.page
+      .getByRole("button", { name: "Valider", exact: true })
+      .click();
+  }
+
+  documentFinancierBox(year: number, label: string): Locator {
+    return this.page
+      .getByRole("heading", { level: 2, name: String(year), exact: true })
+      .locator("xpath=..")
+      .getByRole("group", { name: label, exact: true });
+  }
+
+  async uploadDocumentFinancier(year: number, label: string): Promise<void> {
+    await uploadToContainer(this.documentFinancierBox(year, label));
   }
 
   async setPmr(value: number): Promise<void> {

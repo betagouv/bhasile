@@ -10,6 +10,10 @@ import Loader from "@/app/components/ui/Loader";
 import { FileUploadResponse, useFileUpload } from "@/app/hooks/useFileUpload";
 import { cn } from "@/app/utils/classname.util";
 import { formatBytes } from "@/app/utils/number.util";
+import {
+  confirmFileDeletion,
+  FILE_DELETION_ERROR_MESSAGE,
+} from "@/utils/file-deletion.util";
 
 import { DeleteButton } from "../common/DeleteButton";
 
@@ -145,11 +149,7 @@ const Upload = ({
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
 
-    const confirm = window.confirm(
-      "Attention, vous allez supprimer définitivement ce fichier. Êtes-vous bien sûr·e de vouloir continuer ?"
-    );
-
-    if (!confirm) {
+    if (!confirmFileDeletion()) {
       return;
     }
 
@@ -179,7 +179,7 @@ const Upload = ({
       } as React.ChangeEvent<HTMLInputElement>);
     } catch {
       setCurrentState("error");
-      setCurrentErrorMessage("Erreur lors de la suppression du fichier");
+      setCurrentErrorMessage(FILE_DELETION_ERROR_MESSAGE);
     }
   };
 

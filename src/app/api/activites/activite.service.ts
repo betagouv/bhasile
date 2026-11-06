@@ -24,7 +24,7 @@ export const getAverageDepartementPlaces = async (
   }
 
   const now = getNow();
-  const structures = await findAllStructures();
+  const structures = await findAllStructures({});
   const dnaCodes = collectCurrentDnaCodesInDepartement(
     structures,
     departement,

@@ -25,6 +25,7 @@ export const createFakeBudget = ({
   if (isSubventionnee && !isBudgetOpen) {
     return {
       year,
+      cpomStructureType: type,
     } as Budget;
   }
 

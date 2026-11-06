@@ -116,9 +116,9 @@ describe("adresse util", () => {
     });
 
     it("retourne false quand codePostal est renseigné", () => {
-      expect(
-        isAdresseEmpty(makeEmptyAdresse({ codePostal: "75002" }))
-      ).toBe(false);
+      expect(isAdresseEmpty(makeEmptyAdresse({ codePostal: "75002" }))).toBe(
+        false
+      );
     });
 
     it("retourne false quand commune est renseigné", () => {
@@ -154,9 +154,9 @@ describe("adresse util", () => {
     });
 
     it("retourne false quand isLogementSocial est true", () => {
-      expect(
-        isAdresseEmpty(makeEmptyAdresse({ isLogementSocial: true }))
-      ).toBe(false);
+      expect(isAdresseEmpty(makeEmptyAdresse({ isLogementSocial: true }))).toBe(
+        false
+      );
     });
 
     it("retourne false quand isQpv est true", () => {

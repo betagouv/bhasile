@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { createNationalAgent } from "tests/test-utils/factories/session-user.factory";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
@@ -17,7 +18,6 @@ import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
-import { SessionUser } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
@@ -43,15 +43,13 @@ const findOneOrFail = async (id: number) => {
   return row;
 };
 
-const NATIONAL_USER = {
-  role: "NATIONAL",
-  allowedDepartements: [],
-} as unknown as SessionUser;
+const NATIONAL_USER = createNationalAgent();
 
 describe("transformation.repository db integration", () => {
   const createdStructureIds: number[] = [];
   const createdTransformationIds: number[] = [];
   const createdOperateurIds: number[] = [];
+  const createdCpomIds: number[] = [];
 
   const createStructure = async (versionData: Record<string, unknown> = {}) => {
     const structure = await prisma.structure.create({
@@ -186,6 +184,11 @@ describe("transformation.repository db integration", () => {
         where: { id: { in: createdTransformationIds } },
       });
     }
+    if (createdCpomIds.length > 0) {
+      await prisma.cpom.deleteMany({
+        where: { id: { in: createdCpomIds } },
+      });
+    }
     if (createdStructureIds.length > 0) {
       await prisma.structure.deleteMany({
         where: { id: { in: createdStructureIds } },
@@ -259,6 +262,56 @@ describe("transformation.repository db integration", () => {
 
   it("renvoie null via findOne quand la transformation n'existe pas", async () => {
     expect(await findOne(-1)).toBeNull();
+  });
+
+  it("refuse l'id de la version d'une autre structure sans modifier cette version", async () => {
+    const otherStructure = await createStructure({ nom: "Nom d'origine" });
+    const foreignVersionId = otherStructure.structureVersions[0].id;
+    const { transformationId, structureVersionTransformationId } =
+      await createBareTransformation();
+
+    const error = await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: structureVersionTransformationId,
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: { id: foreignVersionId, nom: "Nom réécrit" },
+        },
+      ],
+    }).catch((caughtError: unknown) => caughtError);
+
+    const foreignVersion = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: foreignVersionId },
+    });
+    expect(foreignVersion.nom).toBe("Nom d'origine");
+    expect(error).toMatchObject({ name: "DomainError", status: 404 });
+  });
+
+  it("refuse l'id de la version d'un autre bloc sans modifier cette version", async () => {
+    const otherBlock = await createBareTransformation();
+    const { transformationId, structureVersionTransformationId } =
+      await createBareTransformation();
+
+    const error = await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: structureVersionTransformationId,
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: {
+            id: otherBlock.structureVersionId,
+            nom: "Nom réécrit",
+          },
+        },
+      ],
+    }).catch((caughtError: unknown) => caughtError);
+
+    const foreignVersion = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: otherBlock.structureVersionId },
+    });
+    expect(foreignVersion.nom).not.toBe("Nom réécrit");
+    expect(error).toMatchObject({ name: "DomainError", status: 404 });
   });
 
   it("met à jour la structureVersion existante d'un bloc quand l'id n'est pas renvoyé, sans créer de doublon", async () => {
@@ -1562,6 +1615,48 @@ describe("transformation.repository db integration", () => {
       where: { id: sourceStructure.id },
     });
     expect(structure.fermetureDate?.toISOString()).toBe(fermetureDate);
+  });
+
+  it("fixe la sortie CPOM d'une structure fermée à sa date de fermeture", async () => {
+    const sourceStructure = await createStructure();
+    const operateur = await createOperateur();
+    const fermetureDate = "2024-09-30T00:00:00.000Z";
+    const cpom = await prisma.cpom.create({
+      data: {
+        operateur: { connect: { id: operateur.id } },
+        structures: {
+          create: { structure: { connect: { id: sourceStructure.id } } },
+        },
+        actesAdministratifs: {
+          create: {
+            category: "CONVENTION_CPOM",
+            startDate: new Date("2023-01-01T12:00:00.000Z"),
+            endDate: new Date("2027-12-31T12:00:00.000Z"),
+          },
+        },
+      },
+    });
+    createdCpomIds.push(cpom.id);
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: fermetureDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const cpomStructure = await prisma.cpomStructure.findFirstOrThrow({
+      where: { cpomId: cpom.id, structureId: sourceStructure.id },
+    });
+    expect(cpomStructure.dateEnd?.toISOString()).toBe(fermetureDate);
   });
 
   it("définit fermetureDate sur chaque structure fermée avec sa propre effectiveDate", async () => {

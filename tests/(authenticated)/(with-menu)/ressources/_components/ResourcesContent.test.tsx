@@ -59,6 +59,14 @@ const FAQ_BLOCK: FaqBlock = {
     {
       id: "faq--cpom",
       title: "CPOM",
+      items: [
+        {
+          id: 1,
+          question: "Quelle est la durée d’un CPOM ?",
+          contentMarkdown: "Cinq ans.",
+          category: "CPOM",
+        },
+      ],
     },
   ],
 };
@@ -198,7 +206,7 @@ describe("ResourcesContent", () => {
     ).toBeInTheDocument();
   });
 
-  it("affiche un message dédié quand aucun contenu n’est publié", () => {
+  it("affiche le message d’absence de contenu lorsqu’aucun bloc ni FAQ n’est disponible", () => {
     // GIVEN
     mockedSearchParams.searchParamsValue = new URLSearchParams();
 

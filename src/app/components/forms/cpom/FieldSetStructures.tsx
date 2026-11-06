@@ -1,13 +1,16 @@
 import { useFormContext } from "react-hook-form";
 
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
-import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
+import { CpomApiRead, CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 import { FormKind } from "@/types/global";
 import { ACCEPTED_STRUCTURE_TYPES } from "@/types/structure.type";
 
 import { StructuresList } from "./StructuresList";
 
-export const FieldSetStructures = ({ formKind }: Props) => {
+export const FieldSetStructures = ({
+  formKind,
+  cpomStructures,
+}: Props) => {
   const { watch } = useFormContext();
 
   const departements = watch("departements") as CpomDepartementApiType[];
@@ -36,11 +39,15 @@ export const FieldSetStructures = ({ formKind }: Props) => {
           Composition
         </legend>
       )}
-      <StructuresList structures={structures} />
+      <StructuresList
+        structures={structures}
+        cpomStructures={cpomStructures}
+      />
     </fieldset>
   );
 };
 
 type Props = {
   formKind?: FormKind;
+  cpomStructures?: CpomApiRead["structures"];
 };

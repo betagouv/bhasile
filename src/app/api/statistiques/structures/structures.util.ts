@@ -1,7 +1,3 @@
-import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
-import type { StructureDbList } from "@/app/api/structures/structure.db.type";
-import { isStructureInCpom } from "@/app/api/structures/structure.util";
-import { startOfUtcDay } from "@/app/utils/date.util";
 import { getNow } from "@/app/utils/now.util";
 import {
   BatiStat,
@@ -27,11 +23,13 @@ import {
   computeTotalPlaces,
   filterByActiveStructureId,
   filterByEffectiveVersionAtDate,
+  filterInitialisedStructures,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
+  isCpomLinkActiveInYear,
   mapTypologieYears,
-  structuresActiveInPeriod,
+  resolveCountedStructuresForYear,
 } from "../statistiques.util";
 
 const getRepartitionFromRepartitions = (
@@ -122,7 +120,7 @@ const countActiveCpoms = (
   for (const link of cpomLinks) {
     if (
       structureIds.has(link.structureId) &&
-      isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year)
+      isCpomLinkActiveInYear(link, year)
     ) {
       activeCpomIds.add(link.cpomId);
     }
@@ -142,59 +140,13 @@ export const countStructuresAvecCpomForYear = (
   for (const link of cpomLinks) {
     if (
       structureIds.has(link.structureId) &&
-      isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year)
+      isCpomLinkActiveInYear(link, year)
     ) {
       structuresWithActiveCpom.add(link.structureId);
     }
   }
 
   return structuresWithActiveCpom.size;
-};
-
-const isCpomLinkActiveNow = (
-  link: StatistiqueDbCpomStructure,
-  now: Date
-): boolean => {
-  const [cpomDateStart, cpomDateEnd] = getDatesOfCurrentActeAdministratif(
-    link.cpom?.actesAdministratifs ?? [],
-    "CONVENTION_CPOM",
-    false
-  );
-  const dateStart = link.dateStart ?? cpomDateStart;
-  const dateEnd = link.dateEnd ?? cpomDateEnd;
-
-  if (!dateStart || !dateEnd) {
-    return false;
-  }
-
-  const nowDay = startOfUtcDay(now);
-  return dateStart <= nowDay && dateEnd >= nowDay;
-};
-
-const computeActiveCpomStats = (
-  cpomLinks: StatistiqueDbCpomStructure[],
-  activeStructureIds: number[]
-): { totalCpoms: number; structuresAvecCpom: number } => {
-  const now = getNow();
-  const activeStructureIdSet = new Set(activeStructureIds);
-  const activeCpomIds = new Set<number>();
-  const structureIdsWithActiveCpom = new Set<number>();
-
-  for (const link of cpomLinks) {
-    if (!activeStructureIdSet.has(link.structureId)) {
-      continue;
-    }
-    if (!isCpomLinkActiveNow(link, now)) {
-      continue;
-    }
-    activeCpomIds.add(link.cpomId);
-    structureIdsWithActiveCpom.add(link.structureId);
-  }
-
-  return {
-    totalCpoms: activeCpomIds.size,
-    structuresAvecCpom: structureIdsWithActiveCpom.size,
-  };
 };
 
 const fillStructureTypes = (
@@ -274,82 +226,46 @@ const computeBatiStats = (
   );
 };
 
-const countStructuresByType = (
-  structures: StatistiqueDbStructure[],
-  type: StructureType
-): number => structures.filter((structure) => structure.type === type).length;
-
-const countStructuresByBati = (
-  structures: StatistiqueDbStructure[],
-  batiMap: Map<number, Repartition>,
-  bati: Repartition
-): number =>
-  // Aligné sur le global : une structure sans adresse répartie n'a pas de bâti
-  structures.filter((structure) => batiMap.get(structure.id) === bati).length;
-
 const computeByYearStats = (
   context: StatistiquesCpomYearContext,
-  batiMap: Map<number, Repartition>
+  batiMap: Map<number, Repartition>,
+  currentAdresses: StatistiqueDbAdresse[]
 ): StructuresByYearStat[] =>
   mapTypologieYears<StructuresByYearStat>(
-    context.allStructures,
-    context.activeStructureIdsByPeriod,
-    context.typologies,
-    (year, structuresForYear) => {
+    context,
+    (year, structuresForYear, completude) => {
       const typologieMapForYear = getTypologieMapForExactYear(
         context.typologies,
         year
       );
-      const structuresWithTypologie = filterStructuresWithTypologie(
-        structuresForYear,
-        typologieMapForYear
-      );
-      const structureIdsWithTypologie = new Set(
-        structuresWithTypologie.map((structure) => structure.id)
+      // Année de campagne : exactement les structures actualisées, celles du score.
+      const countedStructures = completude
+        ? structuresForYear
+        : filterStructuresWithTypologie(structuresForYear, typologieMapForYear);
+      const countedStructureIds = new Set(
+        countedStructures.map((structure) => structure.id)
       );
 
       return {
-        totalStructures: structuresWithTypologie.length,
+        structureTypes: computeTypeStats(
+          countedStructures,
+          typologieMapForYear
+        ),
+        structureBatis: computeBatiStats(
+          countedStructures,
+          batiMap,
+          currentAdresses
+        ),
+        totalStructures: countedStructures.length,
         totalCpoms: countActiveCpoms(
           context.cpomLinks,
-          structureIdsWithTypologie,
+          countedStructureIds,
           year
         ),
         structuresAvecCpom: countStructuresAvecCpomForYear(
           context.cpomLinks,
-          structureIdsWithTypologie,
+          countedStructureIds,
           year
-        ),
-        structuresCada: countStructuresByType(
-          structuresWithTypologie,
-          StructureType.CADA
-        ),
-        structuresCph: countStructuresByType(
-          structuresWithTypologie,
-          StructureType.CPH
-        ),
-        structuresHuda: countStructuresByType(
-          structuresWithTypologie,
-          StructureType.HUDA
-        ),
-        structuresCaes: countStructuresByType(
-          structuresWithTypologie,
-          StructureType.CAES
-        ),
-        structuresBatiCollectif: countStructuresByBati(
-          structuresWithTypologie,
-          batiMap,
-          Repartition.COLLECTIF
-        ),
-        structuresBatiDiffus: countStructuresByBati(
-          structuresWithTypologie,
-          batiMap,
-          Repartition.DIFFUS
-        ),
-        structuresBatiMixte: countStructuresByBati(
-          structuresWithTypologie,
-          batiMap,
-          Repartition.MIXTE
         ),
       };
     }
@@ -358,13 +274,8 @@ const computeByYearStats = (
 export const computeStructuresStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const {
-    structures,
-    typologies,
-    adresses,
-    cpomLinks,
-    structureVersionTimeline,
-  } = context;
+  const { typologies, adresses, cpomLinks, timelineByStructureId } = context;
+  const structures = filterInitialisedStructures(context.structures, context);
   const typologieMap = getLastTypologiePerStructure(typologies);
   const now = getNow();
   // Le bâti (vue globale et byYear) reflète l'adresse actuelle : `adresses` remonte
@@ -373,15 +284,14 @@ export const computeStructuresStatistiques = (
     adresses,
     structures.map((structure) => structure.id),
     now,
-    structureVersionTimeline,
+    timelineByStructureId,
     now
   );
   const batiMap = getBatiPerStructure(currentAdresses);
-  const activeStructureIds = structures.map((structure) => structure.id);
-  const { totalCpoms, structuresAvecCpom } = computeActiveCpomStats(
-    cpomLinks,
-    activeStructureIds
+  const activeStructureIds = new Set(
+    structures.map((structure) => structure.id)
   );
+  const currentYear = now.getUTCFullYear();
 
   const structureBatis = computeBatiStats(structures, batiMap, currentAdresses);
 
@@ -394,11 +304,15 @@ export const computeStructuresStatistiques = (
       (total, bati) => total + bati.places,
       0
     ),
-    totalCpoms,
-    structuresAvecCpom,
+    totalCpoms: countActiveCpoms(cpomLinks, activeStructureIds, currentYear),
+    structuresAvecCpom: countStructuresAvecCpomForYear(
+      cpomLinks,
+      activeStructureIds,
+      currentYear
+    ),
     structureTypes: computeTypeStats(structures, typologieMap),
     structureBatis,
-    byYear: computeByYearStats(context, batiMap),
+    byYear: computeByYearStats(context, batiMap, currentAdresses),
   };
 };
 
@@ -415,11 +329,9 @@ export const computeStructuresIndicatorForYear = (
     return null;
   }
 
-  const structuresForYear = structuresActiveInPeriod(
-    context.allStructures,
-    context.activeStructureIdsByPeriod,
-    "year",
-    String(year)
+  const { structures: structuresForYear } = resolveCountedStructuresForYear(
+    context,
+    year
   );
 
   if (field === "totalStructures") {

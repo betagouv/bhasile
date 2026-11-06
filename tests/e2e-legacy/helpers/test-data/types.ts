@@ -108,7 +108,6 @@ export type EvaluationData = {
   notePersonne?: FinanceValue;
   notePro?: FinanceValue;
   noteStructure?: FinanceValue;
-  note?: FinanceValue;
   filePath?: string;
   planActionFilePath?: string;
 };

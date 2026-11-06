@@ -1,0 +1,29 @@
+// File des mails : une ligne écrite dans la transaction du fait à signaler ; sans ligne, pas de mail
+model EmailNotification {
+  id          Int                          @id @default(autoincrement())
+  message     Message                      @relation(fields: [messageId], references: [id], onDelete: Restrict)
+  messageId   Int                          @unique
+  processedAt DateTime? // null = à notifier
+  abandonedAt DateTime? // reprise abandonnée après 3 jours
+  recipients  EmailNotificationRecipient[]
+
+  createdAt DateTime @default(now())
+
+  @@index([processedAt])
+  @@schema("public")
+}
+
+// Un fait signalé à un destinataire dans un mail accepté par Brevo ; un mail regroupe plusieurs faits
+model EmailNotificationRecipient {
+  notification   EmailNotification @relation(fields: [notificationId], references: [id], onDelete: Restrict)
+  notificationId Int
+  user           User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId         Int
+  email          String
+  brevoMessageId String // retrouve le mail dans les logs Brevo
+
+  createdAt DateTime @default(now())
+
+  @@id([notificationId, userId])
+  @@schema("public")
+}

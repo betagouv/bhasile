@@ -5,6 +5,7 @@ import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
+import { assertFilesCanBeAttachedToEntity } from "../files/file.service";
 import {
   OperateurDbDetail,
   OperateurListRow,
@@ -33,6 +34,18 @@ export const findBySearchTerm = async (
   );
 };
 
+export const findOperateurFiliales = async (
+  parentIds: number[]
+): Promise<{ id: number }[]> => {
+  if (parentIds.length === 0) {
+    return [];
+  }
+  return prisma.operateur.findMany({
+    where: { parentId: { in: parentIds } },
+    select: { id: true },
+  });
+};
+
 export const findAllOperateurs = (): Promise<OperateurListRow[]> =>
   prisma.operateur.findMany({ select: operateurListSelect });
 
@@ -58,6 +71,10 @@ export const updateOne = async (
   const { actesAdministratifs, contacts, logo, ...operateurFields } = operateur;
 
   return prisma.$transaction(async (tx) => {
+    await assertFilesCanBeAttachedToEntity(tx, logo ? [logo] : [], {
+      operateurId: operateur.id,
+    });
+
     const updated = await tx.operateur.update({
       where: { id: operateur.id },
       data: {

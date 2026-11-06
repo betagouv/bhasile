@@ -1,60 +1,43 @@
 import { getNow } from "@/app/utils/now.util";
+import { AccessRole, GrantScope } from "@/generated/prisma/client";
 
 import { prisma } from "./prisma";
 
 export const E2E_AGENT_EMAIL = "e2e.agent@bhasile.local";
 export const E2E_AGENT_NAME = "E2E Agent";
-export const E2E_AGENT_ROLE = "DEPARTEMENT_PARIS";
 
-const E2E_AGENT_DEPARTEMENT = "75";
-const E2E_AGENT_EMAIL_PATTERN = "^e2e\\.agent@bhasile\\.local$";
+const E2E_AGENT_DEPARTEMENTS = ["75", "92"];
 
 export const seedAgent = async (): Promise<void> => {
-  await prisma.role.upsert({
-    where: { name: "ANONYMOUS" },
-    update: {},
-    create: { name: "ANONYMOUS" },
-  });
-
-  const departement = await prisma.departement.findUnique({
-    where: { numero: E2E_AGENT_DEPARTEMENT },
+  const departements = await prisma.departement.findMany({
+    where: { numero: { in: E2E_AGENT_DEPARTEMENTS } },
     select: { numero: true },
   });
-  if (!departement) {
+  if (departements.length !== E2E_AGENT_DEPARTEMENTS.length) {
     throw new Error(
-      `Département ${E2E_AGENT_DEPARTEMENT} absent de la base : lancer \`npx prisma db seed\` avant les tests e2e.`
+      `Départements ${E2E_AGENT_DEPARTEMENTS.join(", ")} absents de la base : lancer \`npx prisma db seed\` avant les tests e2e.`
     );
   }
 
-  const role = await prisma.role.upsert({
-    where: { name: E2E_AGENT_ROLE },
-    update: {},
-    create: { name: E2E_AGENT_ROLE },
-    select: { id: true },
-  });
-
-  // Le rôle porte le nom d'un rôle réel : `role.seed.ts` peut l'avoir créé avec
-  // d'autres départements, qu'un simple upsert laisserait en place.
-  await prisma.roleDepartement.deleteMany({ where: { roleId: role.id } });
-  await prisma.roleDepartement.create({
-    data: { departementNumero: departement.numero, roleId: role.id },
-  });
-
-  const emailPattern = await prisma.emailPattern.upsert({
-    where: { pattern: E2E_AGENT_EMAIL_PATTERN },
-    update: { roleId: role.id },
-    create: { pattern: E2E_AGENT_EMAIL_PATTERN, roleId: role.id },
-    select: { id: true },
-  });
-
-  await prisma.user.upsert({
+  const user = await prisma.user.upsert({
     where: { email: E2E_AGENT_EMAIL },
-    update: { emailPatternId: emailPattern.id, roleId: null },
+    update: { isAgent: true },
     create: {
       email: E2E_AGENT_EMAIL,
       name: E2E_AGENT_NAME,
-      emailPatternId: emailPattern.id,
+      isAgent: true,
       lastConnection: getNow(),
     },
+    select: { id: true },
+  });
+
+  await prisma.grant.deleteMany({ where: { userId: user.id } });
+  await prisma.grant.createMany({
+    data: departements.map((departement) => ({
+      userId: user.id,
+      role: AccessRole.EDITEUR,
+      scope: GrantScope.DEPARTEMENT,
+      departementNumero: departement.numero,
+    })),
   });
 };

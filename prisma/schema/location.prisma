@@ -4,7 +4,7 @@ model Departement {
   population           Int?
   structures           Structure[]
   structureVersions    StructureVersion[]
-  roleDepartements     RoleDepartement[]
+  grants               Grant[]
   regionAdministrative Region?            @relation(fields: [regionId], references: [id])
   regionId             Int?
   cpoms                CpomDepartement[]
@@ -20,6 +20,7 @@ model Region {
   code         String
   departements Departement[]
   cpoms        Cpom[]
+  grants       Grant[]
 
   @@schema("public")
 }

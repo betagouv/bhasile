@@ -16,6 +16,7 @@ import { recursivelySerializeForClient } from "@/utils-server/serialization.serv
 
 import { getContactsApiRead } from "../contacts/contact.util";
 import { getDownloadLink } from "../files/file.service";
+import { resolveFilters } from "../filters/filters.service";
 import { findAllStructures } from "../structures/structure.repository";
 import {
   findAllOperateurs,
@@ -37,23 +38,32 @@ import {
 export const getOperateurs = cache(
   async (
     page: number | null,
-    search: string | null
+    search: string | null,
+    departements: string | null,
+    operateursFilter: string | null,
+    types: string | null
   ): Promise<{
     operateurs: OperateurListItem[];
     totalOperateurs: number;
   }> => {
     const now = getNow();
     const [structures, operateurs] = await Promise.all([
-      findAllStructures(),
+      findAllStructures({}),
       findAllOperateurs(),
     ]);
 
+    const filters = await resolveFilters({
+      departements,
+      operateurs: operateursFilter,
+      types,
+    });
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
     const filialesByParentId = buildFilialesByParentId(operateurs);
     const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
       structures,
       topLevelByOperateurId,
-      now
+      now,
+      filters
     );
 
     const items = operateurs

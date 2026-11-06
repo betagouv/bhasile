@@ -147,7 +147,7 @@ export const FieldSetHebergement = ({
         <h2 className="text-xl font-bold mb-4 text-title-blue-france max-w-3xl">
           {`Veuillez conserver uniquement les adresses d’hébergement qui composent l’ensemble de la structure une fois ${getTransformationNounAvecArticle(
             formKind
-          )} effective et actualiser le nombre de place attribué à chacune d’entre elles ainsi que leurs particularités.`}
+          )} effective et actualiser le nombre de places attribuées à chacune d’entre elles ainsi que leurs particularités.`}
         </h2>
       )}
       <fieldset className="flex flex-col gap-6">
@@ -159,21 +159,20 @@ export const FieldSetHebergement = ({
           />
         )}
 
-        {typeBati === Repartition.COLLECTIF &&
-          formKind !== FormKind.ADRESSES_RECOVERY && (
-            <div className="flex mt-6 -mb-4">
-              <ToggleSwitch
-                inputTitle="Adresse d'hébergement identique"
-                label="L'adresse d'hébergement est-elle la même que l'adresse administrative ?"
-                labelPosition="left"
-                showCheckedHint={false}
-                className="w-fit [&_label]:gap-2"
-                checked={sameAddress}
-                onChange={handleSameAddressChange}
-              />
-              <p className="pl-2">{sameAddress ? "Oui" : "Non"}</p>
-            </div>
-          )}
+        {typeBati === Repartition.COLLECTIF && (
+          <div className="flex mt-6 -mb-4">
+            <ToggleSwitch
+              inputTitle="Adresse d'hébergement identique"
+              label="L'adresse d'hébergement est-elle la même que l'adresse administrative ?"
+              labelPosition="left"
+              showCheckedHint={false}
+              className="w-fit [&_label]:gap-2"
+              checked={sameAddress}
+              onChange={handleSameAddressChange}
+            />
+            <p className="pl-2">{sameAddress ? "Oui" : "Non"}</p>
+          </div>
+        )}
         {fields.map((field, index) => {
           const adresse =
             (watchedAdresses[index] as FormAdresse | undefined) ??

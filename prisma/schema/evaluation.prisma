@@ -6,7 +6,6 @@ model Evaluation {
   notePersonne  Float?
   notePro       Float?
   noteStructure Float?
-  note          Float?
   fileUploads   FileUpload[]
 
   createdAt DateTime @default(now())

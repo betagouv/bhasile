@@ -1,4 +1,4 @@
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -74,7 +74,9 @@ export const huda2: TestStructureScenario = {
       fileUploads: buildRequiredDocumentsFinanciers({
         structureType: StructureType.HUDA,
         resolveFormKind: (document) =>
-          Number(document.year) <= CURRENT_YEAR - 4 ? "ajout" : "finalisation",
+          Number(document.year) <= getCurrentYear() - 4
+            ? "ajout"
+            : "finalisation",
       }),
     },
     finances: {

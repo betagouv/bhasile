@@ -7,6 +7,11 @@ import {
 } from "@/app/api/adresses/ban.service";
 import type { CommuneCoordinates } from "@/types/adresse.type";
 
+vi.mock("@/app/api/adresses/ban.client", () => ({
+  searchMunicipality: vi.fn(),
+  searchAddress: vi.fn(),
+}));
+
 const SAINT_LO: CommuneCoordinates = {
   latitude: 49.113843,
   longitude: -1.080182,

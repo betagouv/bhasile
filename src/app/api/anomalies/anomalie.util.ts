@@ -1,13 +1,12 @@
 import { z } from "zod";
 
 import type { StructureAnomalieDb } from "@/app/api/anomalies/anomalie.db.type";
+import { CODE_REGION_IDF } from "@/constants";
 import type {
   AnomalieContext,
   StructureContext,
 } from "@/lib/anomalies/anomalie.type";
 import { StructureType } from "@/types/structure.type";
-
-const CODE_REGION_IDF = "FR-IDF";
 
 export const buildAnomalieContext = (
   dbStructure: StructureAnomalieDb

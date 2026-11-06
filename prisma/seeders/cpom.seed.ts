@@ -239,18 +239,6 @@ export const createFakeCpoms = async (
           isUiInitialized && regionId
             ? { connect: { id: regionId } }
             : undefined,
-        departements: isUiInitialized
-          ? {
-              create: departements
-                .filter(
-                  (departement) =>
-                    departement.regionAdministrative?.name === regionName
-                )
-                .map((departement) => ({
-                  departementNumero: departement.numero,
-                })),
-            }
-          : undefined,
         budgets: {
           create: budgetYears.flatMap((budgetYear) => {
             return structureTypes.map((structureType) => {

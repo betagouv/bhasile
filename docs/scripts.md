@@ -48,6 +48,8 @@ Par souci de clarté, deux routes sont possibles selon le cas décrit dessus :
 
 Les crons sont déclarés dans `cron.json` à la racine et exécutés par Scalingo. Chaque job passe par `yarn cronify` qui ne lance le script que si la variable d'environnement `IS_PRODUCTION=true` est présente (en prod donc).
 
+Chaque exécution envoie un check-in à [Sentry Crons](https://sentry.incubateur.net) (début, puis succès ou échec). Le moniteur doit exister dans Sentry avec pour slug le nom du script (ex : `eig-fetch`) et la même planification que dans `cron.json` (UTC) : sans lui, le check-in est ignoré. Sentry alerte en cas d'échec ou d'exécution manquée.
+
 Le postdeploy (`scripts/postdeploy.sh` : suppression/recréation des vues + `prisma migrate deploy`) peut être sauté sur un déploiement en posant `SKIP_POSTDEPLOY=1`, puis en la retirant.
 Garde-fou : le skip est ignoré si `IS_PRODUCTION=true` : la prod est toujours migrée, même si la variable a été écrite par erreur.
 

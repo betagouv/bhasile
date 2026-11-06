@@ -1,6 +1,7 @@
-import { Badge } from "@/app/components/common/Badge";
 import { cn } from "@/app/utils/classname.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
+
+import { CpomYearBadge } from "./CpomYearBadge";
 
 export const getBudgetTableHeading = ({ years, structure }: Props) => {
   return [
@@ -16,17 +17,7 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
       >
         <span className={cn("block text-sm", structure && "mb-1")}>{year}</span>
         {structure && (
-          <>
-            {structure.isInCpomPerYear[year] ? (
-              <Badge type="new" className="text-[10px]">
-                En CPOM
-              </Badge>
-            ) : (
-              <Badge type="disabled" className="text-[10px]">
-                Hors CPOM
-              </Badge>
-            )}
-          </>
+          <CpomYearBadge isInCpom={structure.isInCpomPerYear[year]} />
         )}
       </th>
     )),

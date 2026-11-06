@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import Loader from "@/app/components/ui/Loader";
 import { useMapLabels } from "@/app/hooks/useMapLabels";
@@ -14,6 +14,11 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
   const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
 
   const richZoneData = useCartographieRichZoneData();
+
+  const onRegionClickRef = useRef(onRegionClick);
+  useEffect(() => {
+    onRegionClickRef.current = onRegionClick;
+  });
 
   useEffect(() => {
     import("@gouvfr/dsfr-chart")
@@ -36,7 +41,7 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
         path.dataset.regionClickBound = "true";
         path.style.cursor = "pointer";
         path.classList.add("hover:opacity-80", "transition-opacity");
-        path.addEventListener("click", () => onRegionClick(code));
+        path.addEventListener("click", () => onRegionClickRef.current?.(code));
       }
       return true;
     },

@@ -7,7 +7,7 @@ import {
   getStructureVersionTransformationOperateur,
 } from "@/app/utils/transformation.util";
 import { STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER } from "@/config/transformation.config";
-import { AppAbility } from "@/lib/casl/abilities";
+import { AppAbility } from "@/lib/casl";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
@@ -18,6 +18,10 @@ import {
 } from "@/types/dashboard.type";
 import { isStepNotStarted } from "@/types/form.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
+import {
+  matchesFilters,
+  ParsedFilters,
+} from "@/utils/filters.util";
 
 export const getTransformationStatus = (
   transformation: TransformationApiRead
@@ -114,11 +118,8 @@ export const sortDashboardTransformationRows = (
       )
   );
 
-export type BuildDashboardTransformationRowsOptions = {
+export type BuildDashboardTransformationRowsOptions = ParsedFilters & {
   ability: AppAbility;
-  departementList: string[];
-  operateurList: string[];
-  typeList: string[];
 };
 
 const hasNonFinalisedStructure = (
@@ -129,19 +130,6 @@ const hasNonFinalisedStructure = (
       structureVersionTransformation.structureVersion?.structure
         ?.isFinalised === false
   );
-
-const isAcceptedByFilter = (
-  acceptedValues: string[],
-  structureVersionTransformations: StructureVersionTransformationApiRead[],
-  getValue: (
-    structureVersionTransformation: StructureVersionTransformationApiRead
-  ) => string | undefined
-): boolean =>
-  acceptedValues.length === 0 ||
-  structureVersionTransformations.some((structureVersionTransformation) => {
-    const value = getValue(structureVersionTransformation);
-    return value !== undefined && acceptedValues.includes(value);
-  });
 
 export const buildDashboardTransformationRows = (
   transformations: TransformationApiRead[],
@@ -157,24 +145,23 @@ export const buildDashboardTransformationRows = (
     const { structureVersionTransformations } = transformation;
 
     if (
-      !isAcceptedByFilter(
-        options.departementList,
-        structureVersionTransformations,
-        getStructureVersionTransformationDepartement
-      ) ||
-      !isAcceptedByFilter(
-        options.operateurList,
-        structureVersionTransformations,
-        (structureVersionTransformation) =>
-          getStructureVersionTransformationOperateur(
-            structureVersionTransformation
-          )?.id?.toString()
-      ) ||
-      !isAcceptedByFilter(
-        options.typeList,
-        structureVersionTransformations,
-        (structureVersionTransformation) =>
-          structureVersionTransformation.structureType ?? undefined
+      !matchesFilters(
+        {
+          departements: structureVersionTransformations.map(
+            getStructureVersionTransformationDepartement
+          ),
+          operateurIds: structureVersionTransformations.map(
+            (structureVersionTransformation) =>
+              getStructureVersionTransformationOperateur(
+                structureVersionTransformation
+              )?.id
+          ),
+          types: structureVersionTransformations.map(
+            (structureVersionTransformation) =>
+              structureVersionTransformation.structureType
+          ),
+        },
+        options
       )
     ) {
       continue;

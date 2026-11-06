@@ -73,8 +73,30 @@ const FAQ_BLOCK: FaqBlock = {
   icon: "fr-icon-question-answer-line",
   type: "faq",
   tabs: [
-    { id: "1", title: "Général" },
-    { id: "2", title: "Finances" },
+    {
+      id: "faq--cpom",
+      title: "CPOM",
+      items: [
+        {
+          id: 1,
+          question: "Quelle est la durée d’un CPOM ?",
+          contentMarkdown: "Cinq ans.",
+          category: "CPOM",
+        },
+      ],
+    },
+    {
+      id: "faq--finances",
+      title: "Finances",
+      items: [
+        {
+          id: 2,
+          question: "Quel est le budget maximum ?",
+          contentMarkdown: "Le plafond est fixé à 10 000 euros.",
+          category: "Finances",
+        },
+      ],
+    },
   ],
 };
 

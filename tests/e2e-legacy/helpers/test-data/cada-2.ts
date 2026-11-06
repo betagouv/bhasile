@@ -119,7 +119,6 @@ export const cada2: TestStructureScenario = {
         notePersonne: "3",
         notePro: "2.5",
         noteStructure: "3.5",
-        note: "3",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],

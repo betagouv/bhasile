@@ -8,7 +8,9 @@ import {
   getPageParam,
   SearchParams,
 } from "@/app/utils/search-params.util";
+import { PageHeader } from "@/components/PageHeader";
 import { OPERATEURS_STORAGE_KEY } from "@/constants";
+import { getFiltersFromSearchParams } from "@/utils/filters.util";
 
 import { OperateursContent } from "./OperateursContent";
 import { OperateursCount } from "./OperateursCount";
@@ -22,6 +24,7 @@ export default async function Operateurs({
   const params = await searchParams;
   const page = getPageParam(params, "page");
   const search = getFirstParam(params.search);
+  const filters = getFiltersFromSearchParams(params);
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -29,24 +32,14 @@ export default async function Operateurs({
         targetPath="/operateurs"
         storageKey={OPERATEURS_STORAGE_KEY}
       />
-      <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-10">
-        <h2
-          className="text-title-blue-france fr-h5 mr-4 mb-0"
-          id="operateurs-titre"
-        >
-          Opérateurs
-        </h2>
-        <div className="flex items-center">
-          <SearchBar
-            placeholder="Nom d'opérateur"
-            inputId="operateurs-search"
-          />
-          <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
-            <Suspense fallback={<div className="pl-3 min-w-24" />}>
-              <OperateursCount page={page} search={search} />
-            </Suspense>
-          </ContentErrorBoundary>
-        </div>
+      <PageHeader title="Opérateurs" titleId="operateurs-titre" />
+      <div className="flex gap-2 justify-end items-center py-3.5 px-6">
+        <SearchBar placeholder="Nom d'opérateur" inputId="operateurs-search" />
+        <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
+          <Suspense fallback={<div className="pl-3 min-w-24" />}>
+            <OperateursCount page={page} search={search} filters={filters} />
+          </Suspense>
+        </ContentErrorBoundary>
       </div>
       <ContentErrorBoundary
         fallback={
@@ -57,7 +50,7 @@ export default async function Operateurs({
         }
       >
         <Suspense fallback={<OperateursSkeleton />}>
-          <OperateursContent page={page} search={search} />
+          <OperateursContent page={page} search={search} filters={filters} />
         </Suspense>
       </ContentErrorBoundary>
     </div>

@@ -16,13 +16,7 @@ const vide = (year: number, type: "REALISE" | "PREVISIONNEL") => ({
 });
 
 describe("getIndicateursFinanciersSchema", () => {
-  const schema = getIndicateursFinanciersSchema(2024);
-
-  it("rejette une liste vide", () => {
-    const result = schema.safeParse({ indicateursFinanciers: [] });
-
-    expect(result.success).toBe(false);
-  });
+  const schema = getIndicateursFinanciersSchema(2024, {});
 
   it("exige le réalisé pour une année jusqu'au cutoff inclus", () => {
     const result = schema.safeParse({
@@ -82,7 +76,7 @@ describe("getIndicateursFinanciersSchema", () => {
   });
 
   it("émet un message distinct par année fautive", () => {
-    const result = getIndicateursFinanciersSchema(2025).safeParse({
+    const result = getIndicateursFinanciersSchema(2025, {}).safeParse({
       indicateursFinanciers: [vide(2024, "REALISE"), vide(2025, "REALISE")],
     });
 

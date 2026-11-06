@@ -30,7 +30,7 @@
       "scripts/*": ["./scripts/*"],
       "tests/*": ["./tests/*"]
     },
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vitest/globals", "@testing-library/jest-dom/vitest"]
   },
   "include": [
     "next-env.d.ts",

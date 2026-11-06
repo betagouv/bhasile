@@ -11,7 +11,6 @@ const baseIdentificationSchema = structureBaseSchema.extend({
   operateur: operateurSchema,
   creationDate: frenchDateToISO(),
   public: z.enum(PublicType),
-  filiale: z.string().optional(),
 });
 
 export const identificationSchema = structureBaseSchema.and(

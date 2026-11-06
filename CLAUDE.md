@@ -130,15 +130,18 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 
 ## Authentification
 
-- **ProConnect** : agents DREETS/DDETS uniquement, donne accès au dashboard
-- **Mot de passe** : opérateurs, accès limité aux formulaires `/ajout-structure` et `/ajout-adresses`
+- **ProConnect** : tout compte peut se connecter ; l'accès au dashboard demande au moins un binôme (voir [Permissions](docs/permissions.md))
+- **Mot de passe** : opérateurs, accès limité au formulaire `/ajout-structure`
 
 ## Documentation détaillée
 
 - [Architecture](docs/architecture.md) — stack, arborescence, services externes, schéma BDD
 - [Base de données](docs/database.md) — migrations, vues SQL, process recommandé
 - [Scripts](docs/scripts.md) — scripts one-off et récurrents (Scalingo)
+- [Messagerie](docs/messagerie.md) — messagerie tripartite de la tarification (canaux, ajout seul, droits, notifications, preuve)
+- [Emails](docs/email.md) — mails de notification : Brevo transactionnel, un mail groupé par destinataire deux fois par jour, trace et reprise
 - [Anomalies](docs/anomalies.md) — détection des incohérences de données (moteur isomorphe, registre, réconciliation)
+- [Permissions](docs/permissions.md) — binômes rôle × niveau géographique, droits de base par pattern, feuille de route opérateurs
 - [Départements](docs/departements.md) — les deux départements d'une structure : autorisation vs affichage
 - [Référentiel OFII](docs/ofii_referential.md) — mise à jour mensuelle du référentiel OFII
 - [Tests](docs/tests.md) — outils, nommage des fichiers et des cas (`it` en français)

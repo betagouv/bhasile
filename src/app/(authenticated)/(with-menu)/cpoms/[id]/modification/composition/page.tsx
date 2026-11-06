@@ -43,7 +43,10 @@ export default function CpomModificationComposition() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <FieldSetStructures formKind={FormKind.MODIFICATION} />
+        <FieldSetStructures
+          formKind={FormKind.MODIFICATION}
+          cpomStructures={cpom.structures}
+        />
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/cpoms/${cpom.id}`}

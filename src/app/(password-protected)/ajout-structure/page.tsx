@@ -41,7 +41,7 @@ export default async function AjoutStructurePage(): Promise<ReactElement> {
           </li>
           <li className="flex items-start gap-2 mb-3">
             <i className="fr-icon-check-line text-action-high-blue-france text-sm [&::before]:[--icon-size:1.5rem]"></i>
-            <span>Information de contact de la structure ;</span>
+            <span>Informations de contact de la structure ;</span>
           </li>
           <li className="flex items-start gap-2 mb-3">
             <i className="fr-icon-check-line text-action-high-blue-france text-sm [&::before]:[--icon-size:1.5rem]"></i>

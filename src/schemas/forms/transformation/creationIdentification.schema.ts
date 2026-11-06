@@ -28,7 +28,6 @@ import { structureBaseSchema } from "@/schemas/forms/base/structure.base.schema"
 const baseCreationIdentificationSchema = structureBaseSchema.extend({
   operateur: operateurSchema,
   effectiveDate: effectiveDateSchema,
-  filiale: z.string().optional(),
 });
 
 export const creationIdentificationSchema = baseCreationIdentificationSchema

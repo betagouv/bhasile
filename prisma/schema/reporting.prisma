@@ -1,14 +1,25 @@
 // TABLES
 
-// Tarifs journaliers cibles par type de structure et zonage (remplissage manuel)
+// Tarifs journaliers cibles par type de structure, année et zonage (remplissage manuel)
 model TarifJournalierCible {
   id             Int           @id @default(autoincrement())
   structure_type StructureType
+  year           Int
   belongs_to_idf Boolean
   tarif_cible    Decimal
 
-  @@unique([structure_type, belongs_to_idf])
+  @@unique([structure_type, year, belongs_to_idf])
   @@map("tarif_journalier_cible")
+  @@schema("reporting")
+}
+
+// Taux d'encadrement cibles (places par ETP) par type de structure (remplissage manuel)
+model TauxEncadrementCible {
+  id             Int           @id @default(autoincrement())
+  structure_type StructureType @unique
+  taux_cible     Decimal
+
+  @@map("taux_encadrement_cible")
   @@schema("reporting")
 }
 

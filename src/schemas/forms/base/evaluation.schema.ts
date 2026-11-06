@@ -17,12 +17,7 @@ const fileUploadSchema = z.object({
   id: zId(),
 });
 
-const noteFields = [
-  "notePersonne",
-  "notePro",
-  "noteStructure",
-  "note",
-] as const;
+const noteFields = ["notePersonne", "notePro", "noteStructure"] as const;
 
 const evaluationBaseSchema = z.object({
   id: zId(),
@@ -30,7 +25,6 @@ const evaluationBaseSchema = z.object({
   notePersonne: zSafeDecimalsNullish(),
   notePro: zSafeDecimalsNullish(),
   noteStructure: zSafeDecimalsNullish(),
-  note: zSafeDecimalsNullish(),
   fileUploads: z.array(fileUploadSchema.optional()).optional(),
   uuid: z.string().optional(), // Used to identify the evaluation when it is not saved in the database (and so does not have an id)
 });

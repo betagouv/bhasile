@@ -8,17 +8,20 @@ import type { Page } from "@playwright/test";
  */
 
 const waitHydrated = async (page: Page): Promise<void> => {
-  await page.waitForLoadState("networkidle", { timeout: 1_500 }).catch(() => {});
+  await page
+    .waitForLoadState("networkidle", { timeout: 1_500 })
+    .catch(() => {});
 };
 
-/** Onglet Structure → CTA « Créer une structure ». */
+/** Onglet Structure → menu 3-points → « Créer une structure ». */
 export const enterViaCreationCta = async (page: Page): Promise<void> => {
   await page.goto("/structures", { waitUntil: "domcontentloaded" });
   await waitHydrated(page);
+  await page.getByRole("button", { name: "Menu Structures" }).click();
   await page.getByRole("link", { name: "Créer une structure" }).click();
 };
 
-/** Onglet Structure → CTA « Transformer HUDA en CADA ». */
+/** Onglet Structure → bandeau « Transformer HUDA en CADA ». */
 export const enterViaHudaCta = async (page: Page): Promise<void> => {
   await page.goto("/structures", { waitUntil: "domcontentloaded" });
   await waitHydrated(page);

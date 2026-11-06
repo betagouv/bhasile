@@ -54,7 +54,6 @@ describe("ModificationControleQualite page integration", () => {
           notePersonne: 1,
           notePro: 1,
           noteStructure: 1,
-          note: 1,
         }),
       ])
     );

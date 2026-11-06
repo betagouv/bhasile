@@ -74,7 +74,7 @@ export const TransformationTypeForms = ({
             setTransformationType={setTransformationType}
           />
         )}
-        {structureId && !formType ? (
+        {structureId && !formType && !isDepartureLoading ? (
           <FromStructureVersionTransformationForm
             structure={departureStructure}
             transformationType={transformationType}

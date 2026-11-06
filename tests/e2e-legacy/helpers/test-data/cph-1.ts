@@ -226,7 +226,6 @@ export const cph1: TestStructureScenario = {
         notePersonne: "3.5",
         notePro: "3",
         noteStructure: "3.5",
-        note: "3.5",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],

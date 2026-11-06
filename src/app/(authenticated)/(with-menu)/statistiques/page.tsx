@@ -1,5 +1,9 @@
 import { SearchParams } from "@/app/utils/search-params.util";
 import { StatistiquesProvider } from "@/contexts/StatistiquesContext";
+import {
+  getFiltersFromSearchParams,
+  toFiltersSearchParams,
+} from "@/utils/filters.util";
 
 import { StatistiquesContent } from "./_components/StatistiquesContent";
 import { StatistiquesHeader } from "./_components/StatistiquesHeader";
@@ -10,32 +14,23 @@ export default async function StatistiquesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const awaitedSearchParams = await searchParams;
-
-  const departements =
-    typeof awaitedSearchParams.departements === "string"
-      ? awaitedSearchParams.departements
-      : undefined;
-  const operateurs =
-    typeof awaitedSearchParams.operateurs === "string"
-      ? awaitedSearchParams.operateurs
-      : undefined;
-  const types =
-    typeof awaitedSearchParams.types === "string"
-      ? awaitedSearchParams.types
-      : undefined;
-
-  const statistiques = await getStatistiques({
-    departements,
-    operateurs,
-    types,
-  });
+  const filters = getFiltersFromSearchParams(await searchParams);
+  const statistiques = await getStatistiques(filters);
+  const hasFilters = toFiltersSearchParams(filters).size > 0;
 
   return (
     <StatistiquesProvider entity={statistiques}>
       <div className="flex flex-col h-full">
         <StatistiquesHeader />
-        <StatistiquesContent />
+        {statistiques ? (
+          <StatistiquesContent />
+        ) : (
+          <p className="p-16">
+            {hasFilters
+              ? "Aucune structure ne correspond à vos filtres."
+              : "Aucune structure dans votre périmètre."}
+          </p>
+        )}
       </div>
     </StatistiquesProvider>
   );

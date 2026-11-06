@@ -1,10 +1,6 @@
 import { fireEvent, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import FinalisationFinancePage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/03-finance/page";
-
-import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
-import { createFinalisationFinanceValidStructure } from "../../../../../test-utils/structure.factory";
+import { mockStructurePageFetch } from "tests/test-utils/http.mock";
+import { createFinalisationFinanceValidStructure } from "tests/test-utils/structure.factory";
 import {
   clickButtonByName,
   expectFinalisationStepValidation,
@@ -14,8 +10,12 @@ import {
   getLatestPutStructuresPayloadMatching,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
-} from "../../../../../test-utils/structure-page-test.helpers";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+} from "tests/test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "tests/test-utils/structure-page-test.mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import FinalisationFinancePage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/03-finance/page";
+import { getCurrentYear } from "@/app/utils/now.util";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
@@ -58,10 +58,15 @@ describe("FinalisationFinance page integration", () => {
     });
   });
 
-  it("bloque la validation quand les indicateurs financiers sont manquants", async () => {
+  it("bloque la validation quand les indicateurs financiers d'une année hors CPOM sont manquants", async () => {
     // GIVEN
+    const validStructure = createFinalisationFinanceValidStructure(78);
     const structure = {
-      ...createFinalisationFinanceValidStructure(78),
+      ...validStructure,
+      isInCpomPerYear: {
+        ...validStructure.isInCpomPerYear,
+        [getCurrentYear()]: false,
+      },
       indicateursFinanciers: [],
     };
     const mockedFetch = mockStructurePageFetch(structure);
@@ -71,6 +76,11 @@ describe("FinalisationFinance page integration", () => {
     await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
+    expect(
+      screen.getByText(
+        new RegExp(`réalisé ou prévisionnel ${getCurrentYear()}.*requis`, "i")
+      )
+    ).toBeInTheDocument();
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });

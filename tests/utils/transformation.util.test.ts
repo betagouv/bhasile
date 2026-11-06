@@ -688,23 +688,28 @@ describe("transformation util", () => {
     it.each([
       TransformationType.OUVERTURE_EX_NIHILO,
       TransformationType.TRANSFO_HUDA_FERMETURE_REMISE_EN_CONCURRENCE,
-    ])("renvoie /structures pour %s (pas de type principal)", (transformationType) => {
-      // GIVEN
-      const transformation = createTransformation({
-        id: 5,
-        type: transformationType,
-        structureVersionTransformations: [
-          {
-            id: 1,
-            type: StructureVersionTransformationType.CREATION,
-            structureVersion: { structureId: 1001 },
-          } as StructureVersionTransformationApiRead,
-        ],
-      });
+    ])(
+      "renvoie /structures pour %s (pas de type principal)",
+      (transformationType) => {
+        // GIVEN
+        const transformation = createTransformation({
+          id: 5,
+          type: transformationType,
+          structureVersionTransformations: [
+            {
+              id: 1,
+              type: StructureVersionTransformationType.CREATION,
+              structureVersion: { structureId: 1001 },
+            } as StructureVersionTransformationApiRead,
+          ],
+        });
 
-      // THEN
-      expect(getTransformationOriginRoute(transformation)).toBe("/structures");
-    });
+        // THEN
+        expect(getTransformationOriginRoute(transformation)).toBe(
+          "/structures"
+        );
+      }
+    );
 
     it("se rabat sur /structures quand la structureVersionTransformation principale n'a pas de structureId", () => {
       // GIVEN
@@ -890,7 +895,8 @@ describe("transformation util", () => {
           structureVersion: {
             effectiveDate: "2025-08-25T12:00:00.000Z",
             structure: {
-              codeBhasile: "BHA-NOR-001", isFinalised: true,
+              codeBhasile: "BHA-NOR-001",
+              isFinalised: true,
               placesAutorisees: 40,
             },
           },
@@ -1159,7 +1165,11 @@ describe("getStructureVersionTransformationDepartement", () => {
     const structureVersionTransformation = createStructureVersionTransformation(
       {
         structureVersion: {
-          structure: { codeBhasile: "ABC", isFinalised: true, departementAdministratif: "13" },
+          structure: {
+            codeBhasile: "ABC",
+            isFinalised: true,
+            departementAdministratif: "13",
+          },
         },
       }
     );
@@ -1176,7 +1186,11 @@ describe("getStructureVersionTransformationDepartement", () => {
       {
         structureVersion: {
           departementAdministratif: "50",
-          structure: { codeBhasile: "ABC", isFinalised: true, departementAdministratif: "13" },
+          structure: {
+            codeBhasile: "ABC",
+            isFinalised: true,
+            departementAdministratif: "13",
+          },
         },
       }
     );

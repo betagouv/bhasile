@@ -138,12 +138,6 @@ export async function fillEvaluationsForm(
         String(evaluation.noteStructure)
       );
     }
-    if (evaluation.note !== undefined) {
-      await formHelper.fillInputIfExists(
-        `input[name="evaluations.${i}.note"]`,
-        String(evaluation.note)
-      );
-    }
     if (evaluation.filePath) {
       await setControlesFileInput(
         page,

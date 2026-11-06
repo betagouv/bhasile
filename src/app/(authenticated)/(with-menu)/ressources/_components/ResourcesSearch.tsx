@@ -13,9 +13,12 @@ export const ResourcesSearch = ({ suggestions }: Props): ReactElement => {
   const searchParams = useSearchParams();
   const navigateWithFilter = useFilterNavigation();
 
-  const [searchTerm, setSearchTerm] = useState(
-    searchParams.get("search") ?? ""
-  );
+  const searchParamValue = searchParams.get("search") ?? "";
+  const [searchTerm, setSearchTerm] = useState(searchParamValue);
+
+  useEffect(() => {
+    setSearchTerm(searchParamValue);
+  }, [searchParamValue]);
 
   const applySearch = (searchQuery: string): void => {
     if ((searchParams.get("search") ?? "") === searchQuery) {

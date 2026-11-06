@@ -49,7 +49,6 @@ const structureMinimalApiSchema = z.object({
 
 export const structureOperateurUpdateApiSchema =
   structureMinimalApiSchema.extend({
-    filiale: z.string().optional(),
     adresseAdministrative: z
       .string()
       .min(1, "L'adresse administrative est requise"),

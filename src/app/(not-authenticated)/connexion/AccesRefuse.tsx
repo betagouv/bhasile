@@ -1,25 +1,55 @@
+"use client";
+
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { ReactElement } from "react";
+import { ReactElement, useEffect, useRef } from "react";
 
 import { ExternalLink } from "@/app/components/common/ExternalLink";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
+import {
+  AUTH_FAILURE_ALERTS,
+  AuthAlert,
+  DEFAULT_AUTH_ALERT,
+  isAuthFailureReason,
+  NEXTAUTH_ERROR_ALERTS,
+} from "@/lib/next-auth/auth-failure";
 
-export const AccesRefuse = (): ReactElement => {
+type AccesRefuseProps = {
+  reason?: string | null;
+  error?: string | null;
+};
+
+export const AccesRefuse = ({
+  reason,
+  error,
+}: AccesRefuseProps): ReactElement => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const alert: AuthAlert =
+    (isAuthFailureReason(reason) ? AUTH_FAILURE_ALERTS[reason] : undefined) ??
+    (error ? NEXTAUTH_ERROR_ALERTS[error] : undefined) ??
+    DEFAULT_AUTH_ALERT;
+
+  useEffect(() => {
+    containerRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, []);
+
   return (
-    <div className="max-w-[600px] my-10">
+    <div ref={containerRef} className="max-w-150 my-10">
       <Alert
-        title="Accès refusé"
+        title={alert.title}
         description={
           <span>
-            L’accès à Bhasile n’est pas autorisé pour le compte ProConnect
-            associé à l’adresse que vous avez utilisée.{" "}
+            {alert.description}{" "}
             <ExternalLink
               url={`mailto:${BHASILE_CONTACT_EMAIL}`}
               title="Contacter le support"
             />
           </span>
         }
-        severity="error"
+        severity={alert.severity}
       />
     </div>
   );

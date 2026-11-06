@@ -78,7 +78,6 @@ export type FillOptions = {
   withAntennes?: boolean;
   withSecondDna?: boolean;
   withSecondContact?: boolean;
-  withFiliale?: boolean;
   withQpvPmr?: boolean;
   withUploadActe?: boolean;
   withFermetureDoc?: boolean;
@@ -104,12 +103,6 @@ export const fillCreationIdentification = async (
     page.locator("#effectiveDate"),
     TRANSFORMATION_TEST_VALUES.effectiveDate
   );
-
-  if (options.withFiliale) {
-    // DSFR ToggleSwitch : l'`id` est sur le wrapper, la checkbox est `${id}-input`.
-    await page.locator("#managed-by-a-filiale-input").check({ force: true });
-    await page.locator("#filiale").fill("Filiale E2E");
-  }
 
   await page.locator("#type").selectOption(context.structureType);
 

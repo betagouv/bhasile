@@ -16,6 +16,11 @@ import { PrismaTransaction } from "@/types/prisma.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
+import {
+  findCpomStructuresOfStructure,
+  updateCpomStructuresDateEnd,
+} from "../cpoms/cpom.repository";
+import { getCpomStructureIdsToEndAtFermeture } from "../cpoms/cpom.util";
 import { TRANSFORMATION_FORM_SLUG } from "../forms/form.constants";
 import {
   createOrUpdateForm,
@@ -315,10 +320,22 @@ const setFermetureDates = async (
       );
     }
 
-    await tx.structure.updateMany({
+    const { count } = await tx.structure.updateMany({
       where: { id: structureId, fermetureDate: null },
       data: { fermetureDate: effectiveDate },
     });
+
+    if (count > 0) {
+      const cpomStructures = await findCpomStructuresOfStructure(
+        tx,
+        structureId
+      );
+      await updateCpomStructuresDateEnd(
+        tx,
+        getCpomStructureIdsToEndAtFermeture(cpomStructures, effectiveDate),
+        effectiveDate
+      );
+    }
   }
 };
 

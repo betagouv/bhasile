@@ -20,9 +20,17 @@ export const DownloadItem = ({ item, cpomInherited = false, index }: Props) => {
     window.open(link);
   };
 
+  const hasCustomName = (): boolean => {
+    if (!item.name || item.name === "Document") {
+      return false;
+    }
+    const isDocumentFinancier = "year" in item;
+    return !isDocumentFinancier || item.category === "AUTRE_FINANCIER";
+  };
+
   const getFileLabel = (): string => {
-    if (item.name && item.name !== "Document") {
-      return item?.name;
+    if (hasCustomName()) {
+      return item.name ?? "";
     } else {
       const avenant = index ? `Avenant ${index} ` : "";
       const categoryLabel = getCategoryLabel(item.category);

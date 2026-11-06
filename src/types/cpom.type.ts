@@ -1,5 +1,7 @@
 import type { CpomGranularity } from "@/generated/prisma/client";
 
+import type { Filters } from "./filters.type";
+import type { SessionUser } from "./global";
 import type { CpomColumn } from "./ListColumn";
 
 export type { CpomGranularity };
@@ -16,9 +18,9 @@ export type CpomListItem = {
   isFinalised: boolean;
 };
 
-export type CpomsQuery = {
+export type CpomsQuery = Filters & {
   page: number;
-  departements: string | null;
   column: CpomColumn | null;
   direction: "asc" | "desc" | null;
+  user: SessionUser | undefined;
 };

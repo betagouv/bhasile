@@ -7,10 +7,12 @@ Deux vues distinctes
 Pour chaque structure **ouverte à la date de référence** (`context.structures`) :
 
 1. Résoudre le DNA à la date de l'activité (`lookupStructureIdsForDnaAtDate`)
-2. Prendre la **dernière** activité connue pour cette structure
+2. Prendre le **dernier mois** déclaré pour cette structure, et toutes les activités de ce mois : une par DNA rattaché (une structure multi-DNA somme les chiffres de tous ses DNA)
 3. Sommer les indicateurs (places, motifs, présences indues)
 
 Une structure sans activité n'entre pas dans les totaux.
+
+`placesEnregistreesDna` = `placesDisponibles` + `placesIndisponibles` + `placesCaes` : l'indisponibilité n'est pas suivie pour les CAES, leurs places forment une part à part du camembert.
 
 ## `byMonth` - tableau mensuel
 

@@ -1,17 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import ModificationFinancesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/finances/page";
-import { CURRENT_YEAR } from "@/constants";
-
-import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
-import { createModificationFinancesValidStructure } from "../../../../../test-utils/structure.factory";
+import { screen } from "@testing-library/react";
+import { mockStructurePageFetch } from "tests/test-utils/http.mock";
+import { createModificationFinancesValidStructure } from "tests/test-utils/structure.factory";
 import {
   clickButtonByName,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
-} from "../../../../../test-utils/structure-page-test.helpers";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+} from "tests/test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "tests/test-utils/structure-page-test.mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import ModificationFinancesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/finances/page";
+import { getCurrentYear } from "@/app/utils/now.util";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
@@ -49,14 +49,17 @@ describe("ModificationFinances page integration", () => {
     expect(body.budgets).toEqual(structure.budgets);
     expect(body.indicateursFinanciers).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ year: CURRENT_YEAR, type: "PREVISIONNEL" }),
+        expect.objectContaining({
+          year: getCurrentYear(),
+          type: "PREVISIONNEL",
+        }),
         expect.objectContaining({ year: 2025, type: "PREVISIONNEL" }),
         expect.objectContaining({ year: 2025, type: "REALISE" }),
       ])
     );
     expect(
       body.indicateursFinanciers.filter(
-        (item) => item.year >= CURRENT_YEAR && item.type === "REALISE"
+        (item) => item.year >= getCurrentYear() && item.type === "REALISE"
       )
     ).toEqual([]);
     expect(body.indicateursFinanciers.every((item) => item.year >= 2021)).toBe(
@@ -76,10 +79,15 @@ describe("ModificationFinances page integration", () => {
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 
-  it("bloque la soumission quand les indicateurs financiers sont manquants", async () => {
+  it("bloque la soumission quand les indicateurs financiers d'une année hors CPOM sont manquants", async () => {
     // GIVEN
+    const validStructure = createModificationFinancesValidStructure(78);
     const structure = {
-      ...createModificationFinancesValidStructure(78),
+      ...validStructure,
+      isInCpomPerYear: {
+        ...validStructure.isInCpomPerYear,
+        [getCurrentYear()]: false,
+      },
       indicateursFinanciers: [],
     };
     const mockedFetch = mockStructurePageFetch(structure);
@@ -89,6 +97,11 @@ describe("ModificationFinances page integration", () => {
     await clickButtonByName("Valider");
 
     // THEN
+    expect(
+      screen.getByText(
+        new RegExp(`réalisé ou prévisionnel ${getCurrentYear()}.*requis`, "i")
+      )
+    ).toBeInTheDocument();
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });

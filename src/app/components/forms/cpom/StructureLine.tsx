@@ -32,10 +32,16 @@ export const StructureLine = ({
       setValue(`structures.${index}.dateStart`, undefined);
       setValue(`structures.${index}.dateEnd`, undefined);
     } else {
-      setValue(`structures.${index}.dateStart`, cpomDateStart);
-      setValue(`structures.${index}.dateEnd`, cpomDateEnd);
+      setValue(
+        `structures.${index}.dateStart`,
+        cpomStructure?.[index]?.dateStart ?? cpomDateStart
+      );
+      setValue(
+        `structures.${index}.dateEnd`,
+        cpomStructure?.[index]?.dateEnd ?? cpomDateEnd
+      );
     }
-  }, [index, setValue, cpomDateStart, cpomDateEnd, isEditable]);
+  }, [index, setValue, cpomStructure, cpomDateStart, cpomDateEnd, isEditable]);
 
   const structureLabel = `${structure.codeBhasile} - ${structure.type} ${structure.operateur?.name} ${structure.communeAdministrative ?? structure.departementAdministratif}`;
 

@@ -4,6 +4,7 @@ import {
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { getYearRange } from "@/app/utils/date.util";
+import { getCurrentYear } from "@/app/utils/now.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { DocumentFinancierCategory } from "@/types/document-financier.type";
 import { StepStatus } from "@/types/form.type";
@@ -26,6 +27,13 @@ export type SeededActualisationStructure = SeededStructure;
 const isAutorisee = (type: StructureType): boolean =>
   type === StructureType.CADA || type === StructureType.CPH;
 
+// Document requis volontairement absent, pour éprouver le blocage de l'étape.
+export const ACTUALISATION_MISSING_DOCUMENT = {
+  category: "BUDGET_PREVISIONNEL_DEMANDE",
+  label: "Budget prévisionnel demandé",
+  year: getCurrentYear() - 2,
+} as const;
+
 const fakeFileUpload = (key: string) => ({
   key,
   mimeType: "application/pdf",
@@ -38,7 +46,8 @@ const fakeFileUpload = (key: string) => ({
 const seedRequiredDocuments = async (
   structureId: number,
   codeBhasile: string,
-  type: StructureType
+  type: StructureType,
+  shouldSkipMissingDocument: boolean
 ): Promise<void> => {
   const documents = isAutorisee(type)
     ? structureAutoriseesDocuments
@@ -49,6 +58,13 @@ const seedRequiredDocuments = async (
 
   for (const category of requiredCategories) {
     for (const year of getYearRange().years) {
+      const isMissingDocument =
+        shouldSkipMissingDocument &&
+        category === ACTUALISATION_MISSING_DOCUMENT.category &&
+        year === ACTUALISATION_MISSING_DOCUMENT.year;
+      if (isMissingDocument) {
+        continue;
+      }
       await prisma.documentFinancier.create({
         data: {
           structureId,
@@ -93,7 +109,11 @@ const seedRequiredActe = async (
  */
 export const createActualisationStructureForTest = async ({
   type = StructureType.CADA,
-}: { type?: StructureType } = {}): Promise<SeededActualisationStructure> => {
+  shouldSkipMissingDocument = false,
+}: {
+  type?: StructureType;
+  shouldSkipMissingDocument?: boolean;
+} = {}): Promise<SeededActualisationStructure> => {
   const year = Number(process.env.ACTUALISATION_YEAR);
   if (!Number.isInteger(year)) {
     throw new Error(
@@ -105,7 +125,12 @@ export const createActualisationStructureForTest = async ({
 
   await seedValidStructureBudgets(base.id);
   await seedValidIndicateursFinanciers(base.id);
-  await seedRequiredDocuments(base.id, base.codeBhasile, type);
+  await seedRequiredDocuments(
+    base.id,
+    base.codeBhasile,
+    type,
+    shouldSkipMissingDocument
+  );
   await seedRequiredActe(base.id, base.codeBhasile, type);
   await seedFinalisationForm(base.id);
 

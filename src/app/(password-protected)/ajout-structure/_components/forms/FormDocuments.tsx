@@ -10,7 +10,7 @@ import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
-import { DocumentsFinanciersFlexibleSchema } from "@/schemas/forms/base/documentFinancier.schema";
+import { DocumentsFinanciersSubmitSchema } from "@/schemas/forms/base/documentFinancier.schema";
 import { FormKind } from "@/types/global";
 
 export default function FormDocuments() {
@@ -50,7 +50,7 @@ export default function FormDocuments() {
 
   return (
     <FormWrapper
-      schema={DocumentsFinanciersFlexibleSchema}
+      schema={DocumentsFinanciersSubmitSchema}
       localStorageKey={`ajout-structure-${params.id}-documents`}
       nextRoute={nextRoute}
       resetRoute={resetRoute}

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PUT } from "@/app/api/anomalies/[id]/route";
 
 const mockGetServerSession = vi.fn();
-const mockCanUpdateDepartement = vi.fn();
+const mockCanUpdateStructure = vi.fn();
 const mockGetAnomalieForUpdate = vi.fn();
 const mockSetAnomalieJustification = vi.fn();
 const mockCreateStructureEvent = vi.fn();
@@ -15,9 +15,8 @@ vi.mock("next-auth", () => ({
 
 vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
 
-vi.mock("@/lib/casl/abilities", () => ({
-  canUpdateDepartement: (...args: unknown[]) =>
-    mockCanUpdateDepartement(...args),
+vi.mock("@/lib/casl", () => ({
+  canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
 }));
 
 vi.mock("@/app/api/anomalies/anomalie.service", () => ({
@@ -46,7 +45,7 @@ describe("PUT /api/anomalies/[id]", () => {
     mockGetServerSession.mockResolvedValue({
       user: { email: "agent@gouv.fr", role: "DEPARTEMENT" },
     });
-    mockCanUpdateDepartement.mockReturnValue(true);
+    mockCanUpdateStructure.mockReturnValue(true);
     mockGetAnomalieForUpdate.mockResolvedValue({
       structureId: 42,
       departementAdministratif: "50",
@@ -66,7 +65,7 @@ describe("PUT /api/anomalies/[id]", () => {
   });
 
   it("refuse un agent hors de son département", async () => {
-    mockCanUpdateDepartement.mockReturnValue(false);
+    mockCanUpdateStructure.mockReturnValue(false);
 
     const response = await PUT(
       buildRequest({ isJustified: true, commentaire: "Vérifié" }),

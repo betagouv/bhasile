@@ -1,14 +1,13 @@
 import { ReactElement } from "react";
 
+import { CallToActionBanner } from "@/components/CallToActionBanner";
 import { useStructureContext } from "@/contexts/StructureContext";
-
-import { StructureCallToActionHeader } from "./StructureCallToActionHeader";
 
 export const FinalisationHeader = (): ReactElement => {
   const { structure } = useStructureContext();
 
   return (
-    <StructureCallToActionHeader
+    <CallToActionBanner
       href={`/structures/${structure.id}/finalisation/01-identification`}
       label="Je finalise la création de cette structure"
       message={

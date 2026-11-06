@@ -27,8 +27,7 @@ export default function NotFound(): ReactElement {
               qu’elle est correcte. La page n’est peut-être plus disponible.
               <br />
               Dans ce cas, pour continuer votre visite vous pouvez consulter
-              notre page d’accueil, ou effectuer une recherche avec notre moteur
-              de recherche en haut de page.
+              notre page d’accueil.
               <br />
               Sinon contactez-nous pour que l’on puisse vous rediriger vers la
               bonne information.

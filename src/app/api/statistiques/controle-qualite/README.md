@@ -4,23 +4,27 @@ Structures actives avec typologie (≥1 `StructureTypologie`). Places EIG = somm
 
 ## Sources
 
-- EIG : `EvenementIndesirableGrave` via `dnaCode`, restreints de 2015 à `CURRENT_YEAR`
+- EIG : `EvenementIndesirableGrave` via `dnaCode`, restreints de 2015 à l'année courante (`getCurrentYear()`)
 - Évaluations : `Evaluation` par `structureId`
 - Lien DNA : `lookupStructureIdsForDnaAtDate` (`statistiques.util`) - version effective à la date de l'événement (`structureVersionTimeline`)
 - Violent : sous-chaîne `comportement violent` (insensible à la casse, espaces normalisés) - `isEigComportementViolent`
 
 ## Vue globale `eig` (12 mois glissants)
 
-Fenêtre 12 mois : `filterByTwelveMonthWindow` (`statistiques.util`).
+Fenêtre : du 1er jour du mois d'il y a 12 mois à aujourd'hui (`getTwelveMonthWindow`).
+
+Une structure compte **au numérateur et au dénominateur tant qu'elle est ouverte**, pas au-delà :
+
+- **EIG** : ceux dont le DNA résout, à la date de l'événement, vers une structure du périmètre alors ouverte (même règle que les séries par période).
+- **Places** : places de chaque structure pondérées par sa durée d'ouverture sur la fenêtre. Une structure fermée il y a 5 mois pèse 7/12 de ses places, avec ses EIG des 7 premiers mois.
+- **Évaluations** : celles menées pendant que la structure était ouverte.
+
+Les places sont les dernières places connues de la structure : pas d'historique de capacité sur la fenêtre, pour rester simple.
 
 | Champ                                                                        | Calcul                           |
 | ---------------------------------------------------------------------------- | -------------------------------- |
 | `tauxEig`, `nbEig`, `nbEigComportementViolent`, `tauxEigComportementViolent` | `computeEigRates`                |
 | `moyenneEvaluationsLast12Months`                                             | `computeEvaluationGlobalSummary` |
-
-## TODO (métier)
-
-Confirmer que `moyenneEvaluationsLast12Months` doit bien être sur **12 mois glissants** (comme les EIG) et non sur l'année civile en cours (ex. 2026). À date, même jour - 1 an dans les deux cas.
 
 ## `byMonth` / `byTrimester` / `byYear`
 

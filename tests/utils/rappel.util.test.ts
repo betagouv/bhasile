@@ -110,8 +110,16 @@ describe("groupRappels", () => {
 
   it("groupe par tâche avec le label canonique", () => {
     const rappels = [
-      makeRappel({ id: "a", taskType: "EVALUATION", taskLabel: "Évaluation à mener" }),
-      makeRappel({ id: "b", taskType: "EVALUATION", taskLabel: "Évaluation à lancer" }),
+      makeRappel({
+        id: "a",
+        taskType: "EVALUATION",
+        taskLabel: "Évaluation à mener",
+      }),
+      makeRappel({
+        id: "b",
+        taskType: "EVALUATION",
+        taskLabel: "Évaluation à lancer",
+      }),
     ];
 
     const nodes = groupRappels(rappels, "STRUCTURE", "TASK");

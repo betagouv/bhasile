@@ -1,13 +1,26 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import client from "next-auth/react";
-import { describe, expect, it, Mock } from "vitest";
+import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { Menu } from "@/app/components/Menu";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
 vitest.mock("next-auth/react");
 
+const mockPathname = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => mockPathname(),
+}));
+
+const getGroupButton = (name: string) => screen.getByRole("button", { name });
+
 describe("Menu", () => {
+  beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "true");
+    mockPathname.mockReturnValue("/");
+  });
+
   it("affiche les éléments de l'en-tête au rendu", () => {
     // GIVEN
     const mockSession = {
@@ -26,10 +39,14 @@ describe("Menu", () => {
     });
     expect(logo).toHaveAttribute("href", "/");
     const structures = screen.getByRole("link", {
-      name: "Structures d’hébergement",
+      name: "Voir les structures",
     });
     expect(structures).toHaveAttribute("href", "/structures");
-    const operateurs = screen.getByRole("link", { name: "Opérateurs" });
+    const cpoms = screen.getByRole("link", { name: "Voir les CPOM" });
+    expect(cpoms).toHaveAttribute("href", "/cpoms");
+    const operateurs = screen.getByRole("link", {
+      name: "Voir les opérateurs",
+    });
     expect(operateurs).toHaveAttribute("href", "/operateurs");
     const statistiques = screen.getByRole("link", { name: "Statistiques" });
     expect(statistiques).toHaveAttribute("href", "/statistiques");
@@ -65,5 +82,105 @@ describe("Menu", () => {
     );
     expect(codeSource).toHaveAttribute("target", "_blank");
     expect(codeSource).toHaveAttribute("rel", "noopener external");
+  });
+  it("déploie Structures et opérateurs par défaut", () => {
+    // GIVEN
+    render(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(getGroupButton("Paramètres")).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(screen.queryByText("Voir mon compte")).not.toBeInTheDocument();
+  });
+
+  it("replie Structures et opérateurs quand Paramètres est déployé", () => {
+    // GIVEN
+    render(<Menu />);
+
+    // WHEN
+    fireEvent.click(getGroupButton("Paramètres"));
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+    expect(screen.getByText("Voir mon compte")).toBeInTheDocument();
+  });
+
+  it("replie puis redéploie Structures et opérateurs au clic", () => {
+    // GIVEN
+    render(<Menu />);
+
+    // WHEN
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // THEN
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+
+    // WHEN
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // THEN
+    expect(screen.getByText("Voir les structures")).toBeInTheDocument();
+  });
+
+  it("déploie Paramètres sur une page de paramètres", () => {
+    // GIVEN
+    mockPathname.mockReturnValue("/parametres/compte");
+
+    // WHEN
+    render(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Paramètres")).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Voir mon compte" })
+    ).toHaveAttribute("aria-current", "page");
+  });
+
+  it("garde Structures et opérateurs replié en changeant de page", () => {
+    // GIVEN
+    const { rerender } = render(<Menu />);
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // WHEN
+    mockPathname.mockReturnValue("/statistiques");
+    rerender(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+  });
+
+  it("déploie le groupe de la page visitée en changeant de page", () => {
+    // GIVEN
+    mockPathname.mockReturnValue("/parametres/compte");
+    const { rerender } = render(<Menu />);
+
+    // WHEN
+    mockPathname.mockReturnValue("/cpoms");
+    rerender(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(screen.queryByText("Voir mon compte")).not.toBeInTheDocument();
   });
 });

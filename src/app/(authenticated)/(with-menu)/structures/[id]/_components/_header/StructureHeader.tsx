@@ -20,8 +20,10 @@ import { StructureHeaderModals } from "./StructureHeaderModals";
 
 export const StructureHeader = ({
   actualisationYear,
+  isTarificationAccessible,
 }: {
   actualisationYear: number | null;
+  isTarificationAccessible: boolean;
 }): ReactElement | null => {
   const { structure } = useStructureContext();
   const isStructureFinalisee = structure.isFinalised;
@@ -58,7 +60,10 @@ export const StructureHeader = ({
           </Link>
           <HeaderMainContent />
           <div className="grow" />
-          <StructureHeaderActions actualisationYear={actualisationYear} />
+          <StructureHeaderActions
+            actualisationYear={actualisationYear}
+            isTarificationAccessible={isTarificationAccessible}
+          />
         </div>
 
         <div

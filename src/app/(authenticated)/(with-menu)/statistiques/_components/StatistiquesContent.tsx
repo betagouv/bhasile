@@ -2,18 +2,22 @@
 
 import { ReactElement, useEffect } from "react";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Section } from "@/app/components/common/Section";
 import { useUserAction } from "@/app/hooks/useUserAction";
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { isSomeDataIncomplete } from "@/utils/statistiques.util";
 
 import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";
 import { FinancesBlock } from "./finances/FinancesBlock";
+import { PartialDataNotice } from "./PartialDataNotice";
 import { RMUBlock } from "./rmu/RMUBlock";
+import { StatistiquesCallouts } from "./StatistiquesCallouts";
 import { StructuresBlock } from "./structures/StructuresBlock";
 import { TypesPlacesBlock } from "./type-places/TypesPlacesBlock";
 
 export const StatistiquesContent = (): ReactElement => {
+  const { statistiques } = useStatistiquesContext();
   const { trackStatistiques } = useUserAction();
 
   useEffect(() => {
@@ -23,23 +27,8 @@ export const StatistiquesContent = (): ReactElement => {
 
   return (
     <div className="flex flex-col gap-3 px-3 pt-3">
-      <CustomNotice
-        severity="warning"
-        description={
-          <span>
-            <b>
-              Ces statistiques ne prennent en compte que les informations dont
-              nous disposons.
-            </b>{" "}
-            De façon générale, les PRAHDA et les nuits hôtelières ne sont pas
-            intégrés à Bhasile. Les structures qui n’ont pas encore été
-            initialisées sur l’outil ne sont pas comptabilisées. Enfin, selon
-            les années, les structures qui n’ont pas fait leur actualisation ne
-            sont pas prises en compte.
-          </span>
-        }
-        className="rounded-lg bg-contrast-yellow-tournesol text-action-high-yellow-tournesol [&_.fr-container]:max-w-none"
-      />
+      <StatistiquesCallouts />
+      {isSomeDataIncomplete(statistiques) && <PartialDataNotice />}
       <Section id="structures">
         <StructuresBlock />
       </Section>

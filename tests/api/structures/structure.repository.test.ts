@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { createNationalAgent } from "tests/test-utils/factories/session-user.factory";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
@@ -132,7 +133,6 @@ describe("structure.repository db integration", () => {
       adresseAdministrative: "10 rue de la Paix",
       codePostalAdministratif: "75001",
       communeAdministrative: "Paris",
-      filiale: "Filiale test",
       type: StructureType.CADA,
       latitude: "48.8566",
       longitude: "2.3522",
@@ -144,7 +144,7 @@ describe("structure.repository db integration", () => {
       directionTerritoriale: "DT75",
     });
 
-    // THEN: les scalaires versionnés sont sur le rolling, filiale reste sur Structure
+    // THEN: les scalaires versionnés sont sur le rolling
     const version = await fetchCurrentVersion(structure.id);
     expect(version.public).toBe("FAMILLE");
     expect(version.adresseAdministrative).toBe("10 rue de la Paix");
@@ -161,7 +161,6 @@ describe("structure.repository db integration", () => {
     const updated = await prisma.structure.findUniqueOrThrow({
       where: { id: structure.id },
     });
-    expect(updated.filiale).toBe("Filiale test");
     expect(updated.creationDate?.toISOString()).toBe(creationDate);
     expect(updated.date303?.toISOString()).toBe(date303);
   });
@@ -714,7 +713,7 @@ describe("structure.repository db integration", () => {
     });
 
     // WHEN: the fiche is read end-to-end (findOne + résolution + merge)
-    const read = await getFullStructure(structure.id);
+    const read = await getFullStructure(structure.id, createNationalAgent());
 
     // THEN: the read model reflects the rolling version, not the frozen shell
     expect(read?.nom).toBe("Nom versionné");
@@ -1001,6 +1000,223 @@ describe("structure.repository db integration", () => {
     ).toContain(file.key);
   });
 
+  it("refuse la clé du contrôle d'une autre structure sans déplacer le fichier", async () => {
+    const otherStructure = await createStructure();
+    const structure = await createStructure();
+    const file = await createFileUpload("controle-autre-structure");
+    const foreignControle = await prisma.controle.create({
+      data: {
+        structureId: otherStructure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        type: "PROGRAMME",
+        fileUploads: { connect: { key: file.key } },
+      },
+    });
+
+    const error = await updateOne({
+      id: structure.id,
+      controles: [
+        {
+          date: "2025-01-01T00:00:00.000Z",
+          type: ControleType.PROGRAMME,
+          fileUploads: [{ key: file.key, id: file.id }],
+        },
+      ],
+    }).catch((caughtError: unknown) => caughtError);
+
+    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: file.key },
+    });
+    expect(fileAfter.controleId).toBe(foreignControle.id);
+    expect(error).toMatchObject({ name: "DomainError", status: 409 });
+  });
+
+  it("refuse la clé de l'évaluation d'une autre structure sans déplacer le fichier", async () => {
+    const otherStructure = await createStructure();
+    const structure = await createStructure();
+    const file = await createFileUpload("evaluation-autre-structure");
+    const foreignEvaluation = await prisma.evaluation.create({
+      data: {
+        structureId: otherStructure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        fileUploads: { connect: { key: file.key } },
+      },
+    });
+
+    const error = await updateOne({
+      id: structure.id,
+      evaluations: [
+        {
+          date: "2025-01-01T00:00:00.000Z",
+          fileUploads: [{ key: file.key }],
+        },
+      ],
+    }).catch((caughtError: unknown) => caughtError);
+
+    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: file.key },
+    });
+    expect(fileAfter.evaluationId).toBe(foreignEvaluation.id);
+    expect(error).toMatchObject({ name: "DomainError", status: 409 });
+  });
+
+  it("ne met pas à jour le contrôle d'une autre structure quand son id est envoyé", async () => {
+    const otherStructure = await createStructure();
+    const structure = await createStructure();
+    const foreignDate = new Date("2024-01-01T00:00:00.000Z");
+    const foreignControle = await prisma.controle.create({
+      data: {
+        structureId: otherStructure.id,
+        date: foreignDate,
+        type: "PROGRAMME",
+      },
+    });
+    const file = await createFileUpload("controle-id-etranger");
+
+    await updateOne({
+      id: structure.id,
+      controles: [
+        {
+          id: foreignControle.id,
+          date: "2025-01-01T00:00:00.000Z",
+          type: ControleType.INOPINE,
+          fileUploads: [{ key: file.key, id: file.id }],
+        },
+      ],
+    });
+
+    const foreignAfter = await prisma.controle.findUniqueOrThrow({
+      where: { id: foreignControle.id },
+      include: { fileUploads: true },
+    });
+    expect(foreignAfter.structureId).toBe(otherStructure.id);
+    expect(foreignAfter.date).toEqual(foreignDate);
+    expect(foreignAfter.type).toBe("PROGRAMME");
+    expect(foreignAfter.fileUploads).toHaveLength(0);
+
+    const ownControles = await prisma.controle.findMany({
+      where: { structureId: structure.id },
+      include: { fileUploads: true },
+    });
+    expect(ownControles).toHaveLength(1);
+    expect(ownControles[0].id).not.toBe(foreignControle.id);
+    expect(ownControles[0].fileUploads.map(({ key }) => key)).toEqual([
+      file.key,
+    ]);
+  });
+
+  it("ne met pas à jour l'évaluation d'une autre structure quand son id est envoyé", async () => {
+    const otherStructure = await createStructure();
+    const structure = await createStructure();
+    const foreignEvaluation = await prisma.evaluation.create({
+      data: {
+        structureId: otherStructure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        notePersonne: 1,
+      },
+    });
+    const file = await createFileUpload("evaluation-id-etranger");
+
+    await updateOne({
+      id: structure.id,
+      evaluations: [
+        {
+          id: foreignEvaluation.id,
+          date: "2025-01-01T00:00:00.000Z",
+          notePersonne: 5,
+          fileUploads: [{ key: file.key }],
+        },
+      ],
+    });
+
+    const foreignAfter = await prisma.evaluation.findUniqueOrThrow({
+      where: { id: foreignEvaluation.id },
+      include: { fileUploads: true },
+    });
+    expect(foreignAfter.structureId).toBe(otherStructure.id);
+    expect(foreignAfter.notePersonne).toBe(1);
+    expect(foreignAfter.fileUploads).toHaveLength(0);
+
+    const ownEvaluations = await prisma.evaluation.findMany({
+      where: { structureId: structure.id },
+      include: { fileUploads: true },
+    });
+    expect(ownEvaluations).toHaveLength(1);
+    expect(ownEvaluations[0].id).not.toBe(foreignEvaluation.id);
+    expect(ownEvaluations[0].fileUploads.map(({ key }) => key)).toEqual([
+      file.key,
+    ]);
+  });
+
+  it("met à jour le contrôle de la structure et garde son fichier quand son id est envoyé", async () => {
+    const structure = await createStructure();
+    const file = await createFileUpload("controle-meme-structure");
+    const controle = await prisma.controle.create({
+      data: {
+        structureId: structure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        type: "PROGRAMME",
+        fileUploads: { connect: { key: file.key } },
+      },
+    });
+
+    await updateOne({
+      id: structure.id,
+      controles: [
+        {
+          id: controle.id,
+          date: "2025-01-01T00:00:00.000Z",
+          type: ControleType.INOPINE,
+          fileUploads: [{ key: file.key, id: file.id }],
+        },
+      ],
+    });
+
+    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: file.key },
+    });
+    expect(fileAfter.controleId).toBe(controle.id);
+    const controles = await prisma.controle.findMany({
+      where: { structureId: structure.id },
+    });
+    expect(controles).toHaveLength(1);
+    expect(controles[0].type).toBe("INOPINE");
+  });
+
+  it("met à jour l'évaluation de la structure et garde son fichier quand son id est envoyé", async () => {
+    const structure = await createStructure();
+    const file = await createFileUpload("evaluation-meme-structure");
+    const evaluation = await prisma.evaluation.create({
+      data: {
+        structureId: structure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        fileUploads: { connect: { key: file.key } },
+      },
+    });
+
+    await updateOne({
+      id: structure.id,
+      evaluations: [
+        {
+          id: evaluation.id,
+          date: "2025-01-01T00:00:00.000Z",
+          notePersonne: 5,
+          fileUploads: [{ key: file.key }],
+        },
+      ],
+    });
+
+    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: file.key },
+    });
+    expect(fileAfter.evaluationId).toBe(evaluation.id);
+    const evaluations = await prisma.evaluation.findMany({
+      where: { structureId: structure.id },
+    });
+    expect(evaluations).toHaveLength(1);
+    expect(evaluations[0].notePersonne).toBe(5);
+  });
+
   it("remplace la liste des evaluations", async () => {
     // GIVEN: one existing evaluation
     const structure = await createStructure();
@@ -1008,7 +1224,7 @@ describe("structure.repository db integration", () => {
       data: {
         structureId: structure.id,
         date: new Date("2024-01-01T00:00:00.000Z"),
-        note: 1,
+        notePersonne: 1,
       },
     });
     const file = await createFileUpload("evaluation");
@@ -1016,7 +1232,6 @@ describe("structure.repository db integration", () => {
     // WHEN: sending a new evaluations list
     const newEvaluation = {
       date: "2025-02-01T00:00:00.000Z",
-      note: 4,
       notePersonne: 3,
       notePro: 2,
       noteStructure: 5,
@@ -1036,7 +1251,6 @@ describe("structure.repository db integration", () => {
 
     expect(evaluations).toHaveLength(1);
     expect(evaluations[0]).toMatchObject({
-      note: newEvaluation.note,
       notePersonne: newEvaluation.notePersonne,
       notePro: newEvaluation.notePro,
       noteStructure: newEvaluation.noteStructure,
@@ -1145,15 +1359,14 @@ describe("structure.repository db integration", () => {
     const baseSearch: SearchProps = {
       search: null,
       page: null,
-      type: null,
-      bati: null,
-      placesAutorisees: null,
+      types: null,
       departements: null,
       operateurs: null,
       column: null,
       direction: null,
       selection: true,
       isFinalised: false,
+      user: createNationalAgent(),
     };
 
     const listStructures = async (overrides: Partial<SearchProps>) => {
@@ -1283,7 +1496,7 @@ describe("structure.repository db integration", () => {
       // AND: filtering by the resolved type includes it
       const byType = await listStructures({
         search: structure.codeBhasile,
-        type: StructureType.CADA,
+        types: StructureType.CADA,
       });
       expect(
         byType.some(
@@ -1295,7 +1508,7 @@ describe("structure.repository db integration", () => {
       // AND: filtering by another type excludes it
       const byOtherType = await listStructures({
         search: structure.codeBhasile,
-        type: StructureType.HUDA,
+        types: StructureType.HUDA,
       });
       expect(
         byOtherType.some(
@@ -1312,7 +1525,7 @@ describe("structure.repository db integration", () => {
       await updateOne({ id: structure.id, nom });
 
       // WHEN: read through both the fiche and the list
-      const fiche = await getFullStructure(structure.id);
+      const fiche = await getFullStructure(structure.id, createNationalAgent());
       const [listRow] = await listStructures({ search: structure.codeBhasile });
 
       // THEN: both resolve the version identically
@@ -1345,7 +1558,10 @@ describe("structure.repository db integration", () => {
       });
 
       // WHEN: the transfo form is a draft -> it is ignored, the rolling wins
-      const ficheDraft = await getFullStructure(structure.id);
+      const ficheDraft = await getFullStructure(
+        structure.id,
+        createNationalAgent()
+      );
       const [listDraft] = await listStructures({
         search: structure.codeBhasile,
       });
@@ -1357,7 +1573,10 @@ describe("structure.repository db integration", () => {
         where: { id: form.id },
         data: { status: true },
       });
-      const ficheFinal = await getFullStructure(structure.id);
+      const ficheFinal = await getFullStructure(
+        structure.id,
+        createNationalAgent()
+      );
       const [listFinal] = await listStructures({
         search: structure.codeBhasile,
       });
@@ -1374,15 +1593,14 @@ describe("structure.repository db integration", () => {
     const baseSearch: SearchProps = {
       search: null,
       page: null,
-      type: null,
-      bati: null,
-      placesAutorisees: null,
+      types: null,
       departements: null,
       operateurs: null,
       column: null,
       direction: null,
       selection: false,
       isFinalised: false,
+      user: createNationalAgent(),
     };
 
     const listBy = async (
@@ -1509,7 +1727,7 @@ describe("structure.repository db integration", () => {
       expect(row?.isFinalised).toBe(true);
 
       // AND: the detail read (TS .some() realization) agrees with the SQL one
-      const fiche = await getFullStructure(structure.id);
+      const fiche = await getFullStructure(structure.id, createNationalAgent());
       expect(fiche?.isFinalised).toBe(true);
     });
 
@@ -1560,7 +1778,7 @@ describe("structure.repository db integration", () => {
       expect(row?.isFinalised).toBe(true);
 
       // AND: the detail .some() realization also scans history, not just the current EXTENSION
-      const fiche = await getFullStructure(structure.id);
+      const fiche = await getFullStructure(structure.id, createNationalAgent());
       expect(fiche?.isFinalised).toBe(true);
     });
 
@@ -1581,7 +1799,7 @@ describe("structure.repository db integration", () => {
 
       // AND: detail agrees — born-from-creation only counts once the CREATION is effective,
       // so isFinalised is false instead of the loose .some() returning true.
-      const fiche = await getFullStructure(structure.id);
+      const fiche = await getFullStructure(structure.id, createNationalAgent());
       expect(fiche?.isFinalised).toBe(false);
     });
 
@@ -1742,7 +1960,10 @@ describe("structure.repository db integration", () => {
       createdCpomIds.push(cpom.id);
 
       // WHEN: the host fiche is read
-      const fiche = await getFullStructure(hostStructure.id);
+      const fiche = await getFullStructure(
+        hostStructure.id,
+        createNationalAgent()
+      );
 
       // THEN: the linked partner reflects its version, not the frozen scalar
       const linkedPartner = fiche?.cpomStructures

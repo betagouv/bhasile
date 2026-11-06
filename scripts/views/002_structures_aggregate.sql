@@ -1,30 +1,100 @@
 -- Objective: per-structure impact inputs (places + budget hors CPOM)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_aggregates" AS
 WITH
-  structure_places_autorisees AS (
+  finalized_versions AS (
     SELECT
-      sc."id" AS "structureId",
+      sv."id",
+      sv."structureId",
+      sv."effectiveDate",
       sv."placesAutorisees"
     FROM
-:"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureVersion" sv ON sv."id" = sc."structure_version_id"
+      public."StructureVersion" sv
+      LEFT JOIN public."StructureVersionTransformation" svt ON svt."id" = sv."structureVersionTransformationId"
+      LEFT JOIN public."Form" f ON f."transformationId" = svt."transformationId"
+    WHERE
+      sv."structureId" IS NOT NULL
+      AND (
+        sv."structureVersionTransformationId" IS NULL
+        OR f."status" IS TRUE
+      )
   ),
-  cpom_convention_dates AS (
+  -- Same rule as the statistiques API (see dedicated doc to see business choices)
+  resolved_typologies AS (
+    SELECT
+      st."structureId",
+      st."year",
+      CASE
+        WHEN st."year" >= 2026 THEN (
+          SELECT
+            vf."placesAutorisees"
+          FROM
+            finalized_versions vf
+          WHERE
+            vf."structureId" = st."structureId"
+            AND (
+              vf."effectiveDate" IS NULL
+              OR vf."effectiveDate" < LEAST(MAKE_DATE(st."year", 12, 31), (NOW() AT TIME ZONE 'UTC')::date) + 1
+            )
+          ORDER BY
+            vf."effectiveDate" DESC NULLS LAST,
+            vf."id" DESC
+          LIMIT
+            1
+        )
+        ELSE st."placesAutorisees"
+      END AS "placesAutorisees"
+    FROM
+      public."StructureTypologie" st
+    WHERE
+      st."structureId" IS NOT NULL
+      AND st."year" <= EXTRACT(
+        YEAR
+        FROM
+          NOW() AT TIME ZONE 'UTC'
+      )
+  ),
+  structure_places_autorisees AS (
     SELECT DISTINCT
-      ON (aa."cpomId") aa."cpomId",
+      ON (tr."structureId") tr."structureId",
+      tr."placesAutorisees"
+    FROM
+      resolved_typologies tr
+      INNER JOIN public."Structure" s ON s."id" = tr."structureId"
+    WHERE
+      tr."placesAutorisees" IS NOT NULL
+      AND s."type" IS NOT NULL
+      AND (
+        s."creationDate" IS NULL
+        OR s."creationDate" < (NOW() AT TIME ZONE 'UTC')::date + 1
+      )
+      AND (
+        s."fermetureDate" IS NULL
+        OR s."fermetureDate" >= (NOW() AT TIME ZONE 'UTC')::date
+      )
+    ORDER BY
+      tr."structureId",
+      tr."year" DESC
+  ),
+  ongoing_cpoms AS (
+    SELECT
+      aa."cpomId",
       aa."startDate" AS "cpom_start",
-      aa."endDate" AS "cpom_end"
+      COALESCE(MAX(av."endDate"), aa."endDate") AS "cpom_end"
     FROM
       public."ActeAdministratif" aa
+      LEFT JOIN public."ActeAdministratif" av ON av."parentId" = aa."id"
     WHERE
       aa."cpomId" IS NOT NULL
       AND aa."category" = 'CONVENTION_CPOM'
       AND aa."parentId" IS NULL
-      AND aa."startDate" IS NOT NULL
-      AND aa."endDate" IS NOT NULL
-    ORDER BY
+    GROUP BY
+      aa."id",
       aa."cpomId",
-      aa."endDate" DESC
+      aa."startDate",
+      aa."endDate"
+    HAVING
+      aa."startDate" <= (NOW() AT TIME ZONE 'UTC')::date
+      AND COALESCE(MAX(av."endDate"), aa."endDate") >= (NOW() AT TIME ZONE 'UTC')::date
   ),
   structure_budget_dernier_millesime AS (
     SELECT DISTINCT
@@ -53,19 +123,23 @@ WITH
             1
           FROM
             public."CpomStructure" cs
-            JOIN cpom_convention_dates cp ON cp."cpomId" = cs."cpomId"
+            JOIN ongoing_cpoms cp ON cp."cpomId" = cs."cpomId"
           WHERE
             cs."structureId" = sb."structureId"
-            AND sb."year" >= EXTRACT(
-              YEAR
+            AND COALESCE(cs."dateStart", cp."cpom_start") <= (NOW() AT TIME ZONE 'UTC')::date
+            AND COALESCE(cs."dateEnd", cp."cpom_end") >= (NOW() AT TIME ZONE 'UTC')::date
+            AND EXISTS (
+              SELECT
+                1
               FROM
-                COALESCE(cs."dateStart", cp."cpom_start")
-            )::int
-            AND sb."year" <= EXTRACT(
-              YEAR
-              FROM
-                COALESCE(cs."dateEnd", cp."cpom_end")
-            )::int
+                public."Budget" b
+              WHERE
+                b."cpomId" = cs."cpomId"
+                AND (
+                  b."dotationAccordee" IS NOT NULL
+                  OR b."dotationDemandee" IS NOT NULL
+                )
+            )
         ) THEN NULL
         ELSE COALESCE(sb."dotationAccordee", sb."dotationDemandee")
       END AS "dotation_derniere_annee"
@@ -91,6 +165,6 @@ SELECT
   bdm."dotation_derniere_annee" AS "dotation_derniere_annee"
 FROM
 :"SCHEMA"."structures_core" sc
-  LEFT JOIN:"SCHEMA"."structures_filling" sf ON sf."id" = sc."id"
+  INNER JOIN:"SCHEMA"."structures_filling" sf ON sf."id" = sc."id"
   LEFT JOIN structure_places_autorisees sdm ON sdm."structureId" = sc."id"
   LEFT JOIN budget_dernier_millesime bdm ON bdm."structureId" = sc."id";

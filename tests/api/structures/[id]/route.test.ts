@@ -5,7 +5,6 @@ import { GET, PUT } from "@/app/api/structures/[id]/route";
 
 const mockGetServerSession = vi.fn();
 const mockCanUpdateStructure = vi.fn();
-const mockCanUpdateDepartement = vi.fn();
 const mockFindOne = vi.fn();
 const mockFindOneOperateur = vi.fn();
 const mockFindStructureDepartement = vi.fn();
@@ -13,6 +12,10 @@ const mockUpdateOne = vi.fn();
 const mockCreateStructureEvent = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
 const mockGetAdressesApiRead = vi.fn();
+
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({
+  findOperateurFiliales: vi.fn(async () => []),
+}));
 
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
@@ -26,10 +29,14 @@ vi.mock("@/app/api/anomalies/anomalie.service", () => ({
   recomputeAnomaliesSafely: vi.fn(),
 }));
 
-vi.mock("@/lib/casl/abilities", () => ({
+const mockCanAccessApp = vi.fn().mockReturnValue(true);
+
+vi.mock("@/lib/casl", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
-  canUpdateDepartement: (...args: unknown[]) =>
-    mockCanUpdateDepartement(...args),
+  canAbilityReadStructure: () => true,
+  canAccessApp: (...args: unknown[]) => mockCanAccessApp(...args),
+  defineAbilityFor: () => ({}),
+  isAgent: () => true,
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
@@ -119,7 +126,6 @@ describe("GET /api/structures/[id]", () => {
     const dbStructure = {
       id: 1,
       name: "Test",
-      filiale: null,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
       cpomStructures: [],
@@ -149,7 +155,6 @@ describe("GET /api/structures/[id]", () => {
       id: 1,
       name: "Test",
       nom: "",
-      filiale: undefined,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
       adresses: [{ id: 1 }],
@@ -212,7 +217,6 @@ describe("GET /api/structures/[id]", () => {
     const dbStructure = {
       id: 2,
       name: "Test",
-      filiale: null,
       operateur: { id: 1, name: "Adoma" },
       cpomStructures: [],
       creationDate: new Date("2020-01-01"),
@@ -299,6 +303,24 @@ describe("GET /api/structures/[id]", () => {
     expect(mockFindOne).not.toHaveBeenCalled();
   });
 
+  it("passe par le chemin opérateur pour une session sans binôme", async () => {
+    // GIVEN
+    const structure = { id: 1 };
+    mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
+    mockCanAccessApp.mockReturnValueOnce(false);
+    mockFindOneOperateur.mockResolvedValueOnce(structure);
+
+    const request = new NextRequest("http://localhost/api/structures/1");
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(response.status).toBe(200);
+    expect(mockFindOneOperateur).toHaveBeenCalledWith(1);
+    expect(mockFindOne).not.toHaveBeenCalled();
+  });
+
   it("retourne 404 quand la structure est introuvable", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
@@ -362,7 +384,7 @@ describe("PUT /api/structures/[id]", () => {
     mockFindStructureDepartement.mockResolvedValueOnce({
       departementAdministratif: "75",
     });
-    mockCanUpdateDepartement.mockReturnValueOnce(false);
+    mockCanUpdateStructure.mockReturnValueOnce(false);
 
     const request = new Request("http://localhost/api/structures/2", {
       method: "PUT",
@@ -390,7 +412,7 @@ describe("PUT /api/structures/[id]", () => {
     mockFindStructureDepartement.mockResolvedValueOnce({
       departementAdministratif: "75",
     });
-    mockCanUpdateDepartement.mockReturnValueOnce(true);
+    mockCanUpdateStructure.mockReturnValueOnce(true);
     mockGetAdresseAdministrativeCoordinates.mockResolvedValueOnce(coordinates);
     mockUpdateOne.mockResolvedValueOnce(updatedStructure);
 
@@ -419,7 +441,7 @@ describe("PUT /api/structures/[id]", () => {
     mockFindStructureDepartement.mockResolvedValueOnce({
       departementAdministratif: "75",
     });
-    mockCanUpdateDepartement.mockReturnValueOnce(true);
+    mockCanUpdateStructure.mockReturnValueOnce(true);
     mockGetAdresseAdministrativeCoordinates.mockResolvedValueOnce({});
     mockUpdateOne.mockResolvedValueOnce({ id: 4 });
 

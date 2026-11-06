@@ -1,6 +1,5 @@
 import type { NumericAggregation } from "@/app/utils/math.util";
 import { parseCommaList } from "@/app/utils/string.util";
-import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 import {
   CartographieEvolutionStat,
   CartographieIndicateur,
@@ -13,7 +12,10 @@ import {
   computeActiviteFieldForYears,
 } from "../activite/activite.util";
 import { computeControleQualiteByYear } from "../controle-qualite/controle-qualite.util";
-import { computeFinanceTotalValuesForYears } from "../finance/finance.util";
+import {
+  computeFinanceTotalValuesForYears,
+  FinanceCartographieField,
+} from "../finance/finance.util";
 import {
   computeAdresseSnapshot,
   computeTypologieFieldForYear,
@@ -149,7 +151,7 @@ const financeValuesForYears = (
   context: StatistiquesContext,
   annee: number,
   aggregation: NumericAggregation,
-  field: keyof FinanceByYearScopeStat
+  field: FinanceCartographieField
 ): CartographieIndicateurValues => {
   const [value, previousValue] = computeFinanceTotalValuesForYears(
     context,
@@ -234,7 +236,7 @@ const INDICATEURS: Record<CartographieIndicateur, IndicateurValuesCalculation> =
     "finance.dotationAccordee": (context, annee, aggregation) =>
       financeValuesForYears(context, annee, aggregation, "dotationAccordee"),
     "finance.etp": (context, annee, aggregation) =>
-      financeValuesForYears(context, annee, aggregation, "totalETP"),
+      financeValuesForYears(context, annee, aggregation, "etp"),
     "finance.tauxEncadrement": (context, annee, aggregation) =>
       financeValuesForYears(context, annee, aggregation, "tauxEncadrement"),
     "finance.coutJournalier": (context, annee, aggregation) =>

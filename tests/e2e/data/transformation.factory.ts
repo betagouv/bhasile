@@ -1,12 +1,12 @@
-import { CURRENT_YEAR } from "@/constants";
+import { getCurrentYear } from "@/app/utils/now.util";
 
 import { uniqueTransformationNom } from "./ids";
 
 export const TRANSFORMATION_TEST_VALUES = {
-  effectiveDate: `${CURRENT_YEAR}-06-01`,
-  acteStartDate: `${CURRENT_YEAR}-01-01`,
-  acteEndDate: `${CURRENT_YEAR}-12-31`,
-  acteDate: `${CURRENT_YEAR}-06-01`,
+  effectiveDate: `${getCurrentYear()}-06-01`,
+  acteStartDate: `${getCurrentYear()}-01-01`,
+  acteEndDate: `${getCurrentYear()}-12-31`,
+  acteDate: `${getCurrentYear()}-06-01`,
   creationPlaces: 15,
   extensionPlaces: 20,
   contractionPlaces: 5,

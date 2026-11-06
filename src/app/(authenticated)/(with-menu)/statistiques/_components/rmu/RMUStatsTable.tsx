@@ -3,7 +3,7 @@
 import dayjs from "dayjs";
 import { ReactElement, useState } from "react";
 
-import { EmptyCell } from "@/app/components/common/EmptyCell";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import {
   TimePeriod,
@@ -112,9 +112,11 @@ export const RMUStatsTable = ({
         ? periodItem[line.key as keyof RmuPeriodStat]
         : null;
 
-      return line.format && rawValue !== null && rawValue !== undefined
-        ? line.format(rawValue, periodItem)
-        : rawValue;
+      return line.format && rawValue !== null && rawValue !== undefined ? (
+        line.format(rawValue, periodItem)
+      ) : (
+        <NumberDisplay value={rawValue as number | null} showEmptyCell />
+      );
     }),
   }));
 
@@ -152,7 +154,7 @@ export const RMUStatsTable = ({
                 className="whitespace-nowrap align-middle"
               >
                 <span className="text-sm">
-                  {(cellValue as string) ?? <EmptyCell />}
+                  {cellValue}
                 </span>
               </td>
             ))}

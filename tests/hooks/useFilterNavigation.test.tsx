@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useFilterNavigation } from "@/app/hooks/useFilterNavigation";
 import { SearchParamsNavigationOptions } from "@/app/hooks/useSearchParamsNavigation";
+import { FILTERS_COOKIE } from "@/constants";
 
 const mockReplace = vi.fn();
 let mockSearchParams = new URLSearchParams();
@@ -22,6 +23,23 @@ describe("useFilterNavigation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSearchParams = new URLSearchParams("page=3&search=coquelic");
+    document.cookie = `${FILTERS_COOKIE}=; path=/`;
+  });
+
+  it("met à jour la seule clé modifiée dans les filtres mémorisés", async () => {
+    // GIVEN
+    const user = userEvent.setup();
+    document.cookie = `${FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50&types=CADA")}; path=/`;
+    mockSearchParams = new URLSearchParams("departements=14%2C50&types=CADA");
+    render(<Filter filterKey="types" values={[]} />);
+
+    // WHEN
+    await user.click(screen.getByRole("button", { name: "filtrer" }));
+
+    // THEN
+    expect(document.cookie).toContain(
+      `${FILTERS_COOKIE}=${encodeURIComponent("departements=14%2C50")}`
+    );
   });
 
   it("joint la sélection et ramène à la première page", async () => {
@@ -71,15 +89,17 @@ describe("useFilterNavigation", () => {
 });
 
 const Filter = ({
+  filterKey = "departements",
   values,
   options,
 }: {
+  filterKey?: string;
   values: (string | number)[];
   options?: SearchParamsNavigationOptions;
 }): ReactElement => {
   const navigateWithFilter = useFilterNavigation();
   return (
-    <button onClick={() => navigateWithFilter("departements", values, options)}>
+    <button onClick={() => navigateWithFilter(filterKey, values, options)}>
       filtrer
     </button>
   );

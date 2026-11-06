@@ -1,14 +1,9 @@
 import "@testing-library/jest-dom/vitest";
 
-import { vi } from "vitest";
+import * as matchers from "@testing-library/jest-dom/matchers";
+import { expect } from "vitest";
 
-// Aucun test ne doit appeler la vraie BAN ; un test qui a besoin d'une réponse précise la mocke lui-même.
-vi.mock("@/app/api/adresses/ban.client", () => ({
-  searchMunicipality: vi.fn().mockResolvedValue(null),
-  searchAddress: vi
-    .fn()
-    .mockResolvedValue({ latitude: undefined, longitude: undefined }),
-}));
+expect.extend(matchers);
 
 if (typeof window !== "undefined" && !window.matchMedia) {
   window.matchMedia = (query) => ({
@@ -31,8 +26,14 @@ if (
 }
 
 // Le runtime DSFR n'est pas chargé en jsdom : createModal().open()/close() l'appellent.
+// jsdom rend un <dialog> sans `open` en display: none, ce qui empêche focus et saisie.
 if (typeof window !== "undefined" && !window.dsfr) {
-  window.dsfr = () => ({ modal: { disclose: () => {}, conceal: () => {} } });
+  window.dsfr = (element) => ({
+    modal: {
+      disclose: () => element?.setAttribute("open", ""),
+      conceal: () => element?.removeAttribute("open"),
+    },
+  });
 }
 
 // Node 26 expose un localStorage/sessionStorage global, vide sans --localstorage-file.

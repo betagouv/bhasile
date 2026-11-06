@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { ZoneDataInfo, ZoneLabelWithTrend } from "@/types/map.type";
 
+const NO_DATA_FILL = "var(--border-default-grey)";
+
 export const useMapLabels = ({
   zoneData,
   dependencyTrigger,
@@ -37,6 +39,7 @@ export const useMapLabels = ({
         if (frClass) {
           const code = frClass.replace("FR-", "");
           const zoneInfo = zoneData[code];
+          path.style.fill = zoneInfo === undefined ? NO_DATA_FILL : "";
 
           if (onPathFound) {
             const shouldInclude = onPathFound(path, code);

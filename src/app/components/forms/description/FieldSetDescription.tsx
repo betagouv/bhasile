@@ -1,6 +1,3 @@
-import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
-import autoAnimate from "@formkit/auto-animate";
-import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { isCreation as isCreationFormKind } from "@/app/utils/transformation.util";
@@ -14,17 +11,7 @@ import SelectWithValidation from "../SelectWithValidation";
 export const FieldSetDescription = ({
   formKind = FormKind.FINALISATION,
 }: Props) => {
-  const filialesContainerRef = useRef(null);
-  const { control, setValue, watch } = useFormContext();
-  const [isManagedByAFiliale, setIsManagedByAFiliale] = useState(
-    () => !!watch("filiale")
-  );
-
-  useEffect(() => {
-    if (filialesContainerRef.current) {
-      autoAnimate(filialesContainerRef.current);
-    }
-  }, [filialesContainerRef]);
+  const { control } = useFormContext();
 
   const title = getTitle(formKind);
 
@@ -38,28 +25,7 @@ export const FieldSetDescription = ({
         </legend>
 
         {formKind !== FormKind.MODIFICATION && (
-          <>
-            <div className="flex">
-              <ToggleSwitch
-                label="Cette structure appartient-elle à une filiale d’opérateur (ex: YSOS, filiale de SOS) ?"
-                labelPosition="left"
-                showCheckedHint={false}
-                className="w-fit [&_label]:gap-2"
-                checked={isManagedByAFiliale}
-                name="managed-by-a-filiale"
-                id="managed-by-a-filiale"
-                onChange={() => {
-                  const next = !isManagedByAFiliale;
-                  setIsManagedByAFiliale(next);
-                  if (!next) {
-                    setValue("filiale", undefined, { shouldValidate: true });
-                  }
-                }}
-              />
-              <p className="pl-2">{isManagedByAFiliale ? "Oui" : "Non"}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <SelectWithValidation
                 name="type"
                 control={control}
@@ -77,20 +43,7 @@ export const FieldSetDescription = ({
               </SelectWithValidation>
 
               <OperateurAutocompleteRhf />
-
-              <div ref={filialesContainerRef}>
-                {isManagedByAFiliale && (
-                  <InputWithValidation
-                    name="filiale"
-                    control={control}
-                    type="text"
-                    label="Filiale"
-                    id="filiale"
-                  />
-                )}
-              </div>
             </div>
-          </>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

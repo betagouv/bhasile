@@ -7,6 +7,7 @@ import { getFullStructure } from "@/app/api/structures/structure.service";
 import { createReadEvent } from "@/app/api/user-actions/user-action.service";
 import { parseId } from "@/app/utils/string.util";
 import { StructureProvider } from "@/contexts/StructureContext";
+import { canAccessTarification } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 
@@ -37,12 +38,23 @@ export default async function StructureLayout({
 
   const actualisationYear = getActualisationYear();
 
+  const isTarificationAccessible =
+    !!session?.user &&
+    canAccessTarification(session.user as SessionUser, {
+      id: structure.id,
+      departementAdministratif: structure.departementAdministratif,
+      operateurId: structure.operateur?.id ?? null,
+    });
+
   const plainStructure = JSON.parse(JSON.stringify(structure));
 
   return (
     <StructureProvider entity={plainStructure}>
       <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
-        <StructureHeader actualisationYear={actualisationYear} />
+        <StructureHeader
+          actualisationYear={actualisationYear}
+          isTarificationAccessible={isTarificationAccessible}
+        />
         <div className="flex flex-col gap-3 max-w-7xl mx-auto px-3">
           {children}
         </div>

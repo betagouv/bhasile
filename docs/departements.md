@@ -61,14 +61,17 @@ Le masquage est cosmétique : c'est le 403 de `checkCanUpdateDepartements` qui p
 
 ## 🗺️ Où la règle s'applique
 
-| Endroit                                        | Lit                                             |
-| ---------------------------------------------- | ----------------------------------------------- |
-| Blocs du tableau de bord — filtre et périmètre | `Structure` (via `isStructureInDashboardScope`) |
-| Blocs du tableau de bord — libellé affiché     | version courante                                |
-| Liste `/structures`                            | version courante                                |
-| CASL sur `PUT /api/structures/[id]`            | `Structure` (via `getStructureDepartement`)     |
-| Transformations — autorisation                 | `getStructureVersionDepartement`                |
-| Vues `reporting.*`                             | `Structure`                                     |
+| Endroit                                          | Lit                                             |
+| ------------------------------------------------ | ----------------------------------------------- |
+| Blocs du tableau de bord — filtre et périmètre   | `Structure` (via `isStructureInDashboardScope`) |
+| Blocs du tableau de bord — libellé affiché       | version courante                                |
+| Filtre Zone — structures, opérateurs, stats      | `Structure`                                     |
+| Filtre Zone — CPOM                               | départements du CPOM (ou de sa région)          |
+| Filtre Zone — transformations du tableau de bord | `getStructureVersionDepartement`                |
+| Liste `/structures` — libellé affiché            | version courante                                |
+| CASL sur `PUT /api/structures/[id]`              | `Structure` (via `getStructureDepartement`)     |
+| Transformations — autorisation                   | `getStructureVersionDepartement`                |
+| Vues `reporting.*`                               | `Structure`                                     |
 
 ## ⚠️ Pièges connus
 

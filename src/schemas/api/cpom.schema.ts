@@ -44,6 +44,7 @@ export const cpomApiSchema = z.object({
             codeBhasile: z.string(),
             type: z.enum(StructureType),
             communeAdministrative: z.string(),
+            departementAdministratif: z.string().optional(),
             operateur: operateurSuggestionApiSchema,
             forms: z.array(formApiSchema),
           })

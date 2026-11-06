@@ -1,5 +1,7 @@
 import { structureAutoriseesDocuments } from "@/app/components/forms/finance/documents/documentsStructures";
 import { getYearRange } from "@/app/utils/date.util";
+import { getCurrentYear } from "@/app/utils/now.util";
+import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
@@ -55,7 +57,6 @@ export const createStructure = ({
     placesAutorisees: null,
     anomalies: [],
     operateur: createOperateur(id),
-    filiale: undefined,
     operateurLabel: "Adoma",
     type: structureType,
     adresseAdministrative: adresseAdministrativeValue,
@@ -132,7 +133,14 @@ export const createFinalisationDocumentsFinanciersValidStructure = (
   const { years } = getYearRange();
   const requiredDocuments = years.flatMap((year, index) =>
     structureAutoriseesDocuments
-      .filter((document) => document.required && index >= document.yearIndex)
+      .filter(
+        (document) =>
+          document.required &&
+          index >=
+            getCurrentYear() -
+              DOCUMENTS_FINANCIERS_OPEN_YEAR +
+              document.yearOffset
+      )
       .map((document, docIndex) => ({
         id: year * 100 + docIndex + 1,
         year,
@@ -208,7 +216,6 @@ export const createFinalisationControlesValidStructure = (id: number) => {
         notePersonne: 1,
         notePro: 1,
         noteStructure: 1,
-        note: 1,
         fileUploads: [{ id: 1, key: "evaluation-1" }],
       },
     ],

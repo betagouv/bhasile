@@ -6,7 +6,10 @@ import {
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
-import { getCpomCoveredDocumentsFinanciers } from "@/app/utils/document-financier.util";
+import {
+  getCpomCoveredDocumentsFinanciers,
+  hasDocumentFile,
+} from "@/app/utils/document-financier.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   nullishFrenchDateToISO,
@@ -21,6 +24,7 @@ import { StructureType } from "@/types/structure.type";
 
 export const DocumentFinancierSchema = z.object({
   id: zId(),
+  uuid: z.string().optional(),
   year: zSafeYear(),
   category: z.enum(DocumentFinancierCategory).optional(),
   structureType: z.enum(StructureType).nullish(),
@@ -57,6 +61,34 @@ export const DocumentsFinanciersFlexibleSchema =
       path: ["date303"],
     }
   );
+
+const checkAutresDocumentsHaveFile = (
+  data: { documentsFinanciers?: z.infer<typeof DocumentFinancierSchema>[] },
+  ctx: z.RefinementCtx
+): void => {
+  data.documentsFinanciers?.forEach((documentFinancier, index) => {
+    const isNamedAutreWithoutFile =
+      documentFinancier.category === "AUTRE_FINANCIER" &&
+      !!documentFinancier.name?.trim() &&
+      !hasDocumentFile(documentFinancier);
+    if (isNamedAutreWithoutFile) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["documentsFinanciers", index, "fileUploads"],
+        message: "Importez le document ou supprimez la ligne",
+      });
+    }
+  });
+};
+
+export const DocumentsFinanciersSubmitSchema =
+  DocumentsFinanciersFlexibleSchema.superRefine(checkAutresDocumentsHaveFile);
+
+export const documentsFinanciersCpomSchema = z
+  .object({
+    documentsFinanciers: z.array(DocumentFinancierSchema).optional(),
+  })
+  .superRefine(checkAutresDocumentsHaveFile);
 
 export const getDocumentsFinanciersStrictSchema = (
   structure: StructureApiRead
@@ -104,12 +136,13 @@ export const getDocumentsFinanciersStrictSchema = (
               coveredDocumentsFinanciers
             );
             if (documentIsRequired) {
-              const requiredDocument = data.documentsFinanciers?.find(
+              const hasRequiredDocument = data.documentsFinanciers?.some(
                 (documentFinancier) =>
                   documentFinancier.category === document.value &&
-                  documentFinancier.year === year
+                  documentFinancier.year === year &&
+                  hasDocumentFile(documentFinancier)
               );
-              if (!requiredDocument) {
+              if (!hasRequiredDocument) {
                 ctx.addIssue({
                   path: ["documentsFinanciers", year],
                   code: "custom",
@@ -121,7 +154,8 @@ export const getDocumentsFinanciersStrictSchema = (
         }
       });
     })
-  );
+  )
+  .superRefine(checkAutresDocumentsHaveFile);
 };
 
 export type DocumentFinancierFlexibleFormValues = z.infer<

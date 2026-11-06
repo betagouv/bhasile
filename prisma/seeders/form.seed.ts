@@ -1,7 +1,9 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import {
+  ACTUALISATION_FORM_STEP_SLUGS,
   FINALISATION_FORM_SLUG,
+  getActualisationFormSlug,
   STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS,
   TRANSFORMATION_FORM_SLUG,
 } from "@/app/api/forms/form.constants";
@@ -81,6 +83,28 @@ export const createFakeFormStructureVersionTransformationFermeture = (): Omit<
     version: 1,
     deadline: null,
   };
+};
+
+/** Campagne d'actualisation en cours : échéance à la fin de l'année actualisée. */
+export const createFakeFormActualisation = (
+  year: number
+): Omit<FormDefinition, "id"> => {
+  return {
+    name: `Actualisation ${year}`,
+    slug: getActualisationFormSlug(year),
+    version: 1,
+    deadline: new Date(Date.UTC(year, 11, 31)),
+  };
+};
+
+export const createFakeActualisationFormStepDefinition = (
+  formDefinitionId: number
+): Omit<FormStepDefinition, "id">[] => {
+  return ACTUALISATION_FORM_STEP_SLUGS.map((slug) => ({
+    formDefinitionId,
+    label: slug,
+    slug,
+  }));
 };
 
 export const createFakeFinalisationFormStepDefinition = (
@@ -213,5 +237,35 @@ export const createFakeFormWithSteps = (
           : StepStatus.NON_COMMENCE;
       return createFakeFormStep(id, targetStatus);
     }),
+  };
+};
+
+/**
+ * Formulaire d'actualisation d'une structure : validé (toutes les étapes) ou
+ * saisie partielle, pour simuler une campagne en cours.
+ */
+export const createFakeActualisationFormWithSteps = (
+  formDefinitionId: number,
+  stepDefinitions: { id: number; slug: string }[],
+  options: { isValidated: boolean }
+): Omit<
+  FormWithSteps,
+  | "id"
+  | "structureCodeDna"
+  | "structureId"
+  | "transformationId"
+  | "structureVersionTransformationId"
+> => {
+  return {
+    ...createFakeForm(formDefinitionId),
+    status: options.isValidated,
+    formSteps: stepDefinitions.map(({ id }) =>
+      createFakeFormStep(
+        id,
+        options.isValidated || faker.datatype.boolean({ probability: 0.3 })
+          ? StepStatus.VALIDE
+          : StepStatus.NON_COMMENCE
+      )
+    ),
   };
 };

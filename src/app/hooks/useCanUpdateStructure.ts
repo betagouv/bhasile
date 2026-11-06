@@ -11,14 +11,15 @@ export const useCanUpdateStructure = (structure: StructureApiRead): boolean => {
   return ability.can("update", subject("Structure", structure));
 };
 
-export const useCanUpdateDepartement = (): ((
-  departementAdministratif?: string
-) => boolean) => {
+export const useCanUpdateStructures = (): ((structure: {
+  id: number;
+  departementAdministratif?: string;
+}) => boolean) => {
   const ability = useAbility();
 
-  return (departementAdministratif) =>
+  return ({ id, departementAdministratif }) =>
     ability.can(
       "update",
-      subject("Structure", { departementAdministratif } as StructureApiRead)
+      subject("Structure", { id, departementAdministratif } as StructureApiRead)
     );
 };

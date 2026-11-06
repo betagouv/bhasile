@@ -6,6 +6,7 @@ import {
   findAllOperateurs,
   findBySearchTerm,
   findOne,
+  updateOne,
 } from "@/app/api/operateurs/operateur.repository";
 import prisma from "@/lib/prisma";
 
@@ -78,6 +79,33 @@ describe("operateur.repository db integration", () => {
     expect(operateur?.name).toContain("OP-TEST-");
     expect(operateur?.parentId).toBeNull();
     expect(operateur?.logo?.key).toBe(logoKey);
+  });
+
+  it("refuse le logo d'un autre opérateur sans déplacer le fichier", async () => {
+    const otherOperateur = await prisma.operateur.create({
+      data: { name: `OP-TEST-AUTRE-${randomUUID()}` },
+    });
+
+    const error = await updateOne({
+      id: otherOperateur.id,
+      logo: { key: logoKey! },
+    }).catch((caughtError: unknown) => caughtError);
+
+    const logoAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: logoKey! },
+    });
+    await prisma.operateur.delete({ where: { id: otherOperateur.id } });
+    expect(logoAfter.operateurId).toBe(operateurId);
+    expect(error).toMatchObject({ name: "DomainError", status: 409 });
+  });
+
+  it("accepte de renvoyer le logo du même opérateur", async () => {
+    await updateOne({ id: operateurId, logo: { key: logoKey! } });
+
+    const logoAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: logoKey! },
+    });
+    expect(logoAfter.operateurId).toBe(operateurId);
   });
 
   it("findOne renvoie null quand l'opérateur n'existe pas", async () => {

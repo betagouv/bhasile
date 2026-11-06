@@ -73,7 +73,7 @@ const cpomLink = (
   cpom: { actesAdministratifs: [] },
 });
 
-describe("structures - CPOM actifs à la date de référence", () => {
+describe("structures - CPOM actifs sur l'année en cours", () => {
   beforeEach(() => {
     vi.setSystemTime(REFERENCE_DATE);
   });
@@ -137,6 +137,23 @@ describe("structures - CPOM actifs à la date de référence", () => {
 
     expect(result.totalCpoms).toBe(1);
     expect(result.structuresAvecCpom).toBe(1);
+  });
+
+  it("compte encore un CPOM terminé plus tôt dans l'année, comme la colonne de l'année", () => {
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures: [testStructure(1)],
+        typologies: [testTypologie(1, 1, 2025, 10)],
+        adresses: [],
+        departements: [],
+        cpomLinks: [cpomLink(1, 100, 1, "2024-01-01", "2025-03-31")],
+      })
+    );
+    const year2025 = result.byYear.find((entry) => entry.year === 2025);
+
+    expect(result.totalCpoms).toBe(1);
+    expect(result.totalCpoms).toBe(year2025?.totalCpoms);
+    expect(result.structuresAvecCpom).toBe(year2025?.structuresAvecCpom);
   });
 
   it("distingue deux CPOM actifs simultanés sur le même parc", () => {
@@ -499,6 +516,105 @@ describe("structures - indicateurs annuels (byYear)", () => {
     expect(result.byYear).toContainEqual(
       expect.objectContaining({ year: 2023, totalStructures: 1 })
     );
+    expect(result.byYear).toContainEqual(
+      expect.objectContaining({ year: 2024, totalStructures: 1 })
+    );
+  });
+
+  it("ne comptabilise que les structures actualisées sur une année de campagne", () => {
+    const structures = [
+      testStructure(1, StructureType.CADA),
+      testStructure(2, StructureType.HUDA),
+    ];
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures,
+        allStructures: structures,
+        typologies: [
+          testTypologie(1, 1, 2024, 10),
+          testTypologie(2, 2, 2024, 20),
+          testTypologie(3, 1, 2026, 10),
+          testTypologie(4, 2, 2026, 20),
+        ],
+        adresses: [
+          testAdresse(1, 1, Repartition.COLLECTIF, 10),
+          testAdresse(2, 2, Repartition.DIFFUS, 20),
+        ],
+        departements: [],
+        actualisationFormDefinitions: [
+          { slug: "actualisation-2026" },
+        ],
+        lastValidatedCampagneYearByStructureId: new Map([[2, 2026]]),
+      })
+    );
+    const year2024 = result.byYear.find((entry) => entry.year === 2024);
+    const year2026 = result.byYear.find((entry) => entry.year === 2026);
+
+    expect(result.totalStructures).toBe(2);
+    expect(year2024?.completude).toBeNull();
+    expect(year2024?.totalStructures).toBe(2);
+    expect(year2026?.completude).toMatchObject({
+      nbAttendues: 2,
+      nbRenseignees: 1,
+    });
+    expect(year2026?.totalStructures).toBe(1);
+    expect(year2026?.structureTypes).toContainEqual({
+      type: StructureType.HUDA,
+      structures: 1,
+      places: 20,
+    });
+    expect(year2026?.structureTypes).toContainEqual({
+      type: StructureType.CADA,
+      structures: 0,
+      places: 0,
+    });
+    expect(year2026?.structureBatis).toContainEqual({
+      bati: Repartition.DIFFUS,
+      structures: 1,
+      places: 20,
+    });
+  });
+
+  it("sur une année de campagne, compte les structures actualisées même sans millésime", () => {
+    const structures = [testStructure(1), testStructure(2)];
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures,
+        allStructures: structures,
+        typologies: [testTypologie(1, 1, 2026, 10)],
+        adresses: [],
+        departements: [],
+        actualisationFormDefinitions: [{ slug: "actualisation-2026" }],
+        lastValidatedCampagneYearByStructureId: new Map([
+          [1, 2026],
+          [2, 2026],
+        ]),
+      })
+    );
+    const year2026 = result.byYear.find((entry) => entry.year === 2026);
+
+    expect(year2026?.completude?.nbRenseignees).toBe(2);
+    expect(year2026?.totalStructures).toBe(2);
+  });
+
+  it("exclut les structures non initialisées de l'assiette et des années", () => {
+    const structures = [testStructure(1), testStructure(2)];
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures,
+        allStructures: structures,
+        typologies: [
+          testTypologie(1, 1, 2024, 10),
+          testTypologie(2, 2, 2024, 20),
+        ],
+        adresses: [],
+        departements: [],
+        initialisedStructureIds: new Set([1]),
+      })
+    );
+
+    expect(result.totalStructures).toBe(1);
+    expect(result.totalPlaces).toBe(10);
     expect(result.byYear).toContainEqual(
       expect.objectContaining({ year: 2024, totalStructures: 1 })
     );

@@ -1,10 +1,15 @@
 import { ReactElement } from "react";
 
+import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { isSomeDataIncomplete } from "@/utils/statistiques.util";
+
 import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";
 import { FiltersNotice } from "./FiltersNotice";
 import { FinancesBlock } from "./finances/FinancesBlock";
+import { PartialDataNotice } from "./PartialDataNotice";
 import { RMUBlock } from "./rmu/RMUBlock";
+import { StatistiquesCallouts } from "./StatistiquesCallouts";
 import { StatistiquesPdfHeader } from "./StatistiquesPdfHeader";
 import { StructuresBlock } from "./structures/StructuresBlock";
 import { TypesPlacesBlock } from "./type-places/TypesPlacesBlock";
@@ -25,6 +30,7 @@ export const StatistiquesPdfExportDocument = ({
   const departementsCount = departements?.split(",").length || 0;
   const operateursCount = operateurs?.split(",").length || 0;
   const typesCount = types?.split(",").length || 0;
+  const { statistiques } = useStatistiquesContext();
 
   return (
     <div className="p-14">
@@ -33,6 +39,8 @@ export const StatistiquesPdfExportDocument = ({
         operateursCount={operateursCount}
         typesCount={typesCount}
       />
+      <StatistiquesCallouts />
+      {isSomeDataIncomplete(statistiques) && <PartialDataNotice />}
       <div className="pb-4 break-after-page">
         <StructuresBlock />
       </div>

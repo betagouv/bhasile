@@ -1,9 +1,10 @@
 "use client";
 
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
 import { CustomAccordion } from "@/app/components/common/CustomAccordion";
-import { EmptyCell } from "@/app/components/common/EmptyCell";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
+import { PlacesWithPercentage } from "@/app/components/common/PlacesWithPercentage";
 import { Table } from "@/app/components/common/Table";
 import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
 import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
@@ -45,19 +46,35 @@ export const TypePlaceHistory = ({
     },
     {
       label: "Places PMR",
+      hasPercentage: true,
       getValue: (year) => getStructureTypologie(year)?.pmr,
     },
     {
       label: "Places LGBT",
       subLabel: "(labellisées)",
+      hasPercentage: true,
       getValue: (year) => getStructureTypologie(year)?.lgbt,
     },
     {
       label: "Places FVV/TEH",
       subLabel: "(spécialisées)",
+      hasPercentage: true,
       getValue: (year) => getStructureTypologie(year)?.fvvTeh,
     },
   ];
+
+  const renderCell = (row: PlaceRow, year: number): ReactNode => {
+    const value = row.getValue(year);
+    if (!row.hasPercentage || value === undefined || value === null) {
+      return <NumberDisplay value={value} showEmptyCell />;
+    }
+    return (
+      <PlacesWithPercentage
+        value={value}
+        placesAutorisees={getStructureTypologie(year)?.placesAutorisees}
+      />
+    );
+  };
 
   return (
     <CustomAccordion label="Historique">
@@ -94,7 +111,7 @@ export const TypePlaceHistory = ({
                   isExporting ? "min-w-0 px-1" : "min-w-25"
                 }`}
               >
-                {row.getValue(year) ?? <EmptyCell />}
+                {renderCell(row, year)}
               </td>
             ))}
           </tr>
@@ -111,7 +128,8 @@ export const TypePlaceHistory = ({
 type PlaceRow = {
   label: string;
   subLabel?: string;
-  getValue: (year: number) => number | undefined;
+  hasPercentage?: boolean;
+  getValue: (year: number) => number | null | undefined;
 };
 
 type Props = {
