@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { ReactElement, useState } from "react";
 
 import { getCurrentCpomStructure } from "@/app/utils/structure.util";
+import { CpomStructureAction } from "@/components/CpomStructureAction";
+import { NoPermissionsModal } from "@/components/NoPermissionsModal";
 import { useStructureContext } from "@/contexts/StructureContext";
 
 export const CpomViewer = (): ReactElement => {
@@ -45,19 +46,16 @@ export const CpomViewer = (): ReactElement => {
                       {structure.structure.communeAdministrative}
                     </span>{" "}
                   </span>
-                  {structure.structure.forms?.some((form) => form.status) && (
-                    <Link
-                      className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
-                      title="Voir la structure"
-                      aria-label="Voir la structure"
-                      href={`/structures/${structure.structure.id}`}
-                    />
-                  )}
+                  <CpomStructureAction
+                    structure={structure.structure}
+                    arrowIconClass="fr-icon-arrow-right-s-line"
+                  />
                 </div>
               )
           )}
         </div>
       )}
+      <NoPermissionsModal />
     </>
   );
 };
