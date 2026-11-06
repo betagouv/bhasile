@@ -1,7 +1,7 @@
 import { AccessRole, GrantScope } from "@/generated/prisma/enums";
 import { SessionGrant } from "@/types/global";
 
-import { GrantDb } from "./user.db.type";
+import { GrantDb, PerimeterDb, UserWithGrants } from "./user.db.type";
 
 export const normalizeEmail = (email: string): string =>
   email.trim().toLowerCase();
@@ -18,29 +18,36 @@ export const getAccountStatus = (user: {
 
 export type AccountStatus = "PENDING" | "ACTIVATED" | "DEACTIVATED";
 
-export const getEffectiveGrants = (user: {
-  grants: GrantDb[];
-  emailPattern: { grants: GrantDb[] } | null;
-}): GrantDb[] =>
-  user.grants.length > 0 ? user.grants : (user.emailPattern?.grants ?? []);
-
-export const isAgentUser = (user: {
-  isSuperAdmin: boolean;
-  isAgent: boolean | null;
-  operateurId: number | null;
-  emailPattern: { isAgent: boolean } | null;
-}): boolean =>
-  user.isSuperAdmin ||
-  ((user.isAgent ?? user.emailPattern?.isAgent ?? false) &&
-    user.operateurId === null);
+export const isAgentUser = (
+  user: Pick<UserWithGrants, "isSuperAdmin" | "operateurId" | "perimeter">
+): boolean =>
+  user.isSuperAdmin || (user.perimeter !== null && user.operateurId === null);
 
 export const getAssignedGrants = (
-  user: Parameters<typeof isAgentUser>[0] &
-    Parameters<typeof getEffectiveGrants>[0]
-): GrantDb[] =>
-  isAgentUser(user) || user.operateurId !== null
-    ? getEffectiveGrants(user)
-    : [];
+  user: Pick<
+    UserWithGrants,
+    "isActivated" | "operateurId" | "perimeter" | "grants"
+  >
+): GrantDb[] => {
+  if (!user.isActivated) {
+    return [];
+  }
+  if (user.operateurId !== null) {
+    return user.grants;
+  }
+  return user.perimeter ? getPerimeterGrants(user.perimeter) : [];
+};
+
+export const getPerimeterGrants = (perimeter: PerimeterDb): GrantDb[] => [
+  {
+    role: AccessRole.LECTEUR,
+    scope: GrantScope.NATIONAL,
+    region: null,
+    departement: null,
+    structure: null,
+  },
+  ...perimeter.grants,
+];
 
 export const toContactGrant = (structureId: number): SessionGrant => ({
   role: AccessRole.LECTEUR,

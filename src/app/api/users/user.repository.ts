@@ -9,19 +9,16 @@ const UPDATE_INTERVAL_MINUTES = 60;
 export const upsertUser = async ({
   name,
   email,
-  emailPattern,
 }: UpsertUserArgs): Promise<void> => {
   const now = getNow();
   const threshold = new Date(
     now.getTime() - UPDATE_INTERVAL_MINUTES * 60 * 1000
   );
-  const existing = await prisma.user.findFirst({
-    where: emailWhere(email),
-    orderBy: { id: "asc" },
+  const existing = await prisma.user.findUnique({
+    where: { email },
     select: {
       id: true,
       lastConnection: true,
-      emailPattern: { select: { pattern: true } },
     },
   });
 
@@ -31,9 +28,6 @@ export const upsertUser = async ({
         email,
         name,
         lastConnection: now,
-        ...(emailPattern && {
-          emailPattern: { connect: { pattern: emailPattern } },
-        }),
       },
     });
     return;
@@ -41,8 +35,7 @@ export const upsertUser = async ({
 
   const isRecentConnection =
     existing.lastConnection && existing.lastConnection >= threshold;
-  const isSameEmailPattern = existing.emailPattern?.pattern === emailPattern;
-  if (isRecentConnection && isSameEmailPattern) {
+  if (isRecentConnection) {
     return;
   }
 
@@ -51,17 +44,13 @@ export const upsertUser = async ({
     data: {
       name,
       lastConnection: now,
-      emailPattern: emailPattern
-        ? { connect: { pattern: emailPattern } }
-        : { disconnect: true },
     },
   });
 };
 
 export const findUserIdByEmail = (email: string) =>
-  prisma.user.findFirst({
-    where: emailWhere(email),
-    orderBy: { id: "asc" },
+  prisma.user.findUnique({
+    where: { email },
     select: { id: true },
   });
 
@@ -73,9 +62,8 @@ export const getUserWithGrantsByEmail = async ({
   if (!email) {
     return null;
   }
-  return prisma.user.findFirst({
-    where: emailWhere(email),
-    orderBy: { id: "asc" },
+  return prisma.user.findUnique({
+    where: { email },
     select: userWithGrantsSelect,
   });
 };
@@ -95,21 +83,23 @@ export const findUsersWithGrantsOnStructure = ({
   };
   return prisma.user.findMany({
     where: {
+      isActivated: true,
       OR: [
+        {
+          perimeter: {
+            grants: {
+              some: { scope: GrantScope.DEPARTEMENT, departementNumero },
+            },
+          },
+        },
         { grants: { some: grantWhere } },
-        { emailPattern: { grants: { some: grantWhere } } },
       ],
     },
     select: { ...userWithGrantsSelect, email: true },
   });
 };
 
-const emailWhere = (email: string) => ({
-  email: { equals: email, mode: "insensitive" as const },
-});
-
 type UpsertUserArgs = {
   name: string;
   email: string;
-  emailPattern?: string;
 };

@@ -1,44 +1,23 @@
 import { toBrevoContact } from "scripts/utils/brevo.util";
-
-import { GrantDb } from "@/app/api/users/user.db.type";
-import { AccessRole, GrantScope } from "@/generated/prisma/client";
-
-const buildGrant = (overrides: Partial<GrantDb> = {}): GrantDb => ({
-  role: AccessRole.EDITEUR,
-  scope: GrantScope.NATIONAL,
-  region: null,
-  departement: null,
-  structure: null,
-  ...overrides,
-});
-
-const departementGrant = (numero: string, name: string, role?: AccessRole) =>
-  buildGrant({
-    ...(role ? { role } : {}),
-    scope: GrantScope.DEPARTEMENT,
-    departement: { numero, name, regionId: null },
-  });
-
-const nationalReadGrant = buildGrant({ role: AccessRole.LECTEUR });
+import {
+  createDepartementPerimeter,
+  createNationalPerimeter,
+  createRegionPerimeter,
+} from "tests/test-utils/factories/user-with-grants.factory";
 
 const baseUser = {
   email: "agent@dreets.gouv.fr",
   lastConnection: new Date("2026-09-15T08:30:00.000Z"),
   createdAt: new Date("2025-01-20T10:00:00.000Z"),
-  grants: [],
-  emailPattern: null,
+  isActivated: true,
+  deactivatedAt: null,
+  perimeter: createDepartementPerimeter("13", "Bouches-du-Rhône"),
 };
 
 describe("brevo util", () => {
   it("mappe un agent départemental sur les attributs Brevo", () => {
-    // GIVEN
-    const user = {
-      ...baseUser,
-      grants: [departementGrant("13", "Bouches-du-Rhône")],
-    };
-
     // WHEN
-    const contact = toBrevoContact(user);
+    const contact = toBrevoContact(baseUser);
 
     // THEN
     expect(contact).toEqual({
@@ -49,58 +28,33 @@ describe("brevo util", () => {
         PERIMETRE: "Bouches-du-Rhône",
         LAST_LOGIN: "2026-09-15",
         CREATION_COMPTE: "2025-01-20",
+        ACTIVE_USER: true,
       },
     });
   });
 
-  it("récupère les droits de base du pattern d'email et ignore le binôme lecteur national", () => {
-    // GIVEN
-    const user = {
-      ...baseUser,
-      emailPattern: {
-        grants: [
-          nationalReadGrant,
-          buildGrant({
-            scope: GrantScope.REGION,
-            region: {
-              id: 3,
-              name: "Bretagne",
-              departements: [
-                { numero: "35" },
-                { numero: "22" },
-                { numero: "56" },
-                { numero: "29" },
-              ],
-            },
-          }),
-        ],
-      },
-    };
-
+  it("donne la région et ses départements pour un agent régional, sans la lecture nationale", () => {
     // WHEN
-    const contact = toBrevoContact(user);
+    const contact = toBrevoContact({
+      ...baseUser,
+      perimeter: createRegionPerimeter(),
+    });
 
     // THEN
     expect(contact.attributes.PERIMETRE).toBe("Bretagne");
-    expect(contact.attributes.DEPARTEMENT).toBe("22, 29, 35, 56");
+    expect(contact.attributes.DEPARTEMENT).toBe("22, 29, 35");
   });
 
-  it("fait primer les binômes de l'utilisateur sur ceux du pattern", () => {
-    // GIVEN
-    const user = {
-      ...baseUser,
-      grants: [departementGrant("29", "Finistère", AccessRole.ADMIN)],
-      emailPattern: {
-        grants: [departementGrant("75", "Paris")],
-      },
-    };
-
+  it("marque un agent national sans département", () => {
     // WHEN
-    const contact = toBrevoContact(user);
+    const contact = toBrevoContact({
+      ...baseUser,
+      perimeter: createNationalPerimeter(),
+    });
 
     // THEN
-    expect(contact.attributes.PERIMETRE).toBe("Finistère");
-    expect(contact.attributes.DEPARTEMENT).toBe("29");
+    expect(contact.attributes.PERIMETRE).toBe("National");
+    expect(contact.attributes.DEPARTEMENT).toBe("");
   });
 
   it("laisse la date de dernière connexion vide pour un utilisateur jamais connecté", () => {
@@ -111,12 +65,25 @@ describe("brevo util", () => {
     expect(contact.attributes.LAST_LOGIN).toBe("");
   });
 
-  it("laisse le périmètre vide quand aucun binôme n'est rattaché", () => {
+  it("laisse le périmètre vide pour un compte non activé", () => {
     // WHEN
-    const contact = toBrevoContact(baseUser);
+    const contact = toBrevoContact({ ...baseUser, isActivated: false });
 
     // THEN
     expect(contact.attributes.PERIMETRE).toBe("");
     expect(contact.attributes.DEPARTEMENT).toBe("");
+  });
+
+  it("marque inactif un agent désactivé, sans changer son statut", () => {
+    // WHEN
+    const contact = toBrevoContact({
+      ...baseUser,
+      isActivated: false,
+      deactivatedAt: new Date("2026-11-04T10:00:00.000Z"),
+    });
+
+    // THEN
+    expect(contact.attributes.ACTIVE_USER).toBe(false);
+    expect(contact.attributes.STATUT).toBe("Agent");
   });
 });
