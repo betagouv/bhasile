@@ -141,6 +141,7 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 - [Messagerie](docs/messagerie.md) — messagerie tripartite de la tarification (canaux, ajout seul, droits, notifications, preuve)
 - [Tarification](docs/tarification.md) — campagne de tarification : documents typés, étapes calculées, échéances, contradictoire, copie vers la fiche
 - [Emails](docs/email.md) — mails de notification : Brevo transactionnel, un mail groupé par destinataire deux fois par jour, trace et reprise
+- [Notifications](docs/notifications.md) — cloche in-app : calculée à la lecture, vu à l'ouverture, traité au clic, même politique que les mails
 - [Anomalies](docs/anomalies.md) — détection des incohérences de données (moteur isomorphe, registre, réconciliation)
 - [Permissions](docs/permissions.md) — activation des comptes, périmètres des agents, binômes des opérateurs, feuille de route
 - [Départements](docs/departements.md) — les deux départements d'une structure : autorisation vs affichage

@@ -217,25 +217,26 @@ Les étapes sont définies dans un registre typé en code, `TARIFICATION_STEP_DE
 
 ## Notifications
 
-Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire et par passage (deux par jour), avec deux sections, messages et documents. Aucun délai ne dépend du mail : le contradictoire court depuis l'ouverture, un dépôt est daté par le serveur. Ici, la politique ⏳ :
+Deux canaux : le mail, par le mécanisme des [emails](email.md) (un seul mail par destinataire et par passage, deux par jour, avec deux sections, messages et documents), et la cloche, par celui des [notifications](notifications.md). Aucun délai ne dépend de l'un ou de l'autre : le contradictoire court depuis l'ouverture, un dépôt est daté par le serveur. Ici, la politique ⏳ :
 
-| Fait                                                                         | Destinataires                                                          |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Message                                                                      | voir [Notifications de la messagerie](messagerie.md#notifications)     |
-| Dépôt de l'opérateur (CA, BP, rapports, réponse, pièce)                      | agents éditeurs de la DDETS                                            |
-| Accusé de dépôt                                                              | l'auteur du dépôt : type, date et empreinte, sa preuve hors de Bhasile |
-| Partage d'un document à l'opérateur                                          | l'opérateur, avec le type, l'exercice et l'empreinte du document       |
-| Validation ou modifications demandées                                        | l'auteur de la version                                                 |
-| Contestation de la L48                                                       | les agents éditeurs de la DDETS **et de la DREETS**                    |
-| Retrait d'un document                                                        | ceux qui avaient reçu le mail de son partage                           |
-| Version déposée par un agent, acceptation, sans objet, hors Bhasile, reprise | personne                                                               |
+| Fait                                                                         | Destinataires                                                          | Cloche                                                    |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------- |
+| Message                                                                      | voir [Notifications de la messagerie](messagerie.md#notifications)     | une ligne par conversation non lue                        |
+| Dépôt de l'opérateur (CA, BP, rapports, réponse, pièce)                      | agents éditeurs de la DDETS                                            | oui                                                       |
+| Accusé de dépôt                                                              | l'auteur du dépôt : type, date et empreinte, sa preuve hors de Bhasile | non : il vient de déposer, la cloche n'est pas une preuve |
+| Partage d'un document à l'opérateur                                          | l'opérateur, avec le type, l'exercice et l'empreinte du document       | oui                                                       |
+| Validation ou modifications demandées                                        | l'auteur de la version                                                 | oui                                                       |
+| Contestation de la L48                                                       | les agents éditeurs de la DDETS **et de la DREETS**                    | oui                                                       |
+| Retrait d'un document                                                        | ceux qui avaient reçu le mail de son partage                           | ceux qui avaient traité la ligne de son partage           |
+| Version déposée par un agent, acceptation, sans objet, hors Bhasile, reprise | personne                                                               | non                                                       |
 
 - **Liste blanche** : chaque type d'événement déclare dans le registre s'il notifie ; un nouveau type ne notifie pas par défaut.
 - **La DREETS n'est notifiée que des contestations** : c'est le seul fait qui attend une action de sa part.
 - **Jamais le nom du fichier** dans un mail (un mail est une notification, pas un contenu, voir [Emails](email.md#principes)) : « L48 2027 » et l'empreinte.
 - **File et trace** : la file des [emails](email.md), `EmailNotification` et `EmailNotificationRecipient`, avec ces notifications : elles y ajouteront `eventId` et un `CHECK` (une ligne vise un message ou un événement). Un événement ne s'y inscrit, dans sa transaction, que si son type notifie ; ceux écrits avant n'ont pas de ligne, donc pas de mail. Le mail groupé lit toutes les lignes en attente, avec un template à deux sections.
 - **Destinataires** : une fonction propre à la tarification ; celle de la messagerie (`getMessageRecipients`) exclut les grants `REGION`, alors que la contestation vise la DREETS.
-- **Déjà vu** : un partage ouvert avant le passage du cron n'est pas signalé ; un accusé de dépôt l'est toujours. Un partage retiré avant le passage n'est pas signalé (le mail annoncerait un document retiré).
+- **Déjà vu** : un partage ouvert avant le passage du cron n'est pas signalé, ni un fait traité dans la cloche ; un accusé de dépôt l'est toujours. Un partage retiré avant le passage n'est pas signalé (le mail annoncerait un document retiré).
+- **Retrait dans la cloche** : un partage retiré dont la ligne n'a pas été traitée disparaît, sans ligne de retrait (elle mènerait à un document retiré) ; si elle l'a été, une ligne « Retrait » apparaît.
 - **Les opérateurs** ont un compte dès la mise en service : les rebonds redeviennent utiles (contacts partis), le webhook Brevo est donc un prérequis de la mise en service.
 
 ## Interface
@@ -264,6 +265,7 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 - **Campagnes fermées** : avant l'ouverture, ou pour une structure non éligible, tout est en lecture seule, avec un bandeau. En rattrapage, seule l'étape « Arrêté et tarification » reste active, pour les agents.
 - **Échanges** : un tiroir à droite, ouvert par un bouton flottant (`?canal=tous` ou `?canal=agents`). Un message n'est marqué lu que tiroir ouvert. Le fil intercale les faits du journal (« Envoi : L48 2026 ») : ceux que voit l'opérateur dans le canal partagé, tous dans le canal agents. Un sommaire à gauche liste ces jalons et les messages avec pièces jointes (« Justificatif »). Les tags restent, en attendant la maquette finale.
 - **À l'écran** : « créé », « validé », « signé », « envoyé », jamais « brouillon ».
+- **Cloche** : sur le tableau de bord, à côté du titre (voir [Notifications](notifications.md#écran)).
 - **Tableau de bord** : un bloc « Tarification », sur le gabarit des blocs existants, filtré comme eux et par campagne (étapes en cours, retards, non-lus de la messagerie). L'opérateur a le même bloc, limité à ses structures.
 
 ## Mise en service
@@ -282,6 +284,7 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 | Écritures et gardes                        | `tarification-ecritures` : `POST …/documents`, `POST …/events`, gardes de domaine (`tarification.guard.ts`), sélecteur des campagnes en rattrapage                                                                                  | fait                         |
 | Copie vers la fiche, verrouillage, reprise | `tarification-fiche` : `tarification.fiche.ts`, `syncFicheCopies`, script de reprise                                                                                                                                                | en cours                     |
 | Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                                                                                                                                      | à faire                      |
+| Cloche                                     | `tarification-cloche` : [Notifications](notifications.md), `NotificationRead`, `User.notificationSeenAt`                                                                                                                            | en cours                     |
 | Interface : lecture et visionneuse         | `tarification-ui`                                                                                                                                                                                                                   | fait                         |
 | Interface : dépôts et actions              | `tarification-ui-actions`                                                                                                                                                                                                           | fait                         |
 | Interface : tiroir des échanges            | `tarification-echanges`                                                                                                                                                                                                             | en cours                     |
