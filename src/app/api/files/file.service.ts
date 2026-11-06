@@ -147,8 +147,7 @@ export const getInlineLink = async (
       fileName,
       FILE_UPLOAD_EXPIRATION_DELAY,
       {
-        "response-content-type":
-          mimeType === "text/csv" ? "text/plain; charset=utf-8" : mimeType,
+        "response-content-type": mimeType,
         "response-content-disposition": "inline",
       }
     );
