@@ -32,9 +32,9 @@ export const upsertStructureTarification = async (
 // `update` non vide : sinon Prisma émule l'upsert (SELECT puis INSERT, P2002 sur deux premiers appels simultanés) au lieu d'un INSERT … ON CONFLICT
 export const upsertTarificationCampaign = (
   year: number,
-  db: PrismaTransaction = prisma
+  tx: PrismaTransaction = prisma
 ) =>
-  db.tarificationCampaign.upsert({
+  tx.tarificationCampaign.upsert({
     where: { year },
     update: { year },
     create: { year },
@@ -239,7 +239,7 @@ export const runInTarificationTransaction = async <T>(
 export const findFicheCopies = async (
   structureId: number,
   year: number,
-  db: PrismaTransaction = prisma
+  tx: PrismaTransaction = prisma
 ): Promise<ExistingFicheCopy[]> => {
   const where = {
     sourceTarificationDocument: {
@@ -251,11 +251,11 @@ export const findFicheCopies = async (
     category: true,
     sourceTarificationDocumentId: true,
   };
-  const documentsFinanciers = await db.documentFinancier.findMany({
+  const documentsFinanciers = await tx.documentFinancier.findMany({
     where,
     select,
   });
-  const actesAdministratifs = await db.acteAdministratif.findMany({
+  const actesAdministratifs = await tx.acteAdministratif.findMany({
     where,
     select,
   });
