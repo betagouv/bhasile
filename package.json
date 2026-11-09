@@ -54,7 +54,7 @@
     "copy:maplibre-worker": "mkdir -p public/maplibre && cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs node_modules/maplibre-gl/dist/maplibre-gl-shared.mjs public/maplibre/"
   },
   "dependencies": {
-    "@casl/ability": "^6.8.0",
+    "@casl/ability": "^6.8.3",
     "@casl/prisma": "^1.6.2",
     "@casl/react": "^7.1.0",
     "@codegouvfr/react-dsfr": "^1.36.0",
