@@ -447,10 +447,10 @@
   resolved "https://registry.yarnpkg.com/@gouvfr/dsfr-chart/-/dsfr-chart-2.1.1.tgz#e79bcfa27c2d939517df88fad0301e331d1187f9"
   integrity sha512-+d31EVpxqfA/O5xrPZzOTF8C4usHCVmt+fk00twyMyDp8Tpcz8J7hP4s4a6M+OgkOwnOriRoV5ET55gJmWoIZA==
 
-"@hookform/resolvers@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-6.0.0.tgz#1c33be45bafddc9890fe938730f8b5eb09bb6137"
-  integrity sha512-6iBzQnB+YwAveVc8HUi6QYLITn5X+xNKRMFIcNXHZlvp2aTI7yWbj4n/JodXxirMCcBc4VCjb2aYAJh4x07mVw==
+"@hookform/resolvers@^7.0.1":
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-7.0.1.tgz#2d8d3dce6031083eede37326707e317e85944c73"
+  integrity sha512-F3aM0dDWsRGmFjnnXjogaGLwP7gY2HA6/c5qp4v4Im/UV7pTNkX+WAjcOlM1V0PE0zoMzuPqCyaYtMzUhoFToA==
   dependencies:
     "@standard-schema/utils" "^0.3.0"
 
