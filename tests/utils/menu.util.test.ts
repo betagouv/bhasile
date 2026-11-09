@@ -34,7 +34,10 @@ describe("menu.util", () => {
       const menuItems = resolveMenuItems(operateurUser as SessionUser);
 
       // THEN
-      const structuresMenuGroup = menuItems[1] as MenuGroup;
+      const structuresMenuGroup = menuItems.find(
+        (item) => "id" in item && item.id === "structures"
+      ) as MenuGroup;
+
       expect(structuresMenuGroup).toBeDefined();
 
       const operateurSubItem = structuresMenuGroup.subItems.find(

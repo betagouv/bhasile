@@ -2,9 +2,11 @@
 
 import { ProConnectButton } from "@codegouvfr/react-dsfr/ProConnectButton";
 import { useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { ReactElement } from "react";
 
+import { isAgent } from "@/lib/casl/rules";
+import { SessionUser } from "@/types/global";
 import { clearStoredFilters } from "@/utils/filters.util";
 
 import { AccesRefuse } from "./AccesRefuse";
@@ -13,6 +15,7 @@ export default function Login(): ReactElement {
   const searchParams = useSearchParams();
   const reason = searchParams.get("reason");
   const error = searchParams.get("error");
+  const { data } = useSession();
 
   const accesRefuse =
     searchParams.get("accesRefuse") === "true" ||
@@ -22,7 +25,9 @@ export default function Login(): ReactElement {
   const login = async (): Promise<void> => {
     clearStoredFilters();
     signIn("proconnect", {
-      callbackUrl: process.env.NEXT_PUBLIC_URL,
+      callbackUrl: isAgent(data?.user as SessionUser)
+        ? process.env.NEXT_PUBLIC_URL
+        : `${process.env.NEXT_PUBLIC_URL}/structures`,
     });
   };
 

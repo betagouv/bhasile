@@ -10,6 +10,11 @@ export default function Deconnexion(): ReactElement | null {
   const { data: session, status } = useSession();
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/");
+      return;
+    }
+
     if (status !== "authenticated" || !session) {
       return;
     }
@@ -17,13 +22,12 @@ export default function Deconnexion(): ReactElement | null {
     const idTokenHint = (session as Session & { id_token: string }).id_token;
     const callbackUrl = `/deconnexion/proconnect?id_token_hint=${idTokenHint}`;
 
-    signOut({ redirect: false, callbackUrl }).then((response) =>
-      router.push(response.url)
-    );
+    signOut({ redirect: false, callbackUrl }).then((response) => {
+      router.push(response.url);
+    });
   }, [status, session, router]);
 
   if (status === "unauthenticated") {
-    router.replace("/");
     return null;
   }
 

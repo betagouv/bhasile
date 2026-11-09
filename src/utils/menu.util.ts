@@ -25,7 +25,7 @@ export type MenuItem = MenuLink | MenuGroup;
 
 export const resolveMenuItems = (user?: SessionUser | null): MenuItem[] =>
   buildMenuItems({
-    isAgent: !user || isAgent(user),
+    isAgent: Boolean(user && isAgent(user)),
     operateurId: user?.operateurId ?? null,
   });
 
@@ -36,11 +36,16 @@ const buildMenuItems = ({
   isAgent: boolean;
   operateurId: number | null;
 }): MenuItem[] => [
-  {
-    icon: "ri-speed-up-line",
-    label: "Tableau de bord",
-    url: "/",
-  },
+  // TODO : remettre le tableau de bord, les cpoms et les stats pour les opérateurs dans une future PR
+  ...(isAgent
+    ? [
+        {
+          icon: "ri-speed-up-line",
+          label: "Tableau de bord",
+          url: "/",
+        } satisfies MenuLink,
+      ]
+    : []),
   {
     id: "structures",
     icon: "fr-icon-community-line",
@@ -50,26 +55,40 @@ const buildMenuItems = ({
         label: "Voir les structures",
         url: "/structures",
       },
-      {
-        label: "Voir les CPOM",
-        url: "/cpoms",
-      },
-      isAgent
-        ? {
-            label: "Voir les opérateurs",
-            url: "/operateurs",
-          }
-        : {
-            label: "Voir l’opérateur",
-            url: `/operateurs/${operateurId}`,
-          },
+      ...(isAgent
+        ? [
+            {
+              label: "Voir les CPOM",
+              url: "/cpoms",
+            },
+          ]
+        : []),
+      ...(isAgent
+        ? [
+            {
+              label: "Voir les opérateurs",
+              url: "/operateurs",
+            },
+          ]
+        : operateurId
+          ? [
+              {
+                label: "Voir l’opérateur",
+                url: `/operateurs/${operateurId}`,
+              },
+            ]
+          : []),
     ],
   },
-  {
-    icon: "fr-icon-pie-chart-2-line",
-    label: "Statistiques",
-    url: "/statistiques",
-  },
+  ...(isAgent
+    ? [
+        {
+          icon: "fr-icon-pie-chart-2-line",
+          label: "Statistiques",
+          url: "/statistiques",
+        } satisfies MenuLink,
+      ]
+    : []),
   ...(isAgent && process.env.NEXT_PUBLIC_SHOW_RESSOURCES === "true" //TODO: remove this once the ressources page is ready
     ? [
         {

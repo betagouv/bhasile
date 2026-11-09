@@ -250,7 +250,7 @@ describe("Menu", () => {
     });
     expect(operateurLink).toHaveAttribute("href", "/operateurs/10");
 
-    expect(screen.queryByText("Tableau de bord")).toBeInTheDocument();
     expect(screen.queryByText("Voir les structures")).toBeInTheDocument();
+    expect(screen.queryByText("Voir l’opérateur")).toBeInTheDocument();
   });
 });

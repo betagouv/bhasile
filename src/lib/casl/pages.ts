@@ -3,9 +3,12 @@ import { matchesPath } from "@/utils/path.util";
 
 import { isAgent } from "./rules";
 
-export const commonPages = ["/", "/structures", "/cpoms", "/statistiques"];
+// TODO : ajouter le tableau de bord, cpoms et statistiques plus tard pour les opérateurs et les retirer de agentOnlyPages
+export const commonPages = [
+  /*"/", */ "/structures" /*, "/cpoms", "/statistiques"*/,
+];
 
-export const agentOnlyPages = ["/ressources"];
+export const agentOnlyPages = ["/", "/ressources", "/cpoms", "/statistiques"];
 
 export const canAccessPage = (
   user: SessionUser | undefined,
