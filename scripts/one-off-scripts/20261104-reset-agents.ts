@@ -1,5 +1,6 @@
 // One-off : repart du document d'accès (export Tally) pour rattacher chaque agent à son périmètre.
-// Rien n'est supprimé : les agents absents du document sont désactivés, binômes conservés.
+// Rien n'est supprimé : les agents absents du document sont désactivés, binômes conservés,
+// sauf les éditeurs nationaux, rattachés au périmètre « Lecture nationale ».
 // Le script s'arrête avant toute écriture si le document ou la base est incohérent.
 //
 // Usage : yarn one-off 20261104-reset-agents <fichier.csv> [--dry-run]
@@ -11,6 +12,7 @@ import {
   DocumentPerimeter,
   findEmailCaseDuplicates,
   getMissingColumns,
+  NATIONAL_READERS_PERIMETER_NAME,
   parseAgentsDocument,
   PerimetersPlan,
   planAgentsReset,
@@ -145,6 +147,25 @@ const applyPlan = async (
         perimeterIds.set(name, id);
       }
 
+      if (plan.nationalReaders.length > 0) {
+        const { id: nationalReadersPerimeterId } = await tx.perimeter.upsert({
+          where: { name: NATIONAL_READERS_PERIMETER_NAME },
+          create: { name: NATIONAL_READERS_PERIMETER_NAME },
+          update: {},
+          select: { id: true },
+        });
+        for (const { user } of plan.nationalReaders) {
+          await tx.user.update({
+            where: { id: user.id },
+            data: {
+              perimeterId: nationalReadersPerimeterId,
+              isActivated: true,
+              deactivatedAt: null,
+            },
+          });
+        }
+      }
+
       for (const { email, perimeter, user } of plan.agents) {
         const data = {
           email,
@@ -236,11 +257,20 @@ const logPlan = (
   );
 
   console.log(
+    `\n🔭 ${plan.nationalReaders.length} éditeur(s) national(aux) absent(s) du document, rattaché(s) au périmètre « ${NATIONAL_READERS_PERIMETER_NAME} » (lecture nationale seule) :`
+  );
+  plan.nationalReaders.forEach(({ user, rights }) =>
+    console.log(
+      `  - ${user.email}\n      avant : ${rights}\n      après : Lecteur national`
+    )
+  );
+
+  console.log(
     `\n⛔ ${plan.deactivated.length} agent(s) absent(s) du document, désactivé(s), binômes conservés :`
   );
-  plan.deactivated.forEach(({ user, rights, isNational }) =>
+  plan.deactivated.forEach(({ user, rights }) =>
     console.log(
-      `  - ${isNational ? "[NATIONAL] " : ""}${user.email} : ${rights} (dernière connexion : ${user.lastConnection?.toISOString() ?? "jamais"}${user.deactivatedAt ? `, déjà désactivé le ${user.deactivatedAt.toISOString()}` : ""})`
+      `  - ${user.email} : ${rights} (dernière connexion : ${user.lastConnection?.toISOString() ?? "jamais"}${user.deactivatedAt ? `, déjà désactivé le ${user.deactivatedAt.toISOString()}` : ""})`
     )
   );
 
