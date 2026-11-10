@@ -4,12 +4,9 @@ model User {
   email               String                       @unique
   lastConnection      DateTime?
   userActions         UserAction[]
-  emailPattern        EmailPattern?                @relation(fields: [emailPatternId], references: [id])
-  emailPatternId      Int?
   operateur           Operateur?                   @relation(fields: [operateurId], references: [id], onDelete: Restrict)
   operateurId         Int?
   isSuperAdmin        Boolean                      @default(false)
-  isAgent             Boolean?
   perimeter           Perimeter?                   @relation(fields: [perimeterId], references: [id], onDelete: Restrict)
   perimeterId         Int?
   isActivated         Boolean                      @default(false)
@@ -42,16 +39,6 @@ model UserAction {
   details     Json?
 
   createdAt DateTime @default(now())
-
-  @@schema("public")
-}
-
-model EmailPattern {
-  id      Int     @id @default(autoincrement())
-  pattern String  @unique
-  isAgent Boolean @default(false)
-  users   User[]
-  grants  Grant[]
 
   @@schema("public")
 }

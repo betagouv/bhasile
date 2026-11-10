@@ -130,7 +130,7 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 
 ## Authentification
 
-- **ProConnect** : tout compte peut se connecter ; l'accès au dashboard demande au moins un binôme (voir [Permissions](docs/permissions.md))
+- **ProConnect** : tout compte peut se connecter ; l'accès au dashboard demande un compte activé (voir [Permissions](docs/permissions.md))
 - **Mot de passe** : opérateurs, accès limité au formulaire `/ajout-structure`
 
 ## Documentation détaillée
@@ -141,7 +141,7 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 - [Messagerie](docs/messagerie.md) — messagerie tripartite de la tarification (canaux, ajout seul, droits, notifications, preuve)
 - [Emails](docs/email.md) — mails de notification : Brevo transactionnel, un mail groupé par destinataire deux fois par jour, trace et reprise
 - [Anomalies](docs/anomalies.md) — détection des incohérences de données (moteur isomorphe, registre, réconciliation)
-- [Permissions](docs/permissions.md) — binômes rôle × niveau géographique, droits de base par pattern, feuille de route opérateurs
+- [Permissions](docs/permissions.md) — activation des comptes, périmètres des agents, binômes des opérateurs, feuille de route
 - [Départements](docs/departements.md) — les deux départements d'une structure : autorisation vs affichage
 - [Référentiel OFII](docs/ofii_referential.md) — mise à jour mensuelle du référentiel OFII
 - [Tests](docs/tests.md) — outils, nommage des fichiers et des cas (`it` en français)

@@ -1,6 +1,6 @@
 // One-off : repart du document d'accès (export Tally) pour rattacher chaque agent à son périmètre.
-// Rien n'est supprimé : les agents absents du document sont désactivés, binômes conservés,
-// sauf les éditeurs nationaux, rattachés au périmètre « Lecture nationale ».
+// Rien n'est supprimé : les agents absents du document sont désactivés, périmètre conservé,
+// sauf les nationaux, gardés en lecture nationale (périmètre « Lecture nationale »).
 // Le script s'arrête avant toute écriture si le document ou la base est incohérent.
 //
 // Usage : yarn one-off 20261104-reset-agents <fichier.csv> [--dry-run]
@@ -21,7 +21,7 @@ import {
 } from "scripts/utils/agents-reset.util";
 import { loadCsvFromS3 } from "scripts/utils/csv-loader";
 
-import { grantSelect } from "@/app/api/users/user.db.type";
+import { grantSelect, perimeterSelect } from "@/app/api/users/user.db.type";
 import { normalizeEmail } from "@/app/api/users/user.util";
 import { createPrismaClient } from "@/prisma-client";
 
@@ -74,16 +74,12 @@ const resetAgents = async () => {
         id: true,
         email: true,
         isSuperAdmin: true,
-        isAgent: true,
         operateurId: true,
         isActivated: true,
         deactivatedAt: true,
         lastConnection: true,
-        perimeter: { select: { name: true } },
+        perimeter: { select: perimeterSelect },
         grants: { select: grantSelect },
-        emailPattern: {
-          select: { isAgent: true, grants: { select: grantSelect } },
-        },
       },
       orderBy: { email: "asc" },
     }),
@@ -190,10 +186,7 @@ const applyPlan = async (
       for (const { user } of plan.deactivated) {
         await tx.user.update({
           where: { id: user.id },
-          data: {
-            isActivated: false,
-            deactivatedAt: user.deactivatedAt ?? now,
-          },
+          data: { isActivated: false, deactivatedAt: now },
         });
       }
 
@@ -257,7 +250,7 @@ const logPlan = (
   );
 
   console.log(
-    `\n🔭 ${plan.nationalReaders.length} éditeur(s) national(aux) absent(s) du document, rattaché(s) au périmètre « ${NATIONAL_READERS_PERIMETER_NAME} » (lecture nationale seule) :`
+    `\n🔭 ${plan.nationalReaders.length} agent(s) national(aux) absent(s) du document, rattaché(s) au périmètre « ${NATIONAL_READERS_PERIMETER_NAME} » (lecture nationale seule) :`
   );
   plan.nationalReaders.forEach(({ user, rights }) =>
     console.log(
@@ -266,11 +259,11 @@ const logPlan = (
   );
 
   console.log(
-    `\n⛔ ${plan.deactivated.length} agent(s) absent(s) du document, désactivé(s), binômes conservés :`
+    `\n⛔ ${plan.deactivated.length} agent(s) absent(s) du document, désactivé(s), périmètre conservé :`
   );
   plan.deactivated.forEach(({ user, rights }) =>
     console.log(
-      `  - ${user.email} : ${rights} (dernière connexion : ${user.lastConnection?.toISOString() ?? "jamais"}${user.deactivatedAt ? `, déjà désactivé le ${user.deactivatedAt.toISOString()}` : ""})`
+      `  - ${user.email} : ${rights} (dernière connexion : ${user.lastConnection?.toISOString() ?? "jamais"})`
     )
   );
 
@@ -286,7 +279,9 @@ const logPlan = (
     plan.operateurUsers.forEach(({ email }) => console.log(`  - ${email}`));
   }
 
-  console.log(`\n💤 ${plan.pendingCount} user(s) sans accès, jamais activé(s)`);
+  console.log(
+    `\n💤 ${plan.inactiveCount} user(s) absent(s) du document, en attente ou déjà désactivé(s), inchangé(s)`
+  );
   console.log(`🔡 ${emailsToNormalizeCount} email(s) passé(s) en minuscules\n`);
 };
 
