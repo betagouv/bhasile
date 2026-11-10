@@ -181,7 +181,7 @@ Le reste de ce document décrit les droits appliqués aujourd'hui. Cette refonte
 - **Opérateur** : ses binômes personnels + ses droits de contact, limités à son opérateur.
 - **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
 - **Emails** : users et contacts écrits sans espaces et en minuscules, puis comparés tels quels. En attendant la bascule, la connexion compare sans tenir compte de la casse.
-- **Reprise** : l'export Tally fait foi (agents seulement, pas de superadmin). Une adresse en double arrête le script. Les agents absents sont désactivés et loggés ; leurs binômes restent jusqu'au nettoyage de la bascule.
+- **Reprise** : l'export Tally fait foi (agents seulement, pas de superadmin). Une adresse en double arrête le script. Les agents absents sont désactivés et loggés ; leurs binômes restent jusqu'au nettoyage de la bascule. Le document ne contient que des départements et des régions : les éditeurs nationaux en sont tous absents. Ils restent actifs, rattachés au périmètre national « Lecture nationale » (aucun binôme), donc en lecture nationale seule.
 
 ### PR 1 : modèle (faite)
 
@@ -189,10 +189,10 @@ Le reste de ce document décrit les droits appliqués aujourd'hui. Cette refonte
 - `User.perimeterId`, `User.isActivated` (faux par défaut), `User.deactivatedAt`. Seul `getAccountStatus` les lit.
 - Connexion : recherche du user sans tenir compte de la casse, email créé en minuscules (`normalizeEmail`).
 - One-off `yarn one-off 20261104-reset-agents <fichier.csv> [--dry-run]` :
-  - colonnes et libellés de niveau dans `AGENTS_DOCUMENT_COLUMNS` et `AGENTS_DOCUMENT_LEVELS` ;
+  - colonnes et libellés de niveau dans `AGENTS_DOCUMENT_COLUMNS` et `AGENTS_DOCUMENT_LEVELS` (département ou région, un niveau national est refusé) ;
   - arrêt avant écriture sur une adresse ou un rôle en double, une zone introuvable, un doublon de casse en base ou un user opérateur dans le document ;
-  - périmètres upsertés par nom et leurs binômes recréés, agents du document créés ou rattachés puis activés, superadmins activés, autres agents désactivés, emails passés en minuscules ;
-  - le dry-run classe les agents (nouveau, même zone, droits différents avec avant / après) et liste les désactivés avec leurs droits et leur dernière connexion. Les nationaux absents du document sont en avertissement.
+  - périmètres upsertés par nom et leurs binômes recréés, agents du document créés ou rattachés puis activés, éditeurs nationaux absents rattachés à « Lecture nationale » et activés, superadmins activés, autres agents désactivés, emails passés en minuscules ;
+  - le dry-run classe les agents (nouveau, même zone, droits différents avec avant / après) liste les éditeurs nationaux passés en lecture nationale (avant / après), puis les désactivés avec leurs droits et leur dernière connexion.
 
 ### PR 2 : basculement (#1774)
 

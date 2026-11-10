@@ -15,8 +15,9 @@ export const AGENTS_DOCUMENT_COLUMNS = {
 export const AGENTS_DOCUMENT_LEVELS: Record<string, PerimeterScope> = {
   DEPARTEMENT: GrantScope.DEPARTEMENT,
   REGION: GrantScope.REGION,
-  NATIONAL: GrantScope.NATIONAL,
 };
+
+export const NATIONAL_READERS_PERIMETER_NAME = "Lecture nationale";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -142,6 +143,7 @@ export const planPerimeters = (
   plan.absent = existingPerimeters
     .filter(
       ({ name }) =>
+        name !== NATIONAL_READERS_PERIMETER_NAME &&
         !documentPerimeters.some((perimeter) => perimeter.name === name)
     )
     .map(({ name }) => name);
@@ -154,6 +156,7 @@ export const planAgentsReset = (
 ): AgentsResetPlan => {
   const plan: AgentsResetPlan = {
     agents: [],
+    nationalReaders: [],
     deactivated: [],
     superAdmins: [],
     operateurUsers: [],
@@ -165,6 +168,15 @@ export const planAgentsReset = (
     users.map((user) => [normalizeEmail(user.email), user])
   );
   const documentEmails = new Set<string>();
+
+  const reservedPerimeter = perimeters.find(
+    ({ name }) => name === NATIONAL_READERS_PERIMETER_NAME
+  );
+  if (reservedPerimeter) {
+    plan.errors.push(
+      `ligne ${reservedPerimeter.line} : « ${NATIONAL_READERS_PERIMETER_NAME} » est réservé aux éditeurs nationaux absents du document`
+    );
+  }
 
   for (const perimeter of perimeters) {
     for (const email of perimeter.emails) {
@@ -188,10 +200,7 @@ export const planAgentsReset = (
         user,
         status: getAgentStatus(user, perimeter.zone),
         rightsBefore: user ? describeCurrentRights(user) : "aucun compte",
-        rightsAfter:
-          perimeter.zone.scope === GrantScope.NATIONAL
-            ? "Lecteur national"
-            : `Lecteur national + Admin ${perimeter.zone.label}`,
+        rightsAfter: `Lecteur national + Admin ${perimeter.zone.label}`,
       });
     }
   }
@@ -217,42 +226,30 @@ export const planAgentsReset = (
       ({ scope }) => scope === GrantScope.NATIONAL
     );
     const rights = describeCurrentRights(user);
-    plan.deactivated.push({ user, rights, isNational });
     if (isNational) {
-      plan.warnings.push(
-        `${user.email} (${rights}) est national et absent du document : il sera désactivé`
-      );
+      plan.nationalReaders.push({ user, rights });
+    } else {
+      plan.deactivated.push({ user, rights });
     }
   }
 
   return plan;
 };
 
-export const toPerimeterGrants = (zone: PerimeterZone): PerimeterGrant[] =>
-  zone.scope === GrantScope.NATIONAL
-    ? []
-    : [
-        {
-          role: AccessRole.ADMIN,
-          scope: zone.scope,
-          regionId: zone.regionId,
-          departementNumero: zone.departementNumero,
-        },
-      ];
+export const toPerimeterGrants = (zone: PerimeterZone): PerimeterGrant[] => [
+  {
+    role: AccessRole.ADMIN,
+    scope: zone.scope,
+    regionId: zone.regionId,
+    departementNumero: zone.departementNumero,
+  },
+];
 
 const resolveZone = (
   row: Record<string, string | undefined>,
   scope: PerimeterScope,
   { regions, departements }: Referential
 ): PerimeterZone | null => {
-  if (scope === GrantScope.NATIONAL) {
-    return {
-      scope,
-      regionId: null,
-      departementNumero: null,
-      label: "national",
-    };
-  }
   if (scope === GrantScope.REGION) {
     const rawRegion = normalizeLabel(row[AGENTS_DOCUMENT_COLUMNS.zone] ?? "");
     const region = regions.find(
@@ -303,9 +300,7 @@ const getAgentStatus = (
   }
   const editingKeys = new Set(getEditingGrants(user).map(getGrantKey));
   const isSameRights =
-    zone.scope === GrantScope.NATIONAL
-      ? editingKeys.size === 0
-      : editingKeys.size === 1 && editingKeys.has(getZoneKey(zone));
+    editingKeys.size === 1 && editingKeys.has(getZoneKey(zone));
   return isSameRights ? "SAME_RIGHTS" : "DIFFERENT_RIGHTS";
 };
 
@@ -369,10 +364,7 @@ const getZoneKey = (zone: {
   return zone.scope;
 };
 
-type PerimeterScope =
-  | typeof GrantScope.NATIONAL
-  | typeof GrantScope.REGION
-  | typeof GrantScope.DEPARTEMENT;
+type PerimeterScope = typeof GrantScope.REGION | typeof GrantScope.DEPARTEMENT;
 
 type Referential = {
   regions: { id: number; name: string }[];
@@ -437,15 +429,15 @@ export type PlannedAgent = {
   rightsAfter: string;
 };
 
-export type PlannedDeactivation = {
+export type PlannedUser = {
   user: ResetUser;
   rights: string;
-  isNational: boolean;
 };
 
 export type AgentsResetPlan = {
   agents: PlannedAgent[];
-  deactivated: PlannedDeactivation[];
+  nationalReaders: PlannedUser[];
+  deactivated: PlannedUser[];
   superAdmins: ResetUser[];
   operateurUsers: ResetUser[];
   pendingCount: number;
