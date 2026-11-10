@@ -94,8 +94,6 @@ const defineAgentRules = (
   can("update", "Operateur");
 };
 
-// Prisma traduit `OR: [{}]` par « aucune ligne » : une règle sans restriction
-// doit être déclarée sans conditions pour qu'accessibleBy renvoie `{}`.
 const toRuleConditions = <T extends object>(conditions: T): T | undefined =>
   Object.keys(conditions).length > 0 ? conditions : undefined;
 
