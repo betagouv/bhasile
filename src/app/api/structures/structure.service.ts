@@ -201,7 +201,10 @@ const filterAndSortStructureRows = async (
 ): Promise<StructureListComputedRow[]> => {
   const filtered = filterStructureRows(
     rows,
-    props,
+    {
+      ...props,
+      isFinalised: props.isFinalised || isLimitedToFinalised(props.user),
+    },
     await resolveFilters(props),
     { includeNonVisible: Boolean(props.selection) }
   );
@@ -354,8 +357,13 @@ export const getFullStructure = async (
     return null;
   }
 
+  const isFinalised = isStructureFinalised(resolvedDbStructure, now);
+  if (!isFinalised && isLimitedToFinalised(user)) {
+    return null;
+  }
+
   const structure = dbStructureToApiRead(resolvedDbStructure, now, {
-    isFinalised: isStructureFinalised(resolvedDbStructure, now),
+    isFinalised,
   });
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
@@ -534,3 +542,6 @@ const dbStructureToApiRead = (
     structureVersions: undefined,
   }) as StructureApiRead;
 };
+
+const isLimitedToFinalised = (user: SessionUser | undefined): boolean =>
+  user !== undefined && !isAgent(user);

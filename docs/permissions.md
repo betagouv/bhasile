@@ -25,7 +25,7 @@ Plusieurs périmètres peuvent couvrir la même zone.
 - **En attente** : droits de contact seulement (\*).
 - **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
 - **Agent** : rattaché obligatoirement à un unique périmètre. Droits : la lecture nationale, commune à tous les agents et calculée, plus les binômes de son périmètre (aujourd'hui `ADMIN` sur sa région ou son département). Un périmètre national n'a aucun binôme : aucun agent n'écrit au niveau national, seul le superadmin a tous les droits.
-- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans CPOM ; certains champs lui sont masqués.
+- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans CPOM, sur les structures finalisées seulement ; certains champs lui sont masqués.
 - **Activé sans périmètre ni opérateur** : droits de contact seulement (\*).
 
 (\*) Droits de contact : un user non-agent qui figure comme contact (même email) dans la version affichée d'une structure finalisée lit cette structure, sans validation préalable. Avant la finalisation, les contacts n'ont été saisis que par l'opérateur et ne donnent rien. Seulement si `CONTACT_ACCESS_ENABLED=true`.
