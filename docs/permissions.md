@@ -70,7 +70,7 @@ Une fiche hors périmètre renvoie une 404, pas une 403, pour ne pas révéler q
 
 Mise en prod du basculement :
 
-1. sur #1773, lancer `20261104-reset-agents` (dry-run puis réel) et conserver sa sortie, seule trace des anciens binômes ;
+1. sur #1773, lancer `20261104-reset-agents` (dry-run puis réel) et conserver sa sortie, seule trace des anciens binômes. Le document ne contient que des départements et des régions : les éditeurs nationaux, tous absents, restent actifs dans le périmètre national « Lecture nationale » (aucun binôme), donc en lecture nationale seule. Relancé après la bascule, le script les y laisse ;
 2. déployer #1774 : la migration supprime `EmailPattern`, `User.emailPatternId` et `User.isAgent` ;
 3. lancer `yarn one-off 20261104-clean-grants-and-emails [--dry-run]` : supprime les binômes sans user ni périmètre (anciens patterns) et les binômes personnels des agents, normalise les emails des users et des contacts. Entre 2 et 3, les binômes des agents sont déjà ignorés ; seuls les contacts à l'email en majuscules perdent leurs droits.
 

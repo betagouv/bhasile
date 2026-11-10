@@ -250,7 +250,7 @@ const logPlan = (
   );
 
   console.log(
-    `\n🔭 ${plan.nationalReaders.length} éditeur(s) national(aux) absent(s) du document, rattaché(s) au périmètre « ${NATIONAL_READERS_PERIMETER_NAME} » (lecture nationale seule) :`
+    `\n🔭 ${plan.nationalReaders.length} agent(s) national(aux) absent(s) du document, rattaché(s) au périmètre « ${NATIONAL_READERS_PERIMETER_NAME} » (lecture nationale seule) :`
   );
   plan.nationalReaders.forEach(({ user, rights }) =>
     console.log(

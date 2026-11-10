@@ -177,7 +177,7 @@ export const planAgentsReset = (
   );
   if (reservedPerimeter) {
     plan.errors.push(
-      `ligne ${reservedPerimeter.line} : « ${NATIONAL_READERS_PERIMETER_NAME} » est réservé aux éditeurs nationaux absents du document`
+      `ligne ${reservedPerimeter.line} : « ${NATIONAL_READERS_PERIMETER_NAME} » est réservé aux agents nationaux absents du document`
     );
   }
 
