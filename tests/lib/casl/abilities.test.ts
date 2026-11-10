@@ -15,6 +15,7 @@ import {
 } from "@/generated/prisma/client";
 import {
   canAbilityReadCpom,
+  canAbilityReadOperateur,
   canAbilityReadStructure,
   canAbilityUpdateDepartement,
   canAccessApp,
@@ -377,6 +378,35 @@ describe("Permissions : canUpdateOperateur", () => {
     expect(canUpdateOperateur(createDepartementalAgent(["13"]), 7)).toBe(true);
     expect(canUpdateOperateur(lecteur, 7)).toBe(false);
     expect(canUpdateOperateur(operateurAdmin, 7)).toBe(false);
+  });
+});
+
+describe("Permissions : canAbilityReadOperateur", () => {
+  const operateurUser = createSessionUser({
+    operateurId: 7,
+    grants: [
+      createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+    ],
+  });
+
+  it("laisse un agent lire tous les opérateurs", () => {
+    expect(
+      canAbilityReadOperateur(
+        defineAbilityFor(createDepartementalAgent(["13"])),
+        7
+      )
+    ).toBe(true);
+  });
+
+  it("ne laisse un user opérateur lire que son opérateur", () => {
+    const ability = defineAbilityFor(operateurUser);
+
+    expect(canAbilityReadOperateur(ability, 7)).toBe(true);
+    expect(canAbilityReadOperateur(ability, 8)).toBe(false);
+  });
+
+  it("refuse la lecture sans user", () => {
+    expect(canAbilityReadOperateur(defineAbilityFor(undefined), 7)).toBe(false);
   });
 });
 

@@ -11,7 +11,7 @@ import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { useStoredQueryParams } from "@/app/hooks/useStoredQueryParams";
 import { OPERATEURS_STORAGE_KEY } from "@/constants";
 import { useOperateurContext } from "@/contexts/OperateurContext";
-import { isAgent } from "@/lib/casl";
+import { canAccessPage } from "@/lib/casl/pages";
 import { SessionUser } from "@/types/global";
 
 export const OperateurHeader = (): ReactElement | null => {
@@ -34,7 +34,7 @@ export const OperateurHeader = (): ReactElement | null => {
       ref={headerRef}
     >
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
-        {isAgent(data?.user as SessionUser) && (
+        {canAccessPage(data?.user as SessionUser, "/operateurs") && (
           <Link
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
             title="Retour à la liste des opérateurs"
