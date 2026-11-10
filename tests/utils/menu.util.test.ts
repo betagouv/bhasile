@@ -10,7 +10,7 @@ describe("menu.util", () => {
       vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "false");
     });
 
-    it("doit retourner les menus agents pour un utilisateur agent", () => {
+    it("renvoie le menu agent pour un utilisateur agent", () => {
       // GIVEN
       const agentUser: Partial<SessionUser> = {
         email: "agent@example.com",
@@ -26,7 +26,7 @@ describe("menu.util", () => {
       expect(menuItems[0].label).toBe("Tableau de bord");
     });
 
-    it("doit retourner le menu opérateur avec le bon identifiant pour un utilisateur opérateur", () => {
+    it("renvoie le menu opérateur avec le lien vers son opérateur", () => {
       // GIVEN
       const operateurUser: Partial<SessionUser> = {
         email: "operateur@example.com",

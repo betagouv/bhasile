@@ -15,6 +15,7 @@ import {
 import { CallToActionBanner } from "@/components/CallToActionBanner";
 import { PageHeader } from "@/components/PageHeader";
 import { STRUCTURES_STORAGE_KEY } from "@/constants";
+import { isAgent } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 import { StructuresQuery } from "@/types/structure-list.type";
@@ -132,12 +133,14 @@ const buildStructuresQuery = (
   user: SessionUser | undefined
 ): StructuresQuery => {
   const isClosed = getFirstParam(params.statut) === "fermees";
+  const filters = getFiltersFromSearchParams(params);
   return {
     vue: getFirstParam(params.vue) === "carte" ? "carte" : "tableau",
     mode: parseMapMode(getFirstParam(params.mode), isClosed),
     search: getFirstParam(params.search),
     page: getPageParam(params, "page"),
-    ...getFiltersFromSearchParams(params),
+    ...filters,
+    operateurs: isAgent(user) ? filters.operateurs : null,
     column: parseStructureColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
     isClosed,

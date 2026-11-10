@@ -16,11 +16,7 @@ import { FiltersDepartement } from "./FiltersDepartement";
 import { FilterTypeStructure } from "./FilterTypeStructure";
 
 export const HeaderFilters = () => {
-  const { data, status } = useSession();
-
-  if (status === "loading") {
-    return null;
-  }
+  const { data } = useSession();
 
   return (
     <div className="flex">

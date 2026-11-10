@@ -2,7 +2,10 @@ import "../../build.css";
 import "./globals.css"; // IMPORTANT cet import doit rester en premier pour que les layers css soient respectés
 
 import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
 import { PropsWithChildren, Suspense } from "react";
+
+import { authOptions } from "@/lib/next-auth/auth";
 
 import { DsfrProvider, StartDsfrOnHydration } from "./dsfr-bootstrap";
 import {
@@ -16,8 +19,9 @@ export const metadata: Metadata = {
   description: "Piloter le parc de logements pour demandeurs d’asile",
 };
 
-export default function RootLayout({ children }: PropsWithChildren) {
+export default async function RootLayout({ children }: PropsWithChildren) {
   const lang = "fr";
+  const session = await getServerSession(authOptions);
   return (
     <html
       {...getHtmlAttributes({ lang })}
@@ -30,7 +34,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <body className="overscroll-none bg-default-grey-hover h-full">
         <DsfrProvider lang={lang}>
           <StartDsfrOnHydration />
-          <Providers>
+          <Providers session={session}>
             <Suspense>{children}</Suspense>
           </Providers>
         </DsfrProvider>

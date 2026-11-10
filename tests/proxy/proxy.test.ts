@@ -28,7 +28,6 @@ vi.mock("next-auth", () => ({ getServerSession: mockGetServerSession }));
 vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
 
 const httpMethods = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
-const unprotectedAuthenticatedPages = ["/deconnexion"];
 
 describe("proxy", () => {
   beforeEach(() => {
@@ -36,9 +35,7 @@ describe("proxy", () => {
   });
 
   it("redirige vers la connexion chaque page authentifiée", async () => {
-    const pages = listAuthenticatedPages().filter(
-      (page) => !unprotectedAuthenticatedPages.includes(page)
-    );
+    const pages = listAuthenticatedPages();
 
     const redirections = await Promise.all(
       pages.map(async (page) => {

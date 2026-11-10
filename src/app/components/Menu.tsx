@@ -19,14 +19,12 @@ import { MenuFooter } from "./MenuFooter";
 
 export const Menu = (): ReactElement | null => {
   const pathname = usePathname();
-  const { data: sessionData, status } = useSession();
+  const { data: sessionData } = useSession();
 
-  const menuItems = useMemo(() => {
-    if (status === "loading") {
-      return [];
-    }
-    return resolveMenuItems(sessionData?.user as SessionUser);
-  }, [status, sessionData?.user]);
+  const menuItems = useMemo(
+    () => resolveMenuItems(sessionData?.user as SessionUser),
+    [sessionData?.user]
+  );
 
   const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(() =>
     getDefaultOpenGroup(pathname)
@@ -47,17 +45,6 @@ export const Menu = (): ReactElement | null => {
     "subItems" in menuItem
       ? menuItem.subItems.some((subItem) => matchesPath(pathname, subItem.url))
       : matchesPath(pathname, menuItem.url);
-
-  if (status === "loading") {
-    return (
-      <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey shrink-0">
-        <div className="border-b border-default-grey min-h-[4.35rem] grid">
-          <Logo />
-        </div>
-        <MenuFooter />
-      </nav>
-    );
-  }
 
   return (
     <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey shrink-0">
