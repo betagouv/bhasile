@@ -191,7 +191,10 @@ const getSortedStructureRows = cache(
   async (props: SearchProps): Promise<StructureListComputedRow[]> =>
     filterAndSortStructureRows(
       await computeAllStructureRows(getReadableStructureWhere(props.user)),
-      props
+      {
+        ...props,
+        isFinalised: props.isFinalised || isLimitedToFinalised(props.user),
+      }
     )
 );
 
@@ -201,10 +204,7 @@ const filterAndSortStructureRows = async (
 ): Promise<StructureListComputedRow[]> => {
   const filtered = filterStructureRows(
     rows,
-    {
-      ...props,
-      isFinalised: props.isFinalised || isLimitedToFinalised(props.user),
-    },
+    props,
     await resolveFilters(props),
     { includeNonVisible: Boolean(props.selection) }
   );
