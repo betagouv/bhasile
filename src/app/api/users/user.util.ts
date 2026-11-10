@@ -3,6 +3,21 @@ import { SessionGrant } from "@/types/global";
 
 import { GrantDb } from "./user.db.type";
 
+export const normalizeEmail = (email: string): string =>
+  email.trim().toLowerCase();
+
+export const getAccountStatus = (user: {
+  isActivated: boolean;
+  deactivatedAt: Date | null;
+}): AccountStatus => {
+  if (user.isActivated) {
+    return "ACTIVATED";
+  }
+  return user.deactivatedAt ? "DEACTIVATED" : "PENDING";
+};
+
+export type AccountStatus = "PENDING" | "ACTIVATED" | "DEACTIVATED";
+
 export const getEffectiveGrants = (user: {
   grants: GrantDb[];
   emailPattern: { grants: GrantDb[] } | null;

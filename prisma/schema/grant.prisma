@@ -4,6 +4,8 @@ model Grant {
   userId            Int?
   emailPattern      EmailPattern? @relation(fields: [emailPatternId], references: [id], onDelete: Cascade)
   emailPatternId    Int?
+  perimeter         Perimeter?    @relation(fields: [perimeterId], references: [id], onDelete: Cascade)
+  perimeterId       Int?
   role              AccessRole
   scope             GrantScope
   region            Region?       @relation(fields: [regionId], references: [id], onDelete: Cascade)
@@ -18,6 +20,7 @@ model Grant {
 
   @@index([userId])
   @@index([emailPatternId])
+  @@index([perimeterId])
   @@schema("public")
 }
 
@@ -34,6 +37,18 @@ enum GrantScope {
   REGION
   DEPARTEMENT
   STRUCTURE
+
+  @@schema("public")
+}
+
+model Perimeter {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  grants Grant[]
+  users  User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@schema("public")
 }

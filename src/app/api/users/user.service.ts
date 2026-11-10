@@ -1,10 +1,12 @@
 import { getEmailPatterns } from "../email-patterns/email-pattern.repository";
 import { upsertUser } from "./user.repository";
+import { normalizeEmail } from "./user.util";
 
 export const createOrUpdateUser = async ({
   name,
-  email,
+  email: rawEmail,
 }: CreateOrUpdateUserArgs): Promise<void> => {
+  const email = normalizeEmail(rawEmail);
   const emailPatterns = await getEmailPatterns();
   const emailPattern = emailPatterns.find(({ pattern }) => {
     if (!pattern) {

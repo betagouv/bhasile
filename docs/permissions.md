@@ -54,7 +54,7 @@ flowchart TD
     PA -- "non, ou pas de pattern" --> CT
 
     AGE["<b>Agent</b><br/>Binômes personnels, sinon du pattern<br/>Écriture selon ses binômes éditeur / admin<br/>Lecture des CPOM<br/>Tous les champs"]
-    OPE["<b>Opérateur</b><br/>Binômes personnels, sinon du pattern<br/>+ droits de contact (*)<br/>Tout limité à son opérateur<br/>Lecture seule (écriture : PR 3, par binômes)<br/>Pas de CPOM<br/>Champs réservés aux agents masqués"]
+    OPE["<b>Opérateur</b><br/>Binômes personnels, sinon du pattern<br/>+ droits de contact (*)<br/>Tout limité à son opérateur<br/>Lecture seule (écriture : ouverture aux opérateurs, par binômes)<br/>Pas de CPOM<br/>Champs réservés aux agents masqués"]
     CT["<b>Non-agent sans opérateur</b><br/>Binômes personnels et du pattern ignorés<br/>Droits de contact seulement (*)<br/>Lecture seule<br/>Pas de CPOM<br/>Champs réservés aux agents masqués"]
 
     AGE & OPE & CT --> NONE{Aucun binôme ?}
@@ -87,7 +87,7 @@ Ce que couvre un binôme :
 
 - **Structures** : national = toutes ; région ou département = celles dont le département de rattachement est couvert ; structure = celle-là.
 - **CPOM** : national = tous ; région ou département = ceux dont au moins un département est couvert, plus les CPOM régionaux de la région concernée ; structure = ceux liés à cette structure. Un CPOM régional n'a pas de ligne `CpomDepartement` : il couvre tous les départements de sa région (`regionId`), que `getCpomDepartements` (`cpoms/cpom.util.ts`) en déduit pour la liste, la fiche et les rappels CPOM. Un binôme département donne donc aussi la main sur les CPOM régionaux de sa région. Les autres payloads (fiche structure, fichiers) gardent les lignes brutes, vides pour un CPOM régional.
-- **Opérateurs** : un agent éditeur, quel que soit son niveau, modifie tous les opérateurs ; un user opérateur ne modifie rien, même son opérateur (lecture seule jusqu'à la PR 3). La lecture des opérateurs n'est pas filtrée.
+- **Opérateurs** : un agent éditeur, quel que soit son niveau, modifie tous les opérateurs ; un user opérateur ne modifie rien, même son opérateur (lecture seule jusqu'à l'ouverture aux opérateurs). La lecture des opérateurs n'est pas filtrée.
 - **User opérateur** : tout est en plus restreint aux structures et CPOM de son opérateur.
 
 Où s'applique la lecture : liste, carte et fiche des structures, statistiques et cartographie (donc leurs exports, RMU compris : ceux des départements couverts), liste et fiche des CPOM. Une fiche hors périmètre renvoie une 404, et sans user la lecture est refusée. Exception : la sélection de structure du formulaire opérateur (mot de passe, sans session) reste non filtrée, via `getFullStructuresForOperateur`. Le tableau de bord reste filtré sur l'**écriture** : il sert à agir.
@@ -96,9 +96,9 @@ Une seule définition de « ce que couvre un binôme » (`getStructureConditions
 
 Limites actuelles :
 
-- **`ADMIN` = `EDITEUR`** tant que la gestion des binômes (PR 2) n'existe pas.
+- **`ADMIN` = `EDITEUR`** tant que la gestion des accès n'existe pas.
 - **Non filtré en lecture** : la fiche opérateur (et la liste de ses structures), les fichiers (`/api/files`, ouverts à toute session), les pages de transformation, la moyenne départementale d'activité, et les vues `reporting` / Metabase (hors application).
-- **Users opérateurs** : les RMU des statistiques ne sont filtrés que par département, pas par opérateur. À fermer avec les statistiques en PR 3.
+- **Users opérateurs** : les RMU des statistiques ne sont filtrés que par département, pas par opérateur. À fermer avec les statistiques à l'ouverture aux opérateurs.
 - **Niveau structure** : pas d'accès aux transformations du tableau de bord, qui restent contrôlées par département.
 
 Règle à respecter dans `casl/rules.ts` : le code ne compare jamais les rôles entre eux. Tout droit donné à un rôle doit l'être aussi aux rôles supérieurs, sinon la hiérarchie casse.
@@ -135,7 +135,7 @@ Scripts : `fill-roles` remplace les binômes des patterns présents dans le CSV 
 
 - **CPOM chargé sans ses champs de périmètre** : la règle CPOM lit `departements`, `structures`, `granularity` et `regionId` (`cpomScopeSelect`). Un CPOM passé à CASL sans l'un d'eux ne lève pas d'erreur : la condition correspondante ne matche pas et l'accès est refusé en silence.
 - **Pattern d'email d'opérateur** (`@coallia.org`) : à créer avec `isAgent = false`. Il ne doit viser qu'un domaine propre à l'opérateur, jamais un domaine public. Tant que `EmailPattern.operateurId` n'existe pas, un tel pattern ne donne aucun droit (non-agent sans opérateur).
-- **Pas de contrainte en base sur `Grant`** : Prisma ne modélise pas les CHECK, et on ne veut pas de migration écrite à la main. Une ligne sans propriétaire ou sans cible est donc possible ; elle ne donne aucun droit. La cohérence est vérifiée par le service (PR 2).
+- **Pas de contrainte en base sur `Grant`** : Prisma ne modélise pas les CHECK, et on ne veut pas de migration écrite à la main. Une ligne sans propriétaire ou sans cible est donc possible ; elle ne donne aucun droit. La cohérence sera vérifiée par le service (gestion des accès).
 - **Premier binôme personnel d'un agent** : il remplace tous ses droits de base. Il faut recopier ceux à garder, au minimum `LECTEUR national`.
 - **Maisons mères et filiales** (`Operateur.parentId`) : non géré, à traiter plus tard.
 - **Un user sur deux opérateurs** : cas exclu.
@@ -166,9 +166,53 @@ WHERE u."operateurId" IS NULL
 
 La ligne du postdeploy est à retirer à la PR suivante.
 
+## Refonte : périmètres et activation (en cours)
+
+Le reste de ce document décrit les droits appliqués aujourd'hui. Cette refonte les remplace en deux PR : la première (#1773) ajoute le modèle sans rien changer aux droits, la seconde (#1774) bascule et réécrit ce document.
+
+![Périmètres et binômes : modèle cible](perimeters_and_grants.png)
+
+### Choix métier
+
+- **Activation** : un compte non activé n'a accès à rien. Désactiver ne supprime rien, et la date reste affichée (messagerie). Les droits de contact ne demandent pas d'activation (choix encore à valider par le métier, ouverture après #1742) ; un compte désactivé les perd.
+- **Agent** : rattaché à un seul périmètre nommé (« DDETS Finistère », « SGAR Bretagne »), partagé avec d'autres agents. Droits : la lecture nationale, commune à tous les agents et calculée, plus les binômes de son périmètre (`ADMIN` sur sa zone). Un périmètre national n'a aucun binôme : aucun agent national n'écrit. Plusieurs périmètres peuvent couvrir la même zone.
+- **Statut** : agent = périmètre renseigné, opérateur = `operateurId` renseigné, jamais les deux. `isAgent` disparaît.
+- **Email patterns** : abandonnés.
+- **Opérateur** : ses binômes personnels + ses droits de contact, limités à son opérateur.
+- **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
+- **Emails** : users et contacts écrits sans espaces et en minuscules, puis comparés tels quels. En attendant la bascule, la connexion compare sans tenir compte de la casse.
+- **Reprise** : l'export Tally fait foi (agents seulement, pas de superadmin). Une adresse en double arrête le script. Les agents absents sont désactivés et loggés ; leurs binômes restent jusqu'au nettoyage de la bascule.
+
+### PR 1 : modèle (faite)
+
+- `Perimeter` (dans `grant.prisma`) : `name` unique et ses binômes (`Grant.perimeterId`, supprimés avec lui). La zone d'un périmètre est celle de ses binômes ; un périmètre national n'en a pas.
+- `User.perimeterId`, `User.isActivated` (faux par défaut), `User.deactivatedAt`. Seul `getAccountStatus` les lit.
+- Connexion : recherche du user sans tenir compte de la casse, email créé en minuscules (`normalizeEmail`).
+- One-off `yarn one-off 20261104-reset-agents <fichier.csv> [--dry-run]` :
+  - colonnes et libellés de niveau dans `AGENTS_DOCUMENT_COLUMNS` et `AGENTS_DOCUMENT_LEVELS` ;
+  - arrêt avant écriture sur une adresse ou un rôle en double, une zone introuvable, un doublon de casse en base ou un user opérateur dans le document ;
+  - périmètres upsertés par nom et leurs binômes recréés, agents du document créés ou rattachés puis activés, superadmins activés, autres agents désactivés, emails passés en minuscules ;
+  - le dry-run classe les agents (nouveau, même zone, droits différents avec avant / après) et liste les désactivés avec leurs droits et leur dernière connexion. Les nationaux absents du document sont en avertissement.
+
+### PR 2 : basculement (#1774)
+
+- Session et CASL : compte en attente = droits de contact seulement ; compte désactivé = rien ; superadmin = `manage all` ; agent = lecture nationale + binômes de son périmètre, binômes personnels ignorés ; opérateur = binômes + contacts, filtrés sur `operateurId`.
+- Migration : supprime `User.isAgent`, `EmailPattern` et `User.emailPatternId`. `fill-roles` disparaît ; les anciens one-offs restent, en `@ts-nocheck`.
+- Emails comparés tels quels ; ceux des contacts normalisés à l'écriture (`contactApiSchema`).
+- `brevo-push-users` pousse aussi les agents désactivés, avec un attribut booléen `ACTIVE_USER` (créé dans Brevo).
+- One-off `20261104-clean-grants-and-emails` : supprime les binômes sans user ni périmètre (anciens patterns : la cascade ne joue pas, la colonne part avant la table) et ceux des agents, normalise les emails des users et des contacts.
+
+Mise en prod :
+
+1. sur #1773, `20261104-reset-agents` en dry-run puis réel ; conserver sa sortie, seule trace des anciens binômes ;
+2. déployer #1774 ;
+3. `20261104-clean-grants-and-emails` en dry-run puis réel.
+
+Viennent ensuite la gestion des accès (écran de demande après ProConnect, création par les agents et les opérateurs, désactivation par un admin qui couvre tous les binômes du user, refus d'un binôme déjà couvert) et l'ouverture aux opérateurs (CPOM de leurs structures, statistiques sans RMU ; fiche opérateur dans #1742).
+
 ## Reste à faire
 
-1. **PR 2, administration des binômes** :
+1. **Gestion des accès, administration des binômes** :
    - API de gestion, qui vérifie un seul propriétaire et une cible conforme au `scope` ;
    - hiérarchie admin héritée de la géographie : un admin ajoute ou révoque un binôme, admin compris, si la cible est **dans** son propre périmètre d'admin.
      - National : tout.
@@ -177,7 +221,7 @@ La ligne du postdeploy est à retirer à la PR suivante.
      - Structure : cette structure.
      - Un admin opérateur ne gère que les users de son opérateur.
    - matrice ressource × action × rôle × agent/opérateur validée par le métier.
-2. **PR 3, ouverture aux opérateurs** :
+2. **Ouverture aux opérateurs** :
    - invitation d'un user opérateur par un admin ;
    - authentification des users opérateurs via ProConnect (adresses gmail) ;
    - cloisonnement : toutes les règles d'un user opérateur filtrées sur son `operateurId` ;
