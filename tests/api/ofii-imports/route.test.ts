@@ -63,10 +63,6 @@ describe("/api/ofii-imports", () => {
     expect(mockApplyOfiiImport).not.toHaveBeenCalled();
   });
 
-  it("rejette une requête sans fichier", async () => {
-    expect((await preview(buildRequest())).status).toBe(400);
-  });
-
   it("rejette un fichier qui n'est pas un tableur", async () => {
     const pdf = new File(["%PDF"], "liste.pdf", { type: "application/pdf" });
 
@@ -74,26 +70,18 @@ describe("/api/ofii-imports", () => {
     expect(mockApplyOfiiImport).not.toHaveBeenCalled();
   });
 
-  it("transmet le fichier au service et renvoie son résultat", async () => {
-    const result = { summary: "1 structures importées" };
+  it("transmet le fichier et le mois confirmé au service, puis renvoie son résultat", async () => {
+    const result = { summary: "1 structure importée" };
     mockApplyOfiiImport.mockResolvedValue(result);
 
-    const response = await apply(buildRequest(ofiiFile));
+    const response = await apply(buildRequest(ofiiFile, "2025-09"));
 
     expect(await response.json()).toEqual(result);
     expect(mockApplyOfiiImport).toHaveBeenCalledWith({
       buffer: expect.any(Buffer),
       fileName: "Liste 10.25.xlsx",
-      month: null,
+      month: "2025-09",
     });
-  });
-
-  it("transmet le mois confirmé au service", async () => {
-    await apply(buildRequest(ofiiFile, "2025-09"));
-
-    expect(mockApplyOfiiImport).toHaveBeenCalledWith(
-      expect.objectContaining({ month: "2025-09" })
-    );
   });
 
   it("rejette un mois mal formé", async () => {

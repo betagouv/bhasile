@@ -6,7 +6,10 @@ import { ReactElement, useId, useRef, useState } from "react";
 
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { cn } from "@/app/utils/classname.util";
-import { endOfMonthUtcFromMonthKey, formatDate } from "@/app/utils/date.util";
+import {
+  endOfMonthUtcFromMonthKey,
+  formatMonthLabel,
+} from "@/app/utils/date.util";
 import { formatPlural } from "@/app/utils/string.util";
 import { FileBox } from "@/components/FileBox";
 import { FileBrowseButton } from "@/components/FileBrowseButton";
@@ -206,11 +209,7 @@ export const SpreadsheetImport = ({
 };
 
 const formatMonth = (month: string): string =>
-  formatDate(endOfMonthUtcFromMonthKey(month), {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  formatMonthLabel(endOfMonthUtcFromMonthKey(month));
 
 type Props = {
   endpoint: string;

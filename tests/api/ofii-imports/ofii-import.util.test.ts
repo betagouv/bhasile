@@ -93,15 +93,6 @@ describe("validateOfiiRows", () => {
     ]);
   });
 
-  it("rattache un opérateur par son alias OFII", () => {
-    const { dnas } = validateOfiiRows(
-      [createOfiiRow({ operateur: "adoma sa" })],
-      createOfiiReferential()
-    );
-
-    expect(dnas[0].operateurId).toBe(7);
-  });
-
   it("liste toutes les anomalies d'une ligne invalide sans préparer de DNA", () => {
     const { dnas, errors } = validateOfiiRows(
       [

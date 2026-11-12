@@ -262,7 +262,7 @@ export type OfiiActivite = {
     : NonNullable<ActiviteRow[Key]> | undefined;
 };
 
-export type OfiiDnaChanges = {
+type OfiiDnaChanges = {
   codes: string[];
   existingDnas: { code: string; inactiveInOfiiFileSince: Date | null }[];
   deactivatedCount: number;
