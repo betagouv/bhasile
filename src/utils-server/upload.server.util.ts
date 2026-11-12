@@ -47,7 +47,7 @@ const readFormData = async (request: Request): Promise<FormData> => {
   }
 };
 
-export type UploadedFile = {
+type UploadedFile = {
   buffer: Buffer;
   fileName: string;
   mimeType: string;

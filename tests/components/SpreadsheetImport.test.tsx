@@ -88,36 +88,6 @@ describe("SpreadsheetImport", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("simule l'import puis l'exécute après confirmation", async () => {
-    respondWith(
-      {
-        body: {
-          summary: "1200 structures dans le fichier",
-          changes: ["3 nouvelles structures"],
-          errors: [],
-        },
-      },
-      { body: { summary: "1200 structures importées" } }
-    );
-
-    const user = await selectFile();
-    expect(
-      await screen.findByText("3 nouvelles structures")
-    ).toBeInTheDocument();
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    await user.click(
-      await screen.findByRole("button", { name: "Confirmer l’import" })
-    );
-
-    expect(
-      await screen.findByText("1200 structures importées")
-    ).toBeInTheDocument();
-    expect(global.fetch).toHaveBeenLastCalledWith(
-      "/api/ofii-imports",
-      expect.objectContaining({ method: "POST" })
-    );
-  });
-
   it("refuse un fichier trop volumineux sans l'envoyer", async () => {
     const user = userEvent.setup();
     global.fetch = vi.fn();
@@ -161,12 +131,12 @@ describe("SpreadsheetImport", () => {
     ).not.toHaveLength(0);
   });
 
-  it("propose le mois détecté et l'envoie après confirmation", async () => {
+  it("simule l'import, propose le mois détecté et l'importe après confirmation", async () => {
     respondWith(
       {
         body: {
           summary: "1 structure",
-          changes: [],
+          changes: ["1 nouvelle structure"],
           detectedMonth: "2025-10",
           errors: [],
         },
@@ -175,7 +145,9 @@ describe("SpreadsheetImport", () => {
     );
 
     const user = await selectFile({ withMonth: true });
-    expect(await screen.findByLabelText("Mois")).toHaveValue("10");
+    expect(await screen.findByText("1 nouvelle structure")).toBeInTheDocument();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText("Mois")).toHaveValue("10");
     expect(screen.getByLabelText("Année")).toHaveValue("2025");
     await user.click(
       screen.getByRole("button", {
@@ -184,7 +156,8 @@ describe("SpreadsheetImport", () => {
     );
 
     await screen.findByText("1 structure importée");
-    const [, init] = vi.mocked(global.fetch).mock.lastCall!;
+    const [url, init] = vi.mocked(global.fetch).mock.lastCall!;
+    expect(url).toBe("/api/ofii-imports");
     expect((init?.body as FormData).get("month")).toBe("2025-10");
   });
 

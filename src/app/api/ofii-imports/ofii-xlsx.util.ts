@@ -63,14 +63,9 @@ export type ActiviteRow = {
   presencesInduesDeboutees: number | null;
 };
 
-export type OfiiActiviteSheet = {
-  date: Date; // dernier jour du mois à midi UTC
-  rows: ActiviteRow[];
-};
-
 export type OfiiFullRow = OfiiReferentialRow & ActiviteRow;
 
-export type OfiiFullSheet = {
+type OfiiFullSheet = {
   date: Date | null;
   rows: OfiiFullRow[];
 };

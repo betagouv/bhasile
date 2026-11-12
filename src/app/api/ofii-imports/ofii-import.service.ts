@@ -1,6 +1,6 @@
 import {
   endOfMonthUtcFromMonthKey,
-  formatDate,
+  formatMonthLabel,
   toMonthKey,
 } from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
@@ -62,11 +62,7 @@ export const applyOfiiImport = async (
 
   const count = await saveOfiiImport(date, dnas, rows.map(toOfiiActivite));
 
-  const month = formatDate(date, {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  const month = formatMonthLabel(date);
   return {
     summary: `${formatPlural(rows.length, "structure")} ${pluralize(rows.length, "importée")} pour ${month}, ${formatPlural(count, "structure")} ${pluralize(count, "passée")} ${pluralize(count, "inactive")}.`,
   };
