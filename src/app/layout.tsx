@@ -2,10 +2,9 @@ import "../../build.css";
 import "./globals.css"; // IMPORTANT cet import doit rester en premier pour que les layers css soient respectés
 
 import type { Metadata } from "next";
-import { getServerSession } from "next-auth";
 import { PropsWithChildren, Suspense } from "react";
 
-import { authOptions } from "@/lib/next-auth/auth";
+import { auth } from "@/lib/next-auth/auth";
 
 import { DsfrProvider, StartDsfrOnHydration } from "./dsfr-bootstrap";
 import {
@@ -21,7 +20,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   const lang = "fr";
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   return (
     <html
       {...getHtmlAttributes({ lang })}

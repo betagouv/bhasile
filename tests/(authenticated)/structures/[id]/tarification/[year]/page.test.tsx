@@ -15,11 +15,9 @@ vi.mock("next/navigation", () => ({
   notFound: () => mockNotFound(),
 }));
 
-vi.mock("next-auth", () => ({
-  getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
+vi.mock("@/lib/next-auth/auth", () => ({
+  auth: () => mockGetServerSession(),
 }));
-
-vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
 
 vi.mock("@/app/utils/now.util", async () => {
   const actual = await vi.importActual("@/app/utils/now.util");

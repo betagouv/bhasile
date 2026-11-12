@@ -1,4 +1,3 @@
-import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
@@ -16,7 +15,7 @@ import { CallToActionBanner } from "@/components/CallToActionBanner";
 import { PageHeader } from "@/components/PageHeader";
 import { STRUCTURES_STORAGE_KEY } from "@/constants";
 import { isAgent } from "@/lib/casl";
-import { authOptions } from "@/lib/next-auth/auth";
+import { auth } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 import { StructuresQuery } from "@/types/structure-list.type";
 import { getFiltersFromSearchParams } from "@/utils/filters.util";
@@ -35,7 +34,7 @@ export default async function Structures({
   searchParams: Promise<SearchParams>;
 }): Promise<ReactElement> {
   const params = await searchParams;
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const query = buildStructuresQuery(
     params,
     session?.user as SessionUser | undefined
