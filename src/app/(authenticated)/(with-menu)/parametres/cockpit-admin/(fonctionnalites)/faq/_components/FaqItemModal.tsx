@@ -7,7 +7,7 @@ import { ReactElement, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { FaqApiType } from "@/schemas/api/faq.schema";
-import { faqFormSchema,FaqFormValues } from "@/schemas/forms/base/faq.schema";
+import { faqFormSchema, FaqFormValues } from "@/schemas/forms/base/faq.schema";
 import { renderFaqMarkdown } from "@/utils/faq.util";
 
 import { FaqCategoryField } from "./FaqCategoryField";

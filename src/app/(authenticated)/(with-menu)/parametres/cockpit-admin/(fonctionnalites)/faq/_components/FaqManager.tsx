@@ -1,45 +1,46 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 
 import { useFaqItemMutations } from "@/hooks/useFaqItemMutations";
+import { useModalTarget } from "@/hooks/useModalTarget";
 import { FaqApiType } from "@/schemas/api/faq.schema";
 import { FaqFormValues } from "@/schemas/forms/base/faq.schema";
 import { groupFaqItemsByCategory } from "@/utils/faq.util";
 
+import {
+  FaqCategoryRenameModal,
+  faqCategoryRenameModal,
+} from "./FaqCategoryRenameModal";
 import { FaqDeleteModal, faqDeleteModal } from "./FaqDeleteModal";
 import { FaqItemModal, faqItemModal } from "./FaqItemModal";
 
 export const FaqManager = ({ faqItems }: Props): ReactElement => {
-  const { saveFaqItem, deleteFaqItem, isSaving } = useFaqItemMutations();
-  const [editedFaqItem, setEditedFaqItem] = useState<FaqApiType | null>(null);
-  const [deletedFaqItem, setDeletedFaqItem] = useState<FaqApiType | null>(null);
-  const [itemModalOpenCount, setItemModalOpenCount] = useState(0);
+  const { saveFaqItem, deleteFaqItem, renameFaqCategory, isSaving } =
+    useFaqItemMutations();
+  const itemModal = useModalTarget<FaqApiType>(faqItemModal);
+  const deleteModal = useModalTarget<FaqApiType>(faqDeleteModal);
+  const renameModal = useModalTarget<string>(faqCategoryRenameModal);
 
   const categoryGroups = groupFaqItemsByCategory(faqItems);
 
-  const openItemModal = (faqItem: FaqApiType | null): void => {
-    setEditedFaqItem(faqItem);
-    setItemModalOpenCount((count) => count + 1);
-    faqItemModal.open();
-  };
-
-  const openDeleteModal = (faqItem: FaqApiType): void => {
-    setDeletedFaqItem(faqItem);
-    faqDeleteModal.open();
-  };
-
   const submitFaqItem = async (values: FaqFormValues): Promise<boolean> =>
-    (await saveFaqItem(editedFaqItem?.id ?? null, values)) !== null;
+    (await saveFaqItem(itemModal.target?.id ?? null, values)) !== null;
 
   const confirmDelete = async (id: number): Promise<boolean> =>
     (await deleteFaqItem(id)) !== null;
 
+  const submitCategoryRename = async (
+    category: string,
+    newCategory: string
+  ): Promise<boolean> =>
+    (await renameFaqCategory({ category, newCategory })) !== null;
+
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <Button iconId="fr-icon-add-line" onClick={() => openItemModal(null)}>
+        <Button iconId="fr-icon-add-line" onClick={() => itemModal.open(null)}>
           Ajouter une question
         </Button>
       </div>
@@ -50,7 +51,17 @@ export const FaqManager = ({ faqItems }: Props): ReactElement => {
 
       {categoryGroups.map(({ category, items }) => (
         <section key={category}>
-          <h3 className="fr-h6 text-title-blue-france mb-3">{category}</h3>
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="fr-h6 text-title-blue-france mb-0">{category}</h3>
+            <Button
+              priority="tertiary no outline"
+              size="small"
+              iconId="fr-icon-edit-line"
+              onClick={() => renameModal.open(category)}
+            >
+              Renommer
+            </Button>
+          </div>
           <ul className="list-none p-0 m-0 bg-white border border-default-grey rounded-[10px]">
             {items.map((faqItem) => (
               <li
@@ -63,7 +74,7 @@ export const FaqManager = ({ faqItems }: Props): ReactElement => {
                     priority="tertiary no outline"
                     size="small"
                     iconId="fr-icon-edit-line"
-                    onClick={() => openItemModal(faqItem)}
+                    onClick={() => itemModal.open(faqItem)}
                   >
                     Modifier
                   </Button>
@@ -71,7 +82,7 @@ export const FaqManager = ({ faqItems }: Props): ReactElement => {
                     priority="tertiary no outline"
                     size="small"
                     iconId="fr-icon-delete-line"
-                    onClick={() => openDeleteModal(faqItem)}
+                    onClick={() => deleteModal.open(faqItem)}
                   >
                     Supprimer
                   </Button>
@@ -83,16 +94,22 @@ export const FaqManager = ({ faqItems }: Props): ReactElement => {
       ))}
 
       <FaqItemModal
-        faqItem={editedFaqItem}
-        openCount={itemModalOpenCount}
+        faqItem={itemModal.target}
+        openCount={itemModal.openCount}
         categories={categoryGroups.map(({ category }) => category)}
         isSaving={isSaving}
         onSubmit={submitFaqItem}
       />
       <FaqDeleteModal
-        faqItem={deletedFaqItem}
+        faqItem={deleteModal.target}
         isSaving={isSaving}
         onConfirm={confirmDelete}
+      />
+      <FaqCategoryRenameModal
+        category={renameModal.target}
+        openCount={renameModal.openCount}
+        isSaving={isSaving}
+        onSubmit={submitCategoryRename}
       />
     </div>
   );

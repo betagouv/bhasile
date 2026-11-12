@@ -1,10 +1,16 @@
-import { FaqApiType, FaqApiWrite } from "@/schemas/api/faq.schema";
+import { DomainError } from "@/app/utils/domain-error.util";
+import {
+  FaqApiType,
+  FaqApiWrite,
+  FaqCategoryApiUpdate,
+} from "@/schemas/api/faq.schema";
 
 import {
   createFaqItem,
   deleteFaqItem,
   findFaqItem,
   findFaqItems,
+  updateFaqCategory,
   updateFaqItem,
 } from "./faq.repository";
 import { faqItemNotFound } from "./faq.util";
@@ -34,6 +40,16 @@ export const editFaqItem = async (
 export const removeFaqItem = async (id: number): Promise<void> => {
   await assertFaqItemExists(id);
   await deleteFaqItem(id);
+};
+
+export const renameFaqCategory = async ({
+  category,
+  newCategory,
+}: FaqCategoryApiUpdate): Promise<void> => {
+  const { count } = await updateFaqCategory(category, newCategory);
+  if (count === 0) {
+    throw new DomainError("Catégorie introuvable", 404);
+  }
 };
 
 const assertFaqItemExists = async (id: number): Promise<void> => {
