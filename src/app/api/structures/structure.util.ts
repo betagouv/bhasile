@@ -70,6 +70,10 @@ export const hideAgentOnlyFields = (
 ): StructureApiRead => ({
   ...structure,
   notes: null,
+  budgets: structure.budgets?.map((budget) => ({
+    ...budget,
+    commentaire: null,
+  })),
   controles: [],
   evaluations: [],
   evenementsIndesirablesGraves: [],

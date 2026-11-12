@@ -67,7 +67,7 @@ Une fiche hors périmètre renvoie une 404, pas une 403, pour ne pas révéler q
 Les données sont filtrées par CASL (`rules.ts`) ; les pages, par `canAccessPage` (`lib/casl/pages.ts`), que le proxy consulte avant toute page ProConnect :
 
 - **Agent** : toutes les pages.
-- **Non-agent** (user opérateur, ou contact sans opérateur rattaché) : les structures, et pour un user opérateur sa fiche opérateur sans ses pages de modification. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (CPOM, statistiques, ressources, liste des opérateurs) vers la 404.
+- **Non-agent** (user opérateur, ou contact sans opérateur rattaché) : les structures, et pour un user opérateur sa fiche opérateur sans ses pages de modification. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (CPOM, statistiques, ressources, liste des opérateurs, transformations) vers la 404.
 - **Chemin absent des listes** : refusé à tous.
 
 La fiche opérateur vérifie aussi la règle `read Operateur` (`getOperateur`) : un non-agent ne lit que son opérateur, même sans passer par le proxy. Le menu (`menu.util.ts`) et les liens de la fiche opérateur filtrent leurs entrées avec `canAccessPage` : ouvrir ou fermer une page dans `pages.ts` suffit. « Paramètres » reste derrière son flag, hors de `pages.ts`.
@@ -76,7 +76,7 @@ Fermer une page ne ferme pas son API : elle se ferme dans la route. `/api/statis
 
 ## Avant d'activer les contacts
 
-`CONTACT_ACCESS_ENABLED=true` ouvre l'application à des non-agents, sans validation préalable. Ouverture prévue après #1742, qui limite ce qu'un non-agent voit sur la fiche structure et ferme aux non-agents les pages réservées aux agents et l'API des statistiques. Avant, fermer aussi ce qui reste ouvert à toute session : fichiers, suggestions d'opérateurs, pages de transformation.
+`CONTACT_ACCESS_ENABLED=true` ouvre l'application à des non-agents, sans validation préalable. Ouverture prévue après #1742, qui limite ce qu'un non-agent voit sur la fiche structure et ferme aux non-agents les pages réservées aux agents et l'API des statistiques. Avant, fermer aussi ce qui reste ouvert à toute session : fichiers et suggestions d'opérateurs.
 
 ## Reprise et mise en prod
 
@@ -107,5 +107,5 @@ Mise en prod du basculement :
 - **CPOM chargé sans ses champs de périmètre** : la règle CPOM lit `departements`, `structures`, `granularity` et `regionId` (`cpomScopeSelect`). Sans l'un d'eux, l'accès est refusé en silence.
 - **Pas de contrainte en base** sur `Grant` (un seul propriétaire, user ou périmètre ; pas de binôme `NATIONAL` ou `STRUCTURE` sur un périmètre) ni sur `User` (périmètre et opérateur à la fois) : la cohérence est vérifiée par le one-off de reprise, puis par la gestion des accès.
 - **Maisons mères et filiales** (`Operateur.parentId`) : non géré. **Un user sur deux opérateurs** : exclu.
-- **Non filtré en lecture** : fiche opérateur, fichiers (`/api/files`, ouverts à toute session), pages de transformation, moyenne départementale d'activité, vues `reporting` / Metabase.
+- **Non filtré en lecture** : fiche opérateur, fichiers (`/api/files`, ouverts à toute session), moyenne départementale d'activité, vues `reporting` / Metabase.
 - **`ADMIN` = `EDITEUR`** tant que la gestion des accès n'existe pas.
