@@ -23,7 +23,7 @@ vi.mock("@/app/api/tarifications/tarification.service", () => ({
 
 const participant = { id: 3, level: "OPERATEUR" };
 const params = Promise.resolve({ structureId: "42", year: "2027" });
-const validBody = { fileKey: "abc-ca.pdf", types: ["CA"], status: "SHARED" };
+const validBody = { fileKey: "abc-ca.pdf", types: ["CA"], status: "FINAL" };
 
 const postDocument = (body: unknown) =>
   POST(

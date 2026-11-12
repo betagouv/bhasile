@@ -592,7 +592,7 @@ const buildStructureJournal = () => ({
         ),
         buildJournalDocument(
           OPERATEUR_DEPOSIT_ID,
-          TarificationDocumentStatus.SHARED,
+          TarificationDocumentStatus.FINAL,
           ["CA"]
         ),
       ],
@@ -908,7 +908,7 @@ describe("écritures de la tarification", () => {
       await expect(
         depositTarificationDocument({
           ...deposit,
-          status: TarificationDocumentStatus.SHARED,
+          types: ["CA"],
         })
       ).rejects.toThrow("Cet état");
 

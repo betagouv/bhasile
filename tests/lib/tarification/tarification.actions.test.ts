@@ -86,7 +86,7 @@ describe("computeSectionActions", () => {
           sectionCode: "CA",
           versionIds: [],
         }).depositOptions[0]
-      ).toMatchObject({ type: "CA", statuses: ["SHARED"] });
+      ).toMatchObject({ type: "CA", statuses: ["FINAL"] });
     });
 
     it("ne propose à l'opérateur que ses dépôts, jamais une étape des agents", () => {

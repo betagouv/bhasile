@@ -9,6 +9,7 @@ import {
   getSharedAtByDocumentId,
 } from "@/lib/tarification/tarification.compute";
 import {
+  isOperateurDocument,
   TARIFICATION_DOCUMENT_TYPE_DEFINITIONS,
   TARIFICATION_SECTION_DEFINITIONS,
   type TarificationSectionCode,
@@ -82,6 +83,7 @@ export const getSectionVersions = (
           .join(", "),
         stateLabel: getVersionStateLabel({
           status: document.status,
+          types: document.types,
           isWithdrawn: !activeDocumentIds.has(document.id),
           isShared: sharedAtByDocumentId.has(document.id),
           reviewTypes: documentEvents
@@ -170,11 +172,13 @@ const isReviewType = (type: TarificationEventType): boolean =>
 
 const getVersionStateLabel = ({
   status,
+  types,
   isWithdrawn,
   isShared,
   reviewTypes,
 }: {
   status: TarificationDocumentStatus;
+  types: TarificationDocumentType[];
   isWithdrawn: boolean;
   isShared: boolean;
   reviewTypes: TarificationEventType[];
@@ -182,7 +186,7 @@ const getVersionStateLabel = ({
   if (isWithdrawn) {
     return "Retiré";
   }
-  if (status === TarificationDocumentStatus.SHARED) {
+  if (isOperateurDocument({ types })) {
     return "Déposé";
   }
   if (isShared) {

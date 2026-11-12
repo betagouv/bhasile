@@ -236,7 +236,7 @@ describe("conversation.repository db integration", () => {
         structureTarificationId,
         fileUploadId: file.id,
         types: ["CA"],
-        status: TarificationDocumentStatus.SHARED,
+        status: TarificationDocumentStatus.FINAL,
       },
     });
 
