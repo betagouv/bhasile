@@ -25,7 +25,7 @@ Plusieurs périmètres peuvent couvrir la même zone.
 - **En attente** : droits de contact seulement (\*).
 - **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
 - **Agent** : rattaché obligatoirement à un unique périmètre. Droits : la lecture nationale, commune à tous les agents et calculée, plus les binômes de son périmètre (aujourd'hui `ADMIN` sur sa région ou son département). Un périmètre national n'a aucun binôme : aucun agent n'écrit au niveau national, seul le superadmin a tous les droits.
-- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans CPOM, sur les structures finalisées seulement ; certains champs lui sont masqués.
+- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans les pages CPOM, sur les structures finalisées seulement ; certains champs lui sont masqués (voir plus bas).
 - **Activé sans périmètre ni opérateur** : droits de contact seulement (\*).
 
 (\*) Droits de contact : un user non-agent qui figure comme contact (même email) dans la version affichée d'une structure finalisée lit cette structure, sans validation préalable. Avant la finalisation, les contacts n'ont été saisis que par l'opérateur et ne donnent rien. Seulement si `CONTACT_ACCESS_ENABLED=true`.
@@ -69,6 +69,11 @@ Les données sont filtrées par CASL (`rules.ts`) ; les pages, par `canAccessPag
 - **Agent** : toutes les pages ; les transformations demandent en plus un droit d'écriture (`update Structure`), comme leur API.
 - **Non-agent** (user opérateur, ou contact sans opérateur rattaché) : les structures, et pour un user opérateur sa fiche opérateur sans ses pages de modification. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (CPOM, statistiques, ressources, liste des opérateurs, transformations) vers la 404.
 - **Chemin absent des listes** : refusé à tous.
+
+Champs masqués sur la fiche structure :
+
+- **Non-agents** : commentaires des budgets, de la structure comme de ses CPOM (`hideAgentOnlyFields`). Le reste de la fiche est visible, CPOM compris, mais l'historique ne renvoie pas vers la page du CPOM pour le moment.
+- **Sans droit d'écriture sur la structure**, agent ou non : notes et rue des adresses (`getReadableNotes`, `getReadableAdresses`), car l'adresse d'un lieu d'hébergement est sensible. Le code postal et la commune restent affichés.
 
 La fiche opérateur vérifie aussi la règle `read Operateur` (`getOperateur`) : un non-agent ne lit que son opérateur, même sans passer par le proxy. Le menu (`menu.util.ts`) et les liens de la fiche opérateur filtrent leurs entrées avec `canAccessPage` : ouvrir ou fermer une page dans `pages.ts` suffit. « Paramètres » reste derrière son flag, hors de `pages.ts`.
 

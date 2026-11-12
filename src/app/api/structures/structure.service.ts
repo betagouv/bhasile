@@ -193,7 +193,7 @@ const getSortedStructureRows = cache(
       await computeAllStructureRows(getReadableStructureWhere(props.user)),
       {
         ...props,
-        isFinalised: props.isFinalised || isLimitedToFinalised(props.user),
+        isFinalised: props.isFinalised || isNonAgent(props.user),
       }
     )
 );
@@ -309,7 +309,7 @@ const buildFullStructures = async (
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);
       }
-      return props.user && !isAgent(props.user)
+      return isNonAgent(props.user)
         ? hideAgentOnlyFields(structure)
         : structure;
     })
@@ -358,7 +358,7 @@ export const getFullStructure = async (
   }
 
   const isFinalised = isStructureFinalised(resolvedDbStructure, now);
-  if (!isFinalised && isLimitedToFinalised(user)) {
+  if (!isFinalised && isNonAgent(user)) {
     return null;
   }
 
@@ -368,7 +368,7 @@ export const getFullStructure = async (
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
 
-  return isAgent(user) ? structure : hideAgentOnlyFields(structure);
+  return isNonAgent(user) ? hideAgentOnlyFields(structure) : structure;
 };
 
 export const getStructureForOperateur = async (
@@ -543,5 +543,5 @@ const dbStructureToApiRead = (
   }) as StructureApiRead;
 };
 
-const isLimitedToFinalised = (user: SessionUser | undefined): boolean =>
+const isNonAgent = (user: SessionUser | undefined): boolean =>
   user !== undefined && !isAgent(user);

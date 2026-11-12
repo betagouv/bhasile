@@ -2,6 +2,7 @@ import { SessionUser } from "@/types/global";
 import { matchesPath } from "@/utils/path.util";
 
 import { defineAbilityFor, isAgent } from "./rules";
+import { canAbilityUpdateSomeStructure } from "./structure.ability";
 
 // TODO : ajouter le tableau de bord, cpoms et statistiques plus tard pour les opérateurs et les retirer de agentOnlyPages
 export const commonPages = ["/structures"];
@@ -16,11 +17,11 @@ export const canAccessPage = (
     return false;
   }
 
-  const isUserAgent = isAgent(user);
-
   if (matchesPath(pathname, "/structures/transformation")) {
-    return isUserAgent && defineAbilityFor(user).can("update", "Structure");
+    return canAbilityUpdateSomeStructure(defineAbilityFor(user));
   }
+
+  const isUserAgent = isAgent(user);
 
   if (commonPages.some((base) => matchesPath(pathname, base))) {
     return true;

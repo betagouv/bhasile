@@ -123,6 +123,8 @@ export const structureDetailsInclude = {
                   id: true,
                   codeBhasile: true,
                   type: true,
+                  departementAdministratif: true,
+                  operateurId: true,
                   operateur: {
                     select: { name: true },
                   },
