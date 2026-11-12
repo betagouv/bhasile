@@ -1,8 +1,8 @@
+import { TarificationEventType } from "@/generated/prisma/enums";
 import {
-  TarificationDocumentStatus,
-  TarificationEventType,
-} from "@/generated/prisma/enums";
-import { TARIFICATION_EVENT_DEFINITIONS } from "@/lib/tarification/tarification.definition";
+  isOperateurDocument,
+  TARIFICATION_EVENT_DEFINITIONS,
+} from "@/lib/tarification/tarification.definition";
 import type {
   TarificationJournal,
   TarificationJournalDocument,
@@ -14,11 +14,7 @@ export const filterJournalForOperateur = (
 ): TarificationJournal => {
   const visibleDocumentIds = getOperateurVisibleDocumentIds(journal);
   const sharedDepositIds = new Set(
-    journal.documents
-      .filter(
-        (document) => document.status === TarificationDocumentStatus.SHARED
-      )
-      .map((document) => document.id)
+    journal.documents.filter(isOperateurDocument).map((document) => document.id)
   );
   return {
     ...journal,
@@ -68,8 +64,7 @@ const getOperateurVisibleDocumentIds = (
     journal.documents
       .filter(
         (document) =>
-          document.status === TarificationDocumentStatus.SHARED ||
-          sharedDocumentIds.has(document.id)
+          isOperateurDocument(document) || sharedDocumentIds.has(document.id)
       )
       .map((document) => document.id)
   );

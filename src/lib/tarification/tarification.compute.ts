@@ -1,10 +1,5 @@
+import { addDays, type CivilDate, toLocalDate } from "@/app/utils/date.util";
 import {
-  addDays,
-  type CivilDate,
-  toLocalDate,
-} from "@/app/utils/date.util";
-import {
-  TarificationDocumentStatus,
   TarificationEventType,
   TarificationStepCode,
 } from "@/generated/prisma/enums";
@@ -13,6 +8,7 @@ import {
   CA_DEPOSIT_DEADLINE,
   CONTRADICTOIRE_DAYS,
   CONTRADICTOIRE_DEEMED_RECEIPT_DAYS,
+  isOperateurDocument,
   TARIFICATION_STEP_DEFINITIONS,
 } from "@/lib/tarification/tarification.definition";
 import type {
@@ -78,8 +74,8 @@ const getActiveDocuments = (
 const getSharedAtByDocumentId = (
   journal: TarificationJournal
 ): Map<number, Date> => {
-  const statusByDocumentId = new Map(
-    journal.documents.map((document) => [document.id, document.status])
+  const operateurDocumentIds = new Set(
+    journal.documents.filter(isOperateurDocument).map((document) => document.id)
   );
   const sharedAtByDocumentId = new Map<number, Date>();
   for (const event of getChronologicalEvents(journal)) {
@@ -91,8 +87,7 @@ const getSharedAtByDocumentId = (
     }
     const isOperateurDeposit =
       event.type === TarificationEventType.DOCUMENT_DEPOSITED &&
-      statusByDocumentId.get(event.documentId) ===
-        TarificationDocumentStatus.SHARED;
+      operateurDocumentIds.has(event.documentId);
     if (
       isOperateurDeposit ||
       event.type === TarificationEventType.DOCUMENT_SHARED
