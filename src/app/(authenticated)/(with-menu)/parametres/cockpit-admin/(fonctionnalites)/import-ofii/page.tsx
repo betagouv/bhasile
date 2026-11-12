@@ -9,6 +9,7 @@ export default function CockpitAdminOfiiImport(): ReactElement {
       endpoint="/api/ofii-imports"
       label="Fichier OFII"
       exampleHref={MODELE_OFII_LINK}
+      withMonth
     />
   );
 }

@@ -1,5 +1,5 @@
 // Secours du cockpit admin (Import OFII) : même traitement, depuis un fichier sur S3
-// Usage: yarn script ofii-fill-referential-and-activity <clef_s3_du_xlsx>
+// Usage: yarn script ofii-fill-referential-and-activity <clef_s3_du_xlsx> [AAAA-MM]
 
 import "dotenv/config";
 
@@ -8,10 +8,11 @@ import {
   previewOfiiImport,
 } from "@/app/api/ofii-imports/ofii-import.service";
 import prisma from "@/lib/prisma";
+import { importMonthSchema } from "@/schemas/api/import.schema";
 
 import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
 
-const xlsxLocation = process.argv[2];
+const [xlsxLocation, month] = process.argv.slice(2);
 
 if (!xlsxLocation) {
   throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
@@ -26,7 +27,10 @@ async function main() {
       );
     }
 
-    const file = await loadXlsxBufferFromS3(bucketName, xlsxLocation);
+    const file = {
+      ...(await loadXlsxBufferFromS3(bucketName, xlsxLocation)),
+      month: importMonthSchema.parse(month ?? null),
+    };
     const { errors } = await previewOfiiImport(file);
     if (errors.length > 0) {
       errors.forEach(({ key, issues }) =>

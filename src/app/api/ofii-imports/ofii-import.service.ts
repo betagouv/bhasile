@@ -1,10 +1,10 @@
-import { formatDate } from "@/app/utils/date.util";
-import { DomainError } from "@/app/utils/domain-error.util";
 import {
-  capitalizeFirstLetter,
-  formatPlural,
-  pluralize,
-} from "@/app/utils/string.util";
+  endOfMonthUtcFromMonthKey,
+  formatDate,
+  toMonthKey,
+} from "@/app/utils/date.util";
+import { DomainError } from "@/app/utils/domain-error.util";
+import { formatPlural, pluralize } from "@/app/utils/string.util";
 import { ImportFile, ImportPreview, ImportResult } from "@/types/import.type";
 import { assertImportable } from "@/utils-server/import.server.util";
 
@@ -19,10 +19,11 @@ import { loadOfiiFile } from "./ofii-xlsx.util";
 export const previewOfiiImport = async (
   file: ImportFile
 ): Promise<ImportPreview> => {
-  const { month, rows, errors } = await analyzeOfiiFile(file);
+  const { detectedDate, rows, errors } = await analyzeOfiiFile(file);
   return {
-    summary: `${capitalizeFirstLetter(month)} : ${formatPlural(rows.length, "structure")} dans le fichier`,
+    summary: `${formatPlural(rows.length, "structure")} dans le fichier`,
     details: "Les structures absentes du fichier seront marquées inactives.",
+    detectedMonth: detectedDate && toMonthKey(detectedDate),
     errors,
   };
 };
@@ -30,27 +31,35 @@ export const previewOfiiImport = async (
 export const applyOfiiImport = async (
   file: ImportFile
 ): Promise<ImportResult> => {
-  const { date, month, rows, dnas, errors } = await analyzeOfiiFile(file);
+  const { detectedDate, rows, dnas, errors } = await analyzeOfiiFile(file);
   assertImportable(errors);
+  const date = file.month
+    ? endOfMonthUtcFromMonthKey(file.month)
+    : detectedDate;
+  if (!date) {
+    throw new DomainError(
+      "Indiquez le mois des données : il n’a pas pu être déduit du fichier"
+    );
+  }
 
   const { count } = await saveOfiiDnas(date, dnas);
   await saveOfiiActivites(date, rows.map(toOfiiActivite));
 
+  const month = formatDate(date, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
   return {
     summary: `${formatPlural(rows.length, "structure")} ${pluralize(rows.length, "importée")} pour ${month}, ${formatPlural(count, "structure")} ${pluralize(count, "passée")} ${pluralize(count, "inactive")}.`,
   };
 };
 
 const analyzeOfiiFile = async ({ buffer, fileName }: ImportFile) => {
-  const { date, rows } = loadOfiiFile(buffer, fileName);
+  const { date: detectedDate, rows } = loadOfiiFile(buffer, fileName);
   if (rows.length === 0) {
     throw new DomainError("Le fichier ne contient aucune ligne de structure");
   }
   const { dnas, errors } = validateOfiiRows(rows, await findOfiiReferential());
-  const month = formatDate(date, {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-  return { date, month, rows, dnas, errors };
+  return { detectedDate, rows, dnas, errors };
 };

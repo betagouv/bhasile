@@ -6,9 +6,11 @@ import { ReactElement, useId, useRef, useState } from "react";
 
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { cn } from "@/app/utils/classname.util";
+import { endOfMonthUtcFromMonthKey, formatDate } from "@/app/utils/date.util";
 import { formatPlural } from "@/app/utils/string.util";
 import { FileBox } from "@/components/FileBox";
 import { FileBrowseButton } from "@/components/FileBrowseButton";
+import { MonthSelect } from "@/components/MonthSelect";
 import { SPREADSHEET_MIME_TYPES } from "@/constants";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { useSpreadsheetImport } from "@/hooks/useSpreadsheetImport";
@@ -20,6 +22,7 @@ export const SpreadsheetImport = ({
   endpoint,
   label,
   exampleHref,
+  withMonth = false,
 }: Props): ReactElement => {
   const { previewImport, applyImport } = useSpreadsheetImport(endpoint);
   const { getFetchState } = useFetchState();
@@ -31,6 +34,8 @@ export const SpreadsheetImport = ({
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [month, setMonth] = useState<string | null>(null);
+  const [checkCount, setCheckCount] = useState(0);
 
   const saveKey = `${endpoint}-save`;
   const { mutate: importFile } = useSaveMutation(saveKey, applyImport, {
@@ -49,7 +54,10 @@ export const SpreadsheetImport = ({
     }
     setIsChecking(true);
     try {
-      setPreview(await previewImport(selectedFile));
+      const nextPreview = await previewImport(selectedFile);
+      setPreview(nextPreview);
+      setMonth(nextPreview.detectedMonth ?? null);
+      setCheckCount((count) => count + 1);
     } catch (error) {
       setPreviewError(error instanceof Error ? error.message : String(error));
     } finally {
@@ -59,7 +67,7 @@ export const SpreadsheetImport = ({
 
   const confirmImport = async () => {
     if (file) {
-      setResult(await importFile(file));
+      setResult(await importFile(file, withMonth ? month : null));
     }
   };
 
@@ -69,9 +77,10 @@ export const SpreadsheetImport = ({
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
-      <p className="mb-0">
-        Le fichier est vérifié avant tout import : rien n’est écrit tant qu’il
-        contient des erreurs.
+      <p>
+        Téléversez ici le fichier fourni par l'OFII. Ce fichier doit avoir le
+        bon format, retrouvable dans l'exemple ci après. Tant que des
+        différences existent rien n'est chargé.
       </p>
       {exampleHref && (
         <a
@@ -139,9 +148,26 @@ export const SpreadsheetImport = ({
             title={preview.summary}
             description={preview.details ?? "Le fichier est valide."}
           />
+          {withMonth && (
+            <MonthSelect
+              key={checkCount}
+              initialValue={preview.detectedMonth ?? null}
+              hint={
+                preview.detectedMonth
+                  ? "Mois détecté dans le fichier : vérifiez-le avant d’importer."
+                  : "Le mois n’a pas pu être déduit du fichier : merci de l'indiquer."
+              }
+              onChange={setMonth}
+            />
+          )}
           <div>
-            <Button disabled={isImporting} onClick={confirmImport}>
-              Importer le fichier
+            <Button
+              disabled={isImporting || (withMonth && !month)}
+              onClick={confirmImport}
+            >
+              {withMonth && month
+                ? `Importer les données pour ${formatMonth(month)}`
+                : "Importer le fichier"}
             </Button>
           </div>
         </>
@@ -158,8 +184,16 @@ export const SpreadsheetImport = ({
   );
 };
 
+const formatMonth = (month: string): string =>
+  formatDate(endOfMonthUtcFromMonthKey(month), {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
 type Props = {
   endpoint: string;
   label: string;
   exampleHref?: string;
+  withMonth?: boolean;
 };

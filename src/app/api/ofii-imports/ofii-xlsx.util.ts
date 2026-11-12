@@ -71,7 +71,7 @@ export type OfiiActiviteSheet = {
 export type OfiiFullRow = OfiiReferentialRow & ActiviteRow;
 
 export type OfiiFullSheet = {
-  date: Date;
+  date: Date | null;
   rows: OfiiFullRow[];
 };
 
@@ -204,12 +204,6 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
     }
   }
 
-  if (!sheetDate) {
-    throw new DomainError(
-      `Impossible de déduire le mois du fichier « ${fileName} » : le nom doit contenir le mois et l’année (ex. 10.25)`
-    );
-  }
-
   const sheet = wb.Sheets[chosenSheetName];
 
   const headerRowIdx = findHeaderRow(sheet);
@@ -271,7 +265,9 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
     rows.push(row as OfiiFullRow);
   }
 
-  const date = endOfMonthUtcFromMonth(sheetDate.year, sheetDate.month);
+  const date = sheetDate
+    ? endOfMonthUtcFromMonth(sheetDate.year, sheetDate.month)
+    : null;
 
   return { date, rows };
 }

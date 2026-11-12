@@ -40,6 +40,11 @@ export const toTrimesterKey = (date: Date): string => {
 export const endOfMonthUtcFromMonth = (year: number, month: number): Date =>
   new Date(Date.UTC(year, month, 0, 12, 0, 0, 0));
 
+export const endOfMonthUtcFromMonthKey = (monthKey: string): Date => {
+  const [year, month] = monthKey.split("-").map(Number);
+  return endOfMonthUtcFromMonth(year, month);
+};
+
 export const endOfMonthUtcFromDate = (date: Date): Date =>
   endOfMonthUtcFromMonth(date.getUTCFullYear(), date.getUTCMonth() + 1);
 
