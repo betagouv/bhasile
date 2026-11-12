@@ -94,7 +94,7 @@ describe("useTarificationActions", () => {
     const { depositDocument } = renderActions();
 
     await expect(
-      depositDocument({ file, type: "CA", status: "SHARED" })
+      depositDocument({ file, type: "CA", status: "FINAL" })
     ).rejects.toThrow("Pas ouvert");
 
     expect(getCalls()).toEqual([

@@ -13,7 +13,7 @@ const AGENT_OPTIONS: DepositOption[] = [
   { type: "DAM", label: "DAM 2028", statuses: ["FINAL", "DRAFT"] },
 ];
 const OPERATEUR_OPTIONS: DepositOption[] = [
-  { type: "CA", label: "CA 2026", statuses: ["SHARED"] },
+  { type: "CA", label: "CA 2026", statuses: ["FINAL"] },
 ];
 
 const file = new File(["contenu"], "depot.pdf", { type: "application/pdf" });
@@ -80,7 +80,7 @@ describe("DocumentDeposit", () => {
       expect(mockOnDeposit).toHaveBeenCalledWith({
         file,
         type: "CA",
-        status: "SHARED",
+        status: "FINAL",
       })
     );
   });

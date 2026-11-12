@@ -105,7 +105,7 @@ describe("réponse à la L48 db integration", () => {
       author: { id: operateurId, level: AuthorLevel.OPERATEUR },
       fileKey: budgetFile.key,
       types: ["BP"],
-      status: TarificationDocumentStatus.SHARED,
+      status: TarificationDocumentStatus.FINAL,
     });
     const l48File = await createFile();
     const l48 = await depositTarificationDocument({
@@ -160,7 +160,7 @@ describe("réponse à la L48 db integration", () => {
     const [document] = await findResponseDocuments();
     expect(document).toMatchObject({
       fileUploadId: file.id,
-      status: TarificationDocumentStatus.SHARED,
+      status: TarificationDocumentStatus.FINAL,
     });
     const event = await prisma.tarificationEvent.findUniqueOrThrow({
       where: { id },

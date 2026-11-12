@@ -337,7 +337,7 @@ export const recordTarificationEvent = async ({
         ? await createDocumentInTransaction(transaction, year, {
             fileKey,
             types: [TarificationDocumentType.REPONSE_CONTRADICTOIRE],
-            status: TarificationDocumentStatus.SHARED,
+            status: TarificationDocumentStatus.FINAL,
             author,
           })
         : null;
