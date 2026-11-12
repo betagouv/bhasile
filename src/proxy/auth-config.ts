@@ -212,6 +212,12 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/ofii-imports(?:\/preview)?$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
     pattern: /^\/api\/faq\/categories$/,
     routes: {
       PUT: "proconnect",
