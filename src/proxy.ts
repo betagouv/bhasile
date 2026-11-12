@@ -112,6 +112,7 @@ export const config = {
     "/cpoms/:path*",
     "/statistiques/:path*",
     "/ressources/:path*",
+    "/parametres/:path*",
     "/ajout-structure/:path*",
     "/mot-de-passe",
     // Routes API

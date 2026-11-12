@@ -214,6 +214,7 @@ export const proConnectProtectedPages = [
   "/cpoms",
   "/statistiques",
   "/ressources",
+  "/parametres",
 ];
 
 export const passwordProtectedPages = ["/ajout-structure"];
