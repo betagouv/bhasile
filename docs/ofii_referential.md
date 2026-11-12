@@ -13,6 +13,14 @@ Un fichier avec une seule ligne en erreur n’est pas importé du tout : on corr
 
 Le code vit dans `src/app/api/ofii-imports/` : lecture du tableur (`ofii-xlsx.util.ts`), validation pure (`ofii-import.util.ts`), écritures Prisma (`ofii-import.repository.ts`).
 
+### Ajouter un autre import au cockpit
+
+Les briques communes à tous les imports de tableur sont déjà en place :
+
+- **Service** : exposer `preview(file)` (renvoie `{ summary, details?, errors }`, sans écrire) et `apply(file)` (appelle `assertImportable(errors)` puis écrit, renvoie `{ summary }`). Types dans `src/types/import.type.ts`.
+- **Routes** : `export const POST = cockpitImportRoute(preview)` dans `<import>/preview/route.ts`, et `cockpitImportRoute(apply)` dans `<import>/route.ts`. La fabrique vérifie l'accès au cockpit et lit le fichier envoyé. Déclarer les deux routes dans `src/proxy/auth-config.ts`.
+- **Page** : `<SpreadsheetImport endpoint="/api/<import>" label="…" />` dans le groupe `(fonctionnalites)` du cockpit, puis activer la tuile dans `cockpit-admin.features.ts`.
+
 ## 2. Secours : script Scalingo
 
 Le script `scripts/recurring-scripts/ofii-fill-referential-and-activity.ts` applique le même traitement à un fichier déposé dans le bucket `DOCS_BUCKET_NAME`. Il affiche les lignes en erreur et n’écrit rien s’il y en a.
