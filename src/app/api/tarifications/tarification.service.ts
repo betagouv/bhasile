@@ -16,7 +16,11 @@ import {
   findUsersWithGrantsOnStructure,
   getUserWithGrantsByEmail,
 } from "@/app/api/users/user.repository";
-import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
+import {
+  getAssignedGrants,
+  isAgentUser,
+  normalizeEmail,
+} from "@/app/api/users/user.util";
 import {
   getDepartementTimeZone,
   toCivilDate,
@@ -494,7 +498,9 @@ const resolveParticipant = async (
   structure: StructureScope
 ): Promise<TarificationParticipant> => {
   assertCanAccessTarification(user, structure);
-  const databaseUser = await getUserWithGrantsByEmail({ email: user.email });
+  const databaseUser = await getUserWithGrantsByEmail({
+    email: normalizeEmail(user.email),
+  });
   if (!databaseUser) {
     throw new DomainError("Utilisateur inconnu", 401);
   }

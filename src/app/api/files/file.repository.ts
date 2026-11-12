@@ -37,6 +37,16 @@ export const findOneByKeyWithParents = async (
   });
 };
 
+export const findManyByKeysWithParents = async (
+  tx: PrismaTransaction,
+  keys: string[]
+): Promise<FileWithParents[]> => {
+  return tx.fileUpload.findMany({
+    where: { key: { in: keys } },
+    include: fileWithParentsInclude,
+  });
+};
+
 export const findUnattachedFileUpload = (
   tx: PrismaTransaction,
   key: string

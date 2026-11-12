@@ -1,4 +1,4 @@
-model Notification {
+model Announcement {
   id        Int       @id @default(autoincrement())
   content   String
   startDate DateTime?
