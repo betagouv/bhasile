@@ -7,7 +7,6 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
-  createTarificationDocumentOpening,
   findMessageTarification,
   findStructureTarification,
   findStructureTarificationCampaigns,
@@ -15,6 +14,7 @@ import {
   runInTarificationTransaction,
   upsertStructureTarification,
 } from "@/app/api/tarifications/tarification.repository";
+import { createTarificationDocumentOpening } from "@/app/api/tarifications/tarification-document.repository";
 import {
   AuthorLevel,
   TarificationDocumentStatus,
@@ -177,43 +177,50 @@ describe("tarification.repository db integration", () => {
         },
       });
 
-    const deposit = (fileKey: string) =>
+    const deposit = (fileUploadId: number) =>
       runInTarificationTransaction(
         writeStructureId,
         writeCampaignYear,
         (transaction) =>
           transaction.createDocument({
-            fileKey,
+            fileUploadId,
             types: ["CA"],
             status: TarificationDocumentStatus.SHARED,
-            author: { id: authorId, level: AuthorLevel.OPERATEUR },
           })
       );
 
-    it("crée le document et son événement de dépôt ensemble", async () => {
+    const findUnattachedFile = (fileKey: string) =>
+      runInTarificationTransaction(
+        writeStructureId,
+        writeCampaignYear,
+        (transaction) => transaction.findUnattachedFile(fileKey)
+      );
+
+    it("rattache le document à son fichier et à la tarification", async () => {
       const file = await createFile();
 
-      const document = await deposit(file.key);
+      const document = await deposit(file.id);
 
       expect(
-        await prisma.tarificationEvent.findMany({
-          where: { documentId: document.id },
+        await prisma.tarificationDocument.findUniqueOrThrow({
+          where: { id: document.id },
+          select: { fileUploadId: true, structureTarification: true },
         })
-      ).toMatchObject([
-        {
-          type: TarificationEventType.DOCUMENT_DEPOSITED,
-          authorId,
-          authorLevel: AuthorLevel.OPERATEUR,
-        },
-      ]);
+      ).toMatchObject({
+        fileUploadId: file.id,
+        structureTarification: { structureId: writeStructureId },
+      });
     });
 
-    it("refuse un fichier inconnu ou déjà rattaché à un document", async () => {
+    it("ne retrouve qu'un fichier existant et encore sans rattachement", async () => {
       const file = await createFile();
-      await deposit(file.key);
 
-      await expect(deposit(file.key)).rejects.toThrow("déjà rattaché");
-      await expect(deposit("inconnu.pdf")).rejects.toThrow("introuvable");
+      expect(await findUnattachedFile(file.key)).toEqual({ id: file.id });
+
+      await deposit(file.id);
+
+      expect(await findUnattachedFile(file.key)).toBeNull();
+      expect(await findUnattachedFile("inconnu.pdf")).toBeNull();
     });
 
     it("ne crée pas de tarification quand la transaction échoue", async () => {

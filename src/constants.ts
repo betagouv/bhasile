@@ -108,7 +108,6 @@ export const ALLOWED_MIME_TYPES = [
 // Le navigateur sait les afficher lui-même dans un iframe
 export const INLINE_VIEWABLE_MIME_TYPES = [
   "application/pdf",
-  "text/csv",
   ...IMAGE_MIME_TYPES,
 ];
 

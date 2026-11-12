@@ -4,6 +4,7 @@ import type { Readable } from "node:stream";
 import { Session } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
+import { DomainError } from "@/app/utils/domain-error.util";
 import {
   ALLOWED_MIME_TYPES,
   FILE_UPLOAD_EXPIRATION_DELAY,
@@ -14,13 +15,16 @@ import { canDeleteFile, canReadConversation } from "@/lib/casl";
 import { checkBucket, getMinioClient, getObject } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { EntityId } from "@/types/Entity.type";
 import { SessionUser } from "@/types/global";
 import { Principal, PrincipalType } from "@/types/principal.type";
+import { PrismaTransaction } from "@/types/prisma.type";
 
 import { FileWithParents } from "./file.db.type";
 import {
   createOne,
   deleteOneByKey,
+  findManyByKeysWithParents,
   findOneByKeyWithParents,
 } from "./file.repository";
 
@@ -29,14 +33,65 @@ export const getPrincipal = (session: Session | null): Principal =>
     ? { type: PrincipalType.Agent, user: session.user as SessionUser }
     : { type: PrincipalType.Operateur };
 
+type FileParent = Partial<Record<keyof EntityId, number | null>>;
+
+const getFileParents = (file: FileWithParents): FileParent[] => {
+  const parents: [number | null, FileParent | null][] = [
+    [file.acteAdministratifId, file.acteAdministratif],
+    [file.documentFinancierId, file.documentFinancier],
+    [file.controleId, file.controle],
+    [file.evaluationId, file.evaluation],
+    [file.operateurId, { operateurId: file.operateurId }],
+    [file.messageId, {}],
+    [file.tarificationDocument?.id ?? null, {}],
+  ];
+  return parents.flatMap(([parentId, parent]) =>
+    parentId == null ? [] : [parent ?? {}]
+  );
+};
+
 const isOrphan = (file: FileWithParents): boolean =>
-  file.acteAdministratifId == null &&
-  file.documentFinancierId == null &&
-  file.controleId == null &&
-  file.evaluationId == null &&
-  file.operateurId == null &&
-  file.messageId == null &&
-  file.tarificationDocument == null;
+  getFileParents(file).length === 0;
+
+const isParentOfEntity = (parent: FileParent, entityId: EntityId): boolean => {
+  const entityFields = (Object.keys(entityId) as (keyof EntityId)[]).filter(
+    (field) => entityId[field] !== undefined
+  );
+  return (
+    entityFields.length > 0 &&
+    entityFields.every((field) => parent[field] === entityId[field])
+  );
+};
+
+export const assertFilesCanBeAttachedToEntity = async (
+  tx: PrismaTransaction,
+  fileUploads: { key: string }[],
+  entityId: EntityId
+): Promise<void> => {
+  if (fileUploads.length === 0) {
+    return;
+  }
+
+  const files = await findManyByKeysWithParents(
+    tx,
+    fileUploads.map((fileUpload) => fileUpload.key)
+  );
+
+  const foundKeys = new Set(files.map((file) => file.key));
+  if (fileUploads.some((fileUpload) => !foundKeys.has(fileUpload.key))) {
+    throw new DomainError("Fichier introuvable", 404);
+  }
+
+  const hasFileFromOtherEntity = files.some((file) =>
+    getFileParents(file).some((parent) => !isParentOfEntity(parent, entityId))
+  );
+  if (hasFileFromOtherEntity) {
+    throw new DomainError(
+      "Un fichier est déjà rattaché à une autre entité",
+      409
+    );
+  }
+};
 
 export const authorizeFileAccess = (
   principal: Principal,
@@ -148,8 +203,7 @@ export const getInlineLink = async (
       fileName,
       FILE_UPLOAD_EXPIRATION_DELAY,
       {
-        "response-content-type":
-          mimeType === "text/csv" ? "text/plain; charset=utf-8" : mimeType,
+        "response-content-type": mimeType,
         "response-content-disposition": "inline",
       }
     );
