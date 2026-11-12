@@ -19,6 +19,7 @@ vi.mock("@/app/api/ofii-imports/ofii-xlsx.util", () => ({
 
 vi.mock("@/app/api/ofii-imports/ofii-import.repository", () => ({
   findOfiiReferential: async () => createOfiiReferential(),
+  findOfiiDnaChanges: async () => ({ existingDnas: [], deactivatedCount: 3 }),
   saveOfiiDnas: (...args: unknown[]) => mockSaveOfiiDnas(...args),
   saveOfiiActivites: (...args: unknown[]) => mockSaveOfiiActivites(...args),
 }));
@@ -45,11 +46,22 @@ describe("ofii-import.service", () => {
 
     expect(await previewOfiiImport(file)).toEqual({
       summary: "2 structures dans le fichier",
-      details: "Les structures absentes du fichier seront marquées inactives.",
+      changes: [],
       detectedMonth: "2025-10",
       errors: [{ key: "C0302", issues: ["nom OFII manquant"] }],
     });
     expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
+  });
+
+  it("simule les changements d'un fichier valide sans rien écrire", async () => {
+    expect((await previewOfiiImport(file)).changes).toEqual([
+      "1 nouvelle structure",
+      "0 structure mise à jour",
+      "3 structures absentes du fichier passées inactives",
+      "Activité du mois enregistrée pour 1 structure",
+    ]);
+    expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
+    expect(mockSaveOfiiActivites).not.toHaveBeenCalled();
   });
 
   it("refuse d'importer un fichier qui contient des erreurs", async () => {

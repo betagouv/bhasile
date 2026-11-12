@@ -4,6 +4,11 @@ import { OfiiActivite, OfiiDna, OfiiReferential } from "./ofii-import.util";
 
 const REFERENTIAL_TRANSACTION_TIMEOUT_MS = 60_000;
 
+const absentFromFileWhere = (codes: string[]) => ({
+  code: { notIn: codes },
+  inactiveInOfiiFileSince: null,
+});
+
 export const findOfiiReferential = async (): Promise<OfiiReferential> => ({
   departements: await prisma.departement.findMany({
     select: {
@@ -37,12 +42,22 @@ export const saveOfiiDnas = (date: Date, dnas: OfiiDna[]) =>
         data: { activeInOfiiFileSince: date },
       });
       return tx.dna.updateMany({
-        where: { code: { notIn: codes }, inactiveInOfiiFileSince: null },
+        where: absentFromFileWhere(codes),
         data: { inactiveInOfiiFileSince: date },
       });
     },
     { timeout: REFERENTIAL_TRANSACTION_TIMEOUT_MS }
   );
+
+export const findOfiiDnaChanges = async (codes: string[]) => ({
+  existingDnas: await prisma.dna.findMany({
+    where: { code: { in: codes } },
+    select: { code: true, inactiveInOfiiFileSince: true },
+  }),
+  deactivatedCount: await prisma.dna.count({
+    where: absentFromFileWhere(codes),
+  }),
+});
 
 export const saveOfiiActivites = async (
   date: Date,

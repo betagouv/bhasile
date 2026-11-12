@@ -5,6 +5,7 @@ import {
 
 import {
   buildOperateurLookup,
+  describeOfiiChanges,
   validateOfiiRows,
 } from "@/app/api/ofii-imports/ofii-import.util";
 
@@ -123,6 +124,26 @@ describe("validateOfiiRows", () => {
           "opérateur « INCONNU » inconnu de Bhasile",
         ],
       },
+    ]);
+  });
+});
+
+describe("describeOfiiChanges", () => {
+  it("décrit les créations, mises à jour, réactivations et désactivations", () => {
+    expect(
+      describeOfiiChanges({
+        codes: ["C0301", "C0302", "C0303"],
+        existingDnas: [
+          { code: "C0302", inactiveInOfiiFileSince: null },
+          { code: "C0303", inactiveInOfiiFileSince: new Date("2025-01-31") },
+        ],
+        deactivatedCount: 12,
+      })
+    ).toEqual([
+      "1 nouvelle structure",
+      "1 structure mise à jour",
+      "1 structure réactivée",
+      "12 structures absentes du fichier passées inactives",
     ]);
   });
 });

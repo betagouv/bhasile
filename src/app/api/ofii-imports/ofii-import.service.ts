@@ -9,20 +9,36 @@ import { ImportFile, ImportPreview, ImportResult } from "@/types/import.type";
 import { assertImportable } from "@/utils-server/import.server.util";
 
 import {
+  findOfiiDnaChanges,
   findOfiiReferential,
   saveOfiiActivites,
   saveOfiiDnas,
 } from "./ofii-import.repository";
-import { toOfiiActivite, validateOfiiRows } from "./ofii-import.util";
+import {
+  describeOfiiChanges,
+  toOfiiActivite,
+  validateOfiiRows,
+} from "./ofii-import.util";
 import { loadOfiiFile } from "./ofii-xlsx.util";
 
 export const previewOfiiImport = async (
   file: ImportFile
 ): Promise<ImportPreview> => {
-  const { detectedDate, rows, errors } = await analyzeOfiiFile(file);
+  const { detectedDate, rows, dnas, errors } = await analyzeOfiiFile(file);
+  const codes = dnas.map(({ code }) => code);
+  const changes =
+    errors.length === 0
+      ? [
+          ...describeOfiiChanges({
+            codes,
+            ...(await findOfiiDnaChanges(codes)),
+          }),
+          `Activité du mois enregistrée pour ${formatPlural(rows.length, "structure")}`,
+        ]
+      : [];
   return {
     summary: `${formatPlural(rows.length, "structure")} dans le fichier`,
-    details: "Les structures absentes du fichier seront marquées inactives.",
+    changes,
     detectedMonth: detectedDate && toMonthKey(detectedDate),
     errors,
   };

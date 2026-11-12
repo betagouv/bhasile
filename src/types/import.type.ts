@@ -11,7 +11,7 @@ export type ImportError = {
 
 export type ImportPreview = {
   summary: string;
-  details?: string;
+  changes: string[];
   detectedMonth?: string | null;
   errors: ImportError[];
 };
