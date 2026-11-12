@@ -142,12 +142,11 @@ function parseSheetDate(
 function parseFilenameDate(
   fileName: string
 ): { year: number; month: number } | null {
-  const match = fileName.match(/(\d{2})[^\d]{1}(\d{2})/);
-  if (match) {
-    return {
-      year: parseInt("20" + match[2], 10),
-      month: parseInt(match[1], 10),
-    };
+  for (const match of fileName.matchAll(/(\d{2})[^\d](\d{2})(?!\d)/g)) {
+    const month = parseInt(match[1], 10);
+    if (month >= 1 && month <= 12) {
+      return { year: parseInt("20" + match[2], 10), month };
+    }
   }
   return null;
 }
@@ -166,7 +165,7 @@ function findHeaderRow(sheet: WorkSheet): number {
   return -1;
 }
 
-/* Charge les données référentiel + activité (onglet le plus récent ou "Liste" si présent) */
+/* Charge les données référentiel + activité de l'onglet « Liste », sinon de l'unique onglet daté */
 export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
   const wb = XLSX.read(buffer, { type: "buffer", raw: true });
   const sheetNames = wb.SheetNames;
@@ -187,21 +186,19 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
       .filter(
         (x): x is { name: string; date: { year: number; month: number } } =>
           x.date != null
-      )
-      .sort((a, b) => {
-        if (a.date.year !== b.date.year) {
-          return b.date.year - a.date.year;
-        }
-        return b.date.month - a.date.month;
-      });
-    if (withDates.length == 0) {
-      throw new DomainError(
-        "Aucun onglet daté (ex. « octobre 2025 ») ni onglet « Liste » dans le fichier"
       );
-    } else {
-      chosenSheetName = withDates[0].name;
-      sheetDate = withDates[0].date;
+    if (withDates.length === 0) {
+      throw new DomainError(
+        "Aucun onglet « Liste » ni onglet daté (ex. « octobre 2025 ») dans le fichier"
+      );
     }
+    if (withDates.length > 1) {
+      throw new DomainError(
+        `Le fichier contient plusieurs onglets datés (${withDates.map(({ name }) => `« ${name} »`).join(", ")}) : gardez un seul onglet, nommé « Liste »`
+      );
+    }
+    chosenSheetName = withDates[0].name;
+    sheetDate = withDates[0].date;
   }
 
   const sheet = wb.Sheets[chosenSheetName];

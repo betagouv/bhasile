@@ -72,6 +72,10 @@ export const SpreadsheetImport = ({
     }
   };
 
+  const isBeforeLatestImport = Boolean(
+    month && preview?.latestImportedMonth && month < preview.latestImportedMonth
+  );
+
   const status = isChecking
     ? "Vérification du fichier…"
     : (previewError ?? file?.name ?? "Pas de fichier");
@@ -158,17 +162,28 @@ export const SpreadsheetImport = ({
             <MonthSelect
               key={checkCount}
               initialValue={preview.detectedMonth ?? null}
-              hint={
+              hint={[
                 preview.detectedMonth
                   ? "Mois détecté dans le fichier : vérifiez-le avant d’importer."
-                  : "Le mois n’a pas pu être déduit du fichier : merci de l’indiquer."
+                  : "Le mois n’a pas pu être déduit du fichier : merci de l’indiquer.",
+                preview.latestImportedMonth &&
+                  `Dernier mois importé : ${formatMonth(preview.latestImportedMonth)}.`,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              errorMessage={
+                isBeforeLatestImport
+                  ? "Ce mois est antérieur au dernier import : les imports doivent suivre l’ordre chronologique."
+                  : undefined
               }
               onChange={setMonth}
             />
           )}
           <div>
             <Button
-              disabled={isImporting || (withMonth && !month)}
+              disabled={
+                isImporting || (withMonth && (!month || isBeforeLatestImport))
+              }
               onClick={confirmImport}
             >
               {withMonth && month

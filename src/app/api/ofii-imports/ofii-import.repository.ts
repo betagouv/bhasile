@@ -2,8 +2,6 @@ import prisma from "@/lib/prisma";
 
 import { OfiiActivite, OfiiDna, OfiiReferential } from "./ofii-import.util";
 
-const REFERENTIAL_TRANSACTION_TIMEOUT_MS = 60_000;
-
 const absentFromFileWhere = (codes: string[]) => ({
   code: { notIn: codes },
   inactiveInOfiiFileSince: null,
@@ -22,33 +20,6 @@ export const findOfiiReferential = async (): Promise<OfiiReferential> => ({
   }),
 });
 
-export const saveOfiiDnas = (date: Date, dnas: OfiiDna[]) =>
-  prisma.$transaction(
-    async (tx) => {
-      for (const dna of dnas) {
-        await tx.dna.upsert({
-          where: { code: dna.code },
-          create: {
-            ...dna,
-            activeInOfiiFileSince: date,
-            inactiveInOfiiFileSince: null,
-          },
-          update: { ...dna, inactiveInOfiiFileSince: null },
-        });
-      }
-      const codes = dnas.map((dna) => dna.code);
-      await tx.dna.updateMany({
-        where: { code: { in: codes }, activeInOfiiFileSince: null },
-        data: { activeInOfiiFileSince: date },
-      });
-      return tx.dna.updateMany({
-        where: absentFromFileWhere(codes),
-        data: { inactiveInOfiiFileSince: date },
-      });
-    },
-    { timeout: REFERENTIAL_TRANSACTION_TIMEOUT_MS }
-  );
-
 export const findOfiiDnaChanges = async (codes: string[]) => ({
   existingDnas: await prisma.dna.findMany({
     where: { code: { in: codes } },
@@ -59,15 +30,42 @@ export const findOfiiDnaChanges = async (codes: string[]) => ({
   }),
 });
 
-export const saveOfiiActivites = async (
+export const findLatestOfiiActiviteDate = async (): Promise<Date | null> =>
+  (await prisma.activite.aggregate({ _max: { date: true } }))._max.date;
+
+export const saveOfiiImport = async (
   date: Date,
+  dnas: OfiiDna[],
   activites: OfiiActivite[]
-): Promise<void> => {
-  for (const { dnaCode, ...data } of activites) {
-    await prisma.activite.upsert({
-      where: { dnaCode_date: { dnaCode, date } },
-      create: { dnaCode, date, ...data },
-      update: data,
-    });
-  }
+): Promise<number> => {
+  const codes = dnas.map((dna) => dna.code);
+  const [{ count: deactivatedCount }] = await prisma.$transaction([
+    prisma.dna.updateMany({
+      where: absentFromFileWhere(codes),
+      data: { inactiveInOfiiFileSince: date },
+    }),
+    prisma.dna.updateMany({
+      where: { code: { in: codes }, activeInOfiiFileSince: null },
+      data: { activeInOfiiFileSince: date },
+    }),
+    ...dnas.map((dna) =>
+      prisma.dna.upsert({
+        where: { code: dna.code },
+        create: {
+          ...dna,
+          activeInOfiiFileSince: date,
+          inactiveInOfiiFileSince: null,
+        },
+        update: { ...dna, inactiveInOfiiFileSince: null },
+      })
+    ),
+    ...activites.map(({ dnaCode, ...data }) =>
+      prisma.activite.upsert({
+        where: { dnaCode_date: { dnaCode, date } },
+        create: { dnaCode, date, ...data },
+        update: data,
+      })
+    ),
+  ]);
+  return deactivatedCount;
 };

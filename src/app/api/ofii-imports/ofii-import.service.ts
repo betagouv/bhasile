@@ -9,10 +9,10 @@ import { ImportFile, ImportPreview, ImportResult } from "@/types/import.type";
 import { assertImportable } from "@/utils-server/import.server.util";
 
 import {
+  findLatestOfiiActiviteDate,
   findOfiiDnaChanges,
   findOfiiReferential,
-  saveOfiiActivites,
-  saveOfiiDnas,
+  saveOfiiImport,
 } from "./ofii-import.repository";
 import {
   describeOfiiChanges,
@@ -36,10 +36,12 @@ export const previewOfiiImport = async (
           `Activité du mois enregistrée pour ${formatPlural(rows.length, "structure")}`,
         ]
       : [];
+  const latestImportedDate = await findLatestOfiiActiviteDate();
   return {
     summary: `${formatPlural(rows.length, "structure")} dans le fichier`,
     changes,
     detectedMonth: detectedDate && toMonthKey(detectedDate),
+    latestImportedMonth: latestImportedDate && toMonthKey(latestImportedDate),
     errors,
   };
 };
@@ -58,8 +60,7 @@ export const applyOfiiImport = async (
     );
   }
 
-  const { count } = await saveOfiiDnas(date, dnas);
-  await saveOfiiActivites(date, rows.map(toOfiiActivite));
+  const count = await saveOfiiImport(date, dnas, rows.map(toOfiiActivite));
 
   const month = formatDate(date, {
     month: "long",
