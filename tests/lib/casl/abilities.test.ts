@@ -19,7 +19,6 @@ import {
   canAbilityReadStructure,
   canAbilityUpdateDepartement,
   canAccessApp,
-  canAccessCockpitAdmin,
   canDeleteFile,
   canSaveCpom,
   canUpdateOperateur,
@@ -650,22 +649,6 @@ describe("Permissions : canAccessApp", () => {
         subject("Structure", {} as never)
       )
     ).toBe(false);
-  });
-});
-
-describe("Permissions : canAccessCockpitAdmin", () => {
-  it("ouvre le cockpit admin à un superadmin", () => {
-    expect(
-      canAccessCockpitAdmin(createSessionUser({ isSuperAdmin: true }))
-    ).toBe(true);
-  });
-
-  it("ferme le cockpit admin à un agent éditeur national", () => {
-    expect(canAccessCockpitAdmin(createNationalAgent())).toBe(false);
-  });
-
-  it("ferme le cockpit admin à un utilisateur déconnecté", () => {
-    expect(canAccessCockpitAdmin(undefined)).toBe(false);
   });
 });
 

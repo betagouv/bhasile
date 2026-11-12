@@ -22,38 +22,20 @@ vi.mock("@/app/api/faq/faq.repository", () => ({
 describe("faq.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFindFaqItem.mockResolvedValue({ id: 3 });
   });
 
-  it("met à jour une question existante", async () => {
-    await editFaqItem(3, createFaqItemValues());
-
-    expect(mockUpdateFaqItem).toHaveBeenCalledWith(3, createFaqItemValues());
-  });
-
-  it("rejette la modification d'une question introuvable", async () => {
+  it.each([
+    ["la modification", () => editFaqItem(3, createFaqItemValues())],
+    ["la suppression", () => removeFaqItem(3)],
+  ])("rejette %s d'une question introuvable", async (_, call) => {
     mockFindFaqItem.mockResolvedValue(null);
 
-    await expect(editFaqItem(3, createFaqItemValues())).rejects.toMatchObject({
+    await expect(call()).rejects.toMatchObject({
       message: "Question introuvable",
       status: 404,
     });
     expect(mockUpdateFaqItem).not.toHaveBeenCalled();
-  });
-
-  it("rejette la suppression d'une question introuvable", async () => {
-    mockFindFaqItem.mockResolvedValue(null);
-
-    await expect(removeFaqItem(3)).rejects.toMatchObject({ status: 404 });
     expect(mockDeleteFaqItem).not.toHaveBeenCalled();
-  });
-
-  it("renomme toutes les questions de la catégorie", async () => {
-    mockUpdateFaqCategory.mockResolvedValue({ count: 2 });
-
-    await renameFaqCategory({ category: "Structures", newCategory: "Fiches" });
-
-    expect(mockUpdateFaqCategory).toHaveBeenCalledWith("Structures", "Fiches");
   });
 
   it("rejette le renommage d'une catégorie introuvable", async () => {

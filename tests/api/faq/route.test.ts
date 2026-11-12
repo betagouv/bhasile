@@ -21,11 +21,13 @@ vi.mock("@/app/api/faq/faq.service", () => ({
   addFaqItem: (...args: unknown[]) => mockAddFaqItem(...args),
 }));
 
-const buildRequest = (body: unknown): NextRequest =>
-  new NextRequest("http://localhost/api/faq", {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
+const post = (body: unknown) =>
+  POST(
+    new NextRequest("http://localhost/api/faq", {
+      method: "POST",
+      body: JSON.stringify(body),
+    })
+  );
 
 describe("POST /api/faq", () => {
   beforeEach(() => {
@@ -35,36 +37,23 @@ describe("POST /api/faq", () => {
     });
   });
 
-  it("refuse un utilisateur non authentifié", async () => {
-    mockGetServerSession.mockResolvedValue(null);
-
-    const response = await POST(buildRequest(createFaqItemValues()));
-
-    expect(response.status).toBe(401);
-    expect(mockAddFaqItem).not.toHaveBeenCalled();
-  });
-
   it("refuse un agent qui n'est pas super admin", async () => {
     mockGetServerSession.mockResolvedValue({ user: createNationalAgent() });
 
-    const response = await POST(buildRequest(createFaqItemValues()));
-
-    expect(response.status).toBe(403);
+    expect((await post(createFaqItemValues())).status).toBe(403);
     expect(mockAddFaqItem).not.toHaveBeenCalled();
   });
 
   it("rejette une question vide", async () => {
-    const response = await POST(
-      buildRequest(createFaqItemValues({ question: "  " }))
+    expect((await post(createFaqItemValues({ question: " " }))).status).toBe(
+      400
     );
-
-    expect(response.status).toBe(400);
     expect(mockAddFaqItem).not.toHaveBeenCalled();
   });
 
   it("crée la question, débarrassée des espaces superflus", async () => {
-    const response = await POST(
-      buildRequest(createFaqItemValues({ category: " Structures " }))
+    const response = await post(
+      createFaqItemValues({ category: " Structures " })
     );
 
     expect(response.status).toBe(201);

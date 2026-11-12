@@ -1,15 +1,18 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  createNationalAgent,
+  createSessionUser,
+} from "tests/test-utils/factories/session-user.factory";
+import { describe, expect, it, vi } from "vitest";
 
 import CockpitAdminLayout from "@/app/(authenticated)/(with-menu)/parametres/cockpit-admin/layout";
 
 const mockGetServerSession = vi.fn();
-const mockNotFound = vi.fn(() => {
-  throw new Error("NEXT_NOT_FOUND");
-});
 
 vi.mock("next/navigation", () => ({
-  notFound: () => mockNotFound(),
+  notFound: () => {
+    throw new Error("NEXT_NOT_FOUND");
+  },
 }));
 
 vi.mock("next-auth", () => ({
@@ -22,13 +25,9 @@ const renderLayout = async () =>
   render(await CockpitAdminLayout({ children: <div data-testid="cockpit" /> }));
 
 describe("CockpitAdminLayout", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("affiche le cockpit à un super admin", async () => {
     mockGetServerSession.mockResolvedValue({
-      user: { email: "admin@test.fr", isSuperAdmin: true, grants: [] },
+      user: createSessionUser({ isSuperAdmin: true }),
     });
 
     await renderLayout();
@@ -36,16 +35,11 @@ describe("CockpitAdminLayout", () => {
     expect(screen.getByTestId("cockpit")).toBeInTheDocument();
   });
 
-  it("renvoie une 404 à un utilisateur qui n'est pas super admin", async () => {
-    mockGetServerSession.mockResolvedValue({
-      user: { email: "agent@test.fr", isSuperAdmin: false, grants: [] },
-    });
-
-    await expect(renderLayout()).rejects.toThrow("NEXT_NOT_FOUND");
-  });
-
-  it("renvoie une 404 sans session", async () => {
-    mockGetServerSession.mockResolvedValue(null);
+  it.each([
+    ["à un agent qui n'est pas super admin", { user: createNationalAgent() }],
+    ["sans session", null],
+  ])("renvoie une 404 %s", async (_, session) => {
+    mockGetServerSession.mockResolvedValue(session);
 
     await expect(renderLayout()).rejects.toThrow("NEXT_NOT_FOUND");
   });
