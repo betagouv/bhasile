@@ -1,6 +1,6 @@
-import { CockpitSection } from "@/types/cockpit-admin.type";
+import { CockpitFeature, CockpitSection } from "@/types/cockpit-admin.type";
 
-const COCKPIT_ADMIN_URL = "/parametres/cockpit-admin";
+export const COCKPIT_ADMIN_URL = "/parametres/cockpit-admin";
 
 export const COCKPIT_SECTIONS: CockpitSection[] = [
   {
@@ -61,7 +61,7 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
           "Ajouter, modifier ou supprimer les questions de la page Modèles et ressources.",
         icon: "fr-icon-question-answer-line",
         href: `${COCKPIT_ADMIN_URL}/faq`,
-        isEnabled: false,
+        isEnabled: true,
       },
       {
         title: "Documents de la FAQ",
@@ -87,3 +87,8 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
     ],
   },
 ];
+
+export const findCockpitFeature = (pathname: string): CockpitFeature | null =>
+  COCKPIT_SECTIONS.flatMap((section) => section.features).find((feature) =>
+    pathname.startsWith(feature.href)
+  ) ?? null;
