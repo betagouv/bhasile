@@ -3,6 +3,11 @@
 import { subject } from "@casl/ability";
 import { useAbility } from "@casl/react";
 
+import {
+  type AppAbility,
+  canAbilityReadStructure,
+  type StructureScope,
+} from "@/lib/casl";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 export const useCanUpdateStructure = (structure: StructureApiRead): boolean => {
@@ -22,4 +27,12 @@ export const useCanUpdateStructures = (): ((structure: {
       "update",
       subject("Structure", { id, departementAdministratif } as StructureApiRead)
     );
+};
+
+export const useCanReadStructures = (): ((
+  structure: StructureScope
+) => boolean) => {
+  const ability = useAbility<AppAbility>();
+
+  return (structure) => canAbilityReadStructure(ability, structure);
 };
