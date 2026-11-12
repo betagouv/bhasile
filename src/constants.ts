@@ -120,6 +120,7 @@ export const VISIBILITY_LABELS: Record<Visibility, string> = {
 
 export const MODELE_DIFFUS_LINK = "/adresses-diffus.xlsx";
 export const MODELE_MIXTE_LINK = "/adresses-mixte.xlsx";
+export const MODELE_OFII_LINK = "/liste-donnees-par-centre-09.26-exemple.xlsx";
 
 export const BHASILE_USER_NAME = "BhasileBot";
 export const BHASILE_CONTACT_EMAIL =

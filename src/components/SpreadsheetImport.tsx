@@ -6,6 +6,7 @@ import { ReactElement, useId, useRef, useState } from "react";
 
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { cn } from "@/app/utils/classname.util";
+import { formatPlural } from "@/app/utils/string.util";
 import { FileBox } from "@/components/FileBox";
 import { FileBrowseButton } from "@/components/FileBrowseButton";
 import { SPREADSHEET_MIME_TYPES } from "@/constants";
@@ -13,8 +14,13 @@ import { useFetchState } from "@/contexts/FetchStateContext";
 import { useSpreadsheetImport } from "@/hooks/useSpreadsheetImport";
 import { FetchState } from "@/types/fetch-state.type";
 import { ImportPreview, ImportResult } from "@/types/import.type";
+import { getFileTooLargeMessage, isFileTooLarge } from "@/utils/upload.util";
 
-export const SpreadsheetImport = ({ endpoint, label }: Props): ReactElement => {
+export const SpreadsheetImport = ({
+  endpoint,
+  label,
+  exampleHref,
+}: Props): ReactElement => {
   const { previewImport, applyImport } = useSpreadsheetImport(endpoint);
   const { getFetchState } = useFetchState();
   const labelId = useId();
@@ -37,6 +43,10 @@ export const SpreadsheetImport = ({ endpoint, label }: Props): ReactElement => {
     setPreview(null);
     setPreviewError(null);
     setResult(null);
+    if (isFileTooLarge(selectedFile.size)) {
+      setPreviewError(getFileTooLargeMessage(selectedFile.size));
+      return;
+    }
     setIsChecking(true);
     try {
       setPreview(await previewImport(selectedFile));
@@ -63,6 +73,15 @@ export const SpreadsheetImport = ({ endpoint, label }: Props): ReactElement => {
         Le fichier est vérifié avant tout import : rien n’est écrit tant qu’il
         contient des erreurs.
       </p>
+      {exampleHref && (
+        <a
+          href={exampleHref}
+          download
+          className="fr-link fr-icon-download-line fr-link--icon-left self-start"
+        >
+          Télécharger un fichier d’exemple
+        </a>
+      )}
       <div>
         <p id={labelId} className="font-bold mb-2">
           {label}
@@ -94,7 +113,7 @@ export const SpreadsheetImport = ({ endpoint, label }: Props): ReactElement => {
       {preview && preview.errors.length > 0 && (
         <Alert
           severity="error"
-          title={`${preview.errors.length} ligne(s) à corriger`}
+          title={`${formatPlural(preview.errors.length, "ligne")} à corriger`}
           description={
             <>
               <p>
@@ -142,4 +161,5 @@ export const SpreadsheetImport = ({ endpoint, label }: Props): ReactElement => {
 type Props = {
   endpoint: string;
   label: string;
+  exampleHref?: string;
 };

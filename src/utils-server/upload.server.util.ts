@@ -1,19 +1,25 @@
 import { DomainError } from "@/app/utils/domain-error.util";
-import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from "@/constants";
+import { ALLOWED_MIME_TYPES } from "@/constants";
+import { getFileTooLargeMessage, isFileTooLarge } from "@/utils/upload.util";
 
 export const readUploadedFile = async (
   request: Request,
   allowedMimeTypes: string[] = ALLOWED_MIME_TYPES
 ): Promise<UploadedFile> => {
-  const file = (await request.formData()).get("file");
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (isFileTooLarge(contentLength)) {
+    throw new DomainError(getFileTooLargeMessage(contentLength), 413);
+  }
+
+  const file = await readFormDataFile(request);
   if (!(file instanceof File)) {
     throw new DomainError("Aucun fichier fourni");
   }
   if (!allowedMimeTypes.includes(file.type)) {
     throw new DomainError("Type de fichier non autorisé.");
   }
-  if (file.size > MAX_FILE_SIZE) {
-    throw new DomainError("Fichier trop volumineux.");
+  if (isFileTooLarge(file.size)) {
+    throw new DomainError(getFileTooLargeMessage(file.size), 413);
   }
   return {
     buffer: Buffer.from(await file.arrayBuffer()),
@@ -21,6 +27,18 @@ export const readUploadedFile = async (
     mimeType: file.type,
     size: file.size,
   };
+};
+
+const readFormDataFile = async (
+  request: Request
+): Promise<FormDataEntryValue | null> => {
+  try {
+    return (await request.formData()).get("file");
+  } catch {
+    throw new DomainError(
+      "Le fichier n’a pas pu être lu : il est peut-être corrompu ou trop volumineux"
+    );
+  }
 };
 
 export type UploadedFile = {
