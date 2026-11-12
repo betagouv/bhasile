@@ -1,0 +1,63 @@
+import {
+  createDepartementalAgent,
+  createSessionUser,
+} from "tests/test-utils/factories/session-user.factory";
+import { describe, expect, it } from "vitest";
+
+import { canAccessPage } from "@/lib/casl/pages";
+
+describe("canAccessPage", () => {
+  it("refuse l'accès si l'utilisateur n'est pas connecté", () => {
+    expect(canAccessPage(undefined, "/")).toBe(false);
+  });
+
+  describe("pour un utilisateur opérateur", () => {
+    const currentOperateurUser = createSessionUser({
+      operateurId: 42,
+      isAgent: false,
+    });
+
+    it("autorise l'accès aux pages communes", () => {
+      expect(canAccessPage(currentOperateurUser, "/")).toBe(true);
+      expect(canAccessPage(currentOperateurUser, "/structures")).toBe(true);
+      expect(canAccessPage(currentOperateurUser, "/cpoms")).toBe(true);
+      expect(canAccessPage(currentOperateurUser, "/statistiques")).toBe(true);
+    });
+
+    it("refuse l'accès aux pages strictement réservées aux agents", () => {
+      expect(canAccessPage(currentOperateurUser, "/ressources")).toBe(false);
+    });
+
+    it("autorise l'accès à sa propre page opérateur de base", () => {
+      expect(canAccessPage(currentOperateurUser, "/operateurs/42")).toBe(true);
+    });
+
+    it("refuse l'accès à la page opérateur de base d'un autre opérateur", () => {
+      expect(canAccessPage(currentOperateurUser, "/operateurs/99")).toBe(false);
+    });
+
+    it("refuse l'accès à la racine de la base opérateur si l'utilisateur n'a pas d'id opérateur", () => {
+      const operateurWithoutId = createSessionUser({
+        operateurId: null,
+        isAgent: false,
+      });
+      expect(canAccessPage(operateurWithoutId, "/operateurs/42")).toBe(false);
+    });
+  });
+
+  describe("pour un utilisateur agent", () => {
+    const currentAgentUser = createDepartementalAgent(["75"]);
+
+    it("autorise l'accès aux pages communes", () => {
+      expect(canAccessPage(currentAgentUser, "/")).toBe(true);
+      expect(canAccessPage(currentAgentUser, "/structures")).toBe(true);
+      expect(canAccessPage(currentAgentUser, "/cpoms")).toBe(true);
+      expect(canAccessPage(currentAgentUser, "/statistiques")).toBe(true);
+    });
+
+    it("autorise l'accès aux pages réservées aux agents", () => {
+      expect(canAccessPage(currentAgentUser, "/ressources")).toBe(true);
+      expect(canAccessPage(currentAgentUser, "/operateurs")).toBe(true);
+    });
+  });
+});
