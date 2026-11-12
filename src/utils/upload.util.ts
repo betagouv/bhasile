@@ -1,7 +1,5 @@
-import { formatBytes } from "@/app/utils/number.util";
-import { MAX_FILE_SIZE } from "@/constants";
+import { MAX_FILE_SIZE, MAX_FILE_SIZE_LABEL } from "@/constants";
 
 export const isFileTooLarge = (size: number): boolean => size > MAX_FILE_SIZE;
 
-export const getFileTooLargeMessage = (size: number): string =>
-  `Fichier trop volumineux : ${formatBytes(size)}, pour ${formatBytes(MAX_FILE_SIZE)} maximum`;
+export const FILE_TOO_LARGE_MESSAGE = `Fichier trop volumineux : ${MAX_FILE_SIZE_LABEL} maximum`;

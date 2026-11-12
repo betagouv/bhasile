@@ -105,7 +105,8 @@ export const ALLOWED_MIME_TYPES = [
   ...TEXT_DOCUMENT_MIME_TYPES,
 ];
 
-export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo
+export const MAX_FILE_SIZE = 30 * 1024 * 1024;
+export const MAX_FILE_SIZE_LABEL = "10 Mo";
 
 export const AUTHOR_LEVEL_LABELS: Record<AuthorLevel, string> = {
   DEPARTEMENT: "DDETS",
