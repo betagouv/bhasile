@@ -185,7 +185,7 @@ describe("tarification.repository db integration", () => {
           transaction.createDocument({
             fileUploadId,
             types: ["CA"],
-            status: TarificationDocumentStatus.SHARED,
+            status: TarificationDocumentStatus.FINAL,
           })
       );
 

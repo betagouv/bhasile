@@ -24,13 +24,13 @@ const depositOnTime = async (
 ): Promise<void> => {
   await writer.deposit({
     types: ["CA", "RAPPORT_ACTIVITE"],
-    status: TarificationDocumentStatus.SHARED,
+    status: TarificationDocumentStatus.FINAL,
     author: operateur,
     at: inPreviousYear(campaignYear, "04-15"),
   });
   await writer.deposit({
     types: ["BP", "RAPPORT_BUDGETAIRE"],
-    status: TarificationDocumentStatus.SHARED,
+    status: TarificationDocumentStatus.FINAL,
     author: operateur,
     at: inPreviousYear(campaignYear, "10-20"),
   });
@@ -137,7 +137,7 @@ export const SCENARIOS: Scenario[] = [
       await writer.open(l48DocumentId, operateur, daysAgo(18));
       const responseDocumentId = await writer.deposit({
         types: ["REPONSE_CONTRADICTOIRE"],
-        status: TarificationDocumentStatus.SHARED,
+        status: TarificationDocumentStatus.FINAL,
         author: operateur,
         at: daysAgo(15),
       });
@@ -195,7 +195,7 @@ export const SCENARIOS: Scenario[] = [
     write: async (writer, { agent, reviewer, operateur, campaignYear }) => {
       await writer.deposit({
         types: ["CA"],
-        status: TarificationDocumentStatus.SHARED,
+        status: TarificationDocumentStatus.FINAL,
         author: operateur,
         at: inPreviousYear(campaignYear, "05-20"),
       });
