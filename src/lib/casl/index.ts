@@ -1,3 +1,4 @@
+export { canAccessCockpitAdmin } from "./admin.ability";
 export {
   canAbilityReadCpom,
   canSaveCpom,
