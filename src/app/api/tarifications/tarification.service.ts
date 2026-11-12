@@ -46,6 +46,7 @@ import {
   getOpenCampaignYears,
 } from "@/lib/tarification/tarification.campaign";
 import { computeTarificationState } from "@/lib/tarification/tarification.compute";
+import { isOperateurDocument } from "@/lib/tarification/tarification.definition";
 import {
   computeFicheCopies,
   computeFicheCopyChanges,
@@ -301,7 +302,7 @@ export const depositTarificationDocument = async ({
         author,
       })
   );
-  if (status === TarificationDocumentStatus.SHARED) {
+  if (isOperateurDocument({ types })) {
     await trySyncFicheCopies(structureId, year);
   }
   return document;
@@ -336,7 +337,7 @@ export const recordTarificationEvent = async ({
         ? await createDocumentInTransaction(transaction, year, {
             fileKey,
             types: [TarificationDocumentType.REPONSE_CONTRADICTOIRE],
-            status: TarificationDocumentStatus.SHARED,
+            status: TarificationDocumentStatus.FINAL,
             author,
           })
         : null;
@@ -549,9 +550,7 @@ export const authorizeTarificationDocument = async ({
   if (!journalDocument || !canOperateurOpenDocument(journal, journalDocument)) {
     throw new DomainError("Aucun fichier trouvé", 404);
   }
-  const isOperateurDeposit =
-    journalDocument.status === TarificationDocumentStatus.SHARED;
-  return isOperateurDeposit
+  return isOperateurDocument(journalDocument)
     ? null
     : { documentId: document.id, userId: participant.id };
 };

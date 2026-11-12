@@ -111,13 +111,14 @@ TarificationCampaign 1─N StructureTarification 1─N TarificationDocument 1─
 
 **États**, choisis au dépôt et jamais modifiés :
 
-| État     | Sens                                                                              | Qui le voit         |
-| -------- | --------------------------------------------------------------------------------- | ------------------- |
-| `DRAFT`  | version de travail des agents, à relire                                           | agents              |
-| `FINAL`  | version signée, partagée ensuite par un événement, sans changer d'état            | agents, puis tous   |
-| `SHARED` | document déposé par un agent ou un opérateur, visible des opérateurs dès le dépôt | agents et opérateur |
+| État    | Sens                                    |
+| ------- | --------------------------------------- |
+| `DRAFT` | version de travail des agents, à relire |
+| `FINAL` | version définitive                      |
 
-- **Documents de l'opérateur** ⏳ : la campagne est le seul point d'entrée du CA, du BP et de leurs rapports, qui ne se déposent plus sur la fiche (voir [Fiche structure](#fiche-structure)). Les opérateurs ont un compte dès la mise en service. Un agent qui reçoit malgré tout un document par mail le dépose à la place de l'opérateur, toujours à l'état `SHARED` ; c'est la date du dépôt qui compte.
+L'état ne dit que l'avancement. La visibilité se déduit de l'émetteur du type, dans le registre : un document de l'opérateur (CA, BP, rapports, réponse au contradictoire) se dépose toujours `FINAL` et lui est visible dès le dépôt, même quand un agent le dépose à sa place ; un document des agents ne lui est visible qu'une fois partagé par un événement, sans changer d'état.
+
+- **Documents de l'opérateur** ⏳ : la campagne est le seul point d'entrée du CA, du BP et de leurs rapports, qui ne se déposent plus sur la fiche (voir [Fiche structure](#fiche-structure)). Les opérateurs ont un compte dès la mise en service. Un agent qui reçoit malgré tout un document par mail le dépose à la place de l'opérateur ; c'est la date du dépôt qui compte.
 - **Documents des agents** ⏳ : une version se dépose en `DRAFT`, ou en `FINAL` en cochant « c'est la version signée ».
   - **Relecture** : sur un `DRAFT`, tout agent éditeur sauf son auteur peut **valider** ou **demander des modifications** (avec un texte). Une validation suffit. Une demande de modifications reste affichée sur sa version, même si un agent la relit ensuite : y répondre, c'est déposer une nouvelle version, et personne ne l'annule, pas même son auteur. Tout `DRAFT` est à relire : il n'y a pas de demande de relecture, on sollicite un collègue par un message dans le canal agents.
   - **Partage** : « Envoyer à l'opérateur » n'existe que pour un `FINAL`. La validation n'est pas exigée (rien ne bloque), l'écran affiche « non validé ».

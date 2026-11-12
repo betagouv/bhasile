@@ -151,7 +151,6 @@ const isAllowed = (assertion: () => void): boolean => {
 const PLACEHOLDER_TEXT = "motif";
 
 const DEPOSIT_STATUSES = [
-  TarificationDocumentStatus.SHARED,
   TarificationDocumentStatus.FINAL,
   TarificationDocumentStatus.DRAFT,
 ];
