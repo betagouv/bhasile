@@ -1,9 +1,11 @@
 import {
   createDepartementalAgent,
+  createSessionGrant,
   createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
+import { AccessRole } from "@/generated/prisma/client";
 import { canAccessPage } from "@/lib/casl/pages";
 
 describe("canAccessPage", () => {
@@ -75,6 +77,17 @@ describe("canAccessPage", () => {
       expect(
         canAccessPage(currentAgentUser, "/structures/transformation/type")
       ).toBe(true);
+    });
+
+    it("refuse les transformations à un agent sans droit d'écriture", () => {
+      const readOnlyAgent = createSessionUser({
+        grants: [
+          createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+        ],
+      });
+      expect(
+        canAccessPage(readOnlyAgent, "/structures/transformation/type")
+      ).toBe(false);
     });
   });
 });
