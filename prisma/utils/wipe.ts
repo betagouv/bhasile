@@ -31,7 +31,7 @@ export const wipeTables = async (prisma: PrismaClient) => {
   await prisma.budget.deleteMany({});
   await prisma.structureMillesime.deleteMany({});
   await prisma.note.deleteMany({});
-  await prisma.notification.deleteMany({});
+  await prisma.announcement.deleteMany({});
   await prisma.userAction.deleteMany({});
   await prisma.cpomStructure.deleteMany({});
   await prisma.cpom.deleteMany({});
@@ -51,7 +51,7 @@ export const wipeTables = async (prisma: PrismaClient) => {
   await prisma.structure.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.operateur.deleteMany({});
-  await prisma.emailPattern.deleteMany({});
+  await prisma.perimeter.deleteMany({});
   await prisma.departement.deleteMany({});
   await prisma.region.deleteMany({});
   await prisma.faq.deleteMany({});

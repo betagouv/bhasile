@@ -17,7 +17,11 @@ import {
   findUsersWithGrantsOnStructure,
   getUserWithGrantsByEmail,
 } from "@/app/api/users/user.repository";
-import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
+import {
+  getAssignedGrants,
+  isAgentUser,
+  normalizeEmail,
+} from "@/app/api/users/user.util";
 import {
   getDepartementTimeZone,
   toCivilDate,
@@ -69,7 +73,6 @@ import type {
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
 import {
-  createTarificationDocumentOpening,
   findFicheCopies,
   findMessageTarification,
   findPendingMessageContexts,
@@ -89,6 +92,7 @@ import {
   getMessageRecipients,
   getSelectableCampaignYears,
 } from "./tarification.util";
+import { createTarificationDocumentOpening } from "./tarification-document.repository";
 
 export const getTarificationParticipant = async (
   user: SessionUser,
@@ -302,7 +306,27 @@ export const depositTarificationDocument = async ({
         phase: getCampaignPhase(year, now, journal.timeZone),
         now,
       });
-      return transaction.createDocument({ fileKey, types, status, author });
+      const file = await transaction.findUnattachedFile(fileKey);
+      if (!file) {
+        throw new DomainError(
+          "Ce fichier est introuvable ou déjà rattaché",
+          422
+        );
+      }
+      const document = await transaction.createDocument({
+        fileUploadId: file.id,
+        types,
+        status,
+      });
+      await transaction.createEvent({
+        type: TarificationEventType.DOCUMENT_DEPOSITED,
+        authorId: author.id,
+        authorLevel: author.level,
+        documentId: document.id,
+        stepCode: null,
+        text: null,
+      });
+      return document;
     }
   );
   if (status === TarificationDocumentStatus.SHARED) {
@@ -600,7 +624,9 @@ const resolveParticipant = async (
   structure: StructureScope
 ): Promise<TarificationParticipant> => {
   assertCanAccessTarification(user, structure);
-  const databaseUser = await getUserWithGrantsByEmail({ email: user.email });
+  const databaseUser = await getUserWithGrantsByEmail({
+    email: normalizeEmail(user.email),
+  });
   if (!databaseUser) {
     throw new DomainError("Utilisateur inconnu", 401);
   }

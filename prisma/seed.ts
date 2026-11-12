@@ -10,6 +10,7 @@ import { getRegionFromDepartement } from "@/utils/region.util";
 
 import { createPrismaClient, DATABASE_POOL_MAX } from "./client";
 import { createFakeActivites } from "./seeders/activite.seed";
+import { createAnnouncementsList } from "./seeders/announcement.seed";
 import { createAntenneList } from "./seeders/antenne.seed";
 import {
   getFakeTarifsJournaliersCibles,
@@ -35,7 +36,6 @@ import {
   createFakeStructureVersionTransformationCreationFormStepDefinition,
   createFakeStructureVersionTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
-import { createNotificationsList } from "./seeders/notification.seed";
 import {
   createFakeFiliale,
   createFakeOperateur,
@@ -364,11 +364,11 @@ async function seed(): Promise<void> {
   console.log("💸 Création des journaux de tarification...");
   await createFakeTarificationJournals(prisma, getCurrentYear());
 
-  console.log("📣 Seed des notifications");
-  const notificationsToCreate = createNotificationsList();
-  await prisma.notification.createMany({ data: notificationsToCreate });
-  console.log(`✅ ${notificationsToCreate.length} notifications créées`);
-  logHeap("notifications");
+  console.log("📣 Seed des annonces");
+  const announcementsToCreate = createAnnouncementsList();
+  await prisma.announcement.createMany({ data: announcementsToCreate });
+  console.log(`✅ ${announcementsToCreate.length} annonces créées`);
+  logHeap("announcements");
 
   console.log("❓ Seed des questions de FAQ...");
   const faqItems = getFakeFaqItems();

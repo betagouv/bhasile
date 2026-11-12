@@ -34,11 +34,6 @@ import {
 import prisma from "@/lib/prisma";
 import { ControleType } from "@/types/controle.type";
 
-import {
-  backfillTarificationFromFiche,
-  selectBackfillRows,
-} from "../../../scripts/utils/tarification-backfill";
-
 const mockCopyObject = vi.fn();
 
 vi.mock("@/lib/minio", () => ({
@@ -442,7 +437,7 @@ describe("copie vers la fiche db integration", () => {
                 structureId
               )
             )
-          ).rejects.toThrow("ne peut pas être rattaché");
+          ).rejects.toThrow("rattaché");
         }
       });
 
@@ -462,7 +457,7 @@ describe("copie vers la fiche db integration", () => {
                 structureId
               )
             )
-          ).rejects.toThrow("ne peut pas être rattaché");
+          ).rejects.toThrow("rattaché");
         }
       });
 
@@ -478,7 +473,7 @@ describe("copie vers la fiche db integration", () => {
             name: operateur.name,
             logo: { key },
           } as Parameters<typeof updateOperateur>[0])
-        ).rejects.toThrow("ne peut pas être rattaché");
+        ).rejects.toThrow("rattaché");
 
         await prisma.operateur.delete({ where: { id: operateur.id } });
       });
@@ -506,172 +501,7 @@ describe("copie vers la fiche db integration", () => {
             { structureId }
           )
         )
-      ).rejects.toThrow("ne peut pas être rattaché");
+      ).rejects.toThrow("rattaché");
     });
-  });
-
-  describe("script de reprise", () => {
-    const createFicheRow = async (createdAt: Date, name: string) => {
-      const file = await createFile(name);
-      return prisma.documentFinancier.create({
-        data: {
-          structureId,
-          category: "COMPTE_ADMINISTRATIF_SOUMIS",
-          year: campaignYear - 2,
-          createdAt,
-          fileUploads: { connect: { id: file.id } },
-        },
-      });
-    };
-
-    it("relie la ligne la plus récente de la fiche, comme un dépôt système", async () => {
-      await createFicheRow(new Date("2020-01-01T10:00:00Z"), "ancien.pdf");
-      const latestRow = await createFicheRow(
-        new Date("2021-01-01T10:00:00Z"),
-        "recent.pdf"
-      );
-
-      const { linkedCount } = await backfillTarificationFromFiche(
-        prisma,
-        campaignYear
-      );
-
-      expect(linkedCount).toBe(1);
-      const [copy] = await findCopies();
-      expect(copy.id).toBe(latestRow.id);
-      const document = await prisma.tarificationDocument.findUniqueOrThrow({
-        where: { id: copy.sourceTarificationDocumentId! },
-        include: { fileUpload: true, events: true },
-      });
-      expect(document).toMatchObject({
-        types: ["CA"],
-        status: TarificationDocumentStatus.SHARED,
-        fileUpload: { originalName: "recent.pdf" },
-        events: [
-          {
-            type: TarificationEventType.DOCUMENT_DEPOSITED,
-            authorId: null,
-            authorLevel: null,
-            createdAt: latestRow.createdAt,
-          },
-        ],
-      });
-      expect(document.fileUpload.key).not.toBe(copy.fileUploads[0].key);
-    });
-
-    it("ne reprend qu'une fois une ligne quand deux reprises tournent en même temps", async () => {
-      await createFicheRow(new Date("2021-01-01T10:00:00Z"), "piece.pdf");
-
-      await Promise.all([
-        backfillTarificationFromFiche(prisma, campaignYear),
-        backfillTarificationFromFiche(prisma, campaignYear),
-      ]);
-
-      expect(
-        await prisma.tarificationDocument.count({
-          where: { structureTarification: { structureId } },
-        })
-      ).toBe(1);
-    });
-
-    it("continue après une ligne en échec, la signale, et la retente au tour suivant", async () => {
-      vi.spyOn(console, "error").mockImplementation(() => {});
-      const otherStructure = await prisma.structure.create({
-        data: {
-          codeBhasile: `BHA-FICHE-TEST-${randomUUID()}`,
-          departementAdministratif: "50",
-          type: StructureType.CPH,
-        },
-      });
-      const otherFile = await createFile();
-      await prisma.documentFinancier.create({
-        data: {
-          structureId: otherStructure.id,
-          category: "COMPTE_ADMINISTRATIF_SOUMIS",
-          year: campaignYear - 2,
-          fileUploads: { connect: { id: otherFile.id } },
-        },
-      });
-      await createFicheRow(new Date("2021-01-01T10:00:00Z"), "piece.pdf");
-      mockCopyObject.mockRejectedValueOnce(new Error("Objet introuvable"));
-
-      const firstRun = await backfillTarificationFromFiche(
-        prisma,
-        campaignYear
-      );
-
-      expect(firstRun.linkedCount).toBe(1);
-      expect(firstRun.failedRowIds).toHaveLength(1);
-
-      const secondRun = await backfillTarificationFromFiche(
-        prisma,
-        campaignYear
-      );
-
-      expect(secondRun).toEqual({ linkedCount: 1, failedRowIds: [] });
-
-      await deleteTarificationTestData({
-        structureId: otherStructure.id,
-        campaignYear,
-      });
-      await prisma.documentFinancier.deleteMany({
-        where: { structureId: otherStructure.id },
-      });
-      await prisma.structure.delete({ where: { id: otherStructure.id } });
-    });
-
-    it("ne recrée rien quand on le rejoue, et une synchronisation ne touche pas la ligne reliée", async () => {
-      const row = await createFicheRow(
-        new Date("2021-01-01T10:00:00Z"),
-        "piece.pdf"
-      );
-      await backfillTarificationFromFiche(prisma, campaignYear);
-      const documentCount = () =>
-        prisma.tarificationDocument.count({
-          where: { structureTarification: { structureId } },
-        });
-      const countAfterFirstRun = await documentCount();
-
-      await backfillTarificationFromFiche(prisma, campaignYear);
-      await syncFicheCopies(structureId, campaignYear);
-
-      expect(await documentCount()).toBe(countAfterFirstRun);
-      expect(await findCopies()).toMatchObject([{ id: row.id }]);
-    });
-  });
-});
-
-describe("selectBackfillRows", () => {
-  const buildRow = (
-    id: number,
-    structureId: number | null,
-    createdAt: string,
-    sourceTarificationDocumentId: number | null = null
-  ) => ({
-    id,
-    structureId,
-    createdAt: new Date(createdAt),
-    sourceTarificationDocumentId,
-  });
-
-  it("garde la ligne la plus récente de chaque structure", () => {
-    const selected = selectBackfillRows([
-      buildRow(1, 10, "2025-01-01"),
-      buildRow(2, 10, "2025-03-01"),
-      buildRow(3, 10, "2025-02-01"),
-      buildRow(4, 20, "2025-01-01"),
-    ]);
-
-    expect(selected.map((row) => row.id)).toEqual([2, 4]);
-  });
-
-  it("ignore une structure déjà reliée, et une ligne sans structure", () => {
-    const selected = selectBackfillRows([
-      buildRow(1, 10, "2025-01-01"),
-      buildRow(2, 10, "2025-03-01", 99),
-      buildRow(3, null, "2025-01-01"),
-    ]);
-
-    expect(selected).toEqual([]);
   });
 });

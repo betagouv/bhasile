@@ -1,10 +1,16 @@
+import {
+  createDepartementPerimeter,
+  createNationalPerimeter,
+  createUserWithGrants,
+} from "tests/test-utils/factories/user-with-grants.factory";
 import { describe, expect, it } from "vitest";
 
 import { GrantDb } from "@/app/api/users/user.db.type";
 import {
+  getAccountStatus,
   getAssignedGrants,
-  getEffectiveGrants,
   isAgentUser,
+  normalizeEmail,
   toContactGrant,
   toSessionGrant,
 } from "@/app/api/users/user.util";
@@ -84,113 +90,111 @@ describe("toSessionGrant", () => {
   });
 });
 
-describe("getEffectiveGrants", () => {
-  const patternGrant = buildGrant({ role: AccessRole.LECTEUR });
-  const userGrant = buildGrant();
-
-  it("fait primer les binômes de l'utilisateur sur ceux de son pattern d'email", () => {
-    expect(
-      getEffectiveGrants({
-        grants: [userGrant],
-        emailPattern: { grants: [patternGrant] },
-      })
-    ).toEqual([userGrant]);
+describe("normalizeEmail", () => {
+  it("retire les espaces et passe l'adresse en minuscules", () => {
+    expect(normalizeEmail("  Jean.Dupont@Interieur.GOUV.fr ")).toBe(
+      "jean.dupont@interieur.gouv.fr"
+    );
   });
+});
 
-  it("retombe sur les droits de base du pattern quand l'utilisateur n'a aucun binôme", () => {
+describe("getAccountStatus", () => {
+  it("distingue un compte activé, en attente et désactivé", () => {
+    expect(getAccountStatus({ isActivated: true, deactivatedAt: null })).toBe(
+      "ACTIVATED"
+    );
+    expect(getAccountStatus({ isActivated: false, deactivatedAt: null })).toBe(
+      "PENDING"
+    );
     expect(
-      getEffectiveGrants({
-        grants: [],
-        emailPattern: { grants: [patternGrant] },
-      })
-    ).toEqual([patternGrant]);
-  });
-
-  it("ne renvoie rien sans binôme ni pattern", () => {
-    expect(getEffectiveGrants({ grants: [], emailPattern: null })).toEqual([]);
+      getAccountStatus({ isActivated: false, deactivatedAt: new Date() })
+    ).toBe("DEACTIVATED");
   });
 });
 
 describe("isAgentUser", () => {
-  const buildUser = (
-    overrides: Partial<Parameters<typeof isAgentUser>[0]> = {}
-  ) => ({
-    isSuperAdmin: false,
-    isAgent: null,
-    operateurId: null,
-    emailPattern: null,
-    ...overrides,
+  it("considère comme agent un user rattaché à un périmètre", () => {
+    expect(isAgentUser(createUserWithGrants())).toBe(true);
   });
 
-  it("reprend le statut du pattern d'email quand celui du user n'est pas renseigné", () => {
-    expect(isAgentUser(buildUser({ emailPattern: { isAgent: true } }))).toBe(
-      true
-    );
-    expect(isAgentUser(buildUser({ emailPattern: { isAgent: false } }))).toBe(
-      false
-    );
-  });
-
-  it("fait primer le statut du user sur celui de son pattern", () => {
-    expect(
-      isAgentUser(
-        buildUser({ isAgent: false, emailPattern: { isAgent: true } })
-      )
-    ).toBe(false);
-    expect(isAgentUser(buildUser({ isAgent: true }))).toBe(true);
-  });
-
-  it("ne considère pas comme agent un user sans statut ni pattern", () => {
-    expect(isAgentUser(buildUser())).toBe(false);
+  it("ne considère pas comme agent un user sans périmètre", () => {
+    expect(isAgentUser(createUserWithGrants({ perimeter: null }))).toBe(false);
   });
 
   it("ne considère jamais comme agent un user rattaché à un opérateur", () => {
-    expect(isAgentUser(buildUser({ isAgent: true, operateurId: 3 }))).toBe(
-      false
-    );
+    expect(isAgentUser(createUserWithGrants({ operateurId: 3 }))).toBe(false);
   });
 
   it("considère un superadmin comme agent", () => {
-    expect(isAgentUser(buildUser({ isSuperAdmin: true }))).toBe(true);
+    expect(
+      isAgentUser(createUserWithGrants({ isSuperAdmin: true, perimeter: null }))
+    ).toBe(true);
   });
 });
 
 describe("getAssignedGrants", () => {
   const grant = buildGrant({ role: AccessRole.LECTEUR });
 
-  it("applique les binômes d'un agent", () => {
+  it("donne à un agent la lecture nationale et les binômes de son périmètre", () => {
+    const perimeter = createDepartementPerimeter("29", "Finistère");
+
+    expect(getAssignedGrants(createUserWithGrants({ perimeter }))).toEqual([
+      buildGrant({ role: AccessRole.LECTEUR }),
+      ...perimeter.grants,
+    ]);
+  });
+
+  it("ne donne que la lecture nationale à un agent d'un périmètre national", () => {
     expect(
-      getAssignedGrants({
-        isSuperAdmin: false,
-        isAgent: true,
-        operateurId: null,
-        grants: [grant],
-        emailPattern: null,
-      })
-    ).toEqual([grant]);
+      getAssignedGrants(
+        createUserWithGrants({ perimeter: createNationalPerimeter() })
+      ).map(({ role, scope }) => [role, scope])
+    ).toEqual([[AccessRole.LECTEUR, GrantScope.NATIONAL]]);
+  });
+
+  it("ignore les binômes personnels d'un agent", () => {
+    const structureGrant = buildGrant({
+      scope: GrantScope.STRUCTURE,
+      structure: { id: 12, codeBhasile: "C12" },
+    });
+
+    expect(
+      getAssignedGrants(createUserWithGrants({ grants: [structureGrant] }))
+    ).not.toContainEqual(structureGrant);
   });
 
   it("applique les binômes d'un user rattaché à un opérateur", () => {
     expect(
-      getAssignedGrants({
-        isSuperAdmin: false,
-        isAgent: false,
-        operateurId: 3,
-        grants: [grant],
-        emailPattern: null,
-      })
+      getAssignedGrants(
+        createUserWithGrants({
+          operateurId: 3,
+          perimeter: null,
+          grants: [grant],
+        })
+      )
     ).toEqual([grant]);
   });
 
-  it("ignore les binômes d'un user ni agent ni rattaché à un opérateur", () => {
+  it("ne donne rien à un user ni agent ni opérateur", () => {
     expect(
-      getAssignedGrants({
-        isSuperAdmin: false,
-        isAgent: null,
-        operateurId: null,
-        grants: [grant],
-        emailPattern: { isAgent: false, grants: [grant] },
-      })
+      getAssignedGrants(
+        createUserWithGrants({ perimeter: null, grants: [grant] })
+      )
+    ).toEqual([]);
+  });
+
+  it("ne donne rien à un compte non activé", () => {
+    expect(
+      getAssignedGrants(createUserWithGrants({ isActivated: false }))
+    ).toEqual([]);
+    expect(
+      getAssignedGrants(
+        createUserWithGrants({
+          isActivated: false,
+          operateurId: 3,
+          grants: [grant],
+        })
+      )
     ).toEqual([]);
   });
 });

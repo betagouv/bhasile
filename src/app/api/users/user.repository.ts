@@ -9,7 +9,6 @@ const UPDATE_INTERVAL_MINUTES = 60;
 export const upsertUser = async ({
   name,
   email,
-  emailPattern,
 }: UpsertUserArgs): Promise<void> => {
   const now = getNow();
   const threshold = new Date(
@@ -18,8 +17,8 @@ export const upsertUser = async ({
   const existing = await prisma.user.findUnique({
     where: { email },
     select: {
+      id: true,
       lastConnection: true,
-      emailPattern: { select: { pattern: true } },
     },
   });
 
@@ -29,9 +28,6 @@ export const upsertUser = async ({
         email,
         name,
         lastConnection: now,
-        ...(emailPattern && {
-          emailPattern: { connect: { pattern: emailPattern } },
-        }),
       },
     });
     return;
@@ -39,25 +35,24 @@ export const upsertUser = async ({
 
   const isRecentConnection =
     existing.lastConnection && existing.lastConnection >= threshold;
-  const isSameEmailPattern = existing.emailPattern?.pattern === emailPattern;
-  if (isRecentConnection && isSameEmailPattern) {
+  if (isRecentConnection) {
     return;
   }
 
   await prisma.user.update({
-    where: { email },
+    where: { id: existing.id },
     data: {
       name,
       lastConnection: now,
-      emailPattern: emailPattern
-        ? { connect: { pattern: emailPattern } }
-        : { disconnect: true },
     },
   });
 };
 
 export const findUserIdByEmail = (email: string) =>
-  prisma.user.findUnique({ where: { email }, select: { id: true } });
+  prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
 
 export const getUserWithGrantsByEmail = async ({
   email,
@@ -88,9 +83,16 @@ export const findUsersWithGrantsOnStructure = ({
   };
   return prisma.user.findMany({
     where: {
+      isActivated: true,
       OR: [
+        {
+          perimeter: {
+            grants: {
+              some: { scope: GrantScope.DEPARTEMENT, departementNumero },
+            },
+          },
+        },
         { grants: { some: grantWhere } },
-        { emailPattern: { grants: { some: grantWhere } } },
       ],
     },
     select: { ...userWithGrantsSelect, email: true },
@@ -100,5 +102,4 @@ export const findUsersWithGrantsOnStructure = ({
 type UpsertUserArgs = {
   name: string;
   email: string;
-  emailPattern?: string;
 };
