@@ -1,18 +1,12 @@
 import { SessionUser } from "@/types/global";
 import { matchesPath } from "@/utils/path.util";
 
-import { isAgent } from "./rules";
+import { defineAbilityFor, isAgent } from "./rules";
 
 // TODO : ajouter le tableau de bord, cpoms et statistiques plus tard pour les opérateurs et les retirer de agentOnlyPages
 export const commonPages = ["/structures"];
 
-export const agentOnlyPages = [
-  "/",
-  "/ressources",
-  "/cpoms",
-  "/statistiques",
-  "/structures/transformation",
-];
+export const agentOnlyPages = ["/", "/ressources", "/cpoms", "/statistiques"];
 
 export const canAccessPage = (
   user: SessionUser | undefined,
@@ -24,12 +18,16 @@ export const canAccessPage = (
 
   const isUserAgent = isAgent(user);
 
-  if (agentOnlyPages.some((base) => matchesPath(pathname, base))) {
-    return isUserAgent;
+  if (matchesPath(pathname, "/structures/transformation")) {
+    return isUserAgent && defineAbilityFor(user).can("update", "Structure");
   }
 
   if (commonPages.some((base) => matchesPath(pathname, base))) {
     return true;
+  }
+
+  if (agentOnlyPages.some((base) => matchesPath(pathname, base))) {
+    return isUserAgent;
   }
 
   if (matchesPath(pathname, "/operateurs")) {

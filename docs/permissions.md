@@ -66,7 +66,7 @@ Une fiche hors périmètre renvoie une 404, pas une 403, pour ne pas révéler q
 
 Les données sont filtrées par CASL (`rules.ts`) ; les pages, par `canAccessPage` (`lib/casl/pages.ts`), que le proxy consulte avant toute page ProConnect :
 
-- **Agent** : toutes les pages.
+- **Agent** : toutes les pages ; les transformations demandent en plus un droit d'écriture (`update Structure`), comme leur API.
 - **Non-agent** (user opérateur, ou contact sans opérateur rattaché) : les structures, et pour un user opérateur sa fiche opérateur sans ses pages de modification. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (CPOM, statistiques, ressources, liste des opérateurs, transformations) vers la 404.
 - **Chemin absent des listes** : refusé à tous.
 
