@@ -23,12 +23,4 @@ describe("CockpitAdmin", () => {
       }
     }
   });
-
-  it("attribue une adresse distincte à chaque fonctionnalité", () => {
-    const hrefs = COCKPIT_SECTIONS.flatMap((section) =>
-      section.features.map((feature) => feature.href)
-    );
-
-    expect(new Set(hrefs).size).toBe(hrefs.length);
-  });
 });

@@ -1,4 +1,7 @@
-export { canAccessCockpitAdmin } from "./admin.ability";
+export {
+  assertCockpitAdminAccess,
+  canAccessCockpitAdmin,
+} from "./admin.ability";
 export {
   canAbilityReadCpom,
   canSaveCpom,

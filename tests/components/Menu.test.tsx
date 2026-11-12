@@ -168,23 +168,6 @@ describe("Menu", () => {
     expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
   });
 
-  it("affiche le cockpit admin à un super admin", () => {
-    // GIVEN
-    (client.useSession as Mock).mockReturnValue({
-      data: { user: { isSuperAdmin: true, grants: [] } },
-    });
-
-    // WHEN
-    render(<Menu />);
-    fireEvent.click(getGroupButton("Paramètres"));
-
-    // THEN
-    expect(screen.getByRole("link", { name: "Cockpit admin" })).toHaveAttribute(
-      "href",
-      "/parametres/cockpit-admin"
-    );
-  });
-
   it("masque le cockpit admin aux utilisateurs qui ne sont pas super admin", () => {
     // GIVEN
     (client.useSession as Mock).mockReturnValue({
@@ -211,7 +194,10 @@ describe("Menu", () => {
     fireEvent.click(getGroupButton("Paramètres"));
 
     // THEN
-    expect(screen.getByText("Cockpit admin")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cockpit admin" })).toHaveAttribute(
+      "href",
+      "/parametres/cockpit-admin"
+    );
     expect(screen.queryByText("Voir mon compte")).not.toBeInTheDocument();
   });
 

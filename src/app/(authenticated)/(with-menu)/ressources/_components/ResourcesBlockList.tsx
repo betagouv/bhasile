@@ -2,8 +2,8 @@ import { connection } from "next/server";
 import { ReactElement } from "react";
 
 import { getFaqItems } from "@/app/api/faq/faq.service";
-import { FaqApiType } from "@/schemas/api/faq.schema";
 import { FaqBlock } from "@/types/ressources.type";
+import { groupFaqItemsByCategory } from "@/utils/faq.util";
 import {
   readBlocks,
   readSuggestions,
@@ -18,17 +18,13 @@ export const ResourcesBlockList = async (): Promise<ReactElement> => {
   const { faqItems } = await getFaqItems();
   const validFaqItems = Array.isArray(faqItems) ? faqItems : [];
 
-  const uniqueCategories = Array.from(
-    new Set(validFaqItems.map((faqItem: FaqApiType) => faqItem.category))
+  const dynamicTabs = groupFaqItemsByCategory(validFaqItems).map(
+    ({ category, items }, categoryIndex) => ({
+      id: `faq-tab-${categoryIndex}`,
+      title: category,
+      items,
+    })
   );
-
-  const dynamicTabs = uniqueCategories.map((categoryName, categoryIndex) => ({
-    id: `faq-tab-${categoryIndex}`,
-    title: categoryName,
-    items: validFaqItems.filter(
-      (faqItem: FaqApiType) => faqItem.category === categoryName
-    ),
-  }));
 
   const faqBlock: FaqBlock = {
     type: "faq",

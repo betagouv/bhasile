@@ -11,8 +11,8 @@ export const isSomeDataIncomplete = (
   const isStructuresDataIncomplete = statistiques.structures.byYear.some(
     (structureYear) => isYearIncomplete(structureYear.completude)
   );
-  const isPlacesDataIncomplete = statistiques.places.byYear.some(
-    (placeYear) => isYearIncomplete(placeYear.completude)
+  const isPlacesDataIncomplete = statistiques.places.byYear.some((placeYear) =>
+    isYearIncomplete(placeYear.completude)
   );
   const isFinancesDataIncomplete = statistiques.finance.byYear.some(
     (financeYear) => isYearIncomplete(financeYear.total.completude)
@@ -29,7 +29,9 @@ export const getCompletudeChartData = (
   completudes: (CompletudeStat | null | undefined)[]
 ) => ({
   incompleteYears: completudes.map(isYearIncomplete),
-  nbRenseignees: completudes.map((completude) => completude?.nbRenseignees ?? 0),
+  nbRenseignees: completudes.map(
+    (completude) => completude?.nbRenseignees ?? 0
+  ),
   percentages: completudes.map((completude) =>
     getPercentage(completude?.nbRenseignees ?? 0, completude?.nbAttendues ?? 1)
   ),
