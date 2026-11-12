@@ -2,13 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { ReactElement, useState } from "react";
+
+import { canAccessCockpitAdmin } from "@/lib/casl";
+import { SessionUser } from "@/types/global";
 
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
 
 export const Menu = (): ReactElement => {
   const pathname = usePathname();
+  const session = useSession();
+  const isCockpitAdminAccessible = canAccessCockpitAdmin(
+    session?.data?.user as SessionUser | undefined
+  );
 
   const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(
     getDefaultOpenGroup(pathname)
@@ -18,6 +26,29 @@ export const Menu = (): ReactElement => {
   const toggleGroup = (groupId: MenuGroupId): void => {
     setOpenGroup(openGroup === groupId ? null : groupId);
   };
+
+  const parametresSubItems: MenuSubItem[] = [
+    ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
+      ? [
+          {
+            label: "Gérer les accès",
+            url: "/parametres/acces",
+          },
+          {
+            label: "Voir mon compte",
+            url: "/parametres/compte",
+          },
+        ]
+      : []),
+    ...(isCockpitAdminAccessible
+      ? [
+          {
+            label: "Cockpit admin",
+            url: "/parametres/cockpit-admin",
+          },
+        ]
+      : []),
+  ];
 
   const menuItems: MenuItem[] = [
     {
@@ -58,22 +89,13 @@ export const Menu = (): ReactElement => {
           },
         ]
       : []),
-    ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
+    ...(parametresSubItems.length > 0
       ? [
           {
             id: "parametres" as const,
             icon: "fr-icon-settings-5-line",
             label: "Paramètres",
-            subItems: [
-              {
-                label: "Gérer les accès",
-                url: "/parametres/acces",
-              },
-              {
-                label: "Voir mon compte",
-                url: "/parametres/compte",
-              },
-            ],
+            subItems: parametresSubItems,
           },
         ]
       : []),

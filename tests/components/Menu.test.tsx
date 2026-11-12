@@ -18,6 +18,7 @@ const getGroupButton = (name: string) => screen.getByRole("button", { name });
 describe("Menu", () => {
   beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "true");
+    (client.useSession as Mock).mockReset();
     mockPathname.mockReturnValue("/");
   });
 
@@ -165,6 +166,66 @@ describe("Menu", () => {
       "false"
     );
     expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+  });
+
+  it("affiche le cockpit admin à un super admin", () => {
+    // GIVEN
+    (client.useSession as Mock).mockReturnValue({
+      data: { user: { isSuperAdmin: true, grants: [] } },
+    });
+
+    // WHEN
+    render(<Menu />);
+    fireEvent.click(getGroupButton("Paramètres"));
+
+    // THEN
+    expect(screen.getByRole("link", { name: "Cockpit admin" })).toHaveAttribute(
+      "href",
+      "/parametres/cockpit-admin"
+    );
+  });
+
+  it("masque le cockpit admin aux utilisateurs qui ne sont pas super admin", () => {
+    // GIVEN
+    (client.useSession as Mock).mockReturnValue({
+      data: { user: { isSuperAdmin: false, grants: [] } },
+    });
+
+    // WHEN
+    render(<Menu />);
+    fireEvent.click(getGroupButton("Paramètres"));
+
+    // THEN
+    expect(screen.queryByText("Cockpit admin")).not.toBeInTheDocument();
+  });
+
+  it("affiche Paramètres à un super admin même sans les pages de paramètres", () => {
+    // GIVEN
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "false");
+    (client.useSession as Mock).mockReturnValue({
+      data: { user: { isSuperAdmin: true, grants: [] } },
+    });
+
+    // WHEN
+    render(<Menu />);
+    fireEvent.click(getGroupButton("Paramètres"));
+
+    // THEN
+    expect(screen.getByText("Cockpit admin")).toBeInTheDocument();
+    expect(screen.queryByText("Voir mon compte")).not.toBeInTheDocument();
+  });
+
+  it("masque Paramètres à un utilisateur qui n'est pas super admin sans les pages de paramètres", () => {
+    // GIVEN
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "false");
+
+    // WHEN
+    render(<Menu />);
+
+    // THEN
+    expect(
+      screen.queryByRole("button", { name: "Paramètres" })
+    ).not.toBeInTheDocument();
   });
 
   it("déploie le groupe de la page visitée en changeant de page", () => {
