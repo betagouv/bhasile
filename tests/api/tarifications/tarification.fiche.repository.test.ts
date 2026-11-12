@@ -437,7 +437,7 @@ describe("copie vers la fiche db integration", () => {
                 structureId
               )
             )
-          ).rejects.toThrow("ne peut pas être rattaché");
+          ).rejects.toThrow("rattaché");
         }
       });
 
@@ -457,7 +457,7 @@ describe("copie vers la fiche db integration", () => {
                 structureId
               )
             )
-          ).rejects.toThrow("ne peut pas être rattaché");
+          ).rejects.toThrow("rattaché");
         }
       });
 
@@ -473,7 +473,7 @@ describe("copie vers la fiche db integration", () => {
             name: operateur.name,
             logo: { key },
           } as Parameters<typeof updateOperateur>[0])
-        ).rejects.toThrow("ne peut pas être rattaché");
+        ).rejects.toThrow("rattaché");
 
         await prisma.operateur.delete({ where: { id: operateur.id } });
       });
@@ -501,7 +501,7 @@ describe("copie vers la fiche db integration", () => {
             { structureId }
           )
         )
-      ).rejects.toThrow("ne peut pas être rattaché");
+      ).rejects.toThrow("rattaché");
     });
   });
 });

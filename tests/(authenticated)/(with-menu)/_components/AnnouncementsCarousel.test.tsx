@@ -1,46 +1,44 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { NotificationsCarousel } from "@/app/(authenticated)/(with-menu)/_components/NotificationsCarousel";
+import { AnnouncementsCarousel } from "@/app/(authenticated)/(with-menu)/_components/AnnouncementsCarousel";
 import { SLIDE_ANIMATION_DURATION_MS } from "@/app/hooks/useCarousel";
-import { DashboardNotification } from "@/types/dashboard.type";
+import { DashboardAnnouncement } from "@/types/dashboard.type";
 
-const notifications: DashboardNotification[] = [
+const announcements: DashboardAnnouncement[] = [
   { id: 1, content: "Alpha" },
   { id: 2, content: "Bravo" },
   { id: 3, content: "Charlie" },
 ];
 
 const renderCarousel = (
-  items: DashboardNotification[] = notifications
+  items: DashboardAnnouncement[] = announcements
 ): ReturnType<typeof render> =>
-  render(<NotificationsCarousel notifications={items} />);
+  render(<AnnouncementsCarousel announcements={items} />);
 
 const getRegion = (): HTMLElement =>
-  screen.getByRole("region", { name: "Notifications" });
+  screen.getByRole("region", { name: "Annonces" });
 
 const activeSlideText = (): string =>
   screen.getByRole("group").querySelector('[aria-hidden="false"]')
     ?.textContent ?? "";
 
-describe("NotificationsCarousel", () => {
+describe("AnnouncementsCarousel", () => {
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it("affiche la première notification et le compteur", () => {
+  it("affiche la première annonce et le compteur", () => {
     renderCarousel();
 
     expect(activeSlideText()).toBe("Alpha");
     expect(screen.getByText("1 / 3")).toBeInTheDocument();
   });
 
-  it("passe à la notification suivante au clic sur le bouton suivant", () => {
+  it("passe à la announcement suivante au clic sur le bouton suivant", () => {
     renderCarousel();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Notification suivante" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Annonce suivante" }));
 
     expect(activeSlideText()).toBe("Bravo");
     expect(screen.getByText("2 / 3")).toBeInTheDocument();
@@ -54,7 +52,7 @@ describe("NotificationsCarousel", () => {
     expect(activeSlideText()).toBe("Bravo");
   });
 
-  it("boucle vers la première notification après la dernière", () => {
+  it("boucle vers la première annonce après la dernière", () => {
     renderCarousel();
     const region = getRegion();
 
@@ -65,7 +63,7 @@ describe("NotificationsCarousel", () => {
     expect(activeSlideText()).toBe("Alpha");
   });
 
-  it("boucle vers la dernière notification avec la flèche gauche depuis la première", () => {
+  it("boucle vers la dernière annonce avec la flèche gauche depuis la première", () => {
     renderCarousel();
 
     fireEvent.keyDown(getRegion(), { key: "ArrowLeft" });
@@ -79,11 +77,11 @@ describe("NotificationsCarousel", () => {
     expect(activeSlideText()).toBe("<strong>Alerte</strong>");
   });
 
-  it("masque les contrôles quand il n'y a qu'une seule notification", () => {
+  it("masque les contrôles quand il n'y a qu'une seule annonce", () => {
     renderCarousel([{ id: 1, content: "Seule" }]);
 
     expect(
-      screen.queryByRole("button", { name: "Notification suivante" })
+      screen.queryByRole("button", { name: "Annonce suivante" })
     ).not.toBeInTheDocument();
     expect(activeSlideText()).toBe("Seule");
   });
@@ -91,9 +89,7 @@ describe("NotificationsCarousel", () => {
   it("fait glisser la slide entrante depuis la droite et la sortante vers la gauche au suivant", () => {
     const { container } = renderCarousel();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Notification suivante" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Annonce suivante" }));
 
     expect(
       container.querySelector(".animate-slide-in-right")
@@ -106,9 +102,7 @@ describe("NotificationsCarousel", () => {
   it("inverse le sens de glissement au précédent", () => {
     const { container } = renderCarousel();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Notification précédente" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Annonce précédente" }));
 
     expect(
       container.querySelector(".animate-slide-in-left")
@@ -122,9 +116,7 @@ describe("NotificationsCarousel", () => {
     vi.useFakeTimers();
     const { container } = renderCarousel();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Notification suivante" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Annonce suivante" }));
     act(() => {
       vi.advanceTimersByTime(SLIDE_ANIMATION_DURATION_MS);
     });

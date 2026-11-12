@@ -5,10 +5,10 @@ import { ReactElement } from "react";
 
 import { useCarousel } from "@/app/hooks/useCarousel";
 import { cn } from "@/app/utils/classname.util";
-import { DashboardNotification } from "@/types/dashboard.type";
+import { DashboardAnnouncement } from "@/types/dashboard.type";
 
-export const NotificationsCarousel = ({
-  notifications,
+export const AnnouncementsCarousel = ({
+  announcements,
 }: Props): ReactElement => {
   const {
     index,
@@ -16,37 +16,37 @@ export const NotificationsCarousel = ({
     goToNext,
     handleKeyDown,
     getSlideAnimationClassName,
-  } = useCarousel(notifications.length);
-  const hasMultiple = notifications.length > 1;
+  } = useCarousel(announcements.length);
+  const hasMultiple = announcements.length > 1;
 
   return (
     <section
       className="flex flex-col gap-2 m-4"
       aria-roledescription="carrousel"
-      aria-label="Notifications"
+      aria-label="Annonces"
       onKeyDown={handleKeyDown}
     >
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold uppercase tracking-wide text-mention-grey">
-          Notifications
+          Annonces
         </span>
         {hasMultiple && (
           <div className="flex items-center gap-1">
             <span className="text-sm text-mention-grey">
-              {index + 1} / {notifications.length}
+              {index + 1} / {announcements.length}
             </span>
             <Button
               iconId="fr-icon-arrow-left-s-line"
               priority="tertiary no outline"
               size="small"
-              title="Notification précédente"
+              title="Annonce précédente"
               onClick={goToPrevious}
             />
             <Button
               iconId="fr-icon-arrow-right-s-line"
               priority="tertiary no outline"
               size="small"
-              title="Notification suivante"
+              title="Annonce suivante"
               onClick={goToNext}
             />
           </div>
@@ -59,16 +59,16 @@ export const NotificationsCarousel = ({
         aria-live="polite"
         className="grid overflow-hidden"
       >
-        {notifications.map((notification, slideIndex) => (
+        {announcements.map((announcement, slideIndex) => (
           <div
-            key={notification.id}
+            key={announcement.id}
             className={cn(
               "col-start-1 row-start-1 border-l-4 border-default-blue-france ml-8 pl-8 text-sm text-text-default-grey",
               getSlideAnimationClassName(slideIndex)
             )}
             aria-hidden={slideIndex !== index}
           >
-            <p className="max-w-3xl">{notification.content}</p>
+            <p className="max-w-3xl">{announcement.content}</p>
           </div>
         ))}
       </div>
@@ -77,5 +77,5 @@ export const NotificationsCarousel = ({
 };
 
 type Props = {
-  notifications: DashboardNotification[];
+  announcements: DashboardAnnouncement[];
 };
