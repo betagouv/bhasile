@@ -5,6 +5,7 @@ import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
+import { assertFilesCanBeAttachedToEntity } from "../files/file.service";
 import {
   OperateurDbDetail,
   OperateurListRow,
@@ -70,6 +71,10 @@ export const updateOne = async (
   const { actesAdministratifs, contacts, logo, ...operateurFields } = operateur;
 
   return prisma.$transaction(async (tx) => {
+    await assertFilesCanBeAttachedToEntity(tx, logo ? [logo] : [], {
+      operateurId: operateur.id,
+    });
+
     const updated = await tx.operateur.update({
       where: { id: operateur.id },
       data: {

@@ -1,13 +1,13 @@
-import { AgentZone, getAgentBaseGrants } from "scripts/utils/grant.util";
-
-import { GrantScope, PrismaClient } from "@/generated/prisma/client";
+import {
+  AccessRole,
+  GrantScope,
+  PrismaClient,
+} from "@/generated/prisma/client";
 
 // Comptes du fournisseur d'identité de test ProConnect (FIA1)
 const TEST_EMAIL_DOMAIN = "test.proconnect.gouv.fr";
 
 const ILE_DE_FRANCE = "Île-de-France";
-
-const TEST_EMAIL_PATTERN = `@${TEST_EMAIL_DOMAIN.replaceAll(".", "\\.")}$`;
 
 export const seedRolesAndAgents = async (
   prisma: PrismaClient
@@ -21,33 +21,51 @@ export const seedRolesAndAgents = async (
     {
       name: "Jean Nation",
       email: `national@${TEST_EMAIL_DOMAIN}`,
-      zone: { scope: GrantScope.NATIONAL },
+      perimeter: { name: "Administration centrale", grants: [] },
     },
     {
       name: "Jean Idf",
       email: `regional@${TEST_EMAIL_DOMAIN}`,
-      zone: { scope: GrantScope.REGION, regionId: region.id },
+      perimeter: {
+        name: "DREETS Île-de-France",
+        grants: [
+          {
+            role: AccessRole.ADMIN,
+            scope: GrantScope.REGION,
+            regionId: region.id,
+          },
+        ],
+      },
     },
     {
       name: "Jean Paris",
       email: `departemental@${TEST_EMAIL_DOMAIN}`,
-      zone: { scope: GrantScope.DEPARTEMENT, departementNumeros: ["75"] },
+      perimeter: {
+        name: "DDETS Paris",
+        grants: [
+          {
+            role: AccessRole.ADMIN,
+            scope: GrantScope.DEPARTEMENT,
+            departementNumero: "75",
+          },
+        ],
+      },
     },
   ];
-
-  const emailPattern = await prisma.emailPattern.create({
-    data: { pattern: TEST_EMAIL_PATTERN, isAgent: true },
-    select: { id: true },
-  });
 
   for (const agent of agents) {
     await prisma.user.create({
       data: {
         name: agent.name,
         email: agent.email,
-        emailPatternId: emailPattern.id,
+        isActivated: true,
         lastConnection: new Date(),
-        grants: { createMany: { data: getAgentBaseGrants(agent.zone) } },
+        perimeter: {
+          create: {
+            name: agent.perimeter.name,
+            grants: { createMany: { data: agent.perimeter.grants } },
+          },
+        },
       },
     });
   }
@@ -62,5 +80,13 @@ export const seedRolesAndAgents = async (
 type AgentSeed = {
   name: string;
   email: string;
-  zone: AgentZone;
+  perimeter: {
+    name: string;
+    grants: {
+      role: AccessRole;
+      scope: GrantScope;
+      regionId?: number;
+      departementNumero?: string;
+    }[];
+  };
 };

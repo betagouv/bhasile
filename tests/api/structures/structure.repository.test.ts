@@ -1000,6 +1000,223 @@ describe("structure.repository db integration", () => {
     ).toContain(file.key);
   });
 
+  it("refuse la clé du contrôle d'une autre structure sans déplacer le fichier", async () => {
+    const otherStructure = await createStructure();
+    const structure = await createStructure();
+    const file = await createFileUpload("controle-autre-structure");
+    const foreignControle = await prisma.controle.create({
+      data: {
+        structureId: otherStructure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        type: "PROGRAMME",
+        fileUploads: { connect: { key: file.key } },
+      },
+    });
+
+    const error = await updateOne({
+      id: structure.id,
+      controles: [
+        {
+          date: "2025-01-01T00:00:00.000Z",
+          type: ControleType.PROGRAMME,
+          fileUploads: [{ key: file.key, id: file.id }],
+        },
+      ],
+    }).catch((caughtError: unknown) => caughtError);
+
+    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: file.key },
+    });
+    expect(fileAfter.controleId).toBe(foreignControle.id);
+    expect(error).toMatchObject({ name: "DomainError", status: 409 });
+  });
+
+  it("refuse la clé de l'évaluation d'une autre structure sans déplacer le fichier", async () => {
+    const otherStructure = await createStructure();
+    const structure = await createStructure();
+    const file = await createFileUpload("evaluation-autre-structure");
+    const foreignEvaluation = await prisma.evaluation.create({
+      data: {
+        structureId: otherStructure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        fileUploads: { connect: { key: file.key } },
+      },
+    });
+
+    const error = await updateOne({
+      id: structure.id,
+      evaluations: [
+        {
+          date: "2025-01-01T00:00:00.000Z",
+          fileUploads: [{ key: file.key }],
+        },
+      ],
+    }).catch((caughtError: unknown) => caughtError);
+
+    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: file.key },
+    });
+    expect(fileAfter.evaluationId).toBe(foreignEvaluation.id);
+    expect(error).toMatchObject({ name: "DomainError", status: 409 });
+  });
+
+  it("ne met pas à jour le contrôle d'une autre structure quand son id est envoyé", async () => {
+    const otherStructure = await createStructure();
+    const structure = await createStructure();
+    const foreignDate = new Date("2024-01-01T00:00:00.000Z");
+    const foreignControle = await prisma.controle.create({
+      data: {
+        structureId: otherStructure.id,
+        date: foreignDate,
+        type: "PROGRAMME",
+      },
+    });
+    const file = await createFileUpload("controle-id-etranger");
+
+    await updateOne({
+      id: structure.id,
+      controles: [
+        {
+          id: foreignControle.id,
+          date: "2025-01-01T00:00:00.000Z",
+          type: ControleType.INOPINE,
+          fileUploads: [{ key: file.key, id: file.id }],
+        },
+      ],
+    });
+
+    const foreignAfter = await prisma.controle.findUniqueOrThrow({
+      where: { id: foreignControle.id },
+      include: { fileUploads: true },
+    });
+    expect(foreignAfter.structureId).toBe(otherStructure.id);
+    expect(foreignAfter.date).toEqual(foreignDate);
+    expect(foreignAfter.type).toBe("PROGRAMME");
+    expect(foreignAfter.fileUploads).toHaveLength(0);
+
+    const ownControles = await prisma.controle.findMany({
+      where: { structureId: structure.id },
+      include: { fileUploads: true },
+    });
+    expect(ownControles).toHaveLength(1);
+    expect(ownControles[0].id).not.toBe(foreignControle.id);
+    expect(ownControles[0].fileUploads.map(({ key }) => key)).toEqual([
+      file.key,
+    ]);
+  });
+
+  it("ne met pas à jour l'évaluation d'une autre structure quand son id est envoyé", async () => {
+    const otherStructure = await createStructure();
+    const structure = await createStructure();
+    const foreignEvaluation = await prisma.evaluation.create({
+      data: {
+        structureId: otherStructure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        notePersonne: 1,
+      },
+    });
+    const file = await createFileUpload("evaluation-id-etranger");
+
+    await updateOne({
+      id: structure.id,
+      evaluations: [
+        {
+          id: foreignEvaluation.id,
+          date: "2025-01-01T00:00:00.000Z",
+          notePersonne: 5,
+          fileUploads: [{ key: file.key }],
+        },
+      ],
+    });
+
+    const foreignAfter = await prisma.evaluation.findUniqueOrThrow({
+      where: { id: foreignEvaluation.id },
+      include: { fileUploads: true },
+    });
+    expect(foreignAfter.structureId).toBe(otherStructure.id);
+    expect(foreignAfter.notePersonne).toBe(1);
+    expect(foreignAfter.fileUploads).toHaveLength(0);
+
+    const ownEvaluations = await prisma.evaluation.findMany({
+      where: { structureId: structure.id },
+      include: { fileUploads: true },
+    });
+    expect(ownEvaluations).toHaveLength(1);
+    expect(ownEvaluations[0].id).not.toBe(foreignEvaluation.id);
+    expect(ownEvaluations[0].fileUploads.map(({ key }) => key)).toEqual([
+      file.key,
+    ]);
+  });
+
+  it("met à jour le contrôle de la structure et garde son fichier quand son id est envoyé", async () => {
+    const structure = await createStructure();
+    const file = await createFileUpload("controle-meme-structure");
+    const controle = await prisma.controle.create({
+      data: {
+        structureId: structure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        type: "PROGRAMME",
+        fileUploads: { connect: { key: file.key } },
+      },
+    });
+
+    await updateOne({
+      id: structure.id,
+      controles: [
+        {
+          id: controle.id,
+          date: "2025-01-01T00:00:00.000Z",
+          type: ControleType.INOPINE,
+          fileUploads: [{ key: file.key, id: file.id }],
+        },
+      ],
+    });
+
+    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: file.key },
+    });
+    expect(fileAfter.controleId).toBe(controle.id);
+    const controles = await prisma.controle.findMany({
+      where: { structureId: structure.id },
+    });
+    expect(controles).toHaveLength(1);
+    expect(controles[0].type).toBe("INOPINE");
+  });
+
+  it("met à jour l'évaluation de la structure et garde son fichier quand son id est envoyé", async () => {
+    const structure = await createStructure();
+    const file = await createFileUpload("evaluation-meme-structure");
+    const evaluation = await prisma.evaluation.create({
+      data: {
+        structureId: structure.id,
+        date: new Date("2024-01-01T00:00:00.000Z"),
+        fileUploads: { connect: { key: file.key } },
+      },
+    });
+
+    await updateOne({
+      id: structure.id,
+      evaluations: [
+        {
+          id: evaluation.id,
+          date: "2025-01-01T00:00:00.000Z",
+          notePersonne: 5,
+          fileUploads: [{ key: file.key }],
+        },
+      ],
+    });
+
+    const fileAfter = await prisma.fileUpload.findUniqueOrThrow({
+      where: { key: file.key },
+    });
+    expect(fileAfter.evaluationId).toBe(evaluation.id);
+    const evaluations = await prisma.evaluation.findMany({
+      where: { structureId: structure.id },
+    });
+    expect(evaluations).toHaveLength(1);
+    expect(evaluations[0].notePersonne).toBe(5);
+  });
+
   it("remplace la liste des evaluations", async () => {
     // GIVEN: one existing evaluation
     const structure = await createStructure();

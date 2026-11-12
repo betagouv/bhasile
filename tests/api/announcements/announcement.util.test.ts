@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildActiveWindowWhere } from "@/app/api/notifications/notification.util";
+import { buildActiveWindowWhere } from "@/app/api/announcements/announcement.util";
 
 describe("buildActiveWindowWhere", () => {
   const now = new Date("2026-07-15T12:00:00.000Z");
 
-  it("inclut les notifications sans date de début (startDate null)", () => {
+  it("inclut les annonces sans date de début (startDate null)", () => {
     const where = buildActiveWindowWhere(now);
 
     expect(where.AND).toContainEqual({
@@ -13,7 +13,7 @@ describe("buildActiveWindowWhere", () => {
     });
   });
 
-  it("inclut les notifications sans date de fin (endDate null)", () => {
+  it("inclut les annonces sans date de fin (endDate null)", () => {
     const where = buildActiveWindowWhere(now);
 
     expect(where.AND).toContainEqual({
