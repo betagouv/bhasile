@@ -1,4 +1,12 @@
-import { buildOperateurLookup } from "scripts/utils/ofii-fill-referential";
+import {
+  createOfiiReferential,
+  createOfiiRow,
+} from "tests/test-utils/factories/ofii.factory";
+
+import {
+  buildOperateurLookup,
+  validateOfiiRows,
+} from "@/app/api/ofii-imports/ofii-import.util";
 
 describe("buildOperateurLookup", () => {
   it("rapproche un opérateur de son nom en base", () => {
@@ -60,5 +68,61 @@ describe("buildOperateurLookup", () => {
     expect(() => buildOperateurLookup(operateurs)).toThrow(
       /COALLIA HABITAT.*ADOMA.*COALLIA/
     );
+  });
+});
+
+describe("validateOfiiRows", () => {
+  it("prépare le DNA d'une ligne valide, avec un nom nettoyé", () => {
+    const { dnas, errors } = validateOfiiRows(
+      [createOfiiRow()],
+      createOfiiReferential()
+    );
+
+    expect(errors).toEqual([]);
+    expect(dnas).toEqual([
+      {
+        code: "C0301",
+        departementAdministratif: "03",
+        directionTerritoriale: "Clermont-Ferrand",
+        nom: "CADA MOULINS ADOMA - 03",
+        nomOfii: "CADA MOULINS ADOMA",
+        operateurId: 7,
+        type: "CADA",
+      },
+    ]);
+  });
+
+  it("rattache un opérateur par son alias OFII", () => {
+    const { dnas } = validateOfiiRows(
+      [createOfiiRow({ operateur: "adoma sa" })],
+      createOfiiReferential()
+    );
+
+    expect(dnas[0].operateurId).toBe(7);
+  });
+
+  it("liste toutes les anomalies d'une ligne invalide sans préparer de DNA", () => {
+    const { dnas, errors } = validateOfiiRows(
+      [
+        createOfiiRow({
+          departement: "Atlantide",
+          type: "HOTEL",
+          operateur: "INCONNU",
+        }),
+      ],
+      createOfiiReferential()
+    );
+
+    expect(dnas).toEqual([]);
+    expect(errors).toEqual([
+      {
+        key: "C0301",
+        issues: [
+          "département « Atlantide » inconnu",
+          "type de structure « HOTEL » inconnu",
+          "opérateur « INCONNU » inconnu de Bhasile",
+        ],
+      },
+    ]);
   });
 });

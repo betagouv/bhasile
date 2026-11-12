@@ -1,21 +1,15 @@
-/**
- * Charge un fichier XLSX OFII (activité), prend l'onglet le plus récent (par date dans le nom),
- * trouve la ligne d'en-tête et normalise les colonnes selon POSSIBLE_COLUMNS.
- * Dépendance : npm install xlsx
- */
-
 import type { WorkSheet } from "xlsx";
 import * as XLSX from "xlsx";
 
 import { endOfMonthUtcFromMonth } from "@/app/utils/date.util";
-
+import { DomainError } from "@/app/utils/domain-error.util";
 import {
   buildLabelLookup,
   decodeSheetRange,
   getCellValue,
   normalizeCellValue,
   parseNumericCell,
-} from "./xlsx-utils";
+} from "@/utils-server/xlsx.server.util";
 
 const POSSIBLE_REF_COLUMNS: Record<keyof OfiiReferentialRow, string[]> = {
   dnaCode: ["Code"],
@@ -107,7 +101,7 @@ function parseYear(year: string): string {
   if (year.length === 4) {
     return year;
   }
-  throw new Error(`Année invalide: ${year}`);
+  throw new DomainError(`Année invalide dans le nom d’onglet : ${year}`);
 }
 
 /* Extrait (year, month) du nom d'onglet (ex. "10 25", "octobre 2025", "Liste") ou null. */
@@ -201,7 +195,9 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
         return b.date.month - a.date.month;
       });
     if (withDates.length == 0) {
-      throw new Error("Aucune date trouvée dans le nom d'onglet ou du fichier");
+      throw new DomainError(
+        "Aucun onglet daté (ex. « octobre 2025 ») ni onglet « Liste » dans le fichier"
+      );
     } else {
       chosenSheetName = withDates[0].name;
       sheetDate = withDates[0].date;
@@ -209,8 +205,8 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
   }
 
   if (!sheetDate) {
-    throw new Error(
-      `Impossible d'extraire la date du nom d'onglet ou du fichier : ${fileName}`
+    throw new DomainError(
+      `Impossible de déduire le mois du fichier « ${fileName} » : le nom doit contenir le mois et l’année (ex. 10.25)`
     );
   }
 
@@ -218,8 +214,8 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
 
   const headerRowIdx = findHeaderRow(sheet);
   if (headerRowIdx < 0) {
-    throw new Error(
-      "Aucune ligne d'en-tête trouvée (colonnes OFII attendues)."
+    throw new DomainError(
+      "Aucune ligne d’en-tête trouvée : les colonnes OFII attendues (Code, Capacité…) sont absentes"
     );
   }
 
