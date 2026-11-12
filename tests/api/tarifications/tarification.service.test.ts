@@ -3,6 +3,11 @@ import {
   createSessionGrant,
   createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
+import {
+  createDepartementPerimeter,
+  createRegionPerimeter,
+  createUserWithGrants,
+} from "tests/test-utils/factories/user-with-grants.factory";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -19,10 +24,9 @@ import {
   recordTarificationDocumentOpening,
   recordTarificationEvent,
 } from "@/app/api/tarifications/tarification.service";
+import type { UserWithGrants } from "@/app/api/users/user.db.type";
 import {
-  AccessRole,
   AuthorLevel,
-  GrantScope,
   StructureType,
   TarificationDocumentStatus,
   type TarificationDocumentType,
@@ -75,8 +79,6 @@ vi.mock("@/app/api/tarifications/tarification.repository", () => ({
     mockFindStructureTarificationJournal(...args),
   findTarificationCampaign: (...args: unknown[]) =>
     mockFindTarificationCampaign(...args),
-  createTarificationDocumentOpening: (...args: unknown[]) =>
-    mockCreateTarificationDocumentOpening(...args),
   runInTarificationTransaction: (...args: unknown[]) =>
     mockRunInTarificationTransaction(...args),
   findStructureTarificationCampaigns: (...args: unknown[]) =>
@@ -85,6 +87,11 @@ vi.mock("@/app/api/tarifications/tarification.repository", () => ({
 
 vi.mock("@/app/api/files/file.service", () => ({
   copyStoredFile: vi.fn(),
+}));
+
+vi.mock("@/app/api/tarifications/tarification-document.repository", () => ({
+  createTarificationDocumentOpening: (...args: unknown[]) =>
+    mockCreateTarificationDocumentOpening(...args),
 }));
 
 vi.mock("@/app/api/conversations/conversation.repository", () => ({
@@ -180,22 +187,16 @@ describe("postTarificationMessage", () => {
 });
 
 describe("getTarificationParticipant", () => {
-  const regionalEditorGrant = {
-    role: AccessRole.EDITEUR,
-    scope: GrantScope.REGION,
-    region: { id: 11, name: "Île-de-France", departements: [{ numero: "75" }] },
-    departement: null,
-    structure: null,
-  };
-  const buildDatabaseUser = (overrides: object) => ({
-    id: 5,
-    operateurId: null,
-    isSuperAdmin: false,
-    isAgent: true,
-    grants: [regionalEditorGrant],
-    emailPattern: null,
-    ...overrides,
-  });
+  const buildDatabaseUser = (overrides: Partial<UserWithGrants> = {}) =>
+    createUserWithGrants({
+      id: 5,
+      perimeter: createRegionPerimeter({
+        id: 11,
+        name: "Île-de-France",
+        departements: [{ numero: "75" }],
+      }),
+      ...overrides,
+    });
 
   beforeEach(() => {
     mockFindStructureScope.mockResolvedValue({
@@ -205,7 +206,7 @@ describe("getTarificationParticipant", () => {
     });
   });
 
-  it("signe au niveau régional un agent éditeur de la région", async () => {
+  it("signe au niveau régional un agent d'un périmètre régional", async () => {
     mockGetUserWithGrantsByEmail.mockResolvedValue(buildDatabaseUser({}));
 
     const participant = await getTarificationParticipant(
@@ -225,9 +226,9 @@ describe("getTarificationParticipant", () => {
     ).rejects.toMatchObject({ status: 403 });
   });
 
-  it("retombe au niveau le plus restreint pour un utilisateur qui n'est pas agent en base", async () => {
+  it("retombe au niveau le plus restreint pour un utilisateur sans périmètre en base", async () => {
     mockGetUserWithGrantsByEmail.mockResolvedValue(
-      buildDatabaseUser({ isAgent: false })
+      buildDatabaseUser({ perimeter: null })
     );
 
     const participant = await getTarificationParticipant(
@@ -266,21 +267,12 @@ describe("changeTarificationMessageTag", () => {
 });
 
 describe("notifyPendingTarificationMessages", () => {
-  const departementEditorGrant = {
-    role: AccessRole.EDITEUR,
-    scope: GrantScope.DEPARTEMENT,
-    region: null,
-    departement: { numero: "75", name: "Paris", regionId: 11 },
-    structure: null,
-  };
   const buildAgent = (id: number) => ({
-    id,
+    ...createUserWithGrants({
+      id,
+      perimeter: createDepartementPerimeter("75", "Paris"),
+    }),
     email: `agent${id}@paris.gouv.fr`,
-    operateurId: null,
-    isSuperAdmin: false,
-    isAgent: true,
-    grants: [],
-    emailPattern: { isAgent: true, grants: [departementEditorGrant] },
   });
   const buildPendingMessage = ({
     id,
@@ -825,6 +817,7 @@ describe("écritures de la tarification", () => {
   const transaction = {
     findJournal: vi.fn(),
     findCampaign: vi.fn(),
+    findUnattachedFile: vi.fn(),
     createDocument: vi.fn(),
     createEvent: vi.fn(),
   };
@@ -840,6 +833,7 @@ describe("écritures de la tarification", () => {
     });
     transaction.findJournal.mockResolvedValue(buildStructureJournal());
     transaction.findCampaign.mockResolvedValue(null);
+    transaction.findUnattachedFile.mockResolvedValue({ id: 7 });
     transaction.createDocument.mockResolvedValue({ id: 9 });
     transaction.createEvent.mockResolvedValue({ id: 10 });
     mockRunInTarificationTransaction.mockImplementation(
@@ -876,12 +870,38 @@ describe("écritures de la tarification", () => {
       );
       expect(transaction.findJournal).toHaveBeenCalled();
       expect(mockFindStructureTarificationJournal).not.toHaveBeenCalled();
+      expect(transaction.findUnattachedFile).toHaveBeenCalledWith(
+        "abc-rca.pdf"
+      );
       expect(transaction.createDocument).toHaveBeenCalledWith({
-        fileKey: "abc-rca.pdf",
+        fileUploadId: 7,
         types: ["RCA"],
         status: TarificationDocumentStatus.DRAFT,
-        author: agent,
       });
+    });
+
+    it("journalise le dépôt avec son auteur", async () => {
+      await depositTarificationDocument(deposit);
+
+      expect(transaction.createEvent).toHaveBeenCalledWith({
+        type: TarificationEventType.DOCUMENT_DEPOSITED,
+        authorId: agent.id,
+        authorLevel: agent.level,
+        documentId: 9,
+        stepCode: null,
+        text: null,
+      });
+    });
+
+    it("n'écrit rien quand le fichier est introuvable ou déjà rattaché", async () => {
+      transaction.findUnattachedFile.mockResolvedValue(null);
+
+      await expect(depositTarificationDocument(deposit)).rejects.toMatchObject({
+        status: 422,
+      });
+
+      expect(transaction.createDocument).not.toHaveBeenCalled();
+      expect(transaction.createEvent).not.toHaveBeenCalled();
     });
 
     it("n'écrit rien quand une garde refuse le dépôt", async () => {

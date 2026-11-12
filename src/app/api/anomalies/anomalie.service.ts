@@ -7,6 +7,7 @@ import {
 } from "@/app/api/anomalies/anomalie.repository";
 import { buildAnomalieContext } from "@/app/api/anomalies/anomalie.util";
 import { findUserIdByEmail } from "@/app/api/users/user.repository";
+import { normalizeEmail } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import { Prisma } from "@/generated/prisma/client";
@@ -72,7 +73,7 @@ export const setAnomalieJustification = async (
     return;
   }
 
-  const user = await findUserIdByEmail(email);
+  const user = await findUserIdByEmail(normalizeEmail(email));
 
   if (user === null) {
     throw new DomainError("Utilisateur introuvable", 401);

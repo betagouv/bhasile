@@ -48,7 +48,7 @@ export type DashboardTransformationRow = {
   actionUrl: string | null;
 };
 
-export type DashboardNotification = {
+export type DashboardAnnouncement = {
   id: number;
   content: string;
 };

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
+import { ExternalLink } from "@/app/components/common/ExternalLink";
 import { BHASILE_HELP_CENTER_URL } from "@/constants";
 import { TarificationStepCode } from "@/generated/prisma/enums";
 import type { TarificationSectionCode } from "@/lib/tarification/tarification.definition";
@@ -96,14 +97,12 @@ export const TarificationSidebar = ({
         </ol>
       </nav>
 
-      <a
-        href={BHASILE_HELP_CENTER_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fr-btn fr-btn--secondary fr-btn--sm fr-icon-question-line fr-btn--icon-left self-center mt-auto"
-      >
-        Centre d’aide
-      </a>
+      <ExternalLink
+        title="Centre d’aide"
+        url={BHASILE_HELP_CENTER_URL}
+        className="fr-btn fr-btn--secondary fr-btn--sm self-center mt-auto"
+        icon="fr-icon-question-line"
+      />
     </aside>
   );
 };
