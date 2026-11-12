@@ -93,7 +93,8 @@ export async function proxy(request: NextRequest) {
       }
 
       if (!canAccessPage(user, pathname)) {
-        return NextResponse.redirect(new URL("/404", request.url));
+        const target = pathname === "/" ? "/structures" : "/404";
+        return NextResponse.redirect(new URL(target, request.url));
       }
     }
 

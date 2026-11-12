@@ -4,10 +4,16 @@ import {
   PrismaClient,
 } from "@/generated/prisma/client";
 
+import { createFakeContact } from "./contact.seed";
+
 // Comptes du fournisseur d'identité de test ProConnect (FIA1)
 const TEST_EMAIL_DOMAIN = "test.proconnect.gouv.fr";
 
 const ILE_DE_FRANCE = "Île-de-France";
+
+export const TEST_USER_DEPARTEMENT = "75";
+
+export const TEST_USER_STRUCTURES_COUNT = 3;
 
 export const seedRolesAndAgents = async (
   prisma: PrismaClient
@@ -50,7 +56,7 @@ export const seedRolesAndAgents = async (
           {
             role: AccessRole.ADMIN,
             scope: GrantScope.DEPARTEMENT,
-            departementNumero: "75",
+            departementNumero: TEST_USER_DEPARTEMENT,
           },
         ],
       },
@@ -81,7 +87,7 @@ export const seedRolesAndAgents = async (
         {
           role: AccessRole.LECTEUR,
           scope: GrantScope.DEPARTEMENT,
-          departementNumero: "75",
+          departementNumero: TEST_USER_DEPARTEMENT,
         },
       ],
     },
@@ -130,6 +136,50 @@ export const seedRolesAndAgents = async (
   );
 };
 
+export const seedContactUsers = async (
+  prisma: PrismaClient,
+  structureIds: number[]
+): Promise<void> => {
+  const contactUsers: ContactUserSeed[] = [
+    {
+      prenom: "Jules",
+      nom: "Contact Un",
+      email: `contact-operateur-1@${TEST_EMAIL_DOMAIN}`,
+      structureIds: structureIds.slice(0, 1),
+    },
+    {
+      prenom: "Jules",
+      nom: "Contact Deux",
+      email: `contact-operateur-2@${TEST_EMAIL_DOMAIN}`,
+      structureIds: structureIds.slice(1, 3),
+    },
+  ];
+
+  for (const contactUser of contactUsers) {
+    await prisma.user.create({
+      data: {
+        name: `${contactUser.prenom} ${contactUser.nom}`,
+        email: contactUser.email,
+      },
+    });
+    const versions = await prisma.structureVersion.findMany({
+      where: { structureId: { in: contactUser.structureIds } },
+      select: { id: true },
+    });
+    await prisma.contact.createMany({
+      data: versions.map((version) => ({
+        ...createFakeContact(),
+        prenom: contactUser.prenom,
+        nom: contactUser.nom,
+        email: contactUser.email,
+        structureVersionId: version.id,
+      })),
+    });
+  }
+
+  console.log(`🧑 ${contactUsers.length} contacts de test créés`);
+};
+
 type GrantSeed = {
   role: AccessRole;
   scope: GrantScope;
@@ -150,4 +200,11 @@ type OperateurUserSeed = {
   name: string;
   email: string;
   grants: GrantSeed[];
+};
+
+type ContactUserSeed = {
+  prenom: string;
+  nom: string;
+  email: string;
+  structureIds: number[];
 };

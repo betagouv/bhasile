@@ -41,7 +41,12 @@ import {
   createFakeOperateur,
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
-import { seedRolesAndAgents } from "./seeders/role.seed";
+import {
+  seedContactUsers,
+  seedRolesAndAgents,
+  TEST_USER_DEPARTEMENT,
+  TEST_USER_STRUCTURES_COUNT,
+} from "./seeders/role.seed";
 import {
   buildStructureCreate,
   COLOCATED_COORDINATES,
@@ -264,7 +269,7 @@ async function seed(): Promise<void> {
   const structureParams: SeedStructureParams[] = [];
   let colocatedLeft = COLOCATED_STRUCTURES_COUNT;
 
-  for (const operateur of operateurs) {
+  for (const [operateurIndex, operateur] of operateurs.entries()) {
     const nonOfiiCount = faker.number.int({
       min: seedNumber(200),
       max: seedNumber(250),
@@ -279,17 +284,23 @@ async function seed(): Promise<void> {
     );
 
     for (let index = 0; index < nonOfiiCount + ofiiCount; index++) {
+      const isTestUserStructure =
+        operateurIndex === 0 && index < TEST_USER_STRUCTURES_COUNT;
       const ofii = index >= nonOfiiCount;
-      const departementAdministratif = randomDepartement();
+      const departementAdministratif = isTestUserStructure
+        ? TEST_USER_DEPARTEMENT
+        : randomDepartement();
       const codeBhasile = nextCodeBhasile(departementAdministratif);
 
-      const colocated = !ofii && colocatedLeft > 0;
+      const colocated = !ofii && !isTestUserStructure && colocatedLeft > 0;
       if (colocated) {
         colocatedLeft--;
       }
 
       const filiale =
-        operateur.filiale && faker.datatype.boolean({ probability: 0.2 })
+        !isTestUserStructure &&
+        operateur.filiale &&
+        faker.datatype.boolean({ probability: 0.2 })
           ? operateur.filiale
           : null;
 
@@ -299,7 +310,7 @@ async function seed(): Promise<void> {
         departementAdministratif,
         type: randomType(),
         ofii,
-        isFinalised: faker.datatype.boolean(),
+        isFinalised: isTestUserStructure || faker.datatype.boolean(),
         now,
         formDefs,
         finalisationFormDefId: formFinalisationDefinition.id,
@@ -353,6 +364,13 @@ async function seed(): Promise<void> {
   logHeap("structures");
 
   await mirrorLegacyPlacesToBaseVersions(prisma);
+
+  await seedContactUsers(
+    prisma,
+    seededStructures
+      .slice(0, TEST_USER_STRUCTURES_COUNT)
+      .map((seeded) => seeded.structureId)
+  );
 
   await createFakeCpoms(prisma);
   logHeap("CPOM");

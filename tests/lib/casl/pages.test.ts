@@ -17,15 +17,26 @@ describe("canAccessPage", () => {
       isAgent: false,
     });
 
-    it("autorise l'accès aux pages communes", () => {
-      expect(canAccessPage(currentOperateurUser, "/")).toBe(true);
+    it("autorise l'accès aux structures", () => {
       expect(canAccessPage(currentOperateurUser, "/structures")).toBe(true);
-      expect(canAccessPage(currentOperateurUser, "/cpoms")).toBe(true);
-      expect(canAccessPage(currentOperateurUser, "/statistiques")).toBe(true);
+      expect(canAccessPage(currentOperateurUser, "/structures/12")).toBe(true);
     });
 
-    it("refuse l'accès aux pages strictement réservées aux agents", () => {
+    it("refuse l'accès aux pages réservées aux agents", () => {
+      expect(canAccessPage(currentOperateurUser, "/")).toBe(false);
+      expect(canAccessPage(currentOperateurUser, "/cpoms")).toBe(false);
+      expect(canAccessPage(currentOperateurUser, "/statistiques")).toBe(false);
       expect(canAccessPage(currentOperateurUser, "/ressources")).toBe(false);
+    });
+
+    it("refuse l'accès à la liste des opérateurs et aux modifications de sa fiche", () => {
+      expect(canAccessPage(currentOperateurUser, "/operateurs")).toBe(false);
+      expect(
+        canAccessPage(
+          currentOperateurUser,
+          "/operateurs/42/modification/description"
+        )
+      ).toBe(false);
     });
 
     it("autorise l'accès à sa propre page opérateur de base", () => {

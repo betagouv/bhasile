@@ -4,6 +4,8 @@ import "./globals.css"; // IMPORTANT cet import doit rester en premier pour que 
 import type { Metadata } from "next";
 import { PropsWithChildren, Suspense } from "react";
 
+import { auth } from "@/lib/next-auth/auth";
+
 import { DsfrProvider, StartDsfrOnHydration } from "./dsfr-bootstrap";
 import {
   DsfrHead,
@@ -16,8 +18,9 @@ export const metadata: Metadata = {
   description: "Piloter le parc de logements pour demandeurs d’asile",
 };
 
-export default function RootLayout({ children }: PropsWithChildren) {
+export default async function RootLayout({ children }: PropsWithChildren) {
   const lang = "fr";
+  const session = await auth();
   return (
     <html
       {...getHtmlAttributes({ lang })}
@@ -30,7 +33,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <body className="overscroll-none bg-default-grey-hover h-full">
         <DsfrProvider lang={lang}>
           <StartDsfrOnHydration />
-          <Providers>
+          <Providers session={session}>
             <Suspense>{children}</Suspense>
           </Providers>
         </DsfrProvider>

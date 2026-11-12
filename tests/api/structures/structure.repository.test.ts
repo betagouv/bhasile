@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 
-import { createNationalAgent } from "tests/test-utils/factories/session-user.factory";
+import {
+  createNationalAgent,
+  createSessionGrant,
+  createSessionUser,
+} from "tests/test-utils/factories/session-user.factory";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
@@ -1759,6 +1763,29 @@ describe("structure.repository db integration", () => {
       );
       expect(finalisedRow?.isFinalised).toBe(true);
       expect(inProgressRow?.isFinalised).toBe(false);
+    });
+
+    it("ne montre à un non-agent que les structures finalisées, en liste comme en fiche", async () => {
+      const nonAgent = createSessionUser({
+        isAgent: false,
+        grants: [createSessionGrant({ isNational: true })],
+      });
+      const finalised = await createStructureWithFinalisationForm(true);
+      const inProgress = await createStructureWithFinalisationForm(false);
+
+      const finalisedRow = findRow(
+        await listBy(finalised.codeBhasile, { user: nonAgent }),
+        finalised.codeBhasile
+      );
+      const inProgressRow = findRow(
+        await listBy(inProgress.codeBhasile, { user: nonAgent }),
+        inProgress.codeBhasile
+      );
+
+      expect(finalisedRow).toBeDefined();
+      expect(inProgressRow).toBeUndefined();
+      expect(await getFullStructure(finalised.id, nonAgent)).not.toBeNull();
+      expect(await getFullStructure(inProgress.id, nonAgent)).toBeNull();
     });
 
     it("CREATION puis EXTENSION : finalisée via l'historique, pas via la version courante", async () => {

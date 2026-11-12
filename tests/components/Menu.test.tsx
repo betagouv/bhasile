@@ -253,4 +253,72 @@ describe("Menu", () => {
     expect(screen.queryByText("Voir les structures")).toBeInTheDocument();
     expect(screen.queryByText("Voir l’opérateur")).toBeInTheDocument();
   });
+
+  it("replie Structures et opérateurs quand Paramètres est déployé", () => {
+    // GIVEN
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "true");
+    mockAgentSession();
+    render(<Menu />);
+
+    // WHEN
+    fireEvent.click(getGroupButton("Paramètres"));
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+    expect(screen.getByText("Voir mon compte")).toBeInTheDocument();
+  });
+
+  it("déploie Paramètres sur une page de paramètres", () => {
+    // GIVEN
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "true");
+    mockAgentSession();
+    mockPathname.mockReturnValue("/parametres/compte");
+
+    // WHEN
+    render(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Paramètres")).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Voir mon compte" })
+    ).toHaveAttribute("aria-current", "page");
+  });
+
+  it("garde Structures et opérateurs replié en changeant de page", () => {
+    // GIVEN
+    mockAgentSession();
+    const { rerender } = render(<Menu />);
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // WHEN
+    mockPathname.mockReturnValue("/statistiques");
+    rerender(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+  });
 });
+
+const mockAgentSession = () => {
+  const mockSession = {
+    expires: "1",
+    user: { email: "test@example.com", name: "John Doe", isAgent: true },
+  };
+  vi.mocked(useSession).mockReturnValue({
+    data: mockSession,
+    status: "authenticated",
+    update: vi.fn(),
+  });
+};

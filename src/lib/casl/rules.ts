@@ -68,7 +68,7 @@ const defineReadRules = (
   }
   if (isAgent(user)) {
     can("read", "Operateur");
-  } else if (user.operateurId !== null && user.operateurId !== undefined) {
+  } else if (user.operateurId !== null) {
     can("read", "Operateur", { id: user.operateurId });
   }
 };

@@ -4,9 +4,7 @@ import { matchesPath } from "@/utils/path.util";
 import { isAgent } from "./rules";
 
 // TODO : ajouter le tableau de bord, cpoms et statistiques plus tard pour les opérateurs et les retirer de agentOnlyPages
-export const commonPages = [
-  /*"/", */ "/structures" /*, "/cpoms", "/statistiques"*/,
-];
+export const commonPages = ["/structures"];
 
 export const agentOnlyPages = ["/", "/ressources", "/cpoms", "/statistiques"];
 
