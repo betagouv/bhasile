@@ -1,4 +1,3 @@
-import { DomainError } from "@/app/utils/domain-error.util";
 import { FaqApiType, FaqApiWrite } from "@/schemas/api/faq.schema";
 
 import {
@@ -8,6 +7,7 @@ import {
   findFaqItems,
   updateFaqItem,
 } from "./faq.repository";
+import { faqItemNotFound } from "./faq.util";
 
 export const getFaqItems = async (): Promise<{
   faqItems: FaqApiType[];
@@ -19,9 +19,8 @@ export const getFaqItems = async (): Promise<{
   };
 };
 
-export const addFaqItem = async (input: FaqApiWrite): Promise<number> => {
-  const { id } = await createFaqItem(input);
-  return id;
+export const addFaqItem = async (input: FaqApiWrite): Promise<void> => {
+  await createFaqItem(input);
 };
 
 export const editFaqItem = async (
@@ -39,6 +38,6 @@ export const removeFaqItem = async (id: number): Promise<void> => {
 
 const assertFaqItemExists = async (id: number): Promise<void> => {
   if (!(await findFaqItem(id))) {
-    throw new DomainError("Question introuvable", 404);
+    throw faqItemNotFound();
   }
 };

@@ -89,6 +89,7 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
 ];
 
 export const findCockpitFeature = (pathname: string): CockpitFeature | null =>
-  COCKPIT_SECTIONS.flatMap((section) => section.features).find((feature) =>
-    pathname.startsWith(feature.href)
+  COCKPIT_SECTIONS.flatMap((section) => section.features).find(
+    (feature) =>
+      pathname === feature.href || pathname.startsWith(`${feature.href}/`)
   ) ?? null;

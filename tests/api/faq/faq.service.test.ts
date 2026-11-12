@@ -1,3 +1,4 @@
+import { createFaqItemValues } from "tests/test-utils/factories/faq.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { editFaqItem, removeFaqItem } from "@/app/api/faq/faq.service";
@@ -12,12 +13,6 @@ vi.mock("@/app/api/faq/faq.repository", () => ({
   deleteFaqItem: (...args: unknown[]) => mockDeleteFaqItem(...args),
 }));
 
-const faqItem = {
-  question: "Comment déclarer une fermeture ?",
-  contentMarkdown: "Depuis la fiche structure.",
-  category: "Structures",
-};
-
 describe("faq.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -25,15 +20,15 @@ describe("faq.service", () => {
   });
 
   it("met à jour une question existante", async () => {
-    await editFaqItem(3, faqItem);
+    await editFaqItem(3, createFaqItemValues());
 
-    expect(mockUpdateFaqItem).toHaveBeenCalledWith(3, faqItem);
+    expect(mockUpdateFaqItem).toHaveBeenCalledWith(3, createFaqItemValues());
   });
 
   it("rejette la modification d'une question introuvable", async () => {
     mockFindFaqItem.mockResolvedValue(null);
 
-    await expect(editFaqItem(3, faqItem)).rejects.toMatchObject({
+    await expect(editFaqItem(3, createFaqItemValues())).rejects.toMatchObject({
       message: "Question introuvable",
       status: 404,
     });

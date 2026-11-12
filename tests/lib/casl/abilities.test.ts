@@ -14,6 +14,7 @@ import {
   Structure,
 } from "@/generated/prisma/client";
 import {
+  assertCockpitAdminAccess,
   canAbilityReadCpom,
   canAbilityReadStructure,
   canAbilityUpdateDepartement,
@@ -665,6 +666,26 @@ describe("Permissions : canAccessCockpitAdmin", () => {
 
   it("ferme le cockpit admin à un utilisateur déconnecté", () => {
     expect(canAccessCockpitAdmin(undefined)).toBe(false);
+  });
+});
+
+describe("Permissions : assertCockpitAdminAccess", () => {
+  it("laisse passer un superadmin", () => {
+    expect(() =>
+      assertCockpitAdminAccess(createSessionUser({ isSuperAdmin: true }))
+    ).not.toThrow();
+  });
+
+  it("rejette un utilisateur déconnecté en 401", () => {
+    expect(() => assertCockpitAdminAccess(undefined)).toThrow(
+      expect.objectContaining({ status: 401 })
+    );
+  });
+
+  it("rejette un agent qui n'est pas superadmin en 403", () => {
+    expect(() => assertCockpitAdminAccess(createNationalAgent())).toThrow(
+      expect.objectContaining({ status: 403 })
+    );
   });
 });
 

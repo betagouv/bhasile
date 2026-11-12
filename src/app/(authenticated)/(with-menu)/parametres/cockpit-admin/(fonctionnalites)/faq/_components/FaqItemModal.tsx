@@ -6,11 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ReactElement, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
-import {
-  FaqApiType,
-  FaqApiWrite,
-  faqApiWriteSchema,
-} from "@/schemas/api/faq.schema";
+import { FaqApiType } from "@/schemas/api/faq.schema";
+import { faqFormSchema,FaqFormValues } from "@/schemas/forms/base/faq.schema";
 import { renderFaqMarkdown } from "@/utils/faq.util";
 
 import { FaqCategoryField } from "./FaqCategoryField";
@@ -28,8 +25,8 @@ export const FaqItemModal = ({
     reset,
     control,
     formState: { errors },
-  } = useForm<FaqApiWrite>({
-    resolver: zodResolver(faqApiWriteSchema),
+  } = useForm<FaqFormValues>({
+    resolver: zodResolver(faqFormSchema),
     defaultValues: EMPTY_FAQ_ITEM,
   });
   useEffect(() => {
@@ -97,7 +94,7 @@ export const faqItemModal = createModal({
   isOpenedByDefault: false,
 });
 
-const EMPTY_FAQ_ITEM: FaqApiWrite = {
+const EMPTY_FAQ_ITEM: FaqFormValues = {
   question: "",
   category: "",
   contentMarkdown: "",
@@ -108,5 +105,5 @@ type Props = {
   openCount: number;
   categories: string[];
   isSaving: boolean;
-  onSubmit: (values: FaqApiWrite) => Promise<boolean>;
+  onSubmit: (values: FaqFormValues) => Promise<boolean>;
 };

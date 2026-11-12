@@ -5,11 +5,7 @@ import {
 } from "@/app/utils/search-params.util";
 import { parseCommaList } from "@/app/utils/string.util";
 import { FILTERS_COOKIE } from "@/constants";
-import {
-  FILTER_KEYS,
-  FilterKey,
-  Filters,
-} from "@/types/filters.type";
+import { FILTER_KEYS, FilterKey, Filters } from "@/types/filters.type";
 
 const parseOperateurIds = (value: string | null | undefined): string[] =>
   parseCommaList(value).filter((operateurId) => /^\d+$/.test(operateurId));
@@ -23,9 +19,7 @@ export const getFiltersFromSearchParams = (params: SearchParams): Filters => ({
   types: getFirstParam(params.types),
 });
 
-export const toFiltersSearchParams = (
-  filters: Filters
-): URLSearchParams => {
+export const toFiltersSearchParams = (filters: Filters): URLSearchParams => {
   const params = new URLSearchParams();
   FILTER_KEYS.forEach((key) => {
     const value = filters[key];

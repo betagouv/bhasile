@@ -47,7 +47,5 @@ const hasDocument = (
 ): boolean =>
   actes.some(
     (acte) =>
-      acte.category === category &&
-      acte.parentId === null &&
-      acte.hasFile
+      acte.category === category && acte.parentId === null && acte.hasFile
   );

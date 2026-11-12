@@ -14,8 +14,7 @@ export const findFaqItems = async () => {
 export const findFaqItem = (id: number) =>
   prisma.faq.findUnique({ where: { id }, select: { id: true } });
 
-export const createFaqItem = (data: FaqApiWrite) =>
-  prisma.faq.create({ data, select: { id: true } });
+export const createFaqItem = (data: FaqApiWrite) => prisma.faq.create({ data });
 
 export const updateFaqItem = (id: number, data: FaqApiWrite) =>
   prisma.faq.update({ where: { id }, data });

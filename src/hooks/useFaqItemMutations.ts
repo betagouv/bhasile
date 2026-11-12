@@ -3,22 +3,20 @@
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { ApiError, extractApiError } from "@/app/utils/api-error.util";
 import { useFetchState } from "@/contexts/FetchStateContext";
-import { FaqApiWrite } from "@/schemas/api/faq.schema";
+import { FaqFormValues } from "@/schemas/forms/base/faq.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 const FAQ_SAVE_KEY = "faq-save";
 
-export const useFaqItems = () => {
+export const useFaqItemMutations = () => {
   const { getFetchState } = useFetchState();
 
   const { mutate: saveFaqItem } = useSaveMutation(
     FAQ_SAVE_KEY,
-    (id: number | null, faqItem: FaqApiWrite) =>
-      sendFaqRequest(
-        id === null ? "/api/faq" : `/api/faq/${id}`,
-        id === null ? "POST" : "PUT",
-        faqItem
-      )
+    (id: number | null, faqItem: FaqFormValues) =>
+      id === null
+        ? sendFaqRequest("/api/faq", "POST", faqItem)
+        : sendFaqRequest(`/api/faq/${id}`, "PUT", faqItem)
   );
 
   const { mutate: deleteFaqItem } = useSaveMutation(
@@ -36,15 +34,19 @@ export const useFaqItems = () => {
 const sendFaqRequest = async (
   url: string,
   method: "POST" | "PUT" | "DELETE",
-  faqItem?: FaqApiWrite
-): Promise<true> => {
-  const response = await fetch(url, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: faqItem ? JSON.stringify(faqItem) : undefined,
-  });
+  faqItem?: FaqFormValues
+): Promise<void> => {
+  const response = await fetch(
+    url,
+    faqItem
+      ? {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(faqItem),
+        }
+      : { method }
+  );
   if (!response.ok) {
     throw new ApiError(await extractApiError(response), response.status);
   }
-  return true;
 };

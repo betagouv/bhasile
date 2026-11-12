@@ -93,7 +93,8 @@ export const documentsFinanciersCpomSchema = z
 export const getDocumentsFinanciersStrictSchema = (
   structure: StructureApiRead
 ) => {
-  const coveredDocumentsFinanciers = getCpomCoveredDocumentsFinanciers(structure);
+  const coveredDocumentsFinanciers =
+    getCpomCoveredDocumentsFinanciers(structure);
 
   return DocumentsFinanciersSchema.extend({
     type: z.preprocess(
@@ -102,60 +103,60 @@ export const getDocumentsFinanciersStrictSchema = (
     ),
   })
     .refine(
-    (data) => {
-      if (data.creationDate && data.date303) {
-        return data.creationDate <= data.date303;
-      }
-      return true;
-    },
-    {
-      error:
-        "La date de création de la structure doit être antérieure à la date de rattachement au programme 303",
-      path: ["date303"],
-    }
-  )
-  .check(
-    z.superRefine((data, ctx) => {
-      const isAutorisee = isStructureAutorisee(data.type);
-      const documents = isAutorisee
-        ? structureAutoriseesDocuments
-        : structureSubventionneesDocuments;
-
-      const { years } = getYearRange();
-
-      const referenceYear = Number(
-        getYearFromDate(data.date303 ?? data.creationDate)
-      );
-
-      years.forEach((year) => {
-        if (year >= referenceYear) {
-          documents.forEach((document) => {
-            const documentIsRequired = isDocumentStillRequired(
-              document,
-              year,
-              coveredDocumentsFinanciers
-            );
-            if (documentIsRequired) {
-              const hasRequiredDocument = data.documentsFinanciers?.some(
-                (documentFinancier) =>
-                  documentFinancier.category === document.value &&
-                  documentFinancier.year === year &&
-                  hasDocumentFile(documentFinancier)
-              );
-              if (!hasRequiredDocument) {
-                ctx.addIssue({
-                  path: ["documentsFinanciers", year],
-                  code: "custom",
-                  message: "Ce champ est requis",
-                });
-              }
-            }
-          });
+      (data) => {
+        if (data.creationDate && data.date303) {
+          return data.creationDate <= data.date303;
         }
-      });
-    })
-  )
-  .superRefine(checkAutresDocumentsHaveFile);
+        return true;
+      },
+      {
+        error:
+          "La date de création de la structure doit être antérieure à la date de rattachement au programme 303",
+        path: ["date303"],
+      }
+    )
+    .check(
+      z.superRefine((data, ctx) => {
+        const isAutorisee = isStructureAutorisee(data.type);
+        const documents = isAutorisee
+          ? structureAutoriseesDocuments
+          : structureSubventionneesDocuments;
+
+        const { years } = getYearRange();
+
+        const referenceYear = Number(
+          getYearFromDate(data.date303 ?? data.creationDate)
+        );
+
+        years.forEach((year) => {
+          if (year >= referenceYear) {
+            documents.forEach((document) => {
+              const documentIsRequired = isDocumentStillRequired(
+                document,
+                year,
+                coveredDocumentsFinanciers
+              );
+              if (documentIsRequired) {
+                const hasRequiredDocument = data.documentsFinanciers?.some(
+                  (documentFinancier) =>
+                    documentFinancier.category === document.value &&
+                    documentFinancier.year === year &&
+                    hasDocumentFile(documentFinancier)
+                );
+                if (!hasRequiredDocument) {
+                  ctx.addIssue({
+                    path: ["documentsFinanciers", year],
+                    code: "custom",
+                    message: "Ce champ est requis",
+                  });
+                }
+              }
+            });
+          }
+        });
+      })
+    )
+    .superRefine(checkAutresDocumentsHaveFile);
 };
 
 export type DocumentFinancierFlexibleFormValues = z.infer<

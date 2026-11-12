@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createFaqApiItem } from "tests/test-utils/factories/faq.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FaqManager } from "@/app/(authenticated)/(with-menu)/parametres/cockpit-admin/(fonctionnalites)/faq/_components/FaqManager";
@@ -14,18 +15,13 @@ vi.mock("next/navigation", () => ({
 }));
 
 const faqItems: FaqApiType[] = [
-  {
-    id: 1,
-    question: "Comment déclarer une fermeture ?",
-    contentMarkdown: "Depuis la fiche structure.",
-    category: "Structures",
-  },
-  {
+  createFaqApiItem(),
+  createFaqApiItem({
     id: 2,
     question: "Qui contacter ?",
     contentMarkdown: "L’équipe Bhasile.",
     category: "Général",
-  },
+  }),
 ];
 
 const renderManager = (items: FaqApiType[] = faqItems) =>
@@ -285,8 +281,6 @@ describe("FaqManager", () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith("/api/faq/1", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: undefined,
       });
     });
   });
