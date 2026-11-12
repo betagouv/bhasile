@@ -103,7 +103,6 @@ enum TarificationDocumentType {
 enum TarificationDocumentStatus {
   DRAFT
   FINAL
-  SHARED
 
   @@schema("public")
 }

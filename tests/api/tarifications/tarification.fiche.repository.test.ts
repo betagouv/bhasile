@@ -67,7 +67,7 @@ describe("copie vers la fiche db integration", () => {
       author: { id: authorId, level: AuthorLevel.OPERATEUR },
       fileKey: file.key,
       types,
-      status: TarificationDocumentStatus.SHARED,
+      status: TarificationDocumentStatus.FINAL,
     });
   };
 
@@ -79,7 +79,7 @@ describe("copie vers la fiche db integration", () => {
       author: { id: authorId, level: AuthorLevel.DEPARTEMENT },
       fileKey: file.key,
       types,
-      status: TarificationDocumentStatus.SHARED,
+      status: TarificationDocumentStatus.FINAL,
     });
   };
 

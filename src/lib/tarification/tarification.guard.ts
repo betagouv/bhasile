@@ -62,7 +62,7 @@ export const assertCanDepositDocument = ({
       403
     );
   }
-  if (!getDepositStatuses({ isOperateur, hasOperateurType }).includes(status)) {
+  if (!getDepositStatuses(hasOperateurType).includes(status)) {
     throw new DomainError("Cet état n'est pas possible pour ce dépôt", 422);
   }
   if (types.includes("REPONSE_CONTRADICTOIRE")) {
@@ -117,16 +117,12 @@ const isCatchUpAllowed = (types: TarificationDocumentType[]): boolean =>
     (type) => TARIFICATION_DOCUMENT_TYPE_DEFINITIONS[type].isCatchUpAllowed
   );
 
-// Un agent qui dépose à la place de l'opérateur le partage d'office : pas de brouillon qui compterait comme un dépôt
-const getDepositStatuses = ({
-  isOperateur,
-  hasOperateurType,
-}: {
-  isOperateur: boolean;
-  hasOperateurType: boolean;
-}): TarificationDocumentStatus[] =>
-  isOperateur || hasOperateurType
-    ? [TarificationDocumentStatus.SHARED]
+// Pas de brouillon pour un document de l'opérateur, même déposé par un agent à sa place : il compterait comme un dépôt
+const getDepositStatuses = (
+  hasOperateurType: boolean
+): TarificationDocumentStatus[] =>
+  hasOperateurType
+    ? [TarificationDocumentStatus.FINAL]
     : [TarificationDocumentStatus.DRAFT, TarificationDocumentStatus.FINAL];
 
 const findEventDocument = (

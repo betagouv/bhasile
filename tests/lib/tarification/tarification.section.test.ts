@@ -176,8 +176,10 @@ describe("getSectionVersions", () => {
     expect(getState(sent)).toBe("Envoyé");
 
     const deposited = createJournal();
-    depositDocument(deposited, { types: ["RCA"], at: AT });
-    expect(getState(deposited)).toBe("Déposé");
+    depositDocument(deposited, { types: ["CA"], at: AT });
+    expect(getSectionVersions(toRead(deposited), "CA")[0].stateLabel).toBe(
+      "Déposé"
+    );
   });
 
   it("donne le motif d'un retrait et celui d'une demande de modifications", () => {
