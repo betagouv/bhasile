@@ -206,6 +206,12 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/faq\/categories$/,
+    routes: {
+      PUT: "proconnect",
+    },
+  },
+  {
     pattern: /^\/api\/faq\/\d+$/,
     routes: {
       PUT: "proconnect",

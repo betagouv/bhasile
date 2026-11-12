@@ -21,3 +21,9 @@ export const updateFaqItem = (id: number, data: FaqApiWrite) =>
 
 export const deleteFaqItem = (id: number) =>
   prisma.faq.delete({ where: { id } });
+
+export const updateFaqCategory = (category: string, newCategory: string) =>
+  prisma.faq.updateMany({
+    where: { category },
+    data: { category: newCategory },
+  });

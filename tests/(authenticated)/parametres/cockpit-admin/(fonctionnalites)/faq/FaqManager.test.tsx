@@ -34,7 +34,9 @@ const renderManager = (items: FaqApiType[] = faqItems) =>
 const getDialog = (name: string) => screen.getByRole("dialog", { name });
 
 const getCategorySection = (category: string) =>
-  screen.getByRole("heading", { name: category }).parentElement as HTMLElement;
+  screen
+    .getByRole("heading", { name: category })
+    .closest("section") as HTMLElement;
 
 describe("FaqManager", () => {
   beforeEach(() => {
@@ -283,5 +285,54 @@ describe("FaqManager", () => {
         method: "DELETE",
       });
     });
+  });
+
+  it("renomme une catégorie à partir de son nom actuel", async () => {
+    const user = userEvent.setup();
+    renderManager();
+
+    await user.click(
+      within(getCategorySection("Structures")).getByRole("button", {
+        name: "Renommer",
+      })
+    );
+    const dialog = getDialog("Renommer la catégorie");
+    const name = within(dialog).getByLabelText(/Nom de la catégorie/);
+    expect(name).toHaveValue("Structures");
+
+    await user.clear(name);
+    await user.type(name, "Fiches structures");
+    await user.click(within(dialog).getByRole("button", { name: "Renommer" }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("/api/faq/categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: "Structures",
+          newCategory: "Fiches structures",
+        }),
+      });
+    });
+    expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it("refuse de renommer une catégorie avec un nom vide", async () => {
+    const user = userEvent.setup();
+    renderManager();
+
+    await user.click(
+      within(getCategorySection("Structures")).getByRole("button", {
+        name: "Renommer",
+      })
+    );
+    const dialog = getDialog("Renommer la catégorie");
+    await user.clear(within(dialog).getByLabelText(/Nom de la catégorie/));
+    await user.click(within(dialog).getByRole("button", { name: "Renommer" }));
+
+    expect(
+      await within(dialog).findByText("La catégorie est requise")
+    ).toBeInTheDocument();
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });

@@ -3,6 +3,7 @@
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { ApiError, extractApiError } from "@/app/utils/api-error.util";
 import { useFetchState } from "@/contexts/FetchStateContext";
+import { FaqCategoryApiUpdate } from "@/schemas/api/faq.schema";
 import { FaqFormValues } from "@/schemas/forms/base/faq.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
@@ -24,9 +25,16 @@ export const useFaqItemMutations = () => {
     (id: number) => sendFaqRequest(`/api/faq/${id}`, "DELETE")
   );
 
+  const { mutate: renameFaqCategory } = useSaveMutation(
+    FAQ_SAVE_KEY,
+    (rename: FaqCategoryApiUpdate) =>
+      sendFaqRequest("/api/faq/categories", "PUT", rename)
+  );
+
   return {
     saveFaqItem,
     deleteFaqItem,
+    renameFaqCategory,
     isSaving: getFetchState(FAQ_SAVE_KEY) === FetchState.LOADING,
   };
 };
@@ -34,15 +42,15 @@ export const useFaqItemMutations = () => {
 const sendFaqRequest = async (
   url: string,
   method: "POST" | "PUT" | "DELETE",
-  faqItem?: FaqFormValues
+  body?: FaqFormValues | FaqCategoryApiUpdate
 ): Promise<void> => {
   const response = await fetch(
     url,
-    faqItem
+    body
       ? {
           method,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(faqItem),
+          body: JSON.stringify(body),
         }
       : { method }
   );
