@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-import { MODELE_DIFFUS_LINK, MODELE_MIXTE_LINK } from "@/constants";
+import {
+  MAX_FILE_SIZE_LABEL,
+  MODELE_DIFFUS_LINK,
+  MODELE_MIXTE_LINK,
+} from "@/constants";
 import { Repartition } from "@/types/adresse.type";
 
 import { AdressImporter } from "./AdressImporter";
@@ -44,7 +48,8 @@ export const ImportOptionNotices = ({ typeBati }: Props) => {
           Téléversez le fichier rempli
         </p>
         <p className="text-disabled-grey mb-0 text-xs">
-          Taille maximale : 10 Mo. Formats supportés : xls, xlsx, et csv.
+          Taille maximale : {MAX_FILE_SIZE_LABEL}. Formats supportés : xls,
+          xlsx, et csv.
         </p>
         <AdressImporter typeBati={typeBati} />
       </div>

@@ -4,8 +4,8 @@
 import "dotenv/config";
 
 import { createPrismaClient } from "@/prisma-client";
+import { normalizeDepartementName } from "@/utils-server/departement-name.server.util";
 
-import { normalizeDepartementName } from "../utils/departement-name";
 import { loadRmuFile, type RmuRow } from "../utils/rmu-xlsx";
 import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
 

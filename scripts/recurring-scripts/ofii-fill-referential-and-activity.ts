@@ -1,23 +1,20 @@
-// Orchestrateur : lit un fichier OFII, actualise d'abord le référentiel puis remplit l'activité
-// Usage: yarn script ofii-fill-referential-and-activity <chemin_ou_clef_s3_du_xlsx>
+// Secours du cockpit admin (Import OFII) : même traitement, depuis un fichier sur S3
+// Usage: yarn script ofii-fill-referential-and-activity <clef_s3_du_xlsx> [AAAA-MM]
 
 import "dotenv/config";
 
-import { createPrismaClient } from "@/prisma-client";
+import { applyOfiiImport } from "@/app/api/ofii-imports/ofii-import.service";
+import prisma from "@/lib/prisma";
+import { importMonthSchema } from "@/schemas/api/import.schema";
+import { ImportRejectedError } from "@/utils-server/import.server.util";
 
-import { fillOfiiActiviteFromRows } from "../utils/ofii-fill-activity";
-import { fillOfiiStructureFromRows } from "../utils/ofii-fill-referential";
-import { loadOfiiFile } from "../utils/ofii-xlsx";
 import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
 
-const args = process.argv.slice(2);
-const xlsxLocation = args[0];
+const [xlsxLocation, month] = process.argv.slice(2);
 
 if (!xlsxLocation) {
   throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
 }
-
-const prisma = createPrismaClient();
 
 async function main() {
   try {
@@ -28,30 +25,19 @@ async function main() {
       );
     }
 
-    const { buffer, fileName } = await loadXlsxBufferFromS3(
-      bucketName,
-      xlsxLocation
-    );
-
-    console.log(
-      "📥 Extraction des données OFII (référentiel + activité) depuis le XLSX..."
-    );
-    const { date, rows } = loadOfiiFile(buffer, fileName);
-    console.log(`✓ ${rows.length} lignes trouvées dans l'onglet sélectionné`);
-
-    console.log(":one: Mise à jour du référentiel (structures)...");
-    await fillOfiiStructureFromRows(prisma, date, rows);
-
-    console.log(":two: Mise à jour de l'activité OFII.");
-    console.log(
-      `- (Onglet d'activité traité: ${date.toISOString().slice(0, 7)}, ${rows.length} lignes)`
-    );
-
-    await fillOfiiActiviteFromRows(prisma, date, rows);
-
-    console.log("✅ Référentiel et activité OFII mis à jour avec succès.");
+    const file = {
+      ...(await loadXlsxBufferFromS3(bucketName, xlsxLocation)),
+      month: importMonthSchema.parse(month ?? null),
+    };
+    const { summary } = await applyOfiiImport(file);
+    console.log(`✅ ${summary}`);
   } catch (error) {
-    console.error("❌ Erreur lors de l'exécution du script OFII", error);
+    if (error instanceof ImportRejectedError) {
+      error.errors.forEach(({ key, issues }) =>
+        console.error(`- ${key} : ${issues.join(", ")}`)
+      );
+    }
+    console.error("❌ Erreur lors de l'import OFII", error);
     process.exitCode = 1;
   } finally {
     await prisma.$disconnect();

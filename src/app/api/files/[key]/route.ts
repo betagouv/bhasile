@@ -37,7 +37,10 @@ export async function GET(request: NextRequest) {
 
   const file = await getFileWithParents(key);
   if (!file || !authorizeFileAccess(principal, file, "read")) {
-    return NextResponse.json({ error: "Aucun fichier trouvé" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Aucun fichier trouvé" },
+      { status: 404 }
+    );
   }
 
   if (getLink) {
@@ -70,7 +73,10 @@ export async function DELETE(request: NextRequest) {
 
   const file = await getFileWithParents(key);
   if (!file || !authorizeFileAccess(principal, file, "delete")) {
-    return NextResponse.json({ error: "Aucun fichier trouvé" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Aucun fichier trouvé" },
+      { status: 404 }
+    );
   }
 
   try {

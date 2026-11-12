@@ -105,7 +105,8 @@ export const ALLOWED_MIME_TYPES = [
   ...TEXT_DOCUMENT_MIME_TYPES,
 ];
 
-export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo
+export const MAX_FILE_SIZE = 30 * 1024 * 1024;
+export const MAX_FILE_SIZE_LABEL = "10 Mo";
 
 export const AUTHOR_LEVEL_LABELS: Record<AuthorLevel, string> = {
   DEPARTEMENT: "DDETS",
@@ -120,6 +121,7 @@ export const VISIBILITY_LABELS: Record<Visibility, string> = {
 
 export const MODELE_DIFFUS_LINK = "/adresses-diffus.xlsx";
 export const MODELE_MIXTE_LINK = "/adresses-mixte.xlsx";
+export const MODELE_OFII_LINK = "/liste-donnees-par-centre-09.26-exemple.xlsx";
 
 export const BHASILE_USER_NAME = "BhasileBot";
 export const BHASILE_CONTACT_EMAIL =

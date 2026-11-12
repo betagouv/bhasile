@@ -1,42 +1,34 @@
 import { NextResponse } from "next/server";
 
-import { createUploadedFile, uploadFile, validateUpload } from "./file.service";
+import { apiErrorResponse } from "@/app/utils/api-error-response.util";
+import { readUploadedFile } from "@/utils-server/upload.server.util";
+
+import { createUploadedFile, uploadFile } from "./file.service";
 
 export async function POST(req: Request) {
-  const formData = await req.formData();
-  const file = formData.get("file");
+  try {
+    const file = await readUploadedFile(req);
 
-  if (!(file instanceof File)) {
-    return NextResponse.json(
-      { error: "Aucun fichier fourni" },
-      { status: 400 }
+    const uploadResult = await uploadFile(
+      process.env.S3_BUCKET_NAME!,
+      file.fileName,
+      file.buffer,
+      file.mimeType
     );
+
+    const createdFileUpload = await createUploadedFile({
+      key: uploadResult.key,
+      mimeType: uploadResult.mimeType,
+      originalName: uploadResult.originalName,
+      fileSize: file.size,
+    });
+
+    return NextResponse.json({
+      ...uploadResult,
+      id: createdFileUpload?.id,
+      fileSize: file.size,
+    });
+  } catch (error) {
+    return apiErrorResponse(error);
   }
-
-  const validationResult = validateUpload(file.type, file.size);
-
-  if (validationResult) {
-    return NextResponse.json({ error: validationResult }, { status: 400 });
-  }
-
-  const arrayBuffer = await file.arrayBuffer();
-  const uploadResult = await uploadFile(
-    process.env.S3_BUCKET_NAME!,
-    file.name,
-    Buffer.from(arrayBuffer),
-    file.type
-  );
-
-  const createdFileUpload = await createUploadedFile({
-    key: uploadResult.key,
-    mimeType: uploadResult.mimeType,
-    originalName: uploadResult.originalName,
-    fileSize: file.size,
-  });
-
-  return NextResponse.json({
-    ...uploadResult,
-    id: createdFileUpload?.id,
-    fileSize: file.size,
-  });
 }
