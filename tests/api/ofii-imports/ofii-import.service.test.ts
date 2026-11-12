@@ -40,7 +40,7 @@ describe("ofii-import.service", () => {
     });
 
     expect(await previewOfiiImport(file)).toEqual({
-      summary: "Octobre 2025 : 2 structure(s) dans le fichier",
+      summary: "Octobre 2025 : 2 structures dans le fichier",
       details: "Les structures absentes du fichier seront marquées inactives.",
       errors: [{ key: "C0302", issues: ["nom OFII manquant"] }],
     });
@@ -68,7 +68,7 @@ describe("ofii-import.service", () => {
   it("écrit le référentiel puis l'activité d'un fichier valide", async () => {
     expect(await applyOfiiImport(file)).toEqual({
       summary:
-        "1 structure(s) importée(s) pour octobre 2025, 4 passée(s) inactive(s).",
+        "1 structure importée pour octobre 2025, 4 structures passées inactives.",
     });
     expect(mockSaveOfiiDnas).toHaveBeenCalledWith(date, [
       expect.objectContaining({ code: "C0301", operateurId: 7 }),

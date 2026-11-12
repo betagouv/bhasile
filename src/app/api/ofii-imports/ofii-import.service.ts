@@ -1,6 +1,10 @@
 import { formatDate } from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { capitalizeFirstLetter } from "@/app/utils/string.util";
+import {
+  capitalizeFirstLetter,
+  formatPlural,
+  pluralize,
+} from "@/app/utils/string.util";
 import { ImportFile, ImportPreview, ImportResult } from "@/types/import.type";
 import { assertImportable } from "@/utils-server/import.server.util";
 
@@ -17,7 +21,7 @@ export const previewOfiiImport = async (
 ): Promise<ImportPreview> => {
   const { month, rows, errors } = await analyzeOfiiFile(file);
   return {
-    summary: `${capitalizeFirstLetter(month)} : ${rows.length} structure(s) dans le fichier`,
+    summary: `${capitalizeFirstLetter(month)} : ${formatPlural(rows.length, "structure")} dans le fichier`,
     details: "Les structures absentes du fichier seront marquées inactives.",
     errors,
   };
@@ -33,7 +37,7 @@ export const applyOfiiImport = async (
   await saveOfiiActivites(date, rows.map(toOfiiActivite));
 
   return {
-    summary: `${rows.length} structure(s) importée(s) pour ${month}, ${count} passée(s) inactive(s).`,
+    summary: `${formatPlural(rows.length, "structure")} ${pluralize(rows.length, "importée")} pour ${month}, ${formatPlural(count, "structure")} ${pluralize(count, "passée")} ${pluralize(count, "inactive")}.`,
   };
 };
 

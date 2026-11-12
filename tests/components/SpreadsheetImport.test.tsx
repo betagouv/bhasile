@@ -44,6 +44,22 @@ describe("SpreadsheetImport", () => {
     vi.clearAllMocks();
   });
 
+  it("propose le fichier d'exemple en téléchargement", () => {
+    render(
+      <FetchStateProvider>
+        <SpreadsheetImport
+          endpoint="/api/ofii-imports"
+          label="Fichier OFII"
+          exampleHref="/exemple.xlsx"
+        />
+      </FetchStateProvider>
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Télécharger un fichier d’exemple" })
+    ).toHaveAttribute("href", "/exemple.xlsx");
+  });
+
   it("liste les lignes à corriger sans proposer l'import", async () => {
     respondWith({
       body: {
@@ -89,6 +105,30 @@ describe("SpreadsheetImport", () => {
       "/api/ofii-imports",
       expect.objectContaining({ method: "POST" })
     );
+  });
+
+  it("refuse un fichier trop volumineux sans l'envoyer", async () => {
+    const user = userEvent.setup();
+    global.fetch = vi.fn();
+    const { container } = render(
+      <FetchStateProvider>
+        <SpreadsheetImport endpoint="/api/ofii-imports" label="Fichier OFII" />
+      </FetchStateProvider>
+    );
+    const bigFile = new File(["x"], "Liste 10.25.xlsx", {
+      type: spreadsheet.type,
+    });
+    Object.defineProperty(bigFile, "size", { value: 42 * 1024 * 1024 });
+
+    await user.upload(
+      container.querySelector<HTMLInputElement>('input[type="file"]')!,
+      bigFile
+    );
+
+    expect(
+      (await screen.findAllByText(/Fichier trop volumineux/)).length
+    ).toBeGreaterThan(0);
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it("explique pourquoi un fichier est refusé", async () => {
