@@ -204,6 +204,16 @@ export const TARIFICATION_EVENT_DEFINITIONS: Record<
   },
 };
 
+export const isOperateurDocument = ({
+  types,
+}: {
+  types: TarificationDocumentType[];
+}): boolean =>
+  types.some(
+    (type) =>
+      TARIFICATION_DOCUMENT_TYPE_DEFINITIONS[type].emitter === "OPERATEUR"
+  );
+
 export const TARIFICATION_FICHE_COPY_DEFINITIONS: Partial<
   Record<TarificationDocumentType, FicheCopyDefinition>
 > = {

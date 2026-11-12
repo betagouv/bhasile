@@ -48,7 +48,7 @@ export const depositDocument = (
   {
     types,
     at,
-    status = TarificationDocumentStatus.SHARED,
+    status = TarificationDocumentStatus.FINAL,
     authorId = OPERATEUR_USER_ID,
     authorLevel = AuthorLevel.OPERATEUR,
   }: {
