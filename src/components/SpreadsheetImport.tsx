@@ -14,7 +14,7 @@ import { useFetchState } from "@/contexts/FetchStateContext";
 import { useSpreadsheetImport } from "@/hooks/useSpreadsheetImport";
 import { FetchState } from "@/types/fetch-state.type";
 import { ImportPreview, ImportResult } from "@/types/import.type";
-import { getFileTooLargeMessage, isFileTooLarge } from "@/utils/upload.util";
+import { FILE_TOO_LARGE_MESSAGE, isFileTooLarge } from "@/utils/upload.util";
 
 export const SpreadsheetImport = ({
   endpoint,
@@ -44,7 +44,7 @@ export const SpreadsheetImport = ({
     setPreviewError(null);
     setResult(null);
     if (isFileTooLarge(selectedFile.size)) {
-      setPreviewError(getFileTooLargeMessage(selectedFile.size));
+      setPreviewError(FILE_TOO_LARGE_MESSAGE);
       return;
     }
     setIsChecking(true);

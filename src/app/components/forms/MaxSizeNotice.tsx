@@ -1,4 +1,5 @@
 import { cn } from "@/app/utils/classname.util";
+import { MAX_FILE_SIZE_LABEL } from "@/constants";
 
 import { CustomNotice } from "../common/CustomNotice";
 
@@ -12,8 +13,8 @@ export const MaxSizeNotice = ({ className }: { className?: string }) => {
       )}
       description={
         <>
-          Taille maximale par fichier : 10 Mo. Formats supportés : pdf, xls,
-          xlsx, xlsm, csv et ods.{" "}
+          Taille maximale par fichier : {MAX_FILE_SIZE_LABEL}. Formats supportés
+          : pdf, xls, xlsx, xlsm, csv et ods.{" "}
           <a
             target="_blank"
             className="underline"
