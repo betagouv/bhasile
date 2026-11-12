@@ -41,7 +41,7 @@ const deposit = (
     journal: createJournal(),
     authorLevel: AuthorLevel.OPERATEUR,
     types: ["CA"],
-    status: TarificationDocumentStatus.SHARED,
+    status: TarificationDocumentStatus.FINAL,
     phase: "OPEN",
     now: NOW,
     ...overrides,
@@ -109,7 +109,7 @@ describe("assertCanDepositDocument", () => {
     expect(() => deposit()).not.toThrow();
   });
 
-  it("refuse à l'opérateur un dépôt qui ne serait pas partagé", () => {
+  it("refuse un brouillon à l'opérateur", () => {
     expect(() => deposit({ status: TarificationDocumentStatus.DRAFT })).toThrow(
       "Cet état"
     );
@@ -119,7 +119,7 @@ describe("assertCanDepositDocument", () => {
     expect(() => deposit({ types: ["L48"] })).toThrow("déposé par les agents");
   });
 
-  it("laisse un agent déposer pour l'opérateur, seulement partagé d'office", () => {
+  it("laisse un agent déposer pour l'opérateur, jamais en brouillon", () => {
     const agent = { authorLevel: AuthorLevel.DEPARTEMENT };
 
     expect(() => deposit(agent)).not.toThrow();
@@ -128,7 +128,7 @@ describe("assertCanDepositDocument", () => {
     ).toThrow("Cet état");
   });
 
-  it("dépose une version d'agent en travail ou signée, jamais partagée d'office", () => {
+  it("dépose une version d'agent en travail ou signée", () => {
     const agent = {
       authorLevel: AuthorLevel.DEPARTEMENT,
       types: ["L48"] as TarificationDocumentType[],
@@ -140,7 +140,6 @@ describe("assertCanDepositDocument", () => {
     expect(() =>
       deposit({ ...agent, status: TarificationDocumentStatus.FINAL })
     ).not.toThrow();
-    expect(() => deposit(agent)).toThrow("Cet état");
   });
 
   it("refuse un document qui mêle types de l'opérateur et types des agents", () => {
@@ -245,7 +244,7 @@ describe("assertCanRecordEvent", () => {
       expect(() => share(journal, documentId)).toThrow("déjà partagé");
     });
 
-    it("refuse une version de travail ou un dépôt de l'opérateur", () => {
+    it("refuse une version de travail ou un document de l'opérateur, partagé dès le dépôt", () => {
       const journal = createJournal();
 
       expect(() => share(journal, depositDraft(journal))).toThrow(
@@ -259,7 +258,7 @@ describe("assertCanRecordEvent", () => {
             at: "2027-04-10T10:00:00Z",
           })
         )
-      ).toThrow("version signée");
+      ).toThrow("déjà partagé");
     });
 
     it("refuse une L48 sans BP déposé", () => {

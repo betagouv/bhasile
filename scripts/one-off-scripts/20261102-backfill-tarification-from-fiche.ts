@@ -108,7 +108,7 @@ const linkRowToTarification = async ({
         structureTarificationId: tarification.id,
         fileUploadId: fileUpload.id,
         types: [type],
-        status: TarificationDocumentStatus.SHARED,
+        status: TarificationDocumentStatus.FINAL,
       },
       select: { id: true },
     });

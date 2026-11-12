@@ -2,7 +2,7 @@
 CREATE TYPE "TarificationDocumentType" AS ENUM ('CA', 'RAPPORT_ACTIVITE', 'BP', 'RAPPORT_BUDGETAIRE', 'RCA', 'L48', 'REPONSE_CONTRADICTOIRE', 'DAB', 'ARRETE', 'DAM', 'ECHEANCIER', 'DAI', 'PIECE_JUSTIFICATIVE', 'AUTRE');
 
 -- CreateEnum
-CREATE TYPE "TarificationDocumentStatus" AS ENUM ('DRAFT', 'FINAL', 'SHARED');
+CREATE TYPE "TarificationDocumentStatus" AS ENUM ('DRAFT', 'FINAL');
 
 -- CreateEnum
 CREATE TYPE "TarificationStepCode" AS ENUM ('RCA', 'L48', 'DAB', 'ARRETE');
