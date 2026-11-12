@@ -21,18 +21,11 @@ import {
   isAgentUser,
   normalizeEmail,
 } from "@/app/api/users/user.util";
-import {
-  getDepartementTimeZone,
-  toCivilDate,
-} from "@/app/utils/date.util";
+import { getDepartementTimeZone, toCivilDate } from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import {
-  AuthorLevel,
-  TarificationDocumentStatus,
-  type Visibility,
-} from "@/generated/prisma/enums";
+import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
 import {
   canAccessTarification,
   canParticipateInTarification,
@@ -41,6 +34,7 @@ import {
 } from "@/lib/casl";
 import { getOpenCampaignYears } from "@/lib/tarification/tarification.campaign";
 import { computeTarificationState } from "@/lib/tarification/tarification.compute";
+import { isOperateurDocument } from "@/lib/tarification/tarification.definition";
 import {
   canOperateurOpenDocument,
   filterJournalForOperateur,
@@ -300,9 +294,7 @@ export const authorizeTarificationDocument = async ({
   if (!journalDocument || !canOperateurOpenDocument(journal, journalDocument)) {
     throw new DomainError("Aucun fichier trouvé", 404);
   }
-  const isOperateurDeposit =
-    journalDocument.status === TarificationDocumentStatus.SHARED;
-  return isOperateurDeposit
+  return isOperateurDocument(journalDocument)
     ? null
     : { documentId: document.id, userId: participant.id };
 };

@@ -569,7 +569,7 @@ const buildStructureJournal = () => ({
         ),
         buildJournalDocument(
           OPERATEUR_DEPOSIT_ID,
-          TarificationDocumentStatus.SHARED,
+          TarificationDocumentStatus.FINAL,
           ["CA"]
         ),
       ],
