@@ -32,6 +32,7 @@ const selectFile = async ({ withMonth = false } = {}) => {
       <SpreadsheetImport
         endpoint="/api/ofii-imports"
         label="Fichier OFII"
+        intro="Chargez le fichier."
         withMonth={withMonth}
       />
     </FetchStateProvider>
@@ -54,6 +55,7 @@ describe("SpreadsheetImport", () => {
         <SpreadsheetImport
           endpoint="/api/ofii-imports"
           label="Fichier OFII"
+          intro="Chargez le fichier."
           exampleHref="/exemple.xlsx"
         />
       </FetchStateProvider>
@@ -82,15 +84,16 @@ describe("SpreadsheetImport", () => {
       expect.objectContaining({ method: "POST" })
     );
     expect(
-      screen.queryByRole("button", { name: "Importer le fichier" })
+      screen.queryByRole("button", { name: "Confirmer l’import" })
     ).not.toBeInTheDocument();
   });
 
-  it("importe un fichier valide après vérification", async () => {
+  it("simule l'import puis l'exécute après confirmation", async () => {
     respondWith(
       {
         body: {
-          summary: "Fichier de octobre 2025 : 1200 structures",
+          summary: "1200 structures dans le fichier",
+          changes: ["3 nouvelles structures"],
           errors: [],
         },
       },
@@ -98,8 +101,12 @@ describe("SpreadsheetImport", () => {
     );
 
     const user = await selectFile();
+    expect(
+      await screen.findByText("3 nouvelles structures")
+    ).toBeInTheDocument();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
     await user.click(
-      await screen.findByRole("button", { name: "Importer le fichier" })
+      await screen.findByRole("button", { name: "Confirmer l’import" })
     );
 
     expect(
@@ -116,7 +123,11 @@ describe("SpreadsheetImport", () => {
     global.fetch = vi.fn();
     const { container } = render(
       <FetchStateProvider>
-        <SpreadsheetImport endpoint="/api/ofii-imports" label="Fichier OFII" />
+        <SpreadsheetImport
+          endpoint="/api/ofii-imports"
+          label="Fichier OFII"
+          intro="Chargez le fichier."
+        />
       </FetchStateProvider>
     );
     const bigFile = new File(["x"], "Liste 10.25.xlsx", {
@@ -153,7 +164,12 @@ describe("SpreadsheetImport", () => {
   it("propose le mois détecté et l'envoie après confirmation", async () => {
     respondWith(
       {
-        body: { summary: "1 structure", detectedMonth: "2025-10", errors: [] },
+        body: {
+          summary: "1 structure",
+          changes: [],
+          detectedMonth: "2025-10",
+          errors: [],
+        },
       },
       { body: { summary: "1 structure importée" } }
     );
@@ -163,7 +179,7 @@ describe("SpreadsheetImport", () => {
     expect(screen.getByLabelText("Année")).toHaveValue("2025");
     await user.click(
       screen.getByRole("button", {
-        name: "Importer les données pour octobre 2025",
+        name: "Confirmer l’import pour octobre 2025",
       })
     );
 
@@ -174,12 +190,17 @@ describe("SpreadsheetImport", () => {
 
   it("fait saisir le mois quand il n'a pas pu être déduit du fichier", async () => {
     respondWith({
-      body: { summary: "1 structure", detectedMonth: null, errors: [] },
+      body: {
+        summary: "1 structure",
+        changes: [],
+        detectedMonth: null,
+        errors: [],
+      },
     });
 
     const user = await selectFile({ withMonth: true });
     expect(
-      await screen.findByRole("button", { name: "Importer le fichier" })
+      await screen.findByRole("button", { name: "Confirmer l’import" })
     ).toBeDisabled();
 
     const year = screen.getByLabelText("Année");
@@ -191,7 +212,7 @@ describe("SpreadsheetImport", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Importer les données pour septembre/,
+        name: /Confirmer l’import pour septembre/,
       })
     ).toBeEnabled();
   });

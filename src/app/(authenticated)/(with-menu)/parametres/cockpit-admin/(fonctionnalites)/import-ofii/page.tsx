@@ -8,6 +8,7 @@ export default function CockpitAdminOfiiImport(): ReactElement {
     <SpreadsheetImport
       endpoint="/api/ofii-imports"
       label="Fichier OFII"
+      intro="Téléversez ici le fichier fourni par l’OFII. Il doit respecter le format du fichier d’exemple ci-après : tant qu’il contient des erreurs, rien n’est chargé."
       exampleHref={MODELE_OFII_LINK}
       withMonth
     />

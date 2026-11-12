@@ -21,6 +21,7 @@ import { FILE_TOO_LARGE_MESSAGE, isFileTooLarge } from "@/utils/upload.util";
 export const SpreadsheetImport = ({
   endpoint,
   label,
+  intro,
   exampleHref,
   withMonth = false,
 }: Props): ReactElement => {
@@ -77,11 +78,7 @@ export const SpreadsheetImport = ({
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
-      <p>
-        Téléversez ici le fichier fourni par l'OFII. Ce fichier doit avoir le
-        bon format, retrouvable dans l'exemple ci après. Tant que des
-        différences existent rien n'est chargé.
-      </p>
+      <p className="mb-0">{intro}</p>
       {exampleHref && (
         <a
           href={exampleHref}
@@ -145,8 +142,17 @@ export const SpreadsheetImport = ({
         <>
           <Alert
             severity="info"
-            title={preview.summary}
-            description={preview.details ?? "Le fichier est valide."}
+            title="Prévisualisation de l’import"
+            description={
+              <>
+                <p>{preview.summary} :</p>
+                <ul>
+                  {preview.changes.map((change) => (
+                    <li key={change}>{change}</li>
+                  ))}
+                </ul>
+              </>
+            }
           />
           {withMonth && (
             <MonthSelect
@@ -155,7 +161,7 @@ export const SpreadsheetImport = ({
               hint={
                 preview.detectedMonth
                   ? "Mois détecté dans le fichier : vérifiez-le avant d’importer."
-                  : "Le mois n’a pas pu être déduit du fichier : merci de l'indiquer."
+                  : "Le mois n’a pas pu être déduit du fichier : merci de l’indiquer."
               }
               onChange={setMonth}
             />
@@ -166,8 +172,8 @@ export const SpreadsheetImport = ({
               onClick={confirmImport}
             >
               {withMonth && month
-                ? `Importer les données pour ${formatMonth(month)}`
-                : "Importer le fichier"}
+                ? `Confirmer l’import pour ${formatMonth(month)}`
+                : "Confirmer l’import"}
             </Button>
           </div>
         </>
@@ -194,6 +200,7 @@ const formatMonth = (month: string): string =>
 type Props = {
   endpoint: string;
   label: string;
+  intro: string;
   exampleHref?: string;
   withMonth?: boolean;
 };

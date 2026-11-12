@@ -1,5 +1,6 @@
 import { normalizeRegionCode } from "@/app/utils/bhasile.util";
 import { DomainError } from "@/app/utils/domain-error.util";
+import { formatPlural, pluralize } from "@/app/utils/string.util";
 import { StructureType } from "@/generated/prisma/client";
 import { ImportError } from "@/types/import.type";
 import { normalizeDepartementName } from "@/utils-server/departement-name.server.util";
@@ -81,6 +82,31 @@ export const validateOfiiRows = (
   }
 
   return { dnas, errors };
+};
+
+export const describeOfiiChanges = ({
+  codes,
+  existingDnas,
+  deactivatedCount,
+}: OfiiDnaChanges): string[] => {
+  const existingCodes = new Set(existingDnas.map(({ code }) => code));
+  const created = new Set(codes.filter((code) => !existingCodes.has(code)))
+    .size;
+  const reactivated = existingDnas.filter(
+    ({ inactiveInOfiiFileSince }) => inactiveInOfiiFileSince !== null
+  ).length;
+  const updated = existingDnas.length - reactivated;
+
+  return [
+    `${created} ${pluralize(created, "nouvelle")} ${pluralize(created, "structure")}`,
+    `${formatPlural(updated, "structure")} ${pluralize(updated, "mise")} à jour`,
+    ...(reactivated > 0
+      ? [
+          `${formatPlural(reactivated, "structure")} ${pluralize(reactivated, "réactivée")}`,
+        ]
+      : []),
+    `${formatPlural(deactivatedCount, "structure")} ${pluralize(deactivatedCount, "absente")} du fichier ${pluralize(deactivatedCount, "passée")} ${pluralize(deactivatedCount, "inactive")}`,
+  ];
 };
 
 export const toOfiiActivite = (row: ActiviteRow): OfiiActivite => ({
@@ -234,4 +260,10 @@ export type OfiiActivite = {
   [Key in keyof ActiviteRow]: Key extends "dnaCode"
     ? string
     : NonNullable<ActiviteRow[Key]> | undefined;
+};
+
+export type OfiiDnaChanges = {
+  codes: string[];
+  existingDnas: { code: string; inactiveInOfiiFileSince: Date | null }[];
+  deactivatedCount: number;
 };
