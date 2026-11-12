@@ -1,6 +1,7 @@
 export type ImportFile = {
   buffer: Buffer;
   fileName: string;
+  month: string | null;
 };
 
 export type ImportError = {
@@ -11,6 +12,7 @@ export type ImportError = {
 export type ImportPreview = {
   summary: string;
   details?: string;
+  detectedMonth?: string | null;
   errors: ImportError[];
 };
 

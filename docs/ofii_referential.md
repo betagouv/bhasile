@@ -7,7 +7,8 @@ Ce référentiel est alimenté à partir du fichier Excel mensuel fourni par l�
 Un super admin charge le fichier dans **Paramètres → Cockpit admin → Import OFII**.
 
 1. **Vérification** : dès le choix du fichier, il est lu et chaque ligne est contrôlée, sans rien écrire. La page affiche le mois détecté, le nombre de structures, et la liste complète des lignes en erreur.
-2. **Import** : le bouton « Importer le fichier » n’apparaît que si le fichier ne contient aucune erreur. Le fichier est renvoyé et revérifié par le serveur, puis le référentiel et l’activité sont écrits.
+2. **Mois des données** : le mois détecté (nom de l’onglet ou du fichier) est proposé dans deux listes, mois et année, à vérifier. S’il n’a pas pu être déduit, l’utilisateur le saisit.
+3. **Import** : le bouton « Importer les données pour <mois> » n’apparaît que si le fichier ne contient aucune erreur, et reste désactivé tant qu’aucun mois n’est choisi. Le fichier est renvoyé avec le mois confirmé et revérifié par le serveur, puis le référentiel et l’activité sont écrits à ce mois.
 
 Un fichier avec une seule ligne en erreur n’est pas importé du tout : on corrige le fichier, puis on le charge à nouveau.
 
@@ -26,12 +27,14 @@ Les briques communes à tous les imports de tableur sont déjà en place :
 Le script `scripts/recurring-scripts/ofii-fill-referential-and-activity.ts` applique le même traitement à un fichier déposé dans le bucket `DOCS_BUCKET_NAME`. Il affiche les lignes en erreur et n’écrit rien s’il y en a.
 
 ```bash
-yarn script ofii-fill-referential-and-activity <clef_s3_du_fichier_xlsx>
+yarn script ofii-fill-referential-and-activity <clef_s3_du_fichier_xlsx> [AAAA-MM]
 ```
+
+Le mois est facultatif : sans lui, le mois détecté dans le fichier est utilisé, et l’import échoue s’il n’y en a pas.
 
 ## 3. Comportement important
 
-- **Onglet lu** : l’onglet `Liste` s’il existe (le mois vient alors du nom du fichier, ex. `10.25`), sinon l’onglet daté le plus récent (ex. `octobre 2025`).
+- **Onglet lu** : l’onglet `Liste` s’il existe (le mois est alors cherché dans le nom du fichier, ex. `10.25`), sinon l’onglet daté le plus récent (ex. `octobre 2025`). Le mois confirmé dans le cockpit prime sur le mois détecté.
 - **Nom de structure (`Dna.nom`)** :
   - calculé via un _clean name_ (suppression des préfixes CADA/HUDA/…, opérateur, numéro de département, etc.),
   - le nom brut OFII est conservé dans `Dna.nomOfii`.

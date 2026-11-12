@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -25,11 +25,15 @@ const respondWith = (...bodies: { ok?: boolean; body: unknown }[]) => {
   }
 };
 
-const selectFile = async () => {
+const selectFile = async ({ withMonth = false } = {}) => {
   const user = userEvent.setup();
   const { container } = render(
     <FetchStateProvider>
-      <SpreadsheetImport endpoint="/api/ofii-imports" label="Fichier OFII" />
+      <SpreadsheetImport
+        endpoint="/api/ofii-imports"
+        label="Fichier OFII"
+        withMonth={withMonth}
+      />
     </FetchStateProvider>
   );
   await user.upload(
@@ -144,5 +148,51 @@ describe("SpreadsheetImport", () => {
         "Le fichier ne contient aucune ligne de structure"
       )
     ).not.toHaveLength(0);
+  });
+
+  it("propose le mois détecté et l'envoie après confirmation", async () => {
+    respondWith(
+      {
+        body: { summary: "1 structure", detectedMonth: "2025-10", errors: [] },
+      },
+      { body: { summary: "1 structure importée" } }
+    );
+
+    const user = await selectFile({ withMonth: true });
+    expect(await screen.findByLabelText("Mois")).toHaveValue("10");
+    expect(screen.getByLabelText("Année")).toHaveValue("2025");
+    await user.click(
+      screen.getByRole("button", {
+        name: "Importer les données pour octobre 2025",
+      })
+    );
+
+    await screen.findByText("1 structure importée");
+    const [, init] = vi.mocked(global.fetch).mock.lastCall!;
+    expect((init?.body as FormData).get("month")).toBe("2025-10");
+  });
+
+  it("fait saisir le mois quand il n'a pas pu être déduit du fichier", async () => {
+    respondWith({
+      body: { summary: "1 structure", detectedMonth: null, errors: [] },
+    });
+
+    const user = await selectFile({ withMonth: true });
+    expect(
+      await screen.findByRole("button", { name: "Importer le fichier" })
+    ).toBeDisabled();
+
+    const year = screen.getByLabelText("Année");
+    await user.selectOptions(screen.getByLabelText("Mois"), "09");
+    await user.selectOptions(
+      year,
+      within(year).getAllByRole("option")[1] as HTMLOptionElement
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: /Importer les données pour septembre/,
+      })
+    ).toBeEnabled();
   });
 });

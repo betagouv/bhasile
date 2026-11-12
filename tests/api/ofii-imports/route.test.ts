@@ -28,10 +28,13 @@ vi.mock("@/app/api/ofii-imports/ofii-import.service", () => ({
 const XLSX_TYPE =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-const buildRequest = (file?: File): NextRequest => {
+const buildRequest = (file?: File, month?: string): NextRequest => {
   const formData = new FormData();
   if (file) {
     formData.append("file", file);
+  }
+  if (month) {
+    formData.append("month", month);
   }
   return new NextRequest("http://localhost/api/ofii-imports", {
     method: "POST",
@@ -78,11 +81,23 @@ describe("/api/ofii-imports", () => {
     const response = await apply(buildRequest(ofiiFile));
 
     expect(await response.json()).toEqual(result);
+    expect(mockApplyOfiiImport).toHaveBeenCalledWith({
+      buffer: expect.any(Buffer),
+      fileName: "Liste 10.25.xlsx",
+      month: null,
+    });
+  });
+
+  it("transmet le mois confirmé au service", async () => {
+    await apply(buildRequest(ofiiFile, "2025-09"));
+
     expect(mockApplyOfiiImport).toHaveBeenCalledWith(
-      expect.objectContaining({
-        buffer: expect.any(Buffer),
-        fileName: "Liste 10.25.xlsx",
-      })
+      expect.objectContaining({ month: "2025-09" })
     );
+  });
+
+  it("rejette un mois mal formé", async () => {
+    expect((await apply(buildRequest(ofiiFile, "2025-13"))).status).toBe(400);
+    expect(mockApplyOfiiImport).not.toHaveBeenCalled();
   });
 });

@@ -11,7 +11,8 @@ export const readUploadedFile = async (
     throw new DomainError(FILE_TOO_LARGE_MESSAGE, 413);
   }
 
-  const file = await readFormDataFile(request);
+  const formData = await readFormData(request);
+  const file = formData.get("file");
   if (!(file instanceof File)) {
     throw new DomainError("Aucun fichier fourni");
   }
@@ -26,14 +27,17 @@ export const readUploadedFile = async (
     fileName: file.name,
     mimeType: file.type,
     size: file.size,
+    fields: Object.fromEntries(
+      [...formData.entries()].filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string"
+      )
+    ),
   };
 };
 
-const readFormDataFile = async (
-  request: Request
-): Promise<FormDataEntryValue | null> => {
+const readFormData = async (request: Request): Promise<FormData> => {
   try {
-    return (await request.formData()).get("file");
+    return await request.formData();
   } catch {
     throw new DomainError(
       "Le fichier n’a pas pu être lu : il est peut-être corrompu ou trop volumineux"
@@ -46,4 +50,5 @@ export type UploadedFile = {
   fileName: string;
   mimeType: string;
   size: number;
+  fields: Record<string, string>;
 };

@@ -24,7 +24,11 @@ vi.mock("@/app/api/ofii-imports/ofii-import.repository", () => ({
 }));
 
 const date = new Date("2025-10-31T12:00:00Z");
-const file = { buffer: Buffer.from(""), fileName: "Liste 10.25.xlsx" };
+const file = {
+  buffer: Buffer.from(""),
+  fileName: "Liste 10.25.xlsx",
+  month: null,
+};
 
 describe("ofii-import.service", () => {
   beforeEach(() => {
@@ -40,8 +44,9 @@ describe("ofii-import.service", () => {
     });
 
     expect(await previewOfiiImport(file)).toEqual({
-      summary: "Octobre 2025 : 2 structures dans le fichier",
+      summary: "2 structures dans le fichier",
       details: "Les structures absentes du fichier seront marquées inactives.",
+      detectedMonth: "2025-10",
       errors: [{ key: "C0302", issues: ["nom OFII manquant"] }],
     });
     expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
@@ -76,5 +81,21 @@ describe("ofii-import.service", () => {
     expect(mockSaveOfiiActivites).toHaveBeenCalledWith(date, [
       expect.objectContaining({ dnaCode: "C0301", placesAutorisees: 80 }),
     ]);
+  });
+
+  it("écrit les données au mois confirmé, même s'il diffère du mois détecté", async () => {
+    await applyOfiiImport({ ...file, month: "2025-09" });
+
+    expect(mockSaveOfiiDnas).toHaveBeenCalledWith(
+      new Date("2025-09-30T12:00:00Z"),
+      expect.any(Array)
+    );
+  });
+
+  it("refuse d'importer sans mois, quand le fichier ne permet pas de le déduire", async () => {
+    mockLoadOfiiFile.mockReturnValue({ date: null, rows: [createOfiiRow()] });
+
+    await expect(applyOfiiImport(file)).rejects.toMatchObject({ status: 400 });
+    expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
   });
 });
