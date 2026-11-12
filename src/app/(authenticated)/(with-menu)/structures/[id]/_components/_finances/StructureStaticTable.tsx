@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
@@ -12,6 +13,8 @@ import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
+import { isAgent } from "@/lib/casl";
+import { SessionUser } from "@/types/global";
 
 import { ButtonAffectations } from "../ButtonAffectations";
 import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
@@ -21,6 +24,7 @@ export const StructureStaticTable = ({
   endYear,
 }: Props): ReactElement => {
   const { structure } = useStructureContext();
+  const { data } = useSession();
   const isExporting = useExportContext();
 
   const isAutorisee = structure?.isAutorisee ?? false;
@@ -91,15 +95,16 @@ export const StructureStaticTable = ({
           budgets={enhancedBudgets}
           canEdit={false}
         />
-        {(effectiveIsAffectationOpen || isSubventionnee) && (
-          <BudgetTableCommentLine
-            years={years}
-            label="Commentaire"
-            budgets={enhancedBudgets}
-            enabledYears={years}
-            canEdit={false}
-          />
-        )}
+        {isAgent(data?.user as SessionUser) &&
+          (effectiveIsAffectationOpen || isSubventionnee) && (
+            <BudgetTableCommentLine
+              years={years}
+              label="Commentaire"
+              budgets={enhancedBudgets}
+              enabledYears={years}
+              canEdit={false}
+            />
+          )}
       </Table>
       {isAutorisee && (
         <div className="print:hidden">

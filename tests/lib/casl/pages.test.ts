@@ -27,6 +27,9 @@ describe("canAccessPage", () => {
       expect(canAccessPage(currentOperateurUser, "/cpoms")).toBe(false);
       expect(canAccessPage(currentOperateurUser, "/statistiques")).toBe(false);
       expect(canAccessPage(currentOperateurUser, "/ressources")).toBe(false);
+      expect(
+        canAccessPage(currentOperateurUser, "/structures/transformation/type")
+      ).toBe(false);
     });
 
     it("refuse l'accès à la liste des opérateurs et aux modifications de sa fiche", () => {
@@ -69,6 +72,9 @@ describe("canAccessPage", () => {
     it("autorise l'accès aux pages réservées aux agents", () => {
       expect(canAccessPage(currentAgentUser, "/ressources")).toBe(true);
       expect(canAccessPage(currentAgentUser, "/operateurs")).toBe(true);
+      expect(
+        canAccessPage(currentAgentUser, "/structures/transformation/type")
+      ).toBe(true);
     });
   });
 });
