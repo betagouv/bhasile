@@ -17,7 +17,13 @@ export class AuthError extends Error {
   }
 }
 
-export const ACCEPTED_ACR_VALUES = ["eidas1-mfa", "eidas2", "eidas3"] as const;
+export const ACCEPTED_ACR_VALUES = [
+  "eidas0-mfa",
+  "eidas1",
+  "eidas1-mfa",
+  "eidas2",
+  "eidas3",
+] as const;
 
 export type AcceptedAcrValue = (typeof ACCEPTED_ACR_VALUES)[number];
 

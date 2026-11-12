@@ -3,6 +3,11 @@ import {
   createSessionGrant,
   createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
+import {
+  createDepartementPerimeter,
+  createRegionPerimeter,
+  createUserWithGrants,
+} from "tests/test-utils/factories/user-with-grants.factory";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -15,10 +20,9 @@ import {
   postTarificationMessage,
   recordTarificationDocumentOpening,
 } from "@/app/api/tarifications/tarification.service";
+import type { UserWithGrants } from "@/app/api/users/user.db.type";
 import {
-  AccessRole,
   AuthorLevel,
-  GrantScope,
   StructureType,
   TarificationDocumentStatus,
   type TarificationDocumentType,
@@ -160,22 +164,16 @@ describe("postTarificationMessage", () => {
 });
 
 describe("getTarificationParticipant", () => {
-  const regionalEditorGrant = {
-    role: AccessRole.EDITEUR,
-    scope: GrantScope.REGION,
-    region: { id: 11, name: "Île-de-France", departements: [{ numero: "75" }] },
-    departement: null,
-    structure: null,
-  };
-  const buildDatabaseUser = (overrides: object) => ({
-    id: 5,
-    operateurId: null,
-    isSuperAdmin: false,
-    isAgent: true,
-    grants: [regionalEditorGrant],
-    emailPattern: null,
-    ...overrides,
-  });
+  const buildDatabaseUser = (overrides: Partial<UserWithGrants> = {}) =>
+    createUserWithGrants({
+      id: 5,
+      perimeter: createRegionPerimeter({
+        id: 11,
+        name: "Île-de-France",
+        departements: [{ numero: "75" }],
+      }),
+      ...overrides,
+    });
 
   beforeEach(() => {
     mockFindStructureScope.mockResolvedValue({
@@ -185,7 +183,7 @@ describe("getTarificationParticipant", () => {
     });
   });
 
-  it("signe au niveau régional un agent éditeur de la région", async () => {
+  it("signe au niveau régional un agent d'un périmètre régional", async () => {
     mockGetUserWithGrantsByEmail.mockResolvedValue(buildDatabaseUser({}));
 
     const participant = await getTarificationParticipant(
@@ -205,9 +203,9 @@ describe("getTarificationParticipant", () => {
     ).rejects.toMatchObject({ status: 403 });
   });
 
-  it("retombe au niveau le plus restreint pour un utilisateur qui n'est pas agent en base", async () => {
+  it("retombe au niveau le plus restreint pour un utilisateur sans périmètre en base", async () => {
     mockGetUserWithGrantsByEmail.mockResolvedValue(
-      buildDatabaseUser({ isAgent: false })
+      buildDatabaseUser({ perimeter: null })
     );
 
     const participant = await getTarificationParticipant(
@@ -246,21 +244,12 @@ describe("changeTarificationMessageTag", () => {
 });
 
 describe("notifyPendingTarificationMessages", () => {
-  const departementEditorGrant = {
-    role: AccessRole.EDITEUR,
-    scope: GrantScope.DEPARTEMENT,
-    region: null,
-    departement: { numero: "75", name: "Paris", regionId: 11 },
-    structure: null,
-  };
   const buildAgent = (id: number) => ({
-    id,
+    ...createUserWithGrants({
+      id,
+      perimeter: createDepartementPerimeter("75", "Paris"),
+    }),
     email: `agent${id}@paris.gouv.fr`,
-    operateurId: null,
-    isSuperAdmin: false,
-    isAgent: true,
-    grants: [],
-    emailPattern: { isAgent: true, grants: [departementEditorGrant] },
   });
   const buildPendingMessage = ({
     id,

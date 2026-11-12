@@ -1,5 +1,6 @@
 import { FileUpload } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+import { PrismaTransaction } from "@/types/prisma.type";
 
 import { FileWithParents, fileWithParentsInclude } from "./file.db.type";
 
@@ -28,6 +29,16 @@ export const findOneByKeyWithParents = async (
 ): Promise<FileWithParents | null> => {
   return prisma.fileUpload.findUnique({
     where: { key },
+    include: fileWithParentsInclude,
+  });
+};
+
+export const findManyByKeysWithParents = async (
+  tx: PrismaTransaction,
+  keys: string[]
+): Promise<FileWithParents[]> => {
+  return tx.fileUpload.findMany({
+    where: { key: { in: keys } },
     include: fileWithParentsInclude,
   });
 };

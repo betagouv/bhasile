@@ -1,3 +1,10 @@
+import {
+  createDepartementPerimeter,
+  createGrantDb,
+  createNationalPerimeter,
+  createRegionPerimeter,
+  createUserWithGrants,
+} from "tests/test-utils/factories/user-with-grants.factory";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -8,13 +15,16 @@ import {
   getSelectableCampaignYears,
   isNotificationHour,
 } from "@/app/api/tarifications/tarification.util";
-import type { GrantDb } from "@/app/api/users/user.db.type";
 import {
-  AccessRole,
   GrantScope,
   StructureType,
   Visibility,
 } from "@/generated/prisma/enums";
+
+vi.mock("@/app/utils/now.util", async () => {
+  const actual = await vi.importActual("@/app/utils/now.util");
+  return { ...actual, getCurrentYear: () => 2027 };
+});
 
 describe("isNotificationHour", () => {
   it("garde 8 h et 14 h à Paris l'hiver, soit 7 h et 13 h UTC", () => {
@@ -80,26 +90,16 @@ describe("getMessageRecipients", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
   });
-  const buildGrant = (overrides: Partial<GrantDb>): GrantDb => ({
-    role: AccessRole.EDITEUR,
-    scope: GrantScope.DEPARTEMENT,
-    region: null,
-    departement: { numero: "35", name: "Ille-et-Vilaine", regionId: 53 },
-    structure: null,
-    ...overrides,
-  });
   const buildUser = (
     id: number,
     overrides: Partial<Parameters<typeof getMessageRecipients>[0][number]> = {}
   ) => ({
-    id,
+    ...createUserWithGrants({
+      id,
+      perimeter: createDepartementPerimeter("35", "Ille-et-Vilaine"),
+      ...overrides,
+    }),
     email: `agent${id}@ille-et-vilaine.gouv.fr`,
-    operateurId: null,
-    isSuperAdmin: false,
-    isAgent: true,
-    grants: [],
-    emailPattern: { isAgent: true, grants: [buildGrant({})] },
-    ...overrides,
   });
   const getRecipientIds = (
     users: Parameters<typeof getMessageRecipients>[0],
@@ -109,95 +109,30 @@ describe("getMessageRecipients", () => {
       (recipient) => recipient.userId
     );
 
-  it("notifie les agents éditeurs du département, par leur pattern d'email, sauf l'auteur", () => {
+  it("notifie les agents du périmètre du département, sauf l'auteur", () => {
     expect(getRecipientIds([buildUser(1), buildUser(2), buildUser(3)])).toEqual(
       [2, 3]
     );
   });
 
-  it("notifie un agent éditeur de la seule structure", () => {
-    const structureEditor = buildUser(2, {
-      grants: [
-        buildGrant({
-          scope: GrantScope.STRUCTURE,
-          departement: null,
-          structure: { id: 42, codeBhasile: "C42" },
-        }),
-      ],
-      emailPattern: null,
-    });
-
-    expect(getRecipientIds([structureEditor])).toEqual([2]);
-  });
-
-  it("ne notifie pas un agent dont les droits personnels portent sur une autre structure, malgré son pattern", () => {
-    const elsewhereEditor = buildUser(2, {
-      grants: [
-        buildGrant({
-          scope: GrantScope.STRUCTURE,
-          departement: null,
-          structure: { id: 7, codeBhasile: "C7" },
-        }),
-      ],
-    });
-
-    expect(getRecipientIds([elsewhereEditor])).toEqual([]);
-  });
-
-  it("ne notifie ni les lecteurs, ni les agents régionaux, ni un autre département", () => {
+  it("ne notifie ni les agents régionaux, ni nationaux, ni d'un autre département", () => {
     const users = [
-      buildUser(2, {
-        emailPattern: {
-          isAgent: true,
-          grants: [buildGrant({ role: AccessRole.LECTEUR })],
-        },
-      }),
-      buildUser(3, {
-        emailPattern: {
-          isAgent: true,
-          grants: [
-            buildGrant({
-              scope: GrantScope.REGION,
-              departement: null,
-              region: {
-                id: 53,
-                name: "Bretagne",
-                departements: [{ numero: "35" }],
-              },
-            }),
-          ],
-        },
-      }),
+      buildUser(2, { perimeter: createRegionPerimeter() }),
+      buildUser(3, { perimeter: createNationalPerimeter() }),
       buildUser(4, {
-        emailPattern: {
-          isAgent: true,
-          grants: [
-            buildGrant({
-              departement: {
-                numero: "22",
-                name: "Côtes-d'Armor",
-                regionId: 53,
-              },
-            }),
-          ],
-        },
+        perimeter: createDepartementPerimeter("22", "Côtes-d'Armor"),
       }),
     ];
 
     expect(getRecipientIds(users)).toEqual([]);
   });
 
-  it("notifie un administrateur du département", () => {
+  it("ne notifie pas un agent dont le compte n'est pas activé", () => {
     expect(
       getRecipientIds([
-        buildUser(2, {
-          emailPattern: {
-            isAgent: true,
-            grants: [buildGrant({ role: AccessRole.ADMIN })],
-          },
-        }),
+        buildUser(2, { isActivated: false, deactivatedAt: new Date() }),
       ])
-    ).toEqual([2]);
+    ).toEqual([]);
   });
 
   it("ne notifie personne tant que la messagerie est fermée", () => {
@@ -209,8 +144,17 @@ describe("getMessageRecipients", () => {
   it("ne notifie ni les superadmins, ni les utilisateurs d'un opérateur, ni les non-agents", () => {
     const users = [
       buildUser(2, { isSuperAdmin: true }),
-      buildUser(3, { operateurId: 9, isAgent: null }),
-      buildUser(4, { isAgent: false }),
+      buildUser(3, {
+        operateurId: 9,
+        perimeter: null,
+        grants: [
+          createGrantDb({
+            scope: GrantScope.STRUCTURE,
+            structure: { id: 42, codeBhasile: "C42" },
+          }),
+        ],
+      }),
+      buildUser(4, { perimeter: null }),
     ];
 
     expect(getRecipientIds(users)).toEqual([]);
