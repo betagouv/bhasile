@@ -5,7 +5,7 @@ import { ReactElement, useRef, useState } from "react";
 import { Control, useController } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
-import { FaqApiWrite } from "@/schemas/api/faq.schema";
+import { FaqFormValues } from "@/schemas/forms/base/faq.schema";
 
 export const FaqCategoryField = ({
   control,
@@ -82,6 +82,6 @@ export const FaqCategoryField = ({
 };
 
 type Props = {
-  control: Control<FaqApiWrite>;
+  control: Control<FaqFormValues>;
   categories: string[];
 };

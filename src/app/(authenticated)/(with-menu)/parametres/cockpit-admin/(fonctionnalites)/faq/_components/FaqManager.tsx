@@ -3,21 +3,21 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement, useState } from "react";
 
-import { useFaqItems } from "@/hooks/useFaqItems";
-import { FaqApiType, FaqApiWrite } from "@/schemas/api/faq.schema";
+import { useFaqItemMutations } from "@/hooks/useFaqItemMutations";
+import { FaqApiType } from "@/schemas/api/faq.schema";
+import { FaqFormValues } from "@/schemas/forms/base/faq.schema";
+import { groupFaqItemsByCategory } from "@/utils/faq.util";
 
 import { FaqDeleteModal, faqDeleteModal } from "./FaqDeleteModal";
 import { FaqItemModal, faqItemModal } from "./FaqItemModal";
 
 export const FaqManager = ({ faqItems }: Props): ReactElement => {
-  const { saveFaqItem, deleteFaqItem, isSaving } = useFaqItems();
+  const { saveFaqItem, deleteFaqItem, isSaving } = useFaqItemMutations();
   const [editedFaqItem, setEditedFaqItem] = useState<FaqApiType | null>(null);
   const [deletedFaqItem, setDeletedFaqItem] = useState<FaqApiType | null>(null);
   const [itemModalOpenCount, setItemModalOpenCount] = useState(0);
 
-  const categories = [
-    ...new Set(faqItems.map((faqItem) => faqItem.category)),
-  ].sort((a, b) => a.localeCompare(b));
+  const categoryGroups = groupFaqItemsByCategory(faqItems);
 
   const openItemModal = (faqItem: FaqApiType | null): void => {
     setEditedFaqItem(faqItem);
@@ -30,7 +30,7 @@ export const FaqManager = ({ faqItems }: Props): ReactElement => {
     faqDeleteModal.open();
   };
 
-  const submitFaqItem = async (values: FaqApiWrite): Promise<boolean> =>
+  const submitFaqItem = async (values: FaqFormValues): Promise<boolean> =>
     (await saveFaqItem(editedFaqItem?.id ?? null, values)) !== null;
 
   const confirmDelete = async (id: number): Promise<boolean> =>
@@ -44,42 +44,40 @@ export const FaqManager = ({ faqItems }: Props): ReactElement => {
         </Button>
       </div>
 
-      {categories.length === 0 && (
+      {categoryGroups.length === 0 && (
         <p className="text-mention-grey">La FAQ ne contient aucune question.</p>
       )}
 
-      {categories.map((category) => (
+      {categoryGroups.map(({ category, items }) => (
         <section key={category}>
           <h3 className="fr-h6 text-title-blue-france mb-3">{category}</h3>
           <ul className="list-none p-0 m-0 bg-white border border-default-grey rounded-[10px]">
-            {faqItems
-              .filter((faqItem) => faqItem.category === category)
-              .map((faqItem) => (
-                <li
-                  key={faqItem.id}
-                  className="flex items-center justify-between gap-4 px-6 py-3 border-b border-default-grey last:border-b-0"
-                >
-                  <span>{faqItem.question}</span>
-                  <div className="flex shrink-0 gap-2">
-                    <Button
-                      priority="tertiary no outline"
-                      size="small"
-                      iconId="fr-icon-edit-line"
-                      onClick={() => openItemModal(faqItem)}
-                    >
-                      Modifier
-                    </Button>
-                    <Button
-                      priority="tertiary no outline"
-                      size="small"
-                      iconId="fr-icon-delete-line"
-                      onClick={() => openDeleteModal(faqItem)}
-                    >
-                      Supprimer
-                    </Button>
-                  </div>
-                </li>
-              ))}
+            {items.map((faqItem) => (
+              <li
+                key={faqItem.id}
+                className="flex items-center justify-between gap-4 px-6 py-3 border-b border-default-grey last:border-b-0"
+              >
+                <span>{faqItem.question}</span>
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    priority="tertiary no outline"
+                    size="small"
+                    iconId="fr-icon-edit-line"
+                    onClick={() => openItemModal(faqItem)}
+                  >
+                    Modifier
+                  </Button>
+                  <Button
+                    priority="tertiary no outline"
+                    size="small"
+                    iconId="fr-icon-delete-line"
+                    onClick={() => openDeleteModal(faqItem)}
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+              </li>
+            ))}
           </ul>
         </section>
       ))}
@@ -87,7 +85,7 @@ export const FaqManager = ({ faqItems }: Props): ReactElement => {
       <FaqItemModal
         faqItem={editedFaqItem}
         openCount={itemModalOpenCount}
-        categories={categories}
+        categories={categoryGroups.map(({ category }) => category)}
         isSaving={isSaving}
         onSubmit={submitFaqItem}
       />

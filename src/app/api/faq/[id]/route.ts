@@ -1,39 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
 import { editFaqItem, removeFaqItem } from "@/app/api/faq/faq.service";
+import { parseFaqItemId } from "@/app/api/faq/faq.util";
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { parseId } from "@/app/utils/string.util";
-import { canAccessCockpitAdmin } from "@/lib/casl";
-import { authOptions } from "@/lib/next-auth/auth";
+import { assertCockpitAdminAccess } from "@/lib/casl";
+import { getSessionUser } from "@/lib/next-auth/session";
 import { faqApiWriteSchema } from "@/schemas/api/faq.schema";
-import { SessionUser } from "@/types/global";
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-    }
-    if (!canAccessCockpitAdmin(session.user as SessionUser)) {
-      return NextResponse.json(
-        { error: "Droits insuffisants" },
-        { status: 403 }
-      );
-    }
-
-    const id = parseId((await params).id);
-    if (id === null) {
-      return NextResponse.json(
-        { error: "Question introuvable" },
-        { status: 404 }
-      );
-    }
-
+    assertCockpitAdminAccess(await getSessionUser());
+    const id = await parseFaqItemId(params);
     const input = faqApiWriteSchema.parse(await request.json());
+
     await editFaqItem(id, input);
 
     return NextResponse.json("Question mise à jour avec succès", {
@@ -49,24 +31,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-    }
-    if (!canAccessCockpitAdmin(session.user as SessionUser)) {
-      return NextResponse.json(
-        { error: "Droits insuffisants" },
-        { status: 403 }
-      );
-    }
-
-    const id = parseId((await params).id);
-    if (id === null) {
-      return NextResponse.json(
-        { error: "Question introuvable" },
-        { status: 404 }
-      );
-    }
+    assertCockpitAdminAccess(await getSessionUser());
+    const id = await parseFaqItemId(params);
 
     await removeFaqItem(id);
 
