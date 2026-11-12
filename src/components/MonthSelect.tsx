@@ -3,12 +3,14 @@
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { ReactElement, useState } from "react";
 
+import { cn } from "@/app/utils/classname.util";
 import { formatDate } from "@/app/utils/date.util";
 import { getCurrentYear } from "@/app/utils/now.util";
 
 export const MonthSelect = ({
   initialValue,
   hint,
+  errorMessage,
   onChange,
 }: Props): ReactElement => {
   const [initialYear, initialMonth] = initialValue?.split("-") ?? [];
@@ -23,7 +25,9 @@ export const MonthSelect = ({
   };
 
   return (
-    <fieldset className="fr-fieldset mb-0">
+    <fieldset
+      className={cn("fr-fieldset mb-0", errorMessage && "fr-fieldset--error")}
+    >
       <legend className="fr-fieldset__legend fr-text--regular">
         Mois des données
         <span className="fr-hint-text">{hint}</span>
@@ -60,6 +64,9 @@ export const MonthSelect = ({
           ))}
         </Select>
       </div>
+      {errorMessage && (
+        <p className="fr-message fr-message--error mt-2">{errorMessage}</p>
+      )}
     </fieldset>
   );
 };
@@ -85,5 +92,6 @@ const getYearOptions = (initialYear: string | undefined): string[] => {
 type Props = {
   initialValue: string | null;
   hint: string;
+  errorMessage?: string;
   onChange: (value: string | null) => void;
 };

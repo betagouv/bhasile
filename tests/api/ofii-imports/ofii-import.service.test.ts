@@ -10,8 +10,7 @@ import {
 } from "@/app/api/ofii-imports/ofii-import.service";
 
 const mockLoadOfiiFile = vi.fn();
-const mockSaveOfiiDnas = vi.fn();
-const mockSaveOfiiActivites = vi.fn();
+const mockSaveOfiiImport = vi.fn();
 
 vi.mock("@/app/api/ofii-imports/ofii-xlsx.util", () => ({
   loadOfiiFile: (...args: unknown[]) => mockLoadOfiiFile(...args),
@@ -20,8 +19,8 @@ vi.mock("@/app/api/ofii-imports/ofii-xlsx.util", () => ({
 vi.mock("@/app/api/ofii-imports/ofii-import.repository", () => ({
   findOfiiReferential: async () => createOfiiReferential(),
   findOfiiDnaChanges: async () => ({ existingDnas: [], deactivatedCount: 3 }),
-  saveOfiiDnas: (...args: unknown[]) => mockSaveOfiiDnas(...args),
-  saveOfiiActivites: (...args: unknown[]) => mockSaveOfiiActivites(...args),
+  findLatestOfiiActiviteDate: async () => new Date("2025-09-30T12:00:00Z"),
+  saveOfiiImport: (...args: unknown[]) => mockSaveOfiiImport(...args),
 }));
 
 const date = new Date("2025-10-31T12:00:00Z");
@@ -35,7 +34,7 @@ describe("ofii-import.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockLoadOfiiFile.mockReturnValue({ date, rows: [createOfiiRow()] });
-    mockSaveOfiiDnas.mockResolvedValue({ count: 4 });
+    mockSaveOfiiImport.mockResolvedValue(4);
   });
 
   it("décrit le fichier et ses erreurs sans rien écrire", async () => {
@@ -48,9 +47,10 @@ describe("ofii-import.service", () => {
       summary: "2 structures dans le fichier",
       changes: [],
       detectedMonth: "2025-10",
+      latestImportedMonth: "2025-09",
       errors: [{ key: "C0302", issues: ["nom OFII manquant"] }],
     });
-    expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
+    expect(mockSaveOfiiImport).not.toHaveBeenCalled();
   });
 
   it("simule les changements d'un fichier valide sans rien écrire", async () => {
@@ -60,8 +60,7 @@ describe("ofii-import.service", () => {
       "3 structures absentes du fichier passées inactives",
       "Activité du mois enregistrée pour 1 structure",
     ]);
-    expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
-    expect(mockSaveOfiiActivites).not.toHaveBeenCalled();
+    expect(mockSaveOfiiImport).not.toHaveBeenCalled();
   });
 
   it("refuse d'importer un fichier qui contient des erreurs", async () => {
@@ -71,15 +70,14 @@ describe("ofii-import.service", () => {
     });
 
     await expect(applyOfiiImport(file)).rejects.toMatchObject({ status: 400 });
-    expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
-    expect(mockSaveOfiiActivites).not.toHaveBeenCalled();
+    expect(mockSaveOfiiImport).not.toHaveBeenCalled();
   });
 
   it("refuse un fichier sans ligne, qui passerait toutes les structures en inactif", async () => {
     mockLoadOfiiFile.mockReturnValue({ date, rows: [] });
 
     await expect(applyOfiiImport(file)).rejects.toMatchObject({ status: 400 });
-    expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
+    expect(mockSaveOfiiImport).not.toHaveBeenCalled();
   });
 
   it("écrit le référentiel puis l'activité d'un fichier valide", async () => {
@@ -87,19 +85,19 @@ describe("ofii-import.service", () => {
       summary:
         "1 structure importée pour octobre 2025, 4 structures passées inactives.",
     });
-    expect(mockSaveOfiiDnas).toHaveBeenCalledWith(date, [
-      expect.objectContaining({ code: "C0301", operateurId: 7 }),
-    ]);
-    expect(mockSaveOfiiActivites).toHaveBeenCalledWith(date, [
-      expect.objectContaining({ dnaCode: "C0301", placesAutorisees: 80 }),
-    ]);
+    expect(mockSaveOfiiImport).toHaveBeenCalledWith(
+      date,
+      [expect.objectContaining({ code: "C0301", operateurId: 7 })],
+      [expect.objectContaining({ dnaCode: "C0301", placesAutorisees: 80 })]
+    );
   });
 
   it("écrit les données au mois confirmé, même s'il diffère du mois détecté", async () => {
     await applyOfiiImport({ ...file, month: "2025-09" });
 
-    expect(mockSaveOfiiDnas).toHaveBeenCalledWith(
+    expect(mockSaveOfiiImport).toHaveBeenCalledWith(
       new Date("2025-09-30T12:00:00Z"),
+      expect.any(Array),
       expect.any(Array)
     );
   });
@@ -108,6 +106,6 @@ describe("ofii-import.service", () => {
     mockLoadOfiiFile.mockReturnValue({ date: null, rows: [createOfiiRow()] });
 
     await expect(applyOfiiImport(file)).rejects.toMatchObject({ status: 400 });
-    expect(mockSaveOfiiDnas).not.toHaveBeenCalled();
+    expect(mockSaveOfiiImport).not.toHaveBeenCalled();
   });
 });

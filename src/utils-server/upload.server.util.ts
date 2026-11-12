@@ -1,13 +1,15 @@
 import { DomainError } from "@/app/utils/domain-error.util";
-import { ALLOWED_MIME_TYPES } from "@/constants";
+import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from "@/constants";
 import { FILE_TOO_LARGE_MESSAGE, isFileTooLarge } from "@/utils/upload.util";
+
+const MULTIPART_OVERHEAD_MARGIN = 1024 * 1024;
 
 export const readUploadedFile = async (
   request: Request,
   allowedMimeTypes: string[] = ALLOWED_MIME_TYPES
 ): Promise<UploadedFile> => {
   const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (isFileTooLarge(contentLength)) {
+  if (contentLength > MAX_FILE_SIZE + MULTIPART_OVERHEAD_MARGIN) {
     throw new DomainError(FILE_TOO_LARGE_MESSAGE, 413);
   }
 

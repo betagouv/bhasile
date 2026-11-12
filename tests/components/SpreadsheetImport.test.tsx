@@ -216,4 +216,28 @@ describe("SpreadsheetImport", () => {
       })
     ).toBeEnabled();
   });
+
+  it("bloque un import antérieur au dernier mois importé", async () => {
+    respondWith({
+      body: {
+        summary: "1 structure",
+        changes: [],
+        detectedMonth: "2025-08",
+        latestImportedMonth: "2025-10",
+        errors: [],
+      },
+    });
+
+    await selectFile({ withMonth: true });
+
+    expect(
+      await screen.findByText(/antérieur au dernier import/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Dernier mois importé : octobre 2025/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Confirmer l’import pour août 2025" })
+    ).toBeDisabled();
+  });
 });

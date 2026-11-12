@@ -13,6 +13,7 @@ export type ImportPreview = {
   summary: string;
   changes: string[];
   detectedMonth?: string | null;
+  latestImportedMonth?: string | null;
   errors: ImportError[];
 };
 

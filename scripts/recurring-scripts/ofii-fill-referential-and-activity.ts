@@ -3,12 +3,10 @@
 
 import "dotenv/config";
 
-import {
-  applyOfiiImport,
-  previewOfiiImport,
-} from "@/app/api/ofii-imports/ofii-import.service";
+import { applyOfiiImport } from "@/app/api/ofii-imports/ofii-import.service";
 import prisma from "@/lib/prisma";
 import { importMonthSchema } from "@/schemas/api/import.schema";
+import { ImportRejectedError } from "@/utils-server/import.server.util";
 
 import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
 
@@ -31,19 +29,14 @@ async function main() {
       ...(await loadXlsxBufferFromS3(bucketName, xlsxLocation)),
       month: importMonthSchema.parse(month ?? null),
     };
-    const { errors } = await previewOfiiImport(file);
-    if (errors.length > 0) {
-      errors.forEach(({ key, issues }) =>
-        console.error(`- ${key} : ${issues.join(", ")}`)
-      );
-      throw new Error(
-        `${errors.length} ligne(s) en erreur, rien n'a été écrit`
-      );
-    }
-
     const { summary } = await applyOfiiImport(file);
     console.log(`✅ ${summary}`);
   } catch (error) {
+    if (error instanceof ImportRejectedError) {
+      error.errors.forEach(({ key, issues }) =>
+        console.error(`- ${key} : ${issues.join(", ")}`)
+      );
+    }
     console.error("❌ Erreur lors de l'import OFII", error);
     process.exitCode = 1;
   } finally {
