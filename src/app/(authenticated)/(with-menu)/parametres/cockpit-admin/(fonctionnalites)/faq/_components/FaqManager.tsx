@@ -3,10 +3,13 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement } from "react";
 
-import { useFaqItemMutations } from "@/hooks/useFaqItemMutations";
+import { useSaveMutation } from "@/app/hooks/useSaveMutation";
+import { useFetchState } from "@/contexts/FetchStateContext";
+import { useFaq } from "@/hooks/useFaq";
 import { useModalTarget } from "@/hooks/useModalTarget";
 import { FaqApiType } from "@/schemas/api/faq.schema";
 import { FaqFormValues } from "@/schemas/forms/base/faq.schema";
+import { FetchState } from "@/types/fetch-state.type";
 import { groupFaqItemsByCategory } from "@/utils/faq.util";
 
 import {
@@ -17,25 +20,43 @@ import { FaqDeleteModal, faqDeleteModal } from "./FaqDeleteModal";
 import { FaqItemModal, faqItemModal } from "./FaqItemModal";
 
 export const FaqManager = ({ faqItems }: Props): ReactElement => {
-  const { saveFaqItem, deleteFaqItem, renameFaqCategory, isSaving } =
-    useFaqItemMutations();
+  const { addFaqItem, updateFaqItem, deleteFaqItem, renameFaqCategory } =
+    useFaq();
+  const { getFetchState } = useFetchState();
   const itemModal = useModalTarget<FaqApiType>(faqItemModal);
   const deleteModal = useModalTarget<FaqApiType>(faqDeleteModal);
   const renameModal = useModalTarget<string>(faqCategoryRenameModal);
 
+  const { mutate: saveFaqItem } = useSaveMutation(
+    FAQ_SAVE_KEY,
+    (values: FaqFormValues) =>
+      itemModal.target
+        ? updateFaqItem(itemModal.target.id, values)
+        : addFaqItem(values)
+  );
+  const { mutate: removeFaqItem } = useSaveMutation(
+    FAQ_SAVE_KEY,
+    deleteFaqItem
+  );
+  const { mutate: saveCategoryName } = useSaveMutation(
+    FAQ_SAVE_KEY,
+    renameFaqCategory
+  );
+  const isSaving = getFetchState(FAQ_SAVE_KEY) === FetchState.LOADING;
+
   const categoryGroups = groupFaqItemsByCategory(faqItems);
 
   const submitFaqItem = async (values: FaqFormValues): Promise<boolean> =>
-    (await saveFaqItem(itemModal.target?.id ?? null, values)) !== null;
+    (await saveFaqItem(values)) !== null;
 
   const confirmDelete = async (id: number): Promise<boolean> =>
-    (await deleteFaqItem(id)) !== null;
+    (await removeFaqItem(id)) !== null;
 
   const submitCategoryRename = async (
     category: string,
     newCategory: string
   ): Promise<boolean> =>
-    (await renameFaqCategory({ category, newCategory })) !== null;
+    (await saveCategoryName({ category, newCategory })) !== null;
 
   return (
     <div className="flex flex-col gap-8">
@@ -114,6 +135,8 @@ export const FaqManager = ({ faqItems }: Props): ReactElement => {
     </div>
   );
 };
+
+const FAQ_SAVE_KEY = "faq-save";
 
 type Props = {
   faqItems: FaqApiType[];

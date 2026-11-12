@@ -7,8 +7,8 @@ import { ReactElement, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import {
-  FaqCategoryFormValues,
   faqCategoryFormSchema,
+  FaqCategoryFormValues,
 } from "@/schemas/forms/base/faq.schema";
 
 export const FaqCategoryRenameModal = ({

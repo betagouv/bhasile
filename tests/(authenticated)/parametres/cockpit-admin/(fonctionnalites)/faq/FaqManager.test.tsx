@@ -88,7 +88,6 @@ describe("FaqManager", () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith("/api/faq", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: "Où trouver les modèles ?",
           contentMarkdown: "Dans l’onglet Modèles.",
@@ -258,7 +257,6 @@ describe("FaqManager", () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith("/api/faq/1", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: "Comment fermer une structure ?",
           contentMarkdown: "Depuis la fiche structure.",
@@ -307,7 +305,6 @@ describe("FaqManager", () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith("/api/faq/categories", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           category: "Structures",
           newCategory: "Fiches structures",
