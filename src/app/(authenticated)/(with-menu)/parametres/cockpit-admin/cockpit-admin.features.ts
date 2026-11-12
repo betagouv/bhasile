@@ -9,17 +9,9 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
       {
         title: "Import OFII",
         description:
-          "Charger le fichier mensuel de l’OFII pour mettre à jour le référentiel des structures et leur activité.",
+          "Charger le fichier mensuel de l’OFII pour mettre à jour le référentiel des structures et leur activité, et rattacher les opérateurs inconnus à leur alias.",
         icon: "fr-icon-upload-2-line",
         href: `${COCKPIT_ADMIN_URL}/import-ofii`,
-        isEnabled: false,
-      },
-      {
-        title: "Alias OFII des opérateurs",
-        description:
-          "Rattacher un libellé du fichier OFII à un opérateur, par exemple après un renommage.",
-        icon: "fr-icon-links-line",
-        href: `${COCKPIT_ADMIN_URL}/alias-ofii`,
         isEnabled: false,
       },
       {
@@ -33,7 +25,7 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
     ],
   },
   {
-    title: "Contenus",
+    title: "Campagnes",
     features: [
       {
         title: "Annonces",
@@ -43,6 +35,26 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
         href: `${COCKPIT_ADMIN_URL}/annonces`,
         isEnabled: false,
       },
+      {
+        title: "Campagne d’actualisation",
+        description:
+          "Ouvrir la campagne d’actualisation de l’année et fixer sa date limite.",
+        icon: "fr-icon-survey-line",
+        href: `${COCKPIT_ADMIN_URL}/actualisation`,
+        isEnabled: false,
+      },
+      {
+        title: "Passage à l’année suivante",
+        description: "Faire avancer les années ouvertes à la saisie.",
+        icon: "fr-icon-calendar-event-line",
+        href: `${COCKPIT_ADMIN_URL}/millesimes`,
+        isEnabled: false,
+      },
+    ],
+  },
+  {
+    title: "FAQ",
+    features: [
       {
         title: "Questions de la FAQ",
         description:
@@ -57,26 +69,6 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
           "Ajouter ou supprimer les documents téléchargeables de la page Modèles et ressources.",
         icon: "fr-icon-file-text-line",
         href: `${COCKPIT_ADMIN_URL}/documents-faq`,
-        isEnabled: false,
-      },
-    ],
-  },
-  {
-    title: "Campagnes",
-    features: [
-      {
-        title: "Campagne d’actualisation",
-        description:
-          "Ouvrir la campagne d’actualisation de l’année et fixer sa date limite.",
-        icon: "fr-icon-survey-line",
-        href: `${COCKPIT_ADMIN_URL}/actualisation`,
-        isEnabled: false,
-      },
-      {
-        title: "Passage à l’année suivante",
-        description: "Faire avancer les années ouvertes à la saisie.",
-        icon: "fr-icon-calendar-event-line",
-        href: `${COCKPIT_ADMIN_URL}/millesimes`,
         isEnabled: false,
       },
     ],
