@@ -17,7 +17,11 @@ import {
   findUsersWithGrantsOnStructure,
   getUserWithGrantsByEmail,
 } from "@/app/api/users/user.repository";
-import { getAssignedGrants, isAgentUser } from "@/app/api/users/user.util";
+import {
+  getAssignedGrants,
+  isAgentUser,
+  normalizeEmail,
+} from "@/app/api/users/user.util";
 import { getDepartementTimeZone, toCivilDate } from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
@@ -66,7 +70,6 @@ import type {
 
 import { TARIFICATION_CONVERSATION_TAGS } from "./tarification.constants";
 import {
-  createTarificationDocumentOpening,
   findFicheCopies,
   findMessageTarification,
   findPendingMessageContexts,
@@ -76,7 +79,6 @@ import {
   findStructureTarificationJournal,
   findTarificationCampaign,
   runInTarificationTransaction,
-  type TarificationDocumentCreate,
   type TarificationJournalSource,
   type TarificationTransaction,
   upsertStructureTarification,
@@ -88,6 +90,7 @@ import {
   getMessageRecipients,
   getSelectableCampaignYears,
 } from "./tarification.util";
+import { createTarificationDocumentOpening } from "./tarification-document.repository";
 
 export const getTarificationParticipant = async (
   user: SessionUser,
@@ -475,7 +478,17 @@ const trySyncFicheCopies = async (
 const createDocumentInTransaction = async (
   transaction: TarificationTransaction,
   year: number,
-  { fileKey, types, status, author }: TarificationDocumentCreate
+  {
+    fileKey,
+    types,
+    status,
+    author,
+  }: {
+    fileKey: string;
+    types: TarificationDocumentType[];
+    status: TarificationDocumentStatus;
+    author: TarificationParticipant;
+  }
 ): Promise<{ id: number }> => {
   const { journal } = await loadTarificationJournal(year, transaction);
   const now = getNow();
@@ -487,7 +500,24 @@ const createDocumentInTransaction = async (
     phase: getCampaignPhase(year, now, journal.timeZone),
     now,
   });
-  return transaction.createDocument({ fileKey, types, status, author });
+  const file = await transaction.findUnattachedFile(fileKey);
+  if (!file) {
+    throw new DomainError("Ce fichier est introuvable ou déjà rattaché", 422);
+  }
+  const document = await transaction.createDocument({
+    fileUploadId: file.id,
+    types,
+    status,
+  });
+  await transaction.createEvent({
+    type: TarificationEventType.DOCUMENT_DEPOSITED,
+    authorId: author.id,
+    authorLevel: author.level,
+    documentId: document.id,
+    stepCode: null,
+    text: null,
+  });
+  return document;
 };
 
 export const authorizeTarificationDocument = async ({
@@ -621,7 +651,9 @@ const resolveParticipant = async (
   structure: StructureScope
 ): Promise<TarificationParticipant> => {
   assertCanAccessTarification(user, structure);
-  const databaseUser = await getUserWithGrantsByEmail({ email: user.email });
+  const databaseUser = await getUserWithGrantsByEmail({
+    email: normalizeEmail(user.email),
+  });
   if (!databaseUser) {
     throw new DomainError("Utilisateur inconnu", 401);
   }

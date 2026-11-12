@@ -264,6 +264,56 @@ describe("transformation.repository db integration", () => {
     expect(await findOne(-1)).toBeNull();
   });
 
+  it("refuse l'id de la version d'une autre structure sans modifier cette version", async () => {
+    const otherStructure = await createStructure({ nom: "Nom d'origine" });
+    const foreignVersionId = otherStructure.structureVersions[0].id;
+    const { transformationId, structureVersionTransformationId } =
+      await createBareTransformation();
+
+    const error = await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: structureVersionTransformationId,
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: { id: foreignVersionId, nom: "Nom réécrit" },
+        },
+      ],
+    }).catch((caughtError: unknown) => caughtError);
+
+    const foreignVersion = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: foreignVersionId },
+    });
+    expect(foreignVersion.nom).toBe("Nom d'origine");
+    expect(error).toMatchObject({ name: "DomainError", status: 404 });
+  });
+
+  it("refuse l'id de la version d'un autre bloc sans modifier cette version", async () => {
+    const otherBlock = await createBareTransformation();
+    const { transformationId, structureVersionTransformationId } =
+      await createBareTransformation();
+
+    const error = await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: structureVersionTransformationId,
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: {
+            id: otherBlock.structureVersionId,
+            nom: "Nom réécrit",
+          },
+        },
+      ],
+    }).catch((caughtError: unknown) => caughtError);
+
+    const foreignVersion = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: otherBlock.structureVersionId },
+    });
+    expect(foreignVersion.nom).not.toBe("Nom réécrit");
+    expect(error).toMatchObject({ name: "DomainError", status: 404 });
+  });
+
   it("met à jour la structureVersion existante d'un bloc quand l'id n'est pas renvoyé, sans créer de doublon", async () => {
     // GIVEN: a transformation whose block already holds a structureVersion
     const { transformationId, structureVersionTransformationId, structureId } =
