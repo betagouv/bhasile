@@ -26,6 +26,7 @@ export const MessageItem = ({
   >
     <p className="text-sm mb-1">
       <strong>{message.author.name ?? "Utilisateur"}</strong>
+      {isOwn && <span className="fr-sr-only"> (vous)</span>}
       {" · "}
       {AUTHOR_LEVEL_LABELS[message.authorLevel]}
       {" · "}

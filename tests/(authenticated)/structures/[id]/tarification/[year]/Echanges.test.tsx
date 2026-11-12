@@ -648,11 +648,11 @@ describe("Echanges", () => {
 
       renderEchanges();
 
-      expect((await screen.findByText("Le mien")).closest("li")).toHaveClass(
-        "self-end"
-      );
-      expect(screen.getByText("Le sien").closest("li")).toHaveClass(
-        "self-start"
+      expect(
+        (await screen.findByText("Le mien")).closest("li")
+      ).toHaveTextContent("Moi (vous)");
+      expect(screen.getByText("Le sien").closest("li")).not.toHaveTextContent(
+        "(vous)"
       );
     });
   });
