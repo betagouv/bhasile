@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { ReactElement } from "react";
 
+import { canAccessPage } from "@/lib/casl/pages";
+import { SessionUser } from "@/types/global";
 import { HistoryEvent, HistoryEventKind } from "@/types/structure-history.type";
 
 import { StructureRefLinks } from "./StructureRefLinks";
@@ -38,7 +41,12 @@ const eventConfig: Record<
 };
 
 export const HistoryEventLabel = ({ event }: Props): ReactElement => {
+  const { data } = useSession();
+
   if (event.kind === "CPOM_ENTRY" || event.kind === "CPOM_EXIT") {
+    const cpomLabel = `${event.cpom.operateurName} ${
+      event.cpom.regionName ?? event.cpom.departements.join(", ")
+    }`;
     return (
       <span>
         <strong>
@@ -46,10 +54,11 @@ export const HistoryEventLabel = ({ event }: Props): ReactElement => {
             ? "Entrée dans le CPOM"
             : "Sortie du CPOM"}
         </strong>{" "}
-        <Link href={`/cpoms/${event.cpom.id}`}>
-          {event.cpom.operateurName}{" "}
-          {event.cpom.regionName ?? event.cpom.departements.join(", ")}
-        </Link>
+        {canAccessPage(data?.user as SessionUser, "/cpoms") ? (
+          <Link href={`/cpoms/${event.cpom.id}`}>{cpomLabel}</Link>
+        ) : (
+          cpomLabel
+        )}
       </span>
     );
   }

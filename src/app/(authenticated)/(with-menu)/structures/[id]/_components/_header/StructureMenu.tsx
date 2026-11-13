@@ -2,6 +2,7 @@
 
 import Button from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 import { PrintableContainer } from "@/app/components/PrintableContainer";
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
@@ -12,6 +13,8 @@ import { getPdfExportPayload } from "@/app/utils/pdf-export.util";
 import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { getStructureDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { useStructureContext } from "@/contexts/StructureContext";
+import { canAccessPage } from "@/lib/casl/pages";
+import { SessionUser } from "@/types/global";
 
 import { StructurePdfExportDocument } from "./StructurePdfExportDocument";
 
@@ -22,6 +25,7 @@ type Props = {
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
   const { structure } = useStructureContext();
+  const { data } = useSession();
   const { trackStructureSpreadsheetExport, trackStructurePdfExport } =
     useUserAction();
 
@@ -49,13 +53,20 @@ export const StructureMenu = ({ structureId }: Props) => {
       />
       {isPanelOpen && (
         <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
-          <Link
-            href={`/structures/transformation/type?structureId=${structureId}`}
-            className="whitespace-nowrap fr-btn fr-btn--tertiary-no-outline"
-          >
-            Extension, contraction ou fermeture
-          </Link>
-          <hr className="w-full" />
+          {canAccessPage(
+            data?.user as SessionUser,
+            "/structures/transformation"
+          ) && (
+            <>
+              <Link
+                href={`/structures/transformation/type?structureId=${structureId}`}
+                className="whitespace-nowrap fr-btn fr-btn--tertiary-no-outline"
+              >
+                Extension, contraction ou fermeture
+              </Link>
+              <hr className="w-full" />
+            </>
+          )}
           <Button
             priority="tertiary no outline"
             onClick={() => {

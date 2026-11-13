@@ -11,6 +11,7 @@ import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import {
   AppAbility,
   canAbilityUpdateDepartement,
+  canAbilityUpdateSomeStructure,
   defineAbilityFor,
 } from "@/lib/casl";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
@@ -59,7 +60,7 @@ export const canUpdateTransformationDepartements = (
   ability: AppAbility,
   structureVersionTransformations: DepartementBearingStructureVersionTransformation[]
 ): boolean =>
-  ability.can("update", "Structure") &&
+  canAbilityUpdateSomeStructure(ability) &&
   !findRefusedDepartement(ability, structureVersionTransformations);
 
 export const isTransformationVisible = (
@@ -84,7 +85,7 @@ export const checkCanUpdateDepartements = (
   }
 
   const ability = defineAbilityFor(user);
-  if (!ability.can("update", "Structure")) {
+  if (!canAbilityUpdateSomeStructure(ability)) {
     throw new DomainError("Droits insuffisants", 403);
   }
 

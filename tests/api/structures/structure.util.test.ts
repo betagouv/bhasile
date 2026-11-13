@@ -936,36 +936,34 @@ describe("buildCommunePoints", () => {
 });
 
 describe("hideAgentOnlyFields", () => {
-  it("masque les données réservées aux agents et garde le reste de la fiche", () => {
+  it("masque les commentaires des budgets, de la structure comme de ses CPOM, et garde le reste de la fiche", () => {
     const structure = {
       id: 1,
       nom: "Centre",
-      notes: "note interne",
+      budgets: [{ year: 2025, commentaire: "commentaire interne" }],
       controles: [{ id: 1 }],
-      evaluations: [{ id: 1 }],
-      evenementsIndesirablesGraves: [{ id: 1 }],
-      anomalies: [{ code: "A" }],
-      cpomStructures: [{ id: 1 }],
-      isInCpom: true,
-      isInCpomPerYear: { 2026: true },
-      history: [
-        { kind: "CPOM_ENTRY", date: "2026-01-01" },
-        { kind: "FERMETURE", date: "2026-06-01" },
+      cpomStructures: [
+        {
+          id: 1,
+          cpom: {
+            id: 7,
+            budgets: [{ year: 2025, commentaire: "commentaire CPOM" }],
+          },
+        },
       ],
     } as unknown as StructureApiRead;
 
     expect(hideAgentOnlyFields(structure)).toEqual({
       id: 1,
       nom: "Centre",
-      notes: null,
-      controles: [],
-      evaluations: [],
-      evenementsIndesirablesGraves: [],
-      anomalies: [],
-      cpomStructures: [],
-      isInCpom: false,
-      isInCpomPerYear: {},
-      history: [{ kind: "FERMETURE", date: "2026-06-01" }],
+      budgets: [{ year: 2025, commentaire: null }],
+      controles: [{ id: 1 }],
+      cpomStructures: [
+        {
+          id: 1,
+          cpom: { id: 7, budgets: [{ year: 2025, commentaire: null }] },
+        },
+      ],
     });
   });
 });

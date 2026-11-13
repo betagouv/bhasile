@@ -46,10 +46,14 @@ describe("StructureHeader", () => {
   it("ramène à la liste des structures par défaut", () => {
     renderWithStructurePageProviders(
       buildClosedStructure(),
-      <StructureHeader
-        actualisationYear={null}
-        isTarificationAccessible={false}
-      />
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader
+            actualisationYear={null}
+            isTarificationAccessible={false}
+          />
+        </AppAbilityProvider>
+      </SessionProvider>
     );
 
     expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
@@ -63,10 +67,14 @@ describe("StructureHeader", () => {
 
     renderWithStructurePageProviders(
       buildClosedStructure(),
-      <StructureHeader
-        actualisationYear={null}
-        isTarificationAccessible={false}
-      />
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader
+            actualisationYear={null}
+            isTarificationAccessible={false}
+          />
+        </AppAbilityProvider>
+      </SessionProvider>
     );
 
     expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
@@ -82,10 +90,14 @@ describe("StructureHeader", () => {
     // WHEN
     renderWithStructurePageProviders(
       structure,
-      <StructureHeader
-        actualisationYear={null}
-        isTarificationAccessible={false}
-      />
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader
+            actualisationYear={null}
+            isTarificationAccessible={false}
+          />
+        </AppAbilityProvider>
+      </SessionProvider>
     );
 
     // THEN
@@ -152,10 +164,14 @@ describe("StructureHeader", () => {
     // WHEN
     renderWithStructurePageProviders(
       structure,
-      <StructureHeader
-        actualisationYear={ACTUALISATION_YEAR}
-        isTarificationAccessible={false}
-      />
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader
+            actualisationYear={ACTUALISATION_YEAR}
+            isTarificationAccessible={false}
+          />
+        </AppAbilityProvider>
+      </SessionProvider>
     );
 
     // THEN
@@ -201,7 +217,11 @@ describe("StructureHeader", () => {
   it("garde le lien vers la tarification sur une structure fermée", () => {
     renderWithStructurePageProviders(
       buildClosedStructure(),
-      <StructureHeader actualisationYear={null} isTarificationAccessible />
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructureHeader actualisationYear={null} isTarificationAccessible />
+        </AppAbilityProvider>
+      </SessionProvider>
     );
 
     expect(screen.getByText(/Fermée le/)).toBeInTheDocument();

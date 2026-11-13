@@ -69,18 +69,20 @@ export const hideAgentOnlyFields = (
   structure: StructureApiRead
 ): StructureApiRead => ({
   ...structure,
-  notes: null,
-  controles: [],
-  evaluations: [],
-  evenementsIndesirablesGraves: [],
-  anomalies: [],
-  cpomStructures: [],
-  isInCpom: false,
-  isInCpomPerYear: {},
-  history: structure.history?.filter(
-    (event) => event.kind !== "CPOM_ENTRY" && event.kind !== "CPOM_EXIT"
-  ),
+  budgets: hideBudgetCommentaires(structure.budgets),
+  cpomStructures: structure.cpomStructures?.map((cpomStructure) => ({
+    ...cpomStructure,
+    cpom: {
+      ...cpomStructure.cpom,
+      budgets: hideBudgetCommentaires(cpomStructure.cpom.budgets),
+    },
+  })),
 });
+
+const hideBudgetCommentaires = <T extends { commentaire?: string | null }>(
+  budgets: T[] | undefined
+): T[] | undefined =>
+  budgets?.map((budget) => ({ ...budget, commentaire: null }));
 
 export const getReadableNotes = (
   structure: StructureApiRead,
