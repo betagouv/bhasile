@@ -2,6 +2,7 @@
 
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
@@ -12,6 +13,8 @@ import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-d
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
 import { PageHeader } from "@/components/PageHeader";
 import { useOptionalStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { isAgent } from "@/lib/casl";
+import { SessionUser } from "@/types/global";
 
 import { StatistiquesPdfExportDocument } from "./StatistiquesPdfExportDocument";
 
@@ -23,6 +26,7 @@ export const StatistiquesHeader = (): ReactElement => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { data } = useSession();
 
   const {
     triggerExport,
@@ -127,7 +131,9 @@ export const StatistiquesHeader = (): ReactElement => {
             { label: "Finance", section: "#finance" },
             { label: "Contrôle qualité", section: "#controle-qualite" },
             { label: "Activité", section: "#activite" },
-            { label: "RMU", section: "#rmu" },
+            ...(isAgent(data?.user as SessionUser)
+              ? [{ label: "RMU", section: "#rmu" }]
+              : []),
           ]}
         />
       )}

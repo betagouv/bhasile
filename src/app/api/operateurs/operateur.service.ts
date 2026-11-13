@@ -43,7 +43,8 @@ export const getOperateurs = cache(
     search: string | null,
     departements: string | null,
     operateursFilter: string | null,
-    types: string | null
+    types: string | null,
+    user: SessionUser | undefined
   ): Promise<{
     operateurs: OperateurListItem[];
     totalOperateurs: number;
@@ -54,11 +55,14 @@ export const getOperateurs = cache(
       findAllOperateurs(),
     ]);
 
-    const filters = await resolveFilters({
-      departements,
-      operateurs: operateursFilter,
-      types,
-    });
+    const filters = await resolveFilters(
+      {
+        departements,
+        operateurs: operateursFilter,
+        types,
+      },
+      user as SessionUser
+    );
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
     const filialesByParentId = buildFilialesByParentId(operateurs);
     const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(

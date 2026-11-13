@@ -61,7 +61,12 @@ describe("menu.util", () => {
 
       const urls = listUrls(resolveMenuItems(operateurUser as SessionUser));
 
-      expect(urls).toEqual(["/structures", "/operateurs/42"]);
+      expect(urls).toEqual([
+        "/structures",
+        "/cpoms",
+        "/operateurs/42",
+        "/statistiques",
+      ]);
     });
 
     it("n'affiche à un non-agent sans opérateur que les structures", () => {
