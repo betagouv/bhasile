@@ -25,7 +25,7 @@ Plusieurs périmètres peuvent couvrir la même zone.
 - **En attente** : droits de contact seulement (\*).
 - **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
 - **Agent** : rattaché obligatoirement à un unique périmètre. Droits : la lecture nationale, commune à tous les agents et calculée, plus les binômes de son périmètre (aujourd'hui `ADMIN` sur sa région ou son département). Un périmètre national n'a aucun binôme : aucun agent n'écrit au niveau national, seul le superadmin a tous les droits.
-- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans CPOM ; certains champs lui sont masqués.
+- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans CPOM, sur les structures finalisées seulement ; certains champs lui sont masqués.
 - **Activé sans périmètre ni opérateur** : droits de contact seulement (\*).
 
 (\*) Droits de contact : un user non-agent qui figure comme contact (même email) dans la version affichée d'une structure finalisée lit cette structure, sans validation préalable. Avant la finalisation, les contacts n'ont été saisis que par l'opérateur et ne donnent rien. Seulement si `CONTACT_ACCESS_ENABLED=true`.
@@ -62,9 +62,21 @@ Une fiche hors périmètre renvoie une 404, pas une 403, pour ne pas révéler q
 - **Région distincte du département** : couvrir une région revient à couvrir ses départements, mais le métier distingue les deux niveaux : un binôme régional couvre aussi les CPOM régionaux, et la messagerie sépare DREETS et DDETS (signature des messages, notifications réservées aux périmètres départementaux).
 - **Suppressions** : supprimer une zone, une structure ou un périmètre supprime ses binômes (`Cascade`) ; un périmètre qui a des agents ne se supprime pas (`Restrict`), un opérateur qui a des users non plus.
 
+## Pages et menu par profil
+
+Les données sont filtrées par CASL (`rules.ts`) ; les pages, par `canAccessPage` (`lib/casl/pages.ts`), que le proxy consulte avant toute page ProConnect :
+
+- **Agent** : toutes les pages.
+- **Non-agent** (user opérateur, ou contact sans opérateur rattaché) : les structures, et pour un user opérateur sa fiche opérateur sans ses pages de modification. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (CPOM, statistiques, ressources, liste des opérateurs) vers la 404.
+- **Chemin absent des listes** : refusé à tous.
+
+La fiche opérateur vérifie aussi la règle `read Operateur` (`getOperateur`) : un non-agent ne lit que son opérateur, même sans passer par le proxy. Le menu (`menu.util.ts`) et les liens de la fiche opérateur filtrent leurs entrées avec `canAccessPage` : ouvrir ou fermer une page dans `pages.ts` suffit. « Paramètres » reste derrière son flag, hors de `pages.ts`.
+
+Fermer une page ne ferme pas son API : elle se ferme dans la route. `/api/statistiques` et `/api/statistiques/cartographie` répondent 403 à un non-agent. Le tableau de bord et la liste des opérateurs n'ont pas d'API, leurs pages appellent les services directement.
+
 ## Avant d'activer les contacts
 
-`CONTACT_ACCESS_ENABLED=true` ouvre l'application à des non-agents, sans validation préalable. Ouverture prévue après #1742, qui limite ce qu'un non-agent voit sur la fiche structure. Avant, fermer aussi ce qui reste ouvert à toute session : fichiers, fiche et liste des opérateurs, pages de transformation, statistiques (le RMU suit le département), pages et menu réservés aux agents.
+`CONTACT_ACCESS_ENABLED=true` ouvre l'application à des non-agents, sans validation préalable. Ouverture prévue après #1742, qui limite ce qu'un non-agent voit sur la fiche structure et ferme aux non-agents les pages réservées aux agents et l'API des statistiques. Avant, fermer aussi ce qui reste ouvert à toute session : fichiers, suggestions d'opérateurs, pages de transformation.
 
 ## Reprise et mise en prod
 
