@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
 
 import {
   getTarificationOverview,
@@ -7,7 +6,7 @@ import {
 } from "@/app/api/tarifications/tarification.service";
 import { isCampaignOpen } from "@/app/api/tarifications/tarification.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { authOptions } from "@/lib/next-auth/auth";
+import { auth } from "@/lib/next-auth/auth";
 import { tarificationParamsSchema } from "@/schemas/api/message.schema";
 import { SessionUser } from "@/types/global";
 
@@ -29,7 +28,7 @@ export default async function TarificationPage({
   }
   const { structureId, year } = parsedParams.data;
 
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user) {
     notFound();
   }

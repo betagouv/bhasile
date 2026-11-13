@@ -1,9 +1,8 @@
-import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { SearchParams } from "@/app/utils/search-params.util";
 import { PageHeader } from "@/components/PageHeader";
-import { authOptions } from "@/lib/next-auth/auth";
+import { auth } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 import { getFiltersFromSearchParams } from "@/utils/filters.util";
 
@@ -25,7 +24,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<ReactElement> {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const user = session?.user as SessionUser | undefined;
   const params = await searchParams;
 
