@@ -26,13 +26,20 @@ Ouvrez [http://localhost:3000](http://localhost:3000) avec votre navigateur pour
 
 ### 🧑 Se connecter avec un rôle
 
-Le seed crée trois agents de test. Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
+Le seed crée huit utilisateurs de test (trois agents, trois opérateurs, deux contacts). Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
 
-| Rôle          | Email                                   | Périmètre        |
-| ------------- | --------------------------------------- | ---------------- |
-| National      | `national@test.proconnect.gouv.fr`      | Tout, en lecture |
-| Régional      | `regional@test.proconnect.gouv.fr`      | Île-de-France    |
-| Départemental | `departemental@test.proconnect.gouv.fr` | Paris (75)       |
+| Rôle                    | Email                                             | Périmètre                                       |
+| ----------------------- | ------------------------------------------------- | ----------------------------------------------- |
+| National                | `national@test.proconnect.gouv.fr`                | Tout, en lecture                                |
+| Régional                | `regional@test.proconnect.gouv.fr`                | Île-de-France                                   |
+| Départemental           | `departemental@test.proconnect.gouv.fr`           | Paris (75)                                      |
+| Opérateur national      | `operateur-national@test.proconnect.gouv.fr`      | Structures du 1er opérateur, en lecture         |
+| Opérateur régional      | `operateur-regional@test.proconnect.gouv.fr`      | Structures du 1er opérateur en IDF, en lecture  |
+| Opérateur départemental | `operateur-departemental@test.proconnect.gouv.fr` | Structures du 1er opérateur à Paris, en lecture |
+| Contact 1               | `contact-operateur-1@test.proconnect.gouv.fr`     | 1 structure dont il est contact                 |
+| Contact 2               | `contact-operateur-2@test.proconnect.gouv.fr`     | 2 structures dont il est contact                |
+
+Le 1er opérateur a toujours au moins trois structures finalisées à Paris : ce sont celles des contacts. Les contacts n'ont accès qu'avec `CONTACT_ACCESS_ENABLED=true`.
 
 Sur la page intermédiaire, choisissez `eidas1-mfa` et cliquez sur "Se connecter" : l'application exige la double authentification. `eidas2` et `eidas3` passent aussi ; `eidas1` et `eidas0` sont refusés.
 
