@@ -7,6 +7,7 @@ import Loader from "@/app/components/ui/Loader";
 import { formatDateTime } from "@/app/utils/date.util";
 import { useConversationMessages } from "@/hooks/useConversationMessages";
 import { MessageDraft } from "@/hooks/useMessageDraft";
+import { useMessageSearch } from "@/hooks/useMessageSearch";
 import {
   ConversationAnchor,
   ConversationTag,
@@ -17,6 +18,7 @@ import { buildConversationThread } from "@/utils/conversation.util";
 import { ConversationSummary } from "./ConversationSummary";
 import { MessageComposer } from "./MessageComposer";
 import { MessageItem } from "./MessageItem";
+import { MessageSearchBar } from "./MessageSearchBar";
 import { ReadOnlyNotice } from "./ReadOnlyNotice";
 
 export const Conversation = ({
@@ -30,6 +32,8 @@ export const Conversation = ({
   anchors,
   canTag,
   draft,
+  searchQuery,
+  onSearchQueryChange,
 }: Props): ReactElement => {
   const {
     messages,
@@ -44,6 +48,16 @@ export const Conversation = ({
   const requestedReceiptIdsRef = useRef(new Set<number>());
   const listRef = useRef<HTMLOListElement>(null);
   const isAtBottomRef = useRef(true);
+
+  const {
+    searchWords,
+    resultCount,
+    resultPosition,
+    currentResultId,
+    isResult,
+    goToOlderResult,
+    goToNewerResult,
+  } = useMessageSearch({ messages, searchQuery, listRef });
 
   useEffect(() => {
     if (!messages || !canParticipate) {
@@ -73,10 +87,10 @@ export const Conversation = ({
 
   useEffect(() => {
     const list = listRef.current;
-    if (list && isAtBottomRef.current) {
+    if (list && isAtBottomRef.current && currentResultId === null) {
       list.scrollTop = list.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, currentResultId]);
 
   const handleScroll = () => {
     const list = listRef.current;
@@ -87,6 +101,23 @@ export const Conversation = ({
       list.scrollHeight - list.scrollTop - list.clientHeight <
       SCROLL_BOTTOM_TOLERANCE_PX;
   };
+
+  const sendMessage: typeof postMessage = async (message) => {
+    await postMessage(message);
+    isAtBottomRef.current = true;
+  };
+
+  const searchBar = (
+    <MessageSearchBar
+      value={searchQuery}
+      onChange={onSearchQueryChange}
+      isSearching={searchWords.length > 0}
+      resultCount={resultCount}
+      resultPosition={resultPosition}
+      onOlderResult={goToOlderResult}
+      onNewerResult={goToNewerResult}
+    />
+  );
 
   if (hasLostAccess) {
     return (
@@ -106,7 +137,10 @@ export const Conversation = ({
         description="Les échanges n’ont pas pu être chargés. Nouvel essai dans quelques secondes."
       />
     ) : (
-      <Loader />
+      <div className="flex flex-col gap-4">
+        {searchBar}
+        <Loader />
+      </div>
     );
   }
 
@@ -114,6 +148,7 @@ export const Conversation = ({
 
   return (
     <div className="flex flex-col gap-4">
+      {searchBar}
       {hasLoadingError && (
         <Alert
           severity="warning"
@@ -156,6 +191,8 @@ export const Conversation = ({
                   tags={tags}
                   canTag={canTagMessages}
                   onTagChange={(tagKey) => changeTag(item.message.id, tagKey)}
+                  searchWords={isResult(item.message.id) ? searchWords : []}
+                  isCurrentResult={item.message.id === currentResultId}
                 />
               )
             )}
@@ -168,7 +205,7 @@ export const Conversation = ({
           tags={tags}
           canTag={canTagMessages}
           draft={draft}
-          onSend={postMessage}
+          onSend={sendMessage}
         />
       )}
     </div>
@@ -188,4 +225,6 @@ type Props = {
   anchors: ConversationAnchor[];
   canTag: boolean;
   draft: MessageDraft;
+  searchQuery: string;
+  onSearchQueryChange: (searchQuery: string) => void;
 };

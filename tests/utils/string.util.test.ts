@@ -50,6 +50,10 @@ describe("string util", () => {
       expect(matchesSearchQuery("Finistère", "Finistère")).toBe(true);
     });
 
+    it("confond l'apostrophe droite et l'apostrophe typographique", () => {
+      expect(matchesSearchQuery("Côte d’Armor", "cote d'armor")).toBe(true);
+    });
+
     it("est insensible à la casse et aux accents", () => {
       expect(matchesSearchQuery("Finistère", "finistere")).toBe(true);
       expect(matchesSearchQuery("ÎLE-DE-FRANCE", "ile de france")).toBe(true);
