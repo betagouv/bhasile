@@ -6,12 +6,18 @@ import {
 import type {
   TarificationJournal,
   TarificationJournalDocument,
+  TarificationJournalEvent,
+  TarificationJournalOpening,
 } from "@/types/tarification.type";
 
 // Seul point de passage : aucune lecture du journal par l'opérateur ne le contourne
-export const filterJournalForOperateur = (
-  journal: TarificationJournal
-): TarificationJournal => {
+export const filterJournalForOperateur = <
+  TDocument extends TarificationJournalDocument,
+  TEvent extends TarificationJournalEvent,
+  TOpening extends TarificationJournalOpening,
+>(
+  journal: TarificationJournal<TDocument, TEvent, TOpening>
+): TarificationJournal<TDocument, TEvent, TOpening> => {
   const visibleDocumentIds = getOperateurVisibleDocumentIds(journal);
   const sharedDepositIds = new Set(
     journal.documents.filter(isOperateurDocument).map((document) => document.id)

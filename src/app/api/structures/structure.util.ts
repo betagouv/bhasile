@@ -220,7 +220,13 @@ export const getCurrentPlacesLogementsSociaux = (
 ) => sumPlaces(structure, (adresse) => adresse.isLogementSocial);
 
 export const isStructureInCpom = (
-  structure: StructureDbDetails | StructureDbList,
+  structure: {
+    cpomStructures?: {
+      dateStart: Date | null;
+      dateEnd: Date | null;
+      cpom: { actesAdministratifs: ActeAdministratifDates[] };
+    }[];
+  },
   year: number = getCurrentYear()
 ): boolean =>
   structure.cpomStructures?.some((cpomStructure) => {

@@ -9,9 +9,10 @@ export const createOne = async ({
   mimeType,
   originalName,
   fileSize,
+  sha256,
 }: CreateOneArgs): Promise<FileUpload | null> => {
   return prisma.fileUpload.create({
-    data: { key, mimeType, originalName, fileSize },
+    data: { key, mimeType, originalName, fileSize, sha256 },
   });
 };
 
@@ -20,6 +21,7 @@ type CreateOneArgs = {
   mimeType: string;
   originalName: string;
   fileSize: number;
+  sha256: string;
 };
 
 export const findOneByKeyWithParents = async (

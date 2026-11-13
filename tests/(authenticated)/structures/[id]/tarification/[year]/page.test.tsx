@@ -19,11 +19,6 @@ vi.mock("@/lib/next-auth/auth", () => ({
   auth: () => mockGetServerSession(),
 }));
 
-vi.mock("@/app/utils/now.util", async () => {
-  const actual = await vi.importActual("@/app/utils/now.util");
-  return { ...actual, getCurrentYear: () => 2026 };
-});
-
 vi.mock("@/app/api/tarifications/tarification.service", () => ({
   getTarificationOverview: (...args: unknown[]) =>
     mockGetTarificationOverview(...args),
@@ -51,6 +46,7 @@ const overview = {
   participant: { id: 3, level: "DEPARTEMENT" },
   isOperateur: false,
   canParticipate: true,
+  openCampaignYears: [2026, 2027],
   campaignYears: [2027, 2026, 2024],
   tags: [{ key: "L48", label: "L48 et procédure contradictoire" }],
 };

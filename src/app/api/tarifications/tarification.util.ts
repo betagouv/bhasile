@@ -4,32 +4,49 @@ import {
   isAgentUser,
   toSessionGrant,
 } from "@/app/api/users/user.util";
+import { getDepartementTimeZone } from "@/app/utils/date.util";
 import { DomainError } from "@/app/utils/domain-error.util";
-import { getCurrentYear } from "@/app/utils/now.util";
+import { getNow } from "@/app/utils/now.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { VISIBILITY_LABELS } from "@/constants";
-import { GrantScope, Visibility } from "@/generated/prisma/enums";
+import {
+  GrantScope,
+  type StructureType,
+  Visibility,
+} from "@/generated/prisma/enums";
 import { canAccessTarification } from "@/lib/casl";
+import { getCampaignPhase } from "@/lib/tarification/tarification.campaign";
 import type { NotificationRecipient } from "@/types/conversation.type";
 import type { SessionPermissions } from "@/types/global";
 
-// La campagne N est ouverte du 1er janvier N-1 au 31 décembre N
-export const getOpenCampaignYears = (): number[] => {
-  const currentYear = getCurrentYear();
-  return [currentYear, currentYear + 1];
-};
-
-export const getSelectableCampaignYears = (
-  tarificationYears: number[]
-): number[] =>
-  [...new Set([...getOpenCampaignYears(), ...tarificationYears])].sort(
+export const getSelectableCampaignYears = ({
+  openCampaignYears,
+  tarificationYears,
+}: {
+  openCampaignYears: number[];
+  tarificationYears: number[];
+}): number[] =>
+  [...new Set([...openCampaignYears, ...tarificationYears])].sort(
     (firstYear, secondYear) => secondYear - firstYear
   );
 
-export const isCampaignOpen = (year: number): boolean =>
-  getOpenCampaignYears().includes(year);
+export const assertStructureEligible = (structure: {
+  type: StructureType | null;
+}): void => {
+  if (!isStructureAutorisee(structure.type)) {
+    throw new DomainError(
+      "Seuls les CADA et les CPH ont une tarification",
+      409
+    );
+  }
+};
 
-export const assertCampaignOpen = (year: number): void => {
-  if (!isCampaignOpen(year)) {
+export const assertCampaignOpen = (
+  year: number,
+  structure: { departementAdministratif: string }
+): void => {
+  const timeZone = getDepartementTimeZone(structure.departementAdministratif);
+  if (getCampaignPhase(year, getNow(), timeZone) !== "OPEN") {
     throw new DomainError(
       `La campagne ${year} n'est pas ouverte : ses échanges sont en lecture seule`,
       409

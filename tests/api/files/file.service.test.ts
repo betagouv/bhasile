@@ -66,7 +66,12 @@ const messageFile = buildFile({
   },
 } as Partial<FileWithParents>);
 
-const tarificationFile = buildFile({ tarificationDocument: { id: 1 } });
+const tarificationFile = buildFile({
+  tarificationDocument: {
+    id: 1,
+    structureTarification: { structureId: 1, campaign: { year: 2027 } },
+  },
+});
 
 const agent: Principal = {
   type: "agent",
@@ -154,13 +159,12 @@ describe("authorizeFileAccess", () => {
     expect(authorizeFileAccess(agent, messageFile, "delete")).toBe(false);
   });
 
-  it("ne traite pas un fichier de tarification comme orphelin, et le ferme à tous", () => {
+  it("ne traite pas un fichier de tarification comme orphelin et n'en laisse jamais supprimer", () => {
     mockCanDeleteFile.mockReturnValue(true);
 
-    expect(authorizeFileAccess(operateur, tarificationFile, "read")).toBe(
+    expect(authorizeFileAccess(operateur, tarificationFile, "delete")).toBe(
       false
     );
-    expect(authorizeFileAccess(agent, tarificationFile, "read")).toBe(false);
     expect(authorizeFileAccess(agent, tarificationFile, "delete")).toBe(false);
   });
 });

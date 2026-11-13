@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { Session } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
@@ -117,6 +119,9 @@ export const authorizeFileAccess = (
   return canDeleteFile(principal.user, file);
 };
 
+export const getSha256 = (fileBuffer: Buffer): string =>
+  createHash("sha256").update(fileBuffer).digest("hex");
+
 export const uploadFile = async (
   bucketName: string,
   fileName: string,
@@ -198,13 +203,15 @@ export const createUploadedFile = async ({
   mimeType,
   originalName,
   fileSize,
+  sha256,
 }: {
   key: string;
   mimeType: string;
   originalName: string;
   fileSize: number;
+  sha256: string;
 }): Promise<FileUpload | null> => {
-  return createOne({ key, mimeType, originalName, fileSize });
+  return createOne({ key, mimeType, originalName, fileSize, sha256 });
 };
 
 export const getFileWithParents = async (

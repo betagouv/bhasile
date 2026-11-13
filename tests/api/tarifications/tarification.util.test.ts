@@ -9,14 +9,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   assertCampaignOpen,
+  assertStructureEligible,
   buildNotificationParams,
   getMessageRecipients,
-  getOpenCampaignYears,
   getSelectableCampaignYears,
-  isCampaignOpen,
   isNotificationHour,
 } from "@/app/api/tarifications/tarification.util";
-import { GrantScope, Visibility } from "@/generated/prisma/enums";
+import {
+  GrantScope,
+  StructureType,
+  Visibility,
+} from "@/generated/prisma/enums";
 
 vi.mock("@/app/utils/now.util", async () => {
   const actual = await vi.importActual("@/app/utils/now.util");
@@ -39,39 +42,43 @@ describe("isNotificationHour", () => {
   });
 });
 
-describe("getOpenCampaignYears", () => {
-  it("ouvre la campagne de l'année et celle de l'année suivante", () => {
-    expect(getOpenCampaignYears()).toEqual([2027, 2028]);
-  });
-});
-
 describe("getSelectableCampaignYears", () => {
   it("propose les campagnes ouvertes et les campagnes passées qui ont des échanges, de la plus récente à la plus ancienne", () => {
-    expect(getSelectableCampaignYears([2025, 2027])).toEqual([
-      2028, 2027, 2025,
-    ]);
-  });
-
-  it("propose seulement les campagnes ouvertes sans échange passé", () => {
-    expect(getSelectableCampaignYears([])).toEqual([2028, 2027]);
-  });
-});
-
-describe("isCampaignOpen", () => {
-  it("considère ouvertes les campagnes de l'année et de l'année suivante", () => {
-    expect(isCampaignOpen(2027)).toBe(true);
-    expect(isCampaignOpen(2028)).toBe(true);
-  });
-
-  it("considère fermées les campagnes passées et trop lointaines", () => {
-    expect(isCampaignOpen(2026)).toBe(false);
-    expect(isCampaignOpen(2029)).toBe(false);
+    expect(
+      getSelectableCampaignYears({
+        openCampaignYears: [2027, 2028],
+        tarificationYears: [2025, 2027],
+      })
+    ).toEqual([2028, 2027, 2025]);
   });
 });
 
 describe("assertCampaignOpen", () => {
-  it("rejette l'écriture dans une campagne passée", () => {
-    expect(() => assertCampaignOpen(2026)).toThrow("lecture seule");
+  beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_EMULATED_NOW", "2026-12-31T21:00:00.000Z");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("ferme une campagne passée à minuit heure locale de la structure", () => {
+    expect(() =>
+      assertCampaignOpen(2026, { departementAdministratif: "75" })
+    ).not.toThrow();
+    expect(() =>
+      assertCampaignOpen(2026, { departementAdministratif: "974" })
+    ).toThrow("lecture seule");
+  });
+});
+
+describe("assertStructureEligible", () => {
+  it("réserve la tarification aux CADA et aux CPH", () => {
+    expect(() =>
+      assertStructureEligible({ type: StructureType.CADA })
+    ).not.toThrow();
+    expect(() => assertStructureEligible({ type: StructureType.HUDA })).toThrow(
+      "CADA et les CPH"
+    );
   });
 });
 
