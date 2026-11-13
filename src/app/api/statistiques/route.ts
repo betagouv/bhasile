@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { isAgent } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { statistiquesFiltersSchema } from "@/schemas/api/statistique.schema";
 import { SessionUser } from "@/types/global";
@@ -12,6 +13,10 @@ export async function GET(request: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
+  const user = session.user as SessionUser;
+  if (!isAgent(user)) {
+    return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
+  }
   const { searchParams } = request.nextUrl;
 
   const filters = statistiquesFiltersSchema.parse({
@@ -21,6 +26,6 @@ export async function GET(request: NextRequest) {
     aggregation: searchParams.get("aggregation"),
   });
 
-  const result = await getStatistiques(filters, session.user as SessionUser);
+  const result = await getStatistiques(filters, user);
   return NextResponse.json(result);
 }

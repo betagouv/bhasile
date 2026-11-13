@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
 import { ReactNode } from "react";
 
 import { getActualisationYear } from "@/app/api/structures/actualisation.util";
@@ -8,7 +7,7 @@ import { createReadEvent } from "@/app/api/user-actions/user-action.service";
 import { parseId } from "@/app/utils/string.util";
 import { StructureProvider } from "@/contexts/StructureContext";
 import { canAccessTarification } from "@/lib/casl";
-import { authOptions } from "@/lib/next-auth/auth";
+import { auth } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 
 import { StructureHeader } from "./_components/_header/StructureHeader";
@@ -26,7 +25,7 @@ export default async function StructureLayout({
     notFound();
   }
 
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const structure = await getFullStructure(
     structureId,
     session?.user as SessionUser | undefined
