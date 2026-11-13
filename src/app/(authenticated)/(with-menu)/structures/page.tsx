@@ -1,4 +1,3 @@
-import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
@@ -15,7 +14,8 @@ import {
 import { CallToActionBanner } from "@/components/CallToActionBanner";
 import { PageHeader } from "@/components/PageHeader";
 import { STRUCTURES_STORAGE_KEY } from "@/constants";
-import { authOptions } from "@/lib/next-auth/auth";
+import { isAgent } from "@/lib/casl";
+import { auth } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 import { StructuresQuery } from "@/types/structure-list.type";
 import { getFiltersFromSearchParams } from "@/utils/filters.util";
@@ -34,7 +34,7 @@ export default async function Structures({
   searchParams: Promise<SearchParams>;
 }): Promise<ReactElement> {
   const params = await searchParams;
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const query = buildStructuresQuery(
     params,
     session?.user as SessionUser | undefined
@@ -132,12 +132,14 @@ const buildStructuresQuery = (
   user: SessionUser | undefined
 ): StructuresQuery => {
   const isClosed = getFirstParam(params.statut) === "fermees";
+  const filters = getFiltersFromSearchParams(params);
   return {
     vue: getFirstParam(params.vue) === "carte" ? "carte" : "tableau",
     mode: parseMapMode(getFirstParam(params.mode), isClosed),
     search: getFirstParam(params.search),
     page: getPageParam(params, "page"),
-    ...getFiltersFromSearchParams(params),
+    ...filters,
+    operateurs: isAgent(user) ? filters.operateurs : null,
     column: parseStructureColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
     isClosed,
