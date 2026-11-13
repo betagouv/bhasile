@@ -77,11 +77,14 @@ export const getCpoms = cache(
     user,
   }: CpomsQuery): Promise<{ cpoms: CpomListItem[]; totalCpoms: number }> => {
     const readableCpoms = await findAllCpoms(getReadableCpomWhere(user));
-    const filters = await resolveFilters({
-      departements,
-      operateurs,
-      types,
-    });
+    const filters = await resolveFilters(
+      {
+        departements,
+        operateurs,
+        types,
+      },
+      user as SessionUser
+    );
     const filtered = readableCpoms.filter((cpom) =>
       matchesCpomFilters(cpom, filters)
     );

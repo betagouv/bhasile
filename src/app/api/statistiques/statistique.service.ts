@@ -2,6 +2,7 @@ import { getNow } from "@/app/utils/now.util";
 import {
   getReadableDepartementNumeros,
   getReadableStructureWhere,
+  isAgent,
 } from "@/lib/casl";
 import {
   StatistiqueApiRead,
@@ -66,7 +67,7 @@ export const buildStatistiquesContext = async (
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = toStatistiquesPerimeterFilters(
-    await resolveFilters(filters)
+    await resolveFilters(filters, user)
   );
   const readableDepartements = getReadableDepartements(
     resolvedFilters.departements,
@@ -233,12 +234,14 @@ export const getStatistiques = async (
 
   const { aggregation } = filters;
 
+  const isAgentUser = isAgent(user);
+
   return {
     structures: computeStructuresStatistiques(context),
     places: computePlacesStatistiques(context),
     finance: computeFinanceStatistiques(context, aggregation),
     controleQualite: computeControleQualiteStatistiques(context, aggregation),
     activite: computeActiviteStatistiques(context),
-    rmu: computeRmuStatistiques(context),
+    ...(isAgentUser ? { rmu: computeRmuStatistiques(context) } : {}),
   };
 };

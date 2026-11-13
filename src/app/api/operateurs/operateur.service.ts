@@ -54,11 +54,14 @@ export const getOperateurs = cache(
       findAllOperateurs(),
     ]);
 
-    const filters = await resolveFilters({
-      departements,
-      operateurs: operateursFilter,
-      types,
-    });
+    const filters = await resolveFilters(
+      {
+        departements,
+        operateurs: operateursFilter,
+        types,
+      },
+      user
+    );
     const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
     const filialesByParentId = buildFilialesByParentId(operateurs);
     const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(

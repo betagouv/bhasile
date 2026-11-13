@@ -3,10 +3,9 @@ import { matchesPath } from "@/utils/path.util";
 
 import { isAgent } from "./rules";
 
-// TODO : ajouter le tableau de bord, cpoms et statistiques plus tard pour les opérateurs et les retirer de agentOnlyPages
-export const commonPages = ["/structures"];
+export const commonPages = ["/structures", "/cpoms", "/statistiques"];
 
-export const agentOnlyPages = ["/", "/ressources", "/cpoms", "/statistiques"];
+export const agentOnlyPages = ["/", "/ressources"];
 
 export const canAccessPage = (
   user: SessionUser | undefined,
@@ -17,6 +16,10 @@ export const canAccessPage = (
   }
 
   const isUserAgent = isAgent(user);
+
+  if (!isUserAgent && user.operateurId === null) {
+    return matchesPath(pathname, "/structures");
+  }
 
   if (commonPages.some((base) => matchesPath(pathname, base))) {
     return true;

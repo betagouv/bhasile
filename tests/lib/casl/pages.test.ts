@@ -24,8 +24,6 @@ describe("canAccessPage", () => {
 
     it("refuse l'accès aux pages réservées aux agents", () => {
       expect(canAccessPage(currentOperateurUser, "/")).toBe(false);
-      expect(canAccessPage(currentOperateurUser, "/cpoms")).toBe(false);
-      expect(canAccessPage(currentOperateurUser, "/statistiques")).toBe(false);
       expect(canAccessPage(currentOperateurUser, "/ressources")).toBe(false);
     });
 

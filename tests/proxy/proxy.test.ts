@@ -112,7 +112,9 @@ describe("proxy", () => {
       }),
     });
 
-    const response = await proxy(new NextRequest("http://localhost/cpoms"));
+    const response = await proxy(
+      new NextRequest("http://localhost/ressources")
+    );
 
     expect(response.headers.get("location")).toBe("http://localhost/404");
   });

@@ -22,7 +22,7 @@ export const getDashboardTransformations = async (
 
   const rows = buildDashboardTransformationRows(transformations, {
     ability: defineAbilityFor(user),
-    ...(await resolveFilters(filters)),
+    ...(await resolveFilters(filters, user)),
   });
 
   return paginateWithTotal(rows, page, MIDDLE_PAGE_SIZE);

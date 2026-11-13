@@ -205,7 +205,7 @@ const filterAndSortStructureRows = async (
   const filtered = filterStructureRows(
     rows,
     props,
-    await resolveFilters(props),
+    await resolveFilters(props, user),
     { includeNonVisible: Boolean(props.selection) }
   );
 

@@ -9,11 +9,14 @@ vi.mock("@/app/api/operateurs/operateur.repository", () => ({
 
 describe("resolveFilters", () => {
   it("ajoute les filiales des opérateurs filtrés, sans remonter d'une filiale à son groupe", async () => {
-    const filters = await resolveFilters({
-      departements: "75",
-      operateurs: "1,11,3",
-      types: null,
-    });
+    const filters = await resolveFilters(
+      {
+        departements: "75",
+        operateurs: "1,11,3",
+        types: null,
+      },
+      user
+    );
 
     expect(filters).toEqual({
       departementList: ["75"],
