@@ -1,11 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import client from "next-auth/react";
-import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
+import { useSession } from "next-auth/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Menu } from "@/app/components/Menu";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
-vitest.mock("next-auth/react");
+vi.mock("next-auth/react", () => ({
+  useSession: vi.fn(),
+}));
 
 const mockPathname = vi.fn();
 
@@ -17,18 +19,23 @@ const getGroupButton = (name: string) => screen.getByRole("button", { name });
 
 describe("Menu", () => {
   beforeEach(() => {
-    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "true");
+    vi.stubEnv("NEXT_PUBLIC_SHOW_RESSOURCES", "false");
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "false");
     mockPathname.mockReturnValue("/");
   });
 
-  it("affiche les éléments de l'en-tête au rendu", () => {
+  it("affiche les éléments pour un utilisateur agent au rendu", () => {
     // GIVEN
     const mockSession = {
       expires: "1",
-      user: { email: "test@example.com", name: "John Doe" },
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
     };
 
-    (client.useSession as Mock).mockReturnValueOnce([mockSession, false]);
+    vi.mocked(useSession).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: vi.fn(),
+    });
 
     // WHEN
     render(<Menu />);
@@ -83,8 +90,23 @@ describe("Menu", () => {
     expect(codeSource).toHaveAttribute("target", "_blank");
     expect(codeSource).toHaveAttribute("rel", "noopener external");
   });
-  it("déploie Structures et opérateurs par défaut", () => {
+
+  it("déploie le groupe Structures et opérateurs par défaut quand on est sur /structures", () => {
     // GIVEN
+    const mockSession = {
+      expires: "1",
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
+    };
+
+    vi.mocked(useSession).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: vi.fn(),
+    });
+
+    mockPathname.mockReturnValue("/structures");
+
+    // WHEN
     render(<Menu />);
 
     // THEN
@@ -92,15 +114,150 @@ describe("Menu", () => {
       "aria-expanded",
       "true"
     );
-    expect(getGroupButton("Paramètres")).toHaveAttribute(
+    expect(screen.getByText("Voir les structures")).toBeInTheDocument();
+  });
+
+  it("replie Structures et opérateurs quand on clique dessus", () => {
+    // GIVEN
+    const mockSession = {
+      expires: "1",
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
+    };
+
+    vi.mocked(useSession).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: vi.fn(),
+    });
+
+    mockPathname.mockReturnValue("/structures");
+
+    render(<Menu />);
+
+    // WHEN
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // THEN
+    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
+  });
+
+  it("redéploie Structures et opérateurs au second clic", () => {
+    // GIVEN
+    const mockSession = {
+      expires: "1",
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
+    };
+
+    vi.mocked(useSession).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: vi.fn(),
+    });
+
+    mockPathname.mockReturnValue("/structures");
+
+    render(<Menu />);
+
+    // WHEN
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // THEN
+    expect(screen.getByText("Voir les structures")).toBeInTheDocument();
+  });
+
+  it("déploie automatiquement le bon groupe quand on change de page", () => {
+    // GIVEN
+    const mockSession = {
+      expires: "1",
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
+    };
+
+    vi.mocked(useSession).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: vi.fn(),
+    });
+
+    mockPathname.mockReturnValue("/structures");
+    const { rerender } = render(<Menu />);
+
+    // WHEN
+    mockPathname.mockReturnValue("/cpoms");
+    rerender(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
       "aria-expanded",
-      "false"
+      "true"
     );
-    expect(screen.queryByText("Voir mon compte")).not.toBeInTheDocument();
+  });
+
+  it("ouvre ou maintient le groupe si le chemin correspond à un sous-élément en changeant de page", () => {
+    // GIVEN
+    const mockSession = {
+      expires: "1",
+      user: { email: "test@example.com", name: "John Doe", isAgent: true },
+    };
+
+    vi.mocked(useSession).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: vi.fn(),
+    });
+
+    mockPathname.mockReturnValue("/structures");
+    const { rerender } = render(<Menu />);
+
+    // WHEN
+    fireEvent.click(getGroupButton("Structures et opérateurs"));
+
+    // WHEN
+    mockPathname.mockReturnValue("/operateurs");
+    rerender(<Menu />);
+
+    // THEN
+    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+  });
+
+  it("affiche les éléments spécifiques pour un utilisateur opérateur au rendu", () => {
+    // GIVEN
+    const mockSession = {
+      expires: "1",
+      user: {
+        email: "operateur@example.com",
+        name: "Jane Operator",
+        operateurId: 10,
+        isAgent: false,
+      },
+    };
+
+    vi.mocked(useSession).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: vi.fn(),
+    });
+
+    // WHEN
+    render(<Menu />);
+
+    // THEN
+    const operateurLink = screen.getByRole("link", {
+      name: "Voir l’opérateur",
+    });
+    expect(operateurLink).toHaveAttribute("href", "/operateurs/10");
+
+    expect(screen.queryByText("Voir les structures")).toBeInTheDocument();
+    expect(screen.queryByText("Voir l’opérateur")).toBeInTheDocument();
   });
 
   it("replie Structures et opérateurs quand Paramètres est déployé", () => {
     // GIVEN
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "true");
+    mockAgentSession();
     render(<Menu />);
 
     // WHEN
@@ -115,25 +272,10 @@ describe("Menu", () => {
     expect(screen.getByText("Voir mon compte")).toBeInTheDocument();
   });
 
-  it("replie puis redéploie Structures et opérateurs au clic", () => {
-    // GIVEN
-    render(<Menu />);
-
-    // WHEN
-    fireEvent.click(getGroupButton("Structures et opérateurs"));
-
-    // THEN
-    expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
-
-    // WHEN
-    fireEvent.click(getGroupButton("Structures et opérateurs"));
-
-    // THEN
-    expect(screen.getByText("Voir les structures")).toBeInTheDocument();
-  });
-
   it("déploie Paramètres sur une page de paramètres", () => {
     // GIVEN
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PARAMETRES", "true");
+    mockAgentSession();
     mockPathname.mockReturnValue("/parametres/compte");
 
     // WHEN
@@ -152,6 +294,7 @@ describe("Menu", () => {
 
   it("garde Structures et opérateurs replié en changeant de page", () => {
     // GIVEN
+    mockAgentSession();
     const { rerender } = render(<Menu />);
     fireEvent.click(getGroupButton("Structures et opérateurs"));
 
@@ -166,21 +309,16 @@ describe("Menu", () => {
     );
     expect(screen.queryByText("Voir les structures")).not.toBeInTheDocument();
   });
-
-  it("déploie le groupe de la page visitée en changeant de page", () => {
-    // GIVEN
-    mockPathname.mockReturnValue("/parametres/compte");
-    const { rerender } = render(<Menu />);
-
-    // WHEN
-    mockPathname.mockReturnValue("/cpoms");
-    rerender(<Menu />);
-
-    // THEN
-    expect(getGroupButton("Structures et opérateurs")).toHaveAttribute(
-      "aria-expanded",
-      "true"
-    );
-    expect(screen.queryByText("Voir mon compte")).not.toBeInTheDocument();
-  });
 });
+
+const mockAgentSession = () => {
+  const mockSession = {
+    expires: "1",
+    user: { email: "test@example.com", name: "John Doe", isAgent: true },
+  };
+  vi.mocked(useSession).mockReturnValue({
+    data: mockSession,
+    status: "authenticated",
+    update: vi.fn(),
+  });
+};

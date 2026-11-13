@@ -10,6 +10,12 @@ export const canUpdateOperateur = (
   operateurId: number
 ): boolean => canAbilityUpdateOperateur(defineAbilityFor(user), operateurId);
 
+export const canAbilityReadOperateur = (
+  ability: AppAbility,
+  operateurId: number
+) =>
+  ability.can("read", subject("Operateur", { id: operateurId } as Operateur));
+
 export const canAbilityUpdateOperateur = (
   ability: AppAbility,
   operateurId: number

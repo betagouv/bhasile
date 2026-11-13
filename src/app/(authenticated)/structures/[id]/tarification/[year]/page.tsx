@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
 
 import { getFullStructure } from "@/app/api/structures/structure.service";
 import {
@@ -9,7 +8,7 @@ import {
 } from "@/app/api/tarifications/tarification.service";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { TarificationStepCode } from "@/generated/prisma/enums";
-import { authOptions } from "@/lib/next-auth/auth";
+import { auth } from "@/lib/next-auth/auth";
 import {
   computeStepProgress,
   getDefaultSectionCode,
@@ -43,7 +42,7 @@ export default async function TarificationPage({
   }
   const { structureId, year } = parsedParams.data;
 
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user) {
     notFound();
   }

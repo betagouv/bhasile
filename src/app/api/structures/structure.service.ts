@@ -191,7 +191,10 @@ const getSortedStructureRows = cache(
   async (props: SearchProps): Promise<StructureListComputedRow[]> =>
     filterAndSortStructureRows(
       await computeAllStructureRows(getReadableStructureWhere(props.user)),
-      props
+      {
+        ...props,
+        isFinalised: props.isFinalised || isLimitedToFinalised(props.user),
+      }
     )
 );
 
@@ -354,8 +357,13 @@ export const getFullStructure = async (
     return null;
   }
 
+  const isFinalised = isStructureFinalised(resolvedDbStructure, now);
+  if (!isFinalised && isLimitedToFinalised(user)) {
+    return null;
+  }
+
   const structure = dbStructureToApiRead(resolvedDbStructure, now, {
-    isFinalised: isStructureFinalised(resolvedDbStructure, now),
+    isFinalised,
   });
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
@@ -534,3 +542,6 @@ const dbStructureToApiRead = (
     structureVersions: undefined,
   }) as StructureApiRead;
 };
+
+const isLimitedToFinalised = (user: SessionUser | undefined): boolean =>
+  user !== undefined && !isAgent(user);
