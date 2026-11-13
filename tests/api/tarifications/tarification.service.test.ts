@@ -18,6 +18,7 @@ import {
   getTarificationOverview,
   getTarificationParticipant,
   getTarificationReader,
+  getTarificationUnreadCounts,
   notifyPendingTarificationMessages,
   postTarificationMessage,
   recordTarificationDocumentOpening,
@@ -35,6 +36,9 @@ import {
 import type { TarificationJournalRead } from "@/types/tarification.type";
 
 const mockUpsertStructureTarification = vi.fn();
+const mockFindStructureTarification = vi.fn();
+const mockFindUnreadMessageCounts = vi.fn();
+
 const mockFindStructureScope = vi.fn();
 const mockGetUserWithGrantsByEmail = vi.fn();
 const mockFindPendingMessageContexts = vi.fn();
@@ -65,7 +69,8 @@ vi.mock("@/lib/casl", async (importOriginal) => {
 vi.mock("@/app/api/tarifications/tarification.repository", () => ({
   upsertStructureTarification: (...args: unknown[]) =>
     mockUpsertStructureTarification(...args),
-  findStructureTarification: vi.fn(),
+  findStructureTarification: (...args: unknown[]) =>
+    mockFindStructureTarification(...args),
   findMessageTarification: vi.fn(),
   findStructureScope: (...args: unknown[]) => mockFindStructureScope(...args),
   findPendingMessageContexts: (...args: unknown[]) =>
@@ -93,6 +98,8 @@ vi.mock("@/app/api/conversations/conversation.repository", () => ({
   upsertConversation: vi.fn(),
   createMessage: vi.fn(),
   findMessages: vi.fn(),
+  findUnreadMessageCounts: (...args: unknown[]) =>
+    mockFindUnreadMessageCounts(...args),
   findConversationMessageIds: vi.fn(),
   updateMessageTagKey: vi.fn(),
   createMessageReceipts: vi.fn(),
@@ -378,7 +385,7 @@ describe("notifyPendingTarificationMessages", () => {
             structure: "C42",
             campagne: "2027",
             canal: "Tout le monde",
-            lien: "https://bhasile.test/structures/42/tarification/2027",
+            lien: "https://bhasile.test/structures/42/tarification/2027?canal=tous",
             nombre: 1,
           },
         ],
@@ -971,6 +978,71 @@ describe("écritures de la tarification", () => {
 
       expect(transaction.createEvent).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("getTarificationUnreadCounts", () => {
+  const counts = [
+    { visibility: "SHARED", _count: { messages: 2 } },
+    { visibility: "AGENTS", _count: { messages: 1 } },
+  ];
+  const buildOverview = (
+    overrides: { isOperateur?: boolean; canParticipate?: boolean } = {}
+  ) => ({
+    participant: { id: 5, level: AuthorLevel.DEPARTEMENT },
+    isOperateur: false,
+    canParticipate: true,
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFindStructureTarification.mockResolvedValue({ id: 9 });
+    mockFindUnreadMessageCounts.mockResolvedValue(counts);
+  });
+
+  it("donne à un agent les non-lus des deux canaux", async () => {
+    await expect(
+      getTarificationUnreadCounts({
+        structureId: 1,
+        year: 2027,
+        overview: buildOverview(),
+      })
+    ).resolves.toEqual({ SHARED: 2, AGENTS: 1 });
+    expect(mockFindUnreadMessageCounts).toHaveBeenCalledWith(9, 5);
+  });
+
+  it("ne révèle pas à l'opérateur l'activité du canal agents", async () => {
+    await expect(
+      getTarificationUnreadCounts({
+        structureId: 1,
+        year: 2027,
+        overview: buildOverview({ isOperateur: true }),
+      })
+    ).resolves.toEqual({ SHARED: 2, AGENTS: 0 });
+  });
+
+  it("ne compte rien pour un superadmin", async () => {
+    await expect(
+      getTarificationUnreadCounts({
+        structureId: 1,
+        year: 2027,
+        overview: buildOverview({ canParticipate: false }),
+      })
+    ).resolves.toEqual({ SHARED: 0, AGENTS: 0 });
+    expect(mockFindUnreadMessageCounts).not.toHaveBeenCalled();
+  });
+
+  it("ne compte rien pour une campagne sans tarification", async () => {
+    mockFindStructureTarification.mockResolvedValue(null);
+
+    await expect(
+      getTarificationUnreadCounts({
+        structureId: 1,
+        year: 2027,
+        overview: buildOverview(),
+      })
+    ).resolves.toEqual({ SHARED: 0, AGENTS: 0 });
   });
 });
 

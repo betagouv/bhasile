@@ -1,5 +1,7 @@
 import { Fragment, ReactElement } from "react";
 
+import { cn } from "@/app/utils/classname.util";
+import { formatDateTime } from "@/app/utils/date.util";
 import { AUTHOR_LEVEL_LABELS } from "@/constants";
 import { MessageApiRead } from "@/schemas/api/message.schema";
 import { ConversationTag } from "@/types/conversation.type";
@@ -8,19 +10,28 @@ import { MessageAttachment } from "./MessageAttachment";
 import { MessageTag } from "./MessageTag";
 
 export const MessageItem = ({
+  elementId,
   message,
+  isOwn,
   tags,
   canTag,
   onTagChange,
 }: Props): ReactElement => (
-  <li className="bg-white p-4 rounded border border-solid border-default-grey">
+  <li
+    id={elementId}
+    className={cn(
+      "max-w-[85%] p-4 rounded border border-solid border-default-grey",
+      isOwn ? "self-end bg-alt-blue-france" : "self-start bg-white"
+    )}
+  >
     <p className="text-sm mb-1">
       <strong>{message.author.name ?? "Utilisateur"}</strong>
+      {isOwn && <span className="fr-sr-only"> (vous)</span>}
       {" · "}
       {AUTHOR_LEVEL_LABELS[message.authorLevel]}
       {" · "}
       <time dateTime={message.createdAt}>
-        {formatMessageDate(message.createdAt)}
+        {formatDateTime(message.createdAt)}
       </time>
     </p>
     <MessageTag
@@ -46,7 +57,7 @@ export const MessageItem = ({
         {message.receipts.map((receipt, receiptIndex) => (
           <Fragment key={receipt.user.id}>
             {receiptIndex > 0 && ", "}
-            <span title={`Le ${formatMessageDate(receipt.createdAt)}`}>
+            <span title={`Le ${formatDateTime(receipt.createdAt)}`}>
               {receipt.user.name ?? "Utilisateur"}
             </span>
           </Fragment>
@@ -56,16 +67,10 @@ export const MessageItem = ({
   </li>
 );
 
-const DATE_TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
-  dateStyle: "short",
-  timeStyle: "short",
-});
-
-const formatMessageDate = (isoDate: string): string =>
-  DATE_TIME_FORMAT.format(new Date(isoDate));
-
 type Props = {
+  elementId: string;
   message: MessageApiRead;
+  isOwn: boolean;
   tags: ConversationTag[];
   canTag: boolean;
   onTagChange: (tagKey: string | null) => Promise<void>;

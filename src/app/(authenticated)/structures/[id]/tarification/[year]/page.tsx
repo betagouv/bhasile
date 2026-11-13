@@ -4,6 +4,7 @@ import { getFullStructure } from "@/app/api/structures/structure.service";
 import {
   getTarificationJournal,
   getTarificationOverview,
+  getTarificationUnreadCounts,
   TarificationOverview,
 } from "@/app/api/tarifications/tarification.service";
 import { DomainError } from "@/app/utils/domain-error.util";
@@ -16,6 +17,7 @@ import {
   canDeclareOutOfBhasile,
   computeSectionActions,
 } from "@/lib/tarification/tarification.actions";
+import { buildConversationAnchors } from "@/lib/tarification/tarification.anchor";
 import { getCampaignPhase } from "@/lib/tarification/tarification.campaign";
 import {
   computeStepProgress,
@@ -24,6 +26,7 @@ import {
   getSectionVersions,
   parseSectionCode,
 } from "@/lib/tarification/tarification.section";
+import { filterJournalForOperateur } from "@/lib/tarification/tarification.visibility";
 import { tarificationParamsSchema } from "@/schemas/api/message.schema";
 import { SessionUser } from "@/types/global";
 
@@ -65,6 +68,12 @@ export default async function TarificationPage({
   if (!structure) {
     notFound();
   }
+
+  const unreadCounts = await getTarificationUnreadCounts({
+    structureId,
+    year,
+    overview,
+  });
 
   const reader = { isAgent: !overview.isOperateur };
   const [{ journal, state, drlUrl }, { journal: previousJournal }] =
@@ -158,7 +167,7 @@ export default async function TarificationPage({
             departementAdministratif: structure.departementAdministratif,
           }}
         />
-        <div className="flex flex-col gap-6 p-4">
+        <div className="flex flex-col gap-6 p-4 pb-20">
           <CampaignNotice
             year={year}
             phase={phase}
@@ -201,6 +210,13 @@ export default async function TarificationPage({
             canParticipate={overview.canParticipate}
             isCampaignOpen={overview.openCampaignYears.includes(year)}
             tags={overview.tags}
+            unreadCounts={unreadCounts}
+            anchorsByVisibility={{
+              SHARED: buildConversationAnchors(
+                filterJournalForOperateur(journal)
+              ),
+              AGENTS: buildConversationAnchors(journal),
+            }}
           />
         </div>
       </main>

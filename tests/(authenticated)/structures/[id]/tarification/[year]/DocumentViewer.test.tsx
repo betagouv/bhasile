@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as XLSX from "xlsx";
 
 import { DocumentViewer } from "@/app/(authenticated)/structures/[id]/tarification/[year]/_components/DocumentViewer";
 
@@ -18,12 +17,6 @@ const docxFile = {
   originalName: "note.docx",
   mimeType:
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-};
-
-const xlsxFile = {
-  key: "bp.xlsx",
-  originalName: "bp.xlsx",
-  mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
 const answerWithLink = (url: string) =>
@@ -87,83 +80,6 @@ describe("DocumentViewer", () => {
     expect(
       screen.queryByRole("button", { name: "Ouvrir le document" })
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Télécharger" })
-    ).toBeInTheDocument();
-  });
-
-  it("affiche un tableur après l'avoir lu par l'application, au clic seulement", async () => {
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.aoa_to_sheet([
-        ["Poste", "Montant"],
-        ["Loyer", 1200],
-      ]),
-      "Budget"
-    );
-    mockFetch.mockResolvedValue({
-      ok: true,
-      blob: async () =>
-        new Blob([XLSX.write(workbook, { type: "array", bookType: "xlsx" })]),
-    });
-    render(<DocumentViewer file={xlsxFile} canOpen title="BP" />);
-
-    expect(mockFetch).not.toHaveBeenCalled();
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Ouvrir le document" })
-    );
-
-    expect(await screen.findByText("Loyer")).toBeInTheDocument();
-    expect(mockFetch).toHaveBeenCalledWith(
-      "/api/files/bp.xlsx?getContent=true"
-    );
-    expect(screen.queryByTitle("BP")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Ouvrir le document" })
-    ).not.toBeInTheDocument();
-  });
-
-  it("désactive le bouton pendant l'ouverture, puis le rend après un échec", async () => {
-    let answerContent: (response: Response) => void = () => {};
-    mockFetch.mockReturnValue(
-      new Promise((resolve) => {
-        answerContent = resolve;
-      })
-    );
-    render(<DocumentViewer file={xlsxFile} canOpen title="BP" />);
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Ouvrir le document" })
-    );
-
-    expect(screen.getByRole("button", { name: "Ouverture…" })).toBeDisabled();
-
-    answerContent(
-      new Response(JSON.stringify({ error: "Panne" }), { status: 500 })
-    );
-
-    expect(
-      await screen.findByRole("button", { name: "Ouvrir le document" })
-    ).toBeEnabled();
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-  });
-
-  it("propose le téléchargement quand un tableur est illisible", async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      blob: async () => new Blob(["pas un tableur"]),
-    });
-    render(<DocumentViewer file={xlsxFile} canOpen title="BP" />);
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Ouvrir le document" })
-    );
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "téléchargez-le"
-    );
     expect(
       screen.getByRole("button", { name: "Télécharger" })
     ).toBeInTheDocument();

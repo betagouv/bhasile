@@ -111,12 +111,6 @@ export const INLINE_VIEWABLE_MIME_TYPES = [
   ...IMAGE_MIME_TYPES,
 ];
 
-// Décodés dans le navigateur par ExcelJS, qui ne lit ni le xls, ni l'ods
-export const SPREADSHEET_PREVIEW_MIME_TYPES = [
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.ms-excel.sheet.macroenabled.12",
-];
-
 export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo
 
 export const AUTHOR_LEVEL_LABELS: Record<AuthorLevel, string> = {

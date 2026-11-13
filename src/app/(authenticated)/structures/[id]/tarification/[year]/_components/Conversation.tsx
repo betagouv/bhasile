@@ -4,13 +4,17 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { ReactElement, useEffect, useRef } from "react";
 
 import Loader from "@/app/components/ui/Loader";
+import { formatDateTime } from "@/app/utils/date.util";
 import { useConversationMessages } from "@/hooks/useConversationMessages";
 import { MessageDraft } from "@/hooks/useMessageDraft";
 import {
+  ConversationAnchor,
   ConversationTag,
   ConversationVisibility,
 } from "@/types/conversation.type";
+import { buildConversationThread } from "@/utils/conversation.util";
 
+import { ConversationSummary } from "./ConversationSummary";
 import { MessageComposer } from "./MessageComposer";
 import { MessageItem } from "./MessageItem";
 import { ReadOnlyNotice } from "./ReadOnlyNotice";
@@ -23,6 +27,7 @@ export const Conversation = ({
   canParticipate,
   isCampaignOpen,
   tags,
+  anchors,
   canTag,
   draft,
 }: Props): ReactElement => {
@@ -105,6 +110,8 @@ export const Conversation = ({
     );
   }
 
+  const thread = buildConversationThread(messages, anchors);
+
   return (
     <div className="flex flex-col gap-4">
       {hasLoadingError && (
@@ -114,26 +121,47 @@ export const Conversation = ({
           description="Les échanges ne sont plus actualisés. Nouvel essai dans quelques secondes."
         />
       )}
-      {messages.length === 0 ? (
-        <p className="mb-0 text-mention-grey">Aucun message pour l’instant.</p>
-      ) : (
-        <ol
-          ref={listRef}
-          onScroll={handleScroll}
-          aria-label="Messages"
-          className="max-h-[60vh] overflow-y-auto list-none p-0 m-0 flex flex-col gap-3"
-        >
-          {messages.map((message) => (
-            <MessageItem
-              key={message.id}
-              message={message}
-              tags={tags}
-              canTag={canTagMessages}
-              onTagChange={(tagKey) => changeTag(message.id, tagKey)}
-            />
-          ))}
-        </ol>
-      )}
+      <div className="flex gap-4 h-[calc(100dvh-30rem)] min-h-64">
+        <ConversationSummary thread={thread} />
+        {thread.length === 0 ? (
+          <p className="mb-0 text-mention-grey">
+            Aucun message pour l’instant.
+          </p>
+        ) : (
+          <ol
+            ref={listRef}
+            onScroll={handleScroll}
+            aria-label="Messages"
+            className="grow min-w-0 overflow-y-auto list-none p-0 m-0 flex flex-col gap-3 [--ol-content:none]"
+          >
+            {thread.map((item) =>
+              item.kind === "anchor" ? (
+                <li
+                  key={item.elementId}
+                  id={item.elementId}
+                  className="self-center p-0 text-xs text-mention-grey text-center"
+                >
+                  {item.label}
+                  {" · "}
+                  <time dateTime={item.date.toISOString()}>
+                    {formatDateTime(item.date)}
+                  </time>
+                </li>
+              ) : (
+                <MessageItem
+                  key={item.elementId}
+                  elementId={item.elementId}
+                  message={item.message}
+                  isOwn={item.message.author.id === currentUserId}
+                  tags={tags}
+                  canTag={canTagMessages}
+                  onTagChange={(tagKey) => changeTag(item.message.id, tagKey)}
+                />
+              )
+            )}
+          </ol>
+        )}
+      </div>
       {!isCampaignOpen && <ReadOnlyNotice year={year} />}
       {isCampaignOpen && canParticipate && (
         <MessageComposer
@@ -157,6 +185,7 @@ type Props = {
   canParticipate: boolean;
   isCampaignOpen: boolean;
   tags: ConversationTag[];
+  anchors: ConversationAnchor[];
   canTag: boolean;
   draft: MessageDraft;
 };

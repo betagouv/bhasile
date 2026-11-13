@@ -12,16 +12,17 @@ import { MAX_FILE_SIZE } from "@/constants";
 import { FetchStateProvider } from "@/contexts/FetchStateContext";
 import { MessageApiRead } from "@/schemas/api/message.schema";
 
-const mockRouterReplace = vi.fn();
 const mockUseSearchParams = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockRouterReplace, push: vi.fn() }),
   usePathname: () => "/structures/42/tarification/2026",
   useSearchParams: () => mockUseSearchParams(),
 }));
 
 const CURRENT_USER_ID = 1;
+const OPEN_DRAWER_QUERY = "canal=tous";
+const NO_ANCHORS = { SHARED: [], AGENTS: [] };
+const NO_UNREAD = { SHARED: 0, AGENTS: 0 };
 const OTHER_USER = { id: 2, name: "Paul Martin" };
 const MESSAGES_URL = "/api/tarifications/42/2026/messages";
 const TAGS = [
@@ -167,6 +168,8 @@ const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
         canParticipate
         isCampaignOpen
         tags={TAGS}
+        anchorsByVisibility={NO_ANCHORS}
+        unreadCounts={NO_UNREAD}
         {...props}
       />
     </FetchStateProvider>
@@ -175,8 +178,16 @@ const renderEchanges = (props: Partial<Parameters<typeof Echanges>[0]> = {}) =>
 describe("Echanges", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(OPEN_DRAWER_QUERY));
     global.fetch = mockFetch;
+    HTMLDialogElement.prototype.showModal = vi.fn(function (
+      this: HTMLDialogElement
+    ) {
+      this.setAttribute("open", "");
+    });
+    vi.spyOn(window.history, "replaceState").mockImplementation(
+      () => undefined
+    );
   });
 
   afterEach(() => {
@@ -357,11 +368,293 @@ describe("Echanges", () => {
       screen.getByRole("tab", { name: "Services de l’État seulement" })
     );
 
-    await waitFor(() =>
-      expect(mockRouterReplace).toHaveBeenCalledWith("?canal=agents", {
-        scroll: true,
-      })
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      null,
+      "",
+      "?canal=agents"
     );
+  });
+
+  describe("pastilles de non-lus", () => {
+    const UNREAD = { SHARED: 2, AGENTS: 1 };
+
+    it("additionne les non-lus des deux canaux sur le bouton, tiroir fermé", () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams());
+      renderEchanges({ unreadCounts: UNREAD });
+
+      expect(
+        screen.getByRole("button", { name: "Échanges 3 non lus" })
+      ).toBeInTheDocument();
+    });
+
+    it("n'affiche pas de pastille sans message non lu", () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams());
+      renderEchanges();
+
+      expect(
+        screen.getByRole("button", { name: "Échanges" })
+      ).toBeInTheDocument();
+    });
+
+    it("retire la pastille du canal ouvert et garde celle de l'autre canal", async () => {
+      answerWith([]);
+      renderEchanges({ unreadCounts: UNREAD });
+
+      expect(
+        await screen.findByRole("tab", { name: "Tout le monde" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: /1 non lu$/ })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Échanges 1 non lu" })
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("passe au canal partagé depuis le canal agents ouvert par le lien d'un mail", async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
+    answerWith([]);
+    renderEchanges();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Tout le monde" }));
+
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      null,
+      "",
+      "?canal=tous"
+    );
+  });
+
+  describe("tiroir", () => {
+    it("ne charge ni n'accuse aucun message tant que le tiroir est fermé", () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams());
+      answerWith([buildMessage()]);
+
+      renderEchanges();
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it("ouvre le tiroir au clic sur le bouton en gardant les autres paramètres", () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams("etape=L48"));
+      answerWith([]);
+      renderEchanges();
+
+      fireEvent.click(screen.getByRole("button", { name: "Échanges" }));
+
+      expect(window.history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "?etape=L48&canal=tous"
+      );
+    });
+
+    it("affiche un tiroir modal quand l'URL le demande", async () => {
+      answerWith([]);
+
+      renderEchanges();
+
+      expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalledOnce();
+      expect(
+        await screen.findByRole("dialog", { name: "Échanges" })
+      ).toBeInTheDocument();
+    });
+
+    it("retire le canal à la fermeture et revient à la page seule", async () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
+      answerWith([]);
+      renderEchanges();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Fermer les échanges" })
+      );
+
+      expect(window.history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "/structures/42/tarification/2026"
+      );
+    });
+
+    it("garde les autres paramètres à la fermeture", () => {
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams("etape=L48&canal=tous")
+      );
+      answerWith([]);
+      renderEchanges();
+
+      fireEvent(screen.getByRole("dialog"), new Event("close"));
+
+      expect(window.history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "?etape=L48"
+      );
+    });
+
+    it("ferme le tiroir au clic sur le fond, pas dans le contenu", () => {
+      answerWith([]);
+      renderEchanges();
+
+      fireEvent.click(screen.getByRole("heading", { name: "Échanges" }));
+      expect(window.history.replaceState).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole("dialog"));
+      expect(window.history.replaceState).toHaveBeenCalledOnce();
+    });
+
+    it("garde le brouillon quand on ferme puis rouvre le tiroir", async () => {
+      answerWith([]);
+      const buildEchanges = () => (
+        <FetchStateProvider>
+          <Echanges
+            structureId={42}
+            year={2026}
+            currentUserId={CURRENT_USER_ID}
+            isOperateur={false}
+            canParticipate
+            isCampaignOpen
+            tags={TAGS}
+            anchorsByVisibility={NO_ANCHORS}
+        unreadCounts={NO_UNREAD}
+          />
+        </FetchStateProvider>
+      );
+      const { rerender } = render(buildEchanges());
+      await screen.findByPlaceholderText("Écrivez un message");
+      typeMessage("Réponse en cours");
+
+      mockUseSearchParams.mockReturnValue(new URLSearchParams());
+      rerender(buildEchanges());
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams(OPEN_DRAWER_QUERY)
+      );
+      rerender(buildEchanges());
+      expect(
+        await screen.findByPlaceholderText("Écrivez un message")
+      ).toHaveValue("Réponse en cours");
+    });
+  });
+
+  describe("fil et sommaire", () => {
+    const ANCHOR = {
+      id: "event-1",
+      label: "Envoi : L48 2026",
+      date: new Date("2026-10-27T08:00:00.000Z"),
+    };
+    const LATER_ANCHOR = {
+      id: "event-2",
+      label: "Dépôt : DAB 2026",
+      date: new Date("2026-10-27T11:00:00.000Z"),
+    };
+
+    it("intercale les jalons du canal affiché dans le fil, par date", async () => {
+      answerWith([buildMessage()]);
+
+      renderEchanges({
+        anchorsByVisibility: {
+          SHARED: [ANCHOR, LATER_ANCHOR],
+          AGENTS: [{ ...ANCHOR, id: "event-9", label: "Relecture : L48 2026" }],
+        },
+      });
+
+      const list = await screen.findByRole("list", { name: "Messages" });
+      const texts = within(list)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent);
+      expect(texts[0]).toContain("Envoi : L48 2026");
+      expect(texts[1]).toContain("Bonjour");
+      expect(texts[2]).toContain("Dépôt : DAB 2026");
+      expect(screen.queryByText(/Relecture/)).not.toBeInTheDocument();
+    });
+
+    it("affiche les jalons même sans aucun message", async () => {
+      answerWith([]);
+
+      renderEchanges({
+        anchorsByVisibility: { SHARED: [ANCHOR], AGENTS: [] },
+      });
+
+      expect(
+        await screen.findByRole("list", { name: "Messages" })
+      ).toHaveTextContent("Envoi : L48 2026");
+      expect(
+        screen.queryByText("Aucun message pour l’instant.")
+      ).not.toBeInTheDocument();
+    });
+
+    it("liste au sommaire les jalons et les seuls messages avec pièces jointes", async () => {
+      answerWith([
+        buildMessage({ id: 10, text: "Sans pièce jointe" }),
+        buildMessage({
+          id: 11,
+          text: "Avec pièce jointe",
+          attachments: [
+            {
+              id: 1,
+              key: "cle",
+              originalName: "preuve.pdf",
+              mimeType: "application/pdf",
+              fileSize: 10,
+            },
+          ],
+        }),
+      ]);
+
+      renderEchanges({
+        anchorsByVisibility: { SHARED: [ANCHOR], AGENTS: [] },
+      });
+
+      const summary = await screen.findByRole("navigation", {
+        name: "Sommaire des échanges",
+      });
+      const entries = within(summary).getAllByRole("button");
+      expect(entries).toHaveLength(2);
+      expect(entries[0]).toHaveTextContent("Envoi : L48 2026");
+      expect(entries[1]).toHaveTextContent("Justificatif");
+    });
+
+    it("fait défiler le fil vers l'élément choisi au sommaire", async () => {
+      answerWith([]);
+      const scrolledElementIds: string[] = [];
+      HTMLElement.prototype.scrollIntoView = function (this: HTMLElement) {
+        scrolledElementIds.push(this.id);
+      };
+      renderEchanges({
+        anchorsByVisibility: { SHARED: [ANCHOR], AGENTS: [] },
+      });
+      const summary = await screen.findByRole("navigation", {
+        name: "Sommaire des échanges",
+      });
+
+      fireEvent.click(within(summary).getByRole("button"));
+
+      expect(scrolledElementIds).toEqual(["jalon-event-1"]);
+    });
+
+    it("distingue ses propres messages de ceux des autres", async () => {
+      answerWith([
+        buildMessage({
+          id: 10,
+          text: "Le mien",
+          author: { id: CURRENT_USER_ID, name: "Moi" },
+        }),
+        buildMessage({ id: 11, text: "Le sien" }),
+      ]);
+
+      renderEchanges();
+
+      expect(
+        (await screen.findByText("Le mien")).closest("li")
+      ).toHaveTextContent("Moi (vous)");
+      expect(screen.getByText("Le sien").closest("li")).not.toHaveTextContent(
+        "(vous)"
+      );
+    });
   });
 
   it("garde le texte, les pièces jointes et le tag de chaque canal quand on change d'onglet", async () => {
@@ -376,6 +669,8 @@ describe("Echanges", () => {
           canParticipate
           isCampaignOpen
           tags={TAGS}
+          anchorsByVisibility={NO_ANCHORS}
+        unreadCounts={NO_UNREAD}
         />
       </FetchStateProvider>
     );
@@ -390,17 +685,17 @@ describe("Echanges", () => {
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams("canal=agents"));
     rerender(buildEchanges());
-    expect(
-      await screen.findByPlaceholderText("Écrivez un message")
-    ).toHaveValue("");
+    expect(await screen.findByPlaceholderText("Écrivez un message")).toHaveValue(
+      ""
+    );
     expect(screen.queryByText("budget.pdf")).not.toBeInTheDocument();
     expect(getComposerTagSelect()).toHaveValue("");
 
-    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(OPEN_DRAWER_QUERY));
     rerender(buildEchanges());
-    expect(
-      await screen.findByPlaceholderText("Écrivez un message")
-    ).toHaveValue("Réponse en cours");
+    expect(await screen.findByPlaceholderText("Écrivez un message")).toHaveValue(
+      "Réponse en cours"
+    );
     expect(screen.getByText("budget.pdf")).toBeInTheDocument();
     expect(getComposerTagSelect()).toHaveValue("RCA");
   });

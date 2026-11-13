@@ -184,7 +184,7 @@ describe("buildNotificationParams", () => {
     });
   });
 
-  it("pointe vers le canal partagé sans paramètre de canal", () => {
+  it("ouvre le tiroir sur le canal partagé", () => {
     vi.stubEnv("NEXT_URL", "https://bhasile.test");
 
     expect(
@@ -193,7 +193,9 @@ describe("buildNotificationParams", () => {
         year: 2027,
         visibility: Visibility.SHARED,
       }).lien
-    ).toBe("https://bhasile.test/structures/42/tarification/2027");
+    ).toBe(
+      "https://bhasile.test/structures/42/tarification/2027?canal=tous"
+    );
   });
 
   it("échoue sans NEXT_URL plutôt que d'envoyer un lien cassé", () => {

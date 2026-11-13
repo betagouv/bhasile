@@ -15,6 +15,7 @@ import {
   findNotifiedPairs,
   findReadPairs,
   findStaleNotificationIds,
+  findUnreadMessageCounts,
   markNotificationsAbandoned,
   markNotificationsProcessed,
   updateMessageTagKey,
@@ -121,6 +122,39 @@ describe("conversation.repository db integration", () => {
     expect(
       await prisma.messageReceipt.count({ where: { messageId: message.id } })
     ).toBe(1);
+  });
+
+  it("compte par canal les messages d'autrui sans accusé du lecteur", async () => {
+    const reader = await prisma.user.create({
+      data: { email: `lecteur-${randomUUID()}@test.fr` },
+    });
+    const countUnread = async () =>
+      Object.fromEntries(
+        (await findUnreadMessageCounts(structureTarificationId, reader.id)).map(
+          ({ visibility, _count }) => [visibility, _count.messages]
+        )
+      );
+    const before = await countUnread();
+    const read = await postMessage(Visibility.SHARED, "lu");
+    await postMessage(Visibility.SHARED, "non lu");
+    await postMessage(Visibility.AGENTS, "non lu agents");
+    await createMessageReceipts(reader.id, [read.id]);
+    await createMessageReceipts(authorId, [read.id]);
+
+    expect(await countUnread()).toEqual({
+      SHARED: (before.SHARED ?? 0) + 1,
+      AGENTS: (before.AGENTS ?? 0) + 1,
+    });
+    expect(
+      await findUnreadMessageCounts(structureTarificationId, authorId)
+    ).toEqual(
+      expect.arrayContaining([
+        { visibility: Visibility.AGENTS, _count: { messages: 0 } },
+      ])
+    );
+
+    await prisma.messageReceipt.deleteMany({ where: { userId: reader.id } });
+    await prisma.user.delete({ where: { id: reader.id } });
   });
 
   it("renvoie les lectures de chaque message avec leur lecteur", async () => {
