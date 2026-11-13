@@ -19,3 +19,9 @@ export const ACCEPTED_STRUCTURE_TYPES: StructureType[] = [
   StructureType.CPH,
   StructureType.HUDA,
 ];
+
+export type StructurePermissionSubject = {
+  id: number;
+  departementAdministratif?: string;
+  operateurId?: number;
+};

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
@@ -8,6 +7,8 @@ import { Table } from "@/app/components/common/Table";
 import { InformationCard } from "@/app/components/InformationCard";
 import { formatDate } from "@/app/utils/date.util";
 import { pluralize } from "@/app/utils/string.util";
+import { CpomStructureAction } from "@/components/CpomStructureAction";
+import { NoPermissionsModal } from "@/components/NoPermissionsModal";
 import { useCpomContext } from "@/contexts/CpomContext";
 
 export const CompositionBlock = () => {
@@ -52,17 +53,17 @@ export const CompositionBlock = () => {
             <td className="text-center!">–</td>
             <td>{formatDate(structure.dateEnd ?? cpom.dateEnd)}</td>
             <td className="py-0! pl-0! pr-2!">
-              {structure.structure?.forms?.some((form) => form.status) && (
-                <Link
-                  href={`/structures/${structure.structure?.id}`}
-                  className="fr-btn fr-btn--tertiary-no-outline fr-btn-sm fr-icon-arrow-right-line before:w-[20] before:h-[20]"
-                  title={`Voir la structure ${structure.structure?.id}`}
+              {structure.structure && (
+                <CpomStructureAction
+                  structure={structure.structure}
+                  className="before:w-[20] before:h-[20]"
                 />
               )}
             </td>
           </tr>
         ))}
       </Table>
+      <NoPermissionsModal />
     </Block>
   );
 };

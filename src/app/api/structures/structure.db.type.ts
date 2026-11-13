@@ -14,6 +14,29 @@ export const includedStructureWhere = {
   OR: [{ type: null }, { type: { notIn: [...EXCLUDED_STRUCTURE_TYPES] } }],
 } satisfies Prisma.StructureWhereInput;
 
+export const cpomLinkedStructureSelect = {
+  id: true,
+  codeBhasile: true,
+  type: true,
+  departementAdministratif: true,
+  fermetureDate: true,
+  operateur: {
+    select: { id: true, name: true },
+  },
+  forms: {
+    select: { status: true, formDefinition: { select: { slug: true } } },
+  },
+  structureVersions: {
+    select: {
+      ...resolvableVersionSelect,
+      communeAdministrative: true,
+      structureVersionTransformation: {
+        select: { type: true, ...transformationStatusSelect },
+      },
+    },
+  },
+} satisfies Prisma.StructureSelect;
+
 export const structureListLightVersionSelect = {
   ...resolvableVersionSelect,
   nom: true,
@@ -118,23 +141,7 @@ export const structureDetailsInclude = {
           structures: {
             where: { structure: includedStructureWhere },
             include: {
-              structure: {
-                select: {
-                  id: true,
-                  codeBhasile: true,
-                  type: true,
-                  operateur: {
-                    select: { name: true },
-                  },
-                  forms: true,
-                  structureVersions: {
-                    select: {
-                      ...resolvableVersionSelect,
-                      communeAdministrative: true,
-                    },
-                  },
-                },
-              },
+              structure: { select: cpomLinkedStructureSelect },
             },
           },
           operateur: true,
@@ -199,6 +206,10 @@ export type StructureListLight = Prisma.StructureGetPayload<{
 
 export type StructureListLightVersion =
   StructureListLight["structureVersions"][number];
+
+export type CpomLinkedStructureDb = Prisma.StructureGetPayload<{
+  select: typeof cpomLinkedStructureSelect;
+}>;
 
 export type StructureDbList = Prisma.StructureGetPayload<{
   include: typeof structureListInclude & {
