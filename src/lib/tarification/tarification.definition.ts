@@ -1,7 +1,9 @@
-import type {
-  TarificationDocumentType,
-  TarificationEventType,
-  TarificationStepCode,
+import {
+  ActeAdministratifCategory,
+  DocumentFinancierCategory,
+  type TarificationDocumentType,
+  type TarificationEventType,
+  type TarificationStepCode,
 } from "@/generated/prisma/enums";
 
 export const TARIFICATION_STEP_DEFINITIONS: Record<
@@ -212,6 +214,39 @@ export const isOperateurDocument = ({
       TARIFICATION_DOCUMENT_TYPE_DEFINITIONS[type].emitter === "OPERATEUR"
   );
 
+export const TARIFICATION_FICHE_COPY_DEFINITIONS: Partial<
+  Record<TarificationDocumentType, FicheCopyDefinition>
+> = {
+  CA: {
+    target: "DOCUMENT_FINANCIER",
+    category: DocumentFinancierCategory.COMPTE_ADMINISTRATIF_SOUMIS,
+  },
+  RCA: {
+    target: "DOCUMENT_FINANCIER",
+    category: DocumentFinancierCategory.COMPTE_ADMINISTRATIF_RETENU,
+  },
+  RAPPORT_ACTIVITE: {
+    target: "DOCUMENT_FINANCIER",
+    category: DocumentFinancierCategory.RAPPORT_ACTIVITE,
+  },
+  BP: {
+    target: "DOCUMENT_FINANCIER",
+    category: DocumentFinancierCategory.BUDGET_PREVISIONNEL_DEMANDE,
+  },
+  DAB: {
+    target: "DOCUMENT_FINANCIER",
+    category: DocumentFinancierCategory.BUDGET_PREVISIONNEL_RETENU,
+  },
+  RAPPORT_BUDGETAIRE: {
+    target: "DOCUMENT_FINANCIER",
+    category: DocumentFinancierCategory.RAPPORT_BUDGETAIRE,
+  },
+  ARRETE: {
+    target: "ACTE_ADMINISTRATIF",
+    category: ActeAdministratifCategory.ARRETE_TARIFICATION,
+  },
+};
+
 export const TARIFICATION_FIRST_CAMPAIGN_YEAR = 2027;
 export const CA_DEPOSIT_DEADLINE = "04-30";
 export const BP_DEPOSIT_DEADLINE = "10-31";
@@ -224,6 +259,10 @@ type StepDefinition = {
   requiredDeposit: "CA" | "BP" | null;
   deadlineDaysAfterDrl: number | null;
 };
+
+type FicheCopyDefinition =
+  | { target: "DOCUMENT_FINANCIER"; category: DocumentFinancierCategory }
+  | { target: "ACTE_ADMINISTRATIF"; category: ActeAdministratifCategory };
 
 type DocumentTypeDefinition = {
   label: string;

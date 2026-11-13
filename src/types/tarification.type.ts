@@ -1,6 +1,8 @@
 import type { CivilDate } from "@/app/utils/date.util";
 import type {
+  ActeAdministratifCategory,
   AuthorLevel,
+  DocumentFinancierCategory,
   TarificationDocumentStatus,
   TarificationDocumentType,
   TarificationEventType,
@@ -62,6 +64,23 @@ export type TarificationJournalView = {
   journal: TarificationJournalRead;
   state: TarificationState;
   drlUrl: string | null;
+};
+
+export type FicheCopyTarget = "DOCUMENT_FINANCIER" | "ACTE_ADMINISTRATIF";
+
+export type FicheCopy = {
+  documentId: number;
+  year: number;
+} & (
+  | { target: "DOCUMENT_FINANCIER"; category: DocumentFinancierCategory }
+  | { target: "ACTE_ADMINISTRATIF"; category: ActeAdministratifCategory }
+);
+
+export type ExistingFicheCopy = {
+  id: number;
+  documentId: number;
+  target: FicheCopyTarget;
+  category: string;
 };
 
 export type CampaignPhase = "UPCOMING" | "OPEN" | "CATCH_UP";

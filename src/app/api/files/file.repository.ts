@@ -1,3 +1,4 @@
+import { DomainError } from "@/app/utils/domain-error.util";
 import { FileUpload } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import type { PrismaTransaction } from "@/types/prisma.type";
@@ -26,6 +27,31 @@ type CreateOneArgs = {
   originalName: string;
   fileSize: number;
   sha256: string;
+};
+
+// Les fichiers de la tarification, de ses copies et des messages font preuve : aucun formulaire ne les rattache
+export const assertFilesCanBeAttached = async (
+  tx: PrismaTransaction,
+  keys: string[]
+): Promise<void> => {
+  const proofFile = await tx.fileUpload.findFirst({
+    where: {
+      key: { in: keys },
+      OR: [
+        { tarificationDocument: { isNot: null } },
+        { messageId: { not: null } },
+        { documentFinancier: { sourceTarificationDocumentId: { not: null } } },
+        { acteAdministratif: { sourceTarificationDocumentId: { not: null } } },
+      ],
+    },
+    select: { id: true },
+  });
+  if (proofFile) {
+    throw new DomainError(
+      "Ce fichier ne peut pas être rattaché à ce formulaire",
+      422
+    );
+  }
 };
 
 export const findOneByKeyWithParents = async (

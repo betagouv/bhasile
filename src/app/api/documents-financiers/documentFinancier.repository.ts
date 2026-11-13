@@ -2,6 +2,7 @@ import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { assertFilesCanBeAttached } from "../files/file.repository";
 import {
   assertFilesCanBeAttachedToEntity,
   getKeysFromIncomingDocumentsOrActes,
@@ -34,8 +35,18 @@ export const createOrUpdateDocumentsFinanciers = async (
 
     const existingFileUpload = await tx.fileUpload.findUnique({
       where: { key },
-      select: { documentFinancierId: true },
+      select: {
+        documentFinancierId: true,
+        documentFinancier: { select: { sourceTarificationDocumentId: true } },
+      },
     });
+    if (existingFileUpload?.documentFinancier?.sourceTarificationDocumentId) {
+      continue;
+    }
+    await assertFilesCanBeAttached(
+      tx,
+      (documentFinancier.fileUploads ?? []).map((fileUpload) => fileUpload.key)
+    );
 
     const data = {
       ...entityId,
@@ -80,7 +91,7 @@ const deleteDocumentsFinanciers = async (
   );
 
   const allDocumentsFinanciers = await tx.documentFinancier.findMany({
-    where,
+    where: { ...where, sourceTarificationDocumentId: null },
     include: { fileUploads: true },
   });
 

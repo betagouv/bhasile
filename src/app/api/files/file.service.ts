@@ -143,6 +143,25 @@ export const uploadFile = async (
   }
 };
 
+export const copyStoredFile = async (
+  bucketName: string,
+  sourceKey: string,
+  originalName: string
+): Promise<string> => {
+  try {
+    const key = `${uuidv4()}-${originalName}`;
+    await getMinioClient().copyObject(
+      bucketName,
+      key,
+      `/${bucketName}/${sourceKey}`
+    );
+    return key;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Erreur lors de la copie du fichier");
+  }
+};
+
 export const deleteFile = async (
   bucketName: string,
   fileName: string
