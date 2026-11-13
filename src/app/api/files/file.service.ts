@@ -40,6 +40,7 @@ const getFileParents = (file: FileWithParents): FileParent[] => {
     [file.evaluationId, file.evaluation],
     [file.operateurId, { operateurId: file.operateurId }],
     [file.messageId, {}],
+    [file.tarificationDocument?.id ?? null, {}],
   ];
   return parents.flatMap(([parentId, parent]) =>
     parentId == null ? [] : [parent ?? {}]
@@ -96,6 +97,10 @@ export const authorizeFileAccess = (
 ): boolean => {
   if (isOrphan(file)) {
     return true;
+  }
+
+  if (file.tarificationDocument) {
+    return false;
   }
   if (principal.type === PrincipalType.Operateur) {
     return false;

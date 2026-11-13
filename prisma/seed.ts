@@ -56,6 +56,7 @@ import {
   SeededStructure,
   SeedStructureParams,
 } from "./seeders/structure-version.seed";
+import { createFakeTarificationJournals } from "./seeders/tarification-journal.seed";
 import {
   generateAllBhasileCodes,
   getNextBhasileCode,
@@ -377,6 +378,9 @@ async function seed(): Promise<void> {
 
   console.log("💬 Création des échanges de tarification...");
   await createFakeConversations(prisma, getCurrentYear());
+
+  console.log("💸 Création des journaux de tarification...");
+  await createFakeTarificationJournals(prisma, getCurrentYear());
 
   console.log("📣 Seed des annonces");
   const announcementsToCreate = createAnnouncementsList();

@@ -48,6 +48,7 @@ const buildFile = (overrides: Partial<FileWithParents>): FileWithParents =>
     evaluation: null,
     operateur: null,
     message: null,
+    tarificationDocument: null,
     ...overrides,
   }) as unknown as FileWithParents;
 
@@ -64,6 +65,8 @@ const messageFile = buildFile({
     },
   },
 } as Partial<FileWithParents>);
+
+const tarificationFile = buildFile({ tarificationDocument: { id: 1 } });
 
 const agent: Principal = {
   type: "agent",
@@ -149,6 +152,16 @@ describe("authorizeFileAccess", () => {
     mockCanDeleteFile.mockReturnValue(true);
 
     expect(authorizeFileAccess(agent, messageFile, "delete")).toBe(false);
+  });
+
+  it("ne traite pas un fichier de tarification comme orphelin, et le ferme à tous", () => {
+    mockCanDeleteFile.mockReturnValue(true);
+
+    expect(authorizeFileAccess(operateur, tarificationFile, "read")).toBe(
+      false
+    );
+    expect(authorizeFileAccess(agent, tarificationFile, "read")).toBe(false);
+    expect(authorizeFileAccess(agent, tarificationFile, "delete")).toBe(false);
   });
 });
 

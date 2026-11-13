@@ -1,22 +1,24 @@
 model User {
-  id                  Int                          @id @default(autoincrement())
-  name                String?
-  email               String                       @unique
-  lastConnection      DateTime?
-  userActions         UserAction[]
-  operateur           Operateur?                   @relation(fields: [operateurId], references: [id], onDelete: Restrict)
-  operateurId         Int?
-  isSuperAdmin        Boolean                      @default(false)
-  perimeter           Perimeter?                   @relation(fields: [perimeterId], references: [id], onDelete: Restrict)
-  perimeterId         Int?
-  isActivated         Boolean                      @default(false)
-  deactivatedAt       DateTime?
-  grants              Grant[]
-  notes               Note[]
-  anomaliesJustifiees Anomalie[]
-  messages            Message[]
-  messageReceipts     MessageReceipt[]
-  emailNotifications  EmailNotificationRecipient[]
+  id                   Int                           @id @default(autoincrement())
+  name                 String?
+  email                String                        @unique
+  lastConnection       DateTime?
+  userActions          UserAction[]
+  operateur            Operateur?                    @relation(fields: [operateurId], references: [id], onDelete: Restrict)
+  operateurId          Int?
+  isSuperAdmin         Boolean                       @default(false)
+  perimeter            Perimeter?                    @relation(fields: [perimeterId], references: [id], onDelete: Restrict)
+  perimeterId          Int?
+  isActivated          Boolean                       @default(false)
+  deactivatedAt        DateTime?
+  grants               Grant[]
+  notes                Note[]
+  anomaliesJustifiees  Anomalie[]
+  messages             Message[]
+  messageReceipts      MessageReceipt[]
+  emailNotifications   EmailNotificationRecipient[]
+  tarificationEvents   TarificationEvent[]
+  tarificationOpenings TarificationDocumentOpening[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
