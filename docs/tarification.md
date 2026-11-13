@@ -240,12 +240,29 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 
 ## Interface
 
-À préciser avec les maquettes (fin novembre).
+- **Page** `/structures/[id]/tarification/[year]`, sans le menu de l'application, avec le même en-tête que la fiche structure. L'élément sélectionné est dans l'URL (`?etape=L48`), pour les liens et le retour arrière ; par défaut, c'est l'étape en cours.
+- **Colonne de gauche** :
+  - le sélecteur de campagne ;
+  - les **documents préliminaires** ⏳ : DRL (lien Légifrance, masqué tant qu'elle n'est pas saisie), CA et rapport d'activité, BP et rapport budgétaire, DAI N (partagée dans la campagne précédente, en lecture seule, masquée si elle n'existe pas). Pas de ROB en V1 : il n'y a pas de donnée derrière ;
+  - le **parcours**, en quatre lignes : RCA, L48, L60, Arrêté et tarification. DAM, DAI et échéanciers se déposent dans la quatrième. Une ligne grise n'est pas interdite : elle n'est simplement pas l'étape en cours, car rien ne bloque l'écriture. Un retard s'affiche en badge.
+- **Sous-états d'une ligne** : créé, relu par, validé, signé, envoyé, reçu. « Relu » liste les `APPROVED`, « validé » se coche dès la première relecture ⏳ (la maquette les sépare, sans geste distinct pour valider). **L'opérateur ne voit qu'envoyé et reçu.**
+- **Panneau du document** : l'état de la version affichée, l'historique des versions déplié au clic, la visionneuse à droite.
+- **Visionneuse** : le fichier n'est chargé qu'au clic sur « Ouvrir le document », pour tout le monde, jamais à l'affichage de la page, pour ne pas compter de fausse ouverture. Un `iframe` sur un lien présigné qui force le type et l'affichage (`inline`) : PDF et images. xlsx et xlsm passent par un aperçu des valeurs. Les autres formats (xls, ods, csv, docx, odt, pptx) se téléchargent. Un bouton « Télécharger » reste toujours visible, car certains navigateurs n'affichent pas les PDF. Afficher et télécharger comptent tous deux comme une ouverture.
+- **Barre d'action**, selon l'état du document et le lecteur. Un bouton ne remplace pas la garde : c'est l'API qui décide, et la page est relue depuis le serveur après chaque action, sans mise à jour optimiste, car le journal fait preuve.
 
-- **Page** `/structures/[id]/tarification/[year]`, celle de la messagerie, qui passe en panneau à part.
-- **Navigation par documents** à gauche, avec la progression des étapes ; à droite, un panneau selon l'état du document sélectionné (relecture, envoi, réponse au contradictoire…). Les délais en cours sont affichés.
-- **Documents préparatoires** ⏳ : DRL (lien Légifrance), CA et rapport d'activité, BP et rapport budgétaire, DAI N (partagée dans la campagne précédente). Pas de ROB en V1.
-- **Visionneuse et téléchargement** : le fichier n'est chargé qu'au clic, jamais à l'affichage de la page, pour ne pas compter de fausse ouverture.
+  | Document sélectionné               | Agent                                                                                         | Opérateur                                                                           |
+  | ---------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+  | Aucun                              | déposer ; « Sans objet »                                                                      | « pas encore envoyé »                                                               |
+  | Version de travail                 | « J'ai relu » et « Demander des modifications », si ce n'est pas son dépôt ; nouvelle version | ne la voit pas                                                                      |
+  | Version signée                     | « Envoyer à l'opérateur », avec « non relu » si personne n'a relu                             | ne la voit pas                                                                      |
+  | Envoyé                             | « Retirer »                                                                                   | ouvrir                                                                              |
+  | L48 envoyée, contradictoire ouvert | « Retirer »                                                                                   | « J'accepte » ou « Je conteste », observations et réponse jointe, échéance affichée |
+  | CA, BP et rapports                 | déposer pour l'opérateur ; « Retirer »                                                        | déposer                                                                             |
+
+- **Confirmations**, sur les gestes visibles d'un tiers ou difficiles à défaire, en décrivant la conséquence : envoi à l'opérateur (avec le délai pour une L48, et l'avertissement pour une deuxième L48), retrait, réponse à la L48. Sans objet et hors Bhasile demandent un motif et rappellent qu'ils ne s'annulent pas. Relire et déposer ne demandent rien.
+- **Hors Bhasile** : un bouton discret dans l'en-tête, pour les agents ; une fois déclaré, un bandeau l'affiche.
+- **Campagnes fermées** : avant l'ouverture, ou pour une structure non éligible, tout est en lecture seule, avec un bandeau. En rattrapage, seule l'étape « Arrêté et tarification » reste active, pour les agents.
+- **Échanges** : un tiroir à droite, ouvert par un bouton flottant (`?echanges=1`, et les liens des mails `?canal=agents` l'ouvrent aussi). Un message n'est marqué lu que tiroir ouvert. Le fil intercale les faits visibles du journal (« Envoi de la L48 »), avec un sommaire d'ancres à gauche. Les tags restent, en attendant la maquette finale.
 - **À l'écran** : « créé », « validé », « signé », « envoyé », jamais « brouillon ».
 - **Tableau de bord** : un bloc « Tarification », sur le gabarit des blocs existants, filtré comme eux et par campagne (étapes en cours, retards, non-lus de la messagerie). L'opérateur a le même bloc, limité à ses structures.
 
@@ -265,12 +282,15 @@ Le mécanisme est celui des [emails](email.md) : un seul mail par destinataire e
 | Écritures et gardes                        | `tarification-ecritures` : `POST …/documents`, `POST …/events`, gardes de domaine (`tarification.guard.ts`), sélecteur des campagnes en rattrapage                                                                                  | fait                         |
 | Copie vers la fiche, verrouillage, reprise | `tarification-fiche` : `tarification.fiche.ts`, `syncFicheCopies`, script de reprise                                                                                                                                                | en cours                     |
 | Notifications                              | mail groupé à plusieurs sources (`tarification-notifications`)                                                                                                                                                                      | à faire                      |
-| Interface                                  | `tarification-ui`, après les maquettes                                                                                                                                                                                              | à faire                      |
+| Interface : lecture et visionneuse         | `tarification-ui`                                                                                                                                                                                                                   | en cours                     |
+| Interface : dépôts et actions              | `tarification-ui-actions`                                                                                                                                                                                                           | à faire                      |
+| Interface : aperçu des tableurs            | `tarification-tableur`                                                                                                                                                                                                              | à faire                      |
+| Interface : tiroir des échanges            | `tarification-echanges`                                                                                                                                                                                                             | à faire                      |
 | Tableau de bord, suivi d'une structure     | `tarification-dashboard`, `StructureSubscription`                                                                                                                                                                                   | à faire                      |
 
 T1 met aussi à jour l'ordre de `prisma/utils/wipe.ts`, les seeders, `isOrphan` et `fileWithParentsInclude` (fichiers rattachés à un document de tarification) et les types de `src/types/`.
 
-Les tags de la messagerie se déduisent de `TARIFICATION_STEP_DEFINITIONS` (codes et libellés des étapes) : `ARRETE_PAIEMENT` est devenu `ARRETE` (« Arrêté »), sans reprise de données tant que la messagerie n'est pas ouverte.
+Les tags de la messagerie se déduisent de `TARIFICATION_STEP_DEFINITIONS` (codes et libellés des étapes).
 
 ## Questions ouvertes
 

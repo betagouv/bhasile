@@ -29,7 +29,7 @@ export const TARIFICATION_STEP_DEFINITIONS: Record<
     deadlineDaysAfterDrl: 60,
   },
   ARRETE: {
-    label: "Arrêté",
+    label: "Arrêté et tarification",
     documentType: "ARRETE",
     requiredDeposit: null,
     deadlineDaysAfterDrl: null,
@@ -247,6 +247,28 @@ export const TARIFICATION_FICHE_COPY_DEFINITIONS: Partial<
   },
 };
 
+export const TARIFICATION_SECTION_DEFINITIONS: Record<
+  TarificationSectionCode,
+  SectionDefinition
+> = {
+  CA: { label: "CA et rapport d'activité", types: ["CA", "RAPPORT_ACTIVITE"] },
+  BP: {
+    label: "BP et rapport budgétaire",
+    types: ["BP", "RAPPORT_BUDGETAIRE"],
+  },
+  DAI: { label: "DAI", types: ["DAI"] },
+  RCA: { label: "RCA", types: ["RCA"] },
+  L48: {
+    label: "L48 (Procédure contradictoire)",
+    types: ["L48", "REPONSE_CONTRADICTOIRE"],
+  },
+  DAB: { label: "L60 (DAB)", types: ["DAB"] },
+  ARRETE: {
+    label: "Arrêté et tarification",
+    types: ["ARRETE", "DAM", "DAI", "ECHEANCIER"],
+  },
+};
+
 export const TARIFICATION_FIRST_CAMPAIGN_YEAR = 2027;
 export const CA_DEPOSIT_DEADLINE = "04-30";
 export const BP_DEPOSIT_DEADLINE = "10-31";
@@ -263,6 +285,14 @@ type StepDefinition = {
 type FicheCopyDefinition =
   | { target: "DOCUMENT_FINANCIER"; category: DocumentFinancierCategory }
   | { target: "ACTE_ADMINISTRATIF"; category: ActeAdministratifCategory };
+
+type SectionDefinition = {
+  label: string;
+  types: TarificationDocumentType[];
+};
+
+export type TarificationSectionCode =
+  "CA" | "BP" | "DAI" | TarificationStepCode;
 
 type DocumentTypeDefinition = {
   label: string;
