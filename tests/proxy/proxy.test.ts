@@ -4,6 +4,7 @@ import path from "node:path";
 import { NextRequest } from "next/server";
 import {
   createDepartementalAgent,
+  createSessionGrant,
   createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -27,7 +28,6 @@ vi.mock("next-auth", () => ({ getServerSession: mockGetServerSession }));
 vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
 
 const httpMethods = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
-const unprotectedAuthenticatedPages = ["/deconnexion"];
 
 describe("proxy", () => {
   beforeEach(() => {
@@ -35,9 +35,7 @@ describe("proxy", () => {
   });
 
   it("redirige vers la connexion chaque page authentifiée", async () => {
-    const pages = listAuthenticatedPages().filter(
-      (page) => !unprotectedAuthenticatedPages.includes(page)
-    );
+    const pages = listAuthenticatedPages();
 
     const redirections = await Promise.all(
       pages.map(async (page) => {
@@ -87,6 +85,36 @@ describe("proxy", () => {
     );
 
     expect(response.status).toBe(200);
+  });
+
+  it("redirige un utilisateur opérateur du tableau de bord vers les structures", async () => {
+    mockGetServerSession.mockResolvedValue({
+      user: createSessionUser({
+        operateurId: 42,
+        isAgent: false,
+        grants: [createSessionGrant({ isNational: true })],
+      }),
+    });
+
+    const response = await proxy(new NextRequest("http://localhost/"));
+
+    expect(response.headers.get("location")).toBe(
+      "http://localhost/structures"
+    );
+  });
+
+  it("redirige un utilisateur opérateur vers la 404 sur une page réservée aux agents", async () => {
+    mockGetServerSession.mockResolvedValue({
+      user: createSessionUser({
+        operateurId: 42,
+        isAgent: false,
+        grants: [createSessionGrant({ isNational: true })],
+      }),
+    });
+
+    const response = await proxy(new NextRequest("http://localhost/cpoms"));
+
+    expect(response.headers.get("location")).toBe("http://localhost/404");
   });
 
   it("intercepte chaque page déclarée comme protégée", () => {
