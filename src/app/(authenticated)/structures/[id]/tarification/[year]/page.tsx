@@ -7,8 +7,16 @@ import {
   TarificationOverview,
 } from "@/app/api/tarifications/tarification.service";
 import { DomainError } from "@/app/utils/domain-error.util";
+import { getNow } from "@/app/utils/now.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { TarificationStepCode } from "@/generated/prisma/enums";
 import { auth } from "@/lib/next-auth/auth";
+import {
+  type ActionContext,
+  canDeclareOutOfBhasile,
+  computeSectionActions,
+} from "@/lib/tarification/tarification.actions";
+import { getCampaignPhase } from "@/lib/tarification/tarification.campaign";
 import {
   computeStepProgress,
   getDefaultSectionCode,
@@ -19,6 +27,7 @@ import {
 import { tarificationParamsSchema } from "@/schemas/api/message.schema";
 import { SessionUser } from "@/types/global";
 
+import { CampaignNotice } from "./_components/CampaignNotice";
 import { ContradictoireNotice } from "./_components/ContradictoireNotice";
 import { DocumentPanel } from "./_components/DocumentPanel";
 import { Echanges } from "./_components/Echanges";
@@ -77,6 +86,17 @@ export default async function TarificationPage({
       ? previousDaiVersions
       : getSectionVersions(journal, selectedCode);
 
+  const now = getNow();
+  const phase = getCampaignPhase(year, now, journal.timeZone);
+  const isEligible = isStructureAutorisee(structure.type);
+  const actionContext: ActionContext = {
+    journal,
+    author: overview.participant,
+    phase,
+    isEligible,
+    now,
+  };
+
   const stepProgress = Object.values(TarificationStepCode).map((code) => ({
     code,
     progress: computeStepProgress(journal, code),
@@ -127,6 +147,8 @@ export default async function TarificationPage({
       <main id="content" className="grow min-w-0 flex flex-col">
         <TarificationHeader
           structureId={structureId}
+          year={year}
+          canDeclareOutOfBhasile={canDeclareOutOfBhasile(actionContext)}
           structure={{
             codeBhasile: structure.codeBhasile,
             nom: structure.nom,
@@ -137,8 +159,25 @@ export default async function TarificationPage({
           }}
         />
         <div className="flex flex-col gap-6 p-4">
+          <CampaignNotice
+            year={year}
+            phase={phase}
+            isEligible={isEligible}
+            isOperateur={overview.isOperateur}
+            isOutOfBhasile={state.isOutOfBhasile}
+          />
           <DocumentPanel
             key={selectedCode}
+            structureId={structureId}
+            year={year}
+            sectionCode={selectedCode}
+            actions={computeSectionActions({
+              context: actionContext,
+              sectionCode: selectedCode,
+              versionIds: versions.map(({ id }) => id),
+            })}
+            hasSharedL48={state.contradictoire.l48DocumentId !== null}
+            contradictoireDeadline={state.contradictoire.deadline}
             label={getSectionLabel(selectedCode, year)}
             versions={versions}
             isOperateur={overview.isOperateur}

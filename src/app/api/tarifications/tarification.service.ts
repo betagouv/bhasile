@@ -29,7 +29,7 @@ import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   AuthorLevel,
   TarificationDocumentStatus,
-  type TarificationDocumentType,
+  TarificationDocumentType,
   TarificationEventType,
   type TarificationStepCode,
   type Visibility,
@@ -81,6 +81,7 @@ import {
   findTarificationCampaign,
   runInTarificationTransaction,
   type TarificationJournalSource,
+  type TarificationTransaction,
   upsertStructureTarification,
 } from "./tarification.repository";
 import {
@@ -293,39 +294,13 @@ export const depositTarificationDocument = async ({
   const document = await runInTarificationTransaction(
     structureId,
     year,
-    async (transaction) => {
-      const { journal } = await loadTarificationJournal(year, transaction);
-      const now = getNow();
-      assertCanDepositDocument({
-        journal,
-        authorLevel: author.level,
+    (transaction) =>
+      createDocumentInTransaction(transaction, year, {
+        fileKey,
         types,
         status,
-        phase: getCampaignPhase(year, now, journal.timeZone),
-        now,
-      });
-      const file = await transaction.findUnattachedFile(fileKey);
-      if (!file) {
-        throw new DomainError(
-          "Ce fichier est introuvable ou déjà rattaché",
-          422
-        );
-      }
-      const document = await transaction.createDocument({
-        fileUploadId: file.id,
-        types,
-        status,
-      });
-      await transaction.createEvent({
-        type: TarificationEventType.DOCUMENT_DEPOSITED,
-        authorId: author.id,
-        authorLevel: author.level,
-        documentId: document.id,
-        stepCode: null,
-        text: null,
-      });
-      return document;
-    }
+        author,
+      })
   );
   if (isOperateurDocument({ types })) {
     await trySyncFicheCopies(structureId, year);
@@ -339,6 +314,7 @@ export const recordTarificationEvent = async ({
   author,
   type,
   documentId,
+  fileKey = null,
   stepCode,
   text,
 }: {
@@ -347,23 +323,32 @@ export const recordTarificationEvent = async ({
   author: TarificationParticipant;
   type: TarificationEventType;
   documentId: number | null;
+  fileKey?: string | null;
   stepCode: TarificationStepCode | null;
   text: string | null;
 }): Promise<{ id: number }> => {
   const structure = await findStructureScopeOrThrow(structureId);
   assertStructureEligible(structure);
-  const event: Omit<TarificationJournalEvent, "id" | "createdAt"> = {
-    type,
-    authorId: author.id,
-    authorLevel: author.level,
-    documentId,
-    stepCode,
-    text,
-  };
   const createdEvent = await runInTarificationTransaction(
     structureId,
     year,
     async (transaction) => {
+      const responseDocument = fileKey
+        ? await createDocumentInTransaction(transaction, year, {
+            fileKey,
+            types: [TarificationDocumentType.REPONSE_CONTRADICTOIRE],
+            status: TarificationDocumentStatus.FINAL,
+            author,
+          })
+        : null;
+      const event: Omit<TarificationJournalEvent, "id" | "createdAt"> = {
+        type,
+        authorId: author.id,
+        authorLevel: author.level,
+        documentId: responseDocument?.id ?? documentId,
+        stepCode,
+        text,
+      };
       const { journal } = await loadTarificationJournal(year, transaction);
       const now = getNow();
       assertCanRecordEvent({
@@ -489,6 +474,51 @@ const trySyncFicheCopies = async (
       error
     );
   }
+};
+
+const createDocumentInTransaction = async (
+  transaction: TarificationTransaction,
+  year: number,
+  {
+    fileKey,
+    types,
+    status,
+    author,
+  }: {
+    fileKey: string;
+    types: TarificationDocumentType[];
+    status: TarificationDocumentStatus;
+    author: TarificationParticipant;
+  }
+): Promise<{ id: number }> => {
+  const { journal } = await loadTarificationJournal(year, transaction);
+  const now = getNow();
+  assertCanDepositDocument({
+    journal,
+    authorLevel: author.level,
+    types,
+    status,
+    phase: getCampaignPhase(year, now, journal.timeZone),
+    now,
+  });
+  const file = await transaction.findUnattachedFile(fileKey);
+  if (!file) {
+    throw new DomainError("Ce fichier est introuvable ou déjà rattaché", 422);
+  }
+  const document = await transaction.createDocument({
+    fileUploadId: file.id,
+    types,
+    status,
+  });
+  await transaction.createEvent({
+    type: TarificationEventType.DOCUMENT_DEPOSITED,
+    authorId: author.id,
+    authorLevel: author.level,
+    documentId: document.id,
+    stepCode: null,
+    text: null,
+  });
+  return document;
 };
 
 export const authorizeTarificationDocument = async ({

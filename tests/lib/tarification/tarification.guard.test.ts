@@ -330,6 +330,49 @@ describe("assertCanRecordEvent", () => {
       ).toThrow("ne la relit pas");
     });
 
+    it("refuse une deuxième validation du même agent, pas celle d'un autre", () => {
+      const journal = createJournal();
+      const documentId = depositDraft(journal);
+      addEvent(journal, {
+        type: TarificationEventType.APPROVED,
+        documentId,
+        authorId: OTHER_AGENT_ID,
+        createdAt: NOW,
+      });
+
+      expect(() => approve(journal, documentId)).toThrow("déjà relu");
+      expect(() => approve(journal, documentId, 22)).not.toThrow();
+    });
+
+    it("laisse revalider après sa propre demande de modifications, et demander des modifications après avoir validé", () => {
+      const journal = createJournal();
+      const documentId = depositDraft(journal);
+      addEvent(journal, {
+        type: TarificationEventType.APPROVED,
+        documentId,
+        authorId: OTHER_AGENT_ID,
+        createdAt: NOW,
+      });
+
+      expect(() =>
+        record(journal, {
+          type: TarificationEventType.CHANGES_REQUESTED,
+          documentId,
+          text: "Corriger le montant",
+        })
+      ).not.toThrow();
+
+      addEvent(journal, {
+        type: TarificationEventType.CHANGES_REQUESTED,
+        documentId,
+        authorId: OTHER_AGENT_ID,
+        text: "Corriger le montant",
+        createdAt: NOW,
+      });
+
+      expect(() => approve(journal, documentId)).not.toThrow();
+    });
+
     it("refuse de relire une version signée", () => {
       const journal = createJournal();
 

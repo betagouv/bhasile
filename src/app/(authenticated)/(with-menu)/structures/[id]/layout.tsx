@@ -5,6 +5,7 @@ import { getActualisationYear } from "@/app/api/structures/actualisation.util";
 import { getFullStructure } from "@/app/api/structures/structure.service";
 import { createReadEvent } from "@/app/api/user-actions/user-action.service";
 import { parseId } from "@/app/utils/string.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { StructureProvider } from "@/contexts/StructureContext";
 import { canAccessTarification } from "@/lib/casl";
 import { auth } from "@/lib/next-auth/auth";
@@ -39,6 +40,7 @@ export default async function StructureLayout({
 
   const isTarificationAccessible =
     !!session?.user &&
+    isStructureAutorisee(structure.type) &&
     canAccessTarification(session.user as SessionUser, {
       id: structure.id,
       departementAdministratif: structure.departementAdministratif,

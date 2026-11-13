@@ -1,11 +1,14 @@
-import { PrismaClient, Visibility } from "@/generated/prisma/client";
+import { PrismaClient, StructureType, Visibility } from "@/generated/prisma/client";
 
 export const createFakeConversations = async (
   prisma: PrismaClient,
   campaignYear: number
 ): Promise<void> => {
   const structures = await prisma.structure.findMany({
-    where: { departementAdministratif: "75" },
+    where: {
+      departementAdministratif: "75",
+      type: { in: [StructureType.CADA, StructureType.CPH] },
+    },
     select: { id: true },
     orderBy: { id: "asc" },
   });

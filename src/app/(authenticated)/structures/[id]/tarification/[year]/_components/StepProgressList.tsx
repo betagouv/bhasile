@@ -19,10 +19,11 @@ export const StepProgressList = ({
             <StepParticipantsSummary participants={progress.creators} />
           }
         />
+        {progress.hasChangesRequested && (
+          <StepProgressLine label="modifications demandées" isDone={false} />
+        )}
         <StepProgressLine
-          label={
-            progress.hasChangesRequested ? "modifications demandées" : "relu"
-          }
+          label="relu"
           isDone={progress.reviewers.length > 0}
           participants={
             <StepParticipantsSummary participants={progress.reviewers} />
