@@ -7,13 +7,14 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
-  createTarificationDocumentOpening,
   findMessageTarification,
   findStructureTarification,
   findStructureTarificationCampaigns,
   findStructureTarificationJournal,
+  runInTarificationTransaction,
   upsertStructureTarification,
 } from "@/app/api/tarifications/tarification.repository";
+import { createTarificationDocumentOpening } from "@/app/api/tarifications/tarification-document.repository";
 import {
   AuthorLevel,
   TarificationDocumentStatus,
@@ -142,6 +143,154 @@ describe("tarification.repository db integration", () => {
       (await findStructureTarificationJournal(structureId, campaignYear + 1))
         ?.structureTarifications
     ).toEqual([]);
+  });
+
+  describe("écritures", () => {
+    const writeCampaignYear = pickTestCampaignYear(8000);
+    let writeStructureId: number;
+
+    beforeAll(async () => {
+      const structure = await prisma.structure.create({
+        data: {
+          codeBhasile: `BHA-TARIF-WRITE-TEST-${randomUUID()}`,
+          departementAdministratif: "50",
+        },
+      });
+      writeStructureId = structure.id;
+    });
+
+    afterAll(async () => {
+      await deleteTarificationTestData({
+        structureId: writeStructureId,
+        campaignYear: writeCampaignYear,
+      });
+      await prisma.structure.delete({ where: { id: writeStructureId } });
+    });
+
+    const createFile = () =>
+      prisma.fileUpload.create({
+        data: {
+          key: `depot-${randomUUID()}.pdf`,
+          mimeType: "application/pdf",
+          originalName: "depot.pdf",
+          fileSize: 10,
+        },
+      });
+
+    const deposit = (fileUploadId: number) =>
+      runInTarificationTransaction(
+        writeStructureId,
+        writeCampaignYear,
+        (transaction) =>
+          transaction.createDocument({
+            fileUploadId,
+            types: ["CA"],
+            status: TarificationDocumentStatus.FINAL,
+          })
+      );
+
+    const findUnattachedFile = (fileKey: string) =>
+      runInTarificationTransaction(
+        writeStructureId,
+        writeCampaignYear,
+        (transaction) => transaction.findUnattachedFile(fileKey)
+      );
+
+    it("rattache le document à son fichier et à la tarification", async () => {
+      const file = await createFile();
+
+      const document = await deposit(file.id);
+
+      expect(
+        await prisma.tarificationDocument.findUniqueOrThrow({
+          where: { id: document.id },
+          select: { fileUploadId: true, structureTarification: true },
+        })
+      ).toMatchObject({
+        fileUploadId: file.id,
+        structureTarification: { structureId: writeStructureId },
+      });
+    });
+
+    it("ne retrouve qu'un fichier existant et encore sans rattachement", async () => {
+      const file = await createFile();
+
+      expect(await findUnattachedFile(file.key)).toEqual({ id: file.id });
+
+      await deposit(file.id);
+
+      expect(await findUnattachedFile(file.key)).toBeNull();
+      expect(await findUnattachedFile("inconnu.pdf")).toBeNull();
+    });
+
+    it("ne crée pas de tarification quand la transaction échoue", async () => {
+      await expect(
+        runInTarificationTransaction(
+          writeStructureId,
+          writeCampaignYear + 1,
+          () => {
+            throw new Error("Garde refusée");
+          }
+        )
+      ).rejects.toThrow("Garde refusée");
+
+      expect(
+        await findStructureTarification(writeStructureId, writeCampaignYear + 1)
+      ).toBeNull();
+      await prisma.tarificationCampaign.deleteMany({
+        where: { year: writeCampaignYear + 1 },
+      });
+    });
+
+    it("exécute l'un après l'autre deux faits simultanés sur une tarification", async () => {
+      const recordOutOfBhasileOnce = () =>
+        runInTarificationTransaction(
+          writeStructureId,
+          writeCampaignYear,
+          async (transaction) => {
+            const structure = await transaction.findJournal();
+            const isAlreadyDeclared = structure?.structureTarifications
+              .flatMap((tarification) => tarification.events)
+              .some(
+                (event) =>
+                  event.type === TarificationEventType.OUT_OF_APP_DECLARED
+              );
+            if (isAlreadyDeclared) {
+              return;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            await transaction.createEvent({
+              type: TarificationEventType.OUT_OF_APP_DECLARED,
+              authorId,
+              authorLevel: AuthorLevel.DEPARTEMENT,
+              documentId: null,
+              stepCode: null,
+              text: "Courrier",
+            });
+          }
+        );
+
+      await runInTarificationTransaction(
+        writeStructureId,
+        writeCampaignYear,
+        async () => {}
+      );
+
+      await Promise.all([
+        recordOutOfBhasileOnce(),
+        recordOutOfBhasileOnce(),
+        recordOutOfBhasileOnce(),
+      ]);
+
+      expect(
+        await prisma.tarificationEvent.count({
+          where: {
+            structureTarification: { structureId: writeStructureId },
+            type: TarificationEventType.OUT_OF_APP_DECLARED,
+          },
+        })
+      ).toBe(1);
+    });
   });
 
   it("ne trouve rien pour une campagne sans échange", async () => {

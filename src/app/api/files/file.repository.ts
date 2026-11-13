@@ -1,8 +1,12 @@
 import { FileUpload } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
-import { PrismaTransaction } from "@/types/prisma.type";
+import type { PrismaTransaction } from "@/types/prisma.type";
 
-import { FileWithParents, fileWithParentsInclude } from "./file.db.type";
+import {
+  FileWithParents,
+  fileWithParentsInclude,
+  unattachedFileWhere,
+} from "./file.db.type";
 
 export const createOne = async ({
   key,
@@ -42,6 +46,15 @@ export const findManyByKeysWithParents = async (
     include: fileWithParentsInclude,
   });
 };
+
+export const findUnattachedFileUpload = (
+  tx: PrismaTransaction,
+  key: string
+): Promise<{ id: number } | null> =>
+  tx.fileUpload.findFirst({
+    where: { key, ...unattachedFileWhere },
+    select: { id: true },
+  });
 
 export const deleteOneByKey = async (
   key: string

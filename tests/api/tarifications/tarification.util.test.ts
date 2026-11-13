@@ -43,13 +43,14 @@ describe("isNotificationHour", () => {
 });
 
 describe("getSelectableCampaignYears", () => {
-  it("propose les campagnes ouvertes et les campagnes passées qui ont des échanges, de la plus récente à la plus ancienne", () => {
+  it("propose les campagnes ouvertes, en rattrapage et celles qui ont une tarification, de la plus récente à la plus ancienne", () => {
     expect(
       getSelectableCampaignYears({
-        openCampaignYears: [2027, 2028],
-        tarificationYears: [2025, 2027],
+        openCampaignYears: [2028, 2029],
+        catchUpCampaignYears: [2027],
+        tarificationYears: [2025, 2028],
       })
-    ).toEqual([2028, 2027, 2025]);
+    ).toEqual([2029, 2028, 2027, 2025]);
   });
 });
 

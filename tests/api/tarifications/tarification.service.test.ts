@@ -13,12 +13,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   authorizeTarificationDocument,
   changeTarificationMessageTag,
+  depositTarificationDocument,
   getTarificationJournal,
+  getTarificationOverview,
   getTarificationParticipant,
   getTarificationReader,
   notifyPendingTarificationMessages,
   postTarificationMessage,
   recordTarificationDocumentOpening,
+  recordTarificationEvent,
 } from "@/app/api/tarifications/tarification.service";
 import type { UserWithGrants } from "@/app/api/users/user.db.type";
 import {
@@ -49,6 +52,8 @@ const { mockCanAccessTarification } = vi.hoisted(() => ({
 const mockFindStructureTarificationJournal = vi.fn();
 const mockFindTarificationCampaign = vi.fn();
 const mockCreateTarificationDocumentOpening = vi.fn();
+const mockRunInTarificationTransaction = vi.fn();
+const mockFindStructureTarificationCampaigns = vi.fn();
 
 // Les opérateurs n'ont pas encore de droit d'édition (feuille de route opérateurs) : on simule leur accès
 vi.mock("@/lib/casl", async (importOriginal) => {
@@ -69,6 +74,13 @@ vi.mock("@/app/api/tarifications/tarification.repository", () => ({
     mockFindStructureTarificationJournal(...args),
   findTarificationCampaign: (...args: unknown[]) =>
     mockFindTarificationCampaign(...args),
+  runInTarificationTransaction: (...args: unknown[]) =>
+    mockRunInTarificationTransaction(...args),
+  findStructureTarificationCampaigns: (...args: unknown[]) =>
+    mockFindStructureTarificationCampaigns(...args),
+}));
+
+vi.mock("@/app/api/tarifications/tarification-document.repository", () => ({
   createTarificationDocumentOpening: (...args: unknown[]) =>
     mockCreateTarificationDocumentOpening(...args),
 }));
@@ -786,5 +798,247 @@ describe("recordTarificationDocumentOpening", () => {
     await recordTarificationDocumentOpening({ documentId: 2, userId: 50 });
 
     expect(mockCreateTarificationDocumentOpening).toHaveBeenCalledWith(2, 50);
+  });
+});
+
+describe("écritures de la tarification", () => {
+  const agent = { id: 51, level: AuthorLevel.DEPARTEMENT };
+  const transaction = {
+    findJournal: vi.fn(),
+    findCampaign: vi.fn(),
+    findUnattachedFile: vi.fn(),
+    createDocument: vi.fn(),
+    createEvent: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv("NEXT_PUBLIC_EMULATED_NOW", "2027-06-01T12:00:00.000Z");
+    mockFindStructureScope.mockResolvedValue({
+      id: 1,
+      departementAdministratif: "75",
+      operateurId: null,
+      type: StructureType.CADA,
+    });
+    transaction.findJournal.mockResolvedValue(buildStructureJournal());
+    transaction.findCampaign.mockResolvedValue(null);
+    transaction.findUnattachedFile.mockResolvedValue({ id: 7 });
+    transaction.createDocument.mockResolvedValue({ id: 9 });
+    transaction.createEvent.mockResolvedValue({ id: 10 });
+    mockRunInTarificationTransaction.mockImplementation(
+      (
+        _structureId: number,
+        _year: number,
+        callback: (openTransaction: typeof transaction) => Promise<unknown>
+      ) => callback(transaction)
+    );
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  describe("depositTarificationDocument", () => {
+    const deposit = {
+      structureId: 1,
+      year: 2027,
+      author: agent,
+      fileKey: "abc-rca.pdf",
+      types: ["RCA" as const],
+      status: TarificationDocumentStatus.DRAFT,
+    };
+
+    it("relit le journal dans la transaction, puis crée le document", async () => {
+      await expect(depositTarificationDocument(deposit)).resolves.toEqual({
+        id: 9,
+      });
+
+      expect(mockRunInTarificationTransaction).toHaveBeenCalledWith(
+        1,
+        2027,
+        expect.any(Function)
+      );
+      expect(transaction.findJournal).toHaveBeenCalled();
+      expect(mockFindStructureTarificationJournal).not.toHaveBeenCalled();
+      expect(transaction.findUnattachedFile).toHaveBeenCalledWith(
+        "abc-rca.pdf"
+      );
+      expect(transaction.createDocument).toHaveBeenCalledWith({
+        fileUploadId: 7,
+        types: ["RCA"],
+        status: TarificationDocumentStatus.DRAFT,
+      });
+    });
+
+    it("journalise le dépôt avec son auteur", async () => {
+      await depositTarificationDocument(deposit);
+
+      expect(transaction.createEvent).toHaveBeenCalledWith({
+        type: TarificationEventType.DOCUMENT_DEPOSITED,
+        authorId: agent.id,
+        authorLevel: agent.level,
+        documentId: 9,
+        stepCode: null,
+        text: null,
+      });
+    });
+
+    it("n'écrit rien quand le fichier est introuvable ou déjà rattaché", async () => {
+      transaction.findUnattachedFile.mockResolvedValue(null);
+
+      await expect(depositTarificationDocument(deposit)).rejects.toMatchObject({
+        status: 422,
+      });
+
+      expect(transaction.createDocument).not.toHaveBeenCalled();
+      expect(transaction.createEvent).not.toHaveBeenCalled();
+    });
+
+    it("n'écrit rien quand une garde refuse le dépôt", async () => {
+      await expect(
+        depositTarificationDocument({
+          ...deposit,
+          types: ["CA"],
+        })
+      ).rejects.toThrow("Cet état");
+
+      expect(transaction.createDocument).not.toHaveBeenCalled();
+    });
+
+    it("n'ouvre pas de transaction pour une structure sans tarification", async () => {
+      mockFindStructureScope.mockResolvedValue({
+        id: 1,
+        departementAdministratif: "75",
+        operateurId: null,
+        type: StructureType.HUDA,
+      });
+
+      await expect(depositTarificationDocument(deposit)).rejects.toThrow(
+        "CADA et les CPH"
+      );
+
+      expect(mockRunInTarificationTransaction).not.toHaveBeenCalled();
+    });
+
+    it("compte la phase de campagne au fuseau de la structure", async () => {
+      vi.stubEnv("NEXT_PUBLIC_EMULATED_NOW", "2027-12-31T21:00:00.000Z");
+
+      await expect(depositTarificationDocument(deposit)).rejects.toThrow(
+        "pas ouvert"
+      );
+    });
+  });
+
+  describe("recordTarificationEvent", () => {
+    it("relit le journal dans la transaction, puis écrit le fait au nom de l'auteur", async () => {
+      await recordTarificationEvent({
+        structureId: 1,
+        year: 2027,
+        author: agent,
+        type: TarificationEventType.OUT_OF_APP_DECLARED,
+        documentId: null,
+        stepCode: null,
+        text: "Courrier",
+      });
+
+      expect(transaction.findJournal).toHaveBeenCalled();
+      expect(mockFindStructureTarificationJournal).not.toHaveBeenCalled();
+      expect(transaction.createEvent).toHaveBeenCalledWith({
+        type: TarificationEventType.OUT_OF_APP_DECLARED,
+        authorId: agent.id,
+        authorLevel: agent.level,
+        documentId: null,
+        stepCode: null,
+        text: "Courrier",
+      });
+    });
+
+    it("n'écrit rien quand une garde refuse le fait", async () => {
+      await expect(
+        recordTarificationEvent({
+          structureId: 1,
+          year: 2027,
+          author: agent,
+          type: TarificationEventType.OUT_OF_APP_DECLARED,
+          documentId: null,
+          stepCode: null,
+          text: null,
+        })
+      ).rejects.toThrow("pas valide");
+
+      expect(transaction.createEvent).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe("getTarificationOverview", () => {
+  const buildScope = (type: StructureType) => ({
+    id: 1,
+    codeBhasile: "BHA-1",
+    departementAdministratif: "75",
+    operateurId: OPERATEUR_ID,
+    type,
+  });
+  const databaseAgent = {
+    id: 51,
+    operateurId: null,
+    isSuperAdmin: false,
+    isAgent: true,
+    grants: [],
+    emailPattern: null,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv("MESSAGERIE_ENABLED", "true");
+    vi.stubEnv("NEXT_PUBLIC_EMULATED_NOW", "2029-06-01T12:00:00.000Z");
+    mockFindStructureTarificationCampaigns.mockResolvedValue([]);
+    mockGetUserWithGrantsByEmail.mockResolvedValue(databaseAgent);
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("propose aux agents les campagnes en rattrapage, sans les dire ouvertes", async () => {
+    mockFindStructureScope.mockResolvedValue(buildScope(StructureType.CADA));
+
+    const overview = await getTarificationOverview(
+      createDepartementalAgent(["75"]),
+      1
+    );
+
+    expect(overview.campaignYears).toEqual([2030, 2029, 2028, 2027]);
+    expect(overview.openCampaignYears).toEqual([2029, 2030]);
+  });
+
+  it("ne propose pas les campagnes en rattrapage à l'opérateur", async () => {
+    mockCanAccessTarification.mockReturnValueOnce(true);
+    mockFindStructureScope.mockResolvedValue(buildScope(StructureType.CADA));
+    mockGetUserWithGrantsByEmail.mockResolvedValue({
+      ...databaseAgent,
+      operateurId: OPERATEUR_ID,
+      isAgent: false,
+    });
+
+    const overview = await getTarificationOverview(
+      createSessionUser({ operateurId: OPERATEUR_ID }),
+      1
+    );
+
+    expect(overview.campaignYears).toEqual([2030, 2029]);
+  });
+
+  it("ne propose à une structure non éligible que ses tarifications existantes", async () => {
+    mockFindStructureScope.mockResolvedValue(buildScope(StructureType.HUDA));
+    mockFindStructureTarificationCampaigns.mockResolvedValue([
+      { campaign: { year: 2027 } },
+    ]);
+
+    const overview = await getTarificationOverview(
+      createDepartementalAgent(["75"]),
+      1
+    );
+
+    expect(overview.campaignYears).toEqual([2027]);
+    expect(overview.openCampaignYears).toEqual([]);
   });
 });
