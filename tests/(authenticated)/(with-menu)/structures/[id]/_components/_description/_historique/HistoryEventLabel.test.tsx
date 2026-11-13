@@ -1,9 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { ComponentProps } from "react";
-import {
-  createDepartementalAgent,
-  createSessionUser,
-} from "tests/test-utils/factories/session-user.factory";
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { HistoryEventLabel } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_description/_historique/HistoryEventLabel";
@@ -120,26 +117,6 @@ describe("HistoryEventLabel", () => {
     expect(
       screen.getByRole("link", { name: "Coallia 92, 93" })
     ).toHaveAttribute("href", "/cpoms/7");
-  });
-
-  it("affiche le CPOM sans lien à un utilisateur qui n'accède pas aux CPOM", () => {
-    mockUseSession.mockReturnValue({
-      data: { user: createSessionUser({ operateurId: 42, isAgent: false }) },
-    });
-
-    const { container } = renderLabel({
-      kind: "CPOM_ENTRY",
-      date: ISO,
-      cpom: {
-        id: 7,
-        operateurName: "Coallia",
-        departements: ["92"],
-        regionName: null,
-      },
-    });
-
-    expect(container.textContent).toBe("Entrée dans le CPOM Coallia 92");
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("sortie CPOM", () => {

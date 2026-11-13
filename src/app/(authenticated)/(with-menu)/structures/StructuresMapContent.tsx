@@ -10,9 +10,7 @@ import { StructuresMapLoader } from "./StructuresMapLoader";
 
 export const StructuresMapContent = async ({
   query,
-}: {
-  query: StructuresQuery;
-}): Promise<ReactElement> => {
+}: Props): Promise<ReactElement> => {
   if (query.mode === "places") {
     const { communes } = await getCommunePoints(query);
     return <StructuresMapLoader communes={communes} />;
@@ -21,4 +19,8 @@ export const StructuresMapContent = async ({
   const points = await getStructureMapPoints(query);
 
   return <StructuresMapLoader points={points} />;
+};
+
+type Props = {
+  query: StructuresQuery;
 };

@@ -4,14 +4,14 @@ import { getCpoms } from "@/app/api/cpoms/cpom.service";
 import { ListLoader } from "@/app/components/lists/ListLoader";
 import { LIST_NAVIGATION_KEY } from "@/constants";
 import { CpomsQuery } from "@/types/cpom.type";
+import { SessionUser } from "@/types/global";
 
 import { CpomsTable } from "./_components/CpomsTable";
 
 export const CpomsContent = async ({
   query,
-}: {
-  query: CpomsQuery;
-}): Promise<ReactElement> => {
+  user,
+}: Props): Promise<ReactElement> => {
   const { cpoms, totalCpoms } = await getCpoms(query);
 
   return (
@@ -24,7 +24,13 @@ export const CpomsContent = async ({
         cpoms={cpoms}
         totalCpoms={totalCpoms}
         ariaLabelledBy="cpoms-titre"
+        user={user}
       />
     </ListLoader>
   );
+};
+
+type Props = {
+  query: CpomsQuery;
+  user: SessionUser;
 };

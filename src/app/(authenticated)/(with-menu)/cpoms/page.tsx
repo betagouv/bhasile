@@ -58,7 +58,7 @@ export default async function Cpoms({
         }
       >
         <Suspense fallback={<CpomsSkeleton />}>
-          <CpomsContent query={query} />
+          <CpomsContent query={query} user={session?.user as SessionUser} />
         </Suspense>
       </ContentErrorBoundary>
     </div>

@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { AppAbilityProvider } from "@/contexts/AbilityProvider";
 import { StructureType } from "@/generated/prisma/client";
 import { Repartition } from "@/types/adresse.type";
+import { SessionUser } from "@/types/global";
 import { StructureListItem } from "@/types/structure-list.type";
 
 import { StructuresTable } from "../../../src/app/(authenticated)/(with-menu)/structures/_components/StructuresTable";
@@ -37,10 +38,11 @@ vi.mock("next-auth/react", async (importOriginal) => {
 });
 
 describe("StructuresTable", () => {
-  it("affiche les en-têtes de colonnes et le contenu des lignes au rendu", () => {
+  it("affiche les en-têtes de colonnes et le contenu des lignes au rendu pour un agent", () => {
     // GIVEN
     const structures = [1, 2, 3].map((id) => buildListItem(id));
     const ariaLabelledBy = "";
+    const agentUser = { isAgent: true } as SessionUser;
 
     // WHEN
     render(
@@ -51,6 +53,7 @@ describe("StructuresTable", () => {
             totalStructures={structures.length}
             ariaLabelledBy={ariaLabelledBy}
             isClosed={false}
+            user={agentUser}
           />
         </AppAbilityProvider>
       </SessionProvider>
@@ -68,6 +71,7 @@ describe("StructuresTable", () => {
     expect(columnHeaders[6]).toHaveAccessibleName("Places aut.");
     expect(columnHeaders[7]).toHaveAccessibleName("Fin convention");
     expect(columnHeaders[8]).toHaveAccessibleName("");
+
     const structureRows = screen.getAllByRole("row");
     const firstStructureCells = within(structureRows[1]).getAllByRole("cell");
     expect(firstStructureCells[0]).toHaveAccessibleName("BHA-1");
@@ -86,6 +90,7 @@ describe("StructuresTable", () => {
       }
     );
     expect(firstStructureButton).toBeInTheDocument();
+
     const secondStructureCells = within(structureRows[2]).getAllByRole("cell");
     expect(secondStructureCells[0]).toHaveAccessibleName("BHA-2");
     expect(secondStructureCells[1]).toHaveAccessibleName("CADA");
@@ -103,6 +108,7 @@ describe("StructuresTable", () => {
       }
     );
     expect(secondStructureButton).toBeInTheDocument();
+
     const thirdStructureCells = within(structureRows[3]).getAllByRole("cell");
     expect(thirdStructureCells[0]).toHaveAccessibleName("BHA-3");
     expect(thirdStructureCells[1]).toHaveAccessibleName("CADA");
@@ -120,6 +126,7 @@ describe("StructuresTable", () => {
       }
     );
     expect(thirdStructureButton).toBeInTheDocument();
+
     const pagination = screen.getByRole("navigation");
     const pages = within(pagination).getAllByRole("link");
     expect(pages[0]).toHaveAccessibleName("Première page");
@@ -127,6 +134,51 @@ describe("StructuresTable", () => {
     expect(pages[2]).toHaveAccessibleName("Page 1/1");
     expect(pages[3]).toHaveAccessibleName("Page suivante");
     expect(pages[4]).toHaveAccessibleName("Dernière page");
+  });
+
+  it("masque la colonne Opérateur pour un utilisateur opérateur", () => {
+    // GIVEN
+    const structures = [buildListItem(1)];
+    const operateurUser = { isAgent: false, operateurId: 1 } as SessionUser;
+
+    // WHEN
+    render(
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructuresTable
+            structures={structures}
+            totalStructures={structures.length}
+            ariaLabelledBy=""
+            isClosed={false}
+            user={operateurUser}
+          />
+        </AppAbilityProvider>
+      </SessionProvider>
+    );
+
+    // THEN
+    const rows = screen.getAllByRole("rowgroup");
+    const columnHeaders = within(rows[0]).getAllByRole("columnheader");
+    expect(columnHeaders).toHaveLength(8);
+    expect(columnHeaders[0]).toHaveAccessibleName("Code");
+    expect(columnHeaders[1]).toHaveAccessibleName("Type");
+    expect(columnHeaders[2]).toHaveAccessibleName("Dépt.");
+    expect(columnHeaders[3]).toHaveAccessibleName("Communes");
+    expect(columnHeaders[4]).toHaveAccessibleName("Bâti");
+    expect(columnHeaders[5]).toHaveAccessibleName("Places aut.");
+    expect(columnHeaders[6]).toHaveAccessibleName("Fin convention");
+    expect(columnHeaders[7]).toHaveAccessibleName("");
+
+    const structureRows = screen.getAllByRole("row");
+    const firstStructureCells = within(structureRows[1]).getAllByRole("cell");
+    expect(firstStructureCells).toHaveLength(8);
+    expect(firstStructureCells[0]).toHaveAccessibleName("BHA-1");
+    expect(firstStructureCells[1]).toHaveAccessibleName("CADA");
+    expect(firstStructureCells[2]).toHaveAccessibleName("75");
+    expect(firstStructureCells[3]).toHaveAccessibleName("Paris");
+    expect(firstStructureCells[4]).toHaveAccessibleName("Diffus");
+    expect(firstStructureCells[5]).toHaveAccessibleName("10");
+    expect(firstStructureCells[6]).toHaveAccessibleName("02/01/2027");
   });
 });
 

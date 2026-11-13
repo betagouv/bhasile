@@ -70,13 +70,13 @@ describe.each(routes)("$name", ({ call, service }) => {
     expect(service).not.toHaveBeenCalled();
   });
 
-  it("refuse un utilisateur opérateur", async () => {
+  it("accepte un utilisateur opérateur", async () => {
     mockGetServerSession.mockResolvedValue({ user: operateurUser });
 
     const response = await call();
 
-    expect(response.status).toBe(403);
-    expect(service).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(service).toHaveBeenCalled();
   });
 
   it("répond à un agent", async () => {

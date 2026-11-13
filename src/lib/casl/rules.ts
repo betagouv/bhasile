@@ -62,11 +62,17 @@ const defineReadRules = (
       toRuleConditions({ ...conditions, ...operateurCondition })
     );
   }
-  if (isAgent(user)) {
+
+  if (isAgent(user) || user.operateurId !== null) {
     for (const conditions of user.grants.flatMap(getCpomConditions)) {
-      can("read", "Cpom", toRuleConditions(conditions));
+      can(
+        "read",
+        "Cpom",
+        toRuleConditions({ ...conditions, ...operateurCondition })
+      );
     }
   }
+
   if (isAgent(user)) {
     can("read", "Operateur");
   } else if (user.operateurId !== null) {
