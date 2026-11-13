@@ -1,4 +1,3 @@
-import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
@@ -10,7 +9,7 @@ import {
   SearchParams,
 } from "@/app/utils/search-params.util";
 import { PageHeader } from "@/components/PageHeader";
-import { authOptions } from "@/lib/next-auth/auth";
+import { auth } from "@/lib/next-auth/auth";
 import { CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
 import { getFiltersFromSearchParams } from "@/utils/filters.util";
@@ -25,7 +24,7 @@ export default async function Cpoms({
   searchParams: Promise<SearchParams>;
 }): Promise<ReactElement> {
   const params = await searchParams;
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const query: CpomsQuery = {
     page: getPageParam(params, "page"),
     ...getFiltersFromSearchParams(params),

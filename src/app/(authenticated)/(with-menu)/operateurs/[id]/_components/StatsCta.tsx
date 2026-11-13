@@ -2,12 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { ReactElement } from "react";
 
 import { useOperateurContext } from "@/contexts/OperateurContext";
+import { canAccessPage } from "@/lib/casl/pages";
+import { SessionUser } from "@/types/global";
 
-export const StatsCta = (): ReactElement => {
+export const StatsCta = (): ReactElement | null => {
   const { operateur } = useOperateurContext();
+  const { data } = useSession();
+
+  if (!canAccessPage(data?.user as SessionUser, "/statistiques")) {
+    return null;
+  }
 
   return (
     <div className="bg-alt-blue-france border border-default-grey rounded-[10px] border-solid flex">
