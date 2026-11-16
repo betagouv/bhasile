@@ -1,5 +1,5 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
@@ -16,14 +16,9 @@ export const FieldSetAdresseAdministrative = ({
 }: {
   formKind?: FormKind;
 }) => {
-  const { control, watch, setValue, getValues, trigger } = useFormContext();
+  const { control, watch, setValue, getValues } = useFormContext();
 
   const [isManualAddress, setIsManualAddress] = useState(false);
-
-  const departementAdministratif = watch("departementAdministratif");
-  useEffect(() => {
-    trigger("adresseAdministrativeComplete");
-  }, [departementAdministratif, trigger]);
 
   const handleAddressAdministrativeChange = () => {
     if (watch("typeBati") === Repartition.COLLECTIF && watch("sameAddress")) {

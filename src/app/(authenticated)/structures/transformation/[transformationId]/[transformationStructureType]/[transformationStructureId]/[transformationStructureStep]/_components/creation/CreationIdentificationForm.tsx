@@ -38,16 +38,7 @@ export const CreationIdentificationForm = ({
     backLink,
     shouldShowIncompleteSteps,
   } = useTransformationFormHandling();
-
   const canUpdateDepartement = useCanUpdateDepartement();
-  const strictSchema = withDepartementAdministratifInPerimetre(
-    creationIdentificationSchema,
-    canUpdateDepartement
-  );
-  const draftSchema = withDepartementAdministratifInPerimetre(
-    creationIdentificationDraftSchema,
-    canUpdateDepartement
-  );
 
   const defaultValues =
     getTransformationDefaultValues<CreationIdentificationDraftFormValues>({
@@ -79,7 +70,12 @@ export const CreationIdentificationForm = ({
 
   return (
     <FormWrapper
-      schema={shouldShowIncompleteSteps ? strictSchema : draftSchema}
+      schema={withDepartementAdministratifInPerimetre(
+        shouldShowIncompleteSteps
+          ? creationIdentificationSchema
+          : creationIdentificationDraftSchema,
+        canUpdateDepartement
+      )}
       defaultValues={defaultValues}
       onSubmit={goToNextStep}
       onError={goToNextStep}
@@ -96,7 +92,7 @@ export const CreationIdentificationForm = ({
             transformationId: transformation.id,
             structureVersionTransformation:
               buildStructureVersionTransformation(data),
-            strictSchema,
+            strictSchema: creationIdentificationSchema,
             values,
           })
         }

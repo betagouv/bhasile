@@ -32,10 +32,7 @@ export const ExistingStructureFlow = ({
     structureVersionTransformation.type
   );
 
-  if (
-    transformationStructureStep ===
-    StructureVersionTransformationStep.DESCRIPTION
-  ) {
+  if (transformationStructureStep === StructureVersionTransformationStep.DESCRIPTION) {
     return (
       <ExistingStructureIdentificationForm
         transformation={transformation}

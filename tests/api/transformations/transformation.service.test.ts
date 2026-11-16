@@ -42,16 +42,7 @@ describe("updateTransformation", () => {
 
   it("enregistre un brouillon dont l'adresse est hors du périmètre de l'agent", async () => {
     await updateTransformation(
-      {
-        id: 1,
-        structureVersionTransformations: [
-          {
-            id: 2,
-            type: StructureVersionTransformationType.CREATION,
-            structureVersion: { departementAdministratif: "40" },
-          },
-        ],
-      },
+      creationHorsPerimetre,
       creationHorsPerimetre,
       agent75
     );

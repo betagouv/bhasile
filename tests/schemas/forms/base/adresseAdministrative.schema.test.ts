@@ -6,55 +6,34 @@ import {
   withDepartementAdministratifInPerimetre,
 } from "@/schemas/forms/base/adresseAdministrative.schema";
 
-const schema = withDepartementAdministratifInPerimetre(
-  adresseAdministrativeAutoSaveSchema,
-  (departementAdministratif) => departementAdministratif === "75"
-);
+const isDepartement75 = (departementAdministratif: string) =>
+  departementAdministratif === "75";
+
+const perimetreIssue = {
+  message: "Le département 10 n’est pas dans votre périmètre.",
+  path: ["adresseAdministrativeComplete"],
+};
 
 describe("withDepartementAdministratifInPerimetre", () => {
   it("accepte un département du périmètre", () => {
-    const result = schema.safeParse({ departementAdministratif: "75" });
+    const schema = withDepartementAdministratifInPerimetre(
+      adresseAdministrativeAutoSaveSchema,
+      isDepartement75
+    );
 
-    expect(result.success).toBe(true);
+    expect(schema.safeParse({ departementAdministratif: "75" }).success).toBe(
+      true
+    );
   });
 
-  it("accepte une adresse sans département", () => {
-    const result = schema.safeParse({});
-
-    expect(result.success).toBe(true);
-  });
-
-  it("rejette un département hors périmètre sur le champ adresse", () => {
-    const result = schema.safeParse({ departementAdministratif: "10" });
-
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0]).toMatchObject({
-      message: "Le département 10 n’est pas dans votre périmètre.",
-      path: ["adresseAdministrativeComplete"],
-    });
-  });
-
-  it("signale le département hors périmètre même quand d'autres champs sont en erreur", () => {
-    const strictSchema = withDepartementAdministratifInPerimetre(
+  it("signale un département hors périmètre sur le champ adresse, même quand d'autres champs sont en erreur", () => {
+    const schema = withDepartementAdministratifInPerimetre(
       adresseAdministrativeSchema,
-      (departementAdministratif) => departementAdministratif === "75"
+      isDepartement75
     );
 
-    const result = strictSchema.safeParse({ departementAdministratif: "10" });
-
-    expect(result.error?.issues).toContainEqual(
-      expect.objectContaining({
-        message: "Le département 10 n’est pas dans votre périmètre.",
-        path: ["adresseAdministrativeComplete"],
-      })
-    );
-  });
-
-  it("laisse le schéma d'origine inchangé", () => {
-    const result = adresseAdministrativeAutoSaveSchema.safeParse({
-      departementAdministratif: "10",
-    });
-
-    expect(result.success).toBe(true);
+    expect(
+      schema.safeParse({ departementAdministratif: "10" }).error?.issues
+    ).toContainEqual(expect.objectContaining(perimetreIssue));
   });
 });

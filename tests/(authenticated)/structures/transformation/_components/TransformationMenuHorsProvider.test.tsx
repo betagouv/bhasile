@@ -6,16 +6,18 @@ import { FetchState } from "@/types/fetch-state.type";
 
 const mockUsePathname = vi.fn<() => string>();
 
-vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
-  useCanUpdateDepartement: () => () => true,
-}));
-
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
   useRouter: () => ({ push: vi.fn() }),
 }));
 
 vi.mock("next-auth/react");
+
+vi.mock("@/hooks/useTransformationStepsWithStatus", async () => ({
+  useTransformationStepsWithStatus: (
+    await import("@/app/utils/transformation.util")
+  ).getTransformationSteps,
+}));
 
 vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
@@ -35,9 +37,10 @@ describe("TransformationMenu hors provider", () => {
     render(<TransformationMenu />);
 
     // THEN
-    expect(
-      screen.getByRole("button", { name: /Cas de figure/ })
-    ).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("button", { name: /Cas de figure/ })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
     expect(screen.getByRole("button", { name: /Vérification/ })).toBeDisabled();
   });
 });

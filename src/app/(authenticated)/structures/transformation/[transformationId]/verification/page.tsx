@@ -8,10 +8,10 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
-import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
 import { useTransformations } from "@/app/hooks/useTransformations";
+import { areAllFormStepsValidated } from "@/app/utils/form-step.util";
 import {
   getTransformationOriginRoute,
   sortStructureVersionTransformationsByType,
@@ -19,6 +19,7 @@ import {
 import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { useTransformationContext } from "@/contexts/TransformationContext";
+import { useTransformationStepsWithStatus } from "@/hooks/useTransformationStepsWithStatus";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiUpdateClient,
@@ -28,7 +29,6 @@ import {
   HudaCadaDestination,
   StructureVersionTransformationType,
 } from "@/types/transformation.type";
-import { isStructureVersionTransformationComplete } from "@/utils/transformation-step-status.util";
 
 import { StructureVersionTransformationGroup } from "./_components/StructureVersionTransformationGroup";
 
@@ -43,11 +43,11 @@ export default function TransformationVerificationPage() {
   const { transformation, setShouldShowIncompleteSteps } =
     useTransformationContext();
   const { updateTransformation } = useTransformations();
+  const { prevStep } = useTransformationFormNavigation();
 
   useEffect(() => {
     setShouldShowIncompleteSteps(true);
   }, [setShouldShowIncompleteSteps]);
-  const { prevStep } = useTransformationFormNavigation();
 
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
@@ -66,16 +66,9 @@ export default function TransformationVerificationPage() {
       HudaCadaDestination.REMISE_EN_CONCURRENCE
     : false;
 
-  const canUpdateDepartement = useCanUpdateDepartement();
-  const allChildFormsAreValidated =
-    transformation.structureVersionTransformations.every(
-      (structureVersionTransformation) =>
-        isStructureVersionTransformationComplete(
-          transformation,
-          structureVersionTransformation,
-          canUpdateDepartement
-        )
-    );
+  const allChildFormsAreValidated = useTransformationStepsWithStatus(
+    transformation
+  ).every((step) => areAllFormStepsValidated(step.steps));
 
   useIsModalOpen(confirmationModal, {
     onConceal: () => router.push(getTransformationOriginRoute(transformation)),
@@ -117,7 +110,6 @@ export default function TransformationVerificationPage() {
           {groups.map((group) => (
             <StructureVersionTransformationGroup
               key={group.type}
-              transformation={transformation}
               type={group.type}
               structureVersionTransformations={group.items}
             />

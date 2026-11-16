@@ -1,38 +1,31 @@
 import Link from "next/link";
 
 import { StructureCard } from "@/app/components/StructureCard";
-import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
 import { formatDate } from "@/app/utils/date.util";
 import { pluralize } from "@/app/utils/string.util";
 import {
   getPlacesSource,
   getStructureVersionDepartement,
 } from "@/app/utils/transformation.util";
-import {
-  StructureVersionTransformationApiRead,
-  TransformationApiRead,
-} from "@/schemas/api/transformation.schema";
+import { useTransformationContext } from "@/contexts/TransformationContext";
+import { useTransformationStepsWithStatus } from "@/hooks/useTransformationStepsWithStatus";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
-import { getStructureVersionTransformationStepItems } from "@/utils/transformation-step-status.util";
 
 type Props = {
-  transformation: TransformationApiRead;
   structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
 export const StructureVersionTransformationItem = ({
-  transformation,
   structureVersionTransformation,
 }: Props) => {
   const cardProps = buildCardProps(structureVersionTransformation);
 
-  const canUpdateDepartement = useCanUpdateDepartement();
-  const firstIncompleteStep = getStructureVersionTransformationStepItems(
-    transformation,
-    structureVersionTransformation,
-    canUpdateDepartement
-  ).find((step) => step.status !== StepStatus.VALIDE);
+  const { transformation } = useTransformationContext();
+  const firstIncompleteStep = useTransformationStepsWithStatus(transformation)
+    .find((step) => step.id === structureVersionTransformation.id)
+    ?.steps.find((stepItem) => stepItem.status !== StepStatus.VALIDE);
 
   const effectiveDate =
     structureVersionTransformation.structureVersion?.effectiveDate;

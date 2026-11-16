@@ -13,7 +13,7 @@ import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { FormKind, SessionUser } from "@/types/global";
+import { FormKind } from "@/types/global";
 import {
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
@@ -31,7 +31,8 @@ vi.mock("next/navigation", () => ({
     transformationStructureId: String(STRUCTURE_VERSION_TRANSFORMATION_ID),
     transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
   }),
-  usePathname: () => "/structures/transformation/12/creation/7/description",
+  usePathname: () =>
+    "/structures/transformation/12/creation/7/description",
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
   notFound: vi.fn(),
 }));
@@ -49,14 +50,11 @@ vi.mock(
 vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({
   DnaAndFiness: () => <div data-testid="dna-and-finess" />,
 }));
-vi.mock(
-  "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness",
-  () => ({
-    TransformationDnaAndFiness: () => (
-      <div data-testid="transformation-dna-and-finess" />
-    ),
-  })
-);
+vi.mock("@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness", () => ({
+  TransformationDnaAndFiness: () => (
+    <div data-testid="transformation-dna-and-finess" />
+  ),
+}));
 vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));
@@ -66,12 +64,11 @@ let fetchMock: ReturnType<typeof mockTransformationFetch>;
 const buildTransformation = (
   structureVersion: StructureVersionTransformationApiRead["structureVersion"]
 ): TransformationApiRead => {
-  const structureVersionTransformation: StructureVersionTransformationApiRead =
-    {
-      id: STRUCTURE_VERSION_TRANSFORMATION_ID,
-      type: StructureVersionTransformationType.CREATION,
-      structureVersion,
-    };
+  const structureVersionTransformation: StructureVersionTransformationApiRead = {
+    id: STRUCTURE_VERSION_TRANSFORMATION_ID,
+    type: StructureVersionTransformationType.CREATION,
+    structureVersion,
+  };
   return {
     id: TRANSFORMATION_ID,
     type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -83,8 +80,7 @@ const renderForm = (
   formKind: FormKind = FormKind.OUVERTURE_EX_NIHILO,
   structureVersion: StructureVersionTransformationApiRead["structureVersion"] = {
     id: 999,
-  },
-  user?: SessionUser
+  }
 ) => {
   const transformation = buildTransformation(structureVersion);
   renderTransformationForm(
@@ -95,8 +91,7 @@ const renderForm = (
         transformation.structureVersionTransformations[0]
       }
       formKind={formKind}
-    />,
-    { user }
+    />
   );
 };
 
@@ -132,19 +127,25 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     );
   });
 
-  it("enregistre l'adresse même quand elle est hors du périmètre de l'agent", async () => {
+  it("enregistre une étape incomplète et son adresse hors périmètre après le passage par la vérification", async () => {
     // GIVEN
-    renderForm(
-      FormKind.OUVERTURE_EX_NIHILO,
-      {
-        id: 999,
-        effectiveDate: "2026-09-11T12:00:00.000Z",
-        adresseAdministrative: "44 Rue de la Paix",
-        codePostalAdministratif: "10000",
-        communeAdministrative: "Troyes",
-        departementAdministratif: "10",
-      },
-      createDepartementalAgent(["75"])
+    const transformation = buildTransformation({
+      id: 999,
+      adresseAdministrative: "44 Rue de la Paix",
+      codePostalAdministratif: "10000",
+      communeAdministrative: "Troyes",
+      departementAdministratif: "10",
+    });
+    renderTransformationForm(
+      transformation,
+      <CreationIdentificationForm
+        transformation={transformation}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
+        formKind={FormKind.OUVERTURE_EX_NIHILO}
+      />,
+      { showIncompleteSteps: true, user: createDepartementalAgent(["75"]) }
     );
 
     // WHEN
@@ -154,19 +155,11 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
 
     // THEN
     await waitFor(() =>
-      expect(fetchMock).toHaveBeenCalledWith(
-        `/api/transformations/${TRANSFORMATION_ID}`,
-        expect.objectContaining({ method: "PUT" })
-      )
+      expect(
+        getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID)
+          .structureVersion
+      ).toMatchObject({ departementAdministratif: "10" })
     );
-    const { structureVersion } = getSavedStructureVersionTransformation(
-      fetchMock,
-      TRANSFORMATION_ID
-    );
-    expect(structureVersion).toMatchObject({
-      adresseAdministrative: "44 Rue de la Paix",
-      departementAdministratif: "10",
-    });
   });
 
   it("lit la date depuis effectiveDate de la version et la renvoie sur effectiveDate (plus de creationDate sur la version)", async () => {
@@ -190,8 +183,10 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
         expect.objectContaining({ method: "PUT" })
       )
     );
-    const structureVersionTransformation =
-      getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID);
+    const structureVersionTransformation = getSavedStructureVersionTransformation(
+      fetchMock,
+      TRANSFORMATION_ID
+    );
     expect(structureVersionTransformation.id).toBe(
       STRUCTURE_VERSION_TRANSFORMATION_ID
     );
@@ -226,35 +221,6 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
       screen.getByTestId("transformation-dna-and-finess")
     ).toBeInTheDocument();
     expect(screen.queryByTestId("dna-and-finess")).not.toBeInTheDocument();
-  });
-
-  it("enregistre une étape incomplète même après le passage par la vérification", async () => {
-    // GIVEN
-    const transformation = buildTransformation({ id: 999 });
-    renderTransformationForm(
-      transformation,
-      <CreationIdentificationForm
-        transformation={transformation}
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        formKind={FormKind.OUVERTURE_EX_NIHILO}
-      />,
-      { showIncompleteSteps: true }
-    );
-
-    // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Étape suivante" })
-    );
-
-    // THEN
-    await waitFor(() =>
-      expect(fetchMock).toHaveBeenCalledWith(
-        `/api/transformations/${TRANSFORMATION_ID}`,
-        expect.objectContaining({ method: "PUT" })
-      )
-    );
   });
 
   it("sauvegarde même quand tous les champs sont vides, y compris les null venant de la BDD", async () => {

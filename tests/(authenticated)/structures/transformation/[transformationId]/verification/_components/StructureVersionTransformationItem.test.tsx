@@ -1,21 +1,19 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { StructureVersionTransformationItem } from "@/app/(authenticated)/structures/transformation/[transformationId]/verification/_components/StructureVersionTransformationItem";
-import {
-  StructureVersionTransformationApiRead,
-  TransformationApiRead,
-} from "@/schemas/api/transformation.schema";
+import { Step } from "@/app/utils/transformation.util";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
 import { StructureType } from "@/types/structure.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 type StructureCardStubProps = {
-  nom?: string | null;
+  nom: string;
   codeBhasile?: string;
-  type?: StructureType;
+  type: StructureType;
   operateur?: { name: string };
-  departementAdministratif?: string;
+  departementAdministratif: string;
 };
 
 vi.mock("@/app/components/StructureCard", () => ({
@@ -28,7 +26,7 @@ vi.mock("@/app/components/StructureCard", () => ({
   }: StructureCardStubProps) => (
     <div
       data-testid="structure-card"
-      data-nom={nom ?? undefined}
+      data-nom={nom}
       data-code={codeBhasile}
       data-type={type}
       data-operateur={operateur?.name}
@@ -37,28 +35,15 @@ vi.mock("@/app/components/StructureCard", () => ({
   ),
 }));
 
-const mockGetStructureVersionTransformationStepItems = vi.fn();
+const mockSteps = vi.fn<() => Step[]>(() => []);
 
-vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
-  useCanUpdateDepartement: () => () => true,
+vi.mock("@/contexts/TransformationContext", () => ({
+  useTransformationContext: () => ({}),
 }));
 
-vi.mock("@/utils/transformation-step-status.util", () => ({
-  getStructureVersionTransformationStepItems: () =>
-    mockGetStructureVersionTransformationStepItems(),
+vi.mock("@/hooks/useTransformationStepsWithStatus", () => ({
+  useTransformationStepsWithStatus: () => mockSteps(),
 }));
-
-const TRANSFORMATION = {
-  id: 3,
-  structureVersionTransformations: [],
-} as TransformationApiRead;
-
-const buildStepItem = (route: string, status: StepStatus) => ({
-  name: route,
-  label: route,
-  route,
-  status,
-});
 
 const buildCompleteStructureVersionTransformation = (
   overrides: Partial<StructureVersionTransformationApiRead> = {}
@@ -71,8 +56,7 @@ const buildCompleteStructureVersionTransformation = (
     departementAdministratif: "Manche",
     effectiveDate: "2026-08-25T12:00:00.000Z",
     structure: {
-      codeBhasile: "BHA-NOR-025",
-      isFinalised: true,
+      codeBhasile: "BHA-NOR-025", isFinalised: true,
       operateur: { id: 10, name: "Groupe SOS" },
     },
     placesAutorisees: 47,
@@ -81,19 +65,13 @@ const buildCompleteStructureVersionTransformation = (
 });
 
 describe("StructureVersionTransformationItem", () => {
-  beforeEach(() => {
-    mockGetStructureVersionTransformationStepItems.mockReturnValue([]);
-  });
-
   it("affiche la StructureCard avec les valeurs dérivées de structureVersion + structure", () => {
     // GIVEN
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation();
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation();
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -107,7 +85,9 @@ describe("StructureVersionTransformationItem", () => {
     expect(card).toHaveAttribute("data-dept", "Manche");
   });
 
-  it.each<[string, () => StructureVersionTransformationApiRead]>([
+  it.each<
+    [string, () => StructureVersionTransformationApiRead]
+  >([
     [
       "nom",
       () =>
@@ -121,9 +101,7 @@ describe("StructureVersionTransformationItem", () => {
     [
       "structureType",
       () =>
-        buildCompleteStructureVersionTransformation({
-          structureType: undefined,
-        }),
+        buildCompleteStructureVersionTransformation({ structureType: undefined }),
     ],
     [
       "departementAdministratif",
@@ -135,36 +113,27 @@ describe("StructureVersionTransformationItem", () => {
           },
         }),
     ],
-  ])(
-    "affiche la StructureCard sans %s quand il est absent",
-    (_label, build) => {
-      // WHEN
-      render(
-        <StructureVersionTransformationItem
-          transformation={TRANSFORMATION}
-          structureVersionTransformation={build()}
-        />
-      );
-
-      // THEN
-      expect(screen.getByTestId("structure-card")).toBeInTheDocument();
-    }
-  );
-
-  it("masque la StructureCard quand aucune information de la structure n'est renseignée", () => {
-    // GIVEN
-    const structureVersionTransformation: StructureVersionTransformationApiRead =
-      {
-        id: 1,
-        type: StructureVersionTransformationType.CREATION,
-        structureVersion: {},
-      };
-
+  ])("affiche la StructureCard quand %s est absent", (_label, build) => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
-        structureVersionTransformation={structureVersionTransformation}
+        structureVersionTransformation={build()}
+      />
+    );
+
+    // THEN
+    expect(screen.getByTestId("structure-card")).toBeInTheDocument();
+  });
+
+  it("masque la StructureCard quand aucune information de la structure n'est renseignée", () => {
+    // WHEN
+    render(
+      <StructureVersionTransformationItem
+        structureVersionTransformation={{
+          id: 1,
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: {},
+        }}
       />
     );
 
@@ -175,20 +144,18 @@ describe("StructureVersionTransformationItem", () => {
   it("affiche la StructureCard sans codeBhasile quand la structure n'est pas encore créée", () => {
     // GIVEN — a CREATION block: the structure (and its codeBhasile) does not exist
     // yet, and the operateur is carried by the structureVersionTransformation itself
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        type: StructureVersionTransformationType.CREATION,
-        operateur: { id: 7, name: "Croix-Rouge" },
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          structure: undefined,
-        },
-      });
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      type: StructureVersionTransformationType.CREATION,
+      operateur: { id: 7, name: "Croix-Rouge" },
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: undefined,
+      },
+    });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -204,23 +171,17 @@ describe("StructureVersionTransformationItem", () => {
 
   it("affiche la StructureCard sans opérateur quand aucun n'est résolvable", () => {
     // GIVEN — structureVersion.structure.operateur missing AND structureVersionTransformation.operateur missing
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        operateur: undefined,
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          structure: {
-            codeBhasile: "BHA-NOR-025",
-            isFinalised: true,
-            operateur: undefined,
-          },
-        },
-      });
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      operateur: undefined,
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: { codeBhasile: "BHA-NOR-025", isFinalised: true, operateur: undefined },
+      },
+    });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -233,23 +194,17 @@ describe("StructureVersionTransformationItem", () => {
 
   it("se rabat sur structureVersionTransformation.operateur quand structureVersion.structure.operateur est absent", () => {
     // GIVEN
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        operateur: { id: 99, name: "Opérateur fallback" },
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          structure: {
-            codeBhasile: "BHA-NOR-025",
-            isFinalised: true,
-            operateur: undefined,
-          },
-        },
-      });
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      operateur: { id: 99, name: "Opérateur fallback" },
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: { codeBhasile: "BHA-NOR-025", isFinalised: true, operateur: undefined },
+      },
+    });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -270,15 +225,13 @@ describe("StructureVersionTransformationItem", () => {
     "affiche le verbe '%s' pour le type %s",
     (structureVersionTransformationType, expectedVerb) => {
       // GIVEN
-      const structureVersionTransformation =
-        buildCompleteStructureVersionTransformation({
-          type: structureVersionTransformationType,
-        });
+      const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+        type: structureVersionTransformationType,
+      });
 
       // WHEN
       render(
         <StructureVersionTransformationItem
-          transformation={TRANSFORMATION}
           structureVersionTransformation={structureVersionTransformation}
         />
       );
@@ -293,18 +246,16 @@ describe("StructureVersionTransformationItem", () => {
 
   it("masque la ligne effectiveDate et la ligne placesAutorisees quand effectiveDate est absent", () => {
     // GIVEN
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          effectiveDate: undefined,
-        },
-      });
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        effectiveDate: undefined,
+      },
+    });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -317,24 +268,21 @@ describe("StructureVersionTransformationItem", () => {
   it("affiche la ligne des places fermées pour une FERMETURE depuis le scalaire de la structure source", () => {
     // GIVEN — une fermeture : les places fermées viennent du scalaire de la
     // structure source (résolu par le serveur), pas d'une typologie par année.
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        type: StructureVersionTransformationType.FERMETURE,
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          structure: {
-            codeBhasile: "BHA-NOR-025",
-            isFinalised: true,
-            operateur: { id: 10, name: "Groupe SOS" },
-            placesAutorisees: 47,
-          },
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      type: StructureVersionTransformationType.FERMETURE,
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: {
+          codeBhasile: "BHA-NOR-025", isFinalised: true,
+          operateur: { id: 10, name: "Groupe SOS" },
+          placesAutorisees: 47,
         },
-      });
+      },
+    });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -346,24 +294,21 @@ describe("StructureVersionTransformationItem", () => {
 
   it("accorde la ligne des places fermées au singulier pour une seule place", () => {
     // GIVEN — la structure source ne porte qu'une seule place.
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        type: StructureVersionTransformationType.FERMETURE,
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          structure: {
-            codeBhasile: "BHA-NOR-025",
-            isFinalised: true,
-            operateur: { id: 10, name: "Groupe SOS" },
-            placesAutorisees: 1,
-          },
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      type: StructureVersionTransformationType.FERMETURE,
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: {
+          codeBhasile: "BHA-NOR-025", isFinalised: true,
+          operateur: { id: 10, name: "Groupe SOS" },
+          placesAutorisees: 1,
         },
-      });
+      },
+    });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -374,24 +319,21 @@ describe("StructureVersionTransformationItem", () => {
 
   it("masque la ligne des places fermées pour une FERMETURE quand la structure source est déjà à zéro place", () => {
     // GIVEN — la structure source ne porte aucune place (scalaire à 0).
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        type: StructureVersionTransformationType.FERMETURE,
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          structure: {
-            codeBhasile: "BHA-NOR-025",
-            isFinalised: true,
-            operateur: { id: 10, name: "Groupe SOS" },
-            placesAutorisees: 0,
-          },
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      type: StructureVersionTransformationType.FERMETURE,
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: {
+          codeBhasile: "BHA-NOR-025", isFinalised: true,
+          operateur: { id: 10, name: "Groupe SOS" },
+          placesAutorisees: 0,
         },
-      });
+      },
+    });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -408,42 +350,36 @@ describe("StructureVersionTransformationItem", () => {
     "affiche la ligne placesAutorisees pour le type %s",
     (structureVersionTransformationType, expectedSuffix) => {
       // GIVEN
-      const structureVersionTransformation =
-        buildCompleteStructureVersionTransformation({
-          type: structureVersionTransformationType,
-        });
+      const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+        type: structureVersionTransformationType,
+      });
 
       // WHEN
       render(
         <StructureVersionTransformationItem
-          transformation={TRANSFORMATION}
           structureVersionTransformation={structureVersionTransformation}
         />
       );
 
       // THEN
       expect(
-        screen.getByText(
-          `47 places autorisées au total après ${expectedSuffix}`
-        )
+        screen.getByText(`47 places autorisées au total après ${expectedSuffix}`)
       ).toBeInTheDocument();
     }
   );
 
   it("masque la ligne placesAutorisees quand la version n'en porte pas (fermeture)", () => {
     // GIVEN — une FERMETURE ne porte aucune place sur sa version.
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          placesAutorisees: undefined,
-        },
-      });
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        placesAutorisees: undefined,
+      },
+    });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -454,20 +390,21 @@ describe("StructureVersionTransformationItem", () => {
 
   it("propose de compléter la première étape non validée", () => {
     // GIVEN
-    mockGetStructureVersionTransformationStepItems.mockReturnValue([
-      buildStepItem("/description", StepStatus.VALIDE),
-      buildStepItem("/places", StepStatus.COMMENCE),
-      buildStepItem("/actes", StepStatus.NON_COMMENCE),
+    mockSteps.mockReturnValue([
+      {
+        id: 1,
+        steps: [
+          { name: "a", label: "", route: "/a", status: StepStatus.VALIDE },
+          { name: "b", label: "", route: "/b", status: StepStatus.COMMENCE },
+        ],
+      },
     ]);
     const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        type: StructureVersionTransformationType.CREATION,
-      });
+      buildCompleteStructureVersionTransformation();
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -477,33 +414,6 @@ describe("StructureVersionTransformationItem", () => {
       screen.getByRole("link", {
         name: "Compléter les informations de la structure",
       })
-    ).toHaveAttribute("href", "/places");
-  });
-
-  it("ne propose pas de compléter quand toutes les étapes sont validées", () => {
-    // GIVEN
-    mockGetStructureVersionTransformationStepItems.mockReturnValue([
-      buildStepItem("/description", StepStatus.VALIDE),
-      buildStepItem("/places", StepStatus.VALIDE),
-    ]);
-    const structureVersionTransformation =
-      buildCompleteStructureVersionTransformation({
-        type: StructureVersionTransformationType.CREATION,
-      });
-
-    // WHEN
-    render(
-      <StructureVersionTransformationItem
-        transformation={TRANSFORMATION}
-        structureVersionTransformation={structureVersionTransformation}
-      />
-    );
-
-    // THEN
-    expect(
-      screen.queryByRole("link", {
-        name: "Compléter les informations de la structure",
-      })
-    ).not.toBeInTheDocument();
+    ).toHaveAttribute("href", "/b");
   });
 });

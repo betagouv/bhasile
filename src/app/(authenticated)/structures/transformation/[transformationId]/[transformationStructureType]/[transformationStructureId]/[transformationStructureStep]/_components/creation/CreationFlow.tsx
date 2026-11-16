@@ -29,10 +29,7 @@ export const CreationFlow = ({
     structureVersionTransformation.type
   );
 
-  if (
-    transformationStructureStep ===
-    StructureVersionTransformationStep.DESCRIPTION
-  ) {
+  if (transformationStructureStep === StructureVersionTransformationStep.DESCRIPTION) {
     return (
       <CreationIdentificationForm
         transformation={transformation}

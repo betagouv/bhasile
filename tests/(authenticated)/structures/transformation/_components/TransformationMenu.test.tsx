@@ -15,10 +15,6 @@ const mockRouterPush = vi.fn();
 const mockUseOptionalTransformationContext =
   vi.fn<() => Partial<{ transformation: TransformationApiRead }>>();
 
-vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
-  useCanUpdateDepartement: () => () => true,
-}));
-
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
   useRouter: () => ({ push: mockRouterPush, refresh: vi.fn() }),
@@ -26,9 +22,18 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("next-auth/react");
 
-vi.mock("@/contexts/TransformationContext", () => ({
-  useOptionalTransformationContext: () =>
-    mockUseOptionalTransformationContext(),
+vi.mock(
+  "@/contexts/TransformationContext",
+  () => ({
+    useOptionalTransformationContext: () =>
+      mockUseOptionalTransformationContext(),
+  })
+);
+
+vi.mock("@/hooks/useTransformationStepsWithStatus", async () => ({
+  useTransformationStepsWithStatus: (
+    await import("@/app/utils/transformation.util")
+  ).getTransformationSteps,
 }));
 
 vi.mock("@/contexts/FetchStateContext", () => ({
@@ -43,6 +48,7 @@ describe("TransformationMenu", () => {
   });
 
   describe("when there is no transformationId", () => {
+
     it("marque 'Cas de figure' comme actif sur le pathname /type", () => {
       // GIVEN
       mockUsePathname.mockReturnValue("/structures/transformation/type");
@@ -148,18 +154,21 @@ describe("TransformationMenu", () => {
       ["/structures/transformation/42/extension/1/description"],
       ["/structures/transformation/42/ouverture/1/description"],
       ["/structures/transformation/42/fermeture/1/description"],
-    ])("marque 'Saisie des données' comme actif sur %s", (pathname: string) => {
-      // GIVEN
-      mockUsePathname.mockReturnValue(pathname);
+    ])(
+      "marque 'Saisie des données' comme actif sur %s",
+      (pathname: string) => {
+        // GIVEN
+        mockUsePathname.mockReturnValue(pathname);
 
-      // WHEN
-      render(<TransformationMenu />);
+        // WHEN
+        render(<TransformationMenu />);
 
-      // THEN
-      expect(
-        screen.getByRole("button", { name: /Saisie des données/ })
-      ).toHaveAttribute("aria-current", "page");
-    });
+        // THEN
+        expect(
+          screen.getByRole("button", { name: /Saisie des données/ })
+        ).toHaveAttribute("aria-current", "page");
+      }
+    );
 
     it("marque 'Vérification' comme actif sur le pathname /verification", () => {
       // GIVEN

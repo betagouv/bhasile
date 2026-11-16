@@ -5,24 +5,33 @@ import { TransformationSteps } from "@/app/(authenticated)/structures/transforma
 import { FetchState } from "@/types/fetch-state.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
-import { createTransformation } from "../../../../test-utils/factories/transformation.factory";
+import {
+  createTransformation,
+  createTransformationForm,
+} from "../../../../test-utils/factories/transformation.factory";
 
 const mockUsePathname = vi.fn<() => string>();
-const mockUseOptionalTransformationContext =
-  vi.fn<() => { shouldShowIncompleteSteps: boolean }>();
+const mockUseOptionalTransformationContext = vi.fn<
+  () => { shouldShowIncompleteSteps: boolean }
+>();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-vi.mock("@/contexts/TransformationContext", () => ({
-  useOptionalTransformationContext: () =>
-    mockUseOptionalTransformationContext(),
-}));
+vi.mock(
+  "@/contexts/TransformationContext",
+  () => ({
+    useOptionalTransformationContext: () =>
+      mockUseOptionalTransformationContext(),
+  })
+);
 
-vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
-  useCanUpdateDepartement: () => () => true,
+vi.mock("@/hooks/useTransformationStepsWithStatus", async () => ({
+  useTransformationStepsWithStatus: (
+    await import("@/app/utils/transformation.util")
+  ).getTransformationSteps,
 }));
 
 vi.mock("@/contexts/FetchStateContext", () => ({
@@ -50,34 +59,23 @@ describe("TransformationSteps", () => {
 
   it("affiche chaque structureVersionTransformation comme un groupe d'étapes", () => {
     // GIVEN
-    const transformation = createTransformation({
-      structureVersionTransformations: [
-        {
-          id: 1,
-          type: StructureVersionTransformationType.FERMETURE,
-          structureVersion: {
-            structureId: 1001,
-            structure: { codeBhasile: "1001", isFinalised: true },
-          },
-        },
-        {
-          id: 2,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            structureId: 1002,
-            structure: { codeBhasile: "1002", isFinalised: true },
-          },
-        },
-        {
-          id: 3,
-          type: StructureVersionTransformationType.CREATION,
-          structureVersion: {
-            structureId: 1003,
-            structure: { codeBhasile: "1003", isFinalised: true },
-          },
-        },
-      ],
-    });
+    const transformation = createTransformation({ structureVersionTransformations: [
+      {
+        id: 1,
+        type: StructureVersionTransformationType.FERMETURE,
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001", isFinalised: true } },
+      },
+      {
+        id: 2,
+        type: StructureVersionTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
+      },
+      {
+        id: 3,
+        type: StructureVersionTransformationType.CREATION,
+        structureVersion: { structureId: 1003, structure: { codeBhasile: "1003", isFinalised: true } },
+      },
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -90,42 +88,28 @@ describe("TransformationSteps", () => {
 
   it("trie les étapes dans l'ordre Fermeture, Contraction, Extension, Création", () => {
     // GIVEN
-    const transformation = createTransformation({
-      structureVersionTransformations: [
-        {
-          id: 1,
-          type: StructureVersionTransformationType.CREATION,
-          structureVersion: {
-            structureId: 1001,
-            structure: { codeBhasile: "1001", isFinalised: true },
-          },
-        },
-        {
-          id: 2,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            structureId: 1002,
-            structure: { codeBhasile: "1002", isFinalised: true },
-          },
-        },
-        {
-          id: 3,
-          type: StructureVersionTransformationType.FERMETURE,
-          structureVersion: {
-            structureId: 1003,
-            structure: { codeBhasile: "1003", isFinalised: true },
-          },
-        },
-        {
-          id: 4,
-          type: StructureVersionTransformationType.CONTRACTION,
-          structureVersion: {
-            structureId: 1004,
-            structure: { codeBhasile: "1004", isFinalised: true },
-          },
-        },
-      ],
-    });
+    const transformation = createTransformation({ structureVersionTransformations: [
+      {
+        id: 1,
+        type: StructureVersionTransformationType.CREATION,
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001", isFinalised: true } },
+      },
+      {
+        id: 2,
+        type: StructureVersionTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
+      },
+      {
+        id: 3,
+        type: StructureVersionTransformationType.FERMETURE,
+        structureVersion: { structureId: 1003, structure: { codeBhasile: "1003", isFinalised: true } },
+      },
+      {
+        id: 4,
+        type: StructureVersionTransformationType.CONTRACTION,
+        structureVersion: { structureId: 1004, structure: { codeBhasile: "1004", isFinalised: true } },
+      },
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -144,18 +128,13 @@ describe("TransformationSteps", () => {
 
   it("affiche les trois sous-étapes pour une étape EXTENSION", () => {
     // GIVEN
-    const transformation = createTransformation({
-      structureVersionTransformations: [
-        {
-          id: 7,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            structureId: 1002,
-            structure: { codeBhasile: "1002", isFinalised: true },
-          },
-        },
-      ],
-    });
+    const transformation = createTransformation({ structureVersionTransformations: [
+      {
+        id: 7,
+        type: StructureVersionTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
+      },
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -174,18 +153,13 @@ describe("TransformationSteps", () => {
 
   it("n'affiche que la sous-étape Description pour une étape FERMETURE", () => {
     // GIVEN
-    const transformation = createTransformation({
-      structureVersionTransformations: [
-        {
-          id: 9,
-          type: StructureVersionTransformationType.FERMETURE,
-          structureVersion: {
-            structureId: 1001,
-            structure: { codeBhasile: "1001", isFinalised: true },
-          },
-        },
-      ],
-    });
+    const transformation = createTransformation({ structureVersionTransformations: [
+      {
+        id: 9,
+        type: StructureVersionTransformationType.FERMETURE,
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001", isFinalised: true } },
+      },
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -201,18 +175,13 @@ describe("TransformationSteps", () => {
     mockUsePathname.mockReturnValue(
       "/structures/transformation/42/extension/7/places-et-hebergement"
     );
-    const transformation = createTransformation({
-      structureVersionTransformations: [
-        {
-          id: 7,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            structureId: 1002,
-            structure: { codeBhasile: "1002", isFinalised: true },
-          },
-        },
-      ],
-    });
+    const transformation = createTransformation({ structureVersionTransformations: [
+      {
+        id: 7,
+        type: StructureVersionTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
+      },
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -229,18 +198,13 @@ describe("TransformationSteps", () => {
 
   it("construit les hrefs de chaque sous-étape à partir des ids de la transformation et de l'étape", () => {
     // GIVEN
-    const transformation = createTransformation({
-      structureVersionTransformations: [
-        {
-          id: 7,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            structureId: 1002,
-            structure: { codeBhasile: "1002", isFinalised: true },
-          },
-        },
-      ],
-    });
+    const transformation = createTransformation({ structureVersionTransformations: [
+      {
+        id: 7,
+        type: StructureVersionTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002", isFinalised: true } },
+      },
+    ] });
 
     // WHEN
     const { container } = render(
@@ -272,18 +236,16 @@ describe("TransformationSteps", () => {
     "utilise le segment correspondant à un type %s dans les hrefs",
     (type: StructureVersionTransformationType, segment: string) => {
       // GIVEN
-      const transformation = createTransformation({
-        structureVersionTransformations: [
-          {
-            id: 7,
-            type: type,
-            structureVersion: {
-              structureId: 1002,
-              structure: { codeBhasile: "1002", isFinalised: true },
-            },
+      const transformation = createTransformation({ structureVersionTransformations: [
+        {
+          id: 7,
+          type: type,
+          structureVersion: {
+            structureId: 1002,
+            structure: { codeBhasile: "1002", isFinalised: true },
           },
-        ],
-      });
+        },
+      ] });
 
       // WHEN
       render(<TransformationSteps transformation={transformation} />);
@@ -296,8 +258,8 @@ describe("TransformationSteps", () => {
     }
   );
 
-  it("affiche une pastille rouge sur chaque étape incomplète quand shouldShowIncompleteSteps est true", () => {
-    // GIVEN — flag set and an empty extension: description and places are incomplete, actes have no required field
+  it("affiche une pastille rouge sur chaque étape non validée quand shouldShowIncompleteSteps est true", () => {
+    // GIVEN — flag set and an extension whose steps are all not validated (no form)
     mockUseOptionalTransformationContext.mockReturnValue({
       shouldShowIncompleteSteps: true,
     });
@@ -317,13 +279,8 @@ describe("TransformationSteps", () => {
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
 
-    // THEN
-    expect(screen.getAllByText("Étape non complétée")).toHaveLength(2);
-    expect(
-      within(
-        screen.getByRole("link", { name: "Actes administratifs" })
-      ).queryByText("Étape non complétée")
-    ).toBeNull();
+    // THEN — one pastille per substep
+    expect(screen.getAllByText("Étape non complétée")).toHaveLength(3);
   });
 
   it("n'affiche aucune pastille quand shouldShowIncompleteSteps est false", () => {
@@ -348,8 +305,8 @@ describe("TransformationSteps", () => {
     expect(screen.queryByText("Étape non complétée")).toBeNull();
   });
 
-  it("n'affiche pas de pastille sur une étape complète jamais enregistrée", () => {
-    // GIVEN
+  it("n'affiche pas de pastille sur une étape validée même quand le flag est activé", () => {
+    // GIVEN — flag set and a form where only the description step is VALIDE
     mockUseOptionalTransformationContext.mockReturnValue({
       shouldShowIncompleteSteps: true,
     });
@@ -357,12 +314,14 @@ describe("TransformationSteps", () => {
       structureVersionTransformations: [
         {
           id: 7,
-          type: StructureVersionTransformationType.FERMETURE,
+          type: StructureVersionTransformationType.EXTENSION,
           structureVersion: {
             structureId: 1002,
-            effectiveDate: "2026-09-11T12:00:00.000Z",
             structure: { codeBhasile: "1002", isFinalised: true },
           },
+          form: createTransformationForm({
+            validatedSlugs: ["01-identification"],
+          }),
         },
       ],
     });
@@ -370,7 +329,12 @@ describe("TransformationSteps", () => {
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
 
-    // THEN
-    expect(screen.queryByText("Étape non complétée")).toBeNull();
+    // THEN — pastilles only on the two non-validated substeps
+    expect(screen.getAllByText("Étape non complétée")).toHaveLength(2);
+    const descriptionLink = screen.getByRole("link", { name: "Description" });
+    expect(
+      within(descriptionLink).queryByText("Étape non complétée")
+    ).toBeNull();
   });
 });
+

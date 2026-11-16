@@ -9,6 +9,7 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
+import { StepStatus } from "@/types/form.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -40,9 +41,12 @@ vi.mock("@codegouvfr/react-dsfr/Modal/useIsModalOpen", () => ({
   useIsModalOpen: () => false,
 }));
 
-vi.mock("@/contexts/TransformationContext", () => ({
-  useTransformationContext: () => mockUseTransformationContext(),
-}));
+vi.mock(
+  "@/contexts/TransformationContext",
+  () => ({
+    useTransformationContext: () => mockUseTransformationContext(),
+  })
+);
 
 vi.mock("@/app/hooks/useTransformations", () => ({
   useTransformations: () => ({
@@ -85,15 +89,14 @@ vi.mock(
   })
 );
 
-vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
-  useCanUpdateDepartement: () => () => true,
-}));
-
-vi.mock("@/utils/transformation-step-status.util", () => ({
-  isStructureVersionTransformationComplete: (
-    _transformation: TransformationApiRead,
-    structureVersionTransformation: StructureVersionTransformationApiRead
-  ) => structureVersionTransformation.form?.status === true,
+vi.mock("@/hooks/useTransformationStepsWithStatus", () => ({
+  useTransformationStepsWithStatus: (transformation: TransformationApiRead) =>
+    transformation.structureVersionTransformations.map(({ id, form }) => ({
+      id,
+      steps: [
+        { status: form?.status ? StepStatus.VALIDE : StepStatus.COMMENCE },
+      ],
+    })),
 }));
 
 vi.mock("@/app/components/forms/TransformationFakeSaver", () => ({
@@ -193,7 +196,8 @@ describe("TransformationVerificationPage", () => {
       buildTransformation({
         form: buildForm(false),
         structureVersionTransformations: [
-          buildStructureVersionTransformation(false),
+          buildStructureVersionTransformation(true, 1),
+          buildStructureVersionTransformation(false, 2),
         ],
       })
     );
