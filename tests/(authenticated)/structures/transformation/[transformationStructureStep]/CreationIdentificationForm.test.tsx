@@ -132,11 +132,18 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     );
   });
 
-  it("n'enregistre pas une adresse hors du périmètre de l'agent", async () => {
+  it("enregistre l'étape sans l'adresse quand elle est hors du périmètre de l'agent", async () => {
     // GIVEN
     renderForm(
       FormKind.OUVERTURE_EX_NIHILO,
-      { id: 999, departementAdministratif: "10" },
+      {
+        id: 999,
+        effectiveDate: "2026-09-11T12:00:00.000Z",
+        adresseAdministrative: "44 Rue de la Paix",
+        codePostalAdministratif: "10000",
+        communeAdministrative: "Troyes",
+        departementAdministratif: "10",
+      },
       createDepartementalAgent(["75"])
     );
 
@@ -147,11 +154,18 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
 
     // THEN
     await waitFor(() =>
-      expect(fetchMock).not.toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         `/api/transformations/${TRANSFORMATION_ID}`,
         expect.objectContaining({ method: "PUT" })
       )
     );
+    const { structureVersion } = getSavedStructureVersionTransformation(
+      fetchMock,
+      TRANSFORMATION_ID
+    );
+    expect(structureVersion.effectiveDate).toBeDefined();
+    expect(structureVersion).not.toHaveProperty("departementAdministratif");
+    expect(structureVersion).not.toHaveProperty("adresseAdministrative");
   });
 
   it("lit la date depuis effectiveDate de la version et la renvoie sur effectiveDate (plus de creationDate sur la version)", async () => {

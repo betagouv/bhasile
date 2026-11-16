@@ -27,6 +27,7 @@ import {
   transformationIdentificationSchema,
 } from "@/schemas/forms/transformation/transformationIdentification.schema";
 import { FormKind } from "@/types/global";
+import { withoutAdresseAdministrativeHorsPerimetre } from "@/utils/adresse-administrative.util";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -73,7 +74,10 @@ export const ExistingStructureIdentificationForm = ({
       id: structureVersionTransformation.id,
       type: structureVersionTransformation.type,
       structureVersion: {
-        ...rest,
+        ...withoutAdresseAdministrativeHorsPerimetre(
+          rest,
+          canUpdateDepartement
+        ),
         dnaStructures: rest.dnaStructures?.filter(
           (dnaStructure) => dnaStructure.dna?.code
         ),
@@ -98,7 +102,7 @@ export const ExistingStructureIdentificationForm = ({
       showContactInfos={false}
     >
       <TransformationFormController
-        schema={draftSchema}
+        schema={transformationIdentificationDraftSchema}
         onSave={(data, values) =>
           handleSave({
             transformationId: transformation.id,
