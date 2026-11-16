@@ -98,8 +98,9 @@ export const authOptions: NextAuthOptions = {
         });
       }
 
+      let databaseName: string | null = null;
       try {
-        await createOrUpdateUser({
+        databaseName = await createOrUpdateUser({
           name: session.user?.name as string,
           email: session.user?.email as string,
         });
@@ -117,6 +118,7 @@ export const authOptions: NextAuthOptions = {
         ...session,
         user: {
           ...session.user,
+          name: databaseName || session.user?.name,
           ...(permissions ?? {}),
           prenom: token.prenom,
         },

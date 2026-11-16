@@ -4,8 +4,8 @@ import { normalizeEmail } from "./user.util";
 export const createOrUpdateUser = async ({
   name,
   email,
-}: CreateOrUpdateUserArgs): Promise<void> => {
-  await upsertUser({ name, email: normalizeEmail(email) });
+}: CreateOrUpdateUserArgs): Promise<string | null> => {
+  return upsertUser({ name, email: normalizeEmail(email) });
 };
 
 type CreateOrUpdateUserArgs = {
