@@ -6,11 +6,13 @@ import { StructureVersionTransformationType } from "@/types/transformation.type"
 import { StructureVersionTransformationItem } from "./StructureVersionTransformationItem";
 
 type Props = {
+  transformationId: number;
   type: StructureVersionTransformationType;
   structureVersionTransformations: StructureVersionTransformationApiRead[];
 };
 
 export const StructureVersionTransformationGroup = ({
+  transformationId,
   type,
   structureVersionTransformations,
 }: Props) => {
@@ -28,6 +30,7 @@ export const StructureVersionTransformationGroup = ({
       {structureVersionTransformations.map((structureVersionTransformation) => (
         <StructureVersionTransformationItem
           key={structureVersionTransformation.id}
+          transformationId={transformationId}
           structureVersionTransformation={structureVersionTransformation}
         />
       ))}

@@ -19,12 +19,16 @@ export const StructureCard = ({
     >
       <span className="fr-icon-community-line fr-icon--md text-title-blue-france" />
       <div>
-        <strong className="uppercase font-bold text-title-blue-france">
-          {nom}
-        </strong>
+        {nom && (
+          <strong className="uppercase font-bold text-title-blue-france">
+            {nom}
+          </strong>
+        )}
         <div className="text-sm">
           {codeBhasile && `${codeBhasile} - `}
-          {type}, {operateur.name}, {departementAdministratif}
+          {[type, operateur?.name, departementAdministratif]
+            .filter(Boolean)
+            .join(", ")}
         </div>
       </div>
     </div>
@@ -32,10 +36,10 @@ export const StructureCard = ({
 };
 
 type Props = {
-  nom: string;
+  nom?: string | null;
   codeBhasile?: string;
-  type: StructureType;
-  operateur: { name: string };
-  departementAdministratif: string;
+  type?: StructureType;
+  operateur?: { name: string };
+  departementAdministratif?: string;
   className?: string;
 };

@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import {
   getSavedStructureVersionTransformation,
   mockTransformationFetch,
@@ -12,7 +13,7 @@ import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { FormKind } from "@/types/global";
+import { FormKind, SessionUser } from "@/types/global";
 import {
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
@@ -30,8 +31,7 @@ vi.mock("next/navigation", () => ({
     transformationStructureId: String(STRUCTURE_VERSION_TRANSFORMATION_ID),
     transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
   }),
-  usePathname: () =>
-    "/structures/transformation/12/creation/7/description",
+  usePathname: () => "/structures/transformation/12/creation/7/description",
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
   notFound: vi.fn(),
 }));
@@ -49,11 +49,14 @@ vi.mock(
 vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({
   DnaAndFiness: () => <div data-testid="dna-and-finess" />,
 }));
-vi.mock("@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness", () => ({
-  TransformationDnaAndFiness: () => (
-    <div data-testid="transformation-dna-and-finess" />
-  ),
-}));
+vi.mock(
+  "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness",
+  () => ({
+    TransformationDnaAndFiness: () => (
+      <div data-testid="transformation-dna-and-finess" />
+    ),
+  })
+);
 vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));
@@ -63,11 +66,12 @@ let fetchMock: ReturnType<typeof mockTransformationFetch>;
 const buildTransformation = (
   structureVersion: StructureVersionTransformationApiRead["structureVersion"]
 ): TransformationApiRead => {
-  const structureVersionTransformation: StructureVersionTransformationApiRead = {
-    id: STRUCTURE_VERSION_TRANSFORMATION_ID,
-    type: StructureVersionTransformationType.CREATION,
-    structureVersion,
-  };
+  const structureVersionTransformation: StructureVersionTransformationApiRead =
+    {
+      id: STRUCTURE_VERSION_TRANSFORMATION_ID,
+      type: StructureVersionTransformationType.CREATION,
+      structureVersion,
+    };
   return {
     id: TRANSFORMATION_ID,
     type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -79,7 +83,8 @@ const renderForm = (
   formKind: FormKind = FormKind.OUVERTURE_EX_NIHILO,
   structureVersion: StructureVersionTransformationApiRead["structureVersion"] = {
     id: 999,
-  }
+  },
+  user?: SessionUser
 ) => {
   const transformation = buildTransformation(structureVersion);
   renderTransformationForm(
@@ -90,7 +95,8 @@ const renderForm = (
         transformation.structureVersionTransformations[0]
       }
       formKind={formKind}
-    />
+    />,
+    { user }
   );
 };
 
@@ -126,6 +132,28 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     );
   });
 
+  it("n'enregistre pas une adresse hors du périmètre de l'agent", async () => {
+    // GIVEN
+    renderForm(
+      FormKind.OUVERTURE_EX_NIHILO,
+      { id: 999, departementAdministratif: "10" },
+      createDepartementalAgent(["75"])
+    );
+
+    // WHEN
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN
+    await waitFor(() =>
+      expect(fetchMock).not.toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+  });
+
   it("lit la date depuis effectiveDate de la version et la renvoie sur effectiveDate (plus de creationDate sur la version)", async () => {
     // GIVEN a creation seeded from a structureVersion whose effectiveDate carries the creation date
     renderForm(FormKind.OUVERTURE_EX_NIHILO, {
@@ -147,10 +175,8 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
         expect.objectContaining({ method: "PUT" })
       )
     );
-    const structureVersionTransformation = getSavedStructureVersionTransformation(
-      fetchMock,
-      TRANSFORMATION_ID
-    );
+    const structureVersionTransformation =
+      getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID);
     expect(structureVersionTransformation.id).toBe(
       STRUCTURE_VERSION_TRANSFORMATION_ID
     );

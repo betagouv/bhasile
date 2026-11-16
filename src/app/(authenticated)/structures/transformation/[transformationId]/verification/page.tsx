@@ -112,6 +112,7 @@ export default function TransformationVerificationPage() {
           {groups.map((group) => (
             <StructureVersionTransformationGroup
               key={group.type}
+              transformationId={transformation.id}
               type={group.type}
               structureVersionTransformations={group.items}
             />

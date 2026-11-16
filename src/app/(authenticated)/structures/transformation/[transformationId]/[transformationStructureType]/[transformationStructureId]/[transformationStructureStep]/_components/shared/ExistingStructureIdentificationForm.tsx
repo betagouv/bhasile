@@ -8,6 +8,7 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
+import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
   getInitialAntennes,
@@ -19,6 +20,7 @@ import {
   StructureVersionTransformationApiUpdateClient,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { withDepartementAdministratifInPerimetre } from "@/schemas/forms/base/adresseAdministrative.schema";
 import {
   TransformationIdentificationDraftFormValues,
   transformationIdentificationDraftSchema,
@@ -44,6 +46,16 @@ export const ExistingStructureIdentificationForm = ({
     backLink,
     shouldShowIncompleteSteps,
   } = useTransformationFormHandling();
+
+  const canUpdateDepartement = useCanUpdateDepartement();
+  const strictSchema = withDepartementAdministratifInPerimetre(
+    transformationIdentificationSchema,
+    canUpdateDepartement
+  );
+  const draftSchema = withDepartementAdministratifInPerimetre(
+    transformationIdentificationDraftSchema,
+    canUpdateDepartement
+  );
 
   const defaultValues =
     getTransformationDefaultValues<TransformationIdentificationDraftFormValues>(
@@ -75,11 +87,7 @@ export const ExistingStructureIdentificationForm = ({
 
   return (
     <FormWrapper
-      schema={
-        shouldShowIncompleteSteps
-          ? transformationIdentificationSchema
-          : transformationIdentificationDraftSchema
-      }
+      schema={shouldShowIncompleteSteps ? strictSchema : draftSchema}
       defaultValues={defaultValues}
       onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
@@ -89,13 +97,13 @@ export const ExistingStructureIdentificationForm = ({
       showContactInfos={false}
     >
       <TransformationFormController
-        schema={transformationIdentificationDraftSchema}
+        schema={draftSchema}
         onSave={(data, values) =>
           handleSave({
             transformationId: transformation.id,
             structureVersionTransformation:
               buildStructureVersionTransformation(data),
-            strictSchema: transformationIdentificationSchema,
+            strictSchema,
             values,
           })
         }

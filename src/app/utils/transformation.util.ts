@@ -219,7 +219,7 @@ const getStructureVersionTransformationFormStepStatus = (
   );
 };
 
-const getStepsByType = (
+export const getStepsByType = (
   structureVersionTransformation: StructureVersionTransformationApiUpdate,
   transformationId: number
 ): Step["steps"] => {
