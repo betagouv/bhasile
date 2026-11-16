@@ -21,9 +21,9 @@ import {
 import {
   annulerDemarche,
   clickEtapeSuivante,
+  expectFinalizeBlocked,
   gotoVerification,
   saveProgress,
-  tryFinalizeExpectingBlock,
 } from "../pages/transformation/transformation-nav.helper";
 import { prisma } from "../seed/prisma";
 import { fetchTransformationGraph } from "../seed/transformation-assert";
@@ -81,7 +81,7 @@ test.describe("Transformations — comportements transverses", () => {
     registerTransformation(transformationId);
 
     await gotoVerification(page, transformationId);
-    await tryFinalizeExpectingBlock(page);
+    await expectFinalizeBlocked(page);
 
     const draft = await prisma.transformation.findUniqueOrThrow({
       where: { id: transformationId },
