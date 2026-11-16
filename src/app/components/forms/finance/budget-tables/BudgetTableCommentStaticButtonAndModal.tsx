@@ -1,14 +1,14 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 
 export const BudgetTableCommentStaticButtonAndModal = ({
-  modalId,
   year,
   commentaire,
 }: Props) => {
+  const modalId = useId();
   const modal = useMemo(
     () =>
       createModal({
@@ -46,7 +46,6 @@ export const BudgetTableCommentStaticButtonAndModal = ({
 };
 
 type Props = {
-  modalId: string;
   year: number;
   commentaire?: string | null;
 };
