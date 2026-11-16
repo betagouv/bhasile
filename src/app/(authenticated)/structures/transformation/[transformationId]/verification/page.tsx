@@ -52,7 +52,8 @@ export default function TransformationVerificationPage() {
   console.log("[debug-verif] render", {
     shouldShowIncompleteSteps,
     childForms: transformation.structureVersionTransformations.map(
-      (structureVersionTransformation) => structureVersionTransformation.form?.status
+      (structureVersionTransformation) =>
+        structureVersionTransformation.form?.status
     ),
   });
   const { prevStep } = useTransformationFormNavigation();
@@ -85,9 +86,6 @@ export default function TransformationVerificationPage() {
   });
 
   const handleSubmit = async () => {
-    if (!allChildFormsAreValidated) {
-      return;
-    }
     if (!transformation.form) {
       return;
     }
@@ -131,14 +129,16 @@ export default function TransformationVerificationPage() {
         </div>
         <div className="flex flex-col items-center gap-2">
           <Button
-            disabled={saveState === FetchState.LOADING}
+            disabled={
+              saveState === FetchState.LOADING || !allChildFormsAreValidated
+            }
             onClick={handleSubmit}
             iconId="fr-icon-arrow-right-line"
             iconPosition="right"
           >
             Je confirme et certifie les informations
           </Button>
-          {shouldShowIncompleteSteps && !allChildFormsAreValidated && (
+          {!allChildFormsAreValidated && (
             <p className="text-xs text-default-error mb-0 mt-3 flex items-center gap-1">
               <i
                 className="fr-icon-error-fill text-default-error shrink-0"
