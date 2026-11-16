@@ -9,7 +9,7 @@ const UPDATE_INTERVAL_MINUTES = 60;
 export const upsertUser = async ({
   name,
   email,
-}: UpsertUserArgs): Promise<void> => {
+}: UpsertUserArgs): Promise<string | null> => {
   const now = getNow();
   const threshold = new Date(
     now.getTime() - UPDATE_INTERVAL_MINUTES * 60 * 1000
@@ -18,6 +18,7 @@ export const upsertUser = async ({
     where: { email },
     select: {
       id: true,
+      name: true,
       lastConnection: true,
     },
   });
@@ -30,22 +31,23 @@ export const upsertUser = async ({
         lastConnection: now,
       },
     });
-    return;
+    return name;
   }
 
   const isRecentConnection =
     existing.lastConnection && existing.lastConnection >= threshold;
   if (isRecentConnection) {
-    return;
+    return existing.name;
   }
 
   await prisma.user.update({
     where: { id: existing.id },
     data: {
-      name,
+      name: existing.name || name,
       lastConnection: now,
     },
   });
+  return existing.name || name;
 };
 
 export const findUserIdByEmail = (email: string) =>
