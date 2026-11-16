@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
@@ -11,8 +10,6 @@ import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { useExportContext } from "@/contexts/ExportContext";
 import { useStructureContext } from "@/contexts/StructureContext";
-import { isAgent } from "@/lib/casl";
-import { SessionUser } from "@/types/global";
 
 import { ButtonAffectations } from "../ButtonAffectations";
 import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
@@ -22,7 +19,6 @@ export const CpomStaticTable = ({
   endYear,
 }: Props): ReactElement => {
   const { structure } = useStructureContext();
-  const { data } = useSession();
   const isExporting = useExportContext();
 
   const years =
@@ -89,17 +85,16 @@ export const CpomStaticTable = ({
           canEdit={false}
           type={structure?.type}
         />
-        {isAgent(data?.user as SessionUser) &&
-          (effectiveIsAffectationOpen || isSubventionnee) && (
-            <BudgetTableCommentLine
-              years={years}
-              label="Commentaire"
-              cpomStructures={enhancedCpomStructures}
-              enabledYears={years}
-              canEdit={false}
-              type={structure?.type}
-            />
-          )}
+        {(effectiveIsAffectationOpen || isSubventionnee) && (
+          <BudgetTableCommentLine
+            years={years}
+            label="Commentaire"
+            cpomStructures={enhancedCpomStructures}
+            enabledYears={years}
+            canEdit={false}
+            type={structure?.type}
+          />
+        )}
       </Table>
       {isAutorisee && (
         <div className="print:hidden">

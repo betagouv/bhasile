@@ -136,6 +136,20 @@ export const getTransformation = async (
   return dbTransformationToApiRead(dbTransformation, getNow());
 };
 
+export const getReadableTransformation = async (
+  id: number,
+  user: SessionUser | undefined
+): Promise<TransformationApiRead | null> => {
+  const transformation = await getTransformation(id);
+  return transformation &&
+    isTransformationVisible(
+      defineAbilityFor(user),
+      transformation.structureVersionTransformations
+    )
+    ? transformation
+    : null;
+};
+
 export const getOngoingTransformationsForUser = async (
   user: SessionUser
 ): Promise<TransformationApiRead[]> => {

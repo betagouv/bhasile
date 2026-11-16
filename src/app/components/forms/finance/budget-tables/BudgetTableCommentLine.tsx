@@ -3,7 +3,10 @@ import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentButtonAndModal } from "./BudgetTableCommentButtonAndModal";
-import { BudgetTableCommentStaticButtonAndModal } from "./BudgetTableCommentStaticButtonAndModal";
+import {
+  BudgetTableCommentStaticButtonAndModal,
+  getBudgetCommentaire,
+} from "./BudgetTableCommentStaticButtonAndModal";
 
 export const BudgetTableCommentLine = ({
   type,
@@ -16,6 +19,14 @@ export const BudgetTableCommentLine = ({
   canEdit = true,
 }: Props) => {
   if (!budgets && !cpomStructures) {
+    return null;
+  }
+  if (
+    !canEdit &&
+    years.every(
+      (year) => !getBudgetCommentaire({ type, year, budgets, cpomStructures })
+    )
+  ) {
     return null;
   }
   return (

@@ -543,5 +543,4 @@ const dbStructureToApiRead = (
   }) as StructureApiRead;
 };
 
-const isNonAgent = (user: SessionUser | undefined): boolean =>
-  user !== undefined && !isAgent(user);
+const isNonAgent = (user: SessionUser | undefined): boolean => !isAgent(user);

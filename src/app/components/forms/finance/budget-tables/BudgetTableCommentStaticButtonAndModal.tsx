@@ -26,23 +26,12 @@ export const BudgetTableCommentStaticButtonAndModal = ({
     [budgets, year]
   );
 
-  let currentComment: string | undefined | null;
-
-  if (budgets) {
-    currentComment =
-      budgets?.[getMillesimeIndexForAYear(budgets, year, type)]?.commentaire;
-  }
-  if (cpomStructures) {
-    const { cpomStructureIndex, budgetIndex } =
-      getCpomStructureIndexAndBudgetIndexForAYearAndAType(
-        cpomStructures,
-        year,
-        type
-      );
-    currentComment =
-      cpomStructures[cpomStructureIndex]?.cpom?.budgets?.[budgetIndex]
-        ?.commentaire;
-  }
+  const currentComment = getBudgetCommentaire({
+    type,
+    year,
+    budgets,
+    cpomStructures,
+  });
 
   const handleOpenModal = () => {
     modal.open();
@@ -75,6 +64,25 @@ export const BudgetTableCommentStaticButtonAndModal = ({
       </modal.Component>
     </>
   );
+};
+
+export const getBudgetCommentaire = ({
+  type,
+  year,
+  budgets,
+  cpomStructures,
+}: Props): string | undefined | null => {
+  if (cpomStructures) {
+    const { cpomStructureIndex, budgetIndex } =
+      getCpomStructureIndexAndBudgetIndexForAYearAndAType(
+        cpomStructures,
+        year,
+        type
+      );
+    return cpomStructures[cpomStructureIndex]?.cpom?.budgets?.[budgetIndex]
+      ?.commentaire;
+  }
+  return budgets?.[getMillesimeIndexForAYear(budgets, year, type)]?.commentaire;
 };
 
 type Props = {

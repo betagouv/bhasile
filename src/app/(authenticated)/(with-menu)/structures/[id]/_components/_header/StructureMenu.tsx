@@ -2,10 +2,10 @@
 
 import Button from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 
 import { PrintableContainer } from "@/app/components/PrintableContainer";
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
+import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
 import { usePdfExport } from "@/app/hooks/usePdfExport";
 import { useUserAction } from "@/app/hooks/useUserAction";
 import { formatDate } from "@/app/utils/date.util";
@@ -13,8 +13,6 @@ import { getPdfExportPayload } from "@/app/utils/pdf-export.util";
 import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-download.util";
 import { getStructureDownloadContent } from "@/app/utils/spreadsheet-download/structure-spreadsheet-download.util";
 import { useStructureContext } from "@/contexts/StructureContext";
-import { canAccessPage } from "@/lib/casl/pages";
-import { SessionUser } from "@/types/global";
 
 import { StructurePdfExportDocument } from "./StructurePdfExportDocument";
 
@@ -25,7 +23,7 @@ type Props = {
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
   const { structure } = useStructureContext();
-  const { data } = useSession();
+  const canEdit = useCanUpdateStructure(structure);
   const { trackStructureSpreadsheetExport, trackStructurePdfExport } =
     useUserAction();
 
@@ -53,10 +51,7 @@ export const StructureMenu = ({ structureId }: Props) => {
       />
       {isPanelOpen && (
         <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
-          {canAccessPage(
-            data?.user as SessionUser,
-            "/structures/transformation"
-          ) && (
+          {canEdit && (
             <>
               <Link
                 href={`/structures/transformation/type?structureId=${structureId}`}

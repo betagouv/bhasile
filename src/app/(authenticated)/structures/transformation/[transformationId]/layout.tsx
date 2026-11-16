@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 
-import { getTransformation } from "@/app/api/transformations/transformation.service";
+import { getReadableTransformation } from "@/app/api/transformations/transformation.service";
 import { parseId } from "@/app/utils/string.util";
 import { TransformationProvider } from "@/contexts/TransformationContext";
+import { auth } from "@/lib/next-auth/auth";
+import { SessionUser } from "@/types/global";
 
 import { TransformationHeader } from "../_components/TransformationHeader";
 import { TransformationMenu } from "../_components/TransformationMenu";
@@ -21,7 +23,11 @@ export default async function TransformationLayout({
     notFound();
   }
 
-  const transformation = await getTransformation(id);
+  const session = await auth();
+  const transformation = await getReadableTransformation(
+    id,
+    session?.user as SessionUser | undefined
+  );
 
   if (!transformation) {
     notFound();

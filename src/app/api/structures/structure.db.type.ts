@@ -128,10 +128,15 @@ export const structureDetailsInclude = {
                   operateur: {
                     select: { name: true },
                   },
-                  forms: true,
+                  forms: {
+                    include: { formDefinition: { select: { slug: true } } },
+                  },
                   structureVersions: {
                     select: {
                       ...resolvableVersionSelect,
+                      structureVersionTransformation: {
+                        select: { type: true, ...transformationStatusSelect },
+                      },
                       communeAdministrative: true,
                     },
                   },

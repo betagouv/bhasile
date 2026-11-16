@@ -47,7 +47,7 @@ export const CpomViewer = (): ReactElement => {
                       {structure.structure.communeAdministrative}
                     </span>{" "}
                   </span>
-                  {structure.structure.forms?.some((form) => form.status) &&
+                  {structure.structure.isFinalised &&
                     canReadStructure(structure.structure) && (
                       <Link
                         className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"

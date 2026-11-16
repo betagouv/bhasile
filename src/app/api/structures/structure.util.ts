@@ -573,7 +573,10 @@ const resolveLinkedStructureFields = (
   }
   return {
     ...linkedStructure,
-    structure: resolveCurrentVersionFields(linkedStructure.structure, now),
+    structure: {
+      ...resolveCurrentVersionFields(linkedStructure.structure, now),
+      isFinalised: isStructureFinalised(linkedStructure.structure, now),
+    },
   };
 };
 

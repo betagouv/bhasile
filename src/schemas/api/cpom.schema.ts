@@ -48,6 +48,7 @@ export const cpomApiSchema = z.object({
             operateurId: z.number().nullish(),
             operateur: operateurSuggestionApiSchema,
             forms: z.array(formApiSchema),
+            isFinalised: z.boolean().optional(),
           })
           .optional(),
       })

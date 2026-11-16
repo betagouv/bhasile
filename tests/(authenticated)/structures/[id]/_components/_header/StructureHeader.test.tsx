@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
 import { createActualisationForm } from "tests/test-utils/factories/actualisation-form.factory";
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import { createStructure } from "tests/test-utils/structure.factory";
 import { renderWithStructurePageProviders } from "tests/test-utils/structure-page-test.helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StructureHeader } from "@/app/(authenticated)/(with-menu)/structures/[id]/_components/_header/StructureHeader";
 import { AppAbilityProvider } from "@/contexts/AbilityProvider";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
+import { SessionUser } from "@/types/global";
 
 const mockUseSearchParams = vi.fn();
 
@@ -44,17 +46,7 @@ describe("StructureHeader", () => {
   });
 
   it("ramène à la liste des structures par défaut", () => {
-    renderWithStructurePageProviders(
-      buildClosedStructure(),
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader
-            actualisationYear={null}
-            isTarificationAccessible={false}
-          />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(buildClosedStructure());
 
     expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
       "href",
@@ -65,17 +57,7 @@ describe("StructureHeader", () => {
   it("ramène au tableau de bord quand on en vient", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams("from=dashboard"));
 
-    renderWithStructurePageProviders(
-      buildClosedStructure(),
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader
-            actualisationYear={null}
-            isTarificationAccessible={false}
-          />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(buildClosedStructure());
 
     expect(screen.getByRole("link", { name: "Retour" })).toHaveAttribute(
       "href",
@@ -88,17 +70,7 @@ describe("StructureHeader", () => {
     const structure = buildClosedStructure({ isFinalised: false });
 
     // WHEN
-    renderWithStructurePageProviders(
-      structure,
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader
-            actualisationYear={null}
-            isTarificationAccessible={false}
-          />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(structure);
 
     // THEN
     expect(screen.getByText(/Fermée le/)).toBeInTheDocument();
@@ -112,17 +84,7 @@ describe("StructureHeader", () => {
     const structure = buildStructure({ isFinalised: false });
 
     // WHEN
-    renderWithStructurePageProviders(
-      structure,
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader
-            actualisationYear={null}
-            isTarificationAccessible={false}
-          />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(structure);
 
     // THEN
     expect(screen.getByText(/finalise la création/)).toBeInTheDocument();
@@ -138,17 +100,7 @@ describe("StructureHeader", () => {
     });
 
     // WHEN
-    renderWithStructurePageProviders(
-      structure,
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader
-            actualisationYear={ACTUALISATION_YEAR}
-            isTarificationAccessible={false}
-          />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(structure, { actualisationYear: ACTUALISATION_YEAR });
 
     // THEN
     expect(screen.getByText(/campagne d’actualisation/)).toBeInTheDocument();
@@ -162,17 +114,7 @@ describe("StructureHeader", () => {
     });
 
     // WHEN
-    renderWithStructurePageProviders(
-      structure,
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader
-            actualisationYear={ACTUALISATION_YEAR}
-            isTarificationAccessible={false}
-          />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(structure, { actualisationYear: ACTUALISATION_YEAR });
 
     // THEN
     expect(
@@ -181,14 +123,7 @@ describe("StructureHeader", () => {
   });
 
   it("affiche le lien vers la tarification quand elle est accessible", () => {
-    renderWithStructurePageProviders(
-      buildStructure(),
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader actualisationYear={null} isTarificationAccessible />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(buildStructure(), { isTarificationAccessible: true });
 
     expect(screen.getByRole("link", { name: "Tarification" })).toHaveAttribute(
       "href",
@@ -197,17 +132,7 @@ describe("StructureHeader", () => {
   });
 
   it("masque le lien vers la tarification sinon", () => {
-    renderWithStructurePageProviders(
-      buildStructure(),
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader
-            actualisationYear={null}
-            isTarificationAccessible={false}
-          />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(buildStructure());
 
     expect(
       screen.queryByRole("link", { name: "Tarification" })
@@ -215,14 +140,7 @@ describe("StructureHeader", () => {
   });
 
   it("garde le lien vers la tarification sur une structure fermée", () => {
-    renderWithStructurePageProviders(
-      buildClosedStructure(),
-      <SessionProvider>
-        <AppAbilityProvider>
-          <StructureHeader actualisationYear={null} isTarificationAccessible />
-        </AppAbilityProvider>
-      </SessionProvider>
-    );
+    renderHeader(buildClosedStructure(), { isTarificationAccessible: true });
 
     expect(screen.getByText(/Fermée le/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Tarification" })).toHaveAttribute(
@@ -230,4 +148,43 @@ describe("StructureHeader", () => {
       "/structures/42/tarification"
     );
   });
+
+  it("affiche l’onglet Notes à un agent qui peut modifier la structure", () => {
+    renderHeader(buildStructure(), {}, createDepartementalAgent(["75"]));
+
+    expect(screen.getByRole("link", { name: "Notes" })).toBeInTheDocument();
+  });
+
+  it("masque l’onglet Notes sans droit de modification sur la structure", () => {
+    renderHeader(buildStructure(), {}, createDepartementalAgent(["69"]));
+
+    expect(
+      screen.queryByRole("link", { name: "Notes" })
+    ).not.toBeInTheDocument();
+  });
 });
+
+const renderHeader = (
+  structure: StructureApiRead,
+  {
+    actualisationYear = null,
+    isTarificationAccessible = false,
+  }: {
+    actualisationYear?: number | null;
+    isTarificationAccessible?: boolean;
+  } = {},
+  user?: SessionUser
+) =>
+  renderWithStructurePageProviders(
+    structure,
+    <SessionProvider
+      session={user ? { user, expires: "2999-12-31T00:00:00.000Z" } : null}
+    >
+      <AppAbilityProvider>
+        <StructureHeader
+          actualisationYear={actualisationYear}
+          isTarificationAccessible={isTarificationAccessible}
+        />
+      </AppAbilityProvider>
+    </SessionProvider>
+  );
