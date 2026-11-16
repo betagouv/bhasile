@@ -7,7 +7,6 @@ import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { budgetApiSchema } from "./budget.schema";
 import { departementApiSchema } from "./departement.schema";
 import { documentFinancierApiSchema } from "./documentFinancier.schema";
-import { formApiSchema } from "./form.schema";
 import { operateurSuggestionApiSchema } from "./operateur.schema";
 import { regionApiSchema } from "./region.schema";
 
@@ -45,10 +44,8 @@ export const cpomApiSchema = z.object({
             type: z.enum(StructureType),
             communeAdministrative: z.string(),
             departementAdministratif: z.string().optional(),
-            operateurId: z.number().nullish(),
             operateur: operateurSuggestionApiSchema,
-            forms: z.array(formApiSchema),
-            isFinalised: z.boolean().optional(),
+            isLinkable: z.boolean().optional(),
           })
           .optional(),
       })

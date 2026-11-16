@@ -12,6 +12,7 @@ import {
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Prisma, Structure } from "@/generated/prisma/client";
 import {
+  type AppAbility,
   canAbilityReadStructure,
   defineAbilityFor,
   getReadableStructureWhere,
@@ -349,10 +350,11 @@ export const getFullStructure = async (
 ): Promise<StructureApiRead | null> => {
   const now = getNow();
   const resolvedDbStructure = await getResolvedStructure(id, now);
+  const ability = defineAbilityFor(user);
 
   if (
     !resolvedDbStructure ||
-    !canAbilityReadStructure(defineAbilityFor(user), resolvedDbStructure)
+    !canAbilityReadStructure(ability, resolvedDbStructure)
   ) {
     return null;
   }
@@ -364,6 +366,7 @@ export const getFullStructure = async (
 
   const structure = dbStructureToApiRead(resolvedDbStructure, now, {
     isFinalised,
+    ability,
   });
   structure.adresses = getReadableAdresses(structure, user);
   structure.notes = getReadableNotes(structure, user);
@@ -397,7 +400,11 @@ const dbStructureToApiRead = (
       Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>
     >,
   now: Date,
-  { isFinalised, simple = false }: { isFinalised: boolean; simple?: boolean }
+  {
+    isFinalised,
+    simple = false,
+    ability,
+  }: { isFinalised: boolean; simple?: boolean; ability?: AppAbility }
 ): StructureApiRead => {
   const [debutConvention, finConvention] = getDatesConvention(dbStructure);
   const [debutPeriodeAutorisation, finPeriodeAutorisation] =
@@ -453,7 +460,7 @@ const dbStructureToApiRead = (
   const isMultiDna =
     (dnaStructures?.length ?? 0) > 1 || (structureFinesses?.length ?? 0) > 1;
 
-  const cpomStructures = getCpomStructuresWithDates(dbStructure, now);
+  const cpomStructures = getCpomStructuresWithDates(dbStructure, now, ability);
 
   const history = simple
     ? undefined

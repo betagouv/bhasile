@@ -1,12 +1,10 @@
+import { getBudgetCommentaire } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentButtonAndModal } from "./BudgetTableCommentButtonAndModal";
-import {
-  BudgetTableCommentStaticButtonAndModal,
-  getBudgetCommentaire,
-} from "./BudgetTableCommentStaticButtonAndModal";
+import { BudgetTableCommentStaticButtonAndModal } from "./BudgetTableCommentStaticButtonAndModal";
 
 export const BudgetTableCommentLine = ({
   type,
@@ -21,12 +19,12 @@ export const BudgetTableCommentLine = ({
   if (!budgets && !cpomStructures) {
     return null;
   }
-  if (
-    !canEdit &&
-    years.every(
-      (year) => !getBudgetCommentaire({ type, year, budgets, cpomStructures })
-    )
-  ) {
+  const commentaires = canEdit
+    ? []
+    : years.map((year) =>
+        getBudgetCommentaire({ type, year, budgets, cpomStructures })
+      );
+  if (!canEdit && commentaires.every((commentaire) => !commentaire)) {
     return null;
   }
   return (
@@ -34,7 +32,7 @@ export const BudgetTableCommentLine = ({
       <td className="text-left!">
         <strong className="whitespace-nowrap">{label}</strong>
       </td>
-      {years.map((year) => (
+      {years.map((year, index) => (
         <td key={year}>
           {canEdit ? (
             <BudgetTableCommentButtonAndModal
@@ -47,10 +45,9 @@ export const BudgetTableCommentLine = ({
             />
           ) : (
             <BudgetTableCommentStaticButtonAndModal
+              modalId={`${budgets ? "budgets" : "cpomStructures"}-${year}-commentaire-static-modal`}
               year={year}
-              cpomStructures={cpomStructures}
-              budgets={budgets}
-              type={type}
+              commentaire={commentaires[index]}
             />
           )}
         </td>

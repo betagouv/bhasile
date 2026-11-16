@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 
-import { useCanReadStructures } from "@/app/hooks/useCanUpdateStructure";
 import { getCurrentCpomStructure } from "@/app/utils/structure.util";
 import { useStructureContext } from "@/contexts/StructureContext";
 
@@ -11,7 +10,6 @@ export const CpomViewer = (): ReactElement => {
   const [showCpom, setShowCpom] = useState(false);
 
   const { structure } = useStructureContext();
-  const canReadStructure = useCanReadStructures();
 
   const currentCpomStructure = getCurrentCpomStructure(structure);
 
@@ -47,15 +45,14 @@ export const CpomViewer = (): ReactElement => {
                       {structure.structure.communeAdministrative}
                     </span>{" "}
                   </span>
-                  {structure.structure.isFinalised &&
-                    canReadStructure(structure.structure) && (
-                      <Link
-                        className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
-                        title="Voir la structure"
-                        aria-label="Voir la structure"
-                        href={`/structures/${structure.structure.id}`}
-                      />
-                    )}
+                  {structure.structure.isLinkable && (
+                    <Link
+                      className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
+                      title="Voir la structure"
+                      aria-label="Voir la structure"
+                      href={`/structures/${structure.structure.id}`}
+                    />
+                  )}
                 </div>
               )
           )}
