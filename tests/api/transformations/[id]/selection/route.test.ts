@@ -18,7 +18,14 @@ const buildStructureVersionTransformation = (
   departementAdministratif: string
 ) => ({
   type: StructureVersionTransformationType.FERMETURE,
-  structureVersion: { departementAdministratif },
+  structureVersion: {
+    departementAdministratif,
+    structure: {
+      codeBhasile: "BHA-1",
+      isFinalised: true,
+      departementAdministratif,
+    },
+  },
 });
 
 vi.mock("@/app/api/transformations/transformation.service", () => ({

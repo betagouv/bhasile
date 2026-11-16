@@ -75,6 +75,15 @@ export const isTransformationVisible = (
   );
 };
 
+export const getExistingStructureDepartements = (
+  structureVersionTransformations: DepartementBearingStructureVersionTransformation[]
+): DepartementBearingStructureVersionTransformation[] =>
+  structureVersionTransformations.map((structureVersionTransformation) => ({
+    structureVersion: {
+      structure: structureVersionTransformation.structureVersion?.structure,
+    },
+  }));
+
 export const checkCanUpdateDepartements = (
   user: SessionUser | undefined,
   structureVersionTransformations: DepartementBearingStructureVersionTransformation[]

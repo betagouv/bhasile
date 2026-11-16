@@ -21,6 +21,10 @@ vi.mock("@/contexts/TransformationContext", () => ({
     mockUseOptionalTransformationContext(),
 }));
 
+vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
+  useCanUpdateDepartement: () => () => true,
+}));
+
 vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
 }));

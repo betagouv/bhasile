@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
+import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
 import { useTransformations } from "@/app/hooks/useTransformations";
@@ -65,12 +66,14 @@ export default function TransformationVerificationPage() {
       HudaCadaDestination.REMISE_EN_CONCURRENCE
     : false;
 
+  const canUpdateDepartement = useCanUpdateDepartement();
   const allChildFormsAreValidated =
     transformation.structureVersionTransformations.every(
       (structureVersionTransformation) =>
         isStructureVersionTransformationComplete(
           transformation,
-          structureVersionTransformation
+          structureVersionTransformation,
+          canUpdateDepartement
         )
     );
 

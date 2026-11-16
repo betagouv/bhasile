@@ -25,7 +25,6 @@ import {
   creationIdentificationSchema,
 } from "@/schemas/forms/transformation/creationIdentification.schema";
 import { FormKind } from "@/types/global";
-import { withoutAdresseAdministrativeHorsPerimetre } from "@/utils/adresse-administrative.util";
 
 export const CreationIdentificationForm = ({
   transformation,
@@ -66,10 +65,7 @@ export const CreationIdentificationForm = ({
       operateurId: operateur?.id,
       structureType: type,
       structureVersion: {
-        ...withoutAdresseAdministrativeHorsPerimetre(
-          rest,
-          canUpdateDepartement
-        ),
+        ...rest,
         dnaStructures: rest.dnaStructures?.filter(
           (dnaStructure) => dnaStructure.dna?.code
         ),

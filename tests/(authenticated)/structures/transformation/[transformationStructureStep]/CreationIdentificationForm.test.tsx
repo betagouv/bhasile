@@ -132,7 +132,7 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     );
   });
 
-  it("enregistre l'étape sans l'adresse quand elle est hors du périmètre de l'agent", async () => {
+  it("enregistre l'adresse même quand elle est hors du périmètre de l'agent", async () => {
     // GIVEN
     renderForm(
       FormKind.OUVERTURE_EX_NIHILO,
@@ -163,9 +163,10 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
       fetchMock,
       TRANSFORMATION_ID
     );
-    expect(structureVersion.effectiveDate).toBeDefined();
-    expect(structureVersion).not.toHaveProperty("departementAdministratif");
-    expect(structureVersion).not.toHaveProperty("adresseAdministrative");
+    expect(structureVersion).toMatchObject({
+      adresseAdministrative: "44 Rue de la Paix",
+      departementAdministratif: "10",
+    });
   });
 
   it("lit la date depuis effectiveDate de la version et la renvoie sur effectiveDate (plus de creationDate sur la version)", async () => {

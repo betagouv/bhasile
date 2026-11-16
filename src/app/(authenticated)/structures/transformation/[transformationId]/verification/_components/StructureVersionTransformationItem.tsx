@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { StructureCard } from "@/app/components/StructureCard";
+import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
 import { formatDate } from "@/app/utils/date.util";
 import { pluralize } from "@/app/utils/string.util";
 import {
@@ -26,9 +27,11 @@ export const StructureVersionTransformationItem = ({
 }: Props) => {
   const cardProps = buildCardProps(structureVersionTransformation);
 
+  const canUpdateDepartement = useCanUpdateDepartement();
   const firstIncompleteStep = getStructureVersionTransformationStepItems(
     transformation,
-    structureVersionTransformation
+    structureVersionTransformation,
+    canUpdateDepartement
   ).find((step) => step.status !== StepStatus.VALIDE);
 
   const effectiveDate =

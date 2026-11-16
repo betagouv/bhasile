@@ -39,6 +39,10 @@ vi.mock("@/app/components/StructureCard", () => ({
 
 const mockGetStructureVersionTransformationStepItems = vi.fn();
 
+vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
+  useCanUpdateDepartement: () => () => true,
+}));
+
 vi.mock("@/utils/transformation-step-status.util", () => ({
   getStructureVersionTransformationStepItems: () =>
     mockGetStructureVersionTransformationStepItems(),

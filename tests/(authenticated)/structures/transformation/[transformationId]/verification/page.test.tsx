@@ -85,6 +85,10 @@ vi.mock(
   })
 );
 
+vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
+  useCanUpdateDepartement: () => () => true,
+}));
+
 vi.mock("@/utils/transformation-step-status.util", () => ({
   isStructureVersionTransformationComplete: (
     _transformation: TransformationApiRead,

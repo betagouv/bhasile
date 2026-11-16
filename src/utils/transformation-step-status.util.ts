@@ -13,6 +13,7 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { actesAdministratifsTransformationSchema } from "@/schemas/forms/base/acteAdministratif.schema";
+import { withDepartementAdministratifInPerimetre } from "@/schemas/forms/base/adresseAdministrative.schema";
 import { creationIdentificationSchema } from "@/schemas/forms/transformation/creationIdentification.schema";
 import { getPlacesEtHebergementSchema } from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
 import { fermetureSchema } from "@/schemas/forms/transformation/fermeture.schema";
@@ -23,9 +24,12 @@ import {
   StructureVersionTransformationType,
 } from "@/types/transformation.type";
 
+type CanUpdateDepartement = (departementAdministratif: string) => boolean;
+
 export const getStructureVersionTransformationStepItems = (
   transformation: TransformationApiRead,
-  structureVersionTransformation: StructureVersionTransformationApiRead
+  structureVersionTransformation: StructureVersionTransformationApiRead,
+  canUpdateDepartement: CanUpdateDepartement
 ): Step["steps"] =>
   getStepsByType(structureVersionTransformation, transformation.id).map(
     (stepItem) => ({
@@ -34,7 +38,8 @@ export const getStructureVersionTransformationStepItems = (
         isStepComplete(
           transformation,
           structureVersionTransformation,
-          stepItem.name
+          stepItem.name,
+          canUpdateDepartement
         ),
         stepItem.status
       ),
@@ -42,7 +47,8 @@ export const getStructureVersionTransformationStepItems = (
   );
 
 export const getTransformationStepsWithStatus = (
-  transformation?: TransformationApiRead
+  transformation: TransformationApiRead | undefined,
+  canUpdateDepartement: CanUpdateDepartement
 ): Step[] => {
   if (!transformation) {
     return [];
@@ -58,7 +64,8 @@ export const getTransformationStepsWithStatus = (
           ...step,
           steps: getStructureVersionTransformationStepItems(
             transformation,
-            structureVersionTransformation
+            structureVersionTransformation,
+            canUpdateDepartement
           ),
         }
       : step;
@@ -67,11 +74,13 @@ export const getTransformationStepsWithStatus = (
 
 export const isStructureVersionTransformationComplete = (
   transformation: TransformationApiRead,
-  structureVersionTransformation: StructureVersionTransformationApiRead
+  structureVersionTransformation: StructureVersionTransformationApiRead,
+  canUpdateDepartement: CanUpdateDepartement
 ): boolean =>
   getStructureVersionTransformationStepItems(
     transformation,
-    structureVersionTransformation
+    structureVersionTransformation,
+    canUpdateDepartement
   ).every((stepItem) => stepItem.status === StepStatus.VALIDE);
 
 const resolveStepStatus = (
@@ -87,7 +96,8 @@ const resolveStepStatus = (
 const isStepComplete = (
   transformation: TransformationApiRead,
   structureVersionTransformation: StructureVersionTransformationApiRead,
-  stepName: string
+  stepName: string,
+  canUpdateDepartement: CanUpdateDepartement
 ): boolean => {
   const defaultValues = getTransformationDefaultValues({
     transformation,
@@ -97,7 +107,8 @@ const isStepComplete = (
   switch (stepName) {
     case StructureVersionTransformationStep.DESCRIPTION:
       return getDescriptionSchema(
-        structureVersionTransformation.type
+        structureVersionTransformation.type,
+        canUpdateDepartement
       ).safeParse(defaultValues).success;
     case StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT:
       return getPlacesEtHebergementSchema(
@@ -122,13 +133,22 @@ const isStepComplete = (
   }
 };
 
-const getDescriptionSchema = (type: StructureVersionTransformationType) => {
+const getDescriptionSchema = (
+  type: StructureVersionTransformationType,
+  canUpdateDepartement: CanUpdateDepartement
+) => {
   switch (type) {
     case StructureVersionTransformationType.CREATION:
-      return creationIdentificationSchema;
+      return withDepartementAdministratifInPerimetre(
+        creationIdentificationSchema,
+        canUpdateDepartement
+      );
     case StructureVersionTransformationType.FERMETURE:
       return fermetureSchema;
     default:
-      return transformationIdentificationSchema;
+      return withDepartementAdministratifInPerimetre(
+        transformationIdentificationSchema,
+        canUpdateDepartement
+      );
   }
 };

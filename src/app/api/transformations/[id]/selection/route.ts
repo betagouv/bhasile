@@ -10,7 +10,10 @@ import {
   getTransformation,
   resetTransformationSelection,
 } from "../../transformation.service";
-import { checkCanUpdateDepartements } from "../../transformation.util";
+import {
+  checkCanUpdateDepartements,
+  getExistingStructureDepartements,
+} from "../../transformation.util";
 
 export async function PUT(
   request: NextRequest,
@@ -38,7 +41,9 @@ export async function PUT(
     }
     checkCanUpdateDepartements(
       session.user as SessionUser,
-      transformation.structureVersionTransformations
+      getExistingStructureDepartements(
+        transformation.structureVersionTransformations
+      )
     );
 
     const resetTransformation = await resetTransformationSelection(

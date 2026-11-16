@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { StepStatus } from "@/types/form.type";
+import { StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
@@ -17,6 +18,8 @@ import {
   createTransformationForm,
 } from "../test-utils/factories/transformation.factory";
 
+const allowAllDepartements = () => true;
+
 const getStatuses = (
   structureVersionTransformation: ReturnType<
     typeof createStructureVersionTransformation
@@ -28,7 +31,8 @@ const getStatuses = (
         type: TransformationType.OUVERTURE_EX_NIHILO,
         structureVersionTransformations: [structureVersionTransformation],
       }),
-      structureVersionTransformation
+      structureVersionTransformation,
+      allowAllDepartements
     ).map((stepItem) => [stepItem.name, stepItem.status])
   );
 
@@ -84,6 +88,55 @@ describe("getStructureVersionTransformationStepItems", () => {
   });
 });
 
+describe("statut de la description selon le périmètre", () => {
+  const extension = createStructureVersionTransformation({
+    type: StructureVersionTransformationType.EXTENSION,
+    structureType: StructureType.CADA,
+    structureVersion: {
+      effectiveDate: "2026-09-11T12:00:00.000Z",
+      adresseAdministrative: "12 Rue des Lilas",
+      codePostalAdministratif: "40000",
+      communeAdministrative: "Mont-de-Marsan",
+      departementAdministratif: "40",
+      antennes: [],
+      dnaStructures: [{ dna: { code: "K-803" } }],
+      contacts: [
+        {
+          prenom: "Camille",
+          nom: "Martin",
+          role: "Directrice",
+          email: "camille.martin@example.fr",
+          telephone: "0102030405",
+        },
+      ],
+    },
+  });
+
+  const getDescriptionStatus = (
+    canUpdateDepartement: (departementAdministratif: string) => boolean
+  ) =>
+    getStructureVersionTransformationStepItems(
+      createTransformation({ structureVersionTransformations: [extension] }),
+      extension,
+      canUpdateDepartement
+    ).find(
+      (stepItem) =>
+        stepItem.name === StructureVersionTransformationStep.DESCRIPTION
+    )?.status;
+
+  it("valide une description complète dans le périmètre de l'agent", () => {
+    expect(getDescriptionStatus(() => true)).toBe(StepStatus.VALIDE);
+  });
+
+  it("ne valide pas une description complète dont l'adresse est hors périmètre", () => {
+    expect(
+      getDescriptionStatus(
+        (departementAdministratif) => departementAdministratif === "75"
+      )
+    ).not.toBe(StepStatus.VALIDE);
+  });
+});
+
 describe("isStructureVersionTransformationComplete", () => {
   it("considère complète une structure dont toutes les étapes sont valides", () => {
     const structureVersionTransformation = createStructureVersionTransformation(
@@ -98,7 +151,8 @@ describe("isStructureVersionTransformationComplete", () => {
         createTransformation({
           structureVersionTransformations: [structureVersionTransformation],
         }),
-        structureVersionTransformation
+        structureVersionTransformation,
+        allowAllDepartements
       )
     ).toBe(true);
   });
@@ -116,7 +170,8 @@ describe("isStructureVersionTransformationComplete", () => {
         createTransformation({
           structureVersionTransformations: [structureVersionTransformation],
         }),
-        structureVersionTransformation
+        structureVersionTransformation,
+        allowAllDepartements
       )
     ).toBe(false);
   });

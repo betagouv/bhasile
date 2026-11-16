@@ -11,7 +11,10 @@ import {
   getTransformation,
   updateTransformation,
 } from "../transformation.service";
-import { checkCanUpdateDepartements } from "../transformation.util";
+import {
+  checkCanUpdateDepartements,
+  getExistingStructureDepartements,
+} from "../transformation.util";
 
 export async function DELETE(
   _request: NextRequest,
@@ -33,7 +36,9 @@ export async function DELETE(
     }
     checkCanUpdateDepartements(
       session.user as SessionUser,
-      transformation.structureVersionTransformations
+      getExistingStructureDepartements(
+        transformation.structureVersionTransformations
+      )
     );
 
     await deleteTransformation(Number(id));
