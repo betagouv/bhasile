@@ -31,6 +31,7 @@ export const StructureHeader = ({
   const isStructureFinalisee = structure.isFinalised;
 
   const showActualisation =
+    canEdit &&
     actualisationYear !== null &&
     structure.isFinalised &&
     !structure.isClosed &&
@@ -105,9 +106,10 @@ export const StructureHeader = ({
                 ]}
               />
             )}
-            {isRootPath && !isStructureFinalisee && !structure.isClosed && (
-              <FinalisationHeader />
-            )}
+            {isRootPath &&
+              canEdit &&
+              !isStructureFinalisee &&
+              !structure.isClosed && <FinalisationHeader />}
             {isRootPath && showActualisation && actualisationYear && (
               <ActualisationHeader actualisationYear={actualisationYear} />
             )}

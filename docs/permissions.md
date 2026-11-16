@@ -74,6 +74,9 @@ Champs masqués sur la fiche structure :
 
 - **Non-agents** : commentaires des budgets, de la structure comme de ses CPOM (`hideAgentOnlyFields`). Le reste de la fiche est visible, CPOM compris, mais l'historique ne renvoie pas vers la page du CPOM pour le moment.
 - **Sans droit d'écriture sur la structure**, agent ou non : notes et rue des adresses (`getReadableNotes`, `getReadableAdresses`), car l'adresse d'un lieu d'hébergement est sensible. Le code postal et la commune restent affichés.
+- **Agents éditeurs seulement** : notes, et bandeaux « Je finalise la création » et « J'actualise cette structure », dont les pages sont gardées par `ModificationGuard`. Aujourd'hui seuls les agents reçoivent `update Structure`, le droit d'écriture suffit donc.
+
+Un contact a exactement les droits d'un user opérateur lecteur sur les structures où il figure.
 
 La fiche opérateur vérifie aussi la règle `read Operateur` (`getOperateur`) : un non-agent ne lit que son opérateur, même sans passer par le proxy. Le menu (`menu.util.ts`) et les liens de la fiche opérateur filtrent leurs entrées avec `canAccessPage` : ouvrir ou fermer une page dans `pages.ts` suffit. « Paramètres » reste derrière son flag, hors de `pages.ts`.
 
@@ -104,7 +107,7 @@ Mise en prod du basculement :
    - authentification via ProConnect ;
    - fiche opérateur (#1742), statistiques filtrées sur `operateurId` sans RMU ;
    - lecture des CPOM de leur opérateur dont la zone recouvre, au moins en partie, leurs binômes (PR stackée à venir) ;
-   - écriture par leurs binômes éditeur / admin, restreinte à leur opérateur, selon la matrice validée par le métier.
+   - écriture par leurs binômes éditeur / admin, restreinte à leur opérateur, selon la matrice validée par le métier. Les notes restent réservées aux agents éditeurs : leur ajouter alors la condition `isAgent`. Un opérateur éditeur verra en revanche l'adresse complète.
 3. **Périmètres en écriture seule** (`EDITEUR`), si le besoin se présente : un binôme `EDITEUR` sur le périmètre suffit.
 
 ### Points d'attention restants

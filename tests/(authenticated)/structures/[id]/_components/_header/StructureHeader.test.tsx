@@ -79,12 +79,12 @@ describe("StructureHeader", () => {
     expect(screen.queryByTitle("Menu structure")).not.toBeInTheDocument();
   });
 
-  it("propose la finalisation et le menu pour une structure ouverte", () => {
+  it("propose la finalisation et le menu à un éditeur pour une structure ouverte", () => {
     // GIVEN
     const structure = buildStructure({ isFinalised: false });
 
     // WHEN
-    renderHeader(structure);
+    renderHeader(structure, {}, createDepartementalAgent(["75"]));
 
     // THEN
     expect(screen.getByText(/finalise la création/)).toBeInTheDocument();
@@ -92,7 +92,18 @@ describe("StructureHeader", () => {
     expect(screen.queryByText(/Fermée le/)).not.toBeInTheDocument();
   });
 
-  it("propose l’actualisation pour une structure ouverte dont la campagne est en cours", () => {
+  it("masque la finalisation sans droit d’écriture sur la structure", () => {
+    // GIVEN
+    const structure = buildStructure({ isFinalised: false });
+
+    // WHEN
+    renderHeader(structure, {}, createDepartementalAgent(["69"]));
+
+    // THEN
+    expect(screen.queryByText(/finalise la création/)).not.toBeInTheDocument();
+  });
+
+  it("propose l’actualisation à un éditeur de la structure quand la campagne est en cours", () => {
     // GIVEN
     const structure = buildStructure({
       isFinalised: true,
@@ -100,10 +111,34 @@ describe("StructureHeader", () => {
     });
 
     // WHEN
-    renderHeader(structure, { actualisationYear: ACTUALISATION_YEAR });
+    renderHeader(
+      structure,
+      { actualisationYear: ACTUALISATION_YEAR },
+      createDepartementalAgent(["75"])
+    );
 
     // THEN
     expect(screen.getByText(/campagne d’actualisation/)).toBeInTheDocument();
+  });
+
+  it("masque l’actualisation sans droit d’écriture sur la structure", () => {
+    // GIVEN
+    const structure = buildStructure({
+      isFinalised: true,
+      forms: [createActualisationForm(ACTUALISATION_YEAR)],
+    });
+
+    // WHEN
+    renderHeader(
+      structure,
+      { actualisationYear: ACTUALISATION_YEAR },
+      createDepartementalAgent(["69"])
+    );
+
+    // THEN
+    expect(
+      screen.queryByText(/campagne d’actualisation/)
+    ).not.toBeInTheDocument();
   });
 
   it("masque l’actualisation pour une structure fermée dont la campagne est en cours", () => {
@@ -114,7 +149,11 @@ describe("StructureHeader", () => {
     });
 
     // WHEN
-    renderHeader(structure, { actualisationYear: ACTUALISATION_YEAR });
+    renderHeader(
+      structure,
+      { actualisationYear: ACTUALISATION_YEAR },
+      createDepartementalAgent(["75"])
+    );
 
     // THEN
     expect(
