@@ -5,27 +5,30 @@ import { formatDate } from "@/app/utils/date.util";
 import { pluralize } from "@/app/utils/string.util";
 import {
   getPlacesSource,
-  getStepsByType,
   getStructureVersionDepartement,
 } from "@/app/utils/transformation.util";
-import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureVersionTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
+import { getStructureVersionTransformationStepItems } from "@/utils/transformation-step-status.util";
 
 type Props = {
-  transformationId: number;
+  transformation: TransformationApiRead;
   structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
 export const StructureVersionTransformationItem = ({
-  transformationId,
+  transformation,
   structureVersionTransformation,
 }: Props) => {
   const cardProps = buildCardProps(structureVersionTransformation);
 
-  const firstIncompleteStep = getStepsByType(
-    structureVersionTransformation,
-    transformationId
+  const firstIncompleteStep = getStructureVersionTransformationStepItems(
+    transformation,
+    structureVersionTransformation
   ).find((step) => step.status !== StepStatus.VALIDE);
 
   const effectiveDate =

@@ -1,18 +1,21 @@
 import { StructureEventIcon } from "@/app/components/structures/StructureEventIcon";
 import { getStructureVersionTransformationGroupLabel } from "@/app/utils/transformation.util";
-import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureVersionTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { StructureVersionTransformationItem } from "./StructureVersionTransformationItem";
 
 type Props = {
-  transformationId: number;
+  transformation: TransformationApiRead;
   type: StructureVersionTransformationType;
   structureVersionTransformations: StructureVersionTransformationApiRead[];
 };
 
 export const StructureVersionTransformationGroup = ({
-  transformationId,
+  transformation,
   type,
   structureVersionTransformations,
 }: Props) => {
@@ -30,7 +33,7 @@ export const StructureVersionTransformationGroup = ({
       {structureVersionTransformations.map((structureVersionTransformation) => (
         <StructureVersionTransformationItem
           key={structureVersionTransformation.id}
-          transformationId={transformationId}
+          transformation={transformation}
           structureVersionTransformation={structureVersionTransformation}
         />
       ))}

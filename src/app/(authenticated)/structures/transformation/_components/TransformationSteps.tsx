@@ -1,5 +1,5 @@
-import { getTransformationSteps } from "@/app/utils/transformation.util";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import { getTransformationStepsWithStatus } from "@/utils/transformation-step-status.util";
 
 import { TransformationStep } from "./TransformationStep";
 
@@ -8,7 +8,7 @@ export const TransformationSteps = ({ transformation }: Props) => {
     return null;
   }
 
-  const steps = getTransformationSteps(transformation);
+  const steps = getTransformationStepsWithStatus(transformation);
 
   return (
     <div className="flex flex-col gap-4 mt-6">

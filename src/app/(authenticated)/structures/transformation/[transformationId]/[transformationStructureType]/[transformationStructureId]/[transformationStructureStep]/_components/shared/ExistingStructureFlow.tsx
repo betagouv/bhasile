@@ -2,16 +2,15 @@
 
 import { useParams } from "next/navigation";
 
-import { getPlacesSource } from "@/app/utils/transformation.util";
+import {
+  getPlacesSource,
+  getStructureVersionTransformationFormKind,
+} from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { FormKind } from "@/types/global";
-import {
-  StructureVersionTransformationStep,
-  StructureVersionTransformationType,
-} from "@/types/transformation.type";
+import { StructureVersionTransformationStep } from "@/types/transformation.type";
 
 import { ExistingStructureIdentificationForm } from "./ExistingStructureIdentificationForm";
 import { PlacesEtHebergementForm } from "./PlacesEtHebergementForm";
@@ -28,12 +27,15 @@ export const ExistingStructureFlow = ({
 }: Props) => {
   const { transformationStructureStep } = useParams();
 
-  const formKind =
-    structureVersionTransformation.type === StructureVersionTransformationType.CONTRACTION
-      ? FormKind.CONTRACTION
-      : FormKind.EXTENSION;
+  const formKind = getStructureVersionTransformationFormKind(
+    transformation.type,
+    structureVersionTransformation.type
+  );
 
-  if (transformationStructureStep === StructureVersionTransformationStep.DESCRIPTION) {
+  if (
+    transformationStructureStep ===
+    StructureVersionTransformationStep.DESCRIPTION
+  ) {
     return (
       <ExistingStructureIdentificationForm
         transformation={transformation}

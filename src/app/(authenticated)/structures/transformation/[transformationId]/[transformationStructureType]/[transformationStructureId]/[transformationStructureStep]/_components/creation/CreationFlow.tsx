@@ -2,15 +2,12 @@
 
 import { useParams } from "next/navigation";
 
+import { getStructureVersionTransformationFormKind } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { FormKind } from "@/types/global";
-import {
-  StructureVersionTransformationStep,
-  TransformationType,
-} from "@/types/transformation.type";
+import { StructureVersionTransformationStep } from "@/types/transformation.type";
 
 import { PlacesEtHebergementForm } from "../shared/PlacesEtHebergementForm";
 import { TransformationActesAdministratifsForm } from "../shared/TransformationActesAdministratifsForm";
@@ -27,12 +24,15 @@ export const CreationFlow = ({
 }: Props) => {
   const { transformationStructureStep } = useParams();
 
-  const formKind =
-    transformation.type === TransformationType.OUVERTURE_EX_NIHILO
-      ? FormKind.OUVERTURE_EX_NIHILO
-      : FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
+  const formKind = getStructureVersionTransformationFormKind(
+    transformation.type,
+    structureVersionTransformation.type
+  );
 
-  if (transformationStructureStep === StructureVersionTransformationStep.DESCRIPTION) {
+  if (
+    transformationStructureStep ===
+    StructureVersionTransformationStep.DESCRIPTION
+  ) {
     return (
       <CreationIdentificationForm
         transformation={transformation}

@@ -85,6 +85,13 @@ vi.mock(
   })
 );
 
+vi.mock("@/utils/transformation-step-status.util", () => ({
+  isStructureVersionTransformationComplete: (
+    _transformation: TransformationApiRead,
+    structureVersionTransformation: StructureVersionTransformationApiRead
+  ) => structureVersionTransformation.form?.status === true,
+}));
+
 vi.mock("@/app/components/forms/TransformationFakeSaver", () => ({
   TransformationFakeSaver: () => null,
 }));

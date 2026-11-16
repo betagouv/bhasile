@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StructureVersionTransformationItem } from "@/app/(authenticated)/structures/transformation/[transformationId]/verification/_components/StructureVersionTransformationItem";
-import { STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME } from "@/config/transformation.config";
-import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureVersionTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
 import { StructureType } from "@/types/structure.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
@@ -35,29 +37,23 @@ vi.mock("@/app/components/StructureCard", () => ({
   ),
 }));
 
-const TRANSFORMATION_ID = 3;
+const mockGetStructureVersionTransformationStepItems = vi.fn();
 
-const buildForm = (
-  type: StructureVersionTransformationType,
-  status: StepStatus
-): StructureVersionTransformationApiRead["form"] => ({
-  id: 100,
-  status: status === StepStatus.VALIDE,
-  formDefinition: {
-    id: 1,
-    slug: "transformation",
-    name: STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[type],
-    version: 1,
-  },
-  formSteps: [
-    "01-identification",
-    "02-places-hebergement",
-    "03-actes-administratifs",
-  ].map((slug, index) => ({
-    id: index,
-    status,
-    stepDefinition: { id: index, slug, label: slug },
-  })),
+vi.mock("@/utils/transformation-step-status.util", () => ({
+  getStructureVersionTransformationStepItems: () =>
+    mockGetStructureVersionTransformationStepItems(),
+}));
+
+const TRANSFORMATION = {
+  id: 3,
+  structureVersionTransformations: [],
+} as TransformationApiRead;
+
+const buildStepItem = (route: string, status: StepStatus) => ({
+  name: route,
+  label: route,
+  route,
+  status,
 });
 
 const buildCompleteStructureVersionTransformation = (
@@ -81,6 +77,10 @@ const buildCompleteStructureVersionTransformation = (
 });
 
 describe("StructureVersionTransformationItem", () => {
+  beforeEach(() => {
+    mockGetStructureVersionTransformationStepItems.mockReturnValue([]);
+  });
+
   it("affiche la StructureCard avec les valeurs dérivées de structureVersion + structure", () => {
     // GIVEN
     const structureVersionTransformation =
@@ -89,7 +89,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -137,7 +137,7 @@ describe("StructureVersionTransformationItem", () => {
       // WHEN
       render(
         <StructureVersionTransformationItem
-          transformationId={TRANSFORMATION_ID}
+          transformation={TRANSFORMATION}
           structureVersionTransformation={build()}
         />
       );
@@ -159,7 +159,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -184,7 +184,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -216,7 +216,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -245,7 +245,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -274,7 +274,7 @@ describe("StructureVersionTransformationItem", () => {
       // WHEN
       render(
         <StructureVersionTransformationItem
-          transformationId={TRANSFORMATION_ID}
+          transformation={TRANSFORMATION}
           structureVersionTransformation={structureVersionTransformation}
         />
       );
@@ -300,7 +300,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -330,7 +330,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -359,7 +359,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -387,7 +387,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -412,7 +412,7 @@ describe("StructureVersionTransformationItem", () => {
       // WHEN
       render(
         <StructureVersionTransformationItem
-          transformationId={TRANSFORMATION_ID}
+          transformation={TRANSFORMATION}
           structureVersionTransformation={structureVersionTransformation}
         />
       );
@@ -439,7 +439,7 @@ describe("StructureVersionTransformationItem", () => {
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -450,19 +450,20 @@ describe("StructureVersionTransformationItem", () => {
 
   it("propose de compléter la première étape non validée", () => {
     // GIVEN
+    mockGetStructureVersionTransformationStepItems.mockReturnValue([
+      buildStepItem("/description", StepStatus.VALIDE),
+      buildStepItem("/places", StepStatus.COMMENCE),
+      buildStepItem("/actes", StepStatus.NON_COMMENCE),
+    ]);
     const structureVersionTransformation =
       buildCompleteStructureVersionTransformation({
         type: StructureVersionTransformationType.CREATION,
-        form: buildForm(
-          StructureVersionTransformationType.CREATION,
-          StepStatus.COMMENCE
-        ),
       });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );
@@ -472,27 +473,24 @@ describe("StructureVersionTransformationItem", () => {
       screen.getByRole("link", {
         name: "Compléter les informations de la structure",
       })
-    ).toHaveAttribute(
-      "href",
-      `/structures/transformation/${TRANSFORMATION_ID}/creation/1/description`
-    );
+    ).toHaveAttribute("href", "/places");
   });
 
   it("ne propose pas de compléter quand toutes les étapes sont validées", () => {
     // GIVEN
+    mockGetStructureVersionTransformationStepItems.mockReturnValue([
+      buildStepItem("/description", StepStatus.VALIDE),
+      buildStepItem("/places", StepStatus.VALIDE),
+    ]);
     const structureVersionTransformation =
       buildCompleteStructureVersionTransformation({
         type: StructureVersionTransformationType.CREATION,
-        form: buildForm(
-          StructureVersionTransformationType.CREATION,
-          StepStatus.VALIDE
-        ),
       });
 
     // WHEN
     render(
       <StructureVersionTransformationItem
-        transformationId={TRANSFORMATION_ID}
+        transformation={TRANSFORMATION}
         structureVersionTransformation={structureVersionTransformation}
       />
     );

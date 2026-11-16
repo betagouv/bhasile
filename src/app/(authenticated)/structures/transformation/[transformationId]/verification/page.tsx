@@ -27,6 +27,7 @@ import {
   HudaCadaDestination,
   StructureVersionTransformationType,
 } from "@/types/transformation.type";
+import { isStructureVersionTransformationComplete } from "@/utils/transformation-step-status.util";
 
 import { StructureVersionTransformationGroup } from "./_components/StructureVersionTransformationGroup";
 
@@ -67,7 +68,10 @@ export default function TransformationVerificationPage() {
   const allChildFormsAreValidated =
     transformation.structureVersionTransformations.every(
       (structureVersionTransformation) =>
-        structureVersionTransformation.form?.status === true
+        isStructureVersionTransformationComplete(
+          transformation,
+          structureVersionTransformation
+        )
     );
 
   useIsModalOpen(confirmationModal, {
@@ -110,7 +114,7 @@ export default function TransformationVerificationPage() {
           {groups.map((group) => (
             <StructureVersionTransformationGroup
               key={group.type}
-              transformationId={transformation.id}
+              transformation={transformation}
               type={group.type}
               structureVersionTransformations={group.items}
             />
