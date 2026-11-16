@@ -45,7 +45,6 @@ export const BudgetTableCommentLine = ({
             />
           ) : (
             <BudgetTableCommentStaticButtonAndModal
-              modalId={`${budgets ? "budgets" : "cpomStructures"}-${year}-commentaire-static-modal`}
               year={year}
               commentaire={commentaires[index]}
             />
