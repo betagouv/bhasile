@@ -82,6 +82,7 @@ export const CreationIdentificationForm = ({
       schema={shouldShowIncompleteSteps ? strictSchema : draftSchema}
       defaultValues={defaultValues}
       onSubmit={goToNextStep}
+      onError={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}

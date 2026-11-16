@@ -38,24 +38,13 @@ const confirmationModal = createModal({
 export default function TransformationVerificationPage() {
   const router = useRouter();
 
-  const {
-    transformation,
-    shouldShowIncompleteSteps,
-    setShouldShowIncompleteSteps,
-  } = useTransformationContext();
+  const { transformation, setShouldShowIncompleteSteps } =
+    useTransformationContext();
   const { updateTransformation } = useTransformations();
 
   useEffect(() => {
-    console.log("[debug-verif] effect → setShouldShowIncompleteSteps(true)");
     setShouldShowIncompleteSteps(true);
   }, [setShouldShowIncompleteSteps]);
-  console.log("[debug-verif] render", {
-    shouldShowIncompleteSteps,
-    childForms: transformation.structureVersionTransformations.map(
-      (structureVersionTransformation) =>
-        structureVersionTransformation.form?.status
-    ),
-  });
   const { prevStep } = useTransformationFormNavigation();
 
   const { getFetchState } = useFetchState();

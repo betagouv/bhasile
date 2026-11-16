@@ -19,20 +19,23 @@ export const withDepartementAdministratifInPerimetre = <
   canUpdateDepartement: (departementAdministratif: string) => boolean
 ): TSchema =>
   schema.check(
-    z.superRefine<{ departementAdministratif?: string }>((data, ctx) => {
-      const { departementAdministratif } = data;
-      if (
-        !departementAdministratif ||
-        canUpdateDepartement(departementAdministratif)
-      ) {
-        return;
-      }
-      ctx.addIssue({
-        code: "custom",
-        message: `Le département ${departementAdministratif} n’est pas dans votre périmètre.`,
-        path: ["adresseAdministrativeComplete"],
-      });
-    })
+    z.superRefine<{ departementAdministratif?: string }>(
+      (data, ctx) => {
+        const { departementAdministratif } = data;
+        if (
+          !departementAdministratif ||
+          canUpdateDepartement(departementAdministratif)
+        ) {
+          return;
+        }
+        ctx.addIssue({
+          code: "custom",
+          message: `Le département ${departementAdministratif} n’est pas dans votre périmètre.`,
+          path: ["adresseAdministrativeComplete"],
+        });
+      },
+      { when: () => true }
+    )
   );
 
 export type AdresseAdministrativeFormValues = z.infer<

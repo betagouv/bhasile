@@ -213,6 +213,35 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     expect(screen.queryByTestId("dna-and-finess")).not.toBeInTheDocument();
   });
 
+  it("enregistre une étape incomplète même après le passage par la vérification", async () => {
+    // GIVEN
+    const transformation = buildTransformation({ id: 999 });
+    renderTransformationForm(
+      transformation,
+      <CreationIdentificationForm
+        transformation={transformation}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
+        formKind={FormKind.OUVERTURE_EX_NIHILO}
+      />,
+      { showIncompleteSteps: true }
+    );
+
+    // WHEN
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+  });
+
   it("sauvegarde même quand tous les champs sont vides, y compris les null venant de la BDD", async () => {
     // GIVEN a freshly created version where the DB columns are still null and the
     // operateur is a present-but-empty object (the autocomplete was never filled)

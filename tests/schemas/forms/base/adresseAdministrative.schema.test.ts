@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   adresseAdministrativeAutoSaveSchema,
+  adresseAdministrativeSchema,
   withDepartementAdministratifInPerimetre,
 } from "@/schemas/forms/base/adresseAdministrative.schema";
 
@@ -31,6 +32,22 @@ describe("withDepartementAdministratifInPerimetre", () => {
       message: "Le département 10 n’est pas dans votre périmètre.",
       path: ["adresseAdministrativeComplete"],
     });
+  });
+
+  it("signale le département hors périmètre même quand d'autres champs sont en erreur", () => {
+    const strictSchema = withDepartementAdministratifInPerimetre(
+      adresseAdministrativeSchema,
+      (departementAdministratif) => departementAdministratif === "75"
+    );
+
+    const result = strictSchema.safeParse({ departementAdministratif: "10" });
+
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({
+        message: "Le département 10 n’est pas dans votre périmètre.",
+        path: ["adresseAdministrativeComplete"],
+      })
+    );
   });
 
   it("laisse le schéma d'origine inchangé", () => {
