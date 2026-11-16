@@ -40,12 +40,9 @@ vi.mock("@codegouvfr/react-dsfr/Modal/useIsModalOpen", () => ({
   useIsModalOpen: () => false,
 }));
 
-vi.mock(
-  "@/contexts/TransformationContext",
-  () => ({
-    useTransformationContext: () => mockUseTransformationContext(),
-  })
-);
+vi.mock("@/contexts/TransformationContext", () => ({
+  useTransformationContext: () => mockUseTransformationContext(),
+}));
 
 vi.mock("@/app/hooks/useTransformations", () => ({
   useTransformations: () => ({
@@ -183,7 +180,25 @@ describe("TransformationVerificationPage", () => {
     expect(certifyButton()).toBeDisabled();
   });
 
-  it("signale les étapes incomplètes et ne finalise pas quand un formulaire enfant n'est pas validé", async () => {
+  it("signale les étapes incomplètes dès l'arrivée sur la page", () => {
+    // GIVEN
+    mockContext(
+      buildTransformation({
+        form: buildForm(false),
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(false),
+        ],
+      })
+    );
+
+    // WHEN
+    render(<TransformationVerificationPage />);
+
+    // THEN
+    expect(setShouldShowIncompleteSteps).toHaveBeenCalledWith(true);
+  });
+
+  it("ne finalise pas quand un formulaire enfant n'est pas validé", async () => {
     // GIVEN
     const user = userEvent.setup();
     mockContext(
@@ -201,7 +216,6 @@ describe("TransformationVerificationPage", () => {
     await user.click(certifyButton());
 
     // THEN
-    expect(setShouldShowIncompleteSteps).toHaveBeenCalledWith(true);
     expect(mockUpdateTransformation).not.toHaveBeenCalled();
     expect(mockModalOpen).not.toHaveBeenCalled();
   });
@@ -229,7 +243,6 @@ describe("TransformationVerificationPage", () => {
       form: { ...buildForm(false), status: true },
     });
     await waitFor(() => expect(mockModalOpen).toHaveBeenCalled());
-    expect(setShouldShowIncompleteSteps).not.toHaveBeenCalled();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 

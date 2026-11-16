@@ -5,6 +5,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
@@ -43,6 +44,17 @@ export default function TransformationVerificationPage() {
     setShouldShowIncompleteSteps,
   } = useTransformationContext();
   const { updateTransformation } = useTransformations();
+
+  useEffect(() => {
+    console.log("[debug-verif] effect → setShouldShowIncompleteSteps(true)");
+    setShouldShowIncompleteSteps(true);
+  }, [setShouldShowIncompleteSteps]);
+  console.log("[debug-verif] render", {
+    shouldShowIncompleteSteps,
+    childForms: transformation.structureVersionTransformations.map(
+      (structureVersionTransformation) => structureVersionTransformation.form?.status
+    ),
+  });
   const { prevStep } = useTransformationFormNavigation();
 
   const { getFetchState } = useFetchState();
@@ -74,7 +86,6 @@ export default function TransformationVerificationPage() {
 
   const handleSubmit = async () => {
     if (!allChildFormsAreValidated) {
-      setShouldShowIncompleteSteps(true);
       return;
     }
     if (!transformation.form) {

@@ -20,6 +20,7 @@ export const TransformationProvider = ({ children, transformation }: Props) => {
     useState(false);
 
   const [saveCurrentForm, setSaveCurrentForm] = useState<SaveCurrentFormFn>();
+  console.log("[debug-verif] provider render", { shouldShowIncompleteSteps });
 
   const registerSaver = useCallback((saver: SaveCurrentFormFn | null) => {
     // La forme updater est obligatoire : passer directement `saver` ferait
