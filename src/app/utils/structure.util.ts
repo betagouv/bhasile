@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 
 import { getCurrentYear, getNow } from "@/app/utils/now.util";
+import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import {
   CpomStructureApiRead,
@@ -256,6 +257,30 @@ export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
   });
 
   return { cpomStructureIndex, budgetIndex };
+};
+
+export const getBudgetCommentaire = ({
+  type,
+  year,
+  budgets,
+  cpomStructures,
+}: {
+  type?: StructureType;
+  year: number;
+  budgets?: BudgetApiType[];
+  cpomStructures?: CpomStructureApiWrite[];
+}): string | undefined | null => {
+  if (cpomStructures) {
+    const { cpomStructureIndex, budgetIndex } =
+      getCpomStructureIndexAndBudgetIndexForAYearAndAType(
+        cpomStructures,
+        year,
+        type
+      );
+    return cpomStructures[cpomStructureIndex]?.cpom?.budgets?.[budgetIndex]
+      ?.commentaire;
+  }
+  return budgets?.[getMillesimeIndexForAYear(budgets, year, type)]?.commentaire;
 };
 
 export const getRealCreationYear = (structure: StructureApiRead): number => {

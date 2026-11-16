@@ -32,6 +32,10 @@ vi.mock("@/app/api/cpoms/cpom.repository", () => ({
   createOrUpdateCpom: (...args: unknown[]) => mockCreateOrUpdateCpom(...args),
 }));
 
+vi.mock("@/app/api/structures/structure.repository", () => ({
+  findStructuresOperateur: vi.fn(async () => []),
+}));
+
 vi.mock("@/app/api/regions/region.repository", () => ({
   findRegionIdByName: vi.fn(),
 }));

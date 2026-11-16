@@ -1,9 +1,11 @@
 import {
   createDepartementalAgent,
+  createSessionGrant,
   createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
 import { describe, expect, it } from "vitest";
 
+import { AccessRole } from "@/generated/prisma/client";
 import { canAccessPage } from "@/lib/casl/pages";
 
 describe("canAccessPage", () => {
@@ -27,6 +29,9 @@ describe("canAccessPage", () => {
       expect(canAccessPage(currentOperateurUser, "/cpoms")).toBe(false);
       expect(canAccessPage(currentOperateurUser, "/statistiques")).toBe(false);
       expect(canAccessPage(currentOperateurUser, "/ressources")).toBe(false);
+      expect(
+        canAccessPage(currentOperateurUser, "/structures/transformation/type")
+      ).toBe(false);
     });
 
     it("refuse l'accès à la liste des opérateurs et aux modifications de sa fiche", () => {
@@ -69,6 +74,20 @@ describe("canAccessPage", () => {
     it("autorise l'accès aux pages réservées aux agents", () => {
       expect(canAccessPage(currentAgentUser, "/ressources")).toBe(true);
       expect(canAccessPage(currentAgentUser, "/operateurs")).toBe(true);
+      expect(
+        canAccessPage(currentAgentUser, "/structures/transformation/type")
+      ).toBe(true);
+    });
+
+    it("refuse les transformations à un agent sans droit d'écriture", () => {
+      const readOnlyAgent = createSessionUser({
+        grants: [
+          createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+        ],
+      });
+      expect(
+        canAccessPage(readOnlyAgent, "/structures/transformation/type")
+      ).toBe(false);
     });
   });
 });

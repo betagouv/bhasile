@@ -1,6 +1,8 @@
 import {
   createDepartementalAgent,
   createNationalAgent,
+  createSessionGrant,
+  createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -25,9 +27,12 @@ import {
   isStructureClosed,
   isStructureFinalised,
   isStructureFinalisedAndOpen,
+  resolveCpomLinkedStructure,
   sortStructureRows,
   StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
+import { AccessRole } from "@/generated/prisma/client";
+import { defineAbilityFor } from "@/lib/casl";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
@@ -762,6 +767,95 @@ describe("getFermetureHistory", () => {
   });
 });
 
+describe("resolveCpomLinkedStructure", () => {
+  const now = new Date("2026-06-01T00:00:00.000Z");
+  const operateurAbility = defineAbilityFor(
+    createSessionUser({
+      operateurId: 1,
+      isAgent: false,
+      grants: [
+        createSessionGrant({
+          role: AccessRole.LECTEUR,
+          departementNumeros: ["92"],
+        }),
+      ],
+    })
+  );
+
+  const linkedStructure = ({
+    departementAdministratif = "92",
+    isFinalised = true,
+  }: { departementAdministratif?: string; isFinalised?: boolean } = {}) =>
+    ({
+      id: 1,
+      cpomId: 7,
+      structureId: 10,
+      dateStart: null,
+      dateEnd: null,
+      structure: {
+        id: 10,
+        codeBhasile: "BHA-10",
+        type: StructureType.CADA,
+        departementAdministratif,
+        operateurId: 1,
+        operateur: { name: "Opérateur 1" },
+        forms: [
+          {
+            status: isFinalised,
+            formDefinition: { slug: FINALISATION_FORM_SLUG },
+          },
+        ],
+        structureVersions: [
+          {
+            id: 100,
+            effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+            structureVersionTransformationId: null,
+            structureVersionTransformation: null,
+            communeAdministrative: "Nanterre",
+          },
+        ],
+      },
+    }) as unknown as Parameters<typeof resolveCpomLinkedStructure>[0];
+
+  it("propose le lien vers une structure finalisée que l'utilisateur peut lire", () => {
+    const { structure } = resolveCpomLinkedStructure(
+      linkedStructure(),
+      operateurAbility,
+      now
+    );
+
+    expect(structure).toEqual({
+      id: 10,
+      codeBhasile: "BHA-10",
+      type: StructureType.CADA,
+      departementAdministratif: "92",
+      operateur: { name: "Opérateur 1" },
+      communeAdministrative: "Nanterre",
+      isLinkable: true,
+    });
+  });
+
+  it("ne propose pas le lien vers une structure non finalisée", () => {
+    expect(
+      resolveCpomLinkedStructure(
+        linkedStructure({ isFinalised: false }),
+        operateurAbility,
+        now
+      ).structure.isLinkable
+    ).toBe(false);
+  });
+
+  it("ne propose pas le lien vers une structure hors de la zone de lecture", () => {
+    expect(
+      resolveCpomLinkedStructure(
+        linkedStructure({ departementAdministratif: "75" }),
+        operateurAbility,
+        now
+      ).structure.isLinkable
+    ).toBe(false);
+  });
+});
+
 describe("getReadableNotes", () => {
   const structureParis = {
     departementAdministratif: "75",
@@ -936,36 +1030,34 @@ describe("buildCommunePoints", () => {
 });
 
 describe("hideAgentOnlyFields", () => {
-  it("masque les données réservées aux agents et garde le reste de la fiche", () => {
+  it("masque les commentaires des budgets, de la structure comme de ses CPOM, et garde le reste de la fiche", () => {
     const structure = {
       id: 1,
       nom: "Centre",
-      notes: "note interne",
+      budgets: [{ year: 2025, commentaire: "commentaire interne" }],
       controles: [{ id: 1 }],
-      evaluations: [{ id: 1 }],
-      evenementsIndesirablesGraves: [{ id: 1 }],
-      anomalies: [{ code: "A" }],
-      cpomStructures: [{ id: 1 }],
-      isInCpom: true,
-      isInCpomPerYear: { 2026: true },
-      history: [
-        { kind: "CPOM_ENTRY", date: "2026-01-01" },
-        { kind: "FERMETURE", date: "2026-06-01" },
+      cpomStructures: [
+        {
+          id: 1,
+          cpom: {
+            id: 7,
+            budgets: [{ year: 2025, commentaire: "commentaire CPOM" }],
+          },
+        },
       ],
     } as unknown as StructureApiRead;
 
     expect(hideAgentOnlyFields(structure)).toEqual({
       id: 1,
       nom: "Centre",
-      notes: null,
-      controles: [],
-      evaluations: [],
-      evenementsIndesirablesGraves: [],
-      anomalies: [],
-      cpomStructures: [],
-      isInCpom: false,
-      isInCpomPerYear: {},
-      history: [{ kind: "FERMETURE", date: "2026-06-01" }],
+      budgets: [{ year: 2025, commentaire: null }],
+      controles: [{ id: 1 }],
+      cpomStructures: [
+        {
+          id: 1,
+          cpom: { id: 7, budgets: [{ year: 2025, commentaire: null }] },
+        },
+      ],
     });
   });
 });

@@ -3,60 +3,28 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useMemo } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
-import {
-  getCpomStructureIndexAndBudgetIndexForAYearAndAType,
-  getMillesimeIndexForAYear,
-} from "@/app/utils/structure.util";
-import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
-import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableCommentStaticButtonAndModal = ({
-  type,
+  modalId,
   year,
-  budgets,
-  cpomStructures,
+  commentaire,
 }: Props) => {
   const modal = useMemo(
     () =>
       createModal({
-        id: `${budgets ? "budgets" : "cpomStructures"}-${year}-commentaire-static-modal`,
+        id: modalId,
         isOpenedByDefault: false,
       }),
-    [budgets, year]
+    [modalId]
   );
-
-  let currentComment: string | undefined | null;
-
-  if (budgets) {
-    currentComment =
-      budgets?.[getMillesimeIndexForAYear(budgets, year, type)]?.commentaire;
-  }
-  if (cpomStructures) {
-    const { cpomStructureIndex, budgetIndex } =
-      getCpomStructureIndexAndBudgetIndexForAYearAndAType(
-        cpomStructures,
-        year,
-        type
-      );
-    currentComment =
-      cpomStructures[cpomStructureIndex]?.cpom?.budgets?.[budgetIndex]
-        ?.commentaire;
-  }
-
-  const handleOpenModal = () => {
-    modal.open();
-  };
 
   return (
     <>
-      {currentComment ? (
+      {commentaire ? (
         <Button
           type="button"
           iconId="fr-icon-eye-line"
-          onClick={() => {
-            handleOpenModal();
-          }}
+          onClick={() => modal.open()}
           priority="tertiary no outline"
           size="small"
           className="font-bold"
@@ -71,15 +39,14 @@ export const BudgetTableCommentStaticButtonAndModal = ({
         className="[&_h1]:text-left! [&_h2]:text-left! [&_p]:text-left!"
       >
         <h2 className="text-sm">Détail affectation du résultat - {year}</h2>
-        <p>{currentComment}</p>
+        <p>{commentaire}</p>
       </modal.Component>
     </>
   );
 };
 
 type Props = {
-  type?: StructureType;
+  modalId: string;
   year: number;
-  cpomStructures?: CpomStructureApiWrite[];
-  budgets?: BudgetApiType[];
+  commentaire?: string | null;
 };

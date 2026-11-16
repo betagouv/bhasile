@@ -52,7 +52,7 @@ export const CompositionBlock = () => {
             <td className="text-center!">–</td>
             <td>{formatDate(structure.dateEnd ?? cpom.dateEnd)}</td>
             <td className="py-0! pl-0! pr-2!">
-              {structure.structure?.forms?.some((form) => form.status) && (
+              {structure.structure?.isLinkable && (
                 <Link
                   href={`/structures/${structure.structure?.id}`}
                   className="fr-btn fr-btn--tertiary-no-outline fr-btn-sm fr-icon-arrow-right-line before:w-[20] before:h-[20]"
