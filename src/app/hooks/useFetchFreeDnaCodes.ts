@@ -1,18 +1,24 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { FreeDnaCode, FreeDnaCodeFilters } from "@/types/dna.type";
 import { EntityId } from "@/types/Entity.type";
 
 export const useFetchFreeDnaCodes = ({
   entityId,
-}: {
+  operateurId,
+  departementAdministratif,
+  type,
+}: FreeDnaCodeFilters & {
   entityId?: EntityId;
 } = {}) => {
   const { structureId, structureVersionId } = entityId ?? {};
   const { transformationId } = useParams<{ transformationId?: string }>();
-  const [freeDnaCodes, setFreeDnaCodes] = useState<{ code: string }[]>([]);
+  const [freeDnaCodes, setFreeDnaCodes] = useState<FreeDnaCode[]>();
 
   useEffect(() => {
+    let isStale = false;
+
     const fetchFreeDnaCodes = async () => {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
 
@@ -26,16 +32,41 @@ export const useFetchFreeDnaCodes = ({
       if (transformationId) {
         params.append("transformationId", transformationId);
       }
+      if (operateurId) {
+        params.append("operateurId", String(operateurId));
+      }
+      if (departementAdministratif) {
+        params.append("departementAdministratif", departementAdministratif);
+      }
+      if (type) {
+        params.append("type", type);
+      }
 
       const result = await fetch(
         `${baseUrl}/api/dna-codes?${params.toString()}`
       );
+      if (!result.ok) {
+        return;
+      }
       const data = await result.json();
 
-      setFreeDnaCodes(data);
+      if (!isStale) {
+        setFreeDnaCodes(data);
+      }
     };
     fetchFreeDnaCodes();
-  }, [structureId, structureVersionId, transformationId]);
+
+    return () => {
+      isStale = true;
+    };
+  }, [
+    structureId,
+    structureVersionId,
+    transformationId,
+    operateurId,
+    departementAdministratif,
+    type,
+  ]);
 
   return { freeDnaCodes };
 };

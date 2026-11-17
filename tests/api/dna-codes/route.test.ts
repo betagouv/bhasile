@@ -96,6 +96,82 @@ describe("GET /api/dna-codes", () => {
     });
   });
 
+  it("transmet l'operateurId au repository", async () => {
+    // GIVEN
+    const dnaCodes = [{ code: "C0001", departementAdministratif: "75" }];
+    mockFindAll.mockResolvedValueOnce(dnaCodes);
+
+    const request = new NextRequest(
+      "http://localhost/api/dna-codes?structureId=42&operateurId=3"
+    );
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(dnaCodes);
+    expect(mockFindAll).toHaveBeenCalledWith({
+      entityId: { structureId: 42, structureVersionId: undefined },
+      operateurId: 3,
+    });
+  });
+
+  it("transmet le département et le type au repository", async () => {
+    // GIVEN
+    mockFindAll.mockResolvedValueOnce([]);
+
+    const request = new NextRequest(
+      "http://localhost/api/dna-codes?departementAdministratif=75&type=HUDA"
+    );
+
+    // WHEN
+    await GET(request);
+
+    // THEN
+    expect(mockFindAll).toHaveBeenCalledWith({
+      entityId: { structureId: undefined, structureVersionId: undefined },
+      departementsAdministratifs: ["75"],
+      type: "HUDA",
+    });
+  });
+
+  it("élargit un département corse saisi en « 20 » à la Corse-du-Sud et à la Haute-Corse", async () => {
+    // GIVEN
+    mockFindAll.mockResolvedValueOnce([]);
+
+    const request = new NextRequest(
+      "http://localhost/api/dna-codes?departementAdministratif=20"
+    );
+
+    // WHEN
+    await GET(request);
+
+    // THEN
+    expect(mockFindAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        departementsAdministratifs: ["20", "2A", "2B"],
+      })
+    );
+  });
+
+  it("ignore un type de structure inconnu", async () => {
+    // GIVEN
+    mockFindAll.mockResolvedValueOnce([]);
+
+    const request = new NextRequest(
+      "http://localhost/api/dna-codes?type=INCONNU"
+    );
+
+    // WHEN
+    await GET(request);
+
+    // THEN
+    expect(mockFindAll).toHaveBeenCalledWith(
+      expect.objectContaining({ type: undefined })
+    );
+  });
+
   it("retourne 500 quand le repository lève une erreur", async () => {
     // GIVEN
     mockFindAll.mockRejectedValueOnce(new Error("DB error"));

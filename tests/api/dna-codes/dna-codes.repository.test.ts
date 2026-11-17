@@ -5,6 +5,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { findAll } from "@/app/api/dna-codes/dna-codes.repository";
 import { createOne } from "@/app/api/transformations/transformation.repository";
 import prisma from "@/lib/prisma";
+import { StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -15,6 +16,7 @@ import { createReferentialDna } from "../../test-utils/referential-dna";
 describe("dna-codes.repository findAll db integration", () => {
   const createdStructureIds: number[] = [];
   const createdTransformationIds: number[] = [];
+  const createdOperateurIds: number[] = [];
 
   const createStructure = async () => {
     const structure = await prisma.structure.create({
@@ -25,6 +27,14 @@ describe("dna-codes.repository findAll db integration", () => {
     });
     createdStructureIds.push(structure.id);
     return structure;
+  };
+
+  const createOperateur = async (data: { parentId?: number } = {}) => {
+    const operateur = await prisma.operateur.create({
+      data: { name: `DNA-DC-TEST-OP-${randomUUID()}`, ...data },
+    });
+    createdOperateurIds.push(operateur.id);
+    return operateur;
   };
 
   const createDnaOnVersion = async (
@@ -56,6 +66,9 @@ describe("dna-codes.repository findAll db integration", () => {
     }
     await prisma.dna.deleteMany({
       where: { code: { startsWith: "DNA-DC-TEST-" } },
+    });
+    await prisma.operateur.deleteMany({
+      where: { id: { in: createdOperateurIds } },
     });
   });
 
@@ -132,5 +145,106 @@ describe("dna-codes.repository findAll db integration", () => {
     expect(withoutTransfo).not.toContain(codeInTransfo);
     expect(withoutTransfo).toContain(freeDna.code);
     expect(withoutTransfo).not.toContain(codeOutside);
+  });
+
+  it("restreint les codes libres à l'opérateur, à son parent et à ses filiales", async () => {
+    const parent = await createOperateur();
+    const operateur = await createOperateur({ parentId: parent.id });
+    const filiale = await createOperateur({ parentId: operateur.id });
+    const otherOperateur = await createOperateur();
+
+    const [ownCode, parentCode, filialeCode, otherCode] = await Promise.all(
+      [operateur, parent, filiale, otherOperateur].map(
+        async (dnaOperateur) =>
+          (
+            await createReferentialDna(`DNA-DC-TEST-OP-${randomUUID()}`, {
+              operateur: { connect: { id: dnaOperateur.id } },
+            })
+          ).code
+      )
+    );
+
+    const codes = (await findAll({ operateurId: operateur.id })).map(
+      (dna) => dna.code
+    );
+
+    expect(codes).toContain(ownCode);
+    expect(codes).toContain(parentCode);
+    expect(codes).toContain(filialeCode);
+    expect(codes).not.toContain(otherCode);
+  });
+
+  it("restreint les codes libres au département et au type demandés", async () => {
+    const [departement, otherDepartement] = await prisma.departement.findMany({
+      take: 2,
+      orderBy: { numero: "asc" },
+    });
+
+    const createFreeDna = async (
+      suffix: string,
+      departementNumero: string,
+      type: StructureType
+    ) =>
+      (
+        await createReferentialDna(`DNA-DC-TEST-${suffix}-${randomUUID()}`, {
+          departement: { connect: { numero: departementNumero } },
+          type,
+        })
+      ).code;
+
+    const [matchingCode, otherDepartementCode, otherTypeCode] =
+      await Promise.all([
+        createFreeDna("MATCH", departement.numero, StructureType.HUDA),
+        createFreeDna(
+          "OTHER-DEPT",
+          otherDepartement.numero,
+          StructureType.HUDA
+        ),
+        createFreeDna("OTHER-TYPE", departement.numero, StructureType.CADA),
+      ]);
+
+    const codes = (
+      await findAll({
+        departementsAdministratifs: [departement.numero],
+        type: StructureType.HUDA,
+      })
+    ).map((dna) => dna.code);
+
+    expect(codes).toContain(matchingCode);
+    expect(codes).not.toContain(otherDepartementCode);
+    expect(codes).not.toContain(otherTypeCode);
+  });
+
+  it("garde les codes détenus par la structure même s'ils ne correspondent pas aux filtres", async () => {
+    const operateur = await createOperateur();
+    const structure = await createStructure();
+    const version = await prisma.structureVersion.create({
+      data: { structureId: structure.id },
+    });
+    const ownCode = await createDnaOnVersion(version.id, "OWN-UNMATCHED");
+
+    const codes = (
+      await findAll({
+        entityId: { structureId: structure.id },
+        operateurId: operateur.id,
+        departementsAdministratifs: ["00"],
+        type: StructureType.HUDA,
+      })
+    ).map((dna) => dna.code);
+
+    expect(codes).toContain(ownCode);
+  });
+
+  it("renvoie le département administratif de chaque code", async () => {
+    const freeDna = await createReferentialDna(
+      `DNA-DC-TEST-DEPT-${randomUUID()}`
+    );
+
+    const found = (await findAll()).find((dna) => dna.code === freeDna.code);
+
+    expect(found).toEqual({
+      code: freeDna.code,
+      departementAdministratif: freeDna.departementAdministratif,
+    });
   });
 });

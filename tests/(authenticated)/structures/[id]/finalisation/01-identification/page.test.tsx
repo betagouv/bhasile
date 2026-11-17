@@ -41,7 +41,9 @@ describe("FinalisationIdentification page integration", () => {
       <FinalisationIdentificationPage />
     );
     await waitFor(() => {
-      expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=77");
+      expect(mockedFetch).toHaveBeenCalledWith(
+        "/api/dna-codes?structureId=77&operateurId=1&departementAdministratif=75&type=CADA"
+      );
     });
 
     // WHEN
@@ -80,7 +82,9 @@ describe("FinalisationIdentification page integration", () => {
       <FinalisationIdentificationPage />
     );
     await waitFor(() => {
-      expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=78");
+      expect(mockedFetch).toHaveBeenCalledWith(
+        "/api/dna-codes?structureId=78&operateurId=1&departementAdministratif=75&type=CADA"
+      );
     });
 
     vi.useFakeTimers();

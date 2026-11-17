@@ -29,7 +29,10 @@ const mockedUseFetchFreeDnaCodes = vi.mocked(useFetchFreeDnaCodes);
 describe("TransformationDnaAndFiness", () => {
   beforeEach(() => {
     mockedUseFetchFreeDnaCodes.mockReturnValue({
-      freeDnaCodes: [{ code: "C0001" }, { code: "C0002" }],
+      freeDnaCodes: [
+        { code: "C0001", departementAdministratif: "75" },
+        { code: "C0002", departementAdministratif: "75" },
+      ],
     });
   });
 
@@ -70,10 +73,9 @@ describe("TransformationDnaAndFiness", () => {
         "href",
         "/07-Fiche_de_parametrage_OFII-transformation_parc.xlsx"
       );
-      expect(screen.getByRole("link", { name: "Instructions" })).toHaveAttribute(
-        "href",
-        "/Instruction%20INTV2609238J.pdf"
-      );
+      expect(
+        screen.getByRole("link", { name: "Instructions" })
+      ).toHaveAttribute("href", "/Instruction%20INTV2609238J.pdf");
       expect(screen.getByRole("link", { name: "FAQ" })).toHaveAttribute(
         "href",
         "/11-FAQ%20Transformation%20HUDA%20en%20CADA_FV.pdf"
@@ -119,18 +121,16 @@ describe("TransformationDnaAndFiness", () => {
         screen.getByRole("button", { name: /Ajouter un code DNA/i })
       );
 
-      expect(
-        screen.getAllByRole("combobox", { name: "Code" })
-      ).toHaveLength(2);
+      expect(screen.getAllByRole("combobox", { name: "Code" })).toHaveLength(2);
       expect(
         screen.getAllByRole("textbox", { name: "Description" })
       ).toHaveLength(2);
       expect(
         screen.queryByRole("combobox", { name: "Code DNA" })
       ).not.toBeInTheDocument();
-      expect(
-        screen.getAllByRole("button", { name: "Supprimer" })
-      ).toHaveLength(2);
+      expect(screen.getAllByRole("button", { name: "Supprimer" })).toHaveLength(
+        2
+      );
     });
   });
 
@@ -155,7 +155,9 @@ describe("TransformationDnaAndFiness", () => {
 
       await user.click(screen.getByRole("button", { name: "Supprimer" }));
 
-      expect(screen.getByRole("combobox", { name: "Code" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: "Code" })
+      ).toBeInTheDocument();
       expect(
         screen.queryByRole("button", { name: "Supprimer" })
       ).not.toBeInTheDocument();
@@ -164,7 +166,11 @@ describe("TransformationDnaAndFiness", () => {
     it("supprime la ligne ciblée et non la première", async () => {
       const user = userEvent.setup();
       mockedUseFetchFreeDnaCodes.mockReturnValue({
-        freeDnaCodes: [{ code: "C0001" }, { code: "C0002" }, { code: "C0003" }],
+        freeDnaCodes: [
+          { code: "C0001", departementAdministratif: "75" },
+          { code: "C0002", departementAdministratif: "75" },
+          { code: "C0003", departementAdministratif: "75" },
+        ],
       });
 
       render(
@@ -187,9 +193,7 @@ describe("TransformationDnaAndFiness", () => {
         .map((select) => (select as HTMLSelectElement).value);
       expect(codesBefore).toEqual(["C0001", "C0002", "C0003"]);
 
-      await user.click(
-        screen.getAllByRole("button", { name: "Supprimer" })[1]
-      );
+      await user.click(screen.getAllByRole("button", { name: "Supprimer" })[1]);
 
       const codesAfter = screen
         .getAllByRole("combobox", { name: "Code" })

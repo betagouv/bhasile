@@ -1,23 +1,46 @@
 import { DomainError } from "@/app/utils/domain-error.util";
 import { Dna, Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+import { FreeDnaCode } from "@/types/dna.type";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
+import { StructureType } from "@/types/structure.type";
 
 export const findAll = async ({
   entityId = {},
   operateurId,
+  departementsAdministratifs,
+  type,
   transformationId,
 }: {
   entityId?: EntityId;
   operateurId?: number;
+  departementsAdministratifs?: string[];
+  type?: StructureType;
   transformationId?: number;
-} = {}): Promise<{ code: string }[]> => {
+} = {}): Promise<FreeDnaCode[]> => {
   const { structureId, structureVersionId } = entityId;
 
-  const ownershipFilters: Prisma.DnaWhereInput[] = [
-    { dnaStructures: { none: {} } },
-  ];
+  // Opérateur, département et type ne restreignent que les codes libres : le référentiel OFII peut décrire
+  // un code déjà détenu avec ses anciennes valeurs (transfert en transformation), il doit rester proposé.
+  const freeFilter: Prisma.DnaWhereInput = { dnaStructures: { none: {} } };
+  if (operateurId) {
+    freeFilter.operateur = {
+      OR: [
+        { id: operateurId },
+        { parentId: operateurId },
+        { filiales: { some: { id: operateurId } } },
+      ],
+    };
+  }
+  if (departementsAdministratifs) {
+    freeFilter.departementAdministratif = { in: departementsAdministratifs };
+  }
+  if (type) {
+    freeFilter.type = type;
+  }
+
+  const ownershipFilters: Prisma.DnaWhereInput[] = [freeFilter];
   if (structureId) {
     ownershipFilters.push({
       dnaStructures: { some: { structureVersion: { structureId } } },
@@ -39,16 +62,10 @@ export const findAll = async ({
       },
     });
   }
-  const structureFilter: Prisma.DnaWhereInput = { OR: ownershipFilters };
-
-  const operateurFilter = operateurId !== undefined ? { operateurId } : null;
 
   return prisma.dna.findMany({
-    where: operateurFilter
-      ? { AND: [structureFilter, operateurFilter] }
-      : structureFilter,
-    select: { code: true },
-    distinct: ["code"],
+    where: { OR: ownershipFilters },
+    select: { code: true, departementAdministratif: true },
   });
 };
 

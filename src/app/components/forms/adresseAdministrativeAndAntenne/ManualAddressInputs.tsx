@@ -10,7 +10,10 @@ export const ManualAddressInputs = () => {
 
   const codePostalAdministratif = watch("codePostalAdministratif");
   useEffect(() => {
-    if (codePostalAdministratif) {
+    const isCodePostalComplete = /^\d{5}$/.test(
+      codePostalAdministratif?.trim() ?? ""
+    );
+    if (isCodePostalComplete) {
       setValue(
         "departementAdministratif",
         getDepartementFromCodePostal(codePostalAdministratif)
