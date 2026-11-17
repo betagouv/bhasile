@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off : transforme les patterns d'email individuels (commençant par "^") en binômes personnels.
 // Idempotent : les patterns traités sont supprimés donc ne sont plus retraités.
 //

@@ -19,6 +19,7 @@ type OperateurWithRelations = Operateur & {
     | "structureDnaCode"
     | "cpomId"
     | "structureVersionTransformationId"
+    | "sourceTarificationDocumentId"
   >[];
   contacts: Omit<
     Contact,
@@ -33,6 +34,7 @@ type OperateurWithRelations = Operateur & {
     | "evaluationId"
     | "operateurId"
     | "messageId"
+    | "sha256"
   >;
 };
 

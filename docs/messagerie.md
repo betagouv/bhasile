@@ -5,7 +5,7 @@ Les échanges entre l'opérateur d'une structure, la DDETS et la DREETS pendant 
 Le chantier de la tarification est découpé en deux :
 
 - **la messagerie** (ce document) ;
-- **la campagne et la gestion des documents** : étapes, documents typés, échéances, contradictoire, plugins.
+- **la campagne et la gestion des documents** ([Tarification](tarification.md)) : étapes, documents typés, échéances, contradictoire.
 
 La messagerie est **agnostique** : elle ne connaît ni les étapes ni les documents. La tarification lui fournit ce qu'elle doit afficher (tags, ancres). Ce découpage suit l'interface, où les échanges vivent dans un panneau à part, et permet de livrer et de tester la messagerie en premier.
 
@@ -67,7 +67,7 @@ TarificationCampaign 1─N StructureTarification 1─2 Conversation 1─N Messag
 
 ## Campagnes et conversations
 
-- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule : plus aucun message ni changement de tag, mais la lecture reste possible et les lectures restent enregistrées. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur l'année en cours (`getCurrentYear`), sans cron.
+- **Une campagne N est ouverte du 1er janvier N-1 au 31 décembre N**, puis en lecture seule : plus aucun message ni changement de tag, mais la lecture reste possible et les lectures restent enregistrées. Une structure a donc toujours deux campagnes ouvertes (en 2027 : 2027 et 2028), et les précédentes en lecture seule. C'est un calcul sur la date locale de la structure (`getCampaignPhase`, voir [Tarification](tarification.md#campagnes-et-éligibilité)), sans cron.
 - **Une conversation par tarification et par canal**, au plus deux par tarification (unicité `(structureTarificationId, visibility)`). La visibilité appartient à la conversation, pas au message : l'accès se vérifie une fois, sur la conversation, et aucune requête ne peut faire fuiter le canal agents en oubliant un filtre.
 - **Création à la volée** : la tarification et la conversation sont créées au premier message (création idempotente sur leurs clés uniques). Une campagne ouverte sans message n'existe qu'à l'écran.
 
@@ -101,7 +101,7 @@ type ConversationAnchor = {
 - **Côté écran**, le composant de messagerie reçoit les tags en props, calculés par la page de la tarification.
 - **Côté serveur**, la tarification passe la liste des tags au service de la messagerie, qui vérifie qu'un `tagKey` en fait partie.
 - **La dépendance va dans un seul sens** : la tarification importe la messagerie, jamais l'inverse. La messagerie connaît le contrat (« il y a des tags et des ancres »), pas son contenu (« L48 », « procédure contradictoire »).
-- Les ancres (réception du CA et du BP, envoi et ouverture des documents) relèvent de la gestion des documents. Tant qu'elle n'existe pas, la liste des ancres est vide et seuls les tags choisis classent les messages.
+- Les ancres (dépôts, envois, ouvertures et autres faits du journal) sont calculées par la tarification (`tarification.anchor.ts`), pour chaque canal. Elles s'affichent dans le fil et le sommaire ; aucune n'ouvre encore de phase (`startsTagKey`), donc seuls les tags choisis classent les messages.
 
 ## Droits et visibilité
 
@@ -116,7 +116,7 @@ type ConversationAnchor = {
 
 - **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand : la lecture d'une conversation renvoie les accusés de chaque message. Restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
 - **Accusé envoyé par l'écran** : le client n'envoie que les messages d'autrui sans accusé à son nom, et seulement quand ils sont affichés (onglet visible).
-- **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La messagerie expose un compteur par structure, que le bloc tarification du dashboard affiche.
+- **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur.
 - **Temps réel** : tant que les échanges sont affichés, le client relit toute la conversation toutes les 10 secondes et remplace sa liste (`src/hooks/useConversationMessages.ts`).
   - La requête suivante ne part que 10 secondes après la réponse de la précédente (`setTimeout` chaîné) : un serveur lent n'accumule pas de requêtes.
   - Pause quand l'onglet du navigateur est caché, relecture immédiate au retour et après chaque envoi.
@@ -129,15 +129,15 @@ Le mécanisme (Brevo, mail groupé par cron, trace, reprise, abandon) est décri
 
 - **Un seul type d'événement, le message**, et il notifie.
 - **Contenu** : un mail par destinataire qui liste ses conversations ayant des messages ni lus ni déjà signalés, chacune avec sa structure, sa campagne, son canal, son nombre de messages et son lien ; ni texte, ni pièce jointe. Template `BREVO_MESSAGE_TEMPLATE_ID`, paramètres `nombre` (total) et `conversations` (`structure`, `campagne`, `canal`, `lien` calculés par `buildNotificationParams`, et `nombre`).
-- **Notifiés par défaut, sauf l'auteur**, selon le `Grant.scope` en base (la session ne distingue pas région et département) :
+- **Notifiés par défaut, sauf l'auteur**, comptes activés seulement, selon les binômes du périmètre en base (la session ne distingue pas région et département) :
 
-  | Destinataire                                      | Conversation partagée                    | Conversation agents |
-  | ------------------------------------------------- | ---------------------------------------- | ------------------- |
-  | Agent éditeur, grant `DEPARTEMENT` ou `STRUCTURE` | Oui                                      | Oui                 |
-  | Agent, grant `REGION`                             | Non                                      | Non                 |
-  | Utilisateur de l'opérateur                        | Oui, une fois qu'il a accès (pas encore) | —                   |
+  | Destinataire                                                 | Conversation partagée                    | Conversation agents |
+  | ------------------------------------------------------------ | ---------------------------------------- | ------------------- |
+  | Agent d'un périmètre à binôme `DEPARTEMENT` sur la structure | Oui                                      | Oui                 |
+  | Agent d'un périmètre régional ou national                    | Non                                      | Non                 |
+  | Utilisateur de l'opérateur                                   | Oui, une fois qu'il a accès (pas encore) | —                   |
 
-  La DREETS n'est notifiée que des actions attendues d'elle, qui relèvent de la gestion des documents (une relecture demandée). C'est la DDETS qui mène les échanges.
+  La DREETS n'est notifiée que des actions attendues d'elle, qui relèvent de la tarification (une contestation de la L48, voir [Tarification](tarification.md#notifications)). C'est la DDETS qui mène les échanges.
 
 - **Superadmins** : jamais notifiés (lecture seule).
 - **Regroupement** : deux passages par jour (voir [Emails](email.md#envoi-et-reprise)). Un agent qui suit 50 structures reçoit au plus deux mails par jour, chacun limité aux messages arrivés depuis le précédent ; un message lu à l'écran avant le passage n'est pas signalé.
@@ -155,7 +155,7 @@ Ces règles valent pour la messagerie et pour la gestion des documents, qui y re
 
 **Fichiers**
 
-- **Empreinte SHA-256** des documents de la tarification, calculée à l'upload (voir la RFC 02) ; les pièces jointes des messages n'en ont pas besoin : ce ne sont pas des dépôts officiels, le contradictoire ne passe que par la gestion des documents.
+- **Empreinte SHA-256** des documents de la tarification, calculée à l'upload (voir [Tarification](tarification.md#documents)) ; les pièces jointes des messages n'en ont pas besoin : ce ne sont pas des dépôts officiels, le contradictoire ne passe que par la gestion des documents.
 - **Formats** : `.docx`, `.odt` et `.pptx` s'ajoutent aux formats acceptés (PDF, tableurs, images), dans toute l'application : une seule liste, plus simple qu'une liste par contexte. Limite de 30 Mo inchangée ; au-delà de 50 Mo environ, il faudra un upload direct vers S3 par URL signée (le serveur charge aujourd'hui le fichier en mémoire).
 - **Accès** : un fichier de message se lit selon l'accès à sa conversation (voir [Droits et visibilité](#droits-et-visibilité)) et ne se supprime jamais par l'application (voir l'exception des cascades ci-dessus). `isOrphan` reconnaît `messageId` : sans ça, un fichier de message serait considéré comme orphelin, donc lisible et supprimable par tous.
 
@@ -187,6 +187,7 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
   - Validation par le serveur seulement, comme dans le reste de l'application : un fichier refusé affiche le message du serveur, et « Envoyer » reste désactivé tant qu'un fichier est en cours d'envoi ou en erreur (pas de « ci-joint » sans la pièce).
   - Retirer une pièce jointe supprime le fichier ; un fichier retiré pendant son envoi est supprimé à son arrivée. Une saisie abandonnée laisse des fichiers orphelins (voir [Évolutions possibles](#évolutions-possibles)).
   - Un envoi refusé garde le texte et les pièces jointes ; un envoi accepté les vide sans supprimer les fichiers, désormais rattachés.
+- **Recherche par mots-clés** : le fil reste entier, les mots trouvés sont surlignés dans le texte et le nom des pièces jointes, à la frappe, sans tenir compte des accents ni de la casse. Un résultat est un message contenant tous les mots, dans n'importe quel ordre. On part du plus récent ; Entrée, la loupe et ▲ remontent vers les plus anciens, ▼ redescend, et on boucle aux extrémités. Le résultat courant est retenu par son identifiant, pour qu'un message arrivé pendant la recherche ne le déplace pas. Vider la recherche laisse le fil où il est, pour lire le contexte du résultat ; envoyer un message le ramène en bas. Le mot-clé reste d'un onglet à l'autre, se vide à la fermeture du tiroir et ne va pas dans l'URL, car les échanges peuvent contenir des données nominatives. Tout se passe dans le navigateur, où le fil est déjà chargé : à revoir si un fil dépasse quelques milliers de messages.
 - **Lecture seule** affichée en bandeau, à la place de la saisie : campagne close.
 - **Tags** : liste fournie par la tarification (`getTarificationOverview`), passée en props jusqu'aux composants de la messagerie. L'interface est en attente de la maquette.
   - Pour un agent sur une campagne ouverte : un sélecteur « Tag » à l'écriture (vide par défaut, vidé après l'envoi) et un sélecteur sur chaque message. Un seul changement à la fois par message. Forme provisoire, à revoir avec les maquettes définitives : chaque sélecteur s'appelle « Tag », sans dire de quel message (accessibilité).
@@ -199,21 +200,21 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 
 ## Implémentation
 
-| Brique                           | Où                                                                                                                                                                    | État    |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Modèle et squelette tarification | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                                                              | fait    |
-| Messagerie (agnostique)          | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                                                        | fait    |
-| Branchement tarification         | `src/app/api/tarifications/` : tags (`tarification.constants.ts`), fenêtre de campagne (`tarification.util.ts`), droits et participant                                | fait    |
-| Routes                           | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]`                                | fait    |
-| Droits                           | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                                               | fait    |
-| Pièces jointes                   | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                                                       | fait    |
-| Porte de mise en service         | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                                                     | fait    |
-| Interface : page et fil          | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                                                       | fait    |
-| Interface : pièces jointes       | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                                                           | fait    |
-| Interface : tags                 | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                                                    | fait    |
-| Notifications : envoi            | `src/lib/brevo.ts`, `sendMessageDigests` (conversation.service), `notifyPendingTarificationMessages` et `getMessageRecipients` (tarification), cron `notify-messages` | fait    |
-| Notifications : rebonds          | Consultables dans Brevo ; webhook quand un écran devra les montrer                                                                                                    | reporté |
-| Suivi et compteur de non-lus     | `StructureSubscription`, bloc tarification du dashboard (avec la tarification)                                                                                        | à faire |
+| Brique                              | Où                                                                                                                                                                    | État    |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Modèle et squelette tarification    | `prisma/schema/conversation.prisma`, `prisma/schema/tarification.prisma`                                                                                              | fait    |
+| Messagerie (agnostique)             | `src/app/api/conversations/` : `conversation.service.ts`, `conversation.repository.ts`, `conversation.util.ts`                                                        | fait    |
+| Branchement tarification            | `src/app/api/tarifications/` : tags (`tarification.constants.ts`), fenêtre de campagne (`tarification.util.ts`), droits et participant                                | fait    |
+| Routes                              | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]`                                | fait    |
+| Droits                              | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                                               | fait    |
+| Pièces jointes                      | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                                                       | fait    |
+| Porte de mise en service            | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                                                     | fait    |
+| Interface : page et fil             | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                                                       | fait    |
+| Interface : pièces jointes          | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                                                           | fait    |
+| Interface : tags                    | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                                                    | fait    |
+| Notifications : envoi               | `src/lib/brevo.ts`, `sendMessageDigests` (conversation.service), `notifyPendingTarificationMessages` et `getMessageRecipients` (tarification), cron `notify-messages` | fait    |
+| Notifications : rebonds             | Consultables dans Brevo ; webhook quand un écran devra les montrer                                                                                                    | reporté |
+| Suivi et non-lus du tableau de bord | `StructureSubscription`, bloc tarification du dashboard (avec la tarification)                                                                                        | à faire |
 
 ## Évolutions possibles
 
@@ -223,7 +224,6 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 | Date de réponse attendue sur un message (« réponse attendue avant le … »)                                                  | Colonne nullable sur `Message`, indicateur dans le bloc dashboard.                                                                                                                                                                                                                                         |
 | Regroupement des mails (un résumé plutôt que cinq mails en une minute)                                                     | Le cron regroupe par destinataire les messages encore sans trace d'envoi.                                                                                                                                                                                                                                  |
 | Marquer comme non lu                                                                                                       | Préférence modifiable, à part des accusés de lecture.                                                                                                                                                                                                                                                      |
-| Recherche par mot-clé dans les échanges                                                                                    | Recherche plein texte PostgreSQL sur le texte des messages.                                                                                                                                                                                                                                                |
 | Ménage des fichiers orphelins (envoyés puis abandonnés avant l'envoi du message)                                           | Tâche périodique : supprimer les fichiers sans rattachement de plus de 24 h.                                                                                                                                                                                                                               |
 | Temps réel poussé                                                                                                          | SSE + `LISTEN/NOTIFY`, sans changer le modèle.                                                                                                                                                                                                                                                             |
 | Triggers d'ajout seul (`UPDATE`, `DELETE`, `TRUNCATE`), si les journaux doivent résister aux scripts et requêtes manuelles | Migration écrite à la main : `BEFORE UPDATE OR DELETE` par ligne et `BEFORE TRUNCATE` par instruction. Sur `Message`, refuser tout `UPDATE` qui touche autre chose que `tagKey` (`to_jsonb(NEW) - 'tagKey'` comparé à `to_jsonb(OLD) - 'tagKey'`). Le wipe des seeders lève la protection pour sa session. |

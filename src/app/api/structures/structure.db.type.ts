@@ -1,6 +1,7 @@
 import { Form, Prisma, StructureType } from "@/generated/prisma/client";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/types/structure.type";
 
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import {
   resolvableVersionSelect,
   type StructureVersionDbDetails,
@@ -100,6 +101,35 @@ export const structureListInclude = {
   actesAdministratifs: true,
 } satisfies Prisma.StructureInclude;
 
+export const cpomLinkedStructuresInclude = {
+  where: { structure: includedStructureWhere },
+  include: {
+    structure: {
+      select: {
+        id: true,
+        codeBhasile: true,
+        type: true,
+        departementAdministratif: true,
+        operateurId: true,
+        operateur: { select: { name: true } },
+        forms: {
+          where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
+          select: { status: true, formDefinition: { select: { slug: true } } },
+        },
+        structureVersions: {
+          select: {
+            ...resolvableVersionSelect,
+            structureVersionTransformation: {
+              select: { type: true, ...transformationStatusSelect },
+            },
+            communeAdministrative: true,
+          },
+        },
+      },
+    },
+  },
+} satisfies Prisma.CpomStructureFindManyArgs;
+
 export const structureDetailsInclude = {
   anomalies: {
     where: { isJustified: true },
@@ -115,28 +145,7 @@ export const structureDetailsInclude = {
     include: {
       cpom: {
         include: {
-          structures: {
-            where: { structure: includedStructureWhere },
-            include: {
-              structure: {
-                select: {
-                  id: true,
-                  codeBhasile: true,
-                  type: true,
-                  operateur: {
-                    select: { name: true },
-                  },
-                  forms: true,
-                  structureVersions: {
-                    select: {
-                      ...resolvableVersionSelect,
-                      communeAdministrative: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
+          structures: cpomLinkedStructuresInclude,
           operateur: true,
           region: true,
           departements: {

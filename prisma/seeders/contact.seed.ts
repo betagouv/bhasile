@@ -18,7 +18,9 @@ export const createFakeContact = (): Omit<
     prenom,
     nom,
     telephone: faker.phone.number().toString(),
-    email: faker.internet.email({ firstName: prenom, lastName: nom }),
+    email: faker.internet
+      .email({ firstName: prenom, lastName: nom })
+      .toLowerCase(),
     role: faker.helpers.arrayElement(["Directeur", "Contact"]),
     perimetre: faker.lorem.words(2),
     createdAt: faker.date.past(),

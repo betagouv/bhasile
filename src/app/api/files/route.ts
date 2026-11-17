@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { createUploadedFile, uploadFile, validateUpload } from "./file.service";
+import {
+  createUploadedFile,
+  getSha256,
+  uploadFile,
+  validateUpload,
+} from "./file.service";
 
 export async function POST(req: Request) {
   const formData = await req.formData();
@@ -19,24 +24,27 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: validationResult }, { status: 400 });
   }
 
-  const arrayBuffer = await file.arrayBuffer();
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
   const uploadResult = await uploadFile(
     process.env.S3_BUCKET_NAME!,
     file.name,
-    Buffer.from(arrayBuffer),
+    fileBuffer,
     file.type
   );
+  const sha256 = getSha256(fileBuffer);
 
   const createdFileUpload = await createUploadedFile({
     key: uploadResult.key,
     mimeType: uploadResult.mimeType,
     originalName: uploadResult.originalName,
     fileSize: file.size,
+    sha256,
   });
 
   return NextResponse.json({
     ...uploadResult,
     id: createdFileUpload?.id,
     fileSize: file.size,
+    sha256,
   });
 }

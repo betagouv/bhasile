@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { isAgent } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import {
   CartographieNotImplementedApiRead,
@@ -14,6 +15,10 @@ export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
+  const user = session.user as SessionUser;
+  if (!isAgent(user)) {
+    return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
   }
   const { searchParams } = request.nextUrl;
 
@@ -50,7 +55,7 @@ export async function GET(request: NextRequest) {
       ...filters,
       granularite: filters.granularite,
     },
-    session.user as SessionUser
+    user
   );
   return NextResponse.json(result);
 }

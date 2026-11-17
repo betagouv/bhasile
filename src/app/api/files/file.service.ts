@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { Session } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
@@ -40,6 +42,7 @@ const getFileParents = (file: FileWithParents): FileParent[] => {
     [file.evaluationId, file.evaluation],
     [file.operateurId, { operateurId: file.operateurId }],
     [file.messageId, {}],
+    [file.tarificationDocument?.id ?? null, {}],
   ];
   return parents.flatMap(([parentId, parent]) =>
     parentId == null ? [] : [parent ?? {}]
@@ -97,6 +100,10 @@ export const authorizeFileAccess = (
   if (isOrphan(file)) {
     return true;
   }
+
+  if (file.tarificationDocument) {
+    return false;
+  }
   if (principal.type === PrincipalType.Operateur) {
     return false;
   }
@@ -111,6 +118,9 @@ export const authorizeFileAccess = (
   }
   return canDeleteFile(principal.user, file);
 };
+
+export const getSha256 = (fileBuffer: Buffer): string =>
+  createHash("sha256").update(fileBuffer).digest("hex");
 
 export const uploadFile = async (
   bucketName: string,
@@ -130,6 +140,25 @@ export const uploadFile = async (
   } catch (error) {
     console.error(error);
     throw new Error("Erreur lors de l'upload du fichier");
+  }
+};
+
+export const copyStoredFile = async (
+  bucketName: string,
+  sourceKey: string,
+  originalName: string
+): Promise<string> => {
+  try {
+    const key = `${uuidv4()}-${originalName}`;
+    await getMinioClient().copyObject(
+      bucketName,
+      key,
+      `/${bucketName}/${sourceKey}`
+    );
+    return key;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Erreur lors de la copie du fichier");
   }
 };
 
@@ -158,6 +187,28 @@ export const getDownloadLink = async (
   } catch (error) {
     console.error(error);
     throw new Error("Erreur lors du téléchargement du fichier");
+  }
+};
+
+// Les fichiers sont stockés sans type sur S3 : sans ces en-têtes, le navigateur les téléchargerait
+export const getInlineLink = async (
+  bucketName: string,
+  fileName: string,
+  mimeType: string
+): Promise<string> => {
+  try {
+    return getMinioClient().presignedGetObject(
+      bucketName,
+      fileName,
+      FILE_UPLOAD_EXPIRATION_DELAY,
+      {
+        "response-content-type": mimeType,
+        "response-content-disposition": "inline",
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    throw new Error("Erreur lors de l'ouverture du fichier");
   }
 };
 
@@ -193,13 +244,15 @@ export const createUploadedFile = async ({
   mimeType,
   originalName,
   fileSize,
+  sha256,
 }: {
   key: string;
   mimeType: string;
   originalName: string;
   fileSize: number;
+  sha256: string;
 }): Promise<FileUpload | null> => {
-  return createOne({ key, mimeType, originalName, fileSize });
+  return createOne({ key, mimeType, originalName, fileSize, sha256 });
 };
 
 export const getFileWithParents = async (

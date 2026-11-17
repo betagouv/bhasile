@@ -1,9 +1,5 @@
-import {
-  GetServerSidePropsContext,
-  NextApiRequest,
-  NextApiResponse,
-} from "next";
 import { getServerSession, NextAuthOptions } from "next-auth";
+import { cache } from "react";
 
 import { createOrUpdateUser } from "@/app/api/users/user.service";
 
@@ -102,8 +98,9 @@ export const authOptions: NextAuthOptions = {
         });
       }
 
+      let databaseName: string | null = null;
       try {
-        await createOrUpdateUser({
+        databaseName = await createOrUpdateUser({
           name: session.user?.name as string,
           email: session.user?.email as string,
         });
@@ -121,6 +118,7 @@ export const authOptions: NextAuthOptions = {
         ...session,
         user: {
           ...session.user,
+          name: databaseName || session.user?.name,
           ...(permissions ?? {}),
           prenom: token.prenom,
         },
@@ -226,11 +224,4 @@ export const authOptions: NextAuthOptions = {
   ],
 };
 
-export function auth(
-  ...args:
-    | [GetServerSidePropsContext["req"], GetServerSidePropsContext["res"]]
-    | [NextApiRequest, NextApiResponse]
-    | []
-) {
-  return getServerSession(...args, authOptions);
-}
+export const auth = cache(() => getServerSession(authOptions));

@@ -1,12 +1,12 @@
-import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { SearchParams } from "@/app/utils/search-params.util";
 import { PageHeader } from "@/components/PageHeader";
-import { authOptions } from "@/lib/next-auth/auth";
+import { auth } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 import { getFiltersFromSearchParams } from "@/utils/filters.util";
 
+import { AnnouncementsBlock } from "./_components/AnnouncementsBlock";
 import { AnomaliesBlock } from "./_components/AnomaliesBlock";
 import { BlockSkeleton } from "./_components/BlockSkeleton";
 import {
@@ -16,7 +16,6 @@ import {
   TRANSFORMATIONS_BLOCK_HEADER,
 } from "./_components/dashboardBlocks";
 import { InitialisationsActualisationsBlock } from "./_components/InitialisationsActualisationsBlock";
-import { NotificationsBlock } from "./_components/NotificationsBlock";
 import { RappelsBlock } from "./_components/RappelsBlock";
 import { TransformationsBlock } from "./_components/TransformationsBlock";
 
@@ -25,7 +24,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<ReactElement> {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const user = session?.user as SessionUser | undefined;
   const params = await searchParams;
 
@@ -36,7 +35,7 @@ export default async function DashboardPage({
       <PageHeader title={`Bienvenue${user?.prenom ? ` ${user.prenom}` : ""}`} />
       <div className="flex flex-col gap-3 max-w-7xl mx-auto p-3">
         <Suspense fallback={null}>
-          <NotificationsBlock />
+          <AnnouncementsBlock />
         </Suspense>
         <Suspense
           fallback={

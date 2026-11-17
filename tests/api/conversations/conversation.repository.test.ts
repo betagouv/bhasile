@@ -15,13 +15,18 @@ import {
   findNotifiedPairs,
   findReadPairs,
   findStaleNotificationIds,
+  findUnreadMessageCounts,
   markNotificationsAbandoned,
   markNotificationsProcessed,
   updateMessageTagKey,
   upsertConversation,
 } from "@/app/api/conversations/conversation.repository";
 import { upsertStructureTarification } from "@/app/api/tarifications/tarification.repository";
-import { AuthorLevel, Visibility } from "@/generated/prisma/enums";
+import {
+  AuthorLevel,
+  TarificationDocumentStatus,
+  Visibility,
+} from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
 describe("conversation.repository db integration", () => {
@@ -119,6 +124,39 @@ describe("conversation.repository db integration", () => {
     ).toBe(1);
   });
 
+  it("compte par canal les messages d'autrui sans accusé du lecteur", async () => {
+    const reader = await prisma.user.create({
+      data: { email: `lecteur-${randomUUID()}@test.fr` },
+    });
+    const countUnread = async () =>
+      Object.fromEntries(
+        (await findUnreadMessageCounts(structureTarificationId, reader.id)).map(
+          ({ visibility, _count }) => [visibility, _count.messages]
+        )
+      );
+    const before = await countUnread();
+    const read = await postMessage(Visibility.SHARED, "lu");
+    await postMessage(Visibility.SHARED, "non lu");
+    await postMessage(Visibility.AGENTS, "non lu agents");
+    await createMessageReceipts(reader.id, [read.id]);
+    await createMessageReceipts(authorId, [read.id]);
+
+    expect(await countUnread()).toEqual({
+      SHARED: (before.SHARED ?? 0) + 1,
+      AGENTS: (before.AGENTS ?? 0) + 1,
+    });
+    expect(
+      await findUnreadMessageCounts(structureTarificationId, authorId)
+    ).toEqual(
+      expect.arrayContaining([
+        { visibility: Visibility.AGENTS, _count: { messages: 0 } },
+      ])
+    );
+
+    await prisma.messageReceipt.deleteMany({ where: { userId: reader.id } });
+    await prisma.user.delete({ where: { id: reader.id } });
+  });
+
   it("renvoie les lectures de chaque message avec leur lecteur", async () => {
     const message = await postMessage(Visibility.SHARED, "lu par l'auteur");
     await createMessageReceipts(authorId, [message.id]);
@@ -189,6 +227,22 @@ describe("conversation.repository db integration", () => {
     expect(message.attachments.map((attachment) => attachment.key)).toEqual([
       file.key,
     ]);
+  });
+
+  it("refuse une pièce jointe rattachée à un document de tarification", async () => {
+    const file = await createAttachment();
+    await prisma.tarificationDocument.create({
+      data: {
+        structureTarificationId,
+        fileUploadId: file.id,
+        types: ["CA"],
+        status: TarificationDocumentStatus.FINAL,
+      },
+    });
+
+    await expect(postMessageWithFiles([file.key])).rejects.toThrow(
+      "déjà rattachée"
+    );
   });
 
   it("refuse une pièce jointe déjà rattachée, sans créer le message", async () => {

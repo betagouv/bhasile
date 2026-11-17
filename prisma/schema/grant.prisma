@@ -1,23 +1,23 @@
 model Grant {
-  id                Int           @id @default(autoincrement())
-  user              User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                Int          @id @default(autoincrement())
+  user              User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            Int?
-  emailPattern      EmailPattern? @relation(fields: [emailPatternId], references: [id], onDelete: Cascade)
-  emailPatternId    Int?
+  perimeter         Perimeter?   @relation(fields: [perimeterId], references: [id], onDelete: Cascade)
+  perimeterId       Int?
   role              AccessRole
   scope             GrantScope
-  region            Region?       @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  region            Region?      @relation(fields: [regionId], references: [id], onDelete: Cascade)
   regionId          Int?
-  departement       Departement?  @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
+  departement       Departement? @relation(fields: [departementNumero], references: [numero], onDelete: Cascade)
   departementNumero String?
-  structure         Structure?    @relation(fields: [structureId], references: [id], onDelete: Cascade)
+  structure         Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade)
   structureId       Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([userId])
-  @@index([emailPatternId])
+  @@index([perimeterId])
   @@schema("public")
 }
 
@@ -34,6 +34,18 @@ enum GrantScope {
   REGION
   DEPARTEMENT
   STRUCTURE
+
+  @@schema("public")
+}
+
+model Perimeter {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  grants Grant[]
+  users  User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@schema("public")
 }

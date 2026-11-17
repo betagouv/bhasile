@@ -1,16 +1,25 @@
+import {
+  createDepartementPerimeter,
+  createGrantDb,
+  createNationalPerimeter,
+  createRegionPerimeter,
+  createUserWithGrants,
+} from "tests/test-utils/factories/user-with-grants.factory";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   assertCampaignOpen,
+  assertStructureEligible,
   buildNotificationParams,
   getMessageRecipients,
-  getOpenCampaignYears,
   getSelectableCampaignYears,
-  isCampaignOpen,
   isNotificationHour,
 } from "@/app/api/tarifications/tarification.util";
-import type { GrantDb } from "@/app/api/users/user.db.type";
-import { AccessRole, GrantScope, Visibility } from "@/generated/prisma/enums";
+import {
+  GrantScope,
+  StructureType,
+  Visibility,
+} from "@/generated/prisma/enums";
 
 vi.mock("@/app/utils/now.util", async () => {
   const actual = await vi.importActual("@/app/utils/now.util");
@@ -33,39 +42,44 @@ describe("isNotificationHour", () => {
   });
 });
 
-describe("getOpenCampaignYears", () => {
-  it("ouvre la campagne de l'année et celle de l'année suivante", () => {
-    expect(getOpenCampaignYears()).toEqual([2027, 2028]);
-  });
-});
-
 describe("getSelectableCampaignYears", () => {
-  it("propose les campagnes ouvertes et les campagnes passées qui ont des échanges, de la plus récente à la plus ancienne", () => {
-    expect(getSelectableCampaignYears([2025, 2027])).toEqual([
-      2028, 2027, 2025,
-    ]);
-  });
-
-  it("propose seulement les campagnes ouvertes sans échange passé", () => {
-    expect(getSelectableCampaignYears([])).toEqual([2028, 2027]);
-  });
-});
-
-describe("isCampaignOpen", () => {
-  it("considère ouvertes les campagnes de l'année et de l'année suivante", () => {
-    expect(isCampaignOpen(2027)).toBe(true);
-    expect(isCampaignOpen(2028)).toBe(true);
-  });
-
-  it("considère fermées les campagnes passées et trop lointaines", () => {
-    expect(isCampaignOpen(2026)).toBe(false);
-    expect(isCampaignOpen(2029)).toBe(false);
+  it("propose les campagnes ouvertes, en rattrapage et celles qui ont une tarification, de la plus récente à la plus ancienne", () => {
+    expect(
+      getSelectableCampaignYears({
+        openCampaignYears: [2028, 2029],
+        catchUpCampaignYears: [2027],
+        tarificationYears: [2025, 2028],
+      })
+    ).toEqual([2029, 2028, 2027, 2025]);
   });
 });
 
 describe("assertCampaignOpen", () => {
-  it("rejette l'écriture dans une campagne passée", () => {
-    expect(() => assertCampaignOpen(2026)).toThrow("lecture seule");
+  beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_EMULATED_NOW", "2026-12-31T21:00:00.000Z");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("ferme une campagne passée à minuit heure locale de la structure", () => {
+    expect(() =>
+      assertCampaignOpen(2026, { departementAdministratif: "75" })
+    ).not.toThrow();
+    expect(() =>
+      assertCampaignOpen(2026, { departementAdministratif: "974" })
+    ).toThrow("lecture seule");
+  });
+});
+
+describe("assertStructureEligible", () => {
+  it("réserve la tarification aux CADA et aux CPH", () => {
+    expect(() =>
+      assertStructureEligible({ type: StructureType.CADA })
+    ).not.toThrow();
+    expect(() => assertStructureEligible({ type: StructureType.HUDA })).toThrow(
+      "CADA et les CPH"
+    );
   });
 });
 
@@ -77,26 +91,16 @@ describe("getMessageRecipients", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
   });
-  const buildGrant = (overrides: Partial<GrantDb>): GrantDb => ({
-    role: AccessRole.EDITEUR,
-    scope: GrantScope.DEPARTEMENT,
-    region: null,
-    departement: { numero: "35", name: "Ille-et-Vilaine", regionId: 53 },
-    structure: null,
-    ...overrides,
-  });
   const buildUser = (
     id: number,
     overrides: Partial<Parameters<typeof getMessageRecipients>[0][number]> = {}
   ) => ({
-    id,
+    ...createUserWithGrants({
+      id,
+      perimeter: createDepartementPerimeter("35", "Ille-et-Vilaine"),
+      ...overrides,
+    }),
     email: `agent${id}@ille-et-vilaine.gouv.fr`,
-    operateurId: null,
-    isSuperAdmin: false,
-    isAgent: true,
-    grants: [],
-    emailPattern: { isAgent: true, grants: [buildGrant({})] },
-    ...overrides,
   });
   const getRecipientIds = (
     users: Parameters<typeof getMessageRecipients>[0],
@@ -106,95 +110,30 @@ describe("getMessageRecipients", () => {
       (recipient) => recipient.userId
     );
 
-  it("notifie les agents éditeurs du département, par leur pattern d'email, sauf l'auteur", () => {
+  it("notifie les agents du périmètre du département, sauf l'auteur", () => {
     expect(getRecipientIds([buildUser(1), buildUser(2), buildUser(3)])).toEqual(
       [2, 3]
     );
   });
 
-  it("notifie un agent éditeur de la seule structure", () => {
-    const structureEditor = buildUser(2, {
-      grants: [
-        buildGrant({
-          scope: GrantScope.STRUCTURE,
-          departement: null,
-          structure: { id: 42, codeBhasile: "C42" },
-        }),
-      ],
-      emailPattern: null,
-    });
-
-    expect(getRecipientIds([structureEditor])).toEqual([2]);
-  });
-
-  it("ne notifie pas un agent dont les droits personnels portent sur une autre structure, malgré son pattern", () => {
-    const elsewhereEditor = buildUser(2, {
-      grants: [
-        buildGrant({
-          scope: GrantScope.STRUCTURE,
-          departement: null,
-          structure: { id: 7, codeBhasile: "C7" },
-        }),
-      ],
-    });
-
-    expect(getRecipientIds([elsewhereEditor])).toEqual([]);
-  });
-
-  it("ne notifie ni les lecteurs, ni les agents régionaux, ni un autre département", () => {
+  it("ne notifie ni les agents régionaux, ni nationaux, ni d'un autre département", () => {
     const users = [
-      buildUser(2, {
-        emailPattern: {
-          isAgent: true,
-          grants: [buildGrant({ role: AccessRole.LECTEUR })],
-        },
-      }),
-      buildUser(3, {
-        emailPattern: {
-          isAgent: true,
-          grants: [
-            buildGrant({
-              scope: GrantScope.REGION,
-              departement: null,
-              region: {
-                id: 53,
-                name: "Bretagne",
-                departements: [{ numero: "35" }],
-              },
-            }),
-          ],
-        },
-      }),
+      buildUser(2, { perimeter: createRegionPerimeter() }),
+      buildUser(3, { perimeter: createNationalPerimeter() }),
       buildUser(4, {
-        emailPattern: {
-          isAgent: true,
-          grants: [
-            buildGrant({
-              departement: {
-                numero: "22",
-                name: "Côtes-d'Armor",
-                regionId: 53,
-              },
-            }),
-          ],
-        },
+        perimeter: createDepartementPerimeter("22", "Côtes-d'Armor"),
       }),
     ];
 
     expect(getRecipientIds(users)).toEqual([]);
   });
 
-  it("notifie un administrateur du département", () => {
+  it("ne notifie pas un agent dont le compte n'est pas activé", () => {
     expect(
       getRecipientIds([
-        buildUser(2, {
-          emailPattern: {
-            isAgent: true,
-            grants: [buildGrant({ role: AccessRole.ADMIN })],
-          },
-        }),
+        buildUser(2, { isActivated: false, deactivatedAt: new Date() }),
       ])
-    ).toEqual([2]);
+    ).toEqual([]);
   });
 
   it("ne notifie personne tant que la messagerie est fermée", () => {
@@ -206,8 +145,17 @@ describe("getMessageRecipients", () => {
   it("ne notifie ni les superadmins, ni les utilisateurs d'un opérateur, ni les non-agents", () => {
     const users = [
       buildUser(2, { isSuperAdmin: true }),
-      buildUser(3, { operateurId: 9, isAgent: null }),
-      buildUser(4, { isAgent: false }),
+      buildUser(3, {
+        operateurId: 9,
+        perimeter: null,
+        grants: [
+          createGrantDb({
+            scope: GrantScope.STRUCTURE,
+            structure: { id: 42, codeBhasile: "C42" },
+          }),
+        ],
+      }),
+      buildUser(4, { perimeter: null }),
     ];
 
     expect(getRecipientIds(users)).toEqual([]);
@@ -236,7 +184,7 @@ describe("buildNotificationParams", () => {
     });
   });
 
-  it("pointe vers le canal partagé sans paramètre de canal", () => {
+  it("ouvre le tiroir sur le canal partagé", () => {
     vi.stubEnv("NEXT_URL", "https://bhasile.test");
 
     expect(
@@ -245,7 +193,9 @@ describe("buildNotificationParams", () => {
         year: 2027,
         visibility: Visibility.SHARED,
       }).lien
-    ).toBe("https://bhasile.test/structures/42/tarification/2027");
+    ).toBe(
+      "https://bhasile.test/structures/42/tarification/2027?canal=tous"
+    );
   });
 
   it("échoue sans NEXT_URL plutôt que d'envoyer un lien cassé", () => {

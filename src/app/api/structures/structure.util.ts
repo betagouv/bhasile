@@ -15,11 +15,16 @@ import { normalizeAccents } from "@/app/utils/string.util";
 import { getPlacesByCommunes } from "@/app/utils/structure.util";
 import { isTransformationFinalised } from "@/app/utils/transformation.util";
 import {
+  Prisma,
   PublicType,
   StructureType,
   StructureVersionTransformationType,
 } from "@/generated/prisma/client";
-import { canUpdateStructure } from "@/lib/casl";
+import {
+  type AppAbility,
+  canAbilityReadStructure,
+  canUpdateStructure,
+} from "@/lib/casl";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import {
   StructureAgentUpdateApiType,
@@ -52,6 +57,7 @@ import {
   resolveCurrentVersionFields,
 } from "../structure-versions/structure-version.util";
 import {
+  cpomLinkedStructuresInclude,
   StructureDbDetails,
   StructureDbList,
   StructureListAdresse,
@@ -69,18 +75,20 @@ export const hideAgentOnlyFields = (
   structure: StructureApiRead
 ): StructureApiRead => ({
   ...structure,
-  notes: null,
-  controles: [],
-  evaluations: [],
-  evenementsIndesirablesGraves: [],
-  anomalies: [],
-  cpomStructures: [],
-  isInCpom: false,
-  isInCpomPerYear: {},
-  history: structure.history?.filter(
-    (event) => event.kind !== "CPOM_ENTRY" && event.kind !== "CPOM_EXIT"
-  ),
+  budgets: hideBudgetCommentaires(structure.budgets),
+  cpomStructures: structure.cpomStructures?.map((cpomStructure) => ({
+    ...cpomStructure,
+    cpom: {
+      ...cpomStructure.cpom,
+      budgets: hideBudgetCommentaires(cpomStructure.cpom.budgets),
+    },
+  })),
 });
+
+const hideBudgetCommentaires = <T extends { commentaire?: string | null }>(
+  budgets: T[] | undefined
+): T[] | undefined =>
+  budgets?.map((budget) => ({ ...budget, commentaire: null }));
 
 export const getReadableNotes = (
   structure: StructureApiRead,
@@ -220,7 +228,13 @@ export const getCurrentPlacesLogementsSociaux = (
 ) => sumPlaces(structure, (adresse) => adresse.isLogementSocial);
 
 export const isStructureInCpom = (
-  structure: StructureDbDetails | StructureDbList,
+  structure: {
+    cpomStructures?: {
+      dateStart: Date | null;
+      dateEnd: Date | null;
+      cpom: { actesAdministratifs: ActeAdministratifDates[] };
+    }[];
+  },
   year: number = getCurrentYear()
 ): boolean =>
   structure.cpomStructures?.some((cpomStructure) => {
@@ -506,7 +520,8 @@ export const sortStructureRows = (
 
 export const getCpomStructuresWithDates = (
   structure: StructureDbDetails | StructureDbList,
-  now: Date
+  now: Date,
+  ability?: AppAbility
 ): CpomStructureApiRead[] | undefined => {
   const cpomStructures = structure.cpomStructures?.map((cpomStructure) => {
     const [cpomDateStart, cpomDateEnd] = getCpomDatesConvention(
@@ -535,7 +550,7 @@ export const getCpomStructuresWithDates = (
             ...(linkedStructures
               ? {
                   structures: linkedStructures.map((linkedStructure) =>
-                    resolveLinkedStructureFields(linkedStructure, now)
+                    resolveCpomLinkedStructure(linkedStructure, ability, now)
                   ),
                 }
               : {}),
@@ -546,26 +561,31 @@ export const getCpomStructuresWithDates = (
   return cpomStructures;
 };
 
-type CpomDetailsView = NonNullable<
-  NonNullable<StructureDbDetails["cpomStructures"]>[number]["cpom"]
+type CpomLinkedStructure = Prisma.CpomStructureGetPayload<
+  typeof cpomLinkedStructuresInclude
 >;
 
-type CpomLinkedStructureRow = CpomDetailsView extends {
-  structures: (infer Row)[];
-}
-  ? Row
-  : never;
-
-const resolveLinkedStructureFields = (
-  linkedStructure: CpomLinkedStructureRow,
+export const resolveCpomLinkedStructure = (
+  linkedStructure: CpomLinkedStructure,
+  ability: AppAbility | undefined,
   now: Date
 ) => {
-  if (!linkedStructure.structure) {
-    return linkedStructure;
-  }
+  const { structure } = linkedStructure;
   return {
     ...linkedStructure,
-    structure: resolveCurrentVersionFields(linkedStructure.structure, now),
+    structure: {
+      id: structure.id,
+      codeBhasile: structure.codeBhasile,
+      type: structure.type,
+      departementAdministratif: structure.departementAdministratif,
+      operateur: structure.operateur,
+      communeAdministrative: resolveCurrentVersionFields(structure, now)
+        .communeAdministrative,
+      isLinkable:
+        isStructureFinalised(structure, now) &&
+        !!ability &&
+        canAbilityReadStructure(ability, structure),
+    },
   };
 };
 

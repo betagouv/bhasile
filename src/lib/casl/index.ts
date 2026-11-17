@@ -5,7 +5,10 @@ export {
   getUpdatableCpomWhere,
 } from "./cpom.ability";
 export { canDeleteFile } from "./file.ability";
-export { canUpdateOperateur } from "./operateur.ability";
+export {
+  canAbilityReadOperateur,
+  canUpdateOperateur,
+} from "./operateur.ability";
 export {
   type AppAbility,
   canAccessApp,
@@ -16,6 +19,7 @@ export {
 export {
   canAbilityReadStructure,
   canAbilityUpdateDepartement,
+  canAbilityUpdateSomeStructure,
   canUpdateStructure,
   getReadableDepartementNumeros,
   getReadableStructureWhere,

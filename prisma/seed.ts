@@ -10,6 +10,7 @@ import { getRegionFromDepartement } from "@/utils/region.util";
 
 import { createPrismaClient, DATABASE_POOL_MAX } from "./client";
 import { createFakeActivites } from "./seeders/activite.seed";
+import { createAnnouncementsList } from "./seeders/announcement.seed";
 import { createAntenneList } from "./seeders/antenne.seed";
 import {
   getFakeTarifsJournaliersCibles,
@@ -35,13 +36,17 @@ import {
   createFakeStructureVersionTransformationCreationFormStepDefinition,
   createFakeStructureVersionTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
-import { createNotificationsList } from "./seeders/notification.seed";
 import {
   createFakeFiliale,
   createFakeOperateur,
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
-import { seedRolesAndAgents } from "./seeders/role.seed";
+import {
+  seedContactUsers,
+  seedRolesAndAgents,
+  TEST_USER_DEPARTEMENT,
+  TEST_USER_STRUCTURES_COUNT,
+} from "./seeders/role.seed";
 import {
   buildStructureCreate,
   COLOCATED_COORDINATES,
@@ -51,6 +56,7 @@ import {
   SeededStructure,
   SeedStructureParams,
 } from "./seeders/structure-version.seed";
+import { createFakeTarificationJournals } from "./seeders/tarification-journal.seed";
 import {
   generateAllBhasileCodes,
   getNextBhasileCode,
@@ -101,9 +107,6 @@ async function seed(): Promise<void> {
   await wipeTables(prisma);
 
   await seedRegionsAndDepartements(prisma);
-
-  console.log("🧑 Création des rôles et des utilisateurs test...");
-  await seedRolesAndAgents(prisma);
 
   console.log("📋 Création des FormDefinitions...");
   await prisma.formDefinition.create({
@@ -238,6 +241,9 @@ async function seed(): Promise<void> {
     operateurs.push({ ...operateur, filiale });
   }
 
+  console.log("🧑 Création des rôles et des utilisateurs test...");
+  await seedRolesAndAgents(prisma);
+
   const randomDepartement = (): string =>
     String(faker.number.int({ min: 1, max: 95 })).padStart(2, "0");
 
@@ -264,7 +270,7 @@ async function seed(): Promise<void> {
   const structureParams: SeedStructureParams[] = [];
   let colocatedLeft = COLOCATED_STRUCTURES_COUNT;
 
-  for (const operateur of operateurs) {
+  for (const [operateurIndex, operateur] of operateurs.entries()) {
     const nonOfiiCount = faker.number.int({
       min: seedNumber(200),
       max: seedNumber(250),
@@ -279,17 +285,23 @@ async function seed(): Promise<void> {
     );
 
     for (let index = 0; index < nonOfiiCount + ofiiCount; index++) {
+      const isTestUserStructure =
+        operateurIndex === 0 && index < TEST_USER_STRUCTURES_COUNT;
       const ofii = index >= nonOfiiCount;
-      const departementAdministratif = randomDepartement();
+      const departementAdministratif = isTestUserStructure
+        ? TEST_USER_DEPARTEMENT
+        : randomDepartement();
       const codeBhasile = nextCodeBhasile(departementAdministratif);
 
-      const colocated = !ofii && colocatedLeft > 0;
+      const colocated = !ofii && !isTestUserStructure && colocatedLeft > 0;
       if (colocated) {
         colocatedLeft--;
       }
 
       const filiale =
-        operateur.filiale && faker.datatype.boolean({ probability: 0.2 })
+        !isTestUserStructure &&
+        operateur.filiale &&
+        faker.datatype.boolean({ probability: 0.2 })
           ? operateur.filiale
           : null;
 
@@ -299,7 +311,7 @@ async function seed(): Promise<void> {
         departementAdministratif,
         type: randomType(),
         ofii,
-        isFinalised: faker.datatype.boolean(),
+        isFinalised: isTestUserStructure || faker.datatype.boolean(),
         now,
         formDefs,
         finalisationFormDefId: formFinalisationDefinition.id,
@@ -354,17 +366,27 @@ async function seed(): Promise<void> {
 
   await mirrorLegacyPlacesToBaseVersions(prisma);
 
+  await seedContactUsers(
+    prisma,
+    seededStructures
+      .slice(0, TEST_USER_STRUCTURES_COUNT)
+      .map((seeded) => seeded.structureId)
+  );
+
   await createFakeCpoms(prisma);
   logHeap("CPOM");
 
   console.log("💬 Création des échanges de tarification...");
   await createFakeConversations(prisma, getCurrentYear());
 
-  console.log("📣 Seed des notifications");
-  const notificationsToCreate = createNotificationsList();
-  await prisma.notification.createMany({ data: notificationsToCreate });
-  console.log(`✅ ${notificationsToCreate.length} notifications créées`);
-  logHeap("notifications");
+  console.log("💸 Création des journaux de tarification...");
+  await createFakeTarificationJournals(prisma, getCurrentYear());
+
+  console.log("📣 Seed des annonces");
+  const announcementsToCreate = createAnnouncementsList();
+  await prisma.announcement.createMany({ data: announcementsToCreate });
+  console.log(`✅ ${announcementsToCreate.length} annonces créées`);
+  logHeap("announcements");
 
   console.log("❓ Seed des questions de FAQ...");
   const faqItems = getFakeFaqItems();
