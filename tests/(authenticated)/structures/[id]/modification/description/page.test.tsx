@@ -37,7 +37,9 @@ describe("ModificationDescription page integration", () => {
       <ModificationDescriptionPage />
     );
     await waitFor(() => {
-      expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=77");
+      expect(mockedFetch).toHaveBeenCalledWith(
+        "/api/dna-codes?structureId=77&operateurId=1&departementAdministratif=75&type=CADA"
+      );
     });
 
     // WHEN

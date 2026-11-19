@@ -31,7 +31,10 @@ const mockedUseFetchFreeDnaCodes = vi.mocked(useFetchFreeDnaCodes);
 describe("DnaAndFiness", () => {
   beforeEach(() => {
     mockedUseFetchFreeDnaCodes.mockReturnValue({
-      freeDnaCodes: [{ code: "C0001" }, { code: "C0002" }],
+      freeDnaCodes: [
+        { code: "C0001", departementAdministratif: "75" },
+        { code: "C0002", departementAdministratif: "75" },
+      ],
     });
   });
 
@@ -45,7 +48,9 @@ describe("DnaAndFiness", () => {
 
       const dnaSelect = screen.getByRole("combobox", { name: "Code DNA" });
       expect(dnaSelect).toBeInTheDocument();
-      expect(within(dnaSelect).getByRole("option", { name: "C0001" })).toBeInTheDocument();
+      expect(
+        within(dnaSelect).getByRole("option", { name: "C0001 (75)" })
+      ).toBeInTheDocument();
       expect(screen.getByLabelText("Code FINESS")).toBeInTheDocument();
     });
   });
@@ -58,7 +63,9 @@ describe("DnaAndFiness", () => {
         </FormTestWrapper>
       );
 
-      expect(screen.getByRole("combobox", { name: "Code DNA" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: "Code DNA" })
+      ).toBeInTheDocument();
       expect(screen.queryByLabelText("Code FINESS")).not.toBeInTheDocument();
     });
   });
@@ -105,7 +112,9 @@ describe("DnaAndFiness", () => {
         </FormTestWrapper>
       );
 
-      expect(screen.getByRole("combobox", { name: "Code DNA" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: "Code DNA" })
+      ).toBeInTheDocument();
       expect(screen.getByLabelText("Code FINESS")).toBeInTheDocument();
       expect(screen.queryByText("Codes DNA")).not.toBeInTheDocument();
 
