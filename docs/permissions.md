@@ -23,7 +23,7 @@ Plusieurs périmètres peuvent couvrir la même zone.
 
 - **Désactivé** : rien.
 - **En attente** : droits de contact seulement (\*).
-- **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture).
+- **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture), dont le cockpit admin (`/parametres/cockpit-admin`, ouvert dans `pages.ts` par `canAccessCockpitAdmin`, sujet CASL `CockpitAdmin`).
 - **Agent** : rattaché obligatoirement à un unique périmètre. Droits : la lecture nationale, commune à tous les agents et calculée, plus les binômes de son périmètre (aujourd'hui `ADMIN` sur sa région ou son département). Un périmètre national n'a aucun binôme : aucun agent n'écrit au niveau national, seul le superadmin a tous les droits.
 - **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans les pages CPOM, sur les structures finalisées seulement ; certains champs lui sont masqués (voir plus bas).
 - **Activé sans périmètre ni opérateur** : droits de contact seulement (\*).

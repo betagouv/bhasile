@@ -85,8 +85,13 @@ Un contexte vit dans `src/contexts/` si son provider est monté par une route ou
 
 ### Gestion des permissions
 
-- CASL est utilisé pour contrôler l'accès aux ressources selon le rôle de l'agent (DREETS/DDETS et département/région)
-- Les abilities sont définies dans `src/lib/casl/`
+- Toute règle de droit vit dans `src/lib/casl/` (sujets dans `rules.ts`, helpers dans `*.ability.ts`). Ne jamais tester `isSuperAdmin` ou les `grants` ailleurs.
+- Helpers par paire : `canAbilityX(ability)` côté client (ability du contexte via `useAbility()`), `canX(user)` côté serveur (`defineAbilityFor(user)`).
+- Où contrôler :
+  - **proxy** : session, `canAccessApp`, et l'accès à chaque page par `canAccessPage` (`src/lib/casl/pages.ts`), que le menu (`menu.util.ts`) utilise aussi pour filtrer ses entrées. Une nouvelle section s'ouvre dans `pages.ts` ; toute nouvelle page ou route API se déclare dans `src/proxy/auth-config.ts` (et le `matcher` de `src/proxy.ts`), sinon les tests du proxy échouent ;
+  - **layout ou page** : droits sur une ressource précise (fiche hors périmètre), avec `notFound()` ;
+  - **route API** : revérifier le droit dans le handler (401 sans session, 403 sans droit, 404 hors périmètre).
+- Détails : [Permissions](docs/permissions.md).
 
 ### Migrations de BDD
 
