@@ -75,6 +75,18 @@ describe("menu.util", () => {
       expect(urls).toEqual(["/structures"]);
     });
 
+    it("ajoute le cockpit admin dans Paramètres pour un super admin", () => {
+      const superAdmin: Partial<SessionUser> = {
+        isAgent: true,
+        isSuperAdmin: true,
+        grants: [],
+      };
+
+      expect(listUrls(resolveMenuItems(superAdmin as SessionUser))).toContain(
+        "/parametres/cockpit-admin"
+      );
+    });
+
     it("affiche à un agent le tableau de bord, les CPOM, les opérateurs et les statistiques", () => {
       const agentUser: Partial<SessionUser> = { isAgent: true };
 

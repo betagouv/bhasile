@@ -90,4 +90,24 @@ describe("canAccessPage", () => {
       ).toBe(false);
     });
   });
+
+  describe("pour le cockpit admin", () => {
+    it("ouvre le cockpit et ses pages à un super admin", () => {
+      const superAdmin = createSessionUser({ isSuperAdmin: true });
+
+      expect(canAccessPage(superAdmin, "/parametres/cockpit-admin")).toBe(true);
+      expect(
+        canAccessPage(superAdmin, "/parametres/cockpit-admin/import-ofii")
+      ).toBe(true);
+    });
+
+    it("ferme le cockpit à un agent admin de son département", () => {
+      expect(
+        canAccessPage(
+          createDepartementalAgent(["75"]),
+          "/parametres/cockpit-admin"
+        )
+      ).toBe(false);
+    });
+  });
 });

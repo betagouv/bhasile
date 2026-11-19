@@ -16,6 +16,7 @@ export type AppAbility = PureAbility<
     string,
     (
       | "all"
+      | "CockpitAdmin"
       | Subjects<{
           User: User;
           Structure: Structure;

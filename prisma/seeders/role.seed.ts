@@ -29,6 +29,11 @@ export const seedRolesAndAgents = async (
 
   const agents: AgentSeed[] = [
     {
+      name: "Jean Admin",
+      email: `superadmin@${TEST_EMAIL_DOMAIN}`,
+      isSuperAdmin: true,
+    },
+    {
       name: "Jean Nation",
       email: `national@${TEST_EMAIL_DOMAIN}`,
       perimeter: { name: "Administration centrale", grants: [] },
@@ -99,8 +104,9 @@ export const seedRolesAndAgents = async (
         name: agent.name,
         email: agent.email,
         isActivated: true,
+        isSuperAdmin: agent.isSuperAdmin,
         lastConnection: new Date(),
-        perimeter: {
+        perimeter: agent.perimeter && {
           create: {
             name: agent.perimeter.name,
             grants: { createMany: { data: agent.perimeter.grants } },
@@ -190,7 +196,8 @@ type GrantSeed = {
 type AgentSeed = {
   name: string;
   email: string;
-  perimeter: {
+  isSuperAdmin?: boolean;
+  perimeter?: {
     name: string;
     grants: GrantSeed[];
   };

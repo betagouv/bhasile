@@ -1,4 +1,4 @@
-import { canAccessPage } from "@/lib/casl/pages";
+import { canAccessPage, COCKPIT_ADMIN_PAGE } from "@/lib/casl/pages";
 import { SessionUser } from "@/types/global";
 
 export type MenuGroupId = "structures" | "parametres";
@@ -70,26 +70,34 @@ export const resolveMenuItems = (user?: SessionUser | null): MenuItem[] => {
       ],
       canAccess
     ),
+    ...getParametresGroup(canAccess),
+  ];
+};
+
+const getParametresGroup = (
+  canAccess: (url: string) => boolean
+): MenuGroup[] => {
+  const subItems = [
     ...(process.env.NEXT_PUBLIC_SHOW_PARAMETRES === "true" //TODO: remove this once the parametres pages are ready
       ? [
-          {
-            id: "parametres" as const,
-            icon: "fr-icon-settings-5-line",
-            label: "Paramètres",
-            subItems: [
-              {
-                label: "Gérer les accès",
-                url: "/parametres/acces",
-              },
-              {
-                label: "Voir mon compte",
-                url: "/parametres/compte",
-              },
-            ],
-          } satisfies MenuGroup,
+          { label: "Gérer les accès", url: "/parametres/acces" },
+          { label: "Voir mon compte", url: "/parametres/compte" },
         ]
       : []),
+    ...(canAccess(COCKPIT_ADMIN_PAGE)
+      ? [{ label: "Cockpit admin", url: COCKPIT_ADMIN_PAGE }]
+      : []),
   ];
+  return subItems.length > 0
+    ? [
+        {
+          id: "parametres",
+          icon: "fr-icon-settings-5-line",
+          label: "Paramètres",
+          subItems,
+        },
+      ]
+    : [];
 };
 
 const filterAccessibleItems = (

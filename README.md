@@ -26,10 +26,11 @@ Ouvrez [http://localhost:3000](http://localhost:3000) avec votre navigateur pour
 
 ### 🧑 Se connecter avec un rôle
 
-Le seed crée huit utilisateurs de test (trois agents, trois opérateurs, deux contacts). Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
+Le seed crée neuf utilisateurs de test (un super admin, trois agents, trois opérateurs, deux contacts). Connectez-vous via ProConnect avec l'email voulu (n'importe quel mot de passe) :
 
 | Rôle                    | Email                                             | Périmètre                                       |
 | ----------------------- | ------------------------------------------------- | ----------------------------------------------- |
+| Super admin             | `superadmin@test.proconnect.gouv.fr`              | Tout, en écriture + cockpit admin               |
 | National                | `national@test.proconnect.gouv.fr`                | Tout, en lecture                                |
 | Régional                | `regional@test.proconnect.gouv.fr`                | Île-de-France                                   |
 | Départemental           | `departemental@test.proconnect.gouv.fr`           | Paris (75)                                      |
