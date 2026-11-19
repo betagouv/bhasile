@@ -46,7 +46,7 @@ import {
   seedRolesAndAgents,
   TEST_USER_DEPARTEMENT,
   TEST_USER_STRUCTURES_COUNT,
-} from "./seeders/role.seed";
+} from "./seeders/user.seed";
 import {
   buildStructureCreate,
   COLOCATED_COORDINATES,
