@@ -53,9 +53,9 @@ export const CpomViewer = (): ReactElement => {
                 </div>
               )
           )}
+          <NoPermissionsModal />
         </div>
       )}
-      <NoPermissionsModal />
     </>
   );
 };
