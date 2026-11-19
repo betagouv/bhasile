@@ -4,9 +4,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/api/dna-codes/route";
 
 const mockFindAll = vi.fn();
+const mockFindOperateurFamille = vi.fn();
 
 vi.mock("@/app/api/dna-codes/dna-codes.repository", () => ({
   findAll: (...args: unknown[]) => mockFindAll(...args),
+}));
+
+vi.mock("@/app/api/operateurs/operateur.repository", () => ({
+  findOperateurFamille: (...args: unknown[]) =>
+    mockFindOperateurFamille(...args),
 }));
 
 describe("GET /api/dna-codes", () => {
@@ -29,7 +35,7 @@ describe("GET /api/dna-codes", () => {
     expect(await response.json()).toEqual(dnaCodes);
     expect(mockFindAll).toHaveBeenCalledWith({
       entityId: { structureId: undefined, structureVersionId: undefined },
-      operateurId: undefined,
+      operateurIds: undefined,
     });
   });
 
@@ -50,7 +56,7 @@ describe("GET /api/dna-codes", () => {
     expect(await response.json()).toEqual(dnaCodes);
     expect(mockFindAll).toHaveBeenCalledWith({
       entityId: { structureId: undefined, structureVersionId: undefined },
-      operateurId: undefined,
+      operateurIds: undefined,
     });
   });
 
@@ -71,7 +77,7 @@ describe("GET /api/dna-codes", () => {
     expect(await response.json()).toEqual(dnaCodes);
     expect(mockFindAll).toHaveBeenCalledWith({
       entityId: { structureId: 42, structureVersionId: undefined },
-      operateurId: undefined,
+      operateurIds: undefined,
     });
   });
 
@@ -92,28 +98,27 @@ describe("GET /api/dna-codes", () => {
     expect(await response.json()).toEqual(dnaCodes);
     expect(mockFindAll).toHaveBeenCalledWith({
       entityId: { structureId: undefined, structureVersionId: 7 },
-      operateurId: undefined,
+      operateurIds: undefined,
     });
   });
 
-  it("transmet l'operateurId au repository", async () => {
+  it("restreint les codes libres à la famille de l'opérateur demandé", async () => {
     // GIVEN
-    const dnaCodes = [{ code: "C0001", departementAdministratif: "75" }];
-    mockFindAll.mockResolvedValueOnce(dnaCodes);
+    mockFindAll.mockResolvedValueOnce([]);
+    mockFindOperateurFamille.mockResolvedValueOnce([{ id: 3 }, { id: 5 }]);
 
     const request = new NextRequest(
       "http://localhost/api/dna-codes?structureId=42&operateurId=3"
     );
 
     // WHEN
-    const response = await GET(request);
+    await GET(request);
 
     // THEN
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(dnaCodes);
+    expect(mockFindOperateurFamille).toHaveBeenCalledWith(3);
     expect(mockFindAll).toHaveBeenCalledWith({
       entityId: { structureId: 42, structureVersionId: undefined },
-      operateurId: 3,
+      operateurIds: [3, 5],
     });
   });
 

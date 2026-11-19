@@ -47,6 +47,21 @@ export const findOperateurFiliales = async (
   });
 };
 
+export const findOperateurFamille = async (
+  operateurId: number
+): Promise<{ id: number }[]> => {
+  return prisma.operateur.findMany({
+    where: {
+      OR: [
+        { id: operateurId },
+        { parentId: operateurId },
+        { filiales: { some: { id: operateurId } } },
+      ],
+    },
+    select: { id: true },
+  });
+};
+
 export const findAllOperateurs = (): Promise<OperateurListRow[]> =>
   prisma.operateur.findMany({ select: operateurListSelect });
 

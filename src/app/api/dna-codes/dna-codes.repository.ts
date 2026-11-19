@@ -8,13 +8,13 @@ import { StructureType } from "@/types/structure.type";
 
 export const findAll = async ({
   entityId = {},
-  operateurId,
+  operateurIds,
   departementAdministratif,
   type,
   transformationId,
 }: {
   entityId?: EntityId;
-  operateurId?: number;
+  operateurIds?: number[];
   departementAdministratif?: string;
   type?: StructureType;
   transformationId?: number;
@@ -24,14 +24,8 @@ export const findAll = async ({
   // Opérateur, département et type ne restreignent que les codes libres : le référentiel OFII peut décrire
   // un code déjà détenu avec ses anciennes valeurs (transfert en transformation), il doit rester proposé.
   const freeFilter: Prisma.DnaWhereInput = { dnaStructures: { none: {} } };
-  if (operateurId) {
-    freeFilter.operateur = {
-      OR: [
-        { id: operateurId },
-        { parentId: operateurId },
-        { filiales: { some: { id: operateurId } } },
-      ],
-    };
+  if (operateurIds) {
+    freeFilter.operateurId = { in: operateurIds };
   }
   if (departementAdministratif) {
     freeFilter.departementAdministratif = departementAdministratif;

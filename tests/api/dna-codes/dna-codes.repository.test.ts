@@ -29,9 +29,9 @@ describe("dna-codes.repository findAll db integration", () => {
     return structure;
   };
 
-  const createOperateur = async (data: { parentId?: number } = {}) => {
+  const createOperateur = async () => {
     const operateur = await prisma.operateur.create({
-      data: { name: `DNA-DC-TEST-OP-${randomUUID()}`, ...data },
+      data: { name: `DNA-DC-TEST-OP-${randomUUID()}` },
     });
     createdOperateurIds.push(operateur.id);
     return operateur;
@@ -147,14 +147,12 @@ describe("dna-codes.repository findAll db integration", () => {
     expect(withoutTransfo).not.toContain(codeOutside);
   });
 
-  it("restreint les codes libres à l'opérateur, à son parent et à ses filiales", async () => {
-    const parent = await createOperateur();
-    const operateur = await createOperateur({ parentId: parent.id });
-    const filiale = await createOperateur({ parentId: operateur.id });
+  it("restreint les codes libres aux opérateurs demandés", async () => {
+    const operateur = await createOperateur();
     const otherOperateur = await createOperateur();
 
-    const [ownCode, parentCode, filialeCode, otherCode] = await Promise.all(
-      [operateur, parent, filiale, otherOperateur].map(
+    const [ownCode, otherCode] = await Promise.all(
+      [operateur, otherOperateur].map(
         async (dnaOperateur) =>
           (
             await createReferentialDna(`DNA-DC-TEST-OP-${randomUUID()}`, {
@@ -164,13 +162,11 @@ describe("dna-codes.repository findAll db integration", () => {
       )
     );
 
-    const codes = (await findAll({ operateurId: operateur.id })).map(
+    const codes = (await findAll({ operateurIds: [operateur.id] })).map(
       (dna) => dna.code
     );
 
     expect(codes).toContain(ownCode);
-    expect(codes).toContain(parentCode);
-    expect(codes).toContain(filialeCode);
     expect(codes).not.toContain(otherCode);
   });
 
@@ -226,7 +222,7 @@ describe("dna-codes.repository findAll db integration", () => {
     const codes = (
       await findAll({
         entityId: { structureId: structure.id },
-        operateurId: operateur.id,
+        operateurIds: [operateur.id],
         departementAdministratif: "00",
         type: StructureType.HUDA,
       })
