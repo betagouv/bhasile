@@ -2,6 +2,7 @@ import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
 import { uniqueDnaCode } from "../data/ids";
+import { buildStructureSeed } from "../data/structure.factory";
 import { prisma } from "./prisma";
 import {
   createStructureForTest,
@@ -132,10 +133,7 @@ export const createTransformationSource = async (
 
 export const seedKnownDnaCodes = async (count: number): Promise<string[]> => {
   const codes = Array.from({ length: count }, () => uniqueDnaCode());
-  const [departement, operateur] = await Promise.all([
-    prisma.departement.findFirstOrThrow(),
-    prisma.operateur.findFirstOrThrow(),
-  ]);
+  const { operateurId, departementAdministratif } = buildStructureSeed();
   await prisma.dna.createMany({
     data: codes.map((code) => ({
       code,
@@ -143,8 +141,8 @@ export const seedKnownDnaCodes = async (count: number): Promise<string[]> => {
       nom: `DNA ${code}`,
       nomOfii: `DNA ${code}`,
       directionTerritoriale: "DT",
-      operateurId: operateur.id,
-      departementAdministratif: departement.numero,
+      operateurId,
+      departementAdministratif,
     })),
   });
   return codes;
