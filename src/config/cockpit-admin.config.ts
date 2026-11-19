@@ -77,12 +77,12 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
     title: "Utilisateurs",
     features: [
       {
-        title: "Utilisateurs et droits",
+        title: "Agents et périmètres",
         description:
-          "Créer des périmètres, valider des agents et les rattacher à un périmètre.",
+          "Créer des périmètres, valider ou désactiver des agents et les rattacher à un périmètre.",
         icon: "fr-icon-team-line",
-        href: "/parametres/acces",
-        isEnabled: false,
+        href: `${COCKPIT_ADMIN_URL}/agents`,
+        isEnabled: true,
       },
     ],
   },

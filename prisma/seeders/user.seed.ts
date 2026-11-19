@@ -66,6 +66,16 @@ export const seedRolesAndAgents = async (
         ],
       },
     },
+    {
+      name: "Jeanne Bretagne",
+      email: `regional-en-attente@${TEST_EMAIL_DOMAIN}`,
+      isActivated: false,
+    },
+    {
+      name: "Jeanne Finistère",
+      email: `departemental-en-attente@${TEST_EMAIL_DOMAIN}`,
+      isActivated: false,
+    },
   ];
 
   const operateurUsers: OperateurUserSeed[] = [
@@ -103,7 +113,7 @@ export const seedRolesAndAgents = async (
       data: {
         name: agent.name,
         email: agent.email,
-        isActivated: true,
+        isActivated: agent.isActivated ?? true,
         isSuperAdmin: agent.isSuperAdmin,
         lastConnection: new Date(),
         perimeter: agent.perimeter && {
@@ -197,6 +207,7 @@ type AgentSeed = {
   name: string;
   email: string;
   isSuperAdmin?: boolean;
+  isActivated?: boolean;
   perimeter?: {
     name: string;
     grants: GrantSeed[];
