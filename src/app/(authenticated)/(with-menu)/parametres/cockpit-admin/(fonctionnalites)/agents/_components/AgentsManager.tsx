@@ -3,7 +3,6 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
-import Table from "@codegouvfr/react-dsfr/Table";
 import { ReactElement, ReactNode, useState } from "react";
 
 import { AccountStatus } from "@/app/api/users/user.util";
@@ -22,7 +21,11 @@ import { AgentRead, PerimeterRead, ZoneOption } from "@/types/agent.type";
 import { FetchState } from "@/types/fetch-state.type";
 import { AGENT_STATUS_LABELS } from "@/utils/agent.util";
 
-import { AgentAccessModal, agentAccessModal } from "./AgentAccessModal";
+import {
+  AgentAccessModal,
+  agentAccessModal,
+  AgentAccessTarget,
+} from "./AgentAccessModal";
 import { AgentAddModal, agentAddModal } from "./AgentAddModal";
 import {
   AgentDeactivateModal,
@@ -42,9 +45,9 @@ export const AgentsManager = ({
   const { getFetchState } = useFetchState();
   const [status, setStatus] = useState<AccountStatus>("PENDING");
   const [search, setSearch] = useState("");
-  const perimeterModal = useModalTarget<null>(perimeterCreateModal);
+  const perimeterModal = useModalTarget<AgentRead>(perimeterCreateModal);
   const addModal = useModalTarget<null>(agentAddModal);
-  const accessModal = useModalTarget<AgentRead>(agentAccessModal);
+  const accessModal = useModalTarget<AgentAccessTarget>(agentAccessModal);
   const deactivateModal = useModalTarget<AgentRead>(agentDeactivateModal);
 
   const { mutate: savePerimeter } = useSaveMutation(
@@ -79,7 +82,7 @@ export const AgentsManager = ({
       <Button
         priority="tertiary no outline"
         size="small"
-        onClick={() => accessModal.open(agent)}
+        onClick={() => accessModal.open({ agent })}
       >
         {ACCESS_ACTION_LABELS[agent.status]}
       </Button>
@@ -133,18 +136,42 @@ export const AgentsManager = ({
       {shownAgents.length === 0 ? (
         <p className="text-mention-grey">Aucun compte dans cette liste.</p>
       ) : (
-        <Table
-          bordered
-          className="full-width-table"
-          headers={["Email", "Nom", "Périmètre", "Dernière connexion", ""]}
-          data={shownAgents.map((agent) => [
-            agent.email,
-            agent.name ?? "—",
-            agent.perimeter?.name ?? "—",
-            agent.lastConnection ? formatDate(agent.lastConnection) : "Jamais",
-            getActions(agent),
-          ])}
-        />
+        <div className="overflow-x-auto bg-white border border-default-grey rounded-[10px]">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-default-grey text-left">
+                {["Email", "Nom", "Périmètre", "Dernière connexion"].map(
+                  (header) => (
+                    <th key={header} scope="col" className="px-6 py-3">
+                      {header}
+                    </th>
+                  )
+                )}
+                <th scope="col" className="px-6 py-3">
+                  <span className="fr-sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {shownAgents.map((agent) => (
+                <tr
+                  key={agent.id}
+                  className="border-b border-default-grey last:border-b-0"
+                >
+                  <td className="px-6 py-3">{agent.email}</td>
+                  <td className="px-6 py-3">{agent.name ?? "—"}</td>
+                  <td className="px-6 py-3">{agent.perimeter?.name ?? "—"}</td>
+                  <td className="px-6 py-3">
+                    {agent.lastConnection
+                      ? formatDate(agent.lastConnection)
+                      : "Jamais"}
+                  </td>
+                  <td className="px-6 py-3">{getActions(agent)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <PerimeterCreateModal
@@ -152,7 +179,16 @@ export const AgentsManager = ({
         zones={zones}
         perimeters={perimeters}
         isSaving={isSaving}
-        onSubmit={async (values) => (await savePerimeter(values)) !== null}
+        onSubmit={async (values) => {
+          const perimeter = await savePerimeter(values);
+          if (perimeter && perimeterModal.target) {
+            accessModal.open({
+              agent: perimeterModal.target,
+              perimeterId: perimeter.id,
+            });
+          }
+          return perimeter !== null;
+        }}
       />
       <AgentAddModal
         openCount={addModal.openCount}
@@ -163,7 +199,7 @@ export const AgentsManager = ({
         }
       />
       <AgentAccessModal
-        agent={accessModal.target}
+        target={accessModal.target}
         openCount={accessModal.openCount}
         perimeters={perimeters}
         isSaving={isSaving}
@@ -171,6 +207,7 @@ export const AgentsManager = ({
           (await saveAccess(agentId, { status: "ACTIVATED", perimeterId })) !==
           null
         }
+        onCreatePerimeter={perimeterModal.open}
       />
       <AgentDeactivateModal
         agent={deactivateModal.target}

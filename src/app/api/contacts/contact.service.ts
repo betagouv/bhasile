@@ -3,7 +3,19 @@ import { getNow } from "@/app/utils/now.util";
 import { resolveDisplayVersion } from "../structure-versions/structure-version.util";
 import { isStructureFinalised } from "../structures/structure.util";
 import { normalizeEmail } from "../users/user.util";
-import { findStructuresWithContactEmail } from "./contact.repository";
+import {
+  findContactsByEmails,
+  findStructuresWithContactEmail,
+} from "./contact.repository";
+
+export const getContactEmails = async (
+  emails: string[]
+): Promise<Set<string>> =>
+  new Set(
+    (await findContactsByEmails(emails)).flatMap(({ email }) =>
+      email ? [email] : []
+    )
+  );
 
 export const getContactStructureIds = async (
   email: string

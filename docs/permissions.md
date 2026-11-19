@@ -99,10 +99,10 @@ Mise en prod du basculement :
 Un superadmin gère les agents dans **Cockpit admin → Agents et périmètres** (règle CASL `canManageAgents`, sujet `User`) :
 
 - **Périmètre** : départemental ou régional, un binôme `ADMIN` sur la zone, nom unique pré-rempli (« DDETS Finistère »). Les périmètres qui couvrent déjà la zone sont affichés avant création.
-- **Valider** un compte en attente, **changer** le périmètre d'un agent actif, **réactiver** un compte désactivé : un périmètre est toujours exigé.
+- **Valider** un compte en attente, **changer** le périmètre d'un agent actif, **réactiver** un compte désactivé : un périmètre est toujours exigé, et peut être créé depuis la modale.
 - **Désactiver** : `isActivated = false` et `deactivatedAt`, périmètre conservé pour une réactivation.
 - **Ajouter** un agent jamais connecté par son email : compte créé activé, droits dès la première connexion ProConnect.
-- Opérateurs et superadmins n'y figurent pas. Chaque action est tracée dans `UserAction` (type `AGENT_ACCESS`, `details` : `targetUserId`, `from`, `to`).
+- Opérateurs et superadmins n'y figurent pas, ni les contacts de structure en attente (email présent dans `Contact`). Chaque action est tracée dans `UserAction` (type `AGENT_ACCESS`, `details` : `targetUserId`, `from`, `to`).
 
 ## Reste à faire
 

@@ -1,3 +1,4 @@
+import { getContactEmails } from "@/app/api/contacts/contact.service";
 import { getPerimeterOrThrow } from "@/app/api/perimeters/perimeter.service";
 import { createAgentAccessEvent } from "@/app/api/user-actions/user-action.service";
 import { getAccountStatus } from "@/app/api/users/user.util";
@@ -17,7 +18,7 @@ import {
 } from "./agent.repository";
 
 export const getAgents = async (): Promise<AgentRead[]> =>
-  (await findAgents()).map((agent) => ({
+  (await excludePendingContacts(await findAgents())).map((agent) => ({
     id: agent.id,
     email: agent.email,
     name: agent.name,
@@ -52,7 +53,7 @@ export const updateAgentAccess = async (
   method: string
 ): Promise<void> => {
   const agent = await findAgentById(id);
-  if (!agent) {
+  if (!agent || (await excludePendingContacts([agent])).length === 0) {
     throw new DomainError("Agent introuvable", 404);
   }
   const from = describeAgentAccess(getAccountStatus(agent), agent.perimeter);
@@ -74,4 +75,22 @@ export const updateAgentAccess = async (
     from,
     to: describeAgentAccess("DEACTIVATED", agent.perimeter),
   });
+};
+
+const excludePendingContacts = async <T extends AccountStatusFields>(
+  users: T[]
+): Promise<T[]> => {
+  const isPending = (user: T) => getAccountStatus(user) === "PENDING";
+  const contactEmails = await getContactEmails(
+    users.filter(isPending).map(({ email }) => email)
+  );
+  return users.filter(
+    (user) => !(isPending(user) && contactEmails.has(user.email))
+  );
+};
+
+type AccountStatusFields = {
+  email: string;
+  isActivated: boolean;
+  deactivatedAt: Date | null;
 };

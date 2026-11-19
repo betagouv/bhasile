@@ -11,9 +11,9 @@ export async function POST(request: NextRequest) {
     assertAgentsManagementAccess(await getSessionUser());
     const input = perimeterApiCreateSchema.parse(await request.json());
 
-    await addPerimeter(input);
+    const perimeter = await addPerimeter(input);
 
-    return NextResponse.json("Périmètre créé avec succès", { status: 201 });
+    return NextResponse.json(perimeter, { status: 201 });
   } catch (error) {
     return apiErrorResponse(error);
   }

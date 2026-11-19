@@ -6,7 +6,7 @@ export const createPerimeterRead = (
   id: 3,
   name: "DDETS Finistère",
   zoneKey: "DEPARTEMENT:29",
-  zoneLabel: "Finistère (29)",
+  zoneLabel: "29 – Finistère",
   ...overrides,
 });
 

@@ -20,7 +20,7 @@ export const getPerimeters = async (): Promise<PerimeterRead[]> =>
         id,
         name,
         zoneKey: toZoneKey(grant.scope, grant.departementNumero),
-        zoneLabel: `${grant.departement?.name} (${grant.departementNumero})`,
+        zoneLabel: `${grant.departementNumero} – ${grant.departement?.name ?? ""}`,
       };
     }
     if (grant?.scope === GrantScope.REGION && grant.regionId) {
@@ -52,11 +52,11 @@ export const getZoneOptions = async (): Promise<ZoneOption[]> => {
 
 export const addPerimeter = async (
   input: PerimeterApiCreate
-): Promise<void> => {
+): Promise<{ id: number }> => {
   if (await findPerimeterIdByName(input.name)) {
     throw new DomainError(`Un périmètre s’appelle déjà « ${input.name} »`, 409);
   }
-  await createPerimeter(input);
+  return createPerimeter(input);
 };
 
 export const getPerimeterOrThrow = async (id: number) => {

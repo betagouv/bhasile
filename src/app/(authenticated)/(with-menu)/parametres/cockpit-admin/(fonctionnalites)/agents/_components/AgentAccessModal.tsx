@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ReactElement, useEffect, useState } from "react";
 
@@ -8,17 +9,21 @@ import { AgentRead, PerimeterRead } from "@/types/agent.type";
 import { PerimeterSelect } from "./PerimeterSelect";
 
 export const AgentAccessModal = ({
-  agent,
+  target,
   openCount,
   perimeters,
   isSaving,
   onSubmit,
+  onCreatePerimeter,
 }: Props): ReactElement => {
+  const agent = target?.agent ?? null;
   const [perimeterId, setPerimeterId] = useState("");
 
   useEffect(() => {
-    setPerimeterId(agent?.perimeter ? String(agent.perimeter.id) : "");
-  }, [agent, openCount]);
+    const initialPerimeterId =
+      target?.perimeterId ?? target?.agent.perimeter?.id;
+    setPerimeterId(initialPerimeterId ? String(initialPerimeterId) : "");
+  }, [target, openCount]);
 
   const { title, confirmLabel } = getModalLabels(agent);
 
@@ -50,6 +55,16 @@ export const AgentAccessModal = ({
           onChange: (event) => setPerimeterId(event.target.value),
         }}
       />
+      {agent && (
+        <Button
+          priority="tertiary no outline"
+          size="small"
+          iconId="fr-icon-add-line"
+          onClick={() => onCreatePerimeter(agent)}
+        >
+          Créer un périmètre
+        </Button>
+      )}
     </agentAccessModal.Component>
   );
 };
@@ -69,10 +84,16 @@ const getModalLabels = (agent: AgentRead | null) => {
   return { title: "Valider l’agent", confirmLabel: "Valider" };
 };
 
+export type AgentAccessTarget = {
+  agent: AgentRead;
+  perimeterId?: number;
+};
+
 type Props = {
-  agent: AgentRead | null;
+  target: AgentAccessTarget | null;
   openCount: number;
   perimeters: PerimeterRead[];
   isSaving: boolean;
   onSubmit: (agentId: number, perimeterId: number) => Promise<boolean>;
+  onCreatePerimeter: (agent: AgentRead) => void;
 };

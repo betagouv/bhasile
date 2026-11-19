@@ -63,7 +63,7 @@ describe("perimeter.service", () => {
         id: 1,
         name: "DDETS Finistère",
         zoneKey: "DEPARTEMENT:29",
-        zoneLabel: "Finistère (29)",
+        zoneLabel: "29 – Finistère",
       },
       {
         id: 2,
@@ -89,10 +89,13 @@ describe("perimeter.service", () => {
     expect(mockCreatePerimeter).not.toHaveBeenCalled();
   });
 
-  it("crée un périmètre sur une zone déjà couverte, sous un autre nom", async () => {
+  it("crée un périmètre sur une zone déjà couverte, sous un autre nom, et renvoie son id", async () => {
     mockFindPerimeterIdByName.mockResolvedValue(null);
+    mockCreatePerimeter.mockResolvedValue({ id: 7 });
 
-    await addPerimeter({ ...finistere, name: "DDETS Finistère – SIAO" });
+    await expect(
+      addPerimeter({ ...finistere, name: "DDETS Finistère – SIAO" })
+    ).resolves.toEqual({ id: 7 });
 
     expect(mockCreatePerimeter).toHaveBeenCalledWith({
       ...finistere,

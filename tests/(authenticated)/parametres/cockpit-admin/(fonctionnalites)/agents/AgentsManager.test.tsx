@@ -24,19 +24,25 @@ const active = createAgentRead({
   perimeter: { id: 3, name: "DDETS Finistère" },
 });
 
-const renderManager = () =>
-  render(
-    <FetchStateProvider>
-      <AgentsManager
-        agents={[pending, active]}
-        perimeters={[finistere]}
-        zones={[
-          { scope: "DEPARTEMENT", id: "29", name: "Finistère" },
-          { scope: "DEPARTEMENT", id: "56", name: "Morbihan" },
-        ]}
-      />
-    </FetchStateProvider>
-  );
+const morbihan = createPerimeterRead({
+  id: 7,
+  name: "DDETS Morbihan",
+  zoneKey: "DEPARTEMENT:56",
+  zoneLabel: "56 – Morbihan",
+});
+
+const renderManager = (perimeters = [finistere]) => (
+  <FetchStateProvider>
+    <AgentsManager
+      agents={[pending, active]}
+      perimeters={perimeters}
+      zones={[
+        { scope: "DEPARTEMENT", id: "29", name: "Finistère" },
+        { scope: "DEPARTEMENT", id: "56", name: "Morbihan" },
+      ]}
+    />
+  </FetchStateProvider>
+);
 
 const lastRequestBody = () =>
   JSON.parse(vi.mocked(global.fetch).mock.lastCall![1]!.body as string);
@@ -44,12 +50,16 @@ const lastRequestBody = () =>
 describe("AgentsManager", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ id: morbihan.id }),
+    });
   });
 
   it("affiche les comptes en attente par défaut et filtre par la recherche", async () => {
     const user = userEvent.setup();
-    renderManager();
+    render(renderManager());
 
     expect(screen.getByText(pending.email)).toBeInTheDocument();
     expect(screen.queryByText(active.email)).not.toBeInTheDocument();
@@ -66,7 +76,7 @@ describe("AgentsManager", () => {
 
   it("valide un agent en attente dans le périmètre choisi", async () => {
     const user = userEvent.setup();
-    renderManager();
+    render(renderManager());
 
     await user.click(screen.getByRole("button", { name: "Valider" }));
     const dialog = screen.getByRole("dialog", { name: "Valider l’agent" });
@@ -87,7 +97,7 @@ describe("AgentsManager", () => {
 
   it("désactive un agent actif après confirmation", async () => {
     const user = userEvent.setup();
-    renderManager();
+    render(renderManager());
 
     await user.click(screen.getByLabelText("Actif (1)"));
     await user.click(screen.getByRole("button", { name: "Désactiver" }));
@@ -107,7 +117,7 @@ describe("AgentsManager", () => {
 
   it("signale les périmètres existants sur la zone et pré-remplit le nom", async () => {
     const user = userEvent.setup();
-    renderManager();
+    render(renderManager());
 
     await user.click(
       screen.getByRole("button", { name: "Créer un périmètre" })
@@ -146,5 +156,36 @@ describe("AgentsManager", () => {
       departementNumero: "29",
       name: "DDETS Finistère – SIAO",
     });
+  });
+
+  it("crée un périmètre depuis la validation puis y revient avec ce périmètre choisi", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(renderManager());
+
+    await user.click(screen.getByRole("button", { name: "Valider" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Valider l’agent" })).getByRole(
+        "button",
+        { name: "Créer un périmètre" }
+      )
+    );
+    const perimeterDialog = screen.getByRole("dialog", {
+      name: "Créer un périmètre",
+    });
+    await user.selectOptions(
+      within(perimeterDialog).getByLabelText("Département"),
+      "56"
+    );
+    await user.click(
+      within(perimeterDialog).getByRole("button", {
+        name: "Créer le périmètre",
+      })
+    );
+    rerender(renderManager([finistere, morbihan]));
+
+    const accessDialog = await screen.findByRole("dialog", {
+      name: "Valider l’agent",
+    });
+    expect(within(accessDialog).getByLabelText("Périmètre")).toHaveValue("7");
   });
 });

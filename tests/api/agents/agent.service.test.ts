@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { addAgent, updateAgentAccess } from "@/app/api/agents/agent.service";
+import {
+  addAgent,
+  getAgents,
+  updateAgentAccess,
+} from "@/app/api/agents/agent.service";
 
+const mockFindAgents = vi.fn();
 const mockFindUserIdByEmail = vi.fn();
 const mockFindAgentById = vi.fn();
 const mockCreateActivatedAgent = vi.fn();
@@ -9,8 +14,10 @@ const mockActivateAgent = vi.fn();
 const mockDeactivateAgent = vi.fn();
 const mockGetPerimeterOrThrow = vi.fn();
 const mockCreateAgentAccessEvent = vi.fn();
+const mockGetContactEmails = vi.fn();
 
 vi.mock("@/app/api/agents/agent.repository", () => ({
+  findAgents: (...args: unknown[]) => mockFindAgents(...args),
   findUserIdByEmail: (...args: unknown[]) => mockFindUserIdByEmail(...args),
   findAgentById: (...args: unknown[]) => mockFindAgentById(...args),
   createActivatedAgent: (...args: unknown[]) =>
@@ -23,6 +30,10 @@ vi.mock("@/app/api/perimeters/perimeter.service", () => ({
   getPerimeterOrThrow: (...args: unknown[]) => mockGetPerimeterOrThrow(...args),
 }));
 
+vi.mock("@/app/api/contacts/contact.service", () => ({
+  getContactEmails: (...args: unknown[]) => mockGetContactEmails(...args),
+}));
+
 vi.mock("@/app/api/user-actions/user-action.service", () => ({
   createAgentAccessEvent: (...args: unknown[]) =>
     mockCreateAgentAccessEvent(...args),
@@ -31,6 +42,7 @@ vi.mock("@/app/api/user-actions/user-action.service", () => ({
 const finistere = { id: 3, name: "DDETS Finistère" };
 const pendingAgent = {
   id: 12,
+  email: "agent@finistere.gouv.fr",
   isActivated: false,
   deactivatedAt: null,
   perimeter: null,
@@ -41,6 +53,33 @@ describe("agent.service", () => {
     vi.clearAllMocks();
     mockGetPerimeterOrThrow.mockResolvedValue(finistere);
     mockFindAgentById.mockResolvedValue(pendingAgent);
+    mockGetContactEmails.mockResolvedValue(new Set());
+  });
+
+  it("retire des comptes en attente les contacts de structure, sans toucher aux comptes déjà gérés", async () => {
+    const activeContact = {
+      ...pendingAgent,
+      id: 13,
+      email: "contact-actif@operateur.fr",
+      isActivated: true,
+      perimeter: finistere,
+    };
+    mockFindAgents.mockResolvedValue([
+      pendingAgent,
+      { ...pendingAgent, id: 14, email: "contact@operateur.fr" },
+      activeContact,
+    ]);
+    mockGetContactEmails.mockResolvedValue(
+      new Set(["contact@operateur.fr", "contact-actif@operateur.fr"])
+    );
+
+    const agents = await getAgents();
+
+    expect(mockGetContactEmails).toHaveBeenCalledWith([
+      "agent@finistere.gouv.fr",
+      "contact@operateur.fr",
+    ]);
+    expect(agents.map(({ id }) => id)).toEqual([12, 13]);
   });
 
   it("refuse d'ajouter un email qui a déjà un compte", async () => {
@@ -72,6 +111,15 @@ describe("agent.service", () => {
     await expect(
       updateAgentAccess(12, { status: "DEACTIVATED" }, "PUT")
     ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("refuse de valider un contact de structure en attente", async () => {
+    mockGetContactEmails.mockResolvedValue(new Set([pendingAgent.email]));
+
+    await expect(
+      updateAgentAccess(12, { status: "ACTIVATED", perimeterId: 3 }, "PUT")
+    ).rejects.toMatchObject({ status: 404 });
+    expect(mockActivateAgent).not.toHaveBeenCalled();
   });
 
   it("valide un agent en attente dans un périmètre et trace l'avant-après", async () => {
