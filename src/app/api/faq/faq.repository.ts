@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { FaqApiWrite } from "@/schemas/api/faq.schema";
 
 export const findFaqItems = async () => {
   const faqItems = await prisma.faq.findMany({
@@ -9,3 +10,20 @@ export const findFaqItems = async () => {
 
   return { faqItems };
 };
+
+export const findFaqItem = (id: number) =>
+  prisma.faq.findUnique({ where: { id }, select: { id: true } });
+
+export const createFaqItem = (data: FaqApiWrite) => prisma.faq.create({ data });
+
+export const updateFaqItem = (id: number, data: FaqApiWrite) =>
+  prisma.faq.update({ where: { id }, data });
+
+export const deleteFaqItem = (id: number) =>
+  prisma.faq.delete({ where: { id } });
+
+export const updateFaqCategory = (category: string, newCategory: string) =>
+  prisma.faq.updateMany({
+    where: { category },
+    data: { category: newCategory },
+  });

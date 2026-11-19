@@ -1,9 +1,9 @@
 import { ReactElement } from "react";
 
 import { PageHeader } from "@/components/PageHeader";
+import { COCKPIT_SECTIONS } from "@/config/cockpit-admin.config";
 
 import { CockpitFeatureTile } from "./_components/CockpitFeatureTile";
-import { COCKPIT_SECTIONS } from "./cockpit-admin.features";
 
 export default function CockpitAdmin(): ReactElement {
   return (
