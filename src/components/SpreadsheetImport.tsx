@@ -176,7 +176,7 @@ export const SpreadsheetImport = ({
                 .join(" ")}
               errorMessage={
                 isBeforeLatestImport
-                  ? "Ce mois est antérieur au dernier import : les imports doivent suivre l’ordre chronologique."
+                  ? "Ce mois est antérieur au dernier import. Les mois s’importent dans l’ordre chronologique : l’import date la fermeture des structures absentes du fichier, et un mois plus ancien fausserait ces dates."
                   : undefined
               }
               onChange={setMonth}

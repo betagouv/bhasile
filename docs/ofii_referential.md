@@ -19,7 +19,7 @@ Le code vit dans `src/app/api/ofii-imports/` : lecture du tableur (`ofii-xlsx.ut
 Les briques communes à tous les imports de tableur sont déjà en place :
 
 - **Service** : exposer `preview(file)` et `apply(file)`. `preview` n’écrit rien et renvoie un `ImportPreview` : `summary`, `changes` (ce que l’import fera, une phrase par ligne), `errors`, et pour les imports mensuels `detectedMonth` et `latestImportedMonth`. `apply` appelle `assertImportable(errors)` (qui lève une `ImportRejectedError` portant le détail), écrit, puis renvoie `{ summary }`. Types dans `src/types/import.type.ts`.
-- **Routes** : `export const POST = cockpitImportRoute(preview)` dans `<import>/preview/route.ts`, et `cockpitImportRoute(apply)` dans `<import>/route.ts`. La fabrique vérifie l'accès au cockpit et lit le fichier envoyé. Déclarer les deux routes dans `src/proxy/auth-config.ts`.
+- **Routes** : `export const POST = generateCockpitImportRoute(preview)` dans `<import>/preview/route.ts`, et `generateCockpitImportRoute(apply)` dans `<import>/route.ts`. La fabrique vérifie l'accès au cockpit et lit le fichier envoyé. Déclarer les deux routes dans `src/proxy/auth-config.ts`.
 - **Page** : `<SpreadsheetImport endpoint="/api/<import>" label="…" intro="…" />` dans le groupe `(fonctionnalites)` du cockpit (`exampleHref` pour un fichier d’exemple, `withMonth` si les données portent sur un seul mois), puis activer la tuile dans `cockpit-admin.features.ts`.
 
 ## 2. Secours : script Scalingo

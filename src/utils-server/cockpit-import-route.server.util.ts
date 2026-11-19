@@ -9,8 +9,8 @@ import { ImportFile } from "@/types/import.type";
 
 import { readUploadedFile } from "./upload.server.util";
 
-export const cockpitImportRoute =
-  (run: (file: ImportFile) => Promise<unknown>) =>
+export const generateCockpitImportRoute =
+  (processImportFile: (file: ImportFile) => Promise<unknown>) =>
   async (request: Request): Promise<NextResponse> => {
     try {
       assertCockpitAdminAccess(await getSessionUser());
@@ -19,7 +19,8 @@ export const cockpitImportRoute =
         SPREADSHEET_MIME_TYPES
       );
       const month = importMonthSchema.parse(fields.month ?? null);
-      return NextResponse.json(await run({ buffer, fileName, month }));
+      const file = { buffer, fileName, month };
+      return NextResponse.json(await processImportFile(file));
     } catch (error) {
       return apiErrorResponse(error);
     }

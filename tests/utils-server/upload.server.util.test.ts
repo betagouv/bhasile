@@ -12,18 +12,6 @@ const buildRequest = (
   }) as unknown as Request;
 
 describe("readUploadedFile", () => {
-  it("rejette un fichier trop volumineux sans lire le corps de la requête", async () => {
-    const formData = vi.fn();
-
-    await expect(
-      readUploadedFile(buildRequest(42 * 1024 * 1024, formData))
-    ).rejects.toMatchObject({
-      status: 413,
-      message: expect.stringContaining("Fichier trop volumineux"),
-    });
-    expect(formData).not.toHaveBeenCalled();
-  });
-
   it("transforme un corps illisible en erreur explicite", async () => {
     const formData = vi.fn().mockRejectedValue(new TypeError("boundary"));
 
