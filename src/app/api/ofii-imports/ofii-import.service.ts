@@ -7,6 +7,7 @@ import { DomainError } from "@/app/utils/domain-error.util";
 import { formatPlural, pluralize } from "@/app/utils/string.util";
 import { ImportFile, ImportPreview, ImportResult } from "@/types/import.type";
 import { assertImportable } from "@/utils-server/import.server.util";
+import { archiveImportFile } from "@/utils-server/import-archive.server.util";
 
 import {
   findLatestOfiiActiviteDate,
@@ -60,6 +61,7 @@ export const applyOfiiImport = async (
     );
   }
 
+  await archiveImportFile(file, `ofii/${toMonthKey(date)}`);
   const count = await saveOfiiImport(date, dnas, rows.map(toOfiiActivite));
 
   const month = formatMonthLabel(date);

@@ -11,9 +11,14 @@ import {
 
 const mockLoadOfiiFile = vi.fn();
 const mockSaveOfiiImport = vi.fn();
+const mockArchiveImportFile = vi.fn();
 
 vi.mock("@/app/api/ofii-imports/ofii-xlsx.util", () => ({
   loadOfiiFile: (...args: unknown[]) => mockLoadOfiiFile(...args),
+}));
+
+vi.mock("@/utils-server/import-archive.server.util", () => ({
+  archiveImportFile: (...args: unknown[]) => mockArchiveImportFile(...args),
 }));
 
 vi.mock("@/app/api/ofii-imports/ofii-import.repository", () => ({
@@ -71,6 +76,7 @@ describe("ofii-import.service", () => {
 
     await expect(applyOfiiImport(file)).rejects.toMatchObject({ status: 400 });
     expect(mockSaveOfiiImport).not.toHaveBeenCalled();
+    expect(mockArchiveImportFile).not.toHaveBeenCalled();
   });
 
   it("refuse un fichier sans ligne, qui passerait toutes les structures en inactif", async () => {
@@ -95,6 +101,10 @@ describe("ofii-import.service", () => {
   it("écrit les données au mois confirmé, même s'il diffère du mois détecté", async () => {
     await applyOfiiImport({ ...file, month: "2025-09" });
 
+    expect(mockArchiveImportFile).toHaveBeenCalledWith(
+      expect.objectContaining({ fileName: "Liste 10.25.xlsx" }),
+      "ofii/2025-09"
+    );
     expect(mockSaveOfiiImport).toHaveBeenCalledWith(
       new Date("2025-09-30T12:00:00Z"),
       expect.any(Array),

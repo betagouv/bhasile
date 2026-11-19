@@ -12,6 +12,8 @@ Un super admin charge le fichier dans **Paramètres → Cockpit admin → Import
 
 Un fichier avec une seule ligne en erreur n’est pas importé du tout : on corrige le fichier, puis on le charge à nouveau.
 
+Chaque fichier importé est archivé, juste avant l’écriture, dans le bucket `DOCS_BUCKET_NAME` (`placedasile-docs`) sous `superadmin/ofii/<AAAA-MM>/` : on retrouve ainsi le fichier source de chaque import. Si l’archivage échoue, rien n’est écrit.
+
 Le code vit dans `src/app/api/ofii-imports/` : lecture du tableur (`ofii-xlsx.util.ts`), validation pure (`ofii-import.util.ts`), écritures Prisma (`ofii-import.repository.ts`).
 
 ### Ajouter un autre import au cockpit

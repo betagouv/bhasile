@@ -122,11 +122,12 @@ export const uploadFile = async (
   bucketName: string,
   fileName: string,
   fileBuffer: Buffer,
-  mimeType: string
+  mimeType: string,
+  folder?: string
 ) => {
   try {
     await checkBucket(bucketName);
-    const key = `${uuidv4()}-${fileName}`;
+    const key = `${folder ? `${folder}/` : ""}${uuidv4()}-${fileName}`;
     await getMinioClient().putObject(bucketName, key, fileBuffer);
     return {
       key,
