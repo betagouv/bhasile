@@ -5,11 +5,8 @@ import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
 import { PageHeader } from "@/components/PageHeader";
-
-import {
-  COCKPIT_ADMIN_URL,
-  findCockpitFeature,
-} from "../cockpit-admin.features";
+import { COCKPIT_ADMIN_URL } from "@/config/cockpit-admin.config";
+import { findCockpitFeature } from "@/utils/cockpit-admin.util";
 
 export const CockpitFeatureHeader = (): ReactElement => {
   const pathname = usePathname();

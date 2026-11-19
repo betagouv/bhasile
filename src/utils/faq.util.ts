@@ -11,7 +11,9 @@ export const groupFaqItemsByCategory = (
   faqItems: FaqApiType[]
 ): FaqCategoryGroup[] =>
   [...new Set(faqItems.map((faqItem) => faqItem.category))]
-    .sort((a, b) => a.localeCompare(b, "fr"))
+    .sort((firstCategory, secondCategory) =>
+      firstCategory.localeCompare(secondCategory, "fr")
+    )
     .map((category) => ({
       category,
       items: faqItems.filter((faqItem) => faqItem.category === category),

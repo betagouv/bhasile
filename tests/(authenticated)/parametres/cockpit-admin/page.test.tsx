@@ -1,8 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { COCKPIT_SECTIONS } from "@/app/(authenticated)/(with-menu)/parametres/cockpit-admin/cockpit-admin.features";
 import CockpitAdmin from "@/app/(authenticated)/(with-menu)/parametres/cockpit-admin/page";
+import { COCKPIT_SECTIONS } from "@/config/cockpit-admin.config";
 
 vi.mock("@/components/PageHeader", () => ({
   PageHeader: ({ title }: { title: string }) => <h2>{title}</h2>,

@@ -1,4 +1,4 @@
-import { CockpitFeature, CockpitSection } from "@/types/cockpit-admin.type";
+import { CockpitSection } from "@/types/cockpit-admin.type";
 
 export const COCKPIT_ADMIN_URL = "/parametres/cockpit-admin";
 
@@ -87,9 +87,3 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
     ],
   },
 ];
-
-export const findCockpitFeature = (pathname: string): CockpitFeature | null =>
-  COCKPIT_SECTIONS.flatMap((section) => section.features).find(
-    (feature) =>
-      pathname === feature.href || pathname.startsWith(`${feature.href}/`)
-  ) ?? null;

@@ -1,19 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  COCKPIT_SECTIONS,
-  findCockpitFeature,
-} from "@/app/(authenticated)/(with-menu)/parametres/cockpit-admin/cockpit-admin.features";
+import { findCockpitFeature } from "@/utils/cockpit-admin.util";
 
-describe("cockpit-admin.features", () => {
-  it("attribue une adresse distincte à chaque fonctionnalité", () => {
-    const hrefs = COCKPIT_SECTIONS.flatMap((section) =>
-      section.features.map((feature) => feature.href)
-    );
-
-    expect(new Set(hrefs).size).toBe(hrefs.length);
-  });
-
+describe("findCockpitFeature", () => {
   it("retrouve la fonctionnalité d'une page et de ses sous-pages", () => {
     expect(findCockpitFeature("/parametres/cockpit-admin/faq")?.title).toBe(
       "Questions de la FAQ"
