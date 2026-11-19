@@ -42,12 +42,6 @@ import {
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
 import {
-  seedContactUsers,
-  seedRolesAndAgents,
-  TEST_USER_DEPARTEMENT,
-  TEST_USER_STRUCTURES_COUNT,
-} from "./seeders/user.seed";
-import {
   buildStructureCreate,
   COLOCATED_COORDINATES,
   COLOCATED_STRUCTURES_COUNT,
@@ -57,6 +51,12 @@ import {
   SeedStructureParams,
 } from "./seeders/structure-version.seed";
 import { createFakeTarificationJournals } from "./seeders/tarification-journal.seed";
+import {
+  seedContactUsers,
+  seedRolesAndAgents,
+  TEST_USER_DEPARTEMENT,
+  TEST_USER_STRUCTURES_COUNT,
+} from "./seeders/user.seed";
 import {
   generateAllBhasileCodes,
   getNextBhasileCode,
