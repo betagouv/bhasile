@@ -169,7 +169,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `tarification.ability.ts` (`canAccessTarification`, et `getTarificationStructureWhere` pour la cloche) : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : l'envoi des notifications se recette en préprod.
 
 ## Interface
@@ -208,7 +208,7 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 | Routes                              | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]`                                | fait    |
 | Droits                              | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                                               | fait    |
 | Pièces jointes                      | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                                                       | fait    |
-| Porte de mise en service            | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                                                     | fait    |
+| Porte de mise en service            | `MESSAGERIE_ENABLED` dans `canAccessTarification` et `getTarificationStructureWhere`                                                                                  | fait    |
 | Interface : page et fil             | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                                                       | fait    |
 | Interface : pièces jointes          | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                                                           | fait    |
 | Interface : tags                    | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                                                    | fait    |

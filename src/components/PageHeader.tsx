@@ -12,6 +12,7 @@ import { HeaderFilters } from "@/components/header-filters/HeaderFilters";
 export const PageHeader = ({
   title,
   titleId,
+  titleAside,
   tabs,
   menuActions = [],
   withFilters = true,
@@ -34,6 +35,7 @@ export const PageHeader = ({
           <h2 className="text-title-blue-france fr-h5 mb-0 pr-4" id={titleId}>
             {title}
           </h2>
+          {titleAside}
           {tabs}
         </div>
         <div className="flex items-center">
@@ -93,6 +95,7 @@ export type PageHeaderAction =
 type Props = {
   title: string;
   titleId?: string;
+  titleAside?: ReactNode;
   tabs?: ReactNode;
   menuActions?: PageHeaderAction[];
   withFilters?: boolean;

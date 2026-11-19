@@ -121,6 +121,24 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/notifications(\/count)?$/,
+    routes: {
+      GET: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/notifications\/seen$/,
+    routes: {
+      PUT: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/notifications\/reads$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
     pattern: /^\/api\/tarifications\/\d+\/\d+\/messages$/,
     routes: {
       GET: "proconnect",

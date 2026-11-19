@@ -1,5 +1,13 @@
 import type { Prisma } from "@/generated/prisma/client";
 
+// Même compte pour le tiroir des échanges et la cloche
+export const getUnreadMessageWhere = (
+  userId: number
+): Prisma.MessageWhereInput => ({
+  authorId: { not: userId },
+  receipts: { none: { userId } },
+});
+
 export const messageSelect = {
   id: true,
   text: true,

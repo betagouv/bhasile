@@ -46,13 +46,13 @@ const getFirstOpenings = (
   return [...firstOpeningByDocumentId.values()];
 };
 
-const getTypesLabel = (
+export const getTypesLabel = (
   document: TarificationJournalDocument,
   campaignYear: number
 ): string =>
   document.types.map((type) => getExerciseLabel(type, campaignYear)).join(", ");
 
-const getEventLabel = (
+export const getEventLabel = (
   event: TarificationJournalEvent,
   documentLabel: string | null
 ): string => {
