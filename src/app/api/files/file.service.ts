@@ -4,11 +4,7 @@ import { Session } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
 import { DomainError } from "@/app/utils/domain-error.util";
-import {
-  ALLOWED_MIME_TYPES,
-  FILE_UPLOAD_EXPIRATION_DELAY,
-  MAX_FILE_SIZE,
-} from "@/constants";
+import { FILE_UPLOAD_EXPIRATION_DELAY } from "@/constants";
 import { FileUpload } from "@/generated/prisma/client";
 import { canDeleteFile, canReadConversation } from "@/lib/casl";
 import { checkBucket, getMinioClient } from "@/lib/minio";
@@ -126,11 +122,12 @@ export const uploadFile = async (
   bucketName: string,
   fileName: string,
   fileBuffer: Buffer,
-  mimeType: string
+  mimeType: string,
+  folder?: string
 ) => {
   try {
     await checkBucket(bucketName);
-    const key = `${uuidv4()}-${fileName}`;
+    const key = `${folder ? `${folder}/` : ""}${uuidv4()}-${fileName}`;
     await getMinioClient().putObject(bucketName, key, fileBuffer);
     return {
       key,
@@ -210,19 +207,6 @@ export const getInlineLink = async (
     console.error(error);
     throw new Error("Erreur lors de l'ouverture du fichier");
   }
-};
-
-export const validateUpload = (
-  mimeType: string,
-  fileSize: number
-): string | null => {
-  if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
-    return "Type de fichier non autorisé.";
-  }
-  if (fileSize > MAX_FILE_SIZE) {
-    return "Fichier trop volumineux.";
-  }
-  return null;
 };
 
 export const getKeysFromIncomingDocumentsOrActes = (

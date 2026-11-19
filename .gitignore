@@ -38,6 +38,7 @@ next-env.d.ts
 !public/adresses-diffus.xlsx
 !public/adresses-mixte.xlsx
 !public/07-Fiche_de_parametrage_OFII-transformation_parc.xlsx
+!public/liste-donnees-par-centre-09.26-exemple.xlsx
 *.json
 !/*.json
 *.csv

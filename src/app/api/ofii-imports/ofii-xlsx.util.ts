@@ -1,21 +1,15 @@
-/**
- * Charge un fichier XLSX OFII (activité), prend l'onglet le plus récent (par date dans le nom),
- * trouve la ligne d'en-tête et normalise les colonnes selon POSSIBLE_COLUMNS.
- * Dépendance : npm install xlsx
- */
-
 import type { WorkSheet } from "xlsx";
 import * as XLSX from "xlsx";
 
 import { endOfMonthUtcFromMonth } from "@/app/utils/date.util";
-
+import { DomainError } from "@/app/utils/domain-error.util";
 import {
   buildLabelLookup,
   decodeSheetRange,
   getCellValue,
   normalizeCellValue,
   parseNumericCell,
-} from "./xlsx-utils";
+} from "@/utils-server/xlsx.server.util";
 
 const POSSIBLE_REF_COLUMNS: Record<keyof OfiiReferentialRow, string[]> = {
   dnaCode: ["Code"],
@@ -69,15 +63,10 @@ export type ActiviteRow = {
   presencesInduesDeboutees: number | null;
 };
 
-export type OfiiActiviteSheet = {
-  date: Date; // dernier jour du mois à midi UTC
-  rows: ActiviteRow[];
-};
-
 export type OfiiFullRow = OfiiReferentialRow & ActiviteRow;
 
-export type OfiiFullSheet = {
-  date: Date;
+type OfiiFullSheet = {
+  date: Date | null;
   rows: OfiiFullRow[];
 };
 
@@ -107,7 +96,7 @@ function parseYear(year: string): string {
   if (year.length === 4) {
     return year;
   }
-  throw new Error(`Année invalide: ${year}`);
+  throw new DomainError(`Année invalide dans le nom d’onglet : ${year}`);
 }
 
 /* Extrait (year, month) du nom d'onglet (ex. "10 25", "octobre 2025", "Liste") ou null. */
@@ -148,12 +137,11 @@ function parseSheetDate(
 function parseFilenameDate(
   fileName: string
 ): { year: number; month: number } | null {
-  const match = fileName.match(/(\d{2})[^\d]{1}(\d{2})/);
-  if (match) {
-    return {
-      year: parseInt("20" + match[2], 10),
-      month: parseInt(match[1], 10),
-    };
+  for (const match of fileName.matchAll(/(\d{2})[^\d](\d{2})(?!\d)/g)) {
+    const month = parseInt(match[1], 10);
+    if (month >= 1 && month <= 12) {
+      return { year: parseInt("20" + match[2], 10), month };
+    }
   }
   return null;
 }
@@ -172,7 +160,7 @@ function findHeaderRow(sheet: WorkSheet): number {
   return -1;
 }
 
-/* Charge les données référentiel + activité (onglet le plus récent ou "Liste" si présent) */
+/* Charge les données référentiel + activité de l'onglet « Liste », sinon de l'unique onglet daté */
 export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
   const wb = XLSX.read(buffer, { type: "buffer", raw: true });
   const sheetNames = wb.SheetNames;
@@ -193,33 +181,27 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
       .filter(
         (x): x is { name: string; date: { year: number; month: number } } =>
           x.date != null
-      )
-      .sort((a, b) => {
-        if (a.date.year !== b.date.year) {
-          return b.date.year - a.date.year;
-        }
-        return b.date.month - a.date.month;
-      });
-    if (withDates.length == 0) {
-      throw new Error("Aucune date trouvée dans le nom d'onglet ou du fichier");
-    } else {
-      chosenSheetName = withDates[0].name;
-      sheetDate = withDates[0].date;
+      );
+    if (withDates.length === 0) {
+      throw new DomainError(
+        "Aucun onglet « Liste » ni onglet daté (ex. « octobre 2025 ») dans le fichier"
+      );
     }
-  }
-
-  if (!sheetDate) {
-    throw new Error(
-      `Impossible d'extraire la date du nom d'onglet ou du fichier : ${fileName}`
-    );
+    if (withDates.length > 1) {
+      throw new DomainError(
+        `Le fichier contient plusieurs onglets datés (${withDates.map(({ name }) => `« ${name} »`).join(", ")}) : gardez un seul onglet, nommé « Liste »`
+      );
+    }
+    chosenSheetName = withDates[0].name;
+    sheetDate = withDates[0].date;
   }
 
   const sheet = wb.Sheets[chosenSheetName];
 
   const headerRowIdx = findHeaderRow(sheet);
   if (headerRowIdx < 0) {
-    throw new Error(
-      "Aucune ligne d'en-tête trouvée (colonnes OFII attendues)."
+    throw new DomainError(
+      "Aucune ligne d’en-tête trouvée : les colonnes OFII attendues (Code, Capacité…) sont absentes"
     );
   }
 
@@ -275,7 +257,9 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
     rows.push(row as OfiiFullRow);
   }
 
-  const date = endOfMonthUtcFromMonth(sheetDate.year, sheetDate.month);
+  const date = sheetDate
+    ? endOfMonthUtcFromMonth(sheetDate.year, sheetDate.month)
+    : null;
 
   return { date, rows };
 }

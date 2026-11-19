@@ -9,10 +9,10 @@ export const COCKPIT_SECTIONS: CockpitSection[] = [
       {
         title: "Import OFII",
         description:
-          "Charger le fichier mensuel de l’OFII pour mettre à jour le référentiel des structures et leur activité, et rattacher les opérateurs inconnus à leur alias.",
+          "Charger le fichier mensuel de l’OFII pour mettre à jour le référentiel des structures et leur activité.",
         icon: "fr-icon-upload-2-line",
         href: `${COCKPIT_ADMIN_URL}/import-ofii`,
-        isEnabled: false,
+        isEnabled: true,
       },
       {
         title: "Import RMU",
