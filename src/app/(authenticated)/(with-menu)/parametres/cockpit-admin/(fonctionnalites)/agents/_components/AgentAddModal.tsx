@@ -1,10 +1,11 @@
 "use client";
 
+import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReactElement, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useController, useForm } from "react-hook-form";
 
 import {
   agentFormSchema,
@@ -12,24 +13,32 @@ import {
 } from "@/schemas/forms/base/agent.schema";
 import { PerimeterRead } from "@/types/agent.type";
 
-import { PerimeterSelect } from "./PerimeterSelect";
+import { PerimeterPicker } from "./PerimeterPicker";
 
 export const AgentAddModal = ({
+  draft,
   openCount,
   perimeters,
   isSaving,
   onSubmit,
+  onCreatePerimeter,
 }: Props): ReactElement => {
   const {
     register,
     handleSubmit,
     reset,
+    getValues,
+    control,
     formState: { errors },
   } = useForm<AgentFormValues>({ resolver: zodResolver(agentFormSchema) });
+  const { field: perimeterField } = useController({
+    control,
+    name: "perimeterId",
+  });
 
   useEffect(() => {
-    reset({ email: "" });
-  }, [openCount, reset]);
+    reset({ email: draft?.email ?? "", perimeterId: draft?.perimeterId });
+  }, [draft, openCount, reset]);
 
   const submit = handleSubmit(async (values) => {
     if (await onSubmit(values)) {
@@ -61,11 +70,21 @@ export const AgentAddModal = ({
         state={errors.email ? "error" : "default"}
         stateRelatedMessage={errors.email?.message}
       />
-      <PerimeterSelect
+      <PerimeterPicker
+        key={openCount}
         perimeters={perimeters}
-        nativeSelectProps={register("perimeterId", { valueAsNumber: true })}
+        perimeterId={perimeterField.value}
+        onChange={perimeterField.onChange}
         errorMessage={errors.perimeterId?.message}
       />
+      <Button
+        priority="tertiary no outline"
+        size="small"
+        iconId="fr-icon-add-line"
+        onClick={() => onCreatePerimeter({ email: getValues("email") })}
+      >
+        Créer un périmètre
+      </Button>
     </agentAddModal.Component>
   );
 };
@@ -75,9 +94,16 @@ export const agentAddModal = createModal({
   isOpenedByDefault: false,
 });
 
+export type AgentDraft = {
+  email?: string;
+  perimeterId?: number;
+};
+
 type Props = {
+  draft: AgentDraft | null;
   openCount: number;
   perimeters: PerimeterRead[];
   isSaving: boolean;
   onSubmit: (values: AgentFormValues) => Promise<boolean>;
+  onCreatePerimeter: (draft: AgentDraft) => void;
 };

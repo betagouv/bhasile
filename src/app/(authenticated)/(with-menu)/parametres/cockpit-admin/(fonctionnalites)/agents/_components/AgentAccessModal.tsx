@@ -7,7 +7,7 @@ import { ReactElement, useEffect, useState } from "react";
 import { AccountStatus } from "@/app/api/users/user.util";
 import { AgentRead, PerimeterRead } from "@/types/agent.type";
 
-import { PerimeterSelect } from "./PerimeterSelect";
+import { PerimeterPicker } from "./PerimeterPicker";
 
 export const AgentAccessModal = ({
   target,
@@ -18,18 +18,16 @@ export const AgentAccessModal = ({
   onCreatePerimeter,
 }: Props): ReactElement => {
   const agent = target?.agent ?? null;
-  const [perimeterId, setPerimeterId] = useState("");
+  const [perimeterId, setPerimeterId] = useState<number | undefined>();
 
   useEffect(() => {
-    const initialPerimeterId =
-      target?.perimeterId ?? target?.agent.perimeter?.id;
-    setPerimeterId(initialPerimeterId ? String(initialPerimeterId) : "");
+    setPerimeterId(target?.perimeterId ?? target?.agent.perimeter?.id);
   }, [target, openCount]);
 
   const { title, confirmLabel } = ACCESS_ACTIONS[agent?.status ?? "PENDING"];
 
   const submit = async (): Promise<void> => {
-    if (agent && (await onSubmit(agent.id, Number(perimeterId)))) {
+    if (agent && perimeterId && (await onSubmit(agent.id, perimeterId))) {
       agentAccessModal.close();
     }
   };
@@ -49,12 +47,11 @@ export const AgentAccessModal = ({
       ]}
     >
       {agent && <p className="font-bold">{agent.name ?? agent.email}</p>}
-      <PerimeterSelect
+      <PerimeterPicker
+        key={openCount}
         perimeters={perimeters}
-        nativeSelectProps={{
-          value: perimeterId,
-          onChange: (event) => setPerimeterId(event.target.value),
-        }}
+        perimeterId={perimeterId}
+        onChange={setPerimeterId}
       />
       {agent && (
         <Button

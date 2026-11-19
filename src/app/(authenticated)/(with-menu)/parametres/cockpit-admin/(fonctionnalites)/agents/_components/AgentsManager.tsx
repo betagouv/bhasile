@@ -27,7 +27,7 @@ import {
   agentAccessModal,
   AgentAccessTarget,
 } from "./AgentAccessModal";
-import { AgentAddModal, agentAddModal } from "./AgentAddModal";
+import { AgentAddModal, agentAddModal, AgentDraft } from "./AgentAddModal";
 import {
   AgentDeactivateModal,
   agentDeactivateModal,
@@ -46,8 +46,9 @@ export const AgentsManager = ({
   const { getFetchState } = useFetchState();
   const [status, setStatus] = useState<AccountStatus>("PENDING");
   const [search, setSearch] = useState("");
-  const perimeterModal = useModalTarget<AgentRead>(perimeterCreateModal);
-  const addModal = useModalTarget<null>(agentAddModal);
+  const perimeterModal =
+    useModalTarget<PerimeterCreation>(perimeterCreateModal);
+  const addModal = useModalTarget<AgentDraft>(agentAddModal);
   const accessModal = useModalTarget<AgentAccessTarget>(agentAccessModal);
   const deactivateModal = useModalTarget<AgentRead>(agentDeactivateModal);
 
@@ -182,21 +183,24 @@ export const AgentsManager = ({
         isSaving={isSaving}
         onSubmit={async (values) => {
           const perimeter = await savePerimeter(values);
-          if (perimeter && perimeterModal.target) {
-            accessModal.open({
-              agent: perimeterModal.target,
-              perimeterId: perimeter.id,
-            });
+          if (perimeter) {
+            perimeterModal.target?.reopen(perimeter.id);
           }
           return perimeter !== null;
         }}
       />
       <AgentAddModal
+        draft={addModal.target}
         openCount={addModal.openCount}
         perimeters={perimeters}
         isSaving={isSaving}
         onSubmit={async (values: AgentFormValues) =>
           (await saveAgent(values)) !== null
+        }
+        onCreatePerimeter={(draft) =>
+          perimeterModal.open({
+            reopen: (perimeterId) => addModal.open({ ...draft, perimeterId }),
+          })
         }
       />
       <AgentAccessModal
@@ -208,7 +212,11 @@ export const AgentsManager = ({
           (await saveAccess(agentId, { status: "ACTIVATED", perimeterId })) !==
           null
         }
-        onCreatePerimeter={perimeterModal.open}
+        onCreatePerimeter={(agent) =>
+          perimeterModal.open({
+            reopen: (perimeterId) => accessModal.open({ agent, perimeterId }),
+          })
+        }
       />
       <AgentDeactivateModal
         agent={deactivateModal.target}
@@ -222,6 +230,10 @@ export const AgentsManager = ({
 };
 
 const AGENTS_SAVE_KEY = "agents-save";
+
+type PerimeterCreation = {
+  reopen: (perimeterId: number) => void;
+};
 
 type Props = {
   agents: AgentRead[];

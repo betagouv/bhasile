@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import userEvent, { UserEvent } from "@testing-library/user-event";
+import { ReactElement } from "react";
 import {
   createAgentRead,
   createPerimeterRead,
@@ -60,6 +61,27 @@ const expectRequest = async (
   ).toEqual(body);
 };
 
+const createMorbihanFrom = async (
+  user: UserEvent,
+  dialog: HTMLElement,
+  rerender: (ui: ReactElement) => void
+): Promise<void> => {
+  await user.click(
+    within(dialog).getByRole("button", { name: "Créer un périmètre" })
+  );
+  const perimeterDialog = screen.getByRole("dialog", {
+    name: "Créer un périmètre",
+  });
+  await user.selectOptions(
+    within(perimeterDialog).getByLabelText("Département"),
+    "56"
+  );
+  await user.click(
+    within(perimeterDialog).getByRole("button", { name: "Créer le périmètre" })
+  );
+  rerender(renderManager([finistere, morbihan]));
+};
+
 describe("AgentsManager", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -96,7 +118,11 @@ describe("AgentsManager", () => {
     expect(
       within(dialog).getByRole("button", { name: "Valider" })
     ).toBeDisabled();
-    await user.selectOptions(within(dialog).getByLabelText("Périmètre"), "3");
+    await user.type(
+      within(dialog).getByLabelText(/Rechercher un périmètre/),
+      "29"
+    );
+    expect(within(dialog).getByLabelText("Périmètre")).toHaveValue("3");
     await user.click(within(dialog).getByRole("button", { name: "Valider" }));
 
     await expectRequest("/api/agents/12", "PUT", {
@@ -156,34 +182,61 @@ describe("AgentsManager", () => {
     });
   });
 
+  it("filtre les périmètres par nom sans tenir compte des accents, et choisit le premier trouvé", async () => {
+    const user = userEvent.setup();
+    render(renderManager([finistere, morbihan]));
+
+    await user.click(screen.getByRole("button", { name: "Valider" }));
+    const dialog = screen.getByRole("dialog", { name: "Valider l’agent" });
+    await user.type(
+      within(dialog).getByLabelText(/Rechercher un périmètre/),
+      "morbihan"
+    );
+
+    const select = within(dialog).getByLabelText("Périmètre");
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((option) => option.textContent)
+    ).toEqual(["Choisir un périmètre", "DDETS Morbihan"]);
+    expect(select).toHaveValue("7");
+  });
+
   it("crée un périmètre depuis la validation puis y revient avec ce périmètre choisi", async () => {
     const user = userEvent.setup();
     const { rerender } = render(renderManager());
 
     await user.click(screen.getByRole("button", { name: "Valider" }));
-    await user.click(
-      within(screen.getByRole("dialog", { name: "Valider l’agent" })).getByRole(
-        "button",
-        { name: "Créer un périmètre" }
-      )
+    await createMorbihanFrom(
+      user,
+      screen.getByRole("dialog", { name: "Valider l’agent" }),
+      rerender
     );
-    const perimeterDialog = screen.getByRole("dialog", {
-      name: "Créer un périmètre",
-    });
-    await user.selectOptions(
-      within(perimeterDialog).getByLabelText("Département"),
-      "56"
-    );
-    await user.click(
-      within(perimeterDialog).getByRole("button", {
-        name: "Créer le périmètre",
-      })
-    );
-    rerender(renderManager([finistere, morbihan]));
 
-    const accessDialog = await screen.findByRole("dialog", {
+    const dialog = await screen.findByRole("dialog", {
       name: "Valider l’agent",
     });
-    expect(within(accessDialog).getByLabelText("Périmètre")).toHaveValue("7");
+    expect(within(dialog).getByLabelText("Périmètre")).toHaveValue("7");
+  });
+
+  it("crée un périmètre depuis l'ajout d'un agent puis y revient sans perdre l'email saisi", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(renderManager());
+
+    await user.click(screen.getByRole("button", { name: "Ajouter un agent" }));
+    const addDialog = screen.getByRole("dialog", { name: "Ajouter un agent" });
+    await user.type(
+      within(addDialog).getByLabelText("Adresse mail"),
+      "nouvel@morbihan.gouv.fr"
+    );
+    await createMorbihanFrom(user, addDialog, rerender);
+
+    const dialog = await screen.findByRole("dialog", {
+      name: "Ajouter un agent",
+    });
+    expect(within(dialog).getByLabelText("Adresse mail")).toHaveValue(
+      "nouvel@morbihan.gouv.fr"
+    );
+    expect(within(dialog).getByLabelText("Périmètre")).toHaveValue("7");
   });
 });
