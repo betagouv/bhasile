@@ -34,7 +34,9 @@ const buildCpomStructure = (
     communeAdministrative: "Nancy",
     departementAdministratif: "54",
     operateur,
-    forms: [],
+    isFinalised: true,
+    isClosed: false,
+    isVisible: true,
   },
 });
 

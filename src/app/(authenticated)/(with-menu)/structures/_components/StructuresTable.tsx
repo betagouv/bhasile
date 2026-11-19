@@ -7,7 +7,12 @@ import { ReactElement, useState } from "react";
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
 import { useCanUpdateStructures } from "@/app/hooks/useCanUpdateStructure";
+import {
+  NoPermissionsModal,
+  openNoPermissionsModal,
+} from "@/components/NoPermissionsModal";
 import { StructureListItem } from "@/types/structure-list.type";
+import { getStructureHref } from "@/utils/structure-link.util";
 
 import { StructureItem } from "./StructureItem";
 import {
@@ -18,11 +23,6 @@ import {
 
 const finalisationModal = createModal({
   id: "finalisation-modal",
-  isOpenedByDefault: false,
-});
-
-const noPermissionsModal = createModal({
-  id: "no-permissions-modal",
   isOpenedByDefault: false,
 });
 
@@ -47,7 +47,7 @@ export const StructuresTable = ({
     if (canUpdateStructure(structure)) {
       finalisationModal.open();
     } else {
-      noPermissionsModal.open();
+      openNoPermissionsModal();
     }
   };
 
@@ -82,9 +82,8 @@ export const StructuresTable = ({
             children: "Je finalise la création",
             type: "button",
             onClick: () =>
-              router.push(
-                `/structures/${selectedStructure?.id}/finalisation/01-identification`
-              ),
+              selectedStructure &&
+              router.push(getStructureHref(selectedStructure)),
           },
         ]}
       >
@@ -94,22 +93,7 @@ export const StructuresTable = ({
           et complétées par un agent ou une agente.
         </p>
       </finalisationModal.Component>
-      <noPermissionsModal.Component
-        title="Vous n'avez pas les droits pour finaliser cette structure."
-        buttons={[
-          {
-            doClosesModal: true,
-            children: "J'ai compris",
-            type: "button",
-          },
-        ]}
-      >
-        <p>
-          Toutes les informations concernant cette structure n’ont pas encore
-          été saisies. Veuillez attendre qu’une personne disposant des droits
-          nécessaires finalise sa création afin de pouvoir consulter cette page.
-        </p>
-      </noPermissionsModal.Component>
+      <NoPermissionsModal />
     </>
   );
 };

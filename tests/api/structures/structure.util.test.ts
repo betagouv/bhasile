@@ -782,10 +782,16 @@ describe("resolveCpomLinkedStructure", () => {
     })
   );
 
-  const linkedStructure = ({
-    departementAdministratif = "92",
-    isFinalised = true,
-  }: { departementAdministratif?: string; isFinalised?: boolean } = {}) =>
+  const finalisationForm = (status: boolean) => ({
+    status,
+    formDefinition: { slug: FINALISATION_FORM_SLUG },
+  });
+
+  const linkedStructure = (
+    overrides: Partial<
+      Parameters<typeof resolveCpomLinkedStructure>[0]["structure"]
+    > = {}
+  ) =>
     ({
       id: 1,
       cpomId: 7,
@@ -796,15 +802,11 @@ describe("resolveCpomLinkedStructure", () => {
         id: 10,
         codeBhasile: "BHA-10",
         type: StructureType.CADA,
-        departementAdministratif,
+        departementAdministratif: "92",
+        fermetureDate: null,
         operateurId: 1,
         operateur: { name: "Opérateur 1" },
-        forms: [
-          {
-            status: isFinalised,
-            formDefinition: { slug: FINALISATION_FORM_SLUG },
-          },
-        ],
+        forms: [finalisationForm(true)],
         structureVersions: [
           {
             id: 100,
@@ -814,45 +816,89 @@ describe("resolveCpomLinkedStructure", () => {
             communeAdministrative: "Nanterre",
           },
         ],
+        ...overrides,
       },
     }) as unknown as Parameters<typeof resolveCpomLinkedStructure>[0];
 
-  it("propose le lien vers une structure finalisée que l'utilisateur peut lire", () => {
-    const { structure } = resolveCpomLinkedStructure(
-      linkedStructure(),
-      operateurAbility,
-      now
-    );
+  const resolveStructure = (
+    overrides: Parameters<typeof linkedStructure>[0] = {},
+    ability: Parameters<typeof resolveCpomLinkedStructure>[1] = operateurAbility
+  ) =>
+    resolveCpomLinkedStructure(linkedStructure(overrides), ability, now)
+      .structure;
 
-    expect(structure).toEqual({
+  it("expose la commune courante, le statut et les droits sans les données brutes", () => {
+    expect(resolveStructure()).toEqual({
       id: 10,
       codeBhasile: "BHA-10",
       type: StructureType.CADA,
       departementAdministratif: "92",
       operateur: { name: "Opérateur 1" },
       communeAdministrative: "Nanterre",
-      isLinkable: true,
+      isFinalised: true,
+      isClosed: false,
+      isVisible: true,
+      canRead: true,
+      canUpdate: false,
     });
   });
 
-  it("ne propose pas le lien vers une structure non finalisée", () => {
+  it("marque visible et non finalisée une structure au formulaire de finalisation en cours", () => {
     expect(
-      resolveCpomLinkedStructure(
-        linkedStructure({ isFinalised: false }),
-        operateurAbility,
-        now
-      ).structure.isLinkable
-    ).toBe(false);
+      resolveStructure({ forms: [finalisationForm(false)] })
+    ).toMatchObject({ isFinalised: false, isVisible: true });
   });
 
-  it("ne propose pas le lien vers une structure hors de la zone de lecture", () => {
+  it("marque non visible une structure sans formulaire ni création", () => {
+    expect(resolveStructure({ forms: [] })).toMatchObject({
+      isFinalised: false,
+      isVisible: false,
+    });
+  });
+
+  it("marque finalisée et visible une structure née d'une création, sans formulaire", () => {
     expect(
-      resolveCpomLinkedStructure(
-        linkedStructure({ departementAdministratif: "75" }),
-        operateurAbility,
-        now
-      ).structure.isLinkable
-    ).toBe(false);
+      resolveStructure({
+        forms: [],
+        structureVersions: [
+          {
+            id: 100,
+            effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+            structureVersionTransformationId: 5,
+            structureVersionTransformation: {
+              type: StructureVersionTransformationType.CREATION,
+              transformation: { form: { status: true } },
+            },
+            communeAdministrative: "Nanterre",
+          },
+        ],
+      } as Parameters<typeof linkedStructure>[0])
+    ).toMatchObject({ isFinalised: true, isVisible: true });
+  });
+
+  it("marque fermée une structure dont la fermeture est passée", () => {
+    expect(
+      resolveStructure({ fermetureDate: new Date("2025-01-01T00:00:00.000Z") })
+    ).toMatchObject({ isClosed: true });
+  });
+
+  it("refuse la lecture d'une structure hors de la zone de lecture", () => {
+    expect(resolveStructure({ departementAdministratif: "75" })).toMatchObject({
+      canRead: false,
+      canUpdate: false,
+    });
+  });
+
+  it("autorise la modification à un agent éditeur du département", () => {
+    expect(
+      resolveStructure({}, defineAbilityFor(createDepartementalAgent(["92"])))
+    ).toMatchObject({ canRead: true, canUpdate: true });
+  });
+
+  it("refuse tout droit sans ability", () => {
+    expect(
+      resolveCpomLinkedStructure(linkedStructure(), undefined, now).structure
+    ).toMatchObject({ canRead: false, canUpdate: false });
   });
 });
 

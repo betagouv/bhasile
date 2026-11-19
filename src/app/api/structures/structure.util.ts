@@ -23,6 +23,7 @@ import {
 import {
   type AppAbility,
   canAbilityReadStructure,
+  canAbilityUpdateStructure,
   canUpdateStructure,
 } from "@/lib/casl";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
@@ -308,6 +309,14 @@ export const isStructureFinalised = (
   isFinalisationFormValidated(structure.forms) ||
   isBornFromCreation(structure.structureVersions, now);
 
+export const isStructureVisible = ({
+  hasForm,
+  bornFromCreation,
+}: {
+  hasForm: boolean;
+  bornFromCreation: boolean;
+}): boolean => hasForm || bornFromCreation;
+
 export const isStructureClosed = (
   structure: { fermetureDate: Date | null },
   now: Date
@@ -438,7 +447,7 @@ export const filterStructureRows = (
   const search = filters.search ? normalizeAccents(filters.search) : null;
 
   return rows.filter((row) => {
-    if (!includeNonVisible && !row.hasForm && !row.bornFromCreation) {
+    if (!includeNonVisible && !isStructureVisible(row)) {
       return false;
     }
     if (filters.isClosed && !row.isClosed) {
@@ -581,10 +590,14 @@ export const resolveCpomLinkedStructure = (
       operateur: structure.operateur,
       communeAdministrative: resolveCurrentVersionFields(structure, now)
         .communeAdministrative,
-      isLinkable:
-        isStructureFinalised(structure, now) &&
-        !!ability &&
-        canAbilityReadStructure(ability, structure),
+      isFinalised: isStructureFinalised(structure, now),
+      isClosed: isStructureClosed(structure, now),
+      isVisible: isStructureVisible({
+        hasForm: structure.forms.length > 0,
+        bornFromCreation: isBornFromCreation(structure.structureVersions, now),
+      }),
+      canRead: !!ability && canAbilityReadStructure(ability, structure),
+      canUpdate: !!ability && canAbilityUpdateStructure(ability, structure),
     },
   };
 };

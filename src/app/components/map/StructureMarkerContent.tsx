@@ -7,15 +7,25 @@ import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { formatDate } from "@/app/utils/date.util";
 import { getCommunesGroupedByDepartement } from "@/app/utils/structure.util";
 import { DEPARTEMENTS } from "@/constants";
+import {
+  getStructureHref,
+  hasStructureFiche,
+} from "@/utils/structure-link.util";
 
 export const StructureMarkerContent = ({ id }: { id: number }) => {
   const { structure } = useFetchStructure(id);
   if (!structure) {
     return null;
   }
-  const { codeBhasile, type, operateurLabel, nom, finConvention } = structure;
-
-  const isStructureFinalisee = structure.isFinalised;
+  const {
+    codeBhasile,
+    type,
+    operateurLabel,
+    nom,
+    finConvention,
+    isFinalised,
+    isClosed,
+  } = structure;
 
   return (
     <div>
@@ -51,20 +61,13 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
         </div>
       )}
       <div className="text-sm mb-2">
-        <TypeBatiBadge
-          typeBati={structure.typeBati}
-          className="m-0!"
-        />
+        <TypeBatiBadge typeBati={structure.typeBati} className="m-0!" />
       </div>
       <div className="flex justify-end">
         <Link
-          className={`fr-btn fr-btn--tertiary-no-outline ${isStructureFinalisee ? "fr-icon-arrow-right-line" : "fr-icon-edit-line"} `}
+          className={`fr-btn fr-btn--tertiary-no-outline ${hasStructureFiche({ isFinalised, isClosed }) ? "fr-icon-arrow-right-line" : "fr-icon-edit-line"} `}
           title={`Détails de ${nom}`}
-          href={
-            isStructureFinalisee
-              ? `structures/${id}`
-              : `structures/${id}/finalisation/01-identification`
-          }
+          href={getStructureHref({ id, isFinalised, isClosed })}
         >
           Détails de {nom}
         </Link>

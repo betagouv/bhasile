@@ -50,7 +50,7 @@ export const canAbilityUpdateDepartement = (
   departementAdministratif?: string | null
 ) => canAbilityUpdateStructure(ability, { departementAdministratif });
 
-const canAbilityUpdateStructure = (
+export const canAbilityUpdateStructure = (
   ability: AppAbility,
   { id, departementAdministratif }: StructureScope
 ) =>

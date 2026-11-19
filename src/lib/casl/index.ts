@@ -24,6 +24,7 @@ export {
   canAbilityReadStructure,
   canAbilityUpdateDepartement,
   canAbilityUpdateSomeStructure,
+  canAbilityUpdateStructure,
   canUpdateStructure,
   getReadableDepartementNumeros,
   getReadableStructureWhere,

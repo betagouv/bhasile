@@ -110,6 +110,7 @@ export const cpomLinkedStructuresInclude = {
         codeBhasile: true,
         type: true,
         departementAdministratif: true,
+        fermetureDate: true,
         operateurId: true,
         operateur: { select: { name: true } },
         forms: {
