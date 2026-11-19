@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ReactElement, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
-import { formatPlural, pluralize } from "@/app/utils/string.util";
+import { formatPlural } from "@/app/utils/string.util";
 import { GrantScope } from "@/generated/prisma/enums";
 import {
   perimeterFormSchema,
@@ -111,7 +111,7 @@ export const PerimeterCreateModal = ({
           small
           severity="info"
           className="mb-6"
-          description={`${formatPlural(perimetersInZone.length, "périmètre")} ${pluralize(perimetersInZone.length, "existe")} déjà sur cette zone : ${perimetersInZone.map(({ name }) => name).join(", ")}. Vérifiez qu’il en faut bien un autre.`}
+          description={`${formatPlural(perimetersInZone.length, "périmètre")} ${perimetersInZone.length > 1 ? "existent" : "existe"} déjà sur cette zone : ${perimetersInZone.map(({ name }) => name).join(", ")}. Vérifiez qu’il en faut bien un autre.`}
         />
       )}
       <Input
