@@ -32,5 +32,5 @@ export const CpomsContent = async ({
 
 type Props = {
   query: CpomsQuery;
-  user: SessionUser;
+  user: SessionUser | undefined;
 };

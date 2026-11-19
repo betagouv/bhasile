@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { isSomeDataIncomplete } from "@/utils/statistiques.util";
+import { hasRmuSection, isSomeDataIncomplete } from "@/utils/statistiques.util";
 
 import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";
@@ -96,19 +96,23 @@ export const StatistiquesPdfExportDocument = ({
           endMonth={data.activiteEndMonth}
         />
       </div>
-      <div className="pt-14">
-        <StatistiquesPdfHeader
-          departementsCount={departementsCount}
-          operateursCount={operateursCount}
-          typesCount={typesCount}
-        />
-      </div>
-      <div className="pb-4">
-        <RMUBlock
-          startMonth={data.activiteStartMonth}
-          endMonth={data.activiteEndMonth}
-        />
-      </div>
+      {hasRmuSection(statistiques) && (
+        <>
+          <div className="pt-14">
+            <StatistiquesPdfHeader
+              departementsCount={departementsCount}
+              operateursCount={operateursCount}
+              typesCount={typesCount}
+            />
+          </div>
+          <div className="pb-4">
+            <RMUBlock
+              startMonth={data.activiteStartMonth}
+              endMonth={data.activiteEndMonth}
+            />
+          </div>
+        </>
+      )}
       <div className="italic pb-6">
         Pour les données mensuelles, seuls les 6 derniers mois sont intégrés
         dans les exports.

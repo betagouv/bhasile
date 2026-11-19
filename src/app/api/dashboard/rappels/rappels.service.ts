@@ -39,7 +39,7 @@ export const getDashboardRappels = async (
 
   const rappels = buildRappels(structures, cpoms, {
     user,
-    ...(await resolveFilters(filters, user)),
+    ...(await resolveFilters(filters)),
     now,
   });
 

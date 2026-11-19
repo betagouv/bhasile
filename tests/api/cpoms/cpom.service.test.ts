@@ -1,11 +1,19 @@
+import {
+  createNationalAgent,
+  createSessionGrant,
+  createSessionUser,
+} from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { prepareCpomToSave } from "@/app/api/cpoms/cpom.service";
+import { getCpomById, prepareCpomToSave } from "@/app/api/cpoms/cpom.service";
 
 const mockFindRegionIdByName = vi.fn();
 const mockFindStructuresOperateur = vi.fn();
+const mockFindOne = vi.fn();
 
-vi.mock("@/app/api/cpoms/cpom.repository", () => ({}));
+vi.mock("@/app/api/cpoms/cpom.repository", () => ({
+  findOne: (...args: unknown[]) => mockFindOne(...args),
+}));
 
 vi.mock("@/app/api/operateurs/operateur.repository", () => ({}));
 
@@ -181,5 +189,43 @@ describe("prepareCpomToSave", () => {
     );
 
     expect(mockFindStructuresOperateur).not.toHaveBeenCalled();
+  });
+});
+
+describe("getCpomById", () => {
+  const cpom = {
+    id: 1,
+    operateurId: 3,
+    granularity: "DEPARTEMENTALE" as const,
+    regionId: null,
+    region: null,
+    departements: [{ departement: { numero: "59" } }],
+    structures: [],
+    actesAdministratifs: [],
+    budgets: [{ id: 10, year: 2025, commentaire: "Commentaire interne" }],
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFindOne.mockResolvedValue(cpom);
+  });
+
+  it("renvoie les commentaires des budgets à un agent", async () => {
+    const result = await getCpomById(1, createNationalAgent());
+
+    expect(result?.budgets?.[0]?.commentaire).toBe("Commentaire interne");
+  });
+
+  it("masque les commentaires des budgets à un opérateur", async () => {
+    const operateurUser = createSessionUser({
+      operateurId: 3,
+      isAgent: false,
+      grants: [createSessionGrant({ isNational: true })],
+    });
+
+    const result = await getCpomById(1, operateurUser);
+
+    expect(result).not.toBeNull();
+    expect(result?.budgets?.[0]?.commentaire).toBeNull();
   });
 });

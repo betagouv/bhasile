@@ -1,8 +1,8 @@
 import { getNow } from "@/app/utils/now.util";
 import {
+  canReadRmu,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
-  isAgent,
 } from "@/lib/casl";
 import {
   StatistiqueApiRead,
@@ -67,7 +67,7 @@ export const buildStatistiquesContext = async (
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = toStatistiquesPerimeterFilters(
-    await resolveFilters(filters, user)
+    await resolveFilters(filters)
   );
   const readableDepartements = getReadableDepartements(
     resolvedFilters.departements,
@@ -146,7 +146,9 @@ export const buildStatistiquesContext = async (
     findCpomBudgets([...new Set(cpomLinks.map((link) => link.cpomId))]),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
-    resolvedFilters.operateurIds === null && filters.types === null
+    canReadRmu(user) &&
+    resolvedFilters.operateurIds === null &&
+    filters.types === null
       ? findRmus(readableDepartements)
       : Promise.resolve(null),
   ]);
@@ -234,14 +236,12 @@ export const getStatistiques = async (
 
   const { aggregation } = filters;
 
-  const isAgentUser = isAgent(user);
-
   return {
     structures: computeStructuresStatistiques(context),
     places: computePlacesStatistiques(context),
     finance: computeFinanceStatistiques(context, aggregation),
     controleQualite: computeControleQualiteStatistiques(context, aggregation),
     activite: computeActiviteStatistiques(context),
-    ...(isAgentUser ? { rmu: computeRmuStatistiques(context) } : {}),
+    ...(canReadRmu(user) ? { rmu: computeRmuStatistiques(context) } : {}),
   };
 };

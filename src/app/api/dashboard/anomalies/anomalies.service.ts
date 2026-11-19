@@ -35,7 +35,7 @@ export const getDashboardAnomalies = async (
 
   const anomalies = buildDashboardAnomalies(structures, {
     user,
-    ...(await resolveFilters(filters, user)),
+    ...(await resolveFilters(filters)),
     shouldShowIgnored: options.shouldShowIgnored,
     now: getNow(),
   });

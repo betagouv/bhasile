@@ -36,6 +36,12 @@ const operateurUser = createSessionUser({
   grants: [createSessionGrant({ isNational: true })],
 });
 
+const contactUser = createSessionUser({
+  operateurId: null,
+  isAgent: false,
+  grants: [createSessionGrant({ structureIds: [12] })],
+});
+
 const routes = [
   {
     name: "GET /api/statistiques",
@@ -67,6 +73,15 @@ describe.each(routes)("$name", ({ call, service }) => {
     const response = await call();
 
     expect(response.status).toBe(401);
+    expect(service).not.toHaveBeenCalled();
+  });
+
+  it("refuse un contact sans opérateur rattaché", async () => {
+    mockGetServerSession.mockResolvedValue({ user: contactUser });
+
+    const response = await call();
+
+    expect(response.status).toBe(403);
     expect(service).not.toHaveBeenCalled();
   });
 

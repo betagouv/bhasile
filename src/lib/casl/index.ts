@@ -20,6 +20,7 @@ export {
   EDITING_ROLES,
   isAgent,
 } from "./rules";
+export { canReadRmu } from "./statistique.ability";
 export {
   canAbilityReadStructure,
   canAbilityUpdateDepartement,

@@ -1,14 +1,11 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { ReactElement, useEffect } from "react";
 
 import { Section } from "@/app/components/common/Section";
 import { useUserAction } from "@/app/hooks/useUserAction";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { isAgent } from "@/lib/casl";
-import { SessionUser } from "@/types/global";
-import { isSomeDataIncomplete } from "@/utils/statistiques.util";
+import { hasRmuSection, isSomeDataIncomplete } from "@/utils/statistiques.util";
 
 import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";
@@ -22,7 +19,6 @@ import { TypesPlacesBlock } from "./type-places/TypesPlacesBlock";
 export const StatistiquesContent = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
   const { trackStatistiques } = useUserAction();
-  const { data } = useSession();
 
   useEffect(() => {
     trackStatistiques();
@@ -48,7 +44,7 @@ export const StatistiquesContent = (): ReactElement => {
       <Section id="activite">
         <ActiviteBlock />
       </Section>
-      {isAgent(data?.user as SessionUser) && (
+      {hasRmuSection(statistiques) && (
         <Section id="rmu">
           <RMUBlock />
         </Section>

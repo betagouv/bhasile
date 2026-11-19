@@ -1,8 +1,10 @@
 import { cache } from "react";
 
 import { Filters } from "@/types/filters.type";
-import { SessionUser } from "@/types/global";
-import { ParsedFilters, parseFilters } from "@/utils/filters.util";
+import {
+  ParsedFilters,
+  parseFilters,
+} from "@/utils/filters.util";
 
 import { findOperateurFiliales } from "../operateurs/operateur.repository";
 
@@ -10,19 +12,9 @@ const resolveFiltersCached = cache(
   async (
     departements: string | null,
     operateurs: string | null,
-    types: string | null,
-    user: SessionUser
+    types: string | null
   ): Promise<ParsedFilters> => {
-    const effectiveOperateurs = user?.operateurId
-      ? String(user.operateurId)
-      : operateurs;
-
-    const filters = parseFilters({
-      departements,
-      operateurs: effectiveOperateurs,
-      types,
-    });
-
+    const filters = parseFilters({ departements, operateurs, types });
     const filiales = await findOperateurFiliales(
       filters.operateurList.map(Number)
     );
@@ -38,13 +30,13 @@ const resolveFiltersCached = cache(
   }
 );
 
-export const resolveFilters = (
-  { departements, operateurs, types }: Partial<Filters>,
-  user: SessionUser
-): Promise<ParsedFilters> =>
+export const resolveFilters = ({
+  departements,
+  operateurs,
+  types,
+}: Partial<Filters>): Promise<ParsedFilters> =>
   resolveFiltersCached(
     departements ?? null,
     operateurs ?? null,
-    types ?? null,
-    user
+    types ?? null
   );

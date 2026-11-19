@@ -4,7 +4,6 @@ import { getOperateurs } from "@/app/api/operateurs/operateur.service";
 import { ListLoader } from "@/app/components/lists/ListLoader";
 import { LIST_NAVIGATION_KEY } from "@/constants";
 import { Filters } from "@/types/filters.type";
-import { SessionUser } from "@/types/global";
 
 import { OperateurList } from "./OperateursList";
 
@@ -12,15 +11,13 @@ export const OperateursContent = async ({
   page,
   search,
   filters,
-  user,
 }: Props): Promise<ReactElement> => {
   const { operateurs, totalOperateurs } = await getOperateurs(
     page,
     search,
     filters.departements,
     filters.operateurs,
-    filters.types,
-    user
+    filters.types
   );
 
   return (
@@ -41,5 +38,4 @@ type Props = {
   page: number;
   search: string | null;
   filters: Filters;
-  user: SessionUser | undefined;
 };
