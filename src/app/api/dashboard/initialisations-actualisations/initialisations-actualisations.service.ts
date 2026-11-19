@@ -29,7 +29,7 @@ export const getInitialisationsActualisations = async (
 
   const rows = buildDashboardRows(structures, {
     user,
-    ...(await resolveFilters(filters, user as SessionUser)),
+    ...(await resolveFilters(filters)),
     year,
     now,
   });

@@ -4,7 +4,11 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
+import { useOptionalStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { DEFAULT_CARTOGRAPHIE_INDICATEUR } from "@/schemas/api/statistique-cartographie.schema";
+import { hasRmuSection } from "@/utils/statistiques.util";
+
+const RMU_SECTION_TITLE = "Référés Mesures Utiles";
 
 const sections = [
   {
@@ -82,7 +86,7 @@ const sections = [
     ],
   },
   {
-    title: "Référés Mesures Utiles",
+    title: RMU_SECTION_TITLE,
     icon: "fr-icon-article-line",
     items: [
       {
@@ -101,6 +105,11 @@ export const CartographieMenu = (): ReactElement => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { statistiques } = useOptionalStatistiquesContext();
+
+  const visibleSections = hasRmuSection(statistiques)
+    ? sections
+    : sections.filter((section) => section.title !== RMU_SECTION_TITLE);
 
   const currentIndicator =
     searchParams.get("indicateur") || DEFAULT_CARTOGRAPHIE_INDICATEUR;
@@ -113,7 +122,7 @@ export const CartographieMenu = (): ReactElement => {
 
   return (
     <aside className="bg-white w-120 border-r border-default-grey overflow-y-auto max-h-[calc(100vh-var(--structure-header-height))]">
-      {sections.map((section, index) => (
+      {visibleSections.map((section, index) => (
         <div key={section.title} className="px-5 pt-5">
           <h2 className="text-lg font-bold text-title-blue-france flex items-center">
             <span className={`${section.icon} mr-3`} aria-hidden="true" />
@@ -142,7 +151,7 @@ export const CartographieMenu = (): ReactElement => {
               );
             })}
           </div>
-          {index < sections.length - 1 && (
+          {index < visibleSections.length - 1 && (
             <hr className="mt-6 -mx-5 border-default-grey" />
           )}
         </div>

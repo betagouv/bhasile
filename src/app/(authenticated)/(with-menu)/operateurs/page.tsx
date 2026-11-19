@@ -10,8 +10,6 @@ import {
 } from "@/app/utils/search-params.util";
 import { PageHeader } from "@/components/PageHeader";
 import { OPERATEURS_STORAGE_KEY } from "@/constants";
-import { auth } from "@/lib/next-auth/auth";
-import { SessionUser } from "@/types/global";
 import { getFiltersFromSearchParams } from "@/utils/filters.util";
 
 import { OperateursContent } from "./OperateursContent";
@@ -27,8 +25,6 @@ export default async function Operateurs({
   const page = getPageParam(params, "page");
   const search = getFirstParam(params.search);
   const filters = getFiltersFromSearchParams(params);
-  const session = await auth();
-  const user = session?.user as SessionUser | undefined;
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -41,12 +37,7 @@ export default async function Operateurs({
         <SearchBar placeholder="Nom d'opérateur" inputId="operateurs-search" />
         <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
           <Suspense fallback={<div className="pl-3 min-w-24" />}>
-            <OperateursCount
-              page={page}
-              search={search}
-              filters={filters}
-              user={user}
-            />
+            <OperateursCount page={page} search={search} filters={filters} />
           </Suspense>
         </ContentErrorBoundary>
       </div>
@@ -59,12 +50,7 @@ export default async function Operateurs({
         }
       >
         <Suspense fallback={<OperateursSkeleton />}>
-          <OperateursContent
-            page={page}
-            search={search}
-            filters={filters}
-            user={user}
-          />
+          <OperateursContent page={page} search={search} filters={filters} />
         </Suspense>
       </ContentErrorBoundary>
     </div>

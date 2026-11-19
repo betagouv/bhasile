@@ -24,6 +24,27 @@ describe("canAccessPage", () => {
       expect(canAccessPage(currentOperateurUser, "/structures/12")).toBe(true);
     });
 
+    it("autorise la lecture des CPOM et des statistiques", () => {
+      expect(canAccessPage(currentOperateurUser, "/cpoms")).toBe(true);
+      expect(canAccessPage(currentOperateurUser, "/cpoms/12")).toBe(true);
+      expect(canAccessPage(currentOperateurUser, "/statistiques")).toBe(true);
+      expect(
+        canAccessPage(currentOperateurUser, "/statistiques/cartographie")
+      ).toBe(true);
+    });
+
+    it("refuse la création et la modification des CPOM", () => {
+      expect(
+        canAccessPage(currentOperateurUser, "/cpoms/ajout/01-identification")
+      ).toBe(false);
+      expect(
+        canAccessPage(currentOperateurUser, "/cpoms/12/ajout/02-finances")
+      ).toBe(false);
+      expect(
+        canAccessPage(currentOperateurUser, "/cpoms/12/modification/finances")
+      ).toBe(false);
+    });
+
     it("refuse l'accès aux pages réservées aux agents", () => {
       expect(canAccessPage(currentOperateurUser, "/")).toBe(false);
       expect(canAccessPage(currentOperateurUser, "/ressources")).toBe(false);
@@ -59,6 +80,24 @@ describe("canAccessPage", () => {
     });
   });
 
+  describe("pour un contact sans opérateur rattaché", () => {
+    const contactUser = createSessionUser({
+      operateurId: null,
+      isAgent: false,
+      grants: [createSessionGrant({ structureIds: [12] })],
+    });
+
+    it("autorise l'accès aux structures", () => {
+      expect(canAccessPage(contactUser, "/structures/12")).toBe(true);
+    });
+
+    it("refuse l'accès aux CPOM et aux statistiques", () => {
+      expect(canAccessPage(contactUser, "/cpoms")).toBe(false);
+      expect(canAccessPage(contactUser, "/cpoms/12")).toBe(false);
+      expect(canAccessPage(contactUser, "/statistiques")).toBe(false);
+    });
+  });
+
   describe("pour un utilisateur agent", () => {
     const currentAgentUser = createDepartementalAgent(["75"]);
 
@@ -75,6 +114,30 @@ describe("canAccessPage", () => {
       expect(
         canAccessPage(currentAgentUser, "/structures/transformation/type")
       ).toBe(true);
+    });
+
+    it("autorise la création et la modification des CPOM à un agent éditeur", () => {
+      expect(
+        canAccessPage(currentAgentUser, "/cpoms/ajout/01-identification")
+      ).toBe(true);
+      expect(
+        canAccessPage(currentAgentUser, "/cpoms/12/modification/finances")
+      ).toBe(true);
+    });
+
+    it("refuse la création et la modification des CPOM à un agent sans droit d'écriture", () => {
+      const readOnlyAgent = createSessionUser({
+        grants: [
+          createSessionGrant({ role: AccessRole.LECTEUR, isNational: true }),
+        ],
+      });
+      expect(canAccessPage(readOnlyAgent, "/cpoms/12")).toBe(true);
+      expect(
+        canAccessPage(readOnlyAgent, "/cpoms/ajout/01-identification")
+      ).toBe(false);
+      expect(
+        canAccessPage(readOnlyAgent, "/cpoms/12/modification/finances")
+      ).toBe(false);
     });
 
     it("refuse les transformations à un agent sans droit d'écriture", () => {

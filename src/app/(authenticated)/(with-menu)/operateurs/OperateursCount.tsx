@@ -3,21 +3,18 @@ import { ReactElement } from "react";
 import { getOperateurs } from "@/app/api/operateurs/operateur.service";
 import { formatPlural } from "@/app/utils/string.util";
 import { Filters } from "@/types/filters.type";
-import { SessionUser } from "@/types/global";
 
 export const OperateursCount = async ({
   page,
   search,
   filters,
-  user,
 }: Props): Promise<ReactElement> => {
   const { totalOperateurs } = await getOperateurs(
     page,
     search,
     filters.departements,
     filters.operateurs,
-    filters.types,
-    user
+    filters.types
   );
 
   return (
@@ -31,5 +28,4 @@ type Props = {
   page: number;
   search: string | null;
   filters: Filters;
-  user: SessionUser | undefined;
 };

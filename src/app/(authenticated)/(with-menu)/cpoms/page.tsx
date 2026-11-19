@@ -9,6 +9,7 @@ import {
   SearchParams,
 } from "@/app/utils/search-params.util";
 import { PageHeader } from "@/components/PageHeader";
+import { canAccessPage } from "@/lib/casl/pages";
 import { auth } from "@/lib/next-auth/auth";
 import { CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
@@ -25,12 +26,14 @@ export default async function Cpoms({
 }): Promise<ReactElement> {
   const params = await searchParams;
   const session = await auth();
+  const user = session?.user as SessionUser | undefined;
+  const canCreateCpom = canAccessPage(user, "/cpoms/ajout");
   const query: CpomsQuery = {
     page: getPageParam(params, "page"),
     ...getFiltersFromSearchParams(params),
     column: parseCpomColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
-    user: session?.user as SessionUser | undefined,
+    user,
   };
 
   return (
@@ -38,9 +41,16 @@ export default async function Cpoms({
       <PageHeader
         title="CPOM"
         titleId="cpoms-titre"
-        menuActions={[
-          { label: "Créer un CPOM", href: "/cpoms/ajout/01-identification" },
-        ]}
+        menuActions={
+          canCreateCpom
+            ? [
+                {
+                  label: "Créer un CPOM",
+                  href: "/cpoms/ajout/01-identification",
+                },
+              ]
+            : []
+        }
       />
       <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
         <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
@@ -58,7 +68,7 @@ export default async function Cpoms({
         }
       >
         <Suspense fallback={<CpomsSkeleton />}>
-          <CpomsContent query={query} user={session?.user as SessionUser} />
+          <CpomsContent query={query} user={user} />
         </Suspense>
       </ContentErrorBoundary>
     </div>
