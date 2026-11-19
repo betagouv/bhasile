@@ -205,7 +205,7 @@ describe("dna-codes.repository findAll db integration", () => {
 
     const codes = (
       await findAll({
-        departementsAdministratifs: [departement.numero],
+        departementAdministratif: departement.numero,
         type: StructureType.HUDA,
       })
     ).map((dna) => dna.code);
@@ -227,7 +227,7 @@ describe("dna-codes.repository findAll db integration", () => {
       await findAll({
         entityId: { structureId: structure.id },
         operateurId: operateur.id,
-        departementsAdministratifs: ["00"],
+        departementAdministratif: "00",
         type: StructureType.HUDA,
       })
     ).map((dna) => dna.code);

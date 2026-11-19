@@ -9,13 +9,13 @@ import { StructureType } from "@/types/structure.type";
 export const findAll = async ({
   entityId = {},
   operateurId,
-  departementsAdministratifs,
+  departementAdministratif,
   type,
   transformationId,
 }: {
   entityId?: EntityId;
   operateurId?: number;
-  departementsAdministratifs?: string[];
+  departementAdministratif?: string;
   type?: StructureType;
   transformationId?: number;
 } = {}): Promise<FreeDnaCode[]> => {
@@ -33,8 +33,8 @@ export const findAll = async ({
       ],
     };
   }
-  if (departementsAdministratifs) {
-    freeFilter.departementAdministratif = { in: departementsAdministratifs };
+  if (departementAdministratif) {
+    freeFilter.departementAdministratif = departementAdministratif;
   }
   if (type) {
     freeFilter.type = type;

@@ -25,6 +25,31 @@ describe("useFetchFreeDnaCodes", () => {
     expect(result.current.freeDnaCodes).toBeUndefined();
   });
 
+  it("n'expose plus les codes des anciens filtres quand le rechargement échoue", async () => {
+    const mockedFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        toJsonResponse(200, [{ code: "C0001", departementAdministratif: "75" }])
+      )
+      .mockResolvedValueOnce(
+        toJsonResponse(500, { error: "Échec de la récupération des codes DNA" })
+      );
+    global.fetch = mockedFetch;
+
+    const { result, rerender } = renderHook(
+      ({ departementAdministratif }) =>
+        useFetchFreeDnaCodes({ departementAdministratif }),
+      { initialProps: { departementAdministratif: "75" } }
+    );
+    await waitFor(() => expect(result.current.freeDnaCodes).toHaveLength(1));
+
+    rerender({ departementAdministratif: "92" });
+    await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(2));
+    await act(async () => {});
+
+    expect(result.current.freeDnaCodes).toBeUndefined();
+  });
+
   it("ignore la réponse d'une requête périmée quand les filtres changent", async () => {
     const latestCodes = [{ code: "B0001", departementAdministratif: "13" }];
     let resolveStaleResponse: (response: unknown) => void = () => {};

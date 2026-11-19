@@ -131,28 +131,9 @@ describe("GET /api/dna-codes", () => {
     // THEN
     expect(mockFindAll).toHaveBeenCalledWith({
       entityId: { structureId: undefined, structureVersionId: undefined },
-      departementsAdministratifs: ["75"],
+      departementAdministratif: "75",
       type: "HUDA",
     });
-  });
-
-  it("élargit un département corse saisi en « 20 » à la Corse-du-Sud et à la Haute-Corse", async () => {
-    // GIVEN
-    mockFindAll.mockResolvedValueOnce([]);
-
-    const request = new NextRequest(
-      "http://localhost/api/dna-codes?departementAdministratif=20"
-    );
-
-    // WHEN
-    await GET(request);
-
-    // THEN
-    expect(mockFindAll).toHaveBeenCalledWith(
-      expect.objectContaining({
-        departementsAdministratifs: ["20", "2A", "2B"],
-      })
-    );
   });
 
   it("ignore un type de structure inconnu", async () => {

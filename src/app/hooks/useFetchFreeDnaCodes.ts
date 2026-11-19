@@ -20,6 +20,7 @@ export const useFetchFreeDnaCodes = ({
     let isStale = false;
 
     const fetchFreeDnaCodes = async () => {
+      setFreeDnaCodes(undefined);
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
 
       const params = new URLSearchParams();
