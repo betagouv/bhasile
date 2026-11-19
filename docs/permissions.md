@@ -100,7 +100,7 @@ Un superadmin gère les agents dans **Cockpit admin → Agents et périmètres**
 
 - **Périmètre** : départemental ou régional, un binôme `ADMIN` sur la zone, nom unique pré-rempli (« DDETS Finistère »). Les périmètres qui couvrent déjà la zone sont affichés avant création.
 - **Valider** un compte en attente, **changer** le périmètre d'un agent actif, **réactiver** un compte désactivé : un périmètre est toujours exigé, et peut être créé depuis la modale.
-- **Désactiver** : `isActivated = false` et `deactivatedAt`, périmètre conservé pour une réactivation.
+- **Désactiver** un agent actif (refusé sinon) : `isActivated = false` et `deactivatedAt`, périmètre conservé pour une réactivation.
 - **Ajouter** un agent jamais connecté par son email : compte créé activé, droits dès la première connexion ProConnect.
 - Opérateurs et superadmins n'y figurent pas, ni les contacts de structure en attente (email présent dans `Contact`). Chaque action est tracée dans `UserAction` : type `AGENT_ACCESS` pour les accès (`details` : `targetUserId`, `from`, `to`), `PERIMETER_CREATION` pour les périmètres (`details` : `perimeterId`, `name`).
 

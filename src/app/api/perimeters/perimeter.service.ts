@@ -60,7 +60,7 @@ export const addPerimeter = async (
   }
   const perimeter = await createPerimeter(input);
 
-  await createPerimeterCreationEvent(method, {
+  createPerimeterCreationEvent(method, {
     perimeterId: String(perimeter.id),
     name: input.name,
   });

@@ -40,7 +40,7 @@ export const addAgent = async (
   const perimeter = await getPerimeterOrThrow(perimeterId);
   const { id } = await createActivatedAgent(email, perimeter.id);
 
-  await createAgentAccessEvent(method, {
+  createAgentAccessEvent(method, {
     targetUserId: String(id),
     from: "Absent de Bhasile",
     to: describeAgentAccess("ACTIVATED", perimeter),
@@ -56,14 +56,14 @@ export const updateAgentAccess = async (
   if (!agent || (await excludePendingContacts([agent])).length === 0) {
     throw new DomainError("Agent introuvable", 404);
   }
-  const from = describeAgentAccess(getAccountStatus(agent), agent.perimeter);
+  const status = getAccountStatus(agent);
+  if (input.status === "DEACTIVATED" && status !== "ACTIVATED") {
+    throw new DomainError("Seul un agent actif peut être désactivé", 409);
+  }
+  const from = describeAgentAccess(status, agent.perimeter);
   const to = await applyAccessUpdate(id, input, agent.perimeter);
 
-  await createAgentAccessEvent(method, {
-    targetUserId: String(id),
-    from,
-    to,
-  });
+  createAgentAccessEvent(method, { targetUserId: String(id), from, to });
 };
 
 const applyAccessUpdate = async (

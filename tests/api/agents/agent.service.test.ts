@@ -141,6 +141,21 @@ describe("agent.service", () => {
     });
   });
 
+  it.each([
+    ["en attente", pendingAgent],
+    [
+      "déjà désactivé",
+      { ...pendingAgent, deactivatedAt: new Date("2026-10-01") },
+    ],
+  ])("refuse de désactiver un compte %s", async (_, agent) => {
+    mockFindAgentById.mockResolvedValue(agent);
+
+    await expect(
+      updateAgentAccess(12, { status: "DEACTIVATED" }, "PUT")
+    ).rejects.toMatchObject({ status: 409 });
+    expect(mockDeactivateAgent).not.toHaveBeenCalled();
+  });
+
   it("désactive un agent en conservant son périmètre", async () => {
     mockFindAgentById.mockResolvedValue(activeAgent);
 
