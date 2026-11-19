@@ -170,3 +170,19 @@ type AgentAccessEventDetails = {
   from: string;
   to: string;
 };
+
+export const createPerimeterCreationEvent = async (
+  method: string,
+  details: PerimeterCreationEventDetails
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    type: UserActionType.PERIMETER_CREATION,
+    details,
+  });
+};
+
+type PerimeterCreationEventDetails = {
+  perimeterId: string;
+  name: string;
+};

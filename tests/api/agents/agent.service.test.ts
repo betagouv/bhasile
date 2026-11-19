@@ -18,12 +18,15 @@ const mockGetContactEmails = vi.fn();
 
 vi.mock("@/app/api/agents/agent.repository", () => ({
   findAgents: (...args: unknown[]) => mockFindAgents(...args),
-  findUserIdByEmail: (...args: unknown[]) => mockFindUserIdByEmail(...args),
   findAgentById: (...args: unknown[]) => mockFindAgentById(...args),
   createActivatedAgent: (...args: unknown[]) =>
     mockCreateActivatedAgent(...args),
   activateAgent: (...args: unknown[]) => mockActivateAgent(...args),
   deactivateAgent: (...args: unknown[]) => mockDeactivateAgent(...args),
+}));
+
+vi.mock("@/app/api/users/user.repository", () => ({
+  findUserIdByEmail: (...args: unknown[]) => mockFindUserIdByEmail(...args),
 }));
 
 vi.mock("@/app/api/perimeters/perimeter.service", () => ({

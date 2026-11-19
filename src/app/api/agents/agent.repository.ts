@@ -25,9 +25,6 @@ export const findAgentById = (id: number) =>
     select: agentSelect,
   });
 
-export const findUserIdByEmail = (email: string) =>
-  prisma.user.findUnique({ where: { email }, select: { id: true } });
-
 export const createActivatedAgent = (email: string, perimeterId: number) =>
   prisma.user.create({
     data: { email, perimeterId, isActivated: true },

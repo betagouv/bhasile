@@ -1,6 +1,7 @@
 import { getContactEmails } from "@/app/api/contacts/contact.service";
 import { getPerimeterOrThrow } from "@/app/api/perimeters/perimeter.service";
 import { createAgentAccessEvent } from "@/app/api/user-actions/user-action.service";
+import { findUserIdByEmail } from "@/app/api/users/user.repository";
 import { getAccountStatus } from "@/app/api/users/user.util";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { getNow } from "@/app/utils/now.util";
@@ -14,7 +15,6 @@ import {
   deactivateAgent,
   findAgentById,
   findAgents,
-  findUserIdByEmail,
 } from "./agent.repository";
 
 export const getAgents = async (): Promise<AgentRead[]> =>

@@ -9,6 +9,7 @@ export const findPerimeters = () =>
       id: true,
       name: true,
       grants: {
+        orderBy: { id: "asc" },
         select: {
           scope: true,
           regionId: true,
@@ -38,13 +39,16 @@ export const createPerimeter = ({ name, ...zone }: PerimeterApiCreate) =>
     select: { id: true },
   });
 
-export const findZones = async () => ({
-  departements: await prisma.departement.findMany({
-    orderBy: { numero: "asc" },
-    select: { numero: true, name: true },
-  }),
-  regions: await prisma.region.findMany({
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  }),
-});
+export const findZones = async () => {
+  const [departements, regions] = await Promise.all([
+    prisma.departement.findMany({
+      orderBy: { numero: "asc" },
+      select: { numero: true, name: true },
+    }),
+    prisma.region.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
+  return { departements, regions };
+};

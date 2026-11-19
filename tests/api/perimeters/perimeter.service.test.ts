@@ -8,12 +8,18 @@ import {
 const mockFindPerimeters = vi.fn();
 const mockFindPerimeterIdByName = vi.fn();
 const mockCreatePerimeter = vi.fn();
+const mockCreatePerimeterCreationEvent = vi.fn();
 
 vi.mock("@/app/api/perimeters/perimeter.repository", () => ({
   findPerimeters: (...args: unknown[]) => mockFindPerimeters(...args),
   findPerimeterIdByName: (...args: unknown[]) =>
     mockFindPerimeterIdByName(...args),
   createPerimeter: (...args: unknown[]) => mockCreatePerimeter(...args),
+}));
+
+vi.mock("@/app/api/user-actions/user-action.service", () => ({
+  createPerimeterCreationEvent: (...args: unknown[]) =>
+    mockCreatePerimeterCreationEvent(...args),
 }));
 
 const finistere = {
@@ -83,22 +89,26 @@ describe("perimeter.service", () => {
   it("refuse un nom de périmètre déjà pris", async () => {
     mockFindPerimeterIdByName.mockResolvedValue({ id: 1 });
 
-    await expect(addPerimeter(finistere)).rejects.toMatchObject({
+    await expect(addPerimeter(finistere, "POST")).rejects.toMatchObject({
       status: 409,
     });
     expect(mockCreatePerimeter).not.toHaveBeenCalled();
   });
 
-  it("crée un périmètre sur une zone déjà couverte, sous un autre nom, et renvoie son id", async () => {
+  it("crée un périmètre sur une zone déjà couverte, sous un autre nom, le trace et renvoie son id", async () => {
     mockFindPerimeterIdByName.mockResolvedValue(null);
     mockCreatePerimeter.mockResolvedValue({ id: 7 });
 
     await expect(
-      addPerimeter({ ...finistere, name: "DDETS Finistère – SIAO" })
+      addPerimeter({ ...finistere, name: "DDETS Finistère – SIAO" }, "POST")
     ).resolves.toEqual({ id: 7 });
 
     expect(mockCreatePerimeter).toHaveBeenCalledWith({
       ...finistere,
+      name: "DDETS Finistère – SIAO",
+    });
+    expect(mockCreatePerimeterCreationEvent).toHaveBeenCalledWith("POST", {
+      perimeterId: "7",
       name: "DDETS Finistère – SIAO",
     });
   });

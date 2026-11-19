@@ -1,3 +1,4 @@
+import { createPerimeterCreationEvent } from "@/app/api/user-actions/user-action.service";
 import { DomainError } from "@/app/utils/domain-error.util";
 import { GrantScope } from "@/generated/prisma/enums";
 import { PerimeterApiCreate } from "@/schemas/api/perimeter.schema";
@@ -51,12 +52,19 @@ export const getZoneOptions = async (): Promise<ZoneOption[]> => {
 };
 
 export const addPerimeter = async (
-  input: PerimeterApiCreate
+  input: PerimeterApiCreate,
+  method: string
 ): Promise<{ id: number }> => {
   if (await findPerimeterIdByName(input.name)) {
     throw new DomainError(`Un périmètre s’appelle déjà « ${input.name} »`, 409);
   }
-  return createPerimeter(input);
+  const perimeter = await createPerimeter(input);
+
+  await createPerimeterCreationEvent(method, {
+    perimeterId: String(perimeter.id),
+    name: input.name,
+  });
+  return perimeter;
 };
 
 export const getPerimeterOrThrow = async (id: number) => {
