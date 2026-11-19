@@ -19,6 +19,7 @@ export const loadCsvFromS3 = async <T extends Record<string, string>>(
 
   console.log("Parsing du CSV...");
   const records = parse<T>(csvContent, {
+    bom: true,
     columns: true,
     skip_empty_lines: true,
     trim: true,

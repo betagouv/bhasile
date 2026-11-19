@@ -1,6 +1,9 @@
+import { createHash } from "node:crypto";
+
 import { Session } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
+import { DomainError } from "@/app/utils/domain-error.util";
 import {
   ALLOWED_MIME_TYPES,
   FILE_UPLOAD_EXPIRATION_DELAY,
@@ -11,13 +14,16 @@ import { canDeleteFile, canReadConversation } from "@/lib/casl";
 import { checkBucket, getMinioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { EntityId } from "@/types/Entity.type";
 import { SessionUser } from "@/types/global";
 import { Principal, PrincipalType } from "@/types/principal.type";
+import { PrismaTransaction } from "@/types/prisma.type";
 
 import { FileWithParents } from "./file.db.type";
 import {
   createOne,
   deleteOneByKey,
+  findManyByKeysWithParents,
   findOneByKeyWithParents,
 } from "./file.repository";
 
@@ -26,13 +32,65 @@ export const getPrincipal = (session: Session | null): Principal =>
     ? { type: PrincipalType.Agent, user: session.user as SessionUser }
     : { type: PrincipalType.Operateur };
 
+type FileParent = Partial<Record<keyof EntityId, number | null>>;
+
+const getFileParents = (file: FileWithParents): FileParent[] => {
+  const parents: [number | null, FileParent | null][] = [
+    [file.acteAdministratifId, file.acteAdministratif],
+    [file.documentFinancierId, file.documentFinancier],
+    [file.controleId, file.controle],
+    [file.evaluationId, file.evaluation],
+    [file.operateurId, { operateurId: file.operateurId }],
+    [file.messageId, {}],
+    [file.tarificationDocument?.id ?? null, {}],
+  ];
+  return parents.flatMap(([parentId, parent]) =>
+    parentId == null ? [] : [parent ?? {}]
+  );
+};
+
 const isOrphan = (file: FileWithParents): boolean =>
-  file.acteAdministratifId == null &&
-  file.documentFinancierId == null &&
-  file.controleId == null &&
-  file.evaluationId == null &&
-  file.operateurId == null &&
-  file.messageId == null;
+  getFileParents(file).length === 0;
+
+const isParentOfEntity = (parent: FileParent, entityId: EntityId): boolean => {
+  const entityFields = (Object.keys(entityId) as (keyof EntityId)[]).filter(
+    (field) => entityId[field] !== undefined
+  );
+  return (
+    entityFields.length > 0 &&
+    entityFields.every((field) => parent[field] === entityId[field])
+  );
+};
+
+export const assertFilesCanBeAttachedToEntity = async (
+  tx: PrismaTransaction,
+  fileUploads: { key: string }[],
+  entityId: EntityId
+): Promise<void> => {
+  if (fileUploads.length === 0) {
+    return;
+  }
+
+  const files = await findManyByKeysWithParents(
+    tx,
+    fileUploads.map((fileUpload) => fileUpload.key)
+  );
+
+  const foundKeys = new Set(files.map((file) => file.key));
+  if (fileUploads.some((fileUpload) => !foundKeys.has(fileUpload.key))) {
+    throw new DomainError("Fichier introuvable", 404);
+  }
+
+  const hasFileFromOtherEntity = files.some((file) =>
+    getFileParents(file).some((parent) => !isParentOfEntity(parent, entityId))
+  );
+  if (hasFileFromOtherEntity) {
+    throw new DomainError(
+      "Un fichier est déjà rattaché à une autre entité",
+      409
+    );
+  }
+};
 
 export const authorizeFileAccess = (
   principal: Principal,
@@ -41,6 +99,10 @@ export const authorizeFileAccess = (
 ): boolean => {
   if (isOrphan(file)) {
     return true;
+  }
+
+  if (file.tarificationDocument) {
+    return false;
   }
   if (principal.type === PrincipalType.Operateur) {
     return false;
@@ -56,6 +118,9 @@ export const authorizeFileAccess = (
   }
   return canDeleteFile(principal.user, file);
 };
+
+export const getSha256 = (fileBuffer: Buffer): string =>
+  createHash("sha256").update(fileBuffer).digest("hex");
 
 export const uploadFile = async (
   bucketName: string,
@@ -75,6 +140,25 @@ export const uploadFile = async (
   } catch (error) {
     console.error(error);
     throw new Error("Erreur lors de l'upload du fichier");
+  }
+};
+
+export const copyStoredFile = async (
+  bucketName: string,
+  sourceKey: string,
+  originalName: string
+): Promise<string> => {
+  try {
+    const key = `${uuidv4()}-${originalName}`;
+    await getMinioClient().copyObject(
+      bucketName,
+      key,
+      `/${bucketName}/${sourceKey}`
+    );
+    return key;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Erreur lors de la copie du fichier");
   }
 };
 
@@ -103,6 +187,28 @@ export const getDownloadLink = async (
   } catch (error) {
     console.error(error);
     throw new Error("Erreur lors du téléchargement du fichier");
+  }
+};
+
+// Les fichiers sont stockés sans type sur S3 : sans ces en-têtes, le navigateur les téléchargerait
+export const getInlineLink = async (
+  bucketName: string,
+  fileName: string,
+  mimeType: string
+): Promise<string> => {
+  try {
+    return getMinioClient().presignedGetObject(
+      bucketName,
+      fileName,
+      FILE_UPLOAD_EXPIRATION_DELAY,
+      {
+        "response-content-type": mimeType,
+        "response-content-disposition": "inline",
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    throw new Error("Erreur lors de l'ouverture du fichier");
   }
 };
 
@@ -138,13 +244,15 @@ export const createUploadedFile = async ({
   mimeType,
   originalName,
   fileSize,
+  sha256,
 }: {
   key: string;
   mimeType: string;
   originalName: string;
   fileSize: number;
+  sha256: string;
 }): Promise<FileUpload | null> => {
-  return createOne({ key, mimeType, originalName, fileSize });
+  return createOne({ key, mimeType, originalName, fileSize, sha256 });
 };
 
 export const getFileWithParents = async (

@@ -1,6 +1,7 @@
 import { Form, Prisma, StructureType } from "@/generated/prisma/client";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/types/structure.type";
 
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import {
   resolvableVersionSelect,
   type StructureVersionDbDetails,
@@ -13,29 +14,6 @@ import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 export const includedStructureWhere = {
   OR: [{ type: null }, { type: { notIn: [...EXCLUDED_STRUCTURE_TYPES] } }],
 } satisfies Prisma.StructureWhereInput;
-
-export const cpomLinkedStructureSelect = {
-  id: true,
-  codeBhasile: true,
-  type: true,
-  departementAdministratif: true,
-  fermetureDate: true,
-  operateur: {
-    select: { id: true, name: true },
-  },
-  forms: {
-    select: { status: true, formDefinition: { select: { slug: true } } },
-  },
-  structureVersions: {
-    select: {
-      ...resolvableVersionSelect,
-      communeAdministrative: true,
-      structureVersionTransformation: {
-        select: { type: true, ...transformationStatusSelect },
-      },
-    },
-  },
-} satisfies Prisma.StructureSelect;
 
 export const structureListLightVersionSelect = {
   ...resolvableVersionSelect,
@@ -123,6 +101,36 @@ export const structureListInclude = {
   actesAdministratifs: true,
 } satisfies Prisma.StructureInclude;
 
+export const cpomLinkedStructuresInclude = {
+  where: { structure: includedStructureWhere },
+  include: {
+    structure: {
+      select: {
+        id: true,
+        codeBhasile: true,
+        type: true,
+        departementAdministratif: true,
+        fermetureDate: true,
+        operateurId: true,
+        operateur: { select: { name: true } },
+        forms: {
+          where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
+          select: { status: true, formDefinition: { select: { slug: true } } },
+        },
+        structureVersions: {
+          select: {
+            ...resolvableVersionSelect,
+            structureVersionTransformation: {
+              select: { type: true, ...transformationStatusSelect },
+            },
+            communeAdministrative: true,
+          },
+        },
+      },
+    },
+  },
+} satisfies Prisma.CpomStructureFindManyArgs;
+
 export const structureDetailsInclude = {
   anomalies: {
     where: { isJustified: true },
@@ -138,12 +146,7 @@ export const structureDetailsInclude = {
     include: {
       cpom: {
         include: {
-          structures: {
-            where: { structure: includedStructureWhere },
-            include: {
-              structure: { select: cpomLinkedStructureSelect },
-            },
-          },
+          structures: cpomLinkedStructuresInclude,
           operateur: true,
           region: true,
           departements: {
@@ -206,10 +209,6 @@ export type StructureListLight = Prisma.StructureGetPayload<{
 
 export type StructureListLightVersion =
   StructureListLight["structureVersions"][number];
-
-export type CpomLinkedStructureDb = Prisma.StructureGetPayload<{
-  select: typeof cpomLinkedStructureSelect;
-}>;
 
 export type StructureDbList = Prisma.StructureGetPayload<{
   include: typeof structureListInclude & {

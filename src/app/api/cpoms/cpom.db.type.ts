@@ -2,7 +2,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { CpomApiWrite } from "@/schemas/api/cpom.schema";
 
 import {
-  cpomLinkedStructureSelect,
+  cpomLinkedStructuresInclude,
   includedStructureWhere,
 } from "../structures/structure.db.type";
 
@@ -37,12 +37,7 @@ export const cpomListInclude = {
 } satisfies Prisma.CpomInclude;
 
 export const cpomDetailsInclude = {
-  structures: {
-    where: { structure: includedStructureWhere },
-    include: {
-      structure: { select: cpomLinkedStructureSelect },
-    },
-  },
+  structures: cpomLinkedStructuresInclude,
   budgets: true,
   operateur: true,
   region: regionWithDepartementsInclude,

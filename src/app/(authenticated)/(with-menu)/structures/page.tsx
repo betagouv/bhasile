@@ -1,4 +1,3 @@
-import { getServerSession } from "next-auth";
 import { ReactElement, Suspense } from "react";
 
 import { ContentErrorBoundary } from "@/app/components/ContentErrorBoundary";
@@ -15,7 +14,9 @@ import {
 import { CallToActionBanner } from "@/components/CallToActionBanner";
 import { PageHeader } from "@/components/PageHeader";
 import { STRUCTURES_STORAGE_KEY } from "@/constants";
-import { authOptions } from "@/lib/next-auth/auth";
+import { isAgent } from "@/lib/casl";
+import { canAccessPage } from "@/lib/casl/pages";
+import { auth } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
 import { StructuresQuery } from "@/types/structure-list.type";
 import { getFiltersFromSearchParams } from "@/utils/filters.util";
@@ -34,11 +35,10 @@ export default async function Structures({
   searchParams: Promise<SearchParams>;
 }): Promise<ReactElement> {
   const params = await searchParams;
-  const session = await getServerSession(authOptions);
-  const query = buildStructuresQuery(
-    params,
-    session?.user as SessionUser | undefined
-  );
+  const session = await auth();
+  const user = session?.user as SessionUser | undefined;
+  const query = buildStructuresQuery(params, user);
+  const canTransform = canAccessPage(user, "/structures/transformation");
 
   const count = (
     <ContentErrorBoundary fallback={<div className="pl-3 min-w-24" />}>
@@ -58,18 +58,24 @@ export default async function Structures({
         title="Structures"
         titleId="structures-titre"
         tabs={<VisualizationTabs vue={query.vue} />}
-        menuActions={[
-          {
-            label: "Créer une structure",
-            href: "/structures/transformation/type?type=creation",
-          },
-        ]}
+        menuActions={
+          canTransform
+            ? [
+                {
+                  label: "Créer une structure",
+                  href: "/structures/transformation/type?type=creation",
+                },
+              ]
+            : []
+        }
       >
-        <CallToActionBanner
-          message="Vous pouvez dès à présent renseigner les transformations actées des structures HUDA en CADA."
-          label="Transformer HUDA en CADA"
-          href="/structures/transformation/type?type=huda"
-        />
+        {canTransform && (
+          <CallToActionBanner
+            message="Vous pouvez dès à présent renseigner les transformations actées des structures HUDA en CADA."
+            label="Transformer HUDA en CADA"
+            href="/structures/transformation/type?type=huda"
+          />
+        )}
       </PageHeader>
 
       {query.vue === "tableau" ? (
@@ -132,12 +138,14 @@ const buildStructuresQuery = (
   user: SessionUser | undefined
 ): StructuresQuery => {
   const isClosed = getFirstParam(params.statut) === "fermees";
+  const filters = getFiltersFromSearchParams(params);
   return {
     vue: getFirstParam(params.vue) === "carte" ? "carte" : "tableau",
     mode: parseMapMode(getFirstParam(params.mode), isClosed),
     search: getFirstParam(params.search),
     page: getPageParam(params, "page"),
-    ...getFiltersFromSearchParams(params),
+    ...filters,
+    operateurs: isAgent(user) ? filters.operateurs : null,
     column: parseStructureColumn(getFirstParam(params.column)),
     direction: parseSortDirection(getFirstParam(params.direction)),
     isClosed,

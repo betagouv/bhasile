@@ -1,5 +1,15 @@
 import { Prisma } from "@/generated/prisma/client";
 
+export const unattachedFileWhere = {
+  acteAdministratifId: null,
+  documentFinancierId: null,
+  controleId: null,
+  evaluationId: null,
+  operateurId: null,
+  messageId: null,
+  tarificationDocument: null,
+} satisfies Prisma.FileUploadWhereInput;
+
 export const fileWithParentsInclude = {
   acteAdministratif: {
     include: {
@@ -19,6 +29,14 @@ export const fileWithParentsInclude = {
   controle: { include: { structure: true } },
   evaluation: { include: { structure: true } },
   operateur: true,
+  tarificationDocument: {
+    select: {
+      id: true,
+      structureTarification: {
+        select: { structureId: true, campaign: { select: { year: true } } },
+      },
+    },
+  },
   message: {
     select: {
       conversation: {

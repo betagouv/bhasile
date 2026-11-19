@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
+import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { hasOpenActualisation } from "@/app/utils/actualisation-form.util";
@@ -26,9 +27,11 @@ export const StructureHeader = ({
   isTarificationAccessible: boolean;
 }): ReactElement | null => {
   const { structure } = useStructureContext();
+  const canEdit = useCanUpdateStructure(structure);
   const isStructureFinalisee = structure.isFinalised;
 
   const showActualisation =
+    canEdit &&
     actualisationYear !== null &&
     structure.isFinalised &&
     !structure.isClosed &&
@@ -95,13 +98,18 @@ export const StructureHeader = ({
                     label: "Actes administratifs",
                     section: "#actes-administratifs",
                   },
-                  { label: "Notes", section: "#notes" },
+                  {
+                    label: "Notes",
+                    section: "#notes",
+                    isDisplayed: canEdit,
+                  },
                 ]}
               />
             )}
-            {isRootPath && !isStructureFinalisee && !structure.isClosed && (
-              <FinalisationHeader />
-            )}
+            {isRootPath &&
+              canEdit &&
+              !isStructureFinalisee &&
+              !structure.isClosed && <FinalisationHeader />}
             {isRootPath && showActualisation && actualisationYear && (
               <ActualisationHeader actualisationYear={actualisationYear} />
             )}

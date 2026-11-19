@@ -6,7 +6,12 @@ import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { formatBytes } from "@/app/utils/number.util";
 import { MessageApiRead } from "@/schemas/api/message.schema";
 
-export const MessageAttachment = ({ attachment }: Props): ReactElement => {
+import { HighlightedText } from "./HighlightedText";
+
+export const MessageAttachment = ({
+  attachment,
+  searchWords,
+}: Props): ReactElement => {
   const { getDownloadLink } = useFileUpload();
   const [hasOpeningError, setHasOpeningError] = useState(false);
 
@@ -27,7 +32,10 @@ export const MessageAttachment = ({ attachment }: Props): ReactElement => {
         onClick={openAttachment}
         className="underline text-title-blue-france text-left"
       >
-        {attachment.originalName}
+        <HighlightedText
+          text={attachment.originalName}
+          searchWords={searchWords}
+        />
       </button>
       <span className="text-mention-grey">
         {" "}
@@ -52,4 +60,5 @@ const getFileExtension = (fileName: string): string =>
 
 type Props = {
   attachment: MessageApiRead["attachments"][number];
+  searchWords: string[];
 };

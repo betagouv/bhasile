@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off : marque comme agents les patterns d'email et les utilisateurs à binômes personnels existants.
 // Avant ce script, la base ne contient que des agents.
 // Une seule exécution utile : dès qu'un pattern est agent, le script ne fait plus rien,

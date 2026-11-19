@@ -6,8 +6,6 @@ Les mails que Bhasile envoie aux utilisateurs pour les prévenir d'un événemen
 | ---------- | ------------------- | -------------------------------------------- |
 | Messagerie | Nouveau message     | [Notifications](messagerie.md#notifications) |
 
-Sans rapport avec le modèle `Notification`, qui porte les bandeaux affichés dans l'application.
-
 ## Principes
 
 - **Le mail est une notification, jamais un contenu** : un lien vers l'écran concerné et le contexte qui permet de le trier (structure, campagne, auteur). Ni texte métier, ni pièce jointe : un mail se transfère, et les boîtes sont limitées.

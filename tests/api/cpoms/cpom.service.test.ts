@@ -3,10 +3,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prepareCpomToSave } from "@/app/api/cpoms/cpom.service";
 
 const mockFindRegionIdByName = vi.fn();
+const mockFindStructuresOperateur = vi.fn();
 
 vi.mock("@/app/api/cpoms/cpom.repository", () => ({}));
 
 vi.mock("@/app/api/operateurs/operateur.repository", () => ({}));
+
+vi.mock("@/app/api/structures/structure.repository", () => ({
+  findStructuresOperateur: (...args: unknown[]) =>
+    mockFindStructuresOperateur(...args),
+}));
 
 vi.mock("@/app/api/regions/region.repository", () => ({
   findRegionIdByName: (...args: unknown[]) => mockFindRegionIdByName(...args),
@@ -26,6 +32,7 @@ describe("prepareCpomToSave", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFindRegionIdByName.mockResolvedValue(7);
+    mockFindStructuresOperateur.mockResolvedValue([]);
   });
 
   it("vide les départements d'un CPOM régional et résout sa région", async () => {
@@ -131,5 +138,48 @@ describe("prepareCpomToSave", () => {
     );
 
     expect(cpomToSave.departements).toEqual([]);
+  });
+
+  it("rejette une composition qui contient une structure d'un autre opérateur", async () => {
+    mockFindStructuresOperateur.mockResolvedValue([
+      { codeBhasile: "BHA-1", operateurId: 3 },
+      { codeBhasile: "BHA-2", operateurId: 4 },
+    ]);
+
+    await expect(
+      prepareCpomToSave(
+        {
+          structures: [{ structureId: 1 }, { structureId: 2 }],
+        },
+        existingCpom
+      )
+    ).rejects.toThrow(
+      "Structures d'un autre opérateur que celui du CPOM : BHA-2"
+    );
+    expect(mockFindStructuresOperateur).toHaveBeenCalledWith([1, 2]);
+  });
+
+  it("vérifie les structures déjà rattachées quand l'opérateur du CPOM change", async () => {
+    mockFindStructuresOperateur.mockResolvedValue([
+      { codeBhasile: "BHA-1", operateurId: 3 },
+    ]);
+
+    await expect(
+      prepareCpomToSave(
+        { operateur: { id: 5, name: "Coallia" } },
+        { ...existingCpom, structures: [{ structureId: 1 }] }
+      )
+    ).rejects.toThrow(
+      "Structures d'un autre opérateur que celui du CPOM : BHA-1"
+    );
+  });
+
+  it("ne vérifie rien sans changement de composition ni d'opérateur", async () => {
+    await prepareCpomToSave(
+      { name: "CPOM" },
+      { ...existingCpom, structures: [{ structureId: 1 }] }
+    );
+
+    expect(mockFindStructuresOperateur).not.toHaveBeenCalled();
   });
 });

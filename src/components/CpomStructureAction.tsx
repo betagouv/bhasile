@@ -4,10 +4,6 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
 import { ReactElement } from "react";
 
-import {
-  useCanReadStructures,
-  useCanUpdateStructures,
-} from "@/app/hooks/useCanUpdateStructure";
 import { cn } from "@/app/utils/classname.util";
 import { openNoPermissionsModal } from "@/components/NoPermissionsModal";
 import {
@@ -20,13 +16,7 @@ export const CpomStructureAction = ({
   arrowIconClass = "fr-icon-arrow-right-line",
   className,
 }: Props): ReactElement | null => {
-  const canReadStructure = useCanReadStructures();
-  const canUpdateStructure = useCanUpdateStructures();
-
-  const action = getCpomStructureAction(structure, {
-    canReadStructure,
-    canUpdateStructure,
-  });
+  const action = getCpomStructureAction(structure);
 
   if (!action) {
     return null;

@@ -16,7 +16,8 @@ import { recursivelySerializeForClient } from "@/utils-server/serialization.serv
 
 import { resolveFilters } from "../filters/filters.service";
 import { findRegionIdByName } from "../regions/region.repository";
-import { resolveCpomLinkedStructureFields } from "../structures/structure.util";
+import { findStructuresOperateur } from "../structures/structure.repository";
+import { resolveCpomLinkedStructure } from "../structures/structure.util";
 import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";
 import {
   createOrUpdateCpom,
@@ -33,9 +34,7 @@ import {
 } from "./cpom.util";
 
 type ResolvedCpomDetails = Omit<CpomDbDetails, "structures"> & {
-  structures: ReturnType<
-    typeof resolveCpomLinkedStructureFields<CpomDbDetails["structures"][number]>
-  >[];
+  structures: ReturnType<typeof resolveCpomLinkedStructure>[];
 };
 
 const getFullCpom = (cpom: ResolvedCpomDetails): CpomApiRead => {
@@ -94,14 +93,15 @@ export const getCpomById = async (
   user: SessionUser | undefined
 ): Promise<CpomApiRead | null> => {
   const cpom = await findOne(id);
-  if (!cpom || !canAbilityReadCpom(defineAbilityFor(user), cpom)) {
+  const ability = defineAbilityFor(user);
+  if (!cpom || !canAbilityReadCpom(ability, cpom)) {
     return null;
   }
   const now = getNow();
   const resolvedCpom = {
     ...cpom,
     structures: cpom.structures.map((cpomStructure) =>
-      resolveCpomLinkedStructureFields(cpomStructure, now)
+      resolveCpomLinkedStructure(cpomStructure, ability, now)
     ),
   };
   return getFullCpom(resolvedCpom);
@@ -116,6 +116,10 @@ export const prepareCpomToSave = async (
   if (!operateurId) {
     throw new DomainError("Un CPOM doit avoir un opérateur");
   }
+  await checkStructuresOperateur(
+    getStructureIdsToCheck(cpom, existingCpom, operateurId),
+    operateurId
+  );
   const granularity = cpom.granularity ?? existingCpom?.granularity;
   if (!granularity) {
     throw new DomainError("Un CPOM doit avoir une granularité");
@@ -138,6 +142,39 @@ export const prepareCpomToSave = async (
     departements:
       granularity === "REGIONALE" && regionId ? [] : cpom.departements,
   };
+};
+
+const getStructureIdsToCheck = (
+  cpom: CpomApiWrite,
+  existingCpom: CpomDbScope | null,
+  operateurId: number
+): number[] => {
+  if (cpom.structures?.length) {
+    return cpom.structures.map((structure) => structure.structureId);
+  }
+  if (existingCpom && existingCpom.operateurId !== operateurId) {
+    return existingCpom.structures.map((structure) => structure.structureId);
+  }
+  return [];
+};
+
+const checkStructuresOperateur = async (
+  structureIds: number[],
+  operateurId: number
+): Promise<void> => {
+  if (structureIds.length === 0) {
+    return;
+  }
+  const foreignStructures = (
+    await findStructuresOperateur(structureIds)
+  ).filter((structure) => structure.operateurId !== operateurId);
+  if (foreignStructures.length > 0) {
+    throw new DomainError(
+      `Structures d'un autre opérateur que celui du CPOM : ${foreignStructures
+        .map((structure) => structure.codeBhasile)
+        .join(", ")}`
+    );
+  }
 };
 
 const resolveRegionId = async (name: string): Promise<number> => {

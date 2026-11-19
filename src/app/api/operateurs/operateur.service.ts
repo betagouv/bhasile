@@ -4,10 +4,12 @@ import { paginateWithTotal, sortRows } from "@/app/utils/list.util";
 import { getNow } from "@/app/utils/now.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Operateur } from "@/generated/prisma/client";
+import { canAbilityReadOperateur, defineAbilityFor } from "@/lib/casl";
 import {
   OperateurApiRead,
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
+import { SessionUser } from "@/types/global";
 import type {
   OperateurListItem,
   OperateurSuggestionItem,
@@ -117,8 +119,12 @@ const resolveLogoUrl = async (key: string | null): Promise<string | null> => {
 };
 
 export const getOperateur = async (
-  id: number
+  id: number,
+  user: SessionUser | undefined
 ): Promise<OperateurApiRead | null> => {
+  if (!canAbilityReadOperateur(defineAbilityFor(user), id)) {
+    return null;
+  }
   const operateur = await findOne(id);
   if (!operateur) {
     return null;

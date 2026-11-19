@@ -108,6 +108,12 @@ export const findStructureDepartement = async (
     select: { departementAdministratif: true },
   });
 
+export const findStructuresOperateur = (ids: number[]) =>
+  prisma.structure.findMany({
+    where: { id: { in: ids } },
+    select: { codeBhasile: true, operateurId: true },
+  });
+
 export const findValidatedActualisationForm = (
   structureId: number,
   slug: string

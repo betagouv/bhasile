@@ -3,7 +3,11 @@ import { ContactApiType } from "@/schemas/api/contact.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { resolvableVersionSelect } from "../structure-versions/structure-version.db.type";
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
+import {
+  resolvableVersionSelect,
+  transformationStatusSelect,
+} from "../structure-versions/structure-version.db.type";
 
 // WARNING: attenion, auparavant on avait un type de contact,
 // donc on avait une unicité structureDnaCode x type.
@@ -46,22 +50,25 @@ export const createOrUpdateContacts = async (
   });
 };
 
-export const findStructuresWithContactEmail = (email: string) => {
-  const contactWhere = {
-    email: { equals: email, mode: "insensitive" as const },
-  };
-  return prisma.structure.findMany({
+export const findStructuresWithContactEmail = (email: string) =>
+  prisma.structure.findMany({
     where: {
-      structureVersions: { some: { contacts: { some: contactWhere } } },
+      structureVersions: { some: { contacts: { some: { email } } } },
     },
     select: {
       id: true,
+      forms: {
+        where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
+        select: { status: true, formDefinition: { select: { slug: true } } },
+      },
       structureVersions: {
         select: {
           ...resolvableVersionSelect,
-          contacts: { where: contactWhere, select: { id: true } },
+          structureVersionTransformation: {
+            select: { type: true, ...transformationStatusSelect },
+          },
+          contacts: { where: { email }, select: { id: true } },
         },
       },
     },
   });
-};

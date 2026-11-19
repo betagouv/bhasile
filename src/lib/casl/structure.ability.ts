@@ -42,12 +42,15 @@ export const canUpdateStructure = (
   structure?: StructureScope | null
 ) => canAbilityUpdateStructure(defineAbilityFor(user), structure ?? {});
 
+export const canAbilityUpdateSomeStructure = (ability: AppAbility) =>
+  ability.can("update", "Structure");
+
 export const canAbilityUpdateDepartement = (
   ability: AppAbility,
   departementAdministratif?: string | null
 ) => canAbilityUpdateStructure(ability, { departementAdministratif });
 
-const canAbilityUpdateStructure = (
+export const canAbilityUpdateStructure = (
   ability: AppAbility,
   { id, departementAdministratif }: StructureScope
 ) =>

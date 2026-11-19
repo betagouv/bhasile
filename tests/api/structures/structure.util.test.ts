@@ -1,13 +1,14 @@
 import {
   createDepartementalAgent,
   createNationalAgent,
+  createSessionGrant,
+  createSessionUser,
 } from "tests/test-utils/factories/session-user.factory";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
-  CpomLinkedStructureDb,
   StructureDbList,
   StructureListLight,
   StructureListLightVersion,
@@ -26,10 +27,12 @@ import {
   isStructureClosed,
   isStructureFinalised,
   isStructureFinalisedAndOpen,
-  resolveCpomLinkedStructureFields,
+  resolveCpomLinkedStructure,
   sortStructureRows,
   StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
+import { AccessRole } from "@/generated/prisma/client";
+import { defineAbilityFor } from "@/lib/casl";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
@@ -451,87 +454,6 @@ describe("isStructureFinalised", () => {
   });
 });
 
-describe("resolveCpomLinkedStructureFields", () => {
-  const buildCpomLinkedStructure = (
-    overrides: Partial<CpomLinkedStructureDb> = {}
-  ): CpomLinkedStructureDb =>
-    ({
-      id: 7,
-      codeBhasile: "CADA-007",
-      type: StructureType.CADA,
-      departementAdministratif: "54",
-      fermetureDate: null,
-      operateur: { name: "Opérateur" },
-      forms: [],
-      structureVersions: [buildVersion({ communeAdministrative: "Nancy" })],
-      ...overrides,
-    }) as CpomLinkedStructureDb;
-
-  const resolveStructure = (structure: CpomLinkedStructureDb) =>
-    resolveCpomLinkedStructureFields({ id: 1, structure }, now).structure;
-
-  it("marque non visible une structure sans formulaire ni création", () => {
-    expect(resolveStructure(buildCpomLinkedStructure())).toMatchObject({
-      isFinalised: false,
-      isVisible: false,
-      isClosed: false,
-    });
-  });
-
-  it("marque visible et non finalisée une structure au formulaire de finalisation en cours", () => {
-    const structure = buildCpomLinkedStructure({
-      forms: [
-        { status: false, formDefinition: { slug: FINALISATION_FORM_SLUG } },
-      ],
-    });
-    expect(resolveStructure(structure)).toMatchObject({
-      isFinalised: false,
-      isVisible: true,
-    });
-  });
-
-  it("marque finalisée et visible une structure née d'une création, sans formulaire", () => {
-    const structure = buildCpomLinkedStructure({
-      structureVersions: [
-        buildVersion({
-          communeAdministrative: "Nancy",
-          structureVersionTransformationId: 5,
-          structureVersionTransformation: {
-            type: StructureVersionTransformationType.CREATION,
-            transformation: { form: { status: true } },
-          } as unknown as StructureListLightVersion["structureVersionTransformation"],
-        }),
-      ],
-    });
-    expect(resolveStructure(structure)).toMatchObject({
-      isFinalised: true,
-      isVisible: true,
-    });
-  });
-
-  it("marque fermée une structure dont la fermeture est passée", () => {
-    const structure = buildCpomLinkedStructure({
-      fermetureDate: new Date("2025-01-01T00:00:00.000Z"),
-    });
-    expect(resolveStructure(structure)).toMatchObject({ isClosed: true });
-  });
-
-  it("résout la commune de la version courante sans exposer les formulaires ni les versions", () => {
-    const structure = resolveStructure(buildCpomLinkedStructure());
-    expect(structure).toMatchObject({ communeAdministrative: "Nancy" });
-    expect(structure).not.toHaveProperty("forms");
-    expect(structure).not.toHaveProperty("structureVersions");
-    expect(structure).not.toHaveProperty("fermetureDate");
-  });
-
-  it("laisse intacte une ligne sans structure", () => {
-    const cpomStructure = { id: 1, structure: null };
-    expect(resolveCpomLinkedStructureFields(cpomStructure, now)).toBe(
-      cpomStructure
-    );
-  });
-});
-
 describe("isStructureClosed", () => {
   it("est faux sans date de fermeture", () => {
     expect(isStructureClosed({ fermetureDate: null }, now)).toBe(false);
@@ -845,6 +767,141 @@ describe("getFermetureHistory", () => {
   });
 });
 
+describe("resolveCpomLinkedStructure", () => {
+  const now = new Date("2026-06-01T00:00:00.000Z");
+  const operateurAbility = defineAbilityFor(
+    createSessionUser({
+      operateurId: 1,
+      isAgent: false,
+      grants: [
+        createSessionGrant({
+          role: AccessRole.LECTEUR,
+          departementNumeros: ["92"],
+        }),
+      ],
+    })
+  );
+
+  const finalisationForm = (status: boolean) => ({
+    status,
+    formDefinition: { slug: FINALISATION_FORM_SLUG },
+  });
+
+  const linkedStructure = (
+    overrides: Partial<
+      Parameters<typeof resolveCpomLinkedStructure>[0]["structure"]
+    > = {}
+  ) =>
+    ({
+      id: 1,
+      cpomId: 7,
+      structureId: 10,
+      dateStart: null,
+      dateEnd: null,
+      structure: {
+        id: 10,
+        codeBhasile: "BHA-10",
+        type: StructureType.CADA,
+        departementAdministratif: "92",
+        fermetureDate: null,
+        operateurId: 1,
+        operateur: { name: "Opérateur 1" },
+        forms: [finalisationForm(true)],
+        structureVersions: [
+          {
+            id: 100,
+            effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+            structureVersionTransformationId: null,
+            structureVersionTransformation: null,
+            communeAdministrative: "Nanterre",
+          },
+        ],
+        ...overrides,
+      },
+    }) as unknown as Parameters<typeof resolveCpomLinkedStructure>[0];
+
+  const resolveStructure = (
+    overrides: Parameters<typeof linkedStructure>[0] = {},
+    ability: Parameters<typeof resolveCpomLinkedStructure>[1] = operateurAbility
+  ) =>
+    resolveCpomLinkedStructure(linkedStructure(overrides), ability, now)
+      .structure;
+
+  it("expose la commune courante, le statut et les droits sans les données brutes", () => {
+    expect(resolveStructure()).toEqual({
+      id: 10,
+      codeBhasile: "BHA-10",
+      type: StructureType.CADA,
+      departementAdministratif: "92",
+      operateur: { name: "Opérateur 1" },
+      communeAdministrative: "Nanterre",
+      isFinalised: true,
+      isClosed: false,
+      isVisible: true,
+      canRead: true,
+      canUpdate: false,
+    });
+  });
+
+  it("marque visible et non finalisée une structure au formulaire de finalisation en cours", () => {
+    expect(
+      resolveStructure({ forms: [finalisationForm(false)] })
+    ).toMatchObject({ isFinalised: false, isVisible: true });
+  });
+
+  it("marque non visible une structure sans formulaire ni création", () => {
+    expect(resolveStructure({ forms: [] })).toMatchObject({
+      isFinalised: false,
+      isVisible: false,
+    });
+  });
+
+  it("marque finalisée et visible une structure née d'une création, sans formulaire", () => {
+    expect(
+      resolveStructure({
+        forms: [],
+        structureVersions: [
+          {
+            id: 100,
+            effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+            structureVersionTransformationId: 5,
+            structureVersionTransformation: {
+              type: StructureVersionTransformationType.CREATION,
+              transformation: { form: { status: true } },
+            },
+            communeAdministrative: "Nanterre",
+          },
+        ],
+      } as Parameters<typeof linkedStructure>[0])
+    ).toMatchObject({ isFinalised: true, isVisible: true });
+  });
+
+  it("marque fermée une structure dont la fermeture est passée", () => {
+    expect(
+      resolveStructure({ fermetureDate: new Date("2025-01-01T00:00:00.000Z") })
+    ).toMatchObject({ isClosed: true });
+  });
+
+  it("refuse la lecture d'une structure hors de la zone de lecture", () => {
+    expect(resolveStructure({ departementAdministratif: "75" })).toMatchObject({
+      canRead: false,
+      canUpdate: false,
+    });
+  });
+
+  it("autorise la modification à un agent éditeur du département", () => {
+    expect(
+      resolveStructure({}, defineAbilityFor(createDepartementalAgent(["92"])))
+    ).toMatchObject({ canRead: true, canUpdate: true });
+  });
+
+  it("refuse tout droit sans ability", () => {
+    expect(
+      resolveCpomLinkedStructure(linkedStructure(), undefined, now).structure
+    ).toMatchObject({ canRead: false, canUpdate: false });
+  });
+});
+
 describe("getReadableNotes", () => {
   const structureParis = {
     departementAdministratif: "75",
@@ -1019,36 +1076,34 @@ describe("buildCommunePoints", () => {
 });
 
 describe("hideAgentOnlyFields", () => {
-  it("masque les données réservées aux agents et garde le reste de la fiche", () => {
+  it("masque les commentaires des budgets, de la structure comme de ses CPOM, et garde le reste de la fiche", () => {
     const structure = {
       id: 1,
       nom: "Centre",
-      notes: "note interne",
+      budgets: [{ year: 2025, commentaire: "commentaire interne" }],
       controles: [{ id: 1 }],
-      evaluations: [{ id: 1 }],
-      evenementsIndesirablesGraves: [{ id: 1 }],
-      anomalies: [{ code: "A" }],
-      cpomStructures: [{ id: 1 }],
-      isInCpom: true,
-      isInCpomPerYear: { 2026: true },
-      history: [
-        { kind: "CPOM_ENTRY", date: "2026-01-01" },
-        { kind: "FERMETURE", date: "2026-06-01" },
+      cpomStructures: [
+        {
+          id: 1,
+          cpom: {
+            id: 7,
+            budgets: [{ year: 2025, commentaire: "commentaire CPOM" }],
+          },
+        },
       ],
     } as unknown as StructureApiRead;
 
     expect(hideAgentOnlyFields(structure)).toEqual({
       id: 1,
       nom: "Centre",
-      notes: null,
-      controles: [],
-      evaluations: [],
-      evenementsIndesirablesGraves: [],
-      anomalies: [],
-      cpomStructures: [],
-      isInCpom: false,
-      isInCpomPerYear: {},
-      history: [{ kind: "FERMETURE", date: "2026-06-01" }],
+      budgets: [{ year: 2025, commentaire: null }],
+      controles: [{ id: 1 }],
+      cpomStructures: [
+        {
+          id: 1,
+          cpom: { id: 7, budgets: [{ year: 2025, commentaire: null }] },
+        },
+      ],
     });
   });
 });

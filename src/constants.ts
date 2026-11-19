@@ -74,7 +74,7 @@ export const STATS_ACCOUNTED_CLOSED_MAX_YEAR = 2024;
 
 export const MAX_EXPORT_ITEMS = 10;
 
-const IMAGE_MIME_TYPES = [
+export const IMAGE_MIME_TYPES = [
   "image/jpg",
   "image/jpeg",
   "image/png",
@@ -103,6 +103,12 @@ export const ALLOWED_MIME_TYPES = [
   ...DOCUMENT_MIME_TYPES,
   ...IMAGE_MIME_TYPES,
   ...TEXT_DOCUMENT_MIME_TYPES,
+];
+
+// Le navigateur sait les afficher lui-même dans un iframe
+export const INLINE_VIEWABLE_MIME_TYPES = [
+  "application/pdf",
+  ...IMAGE_MIME_TYPES,
 ];
 
 export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo

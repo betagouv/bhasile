@@ -75,6 +75,8 @@ export const cpomApiReadSchema = cpomApiSchema.extend({
             isFinalised: z.boolean(),
             isClosed: z.boolean(),
             isVisible: z.boolean(),
+            canRead: z.boolean(),
+            canUpdate: z.boolean(),
           })
           .optional(),
       })

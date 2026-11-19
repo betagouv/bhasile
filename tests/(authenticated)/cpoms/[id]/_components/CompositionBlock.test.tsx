@@ -8,8 +8,6 @@ import { CpomProvider } from "@/contexts/CpomContext";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
-const mockCanRead = vi.fn();
-const mockCanUpdate = vi.fn();
 const mockOpenNoPermissionsModal = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -22,11 +20,6 @@ vi.mock("next-auth/react", async (importOriginal) => ({
     data: { expires: "1", user: { name: "Agent", role: "NATIONAL" } },
     status: "authenticated",
   }),
-}));
-
-vi.mock("@/app/hooks/useCanUpdateStructure", () => ({
-  useCanReadStructures: () => mockCanRead,
-  useCanUpdateStructures: () => mockCanUpdate,
 }));
 
 vi.mock("@/components/NoPermissionsModal", () => ({
@@ -58,6 +51,8 @@ const renderComposition = (overrides: Partial<LinkedStructure>) => {
           isFinalised: true,
           isClosed: false,
           isVisible: true,
+          canRead: true,
+          canUpdate: true,
           ...overrides,
         },
       },
@@ -78,8 +73,6 @@ const renderComposition = (overrides: Partial<LinkedStructure>) => {
 describe("CompositionBlock", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCanRead.mockReturnValue(true);
-    mockCanUpdate.mockReturnValue(true);
   });
 
   it("affiche une flèche vers la fiche d'une structure finalisée lisible", () => {
@@ -93,9 +86,7 @@ describe("CompositionBlock", () => {
   });
 
   it("n'affiche pas de flèche sans droit de lecture", () => {
-    mockCanRead.mockReturnValue(false);
-
-    const table = renderComposition({ isFinalised: true });
+    const table = renderComposition({ isFinalised: true, canRead: false });
 
     expect(table.queryByRole("link")).not.toBeInTheDocument();
     expect(table.queryByRole("button")).not.toBeInTheDocument();
@@ -115,9 +106,7 @@ describe("CompositionBlock", () => {
   });
 
   it("ouvre la pop-in de droits insuffisants pour une structure non finalisée sans droit de modification", async () => {
-    mockCanUpdate.mockReturnValue(false);
-
-    const table = renderComposition({ isFinalised: false });
+    const table = renderComposition({ isFinalised: false, canUpdate: false });
 
     expect(table.queryByRole("link")).not.toBeInTheDocument();
     await userEvent.click(

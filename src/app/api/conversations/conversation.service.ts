@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 
 import { getNow } from "@/app/utils/now.util";
-import { AuthorLevel, type Visibility } from "@/generated/prisma/enums";
+import { AuthorLevel, Visibility } from "@/generated/prisma/enums";
 import { sendTemplateEmail } from "@/lib/brevo";
 import type {
   ConversationTag,
@@ -18,6 +18,7 @@ import {
   findNotifiedPairs,
   findReadPairs,
   findStaleNotificationIds,
+  findUnreadMessageCounts,
   markNotificationsAbandoned,
   markNotificationsProcessed,
   updateMessageTagKey,
@@ -77,6 +78,28 @@ export const getMessages = ({
 }): Promise<MessageDb[]> => {
   assertCanAccessVisibility(isAgentReader, visibility);
   return findMessages(structureTarificationId, visibility);
+};
+
+export const getUnreadMessageCounts = async ({
+  structureTarificationId,
+  userId,
+  isAgentReader,
+}: {
+  structureTarificationId: number;
+  userId: number;
+  isAgentReader: boolean;
+}): Promise<Record<Visibility, number>> => {
+  const conversations = await findUnreadMessageCounts(
+    structureTarificationId,
+    userId
+  );
+  const getCount = (visibility: Visibility): number =>
+    conversations.find((conversation) => conversation.visibility === visibility)
+      ?._count.messages ?? 0;
+  return {
+    SHARED: getCount(Visibility.SHARED),
+    AGENTS: isAgentReader ? getCount(Visibility.AGENTS) : 0,
+  };
 };
 
 export const changeMessageTag = (

@@ -1,5 +1,4 @@
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
-import { StructurePermissionSubject } from "@/types/structure.type";
 
 type StructureStatus = {
   id: number;
@@ -10,8 +9,6 @@ type StructureStatus = {
 export type CpomLinkedStructure = NonNullable<
   NonNullable<CpomApiRead["structures"]>[number]["structure"]
 >;
-
-type CanOnStructure = (structure: StructurePermissionSubject) => boolean;
 
 type CpomStructureAction =
   | { kind: "fiche" | "finalisation"; href: string; title: string }
@@ -28,24 +25,16 @@ export const getStructureHref = (structure: StructureStatus): string =>
     : `/structures/${structure.id}/finalisation/01-identification`;
 
 export const getCpomStructureAction = (
-  structure: CpomLinkedStructure,
-  {
-    canReadStructure,
-    canUpdateStructure,
-  }: { canReadStructure: CanOnStructure; canUpdateStructure: CanOnStructure }
+  structure: CpomLinkedStructure
 ): CpomStructureAction | null => {
-  const { id, codeBhasile, isFinalised, isClosed } = structure;
+  const { id, codeBhasile, isFinalised, isClosed, canRead, canUpdate } =
+    structure;
   if (!id) {
     return null;
   }
-  const permissionSubject = {
-    id,
-    departementAdministratif: structure.departementAdministratif,
-    operateurId: structure.operateur?.id,
-  };
   const href = getStructureHref({ id, isFinalised, isClosed });
   if (hasStructureFiche(structure)) {
-    return canReadStructure(permissionSubject)
+    return canRead
       ? { kind: "fiche", href, title: `Voir la structure ${codeBhasile}` }
       : null;
   }
@@ -53,7 +42,7 @@ export const getCpomStructureAction = (
     return null;
   }
   const title = `Finaliser la création de la structure ${codeBhasile}`;
-  return canUpdateStructure(permissionSubject)
+  return canUpdate
     ? { kind: "finalisation", href, title }
     : { kind: "finalisationForbidden", title };
 };

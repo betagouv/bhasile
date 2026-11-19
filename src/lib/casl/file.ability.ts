@@ -12,6 +12,13 @@ export const canDeleteFile = (
 ): boolean => {
   const ability = defineAbilityFor(user);
 
+  if (
+    file.acteAdministratif?.sourceTarificationDocumentId ||
+    file.documentFinancier?.sourceTarificationDocumentId
+  ) {
+    return false;
+  }
+
   if (file.acteAdministratifId) {
     const acte = file.acteAdministratif;
     if (!acte) {
