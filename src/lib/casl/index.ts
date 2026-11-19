@@ -29,4 +29,5 @@ export {
   canAccessTarification,
   canParticipateInTarification,
   canReadConversation,
+  getTarificationStructureWhere,
 } from "./tarification.ability";

@@ -19,6 +19,8 @@ model User {
   emailNotifications   EmailNotificationRecipient[]
   tarificationEvents   TarificationEvent[]
   tarificationOpenings TarificationDocumentOpening[]
+  notificationReads    NotificationRead[]
+  notificationSeenAt   DateTime? // repère de la cloche : la ligne la plus récente vue à l'ouverture
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

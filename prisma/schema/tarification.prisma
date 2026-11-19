@@ -59,6 +59,8 @@ model TarificationEvent {
   stepCode                TarificationStepCode?
   text                    String?
 
+  notificationReads NotificationRead[]
+
   createdAt DateTime @default(now()) // horodatage serveur, fait foi
 
   @@index([structureTarificationId, id])

@@ -16,6 +16,7 @@ import {
   TRANSFORMATIONS_BLOCK_HEADER,
 } from "./_components/dashboardBlocks";
 import { InitialisationsActualisationsBlock } from "./_components/InitialisationsActualisationsBlock";
+import { NotificationBellLoader } from "./_components/NotificationBellLoader";
 import { RappelsBlock } from "./_components/RappelsBlock";
 import { TransformationsBlock } from "./_components/TransformationsBlock";
 
@@ -32,7 +33,16 @@ export default async function DashboardPage({
 
   return (
     <>
-      <PageHeader title={`Bienvenue${user?.prenom ? ` ${user.prenom}` : ""}`} />
+      <PageHeader
+        title={`Bienvenue${user?.prenom ? ` ${user.prenom}` : ""}`}
+        titleAside={
+          user && (
+            <Suspense fallback={null}>
+              <NotificationBellLoader user={user} />
+            </Suspense>
+          )
+        }
+      />
       <div className="flex flex-col gap-3 max-w-7xl mx-auto p-3">
         <Suspense fallback={null}>
           <AnnouncementsBlock />

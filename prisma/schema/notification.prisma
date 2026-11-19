@@ -1,0 +1,12 @@
+model NotificationRead {
+  user                User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId              Int
+  tarificationEvent   TarificationEvent @relation(fields: [tarificationEventId], references: [id], onDelete: Restrict)
+  tarificationEventId Int
+
+  createdAt DateTime @default(now())
+
+  @@id([userId, tarificationEventId])
+  @@index([tarificationEventId])
+  @@schema("public")
+}

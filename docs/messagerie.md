@@ -116,7 +116,7 @@ type ConversationAnchor = {
 
 - **Lu** : la première lecture d'un message par un utilisateur est enregistrée (`MessageReceipt`, en ajout seul). Par défaut, chaque participant voit qui a lu quoi et quand : la lecture d'une conversation renvoie les accusés de chaque message. Restreindre cet affichage plus tard (par ex. « lu par les services de l'État » côté opérateur) est une règle d'API, sans migration.
 - **Accusé envoyé par l'écran** : le client n'envoie que les messages d'autrui sans accusé à son nom, et seulement quand ils sont affichés (onglet visible).
-- **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur.
+- **Non lu** = message d'une conversation accessible, écrit par un autre, sans accusé de lecture de l'utilisateur. La cloche liste celles qui en ont et dont l'utilisateur est destinataire selon la politique ci-dessous (la DREETS n'en a pas), sans jamais écrire d'accusé (voir [Notifications](notifications.md)).
 - **Temps réel** : tant que les échanges sont affichés, le client relit toute la conversation toutes les 10 secondes et remplace sa liste (`src/hooks/useConversationMessages.ts`).
   - La requête suivante ne part que 10 secondes après la réponse de la précédente (`setTimeout` chaîné) : un serveur lent n'accumule pas de requêtes.
   - Pause quand l'onglet du navigateur est caché, relecture immédiate au retour et après chaque envoi.
@@ -169,7 +169,7 @@ Les échanges et les pièces sont des **archives publiques** (Code du patrimoine
 
 **Mise en prod**
 
-- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `canAccessTarification` : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
+- Tout part en prod au fil des PR ; avant la mise en service, seuls les superadmins voient les échanges, en lecture seule. La porte est `MESSAGERIE_ENABLED`, lue dans `tarification.ability.ts` (`canAccessTarification`, et `getTarificationStructureWhere` pour la cloche) : tant qu'elle ne vaut pas `true`, les agents et les opérateurs n'ont accès ni à la page, ni à l'API, ni aux fichiers des échanges, et personne n'est notifié par mail. Une variable absente ferme l'accès. Elle vaut `true` en local et en staging.
 - Les crons ne tournent qu'en prod (`scripts/cron.sh`) : l'envoi des notifications se recette en préprod.
 
 ## Interface
@@ -208,7 +208,7 @@ La messagerie est livrée avant la gestion des documents, avec une page minimale
 | Routes                              | `GET`/`POST /api/tarifications/[structureId]/[year]/messages`, `POST …/messages/read`, `PATCH /api/tarifications/messages/[messageId]`                                | fait    |
 | Droits                              | `src/lib/casl/tarification.ability.ts` : `canAccessTarification`, `canReadConversation`                                                                               | fait    |
 | Pièces jointes                      | `FileUpload.messageId`, `src/app/api/files/file.service.ts` (`isOrphan`, `authorizeFileAccess`)                                                                       | fait    |
-| Porte de mise en service            | `MESSAGERIE_ENABLED` dans `canAccessTarification`                                                                                                                     | fait    |
+| Porte de mise en service            | `MESSAGERIE_ENABLED` dans `canAccessTarification` et `getTarificationStructureWhere`                                                                                  | fait    |
 | Interface : page et fil             | `src/app/(authenticated)/structures/[id]/tarification/`, `src/hooks/useConversationMessages.ts`                                                                       | fait    |
 | Interface : pièces jointes          | `src/hooks/useMessageAttachments.ts`, `AttachmentChip`, `MessageAttachment`                                                                                           | fait    |
 | Interface : tags                    | `TagSelect`, `MessageTag`, `changeTag` dans `src/hooks/useConversationMessages.ts`                                                                                    | fait    |
