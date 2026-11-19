@@ -57,24 +57,27 @@ export const updateAgentAccess = async (
     throw new DomainError("Agent introuvable", 404);
   }
   const from = describeAgentAccess(getAccountStatus(agent), agent.perimeter);
+  const to = await applyAccessUpdate(id, input, agent.perimeter);
 
-  if (input.status === "ACTIVATED") {
-    const perimeter = await getPerimeterOrThrow(input.perimeterId);
-    await activateAgent(id, perimeter.id);
-    await createAgentAccessEvent(method, {
-      targetUserId: String(id),
-      from,
-      to: describeAgentAccess("ACTIVATED", perimeter),
-    });
-    return;
-  }
-
-  await deactivateAgent(id, getNow());
   await createAgentAccessEvent(method, {
     targetUserId: String(id),
     from,
-    to: describeAgentAccess("DEACTIVATED", agent.perimeter),
+    to,
   });
+};
+
+const applyAccessUpdate = async (
+  id: number,
+  input: AgentApiUpdate,
+  currentPerimeter: { name: string } | null
+): Promise<string> => {
+  if (input.status === "ACTIVATED") {
+    const perimeter = await getPerimeterOrThrow(input.perimeterId);
+    await activateAgent(id, perimeter.id);
+    return describeAgentAccess("ACTIVATED", perimeter);
+  }
+  await deactivateAgent(id, getNow());
+  return describeAgentAccess("DEACTIVATED", currentPerimeter);
 };
 
 const excludePendingContacts = async <T extends AccountStatusFields>(

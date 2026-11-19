@@ -4,6 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ReactElement, useEffect, useState } from "react";
 
+import { AccountStatus } from "@/app/api/users/user.util";
 import { AgentRead, PerimeterRead } from "@/types/agent.type";
 
 import { PerimeterSelect } from "./PerimeterSelect";
@@ -25,7 +26,7 @@ export const AgentAccessModal = ({
     setPerimeterId(initialPerimeterId ? String(initialPerimeterId) : "");
   }, [target, openCount]);
 
-  const { title, confirmLabel } = getModalLabels(agent);
+  const { title, confirmLabel } = ACCESS_ACTIONS[agent?.status ?? "PENDING"];
 
   const submit = async (): Promise<void> => {
     if (agent && (await onSubmit(agent.id, Number(perimeterId)))) {
@@ -74,14 +75,25 @@ export const agentAccessModal = createModal({
   isOpenedByDefault: false,
 });
 
-const getModalLabels = (agent: AgentRead | null) => {
-  if (agent?.status === "ACTIVATED") {
-    return { title: "Changer de périmètre", confirmLabel: "Enregistrer" };
-  }
-  if (agent?.status === "DEACTIVATED") {
-    return { title: "Réactiver l’agent", confirmLabel: "Réactiver" };
-  }
-  return { title: "Valider l’agent", confirmLabel: "Valider" };
+export const ACCESS_ACTIONS: Record<
+  AccountStatus,
+  { label: string; title: string; confirmLabel: string }
+> = {
+  PENDING: {
+    label: "Valider",
+    title: "Valider l’agent",
+    confirmLabel: "Valider",
+  },
+  ACTIVATED: {
+    label: "Changer de périmètre",
+    title: "Changer de périmètre",
+    confirmLabel: "Enregistrer",
+  },
+  DEACTIVATED: {
+    label: "Réactiver",
+    title: "Réactiver l’agent",
+    confirmLabel: "Réactiver",
+  },
 };
 
 export type AgentAccessTarget = {

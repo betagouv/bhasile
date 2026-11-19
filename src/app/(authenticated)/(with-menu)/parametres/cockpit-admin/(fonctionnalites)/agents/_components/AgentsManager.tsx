@@ -22,6 +22,7 @@ import { FetchState } from "@/types/fetch-state.type";
 import { AGENT_STATUS_LABELS } from "@/utils/agent.util";
 
 import {
+  ACCESS_ACTIONS,
   AgentAccessModal,
   agentAccessModal,
   AgentAccessTarget,
@@ -84,7 +85,7 @@ export const AgentsManager = ({
         size="small"
         onClick={() => accessModal.open({ agent })}
       >
-        {ACCESS_ACTION_LABELS[agent.status]}
+        {ACCESS_ACTIONS[agent.status].label}
       </Button>
       {agent.status === "ACTIVATED" && (
         <Button
@@ -221,12 +222,6 @@ export const AgentsManager = ({
 };
 
 const AGENTS_SAVE_KEY = "agents-save";
-
-const ACCESS_ACTION_LABELS: Record<AccountStatus, string> = {
-  PENDING: "Valider",
-  ACTIVATED: "Changer de périmètre",
-  DEACTIVATED: "Réactiver",
-};
 
 type Props = {
   agents: AgentRead[];

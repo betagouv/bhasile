@@ -50,6 +50,11 @@ const pendingAgent = {
   deactivatedAt: null,
   perimeter: null,
 };
+const activeAgent = {
+  ...pendingAgent,
+  isActivated: true,
+  perimeter: finistere,
+};
 
 describe("agent.service", () => {
   beforeEach(() => {
@@ -61,11 +66,9 @@ describe("agent.service", () => {
 
   it("retire des comptes en attente les contacts de structure, sans toucher aux comptes déjà gérés", async () => {
     const activeContact = {
-      ...pendingAgent,
+      ...activeAgent,
       id: 13,
       email: "contact-actif@operateur.fr",
-      isActivated: true,
-      perimeter: finistere,
     };
     mockFindAgents.mockResolvedValue([
       pendingAgent,
@@ -108,16 +111,18 @@ describe("agent.service", () => {
     });
   });
 
-  it("renvoie une 404 pour un compte qui n'est pas un agent gérable", async () => {
-    mockFindAgentById.mockResolvedValue(null);
-
-    await expect(
-      updateAgentAccess(12, { status: "DEACTIVATED" }, "PUT")
-    ).rejects.toMatchObject({ status: 404 });
-  });
-
-  it("refuse de valider un contact de structure en attente", async () => {
-    mockGetContactEmails.mockResolvedValue(new Set([pendingAgent.email]));
+  it.each([
+    [
+      "un compte qui n'est pas un agent gérable",
+      () => mockFindAgentById.mockResolvedValue(null),
+    ],
+    [
+      "un contact de structure en attente",
+      () =>
+        mockGetContactEmails.mockResolvedValue(new Set([pendingAgent.email])),
+    ],
+  ])("renvoie une 404 pour %s", async (_, arrange) => {
+    arrange();
 
     await expect(
       updateAgentAccess(12, { status: "ACTIVATED", perimeterId: 3 }, "PUT")
@@ -137,11 +142,7 @@ describe("agent.service", () => {
   });
 
   it("désactive un agent en conservant son périmètre", async () => {
-    mockFindAgentById.mockResolvedValue({
-      ...pendingAgent,
-      isActivated: true,
-      perimeter: finistere,
-    });
+    mockFindAgentById.mockResolvedValue(activeAgent);
 
     await updateAgentAccess(12, { status: "DEACTIVATED" }, "PUT");
 

@@ -44,8 +44,21 @@ const renderManager = (perimeters = [finistere]) => (
   </FetchStateProvider>
 );
 
-const lastRequestBody = () =>
-  JSON.parse(vi.mocked(global.fetch).mock.lastCall![1]!.body as string);
+const expectRequest = async (
+  url: string,
+  method: string,
+  body: unknown
+): Promise<void> => {
+  await waitFor(() =>
+    expect(global.fetch).toHaveBeenCalledWith(
+      url,
+      expect.objectContaining({ method })
+    )
+  );
+  expect(
+    JSON.parse(vi.mocked(global.fetch).mock.lastCall![1]!.body as string)
+  ).toEqual(body);
+};
 
 describe("AgentsManager", () => {
   beforeEach(() => {
@@ -86,13 +99,10 @@ describe("AgentsManager", () => {
     await user.selectOptions(within(dialog).getByLabelText("Périmètre"), "3");
     await user.click(within(dialog).getByRole("button", { name: "Valider" }));
 
-    await waitFor(() =>
-      expect(global.fetch).toHaveBeenCalledWith(
-        "/api/agents/12",
-        expect.objectContaining({ method: "PUT" })
-      )
-    );
-    expect(lastRequestBody()).toEqual({ status: "ACTIVATED", perimeterId: 3 });
+    await expectRequest("/api/agents/12", "PUT", {
+      status: "ACTIVATED",
+      perimeterId: 3,
+    });
   });
 
   it("désactive un agent actif après confirmation", async () => {
@@ -106,13 +116,7 @@ describe("AgentsManager", () => {
       within(dialog).getByRole("button", { name: "Désactiver" })
     );
 
-    await waitFor(() =>
-      expect(global.fetch).toHaveBeenCalledWith(
-        "/api/agents/13",
-        expect.objectContaining({ method: "PUT" })
-      )
-    );
-    expect(lastRequestBody()).toEqual({ status: "DEACTIVATED" });
+    await expectRequest("/api/agents/13", "PUT", { status: "DEACTIVATED" });
   });
 
   it("signale les périmètres existants sur la zone et pré-remplit le nom", async () => {
@@ -145,13 +149,7 @@ describe("AgentsManager", () => {
       within(dialog).getByRole("button", { name: "Créer le périmètre" })
     );
 
-    await waitFor(() =>
-      expect(global.fetch).toHaveBeenCalledWith(
-        "/api/perimeters",
-        expect.objectContaining({ method: "POST" })
-      )
-    );
-    expect(lastRequestBody()).toEqual({
+    await expectRequest("/api/perimeters", "POST", {
       scope: "DEPARTEMENT",
       departementNumero: "29",
       name: "DDETS Finistère – SIAO",

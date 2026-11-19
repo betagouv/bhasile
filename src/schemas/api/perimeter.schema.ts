@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { GrantScope } from "@/generated/prisma/enums";
 
-const perimeterNameSchema = z
+export const perimeterNameSchema = z
   .string()
   .trim()
   .min(1, { error: "Le nom du périmètre est requis" });
