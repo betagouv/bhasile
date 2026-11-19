@@ -1,6 +1,8 @@
 export {
+  assertAgentsManagementAccess,
   assertCockpitAdminAccess,
   canAccessCockpitAdmin,
+  canManageAgents,
 } from "./admin.ability";
 export {
   canAbilityReadCpom,

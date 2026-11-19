@@ -230,6 +230,24 @@ export const protectedApiRoutes: ApiRoute[] = [
       DELETE: "proconnect",
     },
   },
+  {
+    pattern: /^\/api\/perimeters$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/agents$/,
+    routes: {
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/agents\/\d+$/,
+    routes: {
+      PUT: "proconnect",
+    },
+  },
 ];
 
 export const proConnectProtectedPages = [
