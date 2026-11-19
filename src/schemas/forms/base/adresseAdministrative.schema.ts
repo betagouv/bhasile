@@ -12,6 +12,32 @@ export const adresseAdministrativeSchema = z.object({
 export const adresseAdministrativeAutoSaveSchema =
   adresseAdministrativeSchema.partial();
 
+export const withDepartementAdministratifInPerimetre = <
+  TSchema extends z.ZodType<{ departementAdministratif?: string }>,
+>(
+  schema: TSchema,
+  canUpdateDepartement: (departementAdministratif: string) => boolean
+): TSchema =>
+  schema.check(
+    z.superRefine<{ departementAdministratif?: string }>(
+      (data, ctx) => {
+        const { departementAdministratif } = data;
+        if (
+          !departementAdministratif ||
+          canUpdateDepartement(departementAdministratif)
+        ) {
+          return;
+        }
+        ctx.addIssue({
+          code: "custom",
+          message: `Le département ${departementAdministratif} n’est pas dans votre périmètre.`,
+          path: ["adresseAdministrativeComplete"],
+        });
+      },
+      { when: () => true }
+    )
+  );
+
 export type AdresseAdministrativeFormValues = z.infer<
   typeof adresseAdministrativeSchema
 >;

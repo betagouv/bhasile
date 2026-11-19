@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { StructureCard } from "@/app/components/StructureCard";
 import { formatDate } from "@/app/utils/date.util";
 import { pluralize } from "@/app/utils/string.util";
@@ -5,7 +7,10 @@ import {
   getPlacesSource,
   getStructureVersionDepartement,
 } from "@/app/utils/transformation.util";
+import { useTransformationContext } from "@/contexts/TransformationContext";
+import { useTransformationStepsWithStatus } from "@/hooks/useTransformationStepsWithStatus";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StepStatus } from "@/types/form.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 type Props = {
@@ -16,6 +21,11 @@ export const StructureVersionTransformationItem = ({
   structureVersionTransformation,
 }: Props) => {
   const cardProps = buildCardProps(structureVersionTransformation);
+
+  const { transformation } = useTransformationContext();
+  const firstIncompleteStep = useTransformationStepsWithStatus(transformation)
+    .find((step) => step.id === structureVersionTransformation.id)
+    ?.steps.find((stepItem) => stepItem.status !== StepStatus.VALIDE);
 
   const effectiveDate =
     structureVersionTransformation.structureVersion?.effectiveDate;
@@ -45,6 +55,14 @@ export const StructureVersionTransformationItem = ({
           </span>
         </div>
       )}
+      {firstIncompleteStep && (
+        <Link
+          href={firstIncompleteStep.route}
+          className="fr-link fr-link--sm fr-icon-arrow-right-line fr-link--icon-right self-start"
+        >
+          Compléter les informations de la structure
+        </Link>
+      )}
     </div>
   );
 };
@@ -64,14 +82,14 @@ const buildCardProps = (
   const departementAdministratif =
     getStructureVersionDepartement(structureVersion);
 
-  if (!nom || !structureType || !operateur || !departementAdministratif) {
+  if (!nom && !structureType && !operateur && !departementAdministratif) {
     return null;
   }
 
   return {
     nom,
     codeBhasile,
-    type: structureType,
+    type: structureType ?? undefined,
     operateur,
     departementAdministratif,
   };

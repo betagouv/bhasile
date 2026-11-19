@@ -9,6 +9,7 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
+import { StepStatus } from "@/types/form.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -88,6 +89,16 @@ vi.mock(
   })
 );
 
+vi.mock("@/hooks/useTransformationStepsWithStatus", () => ({
+  useTransformationStepsWithStatus: (transformation: TransformationApiRead) =>
+    transformation.structureVersionTransformations.map(({ id, form }) => ({
+      id,
+      steps: [
+        { status: form?.status ? StepStatus.VALIDE : StepStatus.COMMENCE },
+      ],
+    })),
+}));
+
 vi.mock("@/app/components/forms/TransformationFakeSaver", () => ({
   TransformationFakeSaver: () => null,
 }));
@@ -125,13 +136,9 @@ const buildTransformation = ({
     structureVersionTransformations,
   }) as TransformationApiRead;
 
-const mockContext = (
-  transformation: TransformationApiRead,
-  shouldShowIncompleteSteps = false
-) => {
+const mockContext = (transformation: TransformationApiRead) => {
   mockUseTransformationContext.mockReturnValue({
     transformation,
-    shouldShowIncompleteSteps,
     setShouldShowIncompleteSteps,
   });
 };
@@ -145,7 +152,7 @@ describe("TransformationVerificationPage", () => {
     mockGetFetchState.mockReturnValue(FetchState.IDLE);
   });
 
-  it("garde le bouton de certification cliquable même quand un formulaire enfant n'est pas validé", () => {
+  it("désactive le bouton de certification quand un formulaire enfant n'est pas validé", () => {
     // GIVEN
     mockContext(
       buildTransformation({
@@ -161,10 +168,10 @@ describe("TransformationVerificationPage", () => {
     render(<TransformationVerificationPage />);
 
     // THEN
-    expect(certifyButton()).toBeEnabled();
+    expect(certifyButton()).toBeDisabled();
   });
 
-  it("désactive le bouton de certification uniquement pendant une sauvegarde en cours", () => {
+  it("désactive le bouton de certification pendant une sauvegarde en cours", () => {
     // GIVEN
     mockGetFetchState.mockReturnValue(FetchState.LOADING);
     mockContext(
@@ -183,9 +190,8 @@ describe("TransformationVerificationPage", () => {
     expect(certifyButton()).toBeDisabled();
   });
 
-  it("signale les étapes incomplètes et ne finalise pas quand un formulaire enfant n'est pas validé", async () => {
+  it("signale les étapes incomplètes dès l'arrivée sur la page", () => {
     // GIVEN
-    const user = userEvent.setup();
     mockContext(
       buildTransformation({
         form: buildForm(false),
@@ -198,12 +204,9 @@ describe("TransformationVerificationPage", () => {
 
     // WHEN
     render(<TransformationVerificationPage />);
-    await user.click(certifyButton());
 
     // THEN
     expect(setShouldShowIncompleteSteps).toHaveBeenCalledWith(true);
-    expect(mockUpdateTransformation).not.toHaveBeenCalled();
-    expect(mockModalOpen).not.toHaveBeenCalled();
   });
 
   it("finalise la transformation et ouvre la modale quand tous les formulaires enfants sont validés", async () => {
@@ -229,7 +232,6 @@ describe("TransformationVerificationPage", () => {
       form: { ...buildForm(false), status: true },
     });
     await waitFor(() => expect(mockModalOpen).toHaveBeenCalled());
-    expect(setShouldShowIncompleteSteps).not.toHaveBeenCalled();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
@@ -258,7 +260,7 @@ describe("TransformationVerificationPage", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("affiche le message d'incomplétude quand le flag est activé et qu'il reste des étapes", () => {
+  it("affiche le message d'incomplétude quand il reste des étapes", () => {
     // GIVEN
     mockContext(
       buildTransformation({
@@ -266,8 +268,7 @@ describe("TransformationVerificationPage", () => {
         structureVersionTransformations: [
           buildStructureVersionTransformation(false),
         ],
-      }),
-      true
+      })
     );
 
     // WHEN
@@ -279,7 +280,7 @@ describe("TransformationVerificationPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("masque le message d'incomplétude quand toutes les étapes sont validées même si le flag est activé", () => {
+  it("masque le message d'incomplétude quand toutes les étapes sont validées", () => {
     // GIVEN
     mockContext(
       buildTransformation({
@@ -287,8 +288,7 @@ describe("TransformationVerificationPage", () => {
         structureVersionTransformations: [
           buildStructureVersionTransformation(true),
         ],
-      }),
-      true
+      })
     );
 
     // WHEN

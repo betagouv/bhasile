@@ -8,6 +8,7 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
+import { useCanUpdateDepartement } from "@/app/hooks/useCanUpdateStructure";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
   getInitialAntennes,
@@ -19,6 +20,7 @@ import {
   StructureVersionTransformationApiUpdateClient,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { withDepartementAdministratifInPerimetre } from "@/schemas/forms/base/adresseAdministrative.schema";
 import {
   TransformationIdentificationDraftFormValues,
   transformationIdentificationDraftSchema,
@@ -44,6 +46,7 @@ export const ExistingStructureIdentificationForm = ({
     backLink,
     shouldShowIncompleteSteps,
   } = useTransformationFormHandling();
+  const canUpdateDepartement = useCanUpdateDepartement();
 
   const defaultValues =
     getTransformationDefaultValues<TransformationIdentificationDraftFormValues>(
@@ -75,13 +78,15 @@ export const ExistingStructureIdentificationForm = ({
 
   return (
     <FormWrapper
-      schema={
+      schema={withDepartementAdministratifInPerimetre(
         shouldShowIncompleteSteps
           ? transformationIdentificationSchema
-          : transformationIdentificationDraftSchema
-      }
+          : transformationIdentificationDraftSchema,
+        canUpdateDepartement
+      )}
       defaultValues={defaultValues}
       onSubmit={goToNextStep}
+      onError={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}

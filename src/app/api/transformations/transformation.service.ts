@@ -51,6 +51,7 @@ import {
   checkCanUpdateDepartements,
   checkEffectiveDatesAreValid,
   checkNoDuplicateStructureIds,
+  getExistingStructureDepartements,
   isTransformationVisible,
 } from "./transformation.util";
 
@@ -285,9 +286,16 @@ export const updateTransformation = async (
   const inputStructureVersionTransformations =
     input.structureVersionTransformations ?? [];
 
+  const isFinalizing = input.form?.status === true;
   checkCanUpdateDepartements(user, [
-    ...transformation.structureVersionTransformations,
-    ...inputStructureVersionTransformations,
+    ...(isFinalizing
+      ? [
+          ...transformation.structureVersionTransformations,
+          ...inputStructureVersionTransformations,
+        ]
+      : getExistingStructureDepartements(
+          transformation.structureVersionTransformations
+        )),
     ...(await resolveStructureDepartements(
       inputStructureVersionTransformations
     )),

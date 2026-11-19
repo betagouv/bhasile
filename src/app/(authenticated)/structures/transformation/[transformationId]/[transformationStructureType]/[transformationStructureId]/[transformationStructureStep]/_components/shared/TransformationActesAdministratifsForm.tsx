@@ -6,12 +6,8 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import {
-  getActesAdministratifsDefaultValues,
-  resolveAvenantParentIds,
-} from "@/app/utils/acte-administratif.util";
-import { getNow } from "@/app/utils/now.util";
-import { getTransformationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
+import { getActesAdministratifsDefaultValues } from "@/app/utils/acte-administratif.util";
+import { getTransformationActesAdministratifsCategoryDisplayRules } from "@/app/utils/transformation.util";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   StructureVersionTransformationApiRead,
@@ -41,19 +37,11 @@ export const TransformationActesAdministratifsForm = ({
     shouldShowIncompleteSteps,
   } = useTransformationFormHandling();
 
-  const effectiveDate =
-    structureVersionTransformation.structureVersion?.effectiveDate;
-  const referenceDate = effectiveDate ? new Date(effectiveDate) : getNow();
-
-  const categoryDisplayRules = resolveAvenantParentIds(
-    getTransformationActesAdministratifsCategoryToDisplay(
-      structureVersionTransformation.type,
-      transformation.type
-    ),
-    structureVersionTransformation.structureVersion?.structure
-      ?.actesAdministratifs,
-    referenceDate
-  );
+  const categoryDisplayRules =
+    getTransformationActesAdministratifsCategoryDisplayRules(
+      transformation,
+      structureVersionTransformation
+    );
 
   const defaultValues = {
     actesAdministratifs: getActesAdministratifsDefaultValues(
@@ -80,6 +68,7 @@ export const TransformationActesAdministratifsForm = ({
       }
       defaultValues={defaultValues}
       onSubmit={goToNextStep}
+      onError={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}

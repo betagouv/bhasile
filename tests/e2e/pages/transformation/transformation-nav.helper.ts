@@ -56,8 +56,10 @@ export const finalizeTransformation = async (page: Page): Promise<void> => {
     .click();
 };
 
-export const tryFinalizeExpectingBlock = async (page: Page): Promise<void> => {
-  await page.getByRole("button", { name: FINALIZE_BUTTON }).click();
+export const expectFinalizeBlocked = async (page: Page): Promise<void> => {
+  await expect(
+    page.getByRole("button", { name: FINALIZE_BUTTON })
+  ).toBeDisabled();
   await expect(
     page.getByText(/certaines étapes ne sont pas encore complétées/i)
   ).toBeVisible();

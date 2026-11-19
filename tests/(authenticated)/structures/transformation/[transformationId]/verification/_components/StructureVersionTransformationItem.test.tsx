@@ -2,7 +2,9 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { StructureVersionTransformationItem } from "@/app/(authenticated)/structures/transformation/[transformationId]/verification/_components/StructureVersionTransformationItem";
+import { Step } from "@/app/utils/transformation.util";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StepStatus } from "@/types/form.type";
 import { StructureType } from "@/types/structure.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
@@ -10,7 +12,7 @@ type StructureCardStubProps = {
   nom: string;
   codeBhasile?: string;
   type: StructureType;
-  operateur: { name: string };
+  operateur?: { name: string };
   departementAdministratif: string;
 };
 
@@ -27,10 +29,20 @@ vi.mock("@/app/components/StructureCard", () => ({
       data-nom={nom}
       data-code={codeBhasile}
       data-type={type}
-      data-operateur={operateur.name}
+      data-operateur={operateur?.name}
       data-dept={departementAdministratif}
     />
   ),
+}));
+
+const mockSteps = vi.fn<() => Step[]>(() => []);
+
+vi.mock("@/contexts/TransformationContext", () => ({
+  useTransformationContext: () => ({}),
+}));
+
+vi.mock("@/hooks/useTransformationStepsWithStatus", () => ({
+  useTransformationStepsWithStatus: () => mockSteps(),
 }));
 
 const buildCompleteStructureVersionTransformation = (
@@ -101,11 +113,27 @@ describe("StructureVersionTransformationItem", () => {
           },
         }),
     ],
-  ])("masque la StructureCard quand %s est absent", (_label, build) => {
+  ])("affiche la StructureCard quand %s est absent", (_label, build) => {
     // WHEN
     render(
       <StructureVersionTransformationItem
         structureVersionTransformation={build()}
+      />
+    );
+
+    // THEN
+    expect(screen.getByTestId("structure-card")).toBeInTheDocument();
+  });
+
+  it("masque la StructureCard quand aucune information de la structure n'est renseignée", () => {
+    // WHEN
+    render(
+      <StructureVersionTransformationItem
+        structureVersionTransformation={{
+          id: 1,
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: {},
+        }}
       />
     );
 
@@ -141,7 +169,7 @@ describe("StructureVersionTransformationItem", () => {
     expect(card).toHaveAttribute("data-dept", "Manche");
   });
 
-  it("masque la StructureCard quand aucun opérateur n'est résolvable", () => {
+  it("affiche la StructureCard sans opérateur quand aucun n'est résolvable", () => {
     // GIVEN — structureVersion.structure.operateur missing AND structureVersionTransformation.operateur missing
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       operateur: undefined,
@@ -159,7 +187,9 @@ describe("StructureVersionTransformationItem", () => {
     );
 
     // THEN
-    expect(screen.queryByTestId("structure-card")).not.toBeInTheDocument();
+    expect(screen.getByTestId("structure-card")).not.toHaveAttribute(
+      "data-operateur"
+    );
   });
 
   it("se rabat sur structureVersionTransformation.operateur quand structureVersion.structure.operateur est absent", () => {
@@ -356,5 +386,34 @@ describe("StructureVersionTransformationItem", () => {
 
     // THEN
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
+  });
+
+  it("propose de compléter la première étape non validée", () => {
+    // GIVEN
+    mockSteps.mockReturnValue([
+      {
+        id: 1,
+        steps: [
+          { name: "a", label: "", route: "/a", status: StepStatus.VALIDE },
+          { name: "b", label: "", route: "/b", status: StepStatus.COMMENCE },
+        ],
+      },
+    ]);
+    const structureVersionTransformation =
+      buildCompleteStructureVersionTransformation();
+
+    // WHEN
+    render(
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
+      />
+    );
+
+    // THEN
+    expect(
+      screen.getByRole("link", {
+        name: "Compléter les informations de la structure",
+      })
+    ).toHaveAttribute("href", "/b");
   });
 });

@@ -1,4 +1,4 @@
-import { getCurrentYear } from "@/app/utils/now.util";
+import { getCurrentYear, getNow } from "@/app/utils/now.util";
 import {
   getTransformationActesAdministratifsCategoryToDisplay,
   STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS,
@@ -24,7 +24,10 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-import { getActesAdministratifsDefaultValues } from "./acte-administratif.util";
+import {
+  getActesAdministratifsDefaultValues,
+  resolveAvenantParentIds,
+} from "./acte-administratif.util";
 import { getYearFromDate } from "./date.util";
 import { areAllFormStepsValidated } from "./form-step.util";
 import {
@@ -443,6 +446,39 @@ export const getTransformationDefaultValues = <T>({
       categoryDisplayRules
     ),
   } as DeepPartial<T>;
+};
+
+export const getStructureVersionTransformationFormKind = (
+  transformationType: TransformationType | undefined,
+  structureVersionTransformationType: StructureVersionTransformationType
+): FormKind => {
+  switch (structureVersionTransformationType) {
+    case StructureVersionTransformationType.CONTRACTION:
+      return FormKind.CONTRACTION;
+    case StructureVersionTransformationType.EXTENSION:
+      return FormKind.EXTENSION;
+    default:
+      return transformationType === TransformationType.OUVERTURE_EX_NIHILO
+        ? FormKind.OUVERTURE_EX_NIHILO
+        : FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
+  }
+};
+
+export const getTransformationActesAdministratifsCategoryDisplayRules = (
+  transformation: TransformationApiRead,
+  structureVersionTransformation: StructureVersionTransformationApiRead
+) => {
+  const effectiveDate =
+    structureVersionTransformation.structureVersion?.effectiveDate;
+  return resolveAvenantParentIds(
+    getTransformationActesAdministratifsCategoryToDisplay(
+      structureVersionTransformation.type,
+      transformation.type
+    ),
+    structureVersionTransformation.structureVersion?.structure
+      ?.actesAdministratifs,
+    effectiveDate ? new Date(effectiveDate) : getNow()
+  );
 };
 
 export const isCreation = (formKind: FormKind): boolean =>

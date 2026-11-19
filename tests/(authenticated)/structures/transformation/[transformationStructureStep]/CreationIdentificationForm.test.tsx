@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createDepartementalAgent } from "tests/test-utils/factories/session-user.factory";
 import {
   getSavedStructureVersionTransformation,
   mockTransformationFetch,
@@ -123,6 +124,41 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     expect(fetchMock).not.toHaveBeenCalledWith(
       `/api/transformations/${TRANSFORMATION_ID}`,
       expect.objectContaining({ method: "PUT" })
+    );
+  });
+
+  it("enregistre une étape incomplète et son adresse hors périmètre après le passage par la vérification", async () => {
+    // GIVEN
+    const transformation = buildTransformation({
+      id: 999,
+      adresseAdministrative: "44 Rue de la Paix",
+      codePostalAdministratif: "10000",
+      communeAdministrative: "Troyes",
+      departementAdministratif: "10",
+    });
+    renderTransformationForm(
+      transformation,
+      <CreationIdentificationForm
+        transformation={transformation}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
+        formKind={FormKind.OUVERTURE_EX_NIHILO}
+      />,
+      { showIncompleteSteps: true, user: createDepartementalAgent(["75"]) }
+    );
+
+    // WHEN
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN
+    await waitFor(() =>
+      expect(
+        getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID)
+          .structureVersion
+      ).toMatchObject({ departementAdministratif: "10" })
     );
   });
 

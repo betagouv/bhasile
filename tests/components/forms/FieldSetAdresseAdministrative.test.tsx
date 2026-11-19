@@ -3,6 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FieldSetAdresseAdministrative } from "@/app/components/forms/adresseAdministrativeAndAntenne/FieldSetAdresseAdministrative";
+import {
+  adresseAdministrativeAutoSaveSchema,
+  withDepartementAdministratifInPerimetre,
+} from "@/schemas/forms/base/adresseAdministrative.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 
@@ -414,6 +418,67 @@ describe("FieldSetAdresseAdministrative", () => {
       await waitFor(() => {
         expect(typeBatiSelect).toHaveValue(Repartition.DIFFUS);
       });
+    });
+  });
+
+  describe("Périmètre de l'agent", () => {
+    const troyesSuggestion = {
+      ...mockAddressSuggestions[0],
+      id: "3",
+      key: "3",
+      label: "44 Rue de la Paix, 10000 Troyes",
+      housenumber: "44",
+      postcode: "10000",
+      city: "Troyes",
+      context: "10, Aube, Grand Est",
+    };
+
+    it("retire l'erreur de périmètre quand l'adresse est corrigée", async () => {
+      // GIVEN
+      const user = userEvent.setup();
+      mockUseAddressSuggestion.mockResolvedValue([
+        troyesSuggestion,
+        mockAddressSuggestions[0],
+      ]);
+      render(
+        <FormTestWrapper
+          defaultValues={{ adresseAdministrativeComplete: "" }}
+          schema={withDepartementAdministratifInPerimetre(
+            adresseAdministrativeAutoSaveSchema,
+            (departementAdministratif) => departementAdministratif === "75"
+          )}
+        >
+          <FieldSetAdresseAdministrative formKind={FormKind.FINALISATION} />
+        </FormTestWrapper>
+      );
+      const addressInput = screen.getByLabelText(
+        "Adresse principale de la structure"
+      );
+      await user.type(addressInput, "Rue de la Paix");
+      await user.click(
+        await screen.findByText("44 Rue de la Paix, 10000 Troyes")
+      );
+      expect(
+        await screen.findByText(
+          "Le département 10 n’est pas dans votre périmètre."
+        )
+      ).toBeInTheDocument();
+
+      // WHEN
+      await user.clear(addressInput);
+      await user.type(addressInput, "Rue de la Paix");
+      await user.click(
+        await screen.findByText("10 Rue de la Paix, 75001 Paris")
+      );
+
+      // THEN
+      await waitFor(() =>
+        expect(
+          screen.queryByText(
+            "Le département 10 n’est pas dans votre périmètre."
+          )
+        ).not.toBeInTheDocument()
+      );
     });
   });
 });
