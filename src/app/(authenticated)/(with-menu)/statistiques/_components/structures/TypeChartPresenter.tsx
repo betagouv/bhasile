@@ -4,8 +4,8 @@ import { ReactElement } from "react";
 
 import { ChartLegend } from "@/app/components/ChartLegend";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
-import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
+import { PieChart } from "@/components/pie-chart/PieChart";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
 import { BatiStat, TypeStructureStat } from "@/schemas/api/statistique.schema";
 import { RepartitionLabel } from "@/types/adresse.type";
