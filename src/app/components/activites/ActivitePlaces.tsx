@@ -1,17 +1,11 @@
 "use client";
 
-import { ReactElement } from "react";
+import { ReactElement, ReactNode, useMemo } from "react";
 
-import PieChart from "@/app/components/common/PieChart";
-import { getPercentage } from "@/app/utils/common.util";
+import { PieChart } from "@/components/pie-chart/PieChart";
 
 import { NumberDisplay } from "../common/NumberDisplay";
-
-const pieChartOptions = {
-  showLabel: false,
-  donut: true,
-  donutWidth: 30,
-};
+import { ActivitePlacesLabel } from "./ActivitePlacesLabel";
 
 export const ActivitePlaces = ({
   placesAutorisees = 0,
@@ -22,76 +16,88 @@ export const ActivitePlaces = ({
   const indisponibles = Number(placesIndisponibles ?? 0);
   const disponibles = Number(placesDisponibles ?? 0);
   const caes = Number(placesCaes ?? 0);
-
   const total = disponibles + indisponibles + caes;
 
-  const labels = [
-    "Places indisponibles",
-    "Places disponibles",
-    ...(caes ? ["Places CAES"] : []),
-  ];
-  const series = [indisponibles, disponibles, ...(caes ? [caes] : [])];
+  const slices = useMemo(
+    () => buildSlices({ indisponibles, caes, disponibles }),
+    [indisponibles, caes, disponibles]
+  );
+
+  const chartData = useMemo(
+    () => ({
+      labels: slices.map(({ kind }) => SLICE_CHART_LABELS[kind]),
+      series: slices.map(({ value }) => value),
+    }),
+    [slices]
+  );
+
+  const calloutLabels = slices.map(({ kind, value }) => (
+    <ActivitePlacesLabel key={kind} value={value} total={total}>
+      {SLICE_CALLOUT_TEXTS[kind]}
+    </ActivitePlacesLabel>
+  ));
 
   return (
-    <div className="flex items-center pt-3">
-      <div>
-        <PieChart
-          size={180}
-          data={{ labels, series }}
-          options={pieChartOptions}
-          isDonut={true}
-          colors={[
-            "var(--grey-925-125)",
-            "var(--yellow-moutarde-850-200)",
-            caes
-              ? "var(--yellow-moutarde-main-679)"
-              : "var(--yellow-moutarde-850-200)",
-          ]}
-        >
-          <div className="absolute w-22 top-15 left-12 text-sm text-center">
-            <strong>
-              <NumberDisplay value={placesAutorisees} />
-            </strong>{" "}
-            places enregistrées DNA
-          </div>
-        </PieChart>
-        <div className="pt-2 text-center">
-          <div>
-            <strong>
-              <NumberDisplay value={indisponibles} />
-            </strong>{" "}
-            indisponibles{" "}
-            <span className="text-mention-grey">
-              ({getPercentage(indisponibles, total)})
-            </span>
-          </div>
-          <div>
-            <strong>
-              <NumberDisplay value={disponibles} />
-            </strong>{" "}
-            disponibles{" "}
-            <span className="text-mention-grey">
-              ({getPercentage(disponibles, total)})
-            </span>
-          </div>
-          {caes ? (
-            <div>
-              <strong>
-                <NumberDisplay value={caes} />
-              </strong>{" "}
-              places CAES
-              <br />
-              <span className="italic">- indisponibilité non suivie</span>{" "}
-              <span className="text-mention-grey">
-                ({getPercentage(caes, total)})
-              </span>
-            </div>
-          ) : null}
+    <div className="pt-3">
+      <PieChart
+        size={180}
+        data={chartData}
+        options={pieChartOptions}
+        isDonut
+        colors={[
+          "var(--grey-925-125)",
+          "var(--yellow-moutarde-main-679)",
+          "var(--yellow-moutarde-850-200)",
+        ]}
+        calloutLabels={calloutLabels}
+      >
+        <div className="w-22 text-sm text-center">
+          <strong>
+            <NumberDisplay value={placesAutorisees} />
+          </strong>{" "}
+          places enregistrées DNA
         </div>
-      </div>
+      </PieChart>
     </div>
   );
 };
+
+const buildSlices = ({
+  indisponibles,
+  caes,
+  disponibles,
+}: Record<SliceKind, number>): Slice[] => [
+  { kind: "indisponibles", value: indisponibles },
+  ...(caes ? [{ kind: "caes" as const, value: caes }] : []),
+  { kind: "disponibles", value: disponibles },
+];
+
+const SLICE_CHART_LABELS: Record<SliceKind, string> = {
+  indisponibles: "Places indisponibles",
+  caes: "Places CAES",
+  disponibles: "Places disponibles",
+};
+
+const SLICE_CALLOUT_TEXTS: Record<SliceKind, ReactNode> = {
+  indisponibles: "indisponibles",
+  caes: (
+    <>
+      places en CAES{" "}
+      <span className="italic">– indisponibilité non suivie</span>
+    </>
+  ),
+  disponibles: "disponibles",
+};
+
+const pieChartOptions = {
+  showLabel: false,
+  donut: true,
+  donutWidth: 30,
+};
+
+type SliceKind = "indisponibles" | "caes" | "disponibles";
+
+type Slice = { kind: SliceKind; value: number };
 
 type Props = {
   placesAutorisees?: number;
