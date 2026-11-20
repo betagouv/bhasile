@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { MouseEvent, useCallback, useEffect, useState } from "react";
 
 import Loader from "@/app/components/ui/Loader";
 import { useMapLabels } from "@/app/hooks/useMapLabels";
@@ -14,11 +14,6 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
   const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
 
   const richZoneData = useCartographieRichZoneData();
-
-  const onRegionClickRef = useRef(onRegionClick);
-  useEffect(() => {
-    onRegionClickRef.current = onRegionClick;
-  });
 
   useEffect(() => {
     import("@gouvfr/dsfr-chart")
@@ -37,11 +32,9 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
         return false;
       }
 
-      if (onRegionClick && path.dataset.regionClickBound !== "true") {
-        path.dataset.regionClickBound = "true";
+      if (onRegionClick) {
         path.style.cursor = "pointer";
         path.classList.add("hover:opacity-80", "transition-opacity");
-        path.addEventListener("click", () => onRegionClickRef.current?.(code));
       }
       return true;
     },
@@ -67,9 +60,11 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
       ref={containerRef}
       className="relative w-full h-full"
       onClickCapture={(event) => {
-        if (decoupage === "dep") {
-          event.stopPropagation();
-          event.preventDefault();
+        event.stopPropagation();
+        event.preventDefault();
+        const clickedZoneCode = getClickedZoneCode(event);
+        if (onRegionClick && clickedZoneCode) {
+          onRegionClick(clickedZoneCode);
         }
       }}
     >
@@ -94,6 +89,18 @@ export const MainMap = ({ zoneData, decoupage, onRegionClick }: Props) => {
       ))}
     </div>
   );
+};
+
+const getClickedZoneCode = (event: MouseEvent): string | null => {
+  const clickedPath = event.nativeEvent
+    .composedPath()
+    .find(
+      (target): target is SVGPathElement => target instanceof SVGPathElement
+    );
+  const zoneClass = Array.from(clickedPath?.classList ?? []).find((name) =>
+    name.startsWith("FR-")
+  );
+  return zoneClass?.replace("FR-", "") ?? null;
 };
 
 type Props = {
