@@ -10,9 +10,7 @@ import { StructuresQuery } from "@/types/structure-list.type";
 
 export const StructuresCount = async ({
   query,
-}: {
-  query: StructuresQuery;
-}): Promise<ReactElement> => {
+}: Props): Promise<ReactElement> => {
   return (
     <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
       {await getCountLabel(query)}
@@ -28,4 +26,8 @@ const getCountLabel = async (query: StructuresQuery): Promise<string> => {
     return formatPlural((await getCommunePoints(query)).totalPlaces, "place");
   }
   return formatPlural((await getStructureMapPoints(query)).length, "structure");
+};
+
+type Props = {
+  query: StructuresQuery;
 };

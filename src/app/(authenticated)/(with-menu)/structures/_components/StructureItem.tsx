@@ -21,6 +21,7 @@ export const StructureItem = ({
   index,
   handleOpenModal,
   isClosed,
+  showOperateurColumn = true,
 }: Props) => {
   return (
     <tr
@@ -30,7 +31,9 @@ export const StructureItem = ({
     >
       <td className="text-left! whitespace-nowrap">{structure.codeBhasile}</td>
       <td className="text-left! whitespace-nowrap">{structure.type}</td>
-      <td className="text-left!">{structure.operateurLabel}</td>
+      {showOperateurColumn && (
+        <td className="text-left!">{structure.operateurLabel}</td>
+      )}
       <td className="text-left!">{structure.departementAdministratif}</td>
       <td className="text-left! whitespace-nowrap">
         {getCommuneLabel(structure.communes)}
@@ -129,4 +132,5 @@ type Props = {
   index: number;
   handleOpenModal: (structure: StructureListItem) => void;
   isClosed: boolean;
+  showOperateurColumn?: boolean;
 };

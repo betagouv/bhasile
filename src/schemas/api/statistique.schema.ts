@@ -4,7 +4,6 @@ import type { NumericAggregation } from "@/app/utils/math.util";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
-
 export type StatistiquesAggregation = NumericAggregation;
 
 export const statistiquesFiltersSchema = z.object({
@@ -217,7 +216,7 @@ export type StatistiqueApiRead = {
     summary: ActiviteSummaryStat;
     byMonth: ActiviteByMonthStat[];
   };
-  rmu: {
+  rmu?: {
     byMonth: RmuPeriodStat[];
     byTrimester: RmuPeriodStat[];
     byYear: RmuPeriodStat[];

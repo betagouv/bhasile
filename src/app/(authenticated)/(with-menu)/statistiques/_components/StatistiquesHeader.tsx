@@ -12,6 +12,7 @@ import { downloadDocument } from "@/app/utils/spreadsheet-download/spreadsheet-d
 import { getStatistiquesDownloadContent } from "@/app/utils/spreadsheet-download/statistiques-spreadsheet-download.util";
 import { PageHeader } from "@/components/PageHeader";
 import { useOptionalStatistiquesContext } from "@/contexts/StatistiquesContext";
+import { hasRmuSection } from "@/utils/statistiques.util";
 
 import { StatistiquesPdfExportDocument } from "./StatistiquesPdfExportDocument";
 
@@ -127,7 +128,9 @@ export const StatistiquesHeader = (): ReactElement => {
             { label: "Finance", section: "#finance" },
             { label: "Contrôle qualité", section: "#controle-qualite" },
             { label: "Activité", section: "#activite" },
-            { label: "RMU", section: "#rmu" },
+            ...(hasRmuSection(statistiques)
+              ? [{ label: "RMU", section: "#rmu" }]
+              : []),
           ]}
         />
       )}

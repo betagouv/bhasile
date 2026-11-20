@@ -11,6 +11,8 @@ import {
   NoPermissionsModal,
   openNoPermissionsModal,
 } from "@/components/NoPermissionsModal";
+import { isAgent } from "@/lib/casl";
+import { SessionUser } from "@/types/global";
 import { StructureListItem } from "@/types/structure-list.type";
 import { getStructureHref } from "@/utils/structure-link.util";
 
@@ -31,12 +33,18 @@ export const StructuresTable = ({
   totalStructures,
   ariaLabelledBy,
   isClosed,
+  user,
 }: Props): ReactElement => {
   const router = useRouter();
   const canUpdateStructure = useCanUpdateStructures();
+  const showOperateurColumn = isAgent(user);
+
+  const visibleSharedColumns = showOperateurColumn
+    ? SHARED_COLUMNS
+    : SHARED_COLUMNS.filter((column) => column.column !== "operateur");
 
   const columns = [
-    ...SHARED_COLUMNS,
+    ...visibleSharedColumns,
     ...(isClosed ? CLOSED_TRAILING_COLUMNS : ACTIVE_TRAILING_COLUMNS),
   ];
 
@@ -62,6 +70,7 @@ export const StructuresTable = ({
               index={index}
               handleOpenModal={handleOpenModal}
               isClosed={isClosed}
+              showOperateurColumn={showOperateurColumn}
             />
           ))}
         </ListTableHeadings>
@@ -103,4 +112,5 @@ type Props = {
   totalStructures: number;
   ariaLabelledBy: string;
   isClosed: boolean;
+  user?: SessionUser;
 };

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { isAgent } from "@/lib/casl";
+import { canAccessPage } from "@/lib/casl/pages";
 import { authOptions } from "@/lib/next-auth/auth";
 import {
   CartographieNotImplementedApiRead,
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
   const user = session.user as SessionUser;
-  if (!isAgent(user)) {
+  if (!canAccessPage(user, "/statistiques")) {
     return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
   }
   const { searchParams } = request.nextUrl;

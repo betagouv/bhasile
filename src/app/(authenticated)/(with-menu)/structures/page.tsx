@@ -91,7 +91,7 @@ export default async function Structures({
               }
             >
               <Suspense fallback={<StructuresSkeleton />}>
-                <StructuresContent query={query} />
+                <StructuresContent query={query} user={user as SessionUser} />
               </Suspense>
             </ContentErrorBoundary>
           </div>

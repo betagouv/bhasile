@@ -44,6 +44,9 @@ export const canSaveCpom = (
   });
 };
 
+export const canAbilityUpdateSomeCpom = (ability: AppAbility) =>
+  ability.can("update", "Cpom");
+
 export const canAbilityUpdateCpom = (ability: AppAbility, cpom: CpomScope) =>
   ability.can("update", subject("Cpom", { ...cpom } as never));
 

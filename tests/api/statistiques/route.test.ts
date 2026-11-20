@@ -36,6 +36,12 @@ const operateurUser = createSessionUser({
   grants: [createSessionGrant({ isNational: true })],
 });
 
+const contactUser = createSessionUser({
+  operateurId: null,
+  isAgent: false,
+  grants: [createSessionGrant({ structureIds: [12] })],
+});
+
 const routes = [
   {
     name: "GET /api/statistiques",
@@ -70,13 +76,22 @@ describe.each(routes)("$name", ({ call, service }) => {
     expect(service).not.toHaveBeenCalled();
   });
 
-  it("refuse un utilisateur opérateur", async () => {
-    mockGetServerSession.mockResolvedValue({ user: operateurUser });
+  it("refuse un contact sans opérateur rattaché", async () => {
+    mockGetServerSession.mockResolvedValue({ user: contactUser });
 
     const response = await call();
 
     expect(response.status).toBe(403);
     expect(service).not.toHaveBeenCalled();
+  });
+
+  it("accepte un utilisateur opérateur", async () => {
+    mockGetServerSession.mockResolvedValue({ user: operateurUser });
+
+    const response = await call();
+
+    expect(response.status).toBe(200);
+    expect(service).toHaveBeenCalled();
   });
 
   it("répond à un agent", async () => {

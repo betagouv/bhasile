@@ -5,7 +5,7 @@ import { ReactElement, useEffect } from "react";
 import { Section } from "@/app/components/common/Section";
 import { useUserAction } from "@/app/hooks/useUserAction";
 import { useStatistiquesContext } from "@/contexts/StatistiquesContext";
-import { isSomeDataIncomplete } from "@/utils/statistiques.util";
+import { hasRmuSection, isSomeDataIncomplete } from "@/utils/statistiques.util";
 
 import { ActiviteBlock } from "./activite/ActiviteBlock";
 import { ControleQualiteBlock } from "./controle-qualite/ControleQualiteBlock";
@@ -44,9 +44,11 @@ export const StatistiquesContent = (): ReactElement => {
       <Section id="activite">
         <ActiviteBlock />
       </Section>
-      <Section id="rmu">
-        <RMUBlock />
-      </Section>
+      {hasRmuSection(statistiques) && (
+        <Section id="rmu">
+          <RMUBlock />
+        </Section>
+      )}
     </div>
   );
 };
