@@ -1,8 +1,8 @@
 import { ReactElement } from "react";
 
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
-import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
+import { PieChart } from "@/components/pie-chart/PieChart";
 
 export const TypePlaceCharts = ({
   placesAutorisees,
@@ -22,6 +22,7 @@ export const TypePlaceCharts = ({
               series: [placesPmr, placesAutorisees - placesPmr],
             }}
             options={{ showLabel: false }}
+            minimumFirstSlice
           ></PieChart>
           <div className="fr-pt-1w text-center">
             <strong>
@@ -50,6 +51,7 @@ export const TypePlaceCharts = ({
               ],
             }}
             options={{ showLabel: false }}
+            minimumFirstSlice
           ></PieChart>
           <div className="fr-pt-1w text-center">
             <strong>
@@ -75,6 +77,7 @@ export const TypePlaceCharts = ({
               series: [placesQPV, placesAutorisees - placesQPV],
             }}
             options={{ showLabel: false }}
+            minimumFirstSlice
           ></PieChart>
           <div className="fr-pt-1w text-center">
             <strong>
@@ -101,6 +104,7 @@ export const TypePlaceCharts = ({
               ],
             }}
             options={{ showLabel: false }}
+            minimumFirstSlice
           ></PieChart>
           <div className="fr-pt-1w text-center">
             <strong>
