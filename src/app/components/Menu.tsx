@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 
 import { SessionUser } from "@/types/global";
+import { ReadableEntities } from "@/types/readable-ids.type";
 import {
   MenuGroup,
   MenuGroupId,
@@ -17,13 +18,13 @@ import { matchesPath } from "@/utils/path.util";
 import { Logo } from "./Logo";
 import { MenuFooter } from "./MenuFooter";
 
-export const Menu = (): ReactElement | null => {
+export const Menu = ({ readableEntities }: Props): ReactElement | null => {
   const pathname = usePathname();
   const { data: sessionData } = useSession();
 
   const menuItems = useMemo(
-    () => resolveMenuItems(sessionData?.user as SessionUser),
-    [sessionData?.user]
+    () => resolveMenuItems(sessionData?.user as SessionUser, readableEntities),
+    [sessionData?.user, readableEntities]
   );
 
   const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(() =>
@@ -106,6 +107,10 @@ export const Menu = (): ReactElement | null => {
       <MenuFooter />
     </nav>
   );
+};
+
+type Props = {
+  readableEntities?: ReadableEntities;
 };
 
 const getDefaultOpenGroup = (pathname: string | null): MenuGroupId =>

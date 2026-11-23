@@ -165,6 +165,9 @@ const getCpomConditions = ({
 export const isAgent = (user: SessionPermissions | undefined): boolean =>
   user?.isAgent === true;
 
+export const hasNationalRead = (user: SessionPermissions): boolean =>
+  user.isSuperAdmin || isAgent(user);
+
 export const canAccessApp = (user: SessionPermissions): boolean =>
   user.isSuperAdmin || (user.grants?.length ?? 0) > 0;
 

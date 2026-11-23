@@ -16,6 +16,7 @@ import {
   canAbilityReadStructure,
   defineAbilityFor,
   getReadableStructureWhere,
+  hasNationalRead,
   isAgent,
 } from "@/lib/casl";
 import {
@@ -23,6 +24,7 @@ import {
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
+import { ALL_READABLE, ReadableIds } from "@/types/readable-ids.type";
 import { PublicType } from "@/types/structure.type";
 import {
   CommunePoints,
@@ -90,6 +92,7 @@ import {
   isStructureFinalised,
   isStructureInCpom,
   isStructureInCpomPerYear,
+  isStructureVisible,
   sortStructureRows,
   StructureListComputedRow,
 } from "./structure.util";
@@ -216,6 +219,18 @@ const filterAndSortStructureRows = async (
     props.direction ?? "asc"
   );
 };
+
+export const getReadableStructureIds = cache(
+  async (user: SessionUser): Promise<ReadableIds> => {
+    if (hasNationalRead(user)) {
+      return ALL_READABLE;
+    }
+    const rows = await computeAllStructureRows(getReadableStructureWhere(user));
+    return rows
+      .filter((row) => isStructureVisible(row) && row.isFinalised)
+      .map((row) => row.id);
+  }
+);
 
 export const getStructuresTotal = async (props: SearchProps): Promise<number> =>
   (await getSortedStructureRows(props)).length;

@@ -5,14 +5,20 @@ import {
 } from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getCpomById, prepareCpomToSave } from "@/app/api/cpoms/cpom.service";
+import {
+  getCpomById,
+  getReadableCpomIds,
+  prepareCpomToSave,
+} from "@/app/api/cpoms/cpom.service";
 
 const mockFindRegionIdByName = vi.fn();
 const mockFindStructuresOperateur = vi.fn();
 const mockFindOne = vi.fn();
+const mockFindAllCpoms = vi.fn();
 
 vi.mock("@/app/api/cpoms/cpom.repository", () => ({
   findOne: (...args: unknown[]) => mockFindOne(...args),
+  findAllCpoms: (...args: unknown[]) => mockFindAllCpoms(...args),
 }));
 
 vi.mock("@/app/api/operateurs/operateur.repository", () => ({}));
@@ -227,5 +233,32 @@ describe("getCpomById", () => {
 
     expect(result).not.toBeNull();
     expect(result?.budgets?.[0]?.commentaire).toBeNull();
+  });
+});
+
+describe("getReadableCpomIds", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("ne requête pas la base pour un agent, qui lit tous les CPOM", async () => {
+    const cpomIds = await getReadableCpomIds(createNationalAgent());
+
+    expect(cpomIds).toBe("all");
+    expect(mockFindAllCpoms).not.toHaveBeenCalled();
+  });
+
+  it("renvoie les CPOM lisibles par un opérateur", async () => {
+    mockFindAllCpoms.mockResolvedValue([{ id: 3 }, { id: 5 }]);
+    const operateurUser = createSessionUser({
+      operateurId: 3,
+      isAgent: false,
+      grants: [createSessionGrant({ departementNumeros: ["59"] })],
+    });
+
+    const cpomIds = await getReadableCpomIds(operateurUser);
+
+    expect(cpomIds).toEqual([3, 5]);
+    expect(mockFindAllCpoms).toHaveBeenCalledOnce();
   });
 });

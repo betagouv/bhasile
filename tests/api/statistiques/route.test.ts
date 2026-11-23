@@ -12,6 +12,7 @@ import { GET as getStatistiques } from "@/app/api/statistiques/route";
 const mockGetServerSession = vi.fn();
 const mockGetStatistiques = vi.fn();
 const mockGetCartographieStatistiques = vi.fn();
+const mockGetReadableStructureIds = vi.fn();
 
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
@@ -23,6 +24,11 @@ vi.mock("@/lib/next-auth/auth", () => ({
 
 vi.mock("@/app/api/statistiques/statistique.service", () => ({
   getStatistiques: (...args: unknown[]) => mockGetStatistiques(...args),
+}));
+
+vi.mock("@/app/api/structures/structure.service", () => ({
+  getReadableStructureIds: (...args: unknown[]) =>
+    mockGetReadableStructureIds(...args),
 }));
 
 vi.mock("@/app/api/statistiques/cartographie/cartographie.service", () => ({
@@ -65,6 +71,7 @@ describe.each(routes)("$name", ({ call, service }) => {
   beforeEach(() => {
     vi.clearAllMocks();
     service.mockResolvedValue({});
+    mockGetReadableStructureIds.mockResolvedValue("all");
   });
 
   it("refuse un utilisateur non connecté", async () => {
@@ -85,8 +92,19 @@ describe.each(routes)("$name", ({ call, service }) => {
     expect(service).not.toHaveBeenCalled();
   });
 
-  it("accepte un utilisateur opérateur", async () => {
+  it("refuse un utilisateur opérateur qui ne lit qu'une structure", async () => {
     mockGetServerSession.mockResolvedValue({ user: operateurUser });
+    mockGetReadableStructureIds.mockResolvedValue([7]);
+
+    const response = await call();
+
+    expect(response.status).toBe(403);
+    expect(service).not.toHaveBeenCalled();
+  });
+
+  it("accepte un utilisateur opérateur qui lit plusieurs structures", async () => {
+    mockGetServerSession.mockResolvedValue({ user: operateurUser });
+    mockGetReadableStructureIds.mockResolvedValue([7, 8]);
 
     const response = await call();
 
