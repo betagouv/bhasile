@@ -3,12 +3,7 @@ import { cache } from "react";
 
 import { createOrUpdateUser } from "@/app/api/users/user.service";
 
-import {
-  ACCEPTED_ACR_VALUES,
-  AuthError,
-  checkAcr,
-  rejectUrl,
-} from "./auth-error";
+import { AuthError, checkAcr, rejectUrl } from "./auth-error";
 import { getPermissionsFromSession, ProConnectUser } from "./auth-util";
 
 export const authOptions: NextAuthOptions = {
@@ -151,10 +146,7 @@ export const authOptions: NextAuthOptions = {
           scope: "openid uid given_name usual_name email siret",
           claims: JSON.stringify({
             id_token: {
-              acr: {
-                essential: true,
-                values: ACCEPTED_ACR_VALUES,
-              },
+              acr: null,
             },
           }),
           redirect_uri:
