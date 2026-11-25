@@ -27,6 +27,9 @@ export const deleteTarificationTestData = async ({
   await prisma.tarificationDocumentOpening.deleteMany({
     where: { document: documentWhere },
   });
+  await prisma.notificationRead.deleteMany({
+    where: { tarificationEvent: documentWhere },
+  });
   await prisma.tarificationEvent.deleteMany({ where: documentWhere });
   await prisma.tarificationDocument.deleteMany({ where: documentWhere });
   await prisma.fileUpload.deleteMany({

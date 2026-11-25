@@ -36,6 +36,7 @@ import {
   createFakeStructureVersionTransformationCreationFormStepDefinition,
   createFakeStructureVersionTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
+import { createFakeNotificationStates } from "./seeders/notification.seed";
 import {
   createFakeFiliale,
   createFakeOperateur,
@@ -381,6 +382,9 @@ async function seed(): Promise<void> {
 
   console.log("💸 Création des journaux de tarification...");
   await createFakeTarificationJournals(prisma, getCurrentYear());
+
+  console.log("🔔 États de la cloche des notifications...");
+  await createFakeNotificationStates(prisma);
 
   console.log("📣 Seed des annonces");
   const announcementsToCreate = createAnnouncementsList();

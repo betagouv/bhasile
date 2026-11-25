@@ -1,6 +1,6 @@
 # Emails
 
-Les mails que Bhasile envoie aux utilisateurs pour les prévenir d'un événement (nouveau message, plus tard document partagé, relecture demandée). Ce document décrit le mécanisme commun ; chaque feature décrit sa politique : qui est notifié, de quoi, avec quel template.
+Les mails que Bhasile envoie aux utilisateurs pour les prévenir d'un événement (nouveau message, plus tard document partagé, relecture demandée). Ce document décrit le mécanisme commun ; chaque feature décrit sa politique : qui est notifié, de quoi, avec quel template. Dans l'application, les mêmes faits passent par la cloche (voir [Notifications](notifications.md)).
 
 | Feature    | Événements notifiés | Politique                                    |
 | ---------- | ------------------- | -------------------------------------------- |

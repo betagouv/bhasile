@@ -298,4 +298,14 @@ export const formatCivilDate = (date: CivilDate): string =>
 export const formatInstantDate = (instant: Date, timeZone: string): string =>
   formatCivilDate(toLocalDate(instant, timeZone));
 
+export const formatInstantDateTime = (
+  instant: Date,
+  timeZone: string
+): string =>
+  new Intl.DateTimeFormat("fr-FR", {
+    timeZone,
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(instant);
+
 export type CivilDate = string;

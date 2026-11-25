@@ -3,7 +3,11 @@ import { DomainError } from "@/app/utils/domain-error.util";
 import type { AuthorLevel, Visibility } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 
-import { type MessageDb, messageSelect } from "./conversation.db.type";
+import {
+  getUnreadMessageWhere,
+  type MessageDb,
+  messageSelect,
+} from "./conversation.db.type";
 
 export const upsertConversation = (
   structureTarificationId: number,
@@ -79,10 +83,7 @@ export const findUnreadMessageCounts = (
       _count: {
         select: {
           messages: {
-            where: {
-              authorId: { not: userId },
-              receipts: { none: { userId } },
-            },
+            where: getUnreadMessageWhere(userId),
           },
         },
       },
