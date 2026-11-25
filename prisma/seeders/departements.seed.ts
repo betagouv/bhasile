@@ -1,6 +1,14 @@
 import { DEPARTEMENTS, REGIONS } from "@/constants";
 import { type Departement, type PrismaClient } from "@/generated/prisma/client";
 
+const SHOWN_REGION_NAMES = new Set(
+  REGIONS.filter((region) => region.show).map((region) => region.name)
+);
+
+export const SEEDABLE_DEPARTEMENT_NUMEROS = DEPARTEMENTS.filter((departement) =>
+  SHOWN_REGION_NAMES.has(departement.region)
+).map((departement) => departement.numero);
+
 const createDepartements = (): Pick<
   Departement,
   "numero" | "name" | "population"
@@ -20,7 +28,9 @@ export const seedRegionsAndDepartements = async (
   });
 
   const regions = await prisma.region.findMany();
-  const regionNameToId = new Map(regions.map((region) => [region.name, region.id]));
+  const regionNameToId = new Map(
+    regions.map((region) => [region.name, region.id])
+  );
 
   const departementsToInsert = createDepartements().map((departement) => ({
     ...departement,

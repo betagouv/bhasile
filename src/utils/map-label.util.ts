@@ -27,7 +27,7 @@ export const getPathVisualCenterOnScreen = (
   path: SVGPathElement
 ): Point | null => {
   const screenMatrix = path.getScreenCTM();
-  const centroid = computeAreaCentroid(sampleContour(path));
+  const centroid = getCachedCentroid(path);
 
   if (!screenMatrix || !centroid) {
     return null;
@@ -37,6 +37,15 @@ export const getPathVisualCenterOnScreen = (
     screenMatrix
   );
   return { x, y };
+};
+
+const centroidByPath = new WeakMap<SVGPathElement, Point | null>();
+
+const getCachedCentroid = (path: SVGPathElement): Point | null => {
+  if (!centroidByPath.has(path)) {
+    centroidByPath.set(path, computeAreaCentroid(sampleContour(path)));
+  }
+  return centroidByPath.get(path) ?? null;
 };
 
 const sampleContour = (path: SVGPathElement): Point[] => {
