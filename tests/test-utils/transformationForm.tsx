@@ -1,3 +1,4 @@
+import { AbilityProvider } from "@casl/react";
 import { render } from "@testing-library/react";
 import { ReactNode, useEffect } from "react";
 import { vi } from "vitest";
@@ -7,8 +8,11 @@ import {
   TransformationProvider,
   useTransformationContext,
 } from "@/contexts/TransformationContext";
+import { defineAbilityFor } from "@/lib/casl";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import { SessionUser } from "@/types/global";
 
+import { createNationalAgent } from "./factories/session-user.factory";
 import { toJsonResponse } from "./http.mock";
 
 const ShowIncompleteStepsSetter = () => {
@@ -22,15 +26,20 @@ const ShowIncompleteStepsSetter = () => {
 export const renderTransformationForm = (
   transformation: TransformationApiRead,
   form: ReactNode,
-  { showIncompleteSteps = false }: { showIncompleteSteps?: boolean } = {}
+  {
+    showIncompleteSteps = false,
+    user = createNationalAgent(),
+  }: { showIncompleteSteps?: boolean; user?: SessionUser } = {}
 ) =>
   render(
-    <FetchStateProvider>
-      <TransformationProvider transformation={transformation}>
-        {showIncompleteSteps && <ShowIncompleteStepsSetter />}
-        {form}
-      </TransformationProvider>
-    </FetchStateProvider>
+    <AbilityProvider value={defineAbilityFor(user)}>
+      <FetchStateProvider>
+        <TransformationProvider transformation={transformation}>
+          {showIncompleteSteps && <ShowIncompleteStepsSetter />}
+          {form}
+        </TransformationProvider>
+      </FetchStateProvider>
+    </AbilityProvider>
   );
 
 export const mockTransformationFetch = (

@@ -73,6 +73,7 @@ export const PlacesEtHebergementForm = ({
       }
       defaultValues={defaultValues}
       onSubmit={goToNextStep}
+      onError={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}

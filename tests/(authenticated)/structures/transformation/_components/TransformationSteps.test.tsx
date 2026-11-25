@@ -28,6 +28,12 @@ vi.mock(
   })
 );
 
+vi.mock("@/hooks/useTransformationStepsWithStatus", async () => ({
+  useTransformationStepsWithStatus: (
+    await import("@/app/utils/transformation.util")
+  ).getTransformationSteps,
+}));
+
 vi.mock("@/contexts/FetchStateContext", () => ({
   useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
 }));

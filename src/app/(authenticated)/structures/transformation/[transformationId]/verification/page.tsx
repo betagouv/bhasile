@@ -5,11 +5,13 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
 import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
 import { useTransformations } from "@/app/hooks/useTransformations";
+import { areAllFormStepsValidated } from "@/app/utils/form-step.util";
 import {
   getTransformationOriginRoute,
   sortStructureVersionTransformationsByType,
@@ -17,6 +19,7 @@ import {
 import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { useFetchState } from "@/contexts/FetchStateContext";
 import { useTransformationContext } from "@/contexts/TransformationContext";
+import { useTransformationStepsWithStatus } from "@/hooks/useTransformationStepsWithStatus";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiUpdateClient,
@@ -37,13 +40,14 @@ const confirmationModal = createModal({
 export default function TransformationVerificationPage() {
   const router = useRouter();
 
-  const {
-    transformation,
-    shouldShowIncompleteSteps,
-    setShouldShowIncompleteSteps,
-  } = useTransformationContext();
+  const { transformation, setShouldShowIncompleteSteps } =
+    useTransformationContext();
   const { updateTransformation } = useTransformations();
   const { prevStep } = useTransformationFormNavigation();
+
+  useEffect(() => {
+    setShouldShowIncompleteSteps(true);
+  }, [setShouldShowIncompleteSteps]);
 
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
@@ -62,21 +66,15 @@ export default function TransformationVerificationPage() {
       HudaCadaDestination.REMISE_EN_CONCURRENCE
     : false;
 
-  const allChildFormsAreValidated =
-    transformation.structureVersionTransformations.every(
-      (structureVersionTransformation) =>
-        structureVersionTransformation.form?.status === true
-    );
+  const allChildFormsAreValidated = useTransformationStepsWithStatus(
+    transformation
+  ).every((step) => areAllFormStepsValidated(step.steps));
 
   useIsModalOpen(confirmationModal, {
     onConceal: () => router.push(getTransformationOriginRoute(transformation)),
   });
 
   const handleSubmit = async () => {
-    if (!allChildFormsAreValidated) {
-      setShouldShowIncompleteSteps(true);
-      return;
-    }
     if (!transformation.form) {
       return;
     }
@@ -119,14 +117,16 @@ export default function TransformationVerificationPage() {
         </div>
         <div className="flex flex-col items-center gap-2">
           <Button
-            disabled={saveState === FetchState.LOADING}
+            disabled={
+              saveState === FetchState.LOADING || !allChildFormsAreValidated
+            }
             onClick={handleSubmit}
             iconId="fr-icon-arrow-right-line"
             iconPosition="right"
           >
             Je confirme et certifie les informations
           </Button>
-          {shouldShowIncompleteSteps && !allChildFormsAreValidated && (
+          {!allChildFormsAreValidated && (
             <p className="text-xs text-default-error mb-0 mt-3 flex items-center gap-1">
               <i
                 className="fr-icon-error-fill text-default-error shrink-0"

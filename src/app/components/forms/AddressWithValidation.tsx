@@ -179,6 +179,7 @@ export default function AddressWithValidation<
     }
 
     setShowSuggestions(false);
+    fullAddressField.onBlur();
     onSelectSuggestion?.();
   };
 
