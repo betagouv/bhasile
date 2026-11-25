@@ -18,9 +18,16 @@ export const mockStructurePageFetch = (structure: StructureLike) => {
   const mockedFetch = vi.mocked(global.fetch);
 
   mockedFetch.mockImplementation((input, init) => {
-    if (input === `/api/dna-codes?structureId=${structure.id}`) {
+    if (
+      typeof input === "string" &&
+      input.startsWith("/api/dna-codes?") &&
+      new URLSearchParams(input.split("?")[1]).get("structureId") ===
+        String(structure.id)
+    ) {
       return Promise.resolve(
-        toJsonResponse(200, [{ code: "C0001" }]) as Response
+        toJsonResponse(200, [
+          { code: "C0001", departementAdministratif: "75" },
+        ]) as Response
       );
     }
 

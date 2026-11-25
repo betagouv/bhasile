@@ -6,6 +6,7 @@ import {
   findAllOperateurs,
   findBySearchTerm,
   findOne,
+  findOperateurFamille,
   updateOne,
 } from "@/app/api/operateurs/operateur.repository";
 import prisma from "@/lib/prisma";
@@ -16,6 +17,7 @@ describe("operateur.repository db integration", () => {
   let logoKey: string | undefined;
   let operateurWithStructureId: number | undefined;
   let structureId: number | undefined;
+  const familleOperateurIds: number[] = [];
 
   beforeAll(async () => {
     logoKey = `op-test-${randomUUID()}`;
@@ -67,6 +69,9 @@ describe("operateur.repository db integration", () => {
     if (operateurId) {
       await prisma.operateur.deleteMany({ where: { id: operateurId } });
     }
+    await prisma.operateur.deleteMany({
+      where: { id: { in: familleOperateurIds } },
+    });
   });
 
   it("findAllOperateurs renvoie les opérateurs avec parentId et la clé de leur logo", async () => {
@@ -118,5 +123,26 @@ describe("operateur.repository db integration", () => {
 
     expect(ids).toContain(operateurWithStructureId);
     expect(ids).not.toContain(operateurId);
+  });
+
+  it("findOperateurFamille renvoie l'opérateur, son parent et ses filiales", async () => {
+    const createFamilleOperateur = async (parentId?: number) => {
+      const operateur = await prisma.operateur.create({
+        data: { name: `OP-TEST-FAMILLE-${randomUUID()}`, parentId },
+      });
+      familleOperateurIds.push(operateur.id);
+      return operateur;
+    };
+    const parent = await createFamilleOperateur();
+    const operateur = await createFamilleOperateur(parent.id);
+    const filiale = await createFamilleOperateur(operateur.id);
+    const otherOperateur = await createFamilleOperateur();
+
+    const ids = (await findOperateurFamille(operateur.id)).map(({ id }) => id);
+
+    expect(ids).toEqual(
+      expect.arrayContaining([operateur.id, parent.id, filiale.id])
+    );
+    expect(ids).not.toContain(otherOperateur.id);
   });
 });
