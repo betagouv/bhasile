@@ -3,7 +3,7 @@ import { cache } from "react";
 
 import { createOrUpdateUser } from "@/app/api/users/user.service";
 
-import { AuthError, checkAcr, rejectUrl } from "./auth-error";
+import { AuthError, rejectUrl } from "./auth-error";
 import { getPermissionsFromSession, ProConnectUser } from "./auth-util";
 
 export const authOptions: NextAuthOptions = {
@@ -22,11 +22,8 @@ export const authOptions: NextAuthOptions = {
           );
         }
 
-        const acr = checkAcr(account?.id_token);
-
         console.info("[auth] connexion acceptée", {
           email,
-          acr,
           provider: account?.provider,
         });
 
@@ -144,11 +141,6 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: "openid uid given_name usual_name email siret",
-          claims: JSON.stringify({
-            id_token: {
-              acr: null,
-            },
-          }),
           redirect_uri:
             process.env.NEXT_PUBLIC_URL + "/api/auth/callback/proconnect",
         },
