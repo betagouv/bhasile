@@ -153,3 +153,36 @@ export const createStatistiquesPdfExportEvent = async (
     details,
   });
 };
+
+export const createAgentAccessEvent = async (
+  method: string,
+  details: AgentAccessEventDetails
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    type: UserActionType.AGENT_ACCESS,
+    details,
+  });
+};
+
+type AgentAccessEventDetails = {
+  targetUserId: string;
+  from: string;
+  to: string;
+};
+
+export const createPerimeterCreationEvent = async (
+  method: string,
+  details: PerimeterCreationEventDetails
+) => {
+  await createUserAction({
+    action: getActionFromMethod(method),
+    type: UserActionType.PERIMETER_CREATION,
+    details,
+  });
+};
+
+type PerimeterCreationEventDetails = {
+  perimeterId: string;
+  name: string;
+};

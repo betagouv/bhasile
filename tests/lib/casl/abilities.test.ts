@@ -14,6 +14,7 @@ import {
   Structure,
 } from "@/generated/prisma/client";
 import {
+  assertAgentsManagementAccess,
   assertCockpitAdminAccess,
   canAbilityReadCpom,
   canAbilityReadOperateur,
@@ -682,23 +683,32 @@ describe("Permissions : canAccessApp", () => {
   });
 });
 
-describe("Permissions : assertCockpitAdminAccess", () => {
+describe.each([
+  ["assertCockpitAdminAccess", assertCockpitAdminAccess],
+  ["assertAgentsManagementAccess", assertAgentsManagementAccess],
+])("Permissions : %s", (_, assertAccess) => {
   it("laisse passer un superadmin", () => {
     expect(() =>
-      assertCockpitAdminAccess(createSessionUser({ isSuperAdmin: true }))
+      assertAccess(createSessionUser({ isSuperAdmin: true }))
     ).not.toThrow();
   });
 
   it("rejette un utilisateur déconnecté en 401", () => {
-    expect(() => assertCockpitAdminAccess(undefined)).toThrow(
+    expect(() => assertAccess(undefined)).toThrow(
       expect.objectContaining({ status: 401 })
     );
   });
 
-  it("rejette un agent qui n'est pas superadmin en 403", () => {
-    expect(() => assertCockpitAdminAccess(createNationalAgent())).toThrow(
-      expect.objectContaining({ status: 403 })
-    );
+  it("rejette un agent admin de sa région en 403", () => {
+    expect(() =>
+      assertAccess(
+        createSessionUser({
+          grants: [
+            createSessionGrant({ role: AccessRole.ADMIN, regionIds: [1] }),
+          ],
+        })
+      )
+    ).toThrow(expect.objectContaining({ status: 403 }));
   });
 });
 

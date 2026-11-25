@@ -94,11 +94,22 @@ Mise en prod du basculement :
 2. déployer #1774 : la migration supprime `EmailPattern`, `User.emailPatternId` et `User.isAgent` ;
 3. lancer `yarn one-off 20261104-clean-grants-and-emails [--dry-run]` : supprime les binômes sans user ni périmètre (anciens patterns) et les binômes personnels des agents, normalise les emails des users et des contacts. Entre 2 et 3, les binômes des agents sont déjà ignorés ; seuls les contacts à l'email en majuscules perdent leurs droits.
 
+## Gestion des agents (cockpit admin)
+
+Un superadmin gère les agents dans **Cockpit admin → Agents et périmètres** (règle CASL `canManageAgents`, sujet `User`) :
+
+- **Périmètre** : départemental ou régional, un binôme `ADMIN` sur la zone, nom unique pré-rempli (« DDETS Finistère »). Les périmètres qui couvrent déjà la zone sont affichés avant création.
+- **Valider** un compte en attente, **changer** le périmètre d'un agent actif, **réactiver** un compte désactivé : un périmètre est toujours exigé.
+- **Désactiver** un agent actif (refusé sinon) : `isActivated = false` et `deactivatedAt`, périmètre conservé pour une réactivation.
+- **Ajouter** un agent jamais connecté par son email : compte créé activé, droits dès la première connexion ProConnect.
+- Dans ces modales, le périmètre se cherche par nom ou numéro de département, et un périmètre manquant peut être créé sans quitter la modale.
+- Opérateurs et superadmins n'y figurent pas, ni les contacts de structure en attente (email présent dans `Contact`). Chaque action est tracée dans `UserAction` : type `AGENT_ACCESS` pour les accès (`details` : `targetUserId`, `from`, `to`), `PERIMETER_CREATION` pour les périmètres (`details` : `perimeterId`, `name`).
+
 ## Reste à faire
 
 1. **Gestion des accès** :
    - écran de demande d'accès après ProConnect ;
-   - création d'accès par les agents et par les opérateurs ;
+   - création d'accès par les agents admin et par les opérateurs (les superadmins le font déjà depuis le cockpit) ;
    - API de gestion des binômes : un seul propriétaire, cible conforme au `scope`, hiérarchie stricte, refus d'un binôme déjà couvert par un droit égal ou supérieur sur une zone englobante (écriture Bretagne ⇒ pas d'écriture Finistère) ;
    - un admin ajoute ou retire un binôme dont la cible est dans son périmètre d'admin ; un admin opérateur ne gère que les users de son opérateur ;
    - désactivation par un admin qui couvre **tous** les binômes du user (inclusion complète) ; un agent national n'est géré que par un superadmin ;

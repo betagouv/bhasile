@@ -50,6 +50,13 @@ export const createOrUpdateContacts = async (
   });
 };
 
+export const findContactsByEmails = (emails: string[]) =>
+  prisma.contact.findMany({
+    where: { email: { in: emails } },
+    distinct: ["email"],
+    select: { email: true },
+  });
+
 export const findStructuresWithContactEmail = (email: string) =>
   prisma.structure.findMany({
     where: {
