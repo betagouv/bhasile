@@ -18,7 +18,10 @@ import {
 } from "./seeders/cible-financiere.seed";
 import { createFakeConversations } from "./seeders/conversation.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
-import { seedRegionsAndDepartements } from "./seeders/departements.seed";
+import {
+  SEEDABLE_DEPARTEMENT_NUMEROS,
+  seedRegionsAndDepartements,
+} from "./seeders/departements.seed";
 import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
 import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
 import { getFakeFaqItems } from "./seeders/faq.seed";
@@ -245,7 +248,7 @@ async function seed(): Promise<void> {
   await seedRolesAndAgents(prisma);
 
   const randomDepartement = (): string =>
-    String(faker.number.int({ min: 1, max: 95 })).padStart(2, "0");
+    faker.helpers.arrayElement(SEEDABLE_DEPARTEMENT_NUMEROS);
 
   const randomType = (): StructureType =>
     faker.helpers.arrayElement([
@@ -453,15 +456,12 @@ async function seed(): Promise<void> {
 
   const numberOfUnusedDnas = 50;
 
-  const [allOperateurs, allDepartements] = await Promise.all([
-    prisma.operateur.findMany({ select: { id: true } }),
-    prisma.departement.findMany({ select: { numero: true } }),
-  ]);
+  const allOperateurs = await prisma.operateur.findMany({
+    select: { id: true },
+  });
   const dnaList = createDnaList(totalDnasNeeded + numberOfUnusedDnas, {
     operateurIds: allOperateurs.map((operateur) => operateur.id),
-    departementNumeros: allDepartements.map(
-      (departement) => departement.numero
-    ),
+    departementNumeros: SEEDABLE_DEPARTEMENT_NUMEROS,
   });
   const createdDnas: { id: number; code: string }[] = [];
   for (const data of chunkElementToSeed(dnaList)) {

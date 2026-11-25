@@ -7,6 +7,8 @@ import {
 } from "@/app/utils/date.util";
 import { type PrismaClient, type Rmu } from "@/generated/prisma/client";
 
+import { SEEDABLE_DEPARTEMENT_NUMEROS } from "./departements.seed";
+
 // Premier mois de collecte en prod ; la collecte arrive après coup, d'où le mois clos.
 const RMU_START_MONTH = "2025-06";
 
@@ -27,16 +29,12 @@ const createFakeRmu = (departementNumero: string, date: Date): FakeRmu => ({
 });
 
 export const createFakeRmus = async (prisma: PrismaClient): Promise<void> => {
-  const departements = await prisma.departement.findMany({
-    select: { numero: true },
-  });
-
   const months = getMonthsBetween(
     RMU_START_MONTH,
     endOfPreviousMonthUtc().toISOString()
   );
 
-  const rmus = departements.flatMap(({ numero }) => {
+  const rmus = SEEDABLE_DEPARTEMENT_NUMEROS.flatMap((numero) => {
     if (!faker.helpers.maybe(() => true, { probability: 0.3 })) {
       return [];
     }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ZoneDataInfo, ZoneLabelWithTrend } from "@/types/map.type";
+import { getPathVisualCenterOnScreen } from "@/utils/map-label.util";
 
 const NO_DATA_FILL = "var(--border-default-grey)";
 
@@ -49,14 +50,14 @@ export const useMapLabels = ({
           }
 
           if (zoneInfo !== undefined) {
-            const pathRect = path.getBoundingClientRect();
+            const center = getPathCenterOnScreen(path);
             newLabels.push({
               code,
               value: zoneInfo.value,
               delta: zoneInfo.delta,
               direction: zoneInfo.direction,
-              x: pathRect.left - containerRect.left + pathRect.width / 2,
-              y: pathRect.top - containerRect.top + pathRect.height / 2,
+              x: center.x - containerRect.left,
+              y: center.y - containerRect.top,
             });
           }
         }
@@ -79,6 +80,19 @@ export const useMapLabels = ({
   }, [zoneData, dependencyTrigger, onPathFound]);
 
   return { containerRef, mapRef, labels };
+};
+
+const getPathCenterOnScreen = (path: SVGPathElement) => {
+  const visualCenter = getPathVisualCenterOnScreen(path);
+  if (visualCenter) {
+    return visualCenter;
+  }
+
+  const pathRect = path.getBoundingClientRect();
+  return {
+    x: pathRect.left + pathRect.width / 2,
+    y: pathRect.top + pathRect.height / 2,
+  };
 };
 
 type UseMapLabelsArgs = {
