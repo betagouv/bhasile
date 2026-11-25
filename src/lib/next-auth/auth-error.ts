@@ -1,9 +1,4 @@
-export type AuthFailureReason =
-  | "email_absent"
-  | "mfa_absente"
-  | "mfa_non_conforme"
-  | "token_illisible"
-  | "erreur_technique";
+import { AuthFailureReason } from "./auth-failure";
 
 export class AuthError extends Error {
   readonly reason: AuthFailureReason;
@@ -16,58 +11,6 @@ export class AuthError extends Error {
     this.cause = cause;
   }
 }
-
-export const ACCEPTED_ACR_VALUES = [
-  "eidas0-mfa",
-  "eidas1",
-  "eidas1-mfa",
-  "eidas2",
-  "eidas3",
-] as const;
-
-export type AcceptedAcrValue = (typeof ACCEPTED_ACR_VALUES)[number];
-
-const isAcceptedAcrValue = (value: unknown): value is AcceptedAcrValue =>
-  typeof value === "string" &&
-  (ACCEPTED_ACR_VALUES as readonly string[]).includes(value);
-
-const decodePayload = (token: string): Record<string, unknown> => {
-  const segment = token.split(".")[1];
-  if (!segment) {
-    throw new AuthError("token_illisible", "segment JWT absent");
-  }
-  const base64 = segment.replace(/-/g, "+").replace(/_/g, "/");
-  return JSON.parse(Buffer.from(base64, "base64").toString("utf8"));
-};
-
-export const checkAcr = (idToken?: string | null): AcceptedAcrValue => {
-  if (!idToken) {
-    throw new AuthError(
-      "mfa_absente",
-      "id_token absent de la réponse ProConnect"
-    );
-  }
-
-  let payload: Record<string, unknown>;
-  try {
-    payload = decodePayload(idToken);
-  } catch (error) {
-    if (error instanceof AuthError) {
-      throw error;
-    }
-    throw new AuthError("token_illisible", "id_token non décodable", error);
-  }
-
-  const acr = payload.acr;
-  if (typeof acr !== "string" || acr.length === 0) {
-    throw new AuthError("mfa_absente", "claim `acr` absente de l'id_token");
-  }
-  if (!isAcceptedAcrValue(acr)) {
-    throw new AuthError("mfa_non_conforme", `niveau ACR insuffisant : ${acr}`);
-  }
-
-  return acr;
-};
 
 export const rejectUrl = (reason: AuthFailureReason): string => {
   return `/connexion?accesRefuse=true&reason=${encodeURIComponent(reason)}`;
