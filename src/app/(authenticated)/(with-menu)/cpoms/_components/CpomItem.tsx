@@ -8,14 +8,20 @@ import {
 import { formatDate } from "@/app/utils/date.util";
 import { CpomListItem } from "@/types/cpom.type";
 
-export const CpomItem = ({ cpom, index }: Props) => {
+export const CpomItem = ({
+  cpom,
+  index,
+  showOperateurColumn = true,
+}: Props) => {
   return (
     <tr
       id={`table-row-key-${index}`}
       data-row-key={index}
       className="border-t border-default-grey h-12"
     >
-      <td className="text-left! min-h-9 py-0!">{cpom.operateurName}</td>
+      {showOperateurColumn && (
+        <td className="text-left! min-h-9 py-0!">{cpom.operateurName}</td>
+      )}
       <td className="text-left! py-0!">
         {getGranularityLabel(cpom.granularity)}
       </td>
@@ -54,4 +60,5 @@ export const CpomItem = ({ cpom, index }: Props) => {
 type Props = {
   cpom: CpomListItem;
   index: number;
+  showOperateurColumn?: boolean;
 };

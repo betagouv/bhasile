@@ -8,6 +8,7 @@ import {
   canAbilityReadCpom,
   defineAbilityFor,
   getReadableCpomWhere,
+  isAgent,
 } from "@/lib/casl";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
@@ -17,7 +18,10 @@ import { recursivelySerializeForClient } from "@/utils-server/serialization.serv
 import { resolveFilters } from "../filters/filters.service";
 import { findRegionIdByName } from "../regions/region.repository";
 import { findStructuresOperateur } from "../structures/structure.repository";
-import { resolveCpomLinkedStructure } from "../structures/structure.util";
+import {
+  hideBudgetCommentaires,
+  resolveCpomLinkedStructure,
+} from "../structures/structure.util";
 import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";
 import {
   createOrUpdateCpom,
@@ -100,6 +104,9 @@ export const getCpomById = async (
   const now = getNow();
   const resolvedCpom = {
     ...cpom,
+    budgets: isAgent(user)
+      ? cpom.budgets
+      : hideBudgetCommentaires(cpom.budgets),
     structures: cpom.structures.map((cpomStructure) =>
       resolveCpomLinkedStructure(cpomStructure, ability, now)
     ),

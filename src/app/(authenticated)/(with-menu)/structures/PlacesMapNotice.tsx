@@ -6,9 +6,7 @@ import { StructuresQuery } from "@/types/structure-list.type";
 
 export const PlacesMapNotice = async ({
   query,
-}: {
-  query: StructuresQuery;
-}): Promise<ReactElement | null> => {
+}: Props): Promise<ReactElement | null> => {
   const { nonLocalisedPlaces, nonRepresentedStructuresCount } =
     await getCommunePoints(query);
   const notices = [
@@ -25,7 +23,7 @@ export const PlacesMapNotice = async ({
   }
 
   return (
-    <div className="absolute top-full right-6 mt-2 px-3 py-2 bg-white text-sm text-mention-grey w-fit max-w-[40rem]">
+    <div className="absolute top-full right-6 mt-2 px-3 py-2 bg-white text-sm text-mention-grey w-fit max-w-160">
       {notices.map((notice) => (
         <p key={notice} className="text-sm mb-0">
           {notice}
@@ -33,4 +31,8 @@ export const PlacesMapNotice = async ({
       ))}
     </div>
   );
+};
+
+type Props = {
+  query: StructuresQuery;
 };

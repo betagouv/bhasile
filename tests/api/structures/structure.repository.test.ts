@@ -1359,6 +1359,7 @@ describe("structure.repository db integration", () => {
   describe("résolution liste/carte", () => {
     const createdTransformationIds: number[] = [];
     const createdSvtIds: number[] = [];
+    const user = createNationalAgent();
 
     const baseSearch: SearchProps = {
       search: null,
@@ -1370,7 +1371,7 @@ describe("structure.repository db integration", () => {
       direction: null,
       selection: true,
       isFinalised: false,
-      user: createNationalAgent(),
+      user,
     };
 
     const listStructures = async (overrides: Partial<SearchProps>) => {
@@ -1592,7 +1593,7 @@ describe("structure.repository db integration", () => {
   describe("contrat finalisation et visibilité", () => {
     const createdTransformationIds: number[] = [];
     const createdSvtIds: number[] = [];
-
+    const user = createNationalAgent();
     // selection: false -> exerce le filtre de visibilité (EXISTS Form OR bornFromCreation)
     const baseSearch: SearchProps = {
       search: null,
@@ -1604,7 +1605,7 @@ describe("structure.repository db integration", () => {
       direction: null,
       selection: false,
       isFinalised: false,
-      user: createNationalAgent(),
+      user,
     };
 
     const listBy = async (

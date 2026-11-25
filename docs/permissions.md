@@ -25,7 +25,7 @@ Plusieurs périmètres peuvent couvrir la même zone.
 - **En attente** : droits de contact seulement (\*).
 - **Superadmin** : tous les droits, hors messagerie (ni message, ni fichier, ni accusé de lecture), dont le cockpit admin (`/parametres/cockpit-admin`, ouvert dans `pages.ts` par `canAccessCockpitAdmin`, sujet CASL `CockpitAdmin`).
 - **Agent** : rattaché obligatoirement à un unique périmètre. Droits : la lecture nationale, commune à tous les agents et calculée, plus les binômes de son périmètre (aujourd'hui `ADMIN` sur sa région ou son département). Un périmètre national n'a aucun binôme : aucun agent n'écrit au niveau national, seul le superadmin a tous les droits.
-- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sans les pages CPOM, sur les structures finalisées seulement ; certains champs lui sont masqués (voir plus bas).
+- **Opérateur** : binômes « rôle × zone » attribués un à un, limités à son opérateur, plus ses droits de contact (\*). Aujourd'hui en lecture seule, sur les structures finalisées et les CPOM de son opérateur ; certains champs lui sont masqués, et les RMU ne lui sont pas montrés (voir plus bas).
 - **Activé sans périmètre ni opérateur** : droits de contact seulement (\*).
 
 (\*) Droits de contact : un user non-agent qui figure comme contact (même email) dans la version affichée d'une structure finalisée lit cette structure, sans validation préalable. Avant la finalisation, les contacts n'ont été saisis que par l'opérateur et ne donnent rien. Seulement si `CONTACT_ACCESS_ENABLED=true`.
@@ -66,13 +66,14 @@ Une fiche hors périmètre renvoie une 404, pas une 403, pour ne pas révéler q
 
 Les données sont filtrées par CASL (`rules.ts`) ; les pages, par `canAccessPage` (`lib/casl/pages.ts`), que le proxy consulte avant toute page ProConnect :
 
-- **Agent** : toutes les pages ; les transformations demandent en plus un droit d'écriture (`update Structure`), comme leur API. Une transformation existante ne s'ouvre que si elle touche un département de son périmètre d'écriture (`getReadableTransformation`, même règle que le tableau de bord), et le lien « Extension, contraction ou fermeture » d'une fiche ne s'affiche que s'il peut modifier cette structure.
-- **Non-agent** (user opérateur, ou contact sans opérateur rattaché) : les structures, et pour un user opérateur sa fiche opérateur sans ses pages de modification. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (CPOM, statistiques, ressources, liste des opérateurs, transformations) vers la 404.
+- **Agent** : toutes les pages ; les transformations demandent en plus un droit d'écriture (`update Structure`), comme leur API, et la création ou la modification d'un CPOM (`/cpoms/ajout`, `/cpoms/[id]/ajout`, `/cpoms/[id]/modification`) un droit `update Cpom`. Une transformation existante ne s'ouvre que si elle touche un département de son périmètre d'écriture (`getReadableTransformation`, même règle que le tableau de bord), et le lien « Extension, contraction ou fermeture » d'une fiche ne s'affiche que s'il peut modifier cette structure.
+- **User opérateur** : les structures, les CPOM et les statistiques en lecture (`operateurPages`), filtrés sur son opérateur par CASL, et sa fiche opérateur sans ses pages de modification. Les statistiques et la cartographie n'incluent pas les RMU (`canReadRmu`) : le service omet `rmu` et le front masque la section quand elle est absente. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (ressources, liste des opérateurs, transformations, création et modification de CPOM) vers la 404.
+- **Contact sans opérateur rattaché** : les structures seulement.
 - **Chemin absent des listes** : refusé à tous.
 
 Champs masqués sur la fiche structure :
 
-- **Non-agents** : commentaires des budgets, de la structure comme de ses CPOM (`hideAgentOnlyFields`). Le reste de la fiche est visible, CPOM compris, mais l'historique ne renvoie pas vers la page du CPOM pour le moment.
+- **Non-agents** : commentaires des budgets, de la structure comme de ses CPOM (`hideAgentOnlyFields`), et ceux des budgets sur la fiche CPOM (`getCpomById`). Le reste de la fiche est visible, CPOM compris, mais l'historique ne renvoie pas vers la page du CPOM pour le moment.
 - **Sans droit d'écriture sur la structure**, agent ou non : notes et rue des adresses (`getReadableNotes`, `getReadableAdresses`), car l'adresse d'un lieu d'hébergement est sensible. Le code postal et la commune restent affichés.
 - **Agents éditeurs seulement** : notes, et bandeaux « Je finalise la création » et « J'actualise cette structure », dont les pages sont gardées par `ModificationGuard`. Aujourd'hui seuls les agents reçoivent `update Structure`, le droit d'écriture suffit donc.
 
@@ -80,7 +81,7 @@ Un contact a exactement les droits d'un user opérateur lecteur sur les structur
 
 La fiche opérateur vérifie aussi la règle `read Operateur` (`getOperateur`) : un non-agent ne lit que son opérateur, même sans passer par le proxy. Le menu (`menu.util.ts`) et les liens de la fiche opérateur filtrent leurs entrées avec `canAccessPage` : ouvrir ou fermer une page dans `pages.ts` suffit. « Paramètres » reste derrière son flag, hors de `pages.ts`.
 
-Fermer une page ne ferme pas son API : elle se ferme dans la route. `/api/statistiques` et `/api/statistiques/cartographie` répondent 403 à un non-agent. Le tableau de bord et la liste des opérateurs n'ont pas d'API, leurs pages appellent les services directement.
+Fermer une page ne ferme pas son API : elle se ferme dans la route. `/api/statistiques` et `/api/statistiques/cartographie` répondent 403 à qui n'a pas accès à `/statistiques` (`canAccessPage`). Le tableau de bord et la liste des opérateurs n'ont pas d'API, leurs pages appellent les services directement.
 
 ## Avant d'activer les contacts
 
@@ -105,8 +106,7 @@ Mise en prod du basculement :
    - affichage de la désactivation dans la messagerie.
 2. **Ouverture aux opérateurs** :
    - authentification via ProConnect ;
-   - fiche opérateur (#1742), statistiques filtrées sur `operateurId` sans RMU ;
-   - lecture des CPOM de leur opérateur dont la zone recouvre, au moins en partie, leurs binômes (PR stackée à venir) ;
+   - fiche opérateur (#1742) ;
    - écriture par leurs binômes éditeur / admin, restreinte à leur opérateur, selon la matrice validée par le métier. Les notes restent réservées aux agents éditeurs : leur ajouter alors la condition `isAgent`. Un opérateur éditeur verra en revanche l'adresse complète.
 3. **Périmètres en écriture seule** (`EDITEUR`), si le besoin se présente : un binôme `EDITEUR` sur le périmètre suffit.
 

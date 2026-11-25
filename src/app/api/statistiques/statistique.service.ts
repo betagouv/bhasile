@@ -1,5 +1,6 @@
 import { getNow } from "@/app/utils/now.util";
 import {
+  canReadRmu,
   getReadableDepartementNumeros,
   getReadableStructureWhere,
 } from "@/lib/casl";
@@ -145,7 +146,9 @@ export const buildStatistiquesContext = async (
     findCpomBudgets([...new Set(cpomLinks.map((link) => link.cpomId))]),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
-    resolvedFilters.operateurIds === null && filters.types === null
+    canReadRmu(user) &&
+    resolvedFilters.operateurIds === null &&
+    filters.types === null
       ? findRmus(readableDepartements)
       : Promise.resolve(null),
   ]);
@@ -239,6 +242,6 @@ export const getStatistiques = async (
     finance: computeFinanceStatistiques(context, aggregation),
     controleQualite: computeControleQualiteStatistiques(context, aggregation),
     activite: computeActiviteStatistiques(context),
-    rmu: computeRmuStatistiques(context),
+    ...(canReadRmu(user) ? { rmu: computeRmuStatistiques(context) } : {}),
   };
 };
