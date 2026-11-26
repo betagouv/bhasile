@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  applyMinimumFirstSlice,
   computeCalloutLayout,
   computeSlices,
   extractSeriesValue,
@@ -24,34 +23,6 @@ describe("pie-chart.util", () => {
     it("retourne 0 pour une série absente ou sans valeur numérique", () => {
       expect(extractSeriesValue(undefined)).toBe(0);
       expect(extractSeriesValue(null)).toBe(0);
-    });
-  });
-
-  describe("applyMinimumFirstSlice", () => {
-    it("remplace une première série nulle par une part minimale du reste", () => {
-      const result = applyMinimumFirstSlice({ series: [0, 50, 50] });
-
-      expect(result.series).toEqual([0.8, 50, 50]);
-    });
-
-    it("conserve la forme objet de la première série", () => {
-      const result = applyMinimumFirstSlice({
-        series: [{ value: 0, meta: "a" }, 100],
-      });
-
-      expect(result.series[0]).toEqual({ value: 0.8, meta: "a" });
-    });
-
-    it("laisse les données intactes quand la première série n'est pas nulle", () => {
-      const data = { series: [10, 90] };
-
-      expect(applyMinimumFirstSlice(data)).toBe(data);
-    });
-
-    it("laisse les données intactes quand toutes les séries sont nulles", () => {
-      const data = { series: [0, 0] };
-
-      expect(applyMinimumFirstSlice(data)).toBe(data);
     });
   });
 

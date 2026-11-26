@@ -2,7 +2,6 @@ import { alphaNumerate, type PieChartData } from "chartist";
 
 export const PIE_CHART_PADDING = 5;
 
-const MINIMUM_FIRST_SLICE_RATIO = 0.008;
 const RIGHT_HALF_END_ANGLE = 180;
 const FULL_CIRCLE_ANGLE = 360;
 const EDGE_ANCHOR_INSET_ANGLE = 5;
@@ -25,25 +24,6 @@ export const extractSeriesValue = (
     return seriesItem.value;
   }
   return 0;
-};
-
-export const applyMinimumFirstSlice = (data: PieChartData): PieChartData => {
-  const values = data.series.map(extractSeriesValue);
-  const [firstValue, ...remainingValues] = values;
-  const remainingSum = remainingValues.reduce((sum, value) => sum + value, 0);
-
-  if (firstValue !== 0 || remainingSum <= 0) {
-    return data;
-  }
-
-  const minimumValue = remainingSum * MINIMUM_FIRST_SLICE_RATIO;
-  const [firstSeriesItem, ...remainingSeries] = data.series;
-  const updatedFirstSeriesItem =
-    typeof firstSeriesItem === "object" && firstSeriesItem !== null
-      ? { ...firstSeriesItem, value: minimumValue }
-      : minimumValue;
-
-  return { ...data, series: [updatedFirstSeriesItem, ...remainingSeries] };
 };
 
 export const buildSliceColorsCss = ({

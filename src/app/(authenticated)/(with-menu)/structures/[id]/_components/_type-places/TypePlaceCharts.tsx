@@ -22,7 +22,6 @@ export const TypePlaceCharts = ({
               series: [placesPmr, placesAutorisees - placesPmr],
             }}
             options={{ showLabel: false }}
-            minimumFirstSlice
           ></PieChart>
           <div className="fr-pt-1w text-center">
             <strong>
@@ -51,7 +50,6 @@ export const TypePlaceCharts = ({
               ],
             }}
             options={{ showLabel: false }}
-            minimumFirstSlice
           ></PieChart>
           <div className="fr-pt-1w text-center">
             <strong>
@@ -77,7 +75,6 @@ export const TypePlaceCharts = ({
               series: [placesQPV, placesAutorisees - placesQPV],
             }}
             options={{ showLabel: false }}
-            minimumFirstSlice
           ></PieChart>
           <div className="fr-pt-1w text-center">
             <strong>
@@ -104,7 +101,6 @@ export const TypePlaceCharts = ({
               ],
             }}
             options={{ showLabel: false }}
-            minimumFirstSlice
           ></PieChart>
           <div className="fr-pt-1w text-center">
             <strong>

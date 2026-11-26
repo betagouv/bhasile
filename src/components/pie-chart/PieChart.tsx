@@ -7,7 +7,6 @@ import { PropsWithChildren, ReactNode, useId, useMemo, useRef } from "react";
 
 import { useChartistPieChart } from "@/hooks/useChartistPieChart";
 import {
-  applyMinimumFirstSlice,
   buildSliceColorsCss,
   extractSeriesValue,
   PIE_CHART_PADDING,
@@ -22,17 +21,11 @@ export const PieChart = ({
   children,
   colors = DEFAULT_COLORS,
   isDonut = false,
-  minimumFirstSlice = false,
   calloutLabels,
   calloutWidth = 160,
 }: Props) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartClass = `piechart-${useId().replace(/:/g, "-")}`;
-
-  const chartData = useMemo(
-    () => (minimumFirstSlice ? applyMinimumFirstSlice(data) : data),
-    [data, minimumFirstSlice]
-  );
 
   const chartOptions = useMemo<PieChartPresetOptions>(
     () => ({
@@ -46,7 +39,7 @@ export const PieChart = ({
     [options, isDonut, size]
   );
 
-  useChartistPieChart(chartRef, chartData, chartOptions);
+  useChartistPieChart(chartRef, data, chartOptions);
 
   const chart = (
     <div className="relative" style={{ width: size, height: size }}>
@@ -63,7 +56,7 @@ export const PieChart = ({
     <div className={`${chartClass} mx-auto w-fit`}>
       {calloutLabels ? (
         <PieChartCallouts
-          values={chartData.series.map(extractSeriesValue)}
+          values={data.series.map(extractSeriesValue)}
           labels={calloutLabels}
           size={size}
           donutWidth={getNumericDonutWidth(chartOptions)}
@@ -104,7 +97,6 @@ type Props = PropsWithChildren<{
   size?: number;
   colors?: string[];
   isDonut?: boolean;
-  minimumFirstSlice?: boolean;
   calloutLabels?: ReactNode[];
   calloutWidth?: number;
 }>;
