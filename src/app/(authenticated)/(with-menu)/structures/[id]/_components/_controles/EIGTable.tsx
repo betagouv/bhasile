@@ -51,7 +51,8 @@ export const EIGTable = (): ReactElement => {
       <Table
         bordered={true}
         className="full-width-table"
-        caption=""
+        caption="Événements indésirables graves"
+        noCaption
         data={getEvenementsIndesirablesGraves()}
         headers={["DOSSIER", "ÉVÉNEMENT", "DÉCLARATION", "NATURE DES FAITS"]}
       />
