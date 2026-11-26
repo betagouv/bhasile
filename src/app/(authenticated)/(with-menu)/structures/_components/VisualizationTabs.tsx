@@ -21,8 +21,8 @@ export const VisualizationTabs = ({ vue }: Props): ReactElement => {
   return (
     <SegmentedControl
       small
-      legend=""
-      inlineLegend
+      legend="Mode d’affichage"
+      hideLegend
       className="[&_div]:ml-0"
       segments={[
         {

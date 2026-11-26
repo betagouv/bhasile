@@ -79,6 +79,12 @@ export type TransformationApiUpdateClient = z.input<
 - [ESLint](https://eslint.org/) et [StyleLint](https://stylelint.io/) pour la cohérence du TS et du CSS
 - [Vite](https://vite.dev/) pour l'intégration avec l'écosystème Next et la vitesse d'exécution
 
+### Warnings d'hydratation du DSFR
+
+Le JS du DSFR (`dsfr.start()`) modifie le HTML rendu côté serveur (attributs `data-fr-js-*`, `class=""` laissé sur les tableaux, variables CSS en style inline sur les onglets), y compris sur le contenu des `Suspense` streamés avant que React ne l'hydrate. React signale alors en dev une divergence d'hydratation, sans effet en prod (il ne retire pas ces attributs).
+
+En dev, `src/lib/dsfr/ignoreDsfrHydrationWarnings.ts` (appelé au chargement de `src/app/dsfr-bootstrap/index.tsx`, après l'interception de `console.error` par l'overlay de Next : depuis `instrumentation-client.ts`, l'overlay recevrait le warning avant le filtre) masque ces warnings, uniquement quand toutes les valeurs côté serveur qui divergent sont l'une de ces trois modifications du DSFR. Une divergence d'un autre attribut ou d'un texte reste affichée. Seul un attribut ou élément présent uniquement côté client, dans le même arbre que du bruit DSFR, serait masqué. Différer `dsfr.start()` a été écarté car les modales et disclosures DSFR ne répondraient pas pendant le chargement. Supprimer ce filtre si react-dsfr démarre un jour le DSFR après l'hydratation complète.
+
 ## 🚀 Services externes
 
 - Remontée d'erreurs : [Sentry](https://sentry.io/)

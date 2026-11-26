@@ -8,8 +8,8 @@ export const TimePeriodSelector = ({
   return (
     <SegmentedControl
       small
-      legend=""
-      inlineLegend
+      legend="Période"
+      hideLegend
       className="[&_div]:ml-0 pb-6 print:hidden"
       segments={[
         {

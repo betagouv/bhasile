@@ -50,8 +50,8 @@ export const GenericTypeChart = ({
       <h4 className="text-title-blue-france text-lg">{title}</h4>
       <SegmentedControl
         small
-        legend=""
-        inlineLegend
+        legend="Unité de décompte"
+        hideLegend
         className="[&_div]:ml-0 pb-6"
         segments={[
           {

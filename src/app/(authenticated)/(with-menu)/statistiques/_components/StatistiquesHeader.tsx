@@ -68,8 +68,8 @@ export const StatistiquesHeader = (): ReactElement => {
       tabs={
         <SegmentedControl
           small
-          legend=""
-          inlineLegend
+          legend="Mode d’affichage"
+          hideLegend
           className="[&_div]:ml-0"
           segments={[
             {

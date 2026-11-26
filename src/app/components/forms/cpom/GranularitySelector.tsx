@@ -11,12 +11,13 @@ export const GranularitySelector = () => {
 
   return (
     <div className="flex gap-6 items-center">
-      <label htmlFor="granularity" className="mb-3">
+      <p aria-hidden="true" className="mb-3">
         Quelle est l’échelle du CPOM ?
-      </label>
+      </p>
 
       <RadioButtons
-        legend=""
+        legend="Quelle est l’échelle du CPOM ?"
+        classes={{ legend: "fr-sr-only" }}
         name="granularity"
         options={[
           {

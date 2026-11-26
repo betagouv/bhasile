@@ -89,7 +89,8 @@ export const EvaluationTable = ({ evaluations }: Props): ReactElement => {
       <Table
         bordered={true}
         className="full-width-table"
-        caption=""
+        caption="Évaluations"
+        noCaption
         data={getEvaluations()}
         headers={[
           "DATE",

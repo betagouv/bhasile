@@ -23,8 +23,8 @@ export const ActiviteHistorique = (): ReactElement => {
         </h4>
         <SegmentedControl
           small
-          legend=""
-          inlineLegend
+          legend="Mode d’affichage"
+          hideLegend
           segments={[
             {
               iconId: "fr-icon-table-line",

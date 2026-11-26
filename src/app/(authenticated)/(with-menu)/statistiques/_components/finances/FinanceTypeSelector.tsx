@@ -8,8 +8,8 @@ export const FinanceTypeSelector = ({
   return (
     <SegmentedControl
       small
-      legend=""
-      inlineLegend
+      legend="Type de financement"
+      hideLegend
       className="[&_div]:ml-0 pb-6"
       segments={[
         {
