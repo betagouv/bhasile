@@ -137,7 +137,7 @@ describe("menu.util", () => {
         ]);
       });
 
-      it("masque les statistiques quand une seule structure est lisible", () => {
+      it("garde les statistiques quand une seule structure est lisible", () => {
         const urls = listUrls(
           resolveMenuItems(operateurUser as SessionUser, {
             structureIds: [7],
@@ -145,24 +145,21 @@ describe("menu.util", () => {
           })
         );
 
-        expect(urls).toEqual(["/structures/7", "/cpoms/3", "/operateurs/42"]);
+        expect(urls).toEqual([
+          "/structures/7",
+          "/cpoms/3",
+          "/operateurs/42",
+          "/statistiques",
+        ]);
       });
 
-      it("garde les listes et les statistiques d'un agent", () => {
-        const agentUser: Partial<SessionUser> = { isAgent: true };
-
-        const urls = listUrls(
-          resolveMenuItems(agentUser as SessionUser, {
-            structureIds: "all",
-            cpomIds: "all",
-          })
-        );
+      it("mène aux listes quand les entités lisibles sont inconnues", () => {
+        const urls = listUrls(resolveMenuItems(operateurUser as SessionUser));
 
         expect(urls).toEqual([
-          "/",
           "/structures",
           "/cpoms",
-          "/operateurs",
+          "/operateurs/42",
           "/statistiques",
         ]);
       });

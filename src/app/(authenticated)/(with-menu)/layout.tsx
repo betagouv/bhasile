@@ -1,9 +1,11 @@
-import { getReadableCpomIds } from "@/app/api/cpoms/cpom.service";
-import { getReadableStructureIds } from "@/app/api/structures/structure.service";
+import * as Sentry from "@sentry/nextjs";
+
+import { getReadableCpomIdsSample } from "@/app/api/cpoms/cpom.service";
+import { getReadableStructureIdsSample } from "@/app/api/structures/structure.service";
 import { Menu } from "@/app/components/Menu";
 import { auth } from "@/lib/next-auth/auth";
 import { SessionUser } from "@/types/global";
-import { ReadableEntities } from "@/types/readable-ids.type";
+import { ReadableEntitiesSample } from "@/types/readable-ids.type";
 
 export default async function RootLayout({
   children,
@@ -12,7 +14,9 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
   const user = session?.user as SessionUser | undefined;
-  const readableEntities = user ? await getReadableEntities(user) : undefined;
+  const readableEntities = user
+    ? await getReadableEntitiesSampleOrUndefined(user)
+    : undefined;
 
   return (
     <main className="w-full max-w-screen flex bg-white" id="content">
@@ -22,12 +26,17 @@ export default async function RootLayout({
   );
 }
 
-const getReadableEntities = async (
+const getReadableEntitiesSampleOrUndefined = async (
   user: SessionUser
-): Promise<ReadableEntities> => {
-  const [structureIds, cpomIds] = await Promise.all([
-    getReadableStructureIds(user),
-    getReadableCpomIds(user),
-  ]);
-  return { structureIds, cpomIds };
+): Promise<ReadableEntitiesSample | undefined> => {
+  try {
+    const [structureIds, cpomIds] = await Promise.all([
+      getReadableStructureIdsSample(user),
+      getReadableCpomIdsSample(user),
+    ]);
+    return { structureIds, cpomIds };
+  } catch (error) {
+    Sentry.captureException(error);
+    return undefined;
+  }
 };

@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 
 import { SessionUser } from "@/types/global";
-import { ReadableEntities } from "@/types/readable-ids.type";
+import { ReadableEntitiesSample } from "@/types/readable-ids.type";
 import {
   MenuGroup,
   MenuGroupId,
@@ -110,7 +110,7 @@ export const Menu = ({ readableEntities }: Props): ReactElement | null => {
 };
 
 type Props = {
-  readableEntities?: ReadableEntities;
+  readableEntities?: ReadableEntitiesSample;
 };
 
 const getDefaultOpenGroup = (pathname: string | null): MenuGroupId =>

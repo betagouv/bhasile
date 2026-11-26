@@ -1,12 +1,6 @@
 import { canAccessPage, COCKPIT_ADMIN_PAGE } from "@/lib/casl/pages";
-import { canReadStatistiques } from "@/lib/casl/statistique.ability";
 import { SessionUser } from "@/types/global";
-import {
-  ALL_READABLE,
-  ALL_READABLE_ENTITIES,
-  ReadableEntities,
-  ReadableIds,
-} from "@/types/readable-ids.type";
+import { ReadableEntitiesSample } from "@/types/readable-ids.type";
 
 export type MenuGroupId = "structures" | "parametres";
 
@@ -30,17 +24,12 @@ export type MenuGroup = {
 
 export type MenuItem = MenuLink | MenuGroup;
 
-const STATISTIQUES_PAGE = "/statistiques";
-
 export const resolveMenuItems = (
   user?: SessionUser | null,
-  readableEntities: ReadableEntities = ALL_READABLE_ENTITIES
+  readableEntities?: ReadableEntitiesSample
 ): MenuItem[] => {
-  const sessionUser = user ?? undefined;
   const canAccess = (url: string): boolean =>
-    url === STATISTIQUES_PAGE
-      ? canReadStatistiques(sessionUser, readableEntities.structureIds)
-      : canAccessPage(sessionUser, url);
+    canAccessPage(user ?? undefined, url);
   const canSeeOperateurs = canAccess("/operateurs");
 
   return [
@@ -58,8 +47,8 @@ export const resolveMenuItems = (
             ? "Structures et opérateurs"
             : "Structures et opérateur",
           subItems: [
-            getStructuresSubItem(readableEntities.structureIds),
-            ...getCpomsSubItems(readableEntities.cpomIds),
+            getStructuresSubItem(readableEntities?.structureIds),
+            ...getCpomsSubItems(readableEntities?.cpomIds),
             canSeeOperateurs
               ? { label: "Voir les opérateurs", url: "/operateurs" }
               : {
@@ -71,7 +60,7 @@ export const resolveMenuItems = (
         {
           icon: "fr-icon-pie-chart-2-line",
           label: "Statistiques",
-          url: STATISTIQUES_PAGE,
+          url: "/statistiques",
         },
         ...(process.env.NEXT_PUBLIC_SHOW_RESSOURCES === "true" //TODO: remove this once the ressources page is ready
           ? [
@@ -89,18 +78,20 @@ export const resolveMenuItems = (
   ];
 };
 
-const getSingleId = (ids: ReadableIds): number | null =>
-  ids !== ALL_READABLE && ids.length === 1 ? ids[0] : null;
+const getSingleId = (ids: number[] | undefined): number | null =>
+  ids?.length === 1 ? ids[0] : null;
 
-const getStructuresSubItem = (structureIds: ReadableIds): MenuSubItem => {
+const getStructuresSubItem = (
+  structureIds: number[] | undefined
+): MenuSubItem => {
   const singleStructureId = getSingleId(structureIds);
   return singleStructureId === null
     ? { label: "Voir les structures", url: "/structures" }
     : { label: "Voir la structure", url: `/structures/${singleStructureId}` };
 };
 
-const getCpomsSubItems = (cpomIds: ReadableIds): MenuSubItem[] => {
-  if (cpomIds !== ALL_READABLE && cpomIds.length === 0) {
+const getCpomsSubItems = (cpomIds: number[] | undefined): MenuSubItem[] => {
+  if (cpomIds?.length === 0) {
     return [];
   }
   const singleCpomId = getSingleId(cpomIds);

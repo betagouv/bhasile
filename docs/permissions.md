@@ -67,7 +67,7 @@ Une fiche hors périmètre renvoie une 404, pas une 403, pour ne pas révéler q
 Les données sont filtrées par CASL (`rules.ts`) ; les pages, par `canAccessPage` (`lib/casl/pages.ts`), que le proxy consulte avant toute page ProConnect :
 
 - **Agent** : toutes les pages ; les transformations demandent en plus un droit d'écriture (`update Structure`), comme leur API, et la création ou la modification d'un CPOM (`/cpoms/ajout`, `/cpoms/[id]/ajout`, `/cpoms/[id]/modification`) un droit `update Cpom`. Une transformation existante ne s'ouvre que si elle touche un département de son périmètre d'écriture (`getReadableTransformation`, même règle que le tableau de bord), et le lien « Extension, contraction ou fermeture » d'une fiche ne s'affiche que s'il peut modifier cette structure.
-- **User opérateur** : les structures, les CPOM et les statistiques en lecture (`operateurPages`), filtrés sur son opérateur par CASL, et sa fiche opérateur sans ses pages de modification. Les statistiques demandent en plus au moins deux structures lisibles (`canReadStatistiques`, voir plus bas) et n'incluent pas les RMU (`canReadRmu`) : le service omet `rmu` et le front masque la section quand elle est absente. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (ressources, liste des opérateurs, transformations, création et modification de CPOM) vers la 404.
+- **User opérateur** : les structures, les CPOM et les statistiques en lecture (`operateurPages`), filtrés sur son opérateur par CASL, et sa fiche opérateur sans ses pages de modification. Les statistiques et la cartographie n'incluent pas les RMU (`canReadRmu`) : le service omet `rmu` et le front masque la section quand elle est absente. Pas encore de tableau de bord : `/` le renvoie vers `/structures` ; les autres pages (ressources, liste des opérateurs, transformations, création et modification de CPOM) vers la 404.
 - **Contact sans opérateur rattaché** : les structures seulement.
 - **Chemin absent des listes** : refusé à tous.
 
@@ -81,14 +81,14 @@ Un contact a exactement les droits d'un user opérateur lecteur sur les structur
 
 La fiche opérateur vérifie aussi la règle `read Operateur` (`getOperateur`) : un non-agent ne lit que son opérateur, même sans passer par le proxy. Le menu (`menu.util.ts`) et les liens de la fiche opérateur filtrent leurs entrées avec `canAccessPage` : ouvrir ou fermer une page dans `pages.ts` suffit. « Paramètres » reste derrière son flag, hors de `pages.ts`.
 
-`/api/statistiques` et `/api/statistiques/cartographie` répondent 403 à qui ne peut pas lire les statistiques (`canReadStatistiques`).
+Fermer une page ne ferme pas son API : elle se ferme dans la route. `/api/statistiques` et `/api/statistiques/cartographie` répondent 403 à qui n'a pas accès à `/statistiques` (`canAccessPage`).
 
-### Entités lisibles : lien direct et statistiques
+### Entités lisibles : lien direct
 
-Le layout `(with-menu)` calcule les structures et les CPOM lisibles (`getReadableStructureIds`, `getReadableCpomIds`) et les passe au menu. Agents et superadmins lisent tout (`hasNationalRead`) : rien n'est requêté. Sinon, les structures comptées sont celles de la liste d'un non-agent (visibles et finalisées, fermées comprises), sans les filtres du header. La règle vaut pour tous les profils :
+Le layout `(with-menu)` demande au plus deux structures et deux CPOM lisibles (`getReadableStructureIdsSample`, `getReadableCpomIdsSample`), assez pour distinguer une entité de plusieurs, et les passe au menu. La requête ne sélectionne que les identifiants : les structures comptées sont celles de la liste d'un non-agent (finalisées, fermées comprises), sans les filtres du header. La règle vaut pour tous les profils :
 
 - une seule structure : « Voir la structure » mène à sa fiche ; un seul CPOM : « Voir le CPOM » mène au sien ; aucun CPOM : l'entrée est masquée. Les listes restent accessibles par leur URL ;
-- statistiques : un user opérateur doit lire au moins deux structures (`MIN_STRUCTURES_FOR_STATISTIQUES`). Ce contrôle demande une requête : il ne vit pas dans `canAccessPage`, que le proxy appelle à chaque page, mais dans le menu, dans le layout `/statistiques` (404) et dans les routes API (403), tous via `canReadStatistiques`.
+- si la requête échoue, le menu garde ses liens vers les listes : l'erreur part dans Sentry sans bloquer la page.
 
 Le menu est calculé au chargement de la page : une structure finalisée ou un binôme ajouté n'y apparaît qu'au chargement suivant. Le tableau de bord et la liste des opérateurs n'ont pas d'API, leurs pages appellent les services directement.
 

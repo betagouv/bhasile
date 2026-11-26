@@ -1,4 +1,10 @@
-import { Form, Prisma, StructureType } from "@/generated/prisma/client";
+import { startOfNextUtcDay } from "@/app/utils/date.util";
+import {
+  Form,
+  Prisma,
+  StructureType,
+  StructureVersionTransformationType,
+} from "@/generated/prisma/client";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/types/structure.type";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
@@ -14,6 +20,32 @@ import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 export const includedStructureWhere = {
   OR: [{ type: null }, { type: { notIn: [...EXCLUDED_STRUCTURE_TYPES] } }],
 } satisfies Prisma.StructureWhereInput;
+
+export const finalisedStructureWhere = (
+  now: Date
+): Prisma.StructureWhereInput => ({
+  OR: [
+    {
+      forms: {
+        some: {
+          status: true,
+          formDefinition: { slug: FINALISATION_FORM_SLUG },
+        },
+      },
+    },
+    {
+      structureVersions: {
+        some: {
+          effectiveDate: { lt: startOfNextUtcDay(now) },
+          structureVersionTransformation: {
+            type: StructureVersionTransformationType.CREATION,
+            transformation: { form: { status: true } },
+          },
+        },
+      },
+    },
+  ],
+});
 
 export const structureListLightVersionSelect = {
   ...resolvableVersionSelect,

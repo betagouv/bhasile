@@ -16,7 +16,6 @@ import {
   canAbilityReadStructure,
   defineAbilityFor,
   getReadableStructureWhere,
-  hasNationalRead,
   isAgent,
 } from "@/lib/casl";
 import {
@@ -24,7 +23,7 @@ import {
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
-import { ALL_READABLE, ReadableIds } from "@/types/readable-ids.type";
+import { READABLE_IDS_SAMPLE_SIZE } from "@/types/readable-ids.type";
 import { PublicType } from "@/types/structure.type";
 import {
   CommunePoints,
@@ -53,6 +52,7 @@ import {
 } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
+  finalisedStructureWhere,
   ResolvedStructureDetails,
   StructureDbDetails,
   StructureDbList,
@@ -63,6 +63,7 @@ import {
   findOne,
   findOneOperateur,
   findStructureDepartement,
+  findStructureIds,
   findStructuresByIds,
   findStructureVersionAdresses,
   findValidatedActualisationForm,
@@ -92,7 +93,6 @@ import {
   isStructureFinalised,
   isStructureInCpom,
   isStructureInCpomPerYear,
-  isStructureVisible,
   sortStructureRows,
   StructureListComputedRow,
 } from "./structure.util";
@@ -220,17 +220,20 @@ const filterAndSortStructureRows = async (
   );
 };
 
-export const getReadableStructureIds = cache(
-  async (user: SessionUser): Promise<ReadableIds> => {
-    if (hasNationalRead(user)) {
-      return ALL_READABLE;
-    }
-    const rows = await computeAllStructureRows(getReadableStructureWhere(user));
-    return rows
-      .filter((row) => isStructureVisible(row) && row.isFinalised)
-      .map((row) => row.id);
-  }
-);
+export const getReadableStructureIdsSample = async (
+  user: SessionUser
+): Promise<number[]> => {
+  const structures = await findStructureIds(
+    {
+      AND: [
+        getReadableStructureWhere(user),
+        finalisedStructureWhere(getRequestNow()),
+      ],
+    },
+    READABLE_IDS_SAMPLE_SIZE
+  );
+  return structures.map((structure) => structure.id);
+};
 
 export const getStructuresTotal = async (props: SearchProps): Promise<number> =>
   (await getSortedStructureRows(props)).length;

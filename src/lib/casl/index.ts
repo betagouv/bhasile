@@ -18,10 +18,9 @@ export {
   canAccessApp,
   defineAbilityFor,
   EDITING_ROLES,
-  hasNationalRead,
   isAgent,
 } from "./rules";
-export { canReadRmu, canReadStatistiques } from "./statistique.ability";
+export { canReadRmu } from "./statistique.ability";
 export {
   canAbilityReadStructure,
   canAbilityUpdateDepartement,
