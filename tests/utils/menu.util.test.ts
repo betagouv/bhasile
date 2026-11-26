@@ -80,6 +80,91 @@ describe("menu.util", () => {
       expect(urls).toEqual(["/structures"]);
     });
 
+    describe("selon les entités lisibles", () => {
+      const operateurUser: Partial<SessionUser> = {
+        operateurId: 42,
+        isAgent: false,
+      };
+
+      it("mène directement à la fiche quand une seule structure est lisible", () => {
+        const menuItems = resolveMenuItems(operateurUser as SessionUser, {
+          structureIds: [7],
+          cpomIds: [3, 4],
+        });
+
+        expect(findStructuresSubItems(menuItems)).toContainEqual({
+          label: "Voir la structure",
+          url: "/structures/7",
+        });
+      });
+
+      it("mène à la liste quand plusieurs structures sont lisibles", () => {
+        const menuItems = resolveMenuItems(operateurUser as SessionUser, {
+          structureIds: [7, 8],
+          cpomIds: [3, 4],
+        });
+
+        expect(findStructuresSubItems(menuItems)).toContainEqual({
+          label: "Voir les structures",
+          url: "/structures",
+        });
+      });
+
+      it("mène directement au CPOM quand un seul est lisible", () => {
+        const menuItems = resolveMenuItems(operateurUser as SessionUser, {
+          structureIds: [7, 8],
+          cpomIds: [3],
+        });
+
+        expect(findStructuresSubItems(menuItems)).toContainEqual({
+          label: "Voir le CPOM",
+          url: "/cpoms/3",
+        });
+      });
+
+      it("masque les CPOM quand aucun n'est lisible", () => {
+        const urls = listUrls(
+          resolveMenuItems(operateurUser as SessionUser, {
+            structureIds: [7, 8],
+            cpomIds: [],
+          })
+        );
+
+        expect(urls).toEqual([
+          "/structures",
+          "/operateurs/42",
+          "/statistiques",
+        ]);
+      });
+
+      it("garde les statistiques quand une seule structure est lisible", () => {
+        const urls = listUrls(
+          resolveMenuItems(operateurUser as SessionUser, {
+            structureIds: [7],
+            cpomIds: [3],
+          })
+        );
+
+        expect(urls).toEqual([
+          "/structures/7",
+          "/cpoms/3",
+          "/operateurs/42",
+          "/statistiques",
+        ]);
+      });
+
+      it("mène aux listes quand les entités lisibles sont inconnues", () => {
+        const urls = listUrls(resolveMenuItems(operateurUser as SessionUser));
+
+        expect(urls).toEqual([
+          "/structures",
+          "/cpoms",
+          "/operateurs/42",
+          "/statistiques",
+        ]);
+      });
+    });
+
     it("ajoute le cockpit admin dans Paramètres pour un super admin", () => {
       const superAdmin: Partial<SessionUser> = {
         isAgent: true,
@@ -107,6 +192,13 @@ describe("menu.util", () => {
     });
   });
 });
+
+const findStructuresSubItems = (menuItems: MenuItem[]) =>
+  (
+    menuItems.find(
+      (item) => "id" in item && item.id === "structures"
+    ) as MenuGroup
+  ).subItems;
 
 const listUrls = (menuItems: MenuItem[]): string[] =>
   menuItems.flatMap((item) =>

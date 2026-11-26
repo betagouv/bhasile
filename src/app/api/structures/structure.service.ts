@@ -23,6 +23,7 @@ import {
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
+import { READABLE_IDS_SAMPLE_SIZE } from "@/types/readable-ids.type";
 import { PublicType } from "@/types/structure.type";
 import {
   CommunePoints,
@@ -51,6 +52,7 @@ import {
 } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
+  finalisedStructureWhere,
   ResolvedStructureDetails,
   StructureDbDetails,
   StructureDbList,
@@ -61,6 +63,7 @@ import {
   findOne,
   findOneOperateur,
   findStructureDepartement,
+  findStructureIds,
   findStructuresByIds,
   findStructureVersionAdresses,
   findValidatedActualisationForm,
@@ -215,6 +218,21 @@ const filterAndSortStructureRows = async (
     props.column ?? "departementAdministratif",
     props.direction ?? "asc"
   );
+};
+
+export const getReadableStructureIdsSample = async (
+  user: SessionUser
+): Promise<number[]> => {
+  const structures = await findStructureIds(
+    {
+      AND: [
+        getReadableStructureWhere(user),
+        finalisedStructureWhere(getRequestNow()),
+      ],
+    },
+    READABLE_IDS_SAMPLE_SIZE
+  );
+  return structures.map((structure) => structure.id);
 };
 
 export const getStructuresTotal = async (props: SearchProps): Promise<number> =>

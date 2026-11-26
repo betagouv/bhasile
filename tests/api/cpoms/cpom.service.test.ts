@@ -5,14 +5,20 @@ import {
 } from "tests/test-utils/factories/session-user.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getCpomById, prepareCpomToSave } from "@/app/api/cpoms/cpom.service";
+import {
+  getCpomById,
+  getReadableCpomIdsSample,
+  prepareCpomToSave,
+} from "@/app/api/cpoms/cpom.service";
 
 const mockFindRegionIdByName = vi.fn();
 const mockFindStructuresOperateur = vi.fn();
 const mockFindOne = vi.fn();
+const mockFindCpomIds = vi.fn();
 
 vi.mock("@/app/api/cpoms/cpom.repository", () => ({
   findOne: (...args: unknown[]) => mockFindOne(...args),
+  findCpomIds: (...args: unknown[]) => mockFindCpomIds(...args),
 }));
 
 vi.mock("@/app/api/operateurs/operateur.repository", () => ({}));
@@ -227,5 +233,25 @@ describe("getCpomById", () => {
 
     expect(result).not.toBeNull();
     expect(result?.budgets?.[0]?.commentaire).toBeNull();
+  });
+});
+
+describe("getReadableCpomIdsSample", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("ne demande que deux CPOM lisibles, assez pour distinguer un CPOM de plusieurs", async () => {
+    mockFindCpomIds.mockResolvedValue([{ id: 3 }, { id: 5 }]);
+    const operateurUser = createSessionUser({
+      operateurId: 3,
+      isAgent: false,
+      grants: [createSessionGrant({ departementNumeros: ["59"] })],
+    });
+
+    const cpomIds = await getReadableCpomIdsSample(operateurUser);
+
+    expect(cpomIds).toEqual([3, 5]);
+    expect(mockFindCpomIds).toHaveBeenCalledWith(expect.anything(), 2);
   });
 });

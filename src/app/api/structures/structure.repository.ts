@@ -43,6 +43,17 @@ export const findAllStructures = (
     select: structureListLightSelect,
   });
 
+export const findStructureIds = (
+  where: Prisma.StructureWhereInput,
+  take: number
+): Promise<{ id: number }[]> =>
+  prisma.structure.findMany({
+    where: { AND: [includedStructureWhere, where] },
+    select: { id: true },
+    orderBy: { id: "asc" },
+    take,
+  });
+
 export const findStructureVersionAdresses = (
   versionIds: number[]
 ): Promise<StructureVersionAdresses[]> =>

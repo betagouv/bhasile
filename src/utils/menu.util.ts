@@ -1,5 +1,6 @@
 import { canAccessPage, COCKPIT_ADMIN_PAGE } from "@/lib/casl/pages";
 import { SessionUser } from "@/types/global";
+import { ReadableEntitiesSample } from "@/types/readable-ids.type";
 
 export type MenuGroupId = "structures" | "parametres";
 
@@ -23,7 +24,10 @@ export type MenuGroup = {
 
 export type MenuItem = MenuLink | MenuGroup;
 
-export const resolveMenuItems = (user?: SessionUser | null): MenuItem[] => {
+export const resolveMenuItems = (
+  user?: SessionUser | null,
+  readableEntities?: ReadableEntitiesSample
+): MenuItem[] => {
   const canAccess = (url: string): boolean =>
     canAccessPage(user ?? undefined, url);
   const canSeeOperateurs = canAccess("/operateurs");
@@ -43,8 +47,8 @@ export const resolveMenuItems = (user?: SessionUser | null): MenuItem[] => {
             ? "Structures et opérateurs"
             : "Structures et opérateur",
           subItems: [
-            { label: "Voir les structures", url: "/structures" },
-            { label: "Voir les CPOM", url: "/cpoms" },
+            getStructuresSubItem(readableEntities?.structureIds),
+            ...getCpomsSubItems(readableEntities?.cpomIds),
             canSeeOperateurs
               ? { label: "Voir les opérateurs", url: "/operateurs" }
               : {
@@ -72,6 +76,28 @@ export const resolveMenuItems = (user?: SessionUser | null): MenuItem[] => {
     ),
     ...getParametresGroup(canAccess),
   ];
+};
+
+const getSingleId = (ids: number[] | undefined): number | null =>
+  ids?.length === 1 ? ids[0] : null;
+
+const getStructuresSubItem = (
+  structureIds: number[] | undefined
+): MenuSubItem => {
+  const singleStructureId = getSingleId(structureIds);
+  return singleStructureId === null
+    ? { label: "Voir les structures", url: "/structures" }
+    : { label: "Voir la structure", url: `/structures/${singleStructureId}` };
+};
+
+const getCpomsSubItems = (cpomIds: number[] | undefined): MenuSubItem[] => {
+  if (cpomIds?.length === 0) {
+    return [];
+  }
+  const singleCpomId = getSingleId(cpomIds);
+  return singleCpomId === null
+    ? [{ label: "Voir les CPOM", url: "/cpoms" }]
+    : [{ label: "Voir le CPOM", url: `/cpoms/${singleCpomId}` }];
 };
 
 const getParametresGroup = (

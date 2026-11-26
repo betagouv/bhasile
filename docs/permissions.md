@@ -81,7 +81,16 @@ Un contact a exactement les droits d'un user opérateur lecteur sur les structur
 
 La fiche opérateur vérifie aussi la règle `read Operateur` (`getOperateur`) : un non-agent ne lit que son opérateur, même sans passer par le proxy. Le menu (`menu.util.ts`) et les liens de la fiche opérateur filtrent leurs entrées avec `canAccessPage` : ouvrir ou fermer une page dans `pages.ts` suffit. « Paramètres » reste derrière son flag, hors de `pages.ts`.
 
-Fermer une page ne ferme pas son API : elle se ferme dans la route. `/api/statistiques` et `/api/statistiques/cartographie` répondent 403 à qui n'a pas accès à `/statistiques` (`canAccessPage`). Le tableau de bord et la liste des opérateurs n'ont pas d'API, leurs pages appellent les services directement.
+Fermer une page ne ferme pas son API : elle se ferme dans la route. `/api/statistiques` et `/api/statistiques/cartographie` répondent 403 à qui n'a pas accès à `/statistiques` (`canAccessPage`).
+
+### Entités lisibles : lien direct
+
+Le layout `(with-menu)` demande au plus deux structures et deux CPOM lisibles (`getReadableStructureIdsSample`, `getReadableCpomIdsSample`), assez pour distinguer une entité de plusieurs, et les passe au menu. La requête ne sélectionne que les identifiants : les structures comptées sont celles de la liste d'un non-agent (finalisées, fermées comprises), sans les filtres du header. La règle vaut pour tous les profils :
+
+- une seule structure : « Voir la structure » mène à sa fiche ; un seul CPOM : « Voir le CPOM » mène au sien ; aucun CPOM : l'entrée est masquée. Les listes restent accessibles par leur URL ;
+- si la requête échoue, le menu garde ses liens vers les listes : l'erreur part dans Sentry sans bloquer la page.
+
+Le menu est calculé au chargement de la page : une structure finalisée ou un binôme ajouté n'y apparaît qu'au chargement suivant. Le tableau de bord et la liste des opérateurs n'ont pas d'API, leurs pages appellent les services directement.
 
 ## Avant d'activer les contacts
 

@@ -13,6 +13,7 @@ import {
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomListItem, CpomsQuery } from "@/types/cpom.type";
 import { SessionUser } from "@/types/global";
+import { READABLE_IDS_SAMPLE_SIZE } from "@/types/readable-ids.type";
 import { recursivelySerializeForClient } from "@/utils-server/serialization.server.util";
 
 import { resolveFilters } from "../filters/filters.service";
@@ -26,6 +27,7 @@ import { CpomDbDetails, CpomDbScope, CpomToSave } from "./cpom.db.type";
 import {
   createOrUpdateCpom,
   findAllCpoms,
+  findCpomIds,
   findCpomScope,
   findOne,
 } from "./cpom.repository";
@@ -91,6 +93,16 @@ export const getCpoms = cache(
     };
   }
 );
+
+export const getReadableCpomIdsSample = async (
+  user: SessionUser
+): Promise<number[]> => {
+  const cpoms = await findCpomIds(
+    getReadableCpomWhere(user),
+    READABLE_IDS_SAMPLE_SIZE
+  );
+  return cpoms.map((cpom) => cpom.id);
+};
 
 export const getCpomById = async (
   id: number,

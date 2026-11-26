@@ -24,6 +24,17 @@ export const findAllCpoms = (
 ): Promise<CpomDbList[]> =>
   prisma.cpom.findMany({ where, include: cpomListInclude });
 
+export const findCpomIds = (
+  where: Prisma.CpomWhereInput,
+  take: number
+): Promise<{ id: number }[]> =>
+  prisma.cpom.findMany({
+    where,
+    select: { id: true },
+    orderBy: { id: "asc" },
+    take,
+  });
+
 export const findOne = async (id: number): Promise<CpomDbDetails | null> => {
   const cpom = await prisma.cpom.findFirst({
     where: { id },
