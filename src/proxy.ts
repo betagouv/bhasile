@@ -6,17 +6,15 @@ import { canAccessApp } from "./lib/casl";
 import { canAccessPage } from "./lib/casl/pages";
 import { authOptions } from "./lib/next-auth/auth";
 import {
-  noProtectionPage,
-  passwordProtectedPages,
   pendingAccessPage,
-  proConnectProtectedPages,
+  protectedPages,
+  publicApiRoutes,
 } from "./proxy/auth-config";
-import { getApiRouteProtection } from "./proxy/auth-util";
 import { filtersProxy } from "./proxy/filters";
 import { SessionUser } from "./types/global";
 import { matchesPath } from "./utils/path.util";
 
-const proConnectPagesProxy = withAuth(filtersProxy, {
+const authenticatedPagesProxy = withAuth(filtersProxy, {
   callbacks: {
     authorized: ({ token }) => {
       return token !== null;
@@ -27,93 +25,53 @@ const proConnectPagesProxy = withAuth(filtersProxy, {
   },
 });
 
-const passwordPagesProxy = (request: NextRequest): NextResponse | null => {
-  const url = request.nextUrl;
+const protectPage = async (request: NextRequest): Promise<NextResponse> => {
+  const { pathname } = request.nextUrl;
+  const session = await getServerSession(authOptions);
 
-  if (!passwordProtectedPages.some((path) => url.pathname.startsWith(path))) {
-    return null;
+  if (session?.user) {
+    const user = session.user as SessionUser;
+
+    if (!canAccessApp(user)) {
+      return NextResponse.redirect(new URL(pendingAccessPage, request.url));
+    }
+
+    if (!canAccessPage(user, pathname)) {
+      const target = pathname === "/" ? "/structures" : "/404";
+      return NextResponse.redirect(new URL(target, request.url));
+    }
   }
-  const passwordCookie = request.cookies.get("mot-de-passe");
-  const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
-    (password) => password.trim()
+
+  return (authenticatedPagesProxy as (request: NextRequest) => NextResponse)(
+    request
   );
-  if (!passwordCookie || !passwords?.includes(passwordCookie?.value?.trim())) {
-    const loginUrl = new URL(noProtectionPage, request.url);
-    loginUrl.searchParams.set("from", url.pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-  return NextResponse.next();
 };
 
-const protectApiWithAuth = async (
-  request: NextRequest
-): Promise<NextResponse | null> => {
-  const protection = getApiRouteProtection(request, request.nextUrl.pathname);
-  const session = await getServerSession(authOptions);
-  const hasProconnectSession =
-    !!session?.user && canAccessApp(session.user as SessionUser);
-  const passwordCookie = request.cookies.get("mot-de-passe");
-  const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
-    (password) => password.trim()
+const protectApi = async (request: NextRequest): Promise<NextResponse> => {
+  const isPublic = publicApiRoutes.some((route) =>
+    matchesPath(request.nextUrl.pathname, route)
   );
-  const hasPassword =
-    passwordCookie && passwords?.includes(passwordCookie?.value?.trim());
-
-  if (protection === "none" || request.nextUrl.pathname === noProtectionPage) {
+  if (isPublic) {
     return NextResponse.next();
   }
 
-  const isUnauthenticated =
-    protection === null ||
-    (protection === "proconnect" && !hasProconnectSession) ||
-    (protection === "password" && !hasPassword) ||
-    (protection === "either" && !hasProconnectSession && !hasPassword);
+  const session = await getServerSession(authOptions);
+  const hasSession =
+    !!session?.user && canAccessApp(session.user as SessionUser);
 
-  if (isUnauthenticated) {
+  if (!hasSession) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
-  return null;
+  return NextResponse.next();
 };
 
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const isProtected = proConnectProtectedPages.some((base) =>
-    matchesPath(pathname, base)
+  const isProtectedPage = protectedPages.some((page) =>
+    matchesPath(request.nextUrl.pathname, page)
   );
 
-  if (isProtected) {
-    const session = await getServerSession(authOptions);
-
-    if (session?.user) {
-      const user = session.user as SessionUser;
-
-      if (!canAccessApp(user)) {
-        return NextResponse.redirect(new URL(pendingAccessPage, request.url));
-      }
-
-      if (!canAccessPage(user, pathname)) {
-        const target = pathname === "/" ? "/structures" : "/404";
-        return NextResponse.redirect(new URL(target, request.url));
-      }
-    }
-
-    return (proConnectPagesProxy as (request: NextRequest) => NextResponse)(
-      request
-    );
-  }
-
-  const passwordResult = passwordPagesProxy(request);
-  if (passwordResult) {
-    return passwordResult;
-  }
-
-  const apiAuthResult = await protectApiWithAuth(request);
-  if (apiAuthResult) {
-    return apiAuthResult;
-  }
-
-  return NextResponse.next();
+  return isProtectedPage ? protectPage(request) : protectApi(request);
 }
 
 export const config = {
@@ -126,8 +84,6 @@ export const config = {
     "/statistiques/:path*",
     "/ressources/:path*",
     "/parametres/:path*",
-    "/ajout-structure/:path*",
-    "/mot-de-passe",
     // Routes API
     "/api/:path*",
   ],

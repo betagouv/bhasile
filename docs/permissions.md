@@ -104,7 +104,8 @@ Mise en prod du basculement :
    - désactivation par un admin qui couvre **tous** les binômes du user (inclusion complète) ; un agent national n'est géré que par un superadmin ;
    - affichage de la désactivation dans la messagerie.
 2. **Ouverture aux opérateurs** :
-   - authentification via ProConnect ;
+   - authentification via ProConnect, seul accès depuis la suppression du formulaire opérateur par mot de passe ;
+   - initialisation des structures sans formulaire de finalisation ni transformation `CREATION` (36 au 27/11/2026, hors PRAHDA et NH) : invisibles et `A_INITIALISER` depuis la suppression du formulaire opérateur, il faut un point d'entrée qui crée leur formulaire de finalisation ;
    - fiche opérateur (#1742), statistiques filtrées sur `operateurId` sans RMU ;
    - lecture des CPOM de leur opérateur dont la zone recouvre, au moins en partie, leurs binômes (PR stackée à venir) ;
    - écriture par leurs binômes éditeur / admin, restreinte à leur opérateur, selon la matrice validée par le métier. Les notes restent réservées aux agents éditeurs : leur ajouter alors la condition `isAgent`. Un opérateur éditeur verra en revanche l'adresse complète.

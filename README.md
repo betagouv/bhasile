@@ -144,18 +144,6 @@ npx patch-package @codegouvfr/react-dsfr
 6. Le patch sera appliqué à chaque `yarn install`
 7. Champagne !
 
-## 🔓 Gestion des pages protégées par mot de passe
-
-La route `/ajout-structure` est protégée par mot de passe. Les pages de dashboard sont protégées par un accès ProConnect.
-
-Pour définir un ou plusieurs mots de passe, il suffit d'ajouter la variable `OPERATEUR_PASSWORDS` dans le fichier `.env`. Les mots de passe devront être séparés par des virgules.
-`PAGE_PASSWORD` est une variable d'environnement legacy et sera bientôt supprimée.
-
-Les pages sont accessibles via :
-
-- http://localhost:3000/ajout-structure pour créer une structure
-- http://localhost:3000/structures pour accéder au tableau de bord
-
 ## 🚀 Mise en production
 
 Pour mettre l'applcation en production, placez vous sur la branche `main` et exécutez :

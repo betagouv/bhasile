@@ -2,8 +2,8 @@ import type { Page } from "@playwright/test";
 
 /**
  * Remplit un champ autocomplete DSFR (opérateur, département, adresse…) et
- * sélectionne la première suggestion. Pattern repris des tests e2e-legacy
- * (éprouvé) : remplissage one-shot + suggestion `[role="option"]`.
+ * sélectionne la première suggestion : remplissage one-shot + suggestion
+ * `[role="option"]`.
  */
 export const fillAutocomplete = async (
   page: Page,

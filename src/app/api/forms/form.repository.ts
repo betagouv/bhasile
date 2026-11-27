@@ -6,10 +6,7 @@ import { EntityId } from "@/types/Entity.type";
 import { StepStatus } from "@/types/form.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import {
-  FINALISATION_FORM_SLUG,
-  STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS,
-} from "./form.constants";
+import { STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS } from "./form.constants";
 import { convertToStepStatus } from "./form.util";
 
 export const createOrUpdateForms = async (
@@ -164,55 +161,6 @@ const createOrUpdateCompleteFormWithSteps = async (
         409
       );
     }
-  }
-};
-
-export const initializeStructureDefaultForms = async (
-  tx: PrismaTransaction,
-  isOperateurUpdate: boolean,
-  structureId: number
-): Promise<void> => {
-  if (!isOperateurUpdate) {
-    return;
-  }
-
-  const formDefinition = await tx.formDefinition.findUnique({
-    where: { slug: FINALISATION_FORM_SLUG },
-    include: { stepsDefinition: true },
-  });
-
-  if (!formDefinition) {
-    throw new Error(
-      `FormDefinition with slug ${FINALISATION_FORM_SLUG} not found`
-    );
-  }
-
-  const formEntity = await tx.form.create({
-    data: {
-      formDefinitionId: formDefinition.id,
-      structureId,
-      status: false,
-    },
-  });
-
-  for (const stepDefinition of formDefinition.stepsDefinition) {
-    let status: StepStatus = StepStatus.NON_COMMENCE;
-
-    // Les deux premières étapes sont marquées "À vérifier"
-    if (
-      stepDefinition.slug === "01-identification" ||
-      stepDefinition.slug === "02-documents-financiers"
-    ) {
-      status = StepStatus.A_VERIFIER;
-    }
-
-    await tx.formStep.create({
-      data: {
-        formId: formEntity.id,
-        stepDefinitionId: stepDefinition.id,
-        status: status,
-      },
-    });
   }
 };
 

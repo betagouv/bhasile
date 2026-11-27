@@ -10,7 +10,7 @@ Bhasile est un outil de pilotage du parc d'hébergement pour demandeurs d'asile,
 - **Validation** : Zod (schémas API dans `src/schemas/api/`, schémas form dans `src/schemas/forms/`)
 - **Formulaires** : react-hook-form
 - **Permissions** : CASL (`src/lib/casl/`)
-- **Auth** : NextAuth — ProConnect pour les agents, mot de passe pour les opérateurs
+- **Auth** : NextAuth — ProConnect
 - **Tests** : Vitest + React Testing Library (pas d'E2E en CI, Playwright disponible manuellement)
 
 ## Commandes essentielles
@@ -42,7 +42,6 @@ src/
       (with-menu)/           # Pages avec la navigation principale
       structures/            # Pages sans navigation principale (utilisées dans le formulaire transformations)
     (not-authenticated)/     # Pages publiques
-    (password-protected)/    # Formulaires opérateurs (mot de passe)
     api/                     # Routes API — une entité = un dossier
       [entite]/
         route.ts             # Gestion HTTP, validation, erreurs
@@ -88,7 +87,7 @@ Un contexte vit dans `src/contexts/` si son provider est monté par une route ou
 - Toute règle de droit vit dans `src/lib/casl/` (sujets dans `rules.ts`, helpers dans `*.ability.ts`). Ne jamais tester `isSuperAdmin` ou les `grants` ailleurs.
 - Helpers : `canX(user)` côté serveur (`defineAbilityFor(user)`) ; une variante `canAbilityX(ability)` seulement si le client en a besoin (ability du contexte via `useAbility()`).
 - Où contrôler :
-  - **proxy** : session, `canAccessApp`, et l'accès à chaque page par `canAccessPage` (`src/lib/casl/pages.ts`), que le menu (`menu.util.ts`) utilise aussi pour filtrer ses entrées. Une nouvelle section s'ouvre dans `pages.ts` ; toute nouvelle page ou route API se déclare dans `src/proxy/auth-config.ts` (et le `matcher` de `src/proxy.ts`), sinon les tests du proxy échouent ;
+  - **proxy** : session, `canAccessApp`, et l'accès à chaque page par `canAccessPage` (`src/lib/casl/pages.ts`), que le menu (`menu.util.ts`) utilise aussi pour filtrer ses entrées. Une nouvelle section s'ouvre dans `pages.ts` et se déclare dans `protectedPages` (`src/proxy/auth-config.ts`) et le `matcher` de `src/proxy.ts`, sinon les tests du proxy échouent. Toute route `/api/*` exige une session activée, sauf celles de `publicApiRoutes` ;
   - **layout ou page** : droits sur une ressource précise (fiche hors périmètre), avec `notFound()` ;
   - **route API** : revérifier le droit dans le handler (401 sans session, 403 sans droit, 404 hors périmètre), via un helper `assertXAccess(user)` quand il existe (`DomainError` traduite par `apiErrorResponse`).
 - Détails : [Permissions](docs/permissions.md).
@@ -135,8 +134,7 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 
 ## Authentification
 
-- **ProConnect** : tout compte peut se connecter ; l'accès au dashboard demande un compte activé (voir [Permissions](docs/permissions.md))
-- **Mot de passe** : opérateurs, accès limité au formulaire `/ajout-structure`
+- **ProConnect** : seul mode d'authentification, agents comme opérateurs. Tout compte peut se connecter ; l'accès au dashboard demande un compte activé (voir [Permissions](docs/permissions.md))
 
 ## Documentation détaillée
 

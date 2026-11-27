@@ -11,12 +11,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { config, proxy } from "@/proxy";
 import {
-  noProtectionPage,
-  passwordProtectedPages,
   pendingAccessPage,
-  proConnectProtectedPages,
-  protectedApiRoutes,
+  protectedPages,
+  publicApiRoutes,
 } from "@/proxy/auth-config";
+import { matchesPath } from "@/utils/path.util";
 
 vi.stubEnv("NEXTAUTH_SECRET", "secret-de-test");
 
@@ -26,8 +25,6 @@ const { mockGetServerSession } = vi.hoisted(() => ({
 
 vi.mock("next-auth", () => ({ getServerSession: mockGetServerSession }));
 vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
-
-const httpMethods = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
 
 describe("proxy", () => {
   beforeEach(() => {
@@ -65,7 +62,7 @@ describe("proxy", () => {
     );
   });
 
-  it("refuse les routes d'API ProConnect à un utilisateur connecté sans aucun droit", async () => {
+  it("refuse les routes d'API à un utilisateur connecté sans aucun droit", async () => {
     mockGetServerSession.mockResolvedValue({ user: createSessionUser() });
 
     const response = await proxy(
@@ -118,13 +115,7 @@ describe("proxy", () => {
   });
 
   it("intercepte chaque page déclarée comme protégée", () => {
-    const pages = [
-      ...proConnectProtectedPages,
-      ...passwordProtectedPages,
-      noProtectionPage,
-    ];
-
-    const ignored = pages.filter(
+    const ignored = protectedPages.filter(
       (page) =>
         !config.matcher.some(
           (entry) => entry === page || entry === `${page}/:path*`
@@ -134,28 +125,31 @@ describe("proxy", () => {
     expect(ignored).toEqual([]);
   });
 
-  it("couvre chaque route d'API", () => {
-    const uncovered = listApiRoutes().filter(
-      (pathname) =>
-        !protectedApiRoutes.some((route) => route.pattern.test(pathname))
+  it("refuse sans session chaque route d'API non publique", async () => {
+    const privateApiRoutes = listApiRoutes().filter(
+      (pathname) => !isPublicApiRoute(pathname)
     );
 
-    expect(uncovered).toEqual([]);
+    const statuses = await Promise.all(
+      privateApiRoutes.map(async (pathname) => {
+        const response = await proxy(
+          new NextRequest(`http://localhost${pathname}`)
+        );
+        return `${pathname} → ${response.status}`;
+      })
+    );
+
+    expect(statuses).toEqual(
+      privateApiRoutes.map((pathname) => `${pathname} → 401`)
+    );
   });
 
-  it("associe une seule protection à chaque route d'API", () => {
-    const ambiguous = listApiRoutes().flatMap((pathname) =>
-      httpMethods
-        .filter(
-          (method) =>
-            protectedApiRoutes.filter(
-              (route) => route.pattern.test(pathname) && method in route.routes
-            ).length > 1
-        )
-        .map((method) => `${method} ${pathname}`)
+  it("laisse passer sans session les routes d'API publiques", async () => {
+    const response = await proxy(
+      new NextRequest("http://localhost/api/auth/session")
     );
 
-    expect(ambiguous).toEqual([]);
+    expect(response.status).toBe(200);
   });
 });
 
@@ -183,3 +177,6 @@ const listApiRoutes = (directory = "src/app/api"): string[] =>
         ? [directory.replace("src/app", "").replace(/\[.+?\]/g, "1")]
         : []
   );
+
+const isPublicApiRoute = (pathname: string): boolean =>
+  publicApiRoutes.some((route) => matchesPath(pathname, route));

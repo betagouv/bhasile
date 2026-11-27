@@ -11,7 +11,3 @@ export const adresseAdministrativeSchema = z.object({
 
 export const adresseAdministrativeAutoSaveSchema =
   adresseAdministrativeSchema.partial();
-
-export type AdresseAdministrativeFormValues = z.infer<
-  typeof adresseAdministrativeSchema
->;

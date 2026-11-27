@@ -13,7 +13,6 @@ import {
   getFullStructure,
   getFullStructures,
   getStructureDepartement,
-  getStructureForOperateur,
 } from "@/app/api/structures/structure.service";
 import { DomainError } from "@/app/utils/domain-error.util";
 import prisma from "@/lib/prisma";
@@ -1945,19 +1944,6 @@ describe("structure.repository db integration", () => {
       expect(await getStructureDepartement(structure.id)).toBe(
         firstDepartement.numero
       );
-    });
-
-    it("getStructureForOperateur résout le type de la version courante", async () => {
-      // GIVEN: a structure typed CADA (invariant Structure scalar)
-      const structure = await createStructure(StructureType.CADA);
-
-      // WHEN: the operateur read resolves the structure
-      const result = await getStructureForOperateur(structure.id);
-
-      // THEN: type comes from the Structure scalar, identity fields stay intact
-      expect(result?.type).toBe(StructureType.CADA);
-      expect(result?.id).toBe(structure.id);
-      expect(result?.codeBhasile).toBe(structure.codeBhasile);
     });
 
     it("getFullStructure résout type/commune des structures liées d'un CPOM via leur version courante", async () => {

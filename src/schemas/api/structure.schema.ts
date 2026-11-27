@@ -47,53 +47,51 @@ const structureMinimalApiSchema = z.object({
   communeAdministrative: z.string().optional(),
 });
 
-export const structureOperateurUpdateApiSchema =
-  structureMinimalApiSchema.extend({
-    adresseAdministrative: z
-      .string()
-      .min(1, "L'adresse administrative est requise"),
-    codePostalAdministratif: z
-      .string()
-      .min(1, "Le code postal administratif est requis"),
-    communeAdministrative: z
-      .string()
-      .min(1, "La commune de l'adresse administrative est requise"),
-    departementAdministratif: z
-      .string()
-      .min(1, "Le département de l'adresse administrative est requis"),
-    latitude: z.string().optional(),
-    longitude: z.string().optional(),
-    creationDate: z.iso.datetime({
-      error: "La date de création est requise",
-    }),
-    date303: z.iso.datetime().nullish(),
-    finessCode: z.string().optional(),
-    public: z.enum(PublicType),
-    adresses: z.array(adresseApiSchema),
-    antennes: z.array(antenneApiSchema).optional(),
-    dnaStructures: z.array(dnaStructureApiSchema).optional(),
-    structureFinesses: z.array(structureFinessApiSchema).optional(),
-    structureTypologies: z.array(structureTypologieApiSchema),
-    forms: z.array(formApiSchema).optional(),
-    contacts: z.array(contactApiSchema),
-    documentsFinanciers: z.array(documentFinancierApiSchema).default([]),
-  });
+export const structureBaseApiSchema = structureMinimalApiSchema.extend({
+  adresseAdministrative: z
+    .string()
+    .min(1, "L'adresse administrative est requise"),
+  codePostalAdministratif: z
+    .string()
+    .min(1, "Le code postal administratif est requis"),
+  communeAdministrative: z
+    .string()
+    .min(1, "La commune de l'adresse administrative est requise"),
+  departementAdministratif: z
+    .string()
+    .min(1, "Le département de l'adresse administrative est requis"),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  creationDate: z.iso.datetime({
+    error: "La date de création est requise",
+  }),
+  date303: z.iso.datetime().nullish(),
+  finessCode: z.string().optional(),
+  public: z.enum(PublicType),
+  adresses: z.array(adresseApiSchema),
+  antennes: z.array(antenneApiSchema).optional(),
+  dnaStructures: z.array(dnaStructureApiSchema).optional(),
+  structureFinesses: z.array(structureFinessApiSchema).optional(),
+  structureTypologies: z.array(structureTypologieApiSchema),
+  forms: z.array(formApiSchema).optional(),
+  contacts: z.array(contactApiSchema),
+  documentsFinanciers: z.array(documentFinancierApiSchema).default([]),
+});
 
-const partialStructureOperateurUpdateApiSchema =
-  structureOperateurUpdateApiSchema.partial().extend({
-    id: z.number(),
-    codeBhasile: z.string().optional(),
-    adresses: z.array(adresseApiSchema.partial()).optional(),
-    dnaStructures: z.array(dnaStructureApiSchema.partial()).optional(),
-    structureFinesses: z.array(structureFinessApiPartialSchema).optional(),
-    forms: z.array(formApiSchema.partial()).optional(),
-    contacts: z.array(contactApiSchema.partial()).optional(),
-    documentsFinanciers: z.array(documentFinancierApiSchema).optional(),
-    structureTypologies: z
-      .array(structureTypologieApiSchema.partial().required({ year: true }))
-      .optional(),
-    structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
-  });
+const partialStructureBaseApiSchema = structureBaseApiSchema.partial().extend({
+  id: z.number(),
+  codeBhasile: z.string().optional(),
+  adresses: z.array(adresseApiSchema.partial()).optional(),
+  dnaStructures: z.array(dnaStructureApiSchema.partial()).optional(),
+  structureFinesses: z.array(structureFinessApiPartialSchema).optional(),
+  forms: z.array(formApiSchema.partial()).optional(),
+  contacts: z.array(contactApiSchema.partial()).optional(),
+  documentsFinanciers: z.array(documentFinancierApiSchema).optional(),
+  structureTypologies: z
+    .array(structureTypologieApiSchema.partial().required({ year: true }))
+    .optional(),
+  structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
+});
 
 const remainingStructureAgentUpdateApiSchema = z.object({
   noEvaluationStructure: z.boolean().optional(),
@@ -110,12 +108,11 @@ const remainingStructureAgentUpdateApiSchema = z.object({
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
 });
 
-export const structureAgentUpdateApiSchema =
-  partialStructureOperateurUpdateApiSchema.and(
-    remainingStructureAgentUpdateApiSchema
-  );
+export const structureAgentUpdateApiSchema = partialStructureBaseApiSchema.and(
+  remainingStructureAgentUpdateApiSchema
+);
 
-export const structureApiSchema = structureOperateurUpdateApiSchema.and(
+export const structureApiSchema = structureBaseApiSchema.and(
   remainingStructureAgentUpdateApiSchema.extend({
     id: z.number(),
   })
@@ -132,8 +129,6 @@ export type StructureAgentUpdateApiClient = z.input<
 >;
 
 export type StructureApiWrite = z.infer<typeof structureApiSchema>;
-
-export type StructureApiWriteClient = z.input<typeof structureApiSchema>;
 
 export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   fermetureDate: string | null;

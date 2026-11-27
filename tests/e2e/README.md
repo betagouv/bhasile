@@ -1,6 +1,6 @@
 # tests/e2e
 
-Suite e2e Playwright. Cohabite avec `tests/e2e-legacy/` pendant la transition — la suite legacy couvre l'ajout et la finalisation, briques en voie de disparition du produit. Une fois ces flux retirés, `tests/e2e-legacy/` sera supprimé.
+Suite e2e Playwright.
 
 ## 🎯 Périmètre
 
@@ -9,8 +9,6 @@ Trois flux couverts :
 1. **Modification d'une structure** — `specs/structure-modification.spec.ts`
 2. **Création d'un CPOM** — `specs/cpom-creation.spec.ts`
 3. **Modification d'un CPOM** — `specs/cpom-modification.spec.ts`
-
-Les flux d'ajout et de finalisation de structure sont testés dans `tests/e2e-legacy/`.
 
 ## 🏃 Lancer
 
@@ -41,7 +39,7 @@ Le seed suppose que `npx prisma db seed` a déjà tourné (il lui faut le dépar
 - **Seeding direct Prisma** (`seed/`) — pas d'aller-retour via l'UI ni l'API HTTP pour préparer les données.
 - **Isolation par identifiant unique** (`data/ids.ts`) : chaque test génère un `codeBhasile` préfixé `E2E-` + uuid court → suite parallélisable.
 - **POM léger** (`pages/`) : une classe par page, méthodes nommées par intention métier, pas d'héritage. Sélecteurs sémantiques (`getByRole`, `getByLabel`).
-- **Aucun import depuis `tests/e2e-legacy/`**. Dépendances `src/` autorisées : `src/types/*`, `@/generated/prisma/client`, `@/prisma-client`, ainsi que les **constantes et utilitaires purs** servant de source de vérité partagée avec l'app (`@/constants`, `@/app/utils/date.util`) — à privilégier plutôt que de dupliquer une valeur (plages d'années, etc.). Ne jamais importer de code à effet de bord (accès DB, `server-only`, composants React).
+- Dépendances `src/` autorisées : `src/types/*`, `@/generated/prisma/client`, `@/prisma-client`, ainsi que les **constantes et utilitaires purs** servant de source de vérité partagée avec l'app (`@/constants`, `@/app/utils/date.util`) — à privilégier plutôt que de dupliquer une valeur (plages d'années, etc.). Ne jamais importer de code à effet de bord (accès DB, `server-only`, composants React).
 
 ## 🧹 Cleanup orphelins
 

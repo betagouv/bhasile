@@ -10,10 +10,7 @@ import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { createOrUpdateControles } from "../controles/controle.repository";
 import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository";
-import {
-  createOrUpdateForms,
-  initializeStructureDefaultForms,
-} from "../forms/form.repository";
+import { createOrUpdateForms } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
@@ -26,7 +23,6 @@ import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   includedStructureWhere,
   StructureDbList,
-  StructureDbOperateur,
   structureDetailsInclude,
   structureListInclude,
   StructureListLight,
@@ -76,29 +72,6 @@ export const findStructuresByIds = (
       },
     },
   });
-
-export const findOneOperateur = async (
-  id: number
-): Promise<StructureDbOperateur | null> => {
-  const structure = await prisma.structure.findFirst({
-    where: { id, ...includedStructureWhere },
-    select: {
-      id: true,
-      codeBhasile: true,
-      forms: true,
-      type: true,
-    },
-  });
-  if (!structure) {
-    return null;
-  }
-  return {
-    id: structure.id,
-    codeBhasile: structure.codeBhasile,
-    forms: structure.forms,
-    type: structure.type ?? null,
-  };
-};
 
 export const findStructureDepartement = async (
   id: number
@@ -178,7 +151,6 @@ const writeToCurrentVersion = async (
 
 export const updateOne = async (
   structure: StructureAgentUpdateApiType,
-  isOperateurUpdate: boolean = false,
   options: { skipActesOrphanDelete?: boolean } = {}
 ): Promise<Structure> => {
   const {
@@ -195,17 +167,7 @@ export const updateOne = async (
 
   return await prisma.$transaction(
     async (tx) => {
-      const updatedStructure = await updateStructure(
-        tx,
-        structure,
-        isOperateurUpdate
-      );
-
-      await initializeStructureDefaultForms(
-        tx,
-        isOperateurUpdate,
-        structure.id
-      );
+      const updatedStructure = await updateStructure(tx, structure);
 
       await writeToCurrentVersion(tx, structure);
       await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
@@ -247,8 +209,7 @@ export const updateOne = async (
 
 const updateStructure = async (
   tx: PrismaTransaction,
-  structure: StructureAgentUpdateApiType,
-  isOperateurUpdate: boolean
+  structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
   const { operateur, creationDate, date303 } = structure;
 
@@ -259,7 +220,6 @@ const updateStructure = async (
     data: {
       creationDate: creationDate ?? undefined,
       date303,
-      type: isOperateurUpdate ? structure.type : undefined,
       operateur: {
         connect: operateur
           ? {
