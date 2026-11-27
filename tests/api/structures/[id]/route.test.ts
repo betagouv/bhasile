@@ -6,7 +6,6 @@ import { GET, PUT } from "@/app/api/structures/[id]/route";
 const mockGetServerSession = vi.fn();
 const mockCanUpdateStructure = vi.fn();
 const mockFindOne = vi.fn();
-const mockFindOneOperateur = vi.fn();
 const mockFindStructureDepartement = vi.fn();
 const mockUpdateOne = vi.fn();
 const mockCreateStructureEvent = vi.fn();
@@ -41,7 +40,6 @@ vi.mock("@/lib/casl", () => ({
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
   findOne: (...args: unknown[]) => mockFindOne(...args),
-  findOneOperateur: (...args: unknown[]) => mockFindOneOperateur(...args),
   findStructureDepartement: (...args: unknown[]) =>
     mockFindStructureDepartement(...args),
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),
@@ -206,7 +204,6 @@ describe("GET /api/structures/[id]", () => {
       isCurrentVersionFromTransformation: false,
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
-    expect(mockFindOneOperateur).not.toHaveBeenCalled();
   });
 
   it("déduit les vulnérabilités lgbt/fvvTeh des places du dernier millésime", async () => {
@@ -283,42 +280,6 @@ describe("GET /api/structures/[id]", () => {
         adresseComplete: "75001 Paris",
       },
     ]);
-  });
-
-  it("retourne une structure limitée quand l'utilisateur n'est pas authentifié", async () => {
-    // GIVEN
-    const structure = { id: 1 };
-    mockGetServerSession.mockResolvedValueOnce(null);
-    mockFindOneOperateur.mockResolvedValueOnce(structure);
-
-    const request = new NextRequest("http://localhost/api/structures/1");
-
-    // WHEN
-    const response = await GET(request);
-
-    // THEN
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(structure);
-    expect(mockFindOneOperateur).toHaveBeenCalledWith(1);
-    expect(mockFindOne).not.toHaveBeenCalled();
-  });
-
-  it("passe par le chemin opérateur pour une session sans binôme", async () => {
-    // GIVEN
-    const structure = { id: 1 };
-    mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
-    mockCanAccessApp.mockReturnValueOnce(false);
-    mockFindOneOperateur.mockResolvedValueOnce(structure);
-
-    const request = new NextRequest("http://localhost/api/structures/1");
-
-    // WHEN
-    const response = await GET(request);
-
-    // THEN
-    expect(response.status).toBe(200);
-    expect(mockFindOneOperateur).toHaveBeenCalledWith(1);
-    expect(mockFindOne).not.toHaveBeenCalled();
   });
 
   it("retourne 404 quand la structure est introuvable", async () => {
@@ -430,8 +391,7 @@ describe("PUT /api/structures/[id]", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toBe("Structure mise à jour avec succès");
     expect(mockUpdateOne).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 3, ...coordinates }),
-      false
+      expect.objectContaining({ id: 3, ...coordinates })
     );
   });
 
@@ -483,8 +443,7 @@ describe("PUT /api/structures/[id]", () => {
             },
           }),
         ],
-      }),
-      false
+      })
     );
   });
 

@@ -54,12 +54,10 @@ import {
   ResolvedStructureDetails,
   StructureDbDetails,
   StructureDbList,
-  StructureDbOperateur,
 } from "./structure.db.type";
 import {
   findAllStructures,
   findOne,
-  findOneOperateur,
   findStructureDepartement,
   findStructuresByIds,
   findStructureVersionAdresses,
@@ -101,13 +99,10 @@ export const updateStructureAgent = async (
     getAdresseAdministrativeCoordinates(structure),
     locateAdresses(structure),
   ]);
-  return await updateStructureAndRecomputeAnomalies(
-    {
-      ...locatedStructure,
-      ...coordinates,
-    },
-    false
-  );
+  return await updateStructureAndRecomputeAnomalies({
+    ...locatedStructure,
+    ...coordinates,
+  });
 };
 
 export const updateActualisation = async (
@@ -125,28 +120,10 @@ export const updateActualisation = async (
     );
   }
 
-  return updateStructureAndRecomputeAnomalies(
-    await locateAdresses(structure),
-    false,
-    { skipActesOrphanDelete: true }
-  );
+  return updateStructureAndRecomputeAnomalies(await locateAdresses(structure), {
+    skipActesOrphanDelete: true,
+  });
 };
-export const updateStructureOperateur = async (
-  structure: StructureAgentUpdateApiType
-): Promise<Structure> => {
-  const [coordinates, locatedStructure] = await Promise.all([
-    getAdresseAdministrativeCoordinates(structure),
-    locateAdresses(structure),
-  ]);
-  return await updateStructureAndRecomputeAnomalies(
-    {
-      ...locatedStructure,
-      ...coordinates,
-    },
-    true
-  );
-};
-
 // Le recalcul suit le commit et n'est jamais dans la transaction d'écriture.
 const updateStructureAndRecomputeAnomalies = async (
   ...args: Parameters<typeof updateOne>
@@ -264,14 +241,6 @@ export const getFullStructures = async (
 ): Promise<FullStructures> =>
   buildFullStructures(await getSortedStructureRows(props), props);
 
-export const getFullStructuresForOperateur = async (
-  props: SearchProps
-): Promise<FullStructures> =>
-  buildFullStructures(
-    await filterAndSortStructureRows(await computeAllStructureRows({}), props),
-    props
-  );
-
 const buildFullStructures = async (
   sorted: StructureListComputedRow[],
   props: SearchProps
@@ -373,10 +342,6 @@ export const getFullStructure = async (
 
   return isNonAgent(user) ? hideAgentOnlyFields(structure) : structure;
 };
-
-export const getStructureForOperateur = async (
-  id: number
-): Promise<StructureDbOperateur | null> => findOneOperateur(id);
 
 export const getStructureDepartement = async (id: number): Promise<string> => {
   const { departementAdministratif } = await findStructureDepartement(id);

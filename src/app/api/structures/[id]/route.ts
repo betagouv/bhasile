@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { apiErrorResponse } from "@/app/utils/api-error-response.util";
-import { canAccessApp, canUpdateStructure } from "@/lib/casl";
+import { canUpdateStructure } from "@/lib/casl";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureAgentUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
@@ -11,23 +11,17 @@ import { createStructureEvent } from "../../user-actions/user-action.service";
 import {
   getFullStructure,
   getStructureDepartement,
-  getStructureForOperateur,
   updateStructureAgent,
 } from "../structure.service";
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    const isAuthenticated =
-      !!session?.user && canAccessApp(session.user as SessionUser);
-
     const id = request.nextUrl.pathname.split("/").pop();
-    const structure = isAuthenticated
-      ? await getFullStructure(
-          Number(id),
-          session?.user as SessionUser | undefined
-        )
-      : await getStructureForOperateur(Number(id));
+    const structure = await getFullStructure(
+      Number(id),
+      session?.user as SessionUser | undefined
+    );
 
     if (!structure) {
       return NextResponse.json(

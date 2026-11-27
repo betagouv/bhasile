@@ -1,4 +1,4 @@
-import { Form, Prisma, StructureType } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/types/structure.type";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
@@ -223,13 +223,6 @@ export type StructureDbDetails = Prisma.StructureGetPayload<{
 // Structure enrichie des champs versionnés résolus depuis sa version courante.
 export type ResolvedStructureDetails = StructureDbDetails &
   Pick<StructureVersionDbDetails, (typeof VERSIONED_FIELD_KEYS)[number]>;
-
-export type StructureDbOperateur = {
-  id: number;
-  type: StructureType | null;
-  codeBhasile: string;
-  forms: Form[];
-};
 
 export type StructureListAdresse = {
   commune: string | null;

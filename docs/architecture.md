@@ -20,7 +20,6 @@ Le projet est basé sur :
   - `app` :
     - `(authenticated)` : contient toutes les pages et composants associés des pages nécessitant une authentification avec ProConnect
     - `(not-authenticated)` : contient toutes les pages et composants associés des pages nécessitant ne nécessitant aucune authentification
-    - `(password-protected)` : contient toutes les pages et composants associés des pages nécessitant une authentification par mot de passe (aujourd'hui uniquement le formulaire opérateur)
     - `api` : chaque dossier désigne une entité. Chaque entité peut posséder :
       - Une `route` qui permet les interactions avec l'API : appel du schéma de validation de données, utilisation des query params, gestion des erreurs HTTP. Il peut appeler un `service` qui gère de la logique métier
       - Un `service` qui gère de la logique métier et peut appeler un `repository` en cas de besoin d'interaction avec la base de données
